@@ -94,7 +94,7 @@ TEST(FileSystemTest, printFileTest)
     directory *d= new directory("root");
     std::shared_ptr<directory> home(d);
     user u1("", "", "", "", 0, home);
-    file f("file1", "/root");
+    file f("file1", "");
     EXPECT_EQ("file1", f.print(u1));
 }
 

@@ -110,17 +110,6 @@ uri user::shareResource(const std::string &resPath, const std::string &resName, 
     return uri();
 }
 
-template<typename C>
-std::shared_ptr<file> user::deleteFile(const std::string &path, const std::string &name, C condition) {
-    //TODO: implement
-    return std::shared_ptr<file>();
-}
-
-template<typename C>
-std::shared_ptr<directory> user::deleteDirectory(const std::string &path, const std::string &name, C condition) {
-    //TODO: implement
-    return std::shared_ptr<directory>();
-}
 
 bool user::operator==(const user &rhs) const {
     //TODO: implement
@@ -129,6 +118,10 @@ bool user::operator==(const user &rhs) const {
 
 bool user::operator!=(const user &rhs) const {
     return !(rhs == *this);
+}
+
+std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path, const std::string &fileName) {
+    return std::shared_ptr<file>();
 }
 
 

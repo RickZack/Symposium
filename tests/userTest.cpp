@@ -47,7 +47,7 @@ struct dirMock: public directory{
     MOCK_METHOD0(resType, const resourceType());
 
     MOCK_METHOD3(access, document(const user &targetUser, const std::string &path, const std::string &resName));
-    MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &targetUser, const std::string &path, const std::string &resName));
+    MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &, const std::string &, const std::string &));
 
     MOCK_METHOD3(print, const std::string(const user &targetUser, bool recursive, int indent));
 };
@@ -118,14 +118,14 @@ TEST_F(UserTest, callChangePrivilege){
 
 TEST_F(UserTest, callDeleteDirectory)
 {
-    //EXPECT_CALL(*homeDir, remove(*u, ".", "dir"));
-    //u->deleteDirectory(".", "dir", "");
+    EXPECT_CALL(*homeDir, remove(*u, ".", "dir"));
+    u->deleteDirectory(".", "dir", "");
 }
 
 TEST_F(UserTest, callDeleteFile)
 {
-    //EXPECT_CALL(*homeDir, remove(*u, ".", "dummyFile"));
-    //u->deleteFile(".", "dummyFile", "");
+    EXPECT_CALL(*homeDir, remove(*u, ".", "dummyFile"));
+    u->deleteFile(".", "dummyFile", "");
 }
 
 TEST_F(UserTest, callShowDir)
@@ -152,8 +152,8 @@ TEST_F(UserTest, callShareResource){
 
 TEST_F(UserTest, callAccessFile){
 
-    //EXPECT_CALL(*homeDir, addLink(".", "sym"));
-    //u->accessFile("", "", "sym");
+    EXPECT_CALL(*homeDir, addLink(".", "sym"));
+    u->accessFile("", "", "sym");
 
 }
 
