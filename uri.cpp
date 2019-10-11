@@ -56,6 +56,7 @@ bool uri::operator!=(const uri &rhs) const {
 }
 
 const privilege uri::getDefaultPrivilege() {
+
     return defaultPrivilege;
 }
 

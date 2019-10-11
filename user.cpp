@@ -27,6 +27,7 @@
  *
  * Created on 17 Giugno 2019, 22.41
  */
+#include <iostream>
 #include "user.h"
 
 user::user(const std::string &username, const std::string &pwd, const std::string &nickname,
@@ -35,6 +36,9 @@ user::user(const std::string &username, const std::string &pwd, const std::strin
                                                           nickname(nickname), iconPath(iconPath), home(home) {
     //TODO: implement
 }
+
+
+
 
 const std::string &user::getUsername() const {
     return username;
@@ -74,41 +78,80 @@ void user::setHome(std::shared_ptr<directory> home) {
 }
 
 std::string user::showDir(bool recursive) const {
-    //TODO: implement
-    return "";
+
+    return home->print(*this, recursive);
+
 }
 
 void user::newFile(const std::string &fileName, const std::string &pathFromHome) {
-    //TODO: implement
+try{
+    if(fileName == "" || pathFromHome=="")
+    {
+        throw "Null Parametrs";
+    }
+    std::shared_ptr<file> newF(nullptr);
+    newF=home->addFile(pathFromHome, fileName);
+    }
+catch (std::string msg)
+    {
+        std::cout<<msg<<std::endl;
+    }
 }
 
 void user::newDirectory(const std::string &dirName, const std::string &pathFromHome) {
-    //TODO: implement
+    try{
+    if(dirName == "" || pathFromHome=="")
+    {
+        throw "Null Parametrs";
+    }
+    std::shared_ptr<directory> newD(nullptr);
+    newD=home->addDirectory(dirName);
+    }
+    catch (std::string msg)
+    {
+        std::cout<<msg<<std::endl;
+    }
+
 }
 
 std::shared_ptr<file> accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ){
+    //CHIEDERE A RICCARDO, CREAZIONE DI UN SYMLINK, PERCHE' RESTITUISCE UN FILE?
+
     //TODO: implement
     return std::shared_ptr<file>();
 }
 
 document user::openFile(const std::string &path, const std::string &fileName) {
-    return document(0);
+    document newD;
+    newD=home->access(*this, path, fileName);
+    return newD;
 }
 
 privilege user::editPrivilege(const user &otherUser, const std::string &resPath, const std::string &resName,
                               privilege newPrivilege) {
-    //TODO: implement
-    return privilege::none;
+    std::shared_ptr<file> newF(nullptr);
+    newF=home->getFile(resPath, resName);
+    privilege newP;
+    newP=newF->setUserPrivilege(otherUser, newPrivilege);
+    return newP;
 }
 
 privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) {
-    //TODO: implement
-    return privilege::none;
+    std::shared_ptr<file> newF(nullptr);
+    newF=home->getFile(resPath, resName);
+    privilege newP;
+    newP=newF->setUserPrivilege(*this, newPrivilege);
+    return newP;
 }
 
 uri user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
-    return uri();
+    std::shared_ptr<file> newF(nullptr);
+    newF=home->getFile(resPath, resName);
+    uri u;
+    u=newF->setSharingPolicy(*this, newPrefs);
+    return u;
 }
+
 
 
 bool user::operator==(const user &rhs) const {
@@ -120,8 +163,21 @@ bool user::operator!=(const user &rhs) const {
     return !(rhs == *this);
 }
 
-std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path, const std::string &fileName) {
-    return std::shared_ptr<file>();
+template <typename C>
+
+std::shared_ptr<directory> user::deleteDirectory(const std::string &path, const std::string &name, C condition){
+    std::shared_ptr<directory> newD(nullptr);
+    newD=home->remove(*this, path, name);
+    return newD;
+
+}
+
+template <typename C>
+std::shared_ptr<file> user::deleteFile(const std::string &path, const std::string &name, C condition){
+    std::shared_ptr<file> newF(nullptr);
+    newF=home->remove(*this, path, name);
+    return newF;
+
 }
 
 

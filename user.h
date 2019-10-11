@@ -166,9 +166,7 @@ public:
   * @return the file just removed from the user's filesystem
   */
     template <typename C>
-    std::shared_ptr<file> deleteFile(const std::string &path, const std::string &name, C condition){
-        return nullptr;
-    }
+    std::shared_ptr<file> deleteFile(const std::string &path, const std::string &name, C condition);
 
     /**
      * @brief removes a file object given a condition on it
@@ -178,9 +176,7 @@ public:
      * @param condition a condition that is to be meet to delete the target directory
      */
     template <typename C>
-    std::shared_ptr<directory> deleteDirectory(const std::string &path, const std::string &name, C condition){
-        return nullptr;
-    }
+    std::shared_ptr<directory> deleteDirectory(const std::string &path, const std::string &name, C condition);
 };
 
 
