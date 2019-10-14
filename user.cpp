@@ -73,7 +73,6 @@ void user::setIconPath(const std::string &iconPath) {
 }
 
 void user::setHome(std::shared_ptr<directory> home) {
-    //TODO: implement
     user::home = home;
 }
 
@@ -84,41 +83,24 @@ std::string user::showDir(bool recursive) const {
 }
 
 void user::newFile(const std::string &fileName, const std::string &pathFromHome) {
-try{
-    if(fileName == "" || pathFromHome=="")
-    {
-        throw "Null Parametrs";
-    }
+
     std::shared_ptr<file> newF(nullptr);
     newF=home->addFile(pathFromHome, fileName);
-    }
-catch (std::string msg)
-    {
-        std::cout<<msg<<std::endl;
-    }
+
 }
 
 void user::newDirectory(const std::string &dirName, const std::string &pathFromHome) {
-    try{
-    if(dirName == "" || pathFromHome=="")
-    {
-        throw "Null Parametrs";
-    }
     std::shared_ptr<directory> newD(nullptr);
     newD=home->addDirectory(dirName);
-    }
-    catch (std::string msg)
-    {
-        std::cout<<msg<<std::endl;
-    }
 
 }
 
-std::shared_ptr<file> accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ){
-    //CHIEDERE A RICCARDO, CREAZIONE DI UN SYMLINK, PERCHE' RESTITUISCE UN FILE?
-
-    //TODO: implement
-    return std::shared_ptr<file>();
+std::shared_ptr<symlink> user::accessFile(const user &otherUser, const std::string &resId, const std::string &path,  const std::string &fileName ){
+    std::shared_ptr<file> newF(nullptr);
+    std::shared_ptr<symlink> newS(nullptr);
+    newF=otherUser.home->getFile(resId, fileName);
+    newS=this->home->addLink(newF, path, fileName);
+    return newS;
 }
 
 document user::openFile(const std::string &path, const std::string &fileName) {
@@ -155,8 +137,7 @@ uri user::shareResource(const std::string &resPath, const std::string &resName, 
 
 
 bool user::operator==(const user &rhs) const {
-    //TODO: implement
-    return true;
+    return this->username == rhs.username;
 }
 
 bool user::operator!=(const user &rhs) const {
@@ -165,16 +146,18 @@ bool user::operator!=(const user &rhs) const {
 
 template <typename C>
 
-std::shared_ptr<directory> user::deleteDirectory(const std::string &path, const std::string &name, C condition){
-    std::shared_ptr<directory> newD(nullptr);
+std::shared_ptr<filesystem> user::deleteDirectory(const std::string &path, const std::string &name, C condition)
+{
+    std::shared_ptr<filesystem> newD(nullptr);
     newD=home->remove(*this, path, name);
     return newD;
 
 }
 
 template <typename C>
-std::shared_ptr<file> user::deleteFile(const std::string &path, const std::string &name, C condition){
-    std::shared_ptr<file> newF(nullptr);
+std::shared_ptr<filesystem> user::deleteFile(const std::string &path, const std::string &name, C condition)
+{
+    std::shared_ptr<filesystem> newF(nullptr);
     newF=home->remove(*this, path, name);
     return newF;
 

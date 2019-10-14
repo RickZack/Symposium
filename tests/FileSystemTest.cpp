@@ -121,7 +121,7 @@ TEST(FileSystemTest, addDirAddFileAddSymPrintTest)
     std::shared_ptr<file> f=d->addFile(".", "file1");
     ASSERT_FALSE(f==nullptr);
     EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n", d->print(u1));
-    std::shared_ptr<class symlink> sym=d->addLink(".", "sym");
+    std::shared_ptr<class symlink> sym=d->addLink(f, ".", "sym");
     ASSERT_FALSE(sym==nullptr);
     EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n-sym\r\n", d->print(u1));
 }

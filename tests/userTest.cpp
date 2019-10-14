@@ -116,7 +116,7 @@ TEST_F(UserTest, callChangePrivilege){
     u->changePrivilege(".", "dummyFile", privilege::owner);
 }
 
-TEST_F(UserTest, callDeleteDirectory)
+/*TEST_F(UserTest, callDeleteDirectory)
 {
     EXPECT_CALL(*homeDir, remove(*u, ".", "dir"));
     u->deleteDirectory(".", "dir", "");
@@ -126,7 +126,7 @@ TEST_F(UserTest, callDeleteFile)
 {
     EXPECT_CALL(*homeDir, remove(*u, ".", "dummyFile"));
     u->deleteFile(".", "dummyFile", "");
-}
+}*/
 
 TEST_F(UserTest, callShowDir)
 {
@@ -153,7 +153,8 @@ TEST_F(UserTest, callShareResource){
 TEST_F(UserTest, callAccessFile){
 
     EXPECT_CALL(*homeDir, addLink(".", "sym"));
-    u->accessFile("", "", "sym");
+    user otherUser("otherUser", "", "", "", 0, std::shared_ptr<directory>());
+    u->accessFile(otherUser, "", "", "sym");
 
 }
 

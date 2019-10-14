@@ -271,7 +271,7 @@ public:
     std::string& setName(const std::string &path, const std::string &fileName, const std::string& newName); //FIXME: redundant
     virtual std::shared_ptr<directory> addDirectory(const std::string &name);
     virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name);
-    virtual std::shared_ptr<class symlink> addLink(const std::string &path, const std::string &name);
+    virtual std::shared_ptr<symlink> addLink(const std::shared_ptr<file> &file, const std::string &path, const std::string &name);
     virtual resourceType resType() const override;
 
     /**
