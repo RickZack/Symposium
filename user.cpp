@@ -27,7 +27,6 @@
  *
  * Created on 17 Giugno 2019, 22.41
  */
-#include <iostream>
 #include "user.h"
 
 user::user(const std::string &username, const std::string &pwd, const std::string &nickname,
@@ -36,9 +35,6 @@ user::user(const std::string &username, const std::string &pwd, const std::strin
                                                           nickname(nickname), iconPath(iconPath), home(home) {
     //TODO: implement
 }
-
-
-
 
 const std::string &user::getUsername() const {
     return username;
@@ -77,12 +73,12 @@ void user::setHome(std::shared_ptr<directory> home) {
 }
 
 std::string user::showDir(bool recursive) const {
-
-    return home->print(*this, recursive);
-
+    //TODO: implement
+    return "";
 }
 
 void user::newFile(const std::string &fileName, const std::string &pathFromHome) {
+<<<<<<< HEAD
 
     std::shared_ptr<file> newF(nullptr);
     newF=home->addFile(pathFromHome, fileName);
@@ -101,39 +97,38 @@ std::shared_ptr<symlink> user::accessFile(const user &otherUser, const std::stri
     newF=otherUser.home->getFile(resId, fileName);
     newS=this->home->addLink(newF, path, fileName);
     return newS;
+=======
+    //TODO: implement
+}
+
+void user::newDirectory(const std::string &dirName, const std::string &pathFromHome) {
+    //TODO: implement
+}
+
+std::shared_ptr<file> accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ){
+    //TODO: implement
+    return std::shared_ptr<file>();
+>>>>>>> parent of 1bbe741... user
 }
 
 document user::openFile(const std::string &path, const std::string &fileName) {
-    document newD;
-    newD=home->access(*this, path, fileName);
-    return newD;
+    return document(0);
 }
 
 privilege user::editPrivilege(const user &otherUser, const std::string &resPath, const std::string &resName,
                               privilege newPrivilege) {
-    std::shared_ptr<file> newF(nullptr);
-    newF=home->getFile(resPath, resName);
-    privilege newP;
-    newP=newF->setUserPrivilege(otherUser, newPrivilege);
-    return newP;
+    //TODO: implement
+    return privilege::none;
 }
 
 privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) {
-    std::shared_ptr<file> newF(nullptr);
-    newF=home->getFile(resPath, resName);
-    privilege newP;
-    newP=newF->setUserPrivilege(*this, newPrivilege);
-    return newP;
+    //TODO: implement
+    return privilege::none;
 }
 
 uri user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
-    std::shared_ptr<file> newF(nullptr);
-    newF=home->getFile(resPath, resName);
-    uri u;
-    u=newF->setSharingPolicy(*this, newPrefs);
-    return u;
+    return uri();
 }
-
 
 
 bool user::operator==(const user &rhs) const {
@@ -144,6 +139,7 @@ bool user::operator!=(const user &rhs) const {
     return !(rhs == *this);
 }
 
+<<<<<<< HEAD
 template <typename C>
 
 std::shared_ptr<filesystem> user::deleteDirectory(const std::string &path, const std::string &name, C condition)
@@ -161,6 +157,10 @@ std::shared_ptr<filesystem> user::deleteFile(const std::string &path, const std:
     newF=home->remove(*this, path, name);
     return newF;
 
+=======
+std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path, const std::string &fileName) {
+    return std::shared_ptr<file>();
+>>>>>>> parent of 1bbe741... user
 }
 
 
