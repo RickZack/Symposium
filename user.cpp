@@ -147,7 +147,6 @@ bool user::operator!=(const user &rhs) const {
 template <typename C>
 
 std::shared_ptr<filesystem> user::deleteDirectory(const std::string &path, const std::string &name, C condition)
-
 {
     std::shared_ptr<filesystem> newD(nullptr);
     newD=home->remove(*this, path, name);
