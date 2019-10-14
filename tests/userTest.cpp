@@ -19,7 +19,7 @@
 /* 
  * File:   userTest.cpp
  * Project: Symposium
- * Authors: 
+ * Authors:
  *          Riccardo Zaccone <riccardo.zaccone at studenti.polito.it>
  *          Ksenia Del Conte Akimova <s256669 at studenti.polito.it>
  *          Alice Morano <s259158 at studenti.polito.it>
@@ -153,10 +153,6 @@ TEST_F(UserTest, callShareResource){
 TEST_F(UserTest, callAccessFile){
 
     EXPECT_CALL(*homeDir, addLink(".", "sym"));
-    user otherUser("otherUser", "", "", "", 0, std::shared_ptr<directory>());
-    u->accessFile(otherUser, "", "", "sym");
+    u->accessFile("", "", "sym");
 
 }
-
-
-
