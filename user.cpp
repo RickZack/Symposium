@@ -96,12 +96,9 @@ void user::newDirectory(const std::string &dirName, const std::string &pathFromH
 
 }
 
-std::shared_ptr<symlink> user::accessFile(const user &otherUser, const std::string &resId, const std::string &path,  const std::string &fileName ){
-    std::shared_ptr<file> newF(nullptr);
-    std::shared_ptr<symlink> newS(nullptr);
-    newF=otherUser.home->getFile(resId, fileName);
-    newS=this->home->addLink(newF, path, fileName);
-    return newS;
+std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ){
+
+    return std::shared_ptr<file>();
 }
 
 document user::openFile(const std::string &path, const std::string &fileName) {
@@ -145,22 +142,22 @@ bool user::operator!=(const user &rhs) const {
     return !(rhs == *this);
 }
 
+
 template <typename C>
 
-std::shared_ptr<filesystem> user::deleteDirectory(const std::string &path, const std::string &name, C condition)
-
+std::shared_ptr<directory> user::deleteDirectory(const std::string &path, const std::string &name, C condition)
 {
-    std::shared_ptr<filesystem> newD(nullptr);
-    newD=home->remove(*this, path, name);
+    std::shared_ptr<directory> newD(nullptr);
+    newD=std::dynamic_pointer_cast<directory>(home->remove(*this, path, name));
     return newD;
 
 }
 
 template <typename C>
-std::shared_ptr<filesystem> user::deleteFile(const std::string &path, const std::string &name, C condition)
+std::shared_ptr<file> user::deleteFile(const std::string &path, const std::string &name, C condition)
 {
-    std::shared_ptr<filesystem> newF(nullptr);
-    newF=home->remove(*this, path, name);
+    std::shared_ptr<file> newF(nullptr);
+    newF=std::dynamic_pointer_cast<file>(home->remove(*this, path, name));
     return newF;
 
 }

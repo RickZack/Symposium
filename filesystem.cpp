@@ -150,7 +150,7 @@ std::shared_ptr<file> directory::addFile(const std::string &path, const std::str
     //TODO: implement
     return nullptr;
 }
-std::shared_ptr<symlink> directory::addLink(const std::shared_ptr<file> &file, const std::string &path, const std::string &name)
+std::shared_ptr<symlink> directory::addLink(const std::string &path, const std::string &name)
 {
     //TODO: implement
     return nullptr;

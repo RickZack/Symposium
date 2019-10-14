@@ -153,7 +153,6 @@ TEST_F(UserTest, callShareResource){
 TEST_F(UserTest, callAccessFile){
 
     EXPECT_CALL(*homeDir, addLink(".", "sym"));
-    user otherUser("otherUser", "", "", "", 0, std::shared_ptr<directory>());
-    u->accessFile(otherUser, "", "", "sym");
+    u->accessFile("", "", "sym");
 
 }

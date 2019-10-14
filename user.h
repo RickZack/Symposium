@@ -101,13 +101,12 @@ public:
 
     /**
      * @brief adds a link to the resource for which the user has been granted a privilege
-     * @param otherUser the owner of the file
      * @param resId the uri of the resource to be linked by the symlink
      * @param path the path to put the resource into
-     * @param fileName the name of the file
+     * @param fileName the name of the new link
      * @return the file just added
      */
-    std::shared_ptr<symlink> accessFile(const user &otherUser, const std::string &resId, const std::string &path,  const std::string &fileName = "");
+    std::shared_ptr<file> accessFile(const std::string &resId, const std::string &path,  const std::string &fileName = "");
 
     /**
      * @brief open a @link file file @endlink already present in the user's filesystem
@@ -167,7 +166,7 @@ public:
   * @return the file just removed from the user's filesystem
   */
     template <typename C>
-    std::shared_ptr<filesystem> deleteFile(const std::string &path, const std::string &name, C condition);
+    std::shared_ptr<file> deleteFile(const std::string &path, const std::string &name, C condition);
 
     /**
      * @brief removes a file object given a condition on it
@@ -177,7 +176,7 @@ public:
      * @param condition a condition that is to be meet to delete the target directory
      */
     template <typename C>
-    std::shared_ptr<filesystem> deleteDirectory(const std::string &path, const std::string &name, C condition);
+    std::shared_ptr<directory> deleteDirectory(const std::string &path, const std::string &name, C condition);
 };
 
 
