@@ -148,7 +148,3 @@ TEST(FileSystemTest, printSymTest)
     class symlink sym("sym", "/root", "file1");
     EXPECT_EQ("sym", sym.print(u1));
 }
-
-
-
-

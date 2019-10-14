@@ -19,7 +19,7 @@
 /* 
  * File:   userTest.cpp
  * Project: Symposium
- * Authors: 
+ * Authors:
  *          Riccardo Zaccone <riccardo.zaccone at studenti.polito.it>
  *          Ksenia Del Conte Akimova <s256669 at studenti.polito.it>
  *          Alice Morano <s259158 at studenti.polito.it>
@@ -157,6 +157,3 @@ TEST_F(UserTest, callAccessFile){
     u->accessFile(otherUser, "", "", "sym");
 
 }
-
-
-

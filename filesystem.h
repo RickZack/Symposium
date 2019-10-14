@@ -1,20 +1,20 @@
 /*
- * Copyright (c) 2019 Riccardo Zaccone, Ksenia Del Conte Akimova, Alice Morano, Martina Bellissimo
- *
- * This file is part of Symposium.
- * Symposium is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Symposium is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+* Copyright (c) 2019 Riccardo Zaccone, Ksenia Del Conte Akimova, Alice Morano, Martina Bellissimo
+*
+* This file is part of Symposium.
+* Symposium is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Symposium is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
 
- * You should have received a copy of the GNU General Public License
- * along with Symposium.  If not, see <http://www.gnu.org/licenses/>.
- */
+* You should have received a copy of the GNU General Public License
+* along with Symposium.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /* 
  * File:   filesystem.h
@@ -271,7 +271,7 @@ public:
     std::string& setName(const std::string &path, const std::string &fileName, const std::string& newName); //FIXME: redundant
     virtual std::shared_ptr<directory> addDirectory(const std::string &name);
     virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name);
-    virtual std::shared_ptr<symlink> addLink(const std::shared_ptr<file> &file, const std::string &path, const std::string &name);
+    virtual std::shared_ptr<class symlink> addLink(const std::shared_ptr<file> &file, const std::string &path, const std::string &name);
     virtual resourceType resType() const override;
 
     /**
