@@ -97,8 +97,29 @@ void user::newDirectory(const std::string &dirName, const std::string &pathFromH
 }
 
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ){
+    std::string str1;
+    std::string str2;
+    std::string str3;
+    std::string str4;
+    std::size_t found = path.find_last_of("/\\");
+    str1.append(path,0, found); //path to the directory of the current user
+    str2.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
+    std::shared_ptr<directory> dir(nullptr);
+    dir=this->home->getDir(str1, str2);
+    std::shared_ptr<directory> root1(nullptr);
+    root1=dir->getRoot();
 
-    return std::shared_ptr<file>();
+    std::shared_ptr<symlink> sym(nullptr);
+    sym=home->addLink(path, fileName);
+
+
+
+    found = resId.find_last_of("/\\");
+    str3.append(resId,0, found); //absolute path to the directory of the file to add
+    str4.append(resId.begin()+found+1,resId.end()); //the id of file to add
+    std::shared_ptr<file> fi(nullptr);
+    fi=root1->getFile(str3, str4);
+    return fi;
 }
 
 document user::openFile(const std::string &path, const std::string &fileName) {
