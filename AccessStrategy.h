@@ -32,16 +32,33 @@
 
 
 #include "privilege.h"
-#include <set>
+#include <unordered_map>
 
 class user;
 
 /*
  * OPTIMIZE: use template to implement strategy pattern
  */
+
+/**
+ * @brief Defines how the permissions on objects of type @link filesystem are handled
+ */
 class AccessStrategy {
 public:
-    virtual bool validateAction(privilege requested)=0;
+    /**
+     * @brief validate an action from user @ref targetUser that requires @ref requested
+     * @param targetUser the user who is doing the action
+     * @param requested the permission requested by the action
+     * @return true if the user is granted the privilege @ref requested
+     */
+    virtual bool validateAction(user &targetUser, privilege requested) =0;
+
+    /**
+     * @brief set the privilege of an user
+     * @param targetUser the user the privilege is to be granted
+     * @param toGrant the privilege to grant to @ref targetUser
+     * @return the privilege previously owned by @ref targetUser, none if no privilege previously owned
+     */
     virtual privilege setPrivilege(user& targetUser, privilege toGrant)=0;
 };
 
@@ -49,18 +66,18 @@ public:
  * @brief class used to model a ReadModifyOwn privilege handling on a resource.
  */
 class RMOAccess: public AccessStrategy{
-    std::set<user*> owners;    /**< set of users with the owner's privilege for the resource */
-    std::set<user*> writers;   /**< set of users with the writer's privilege for the resource */
-    std::set<user*> readers;   /**< set of users with the reader's privilege for the resource */
+    std::unordered_map<std::string, privilege> permission; /**< username and related privilege for the resource */
 public:
-    bool validateAction(privilege requested) override;
+    bool validateAction(user &targetUser, privilege requested) override;
     privilege setPrivilege(user &targetUser, privilege toGrant) override;
 };
 
+/**
+ * @brief class used to model the absence of privilege handling on a resource
+ */
 class TrivialAccess: public AccessStrategy{
 public:
-    bool validateAction(privilege requested) override;
-
+    bool validateAction(user &targetUser, privilege requested) override;
     privilege setPrivilege(user &targetUser, privilege toGrant) override;
 };
 

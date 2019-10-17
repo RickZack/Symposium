@@ -29,6 +29,7 @@
  */
 #ifndef SYMPOSIUM_PRIVILEGE_H
 #define SYMPOSIUM_PRIVILEGE_H
+#include <iostream>
 
 /**
  * @brief defines the possible privileges on a resource
@@ -37,7 +38,7 @@ enum class privilege: char {
     none, readOnly, modify, owner
 };
 
-
+std::ostream& operator<<(std::ostream& output, privilege priv);
 
 
 #endif //SYMPOSIUM_PRIVILEGE_H

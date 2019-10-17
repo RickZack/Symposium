@@ -29,7 +29,7 @@
  */
 #include "AccessStrategy.h"
 
-bool RMOAccess::validateAction(privilege requested) {
+bool RMOAccess::validateAction(user &targetUser, privilege requested) {
     return false;
 }
 
@@ -37,7 +37,7 @@ privilege RMOAccess::setPrivilege(user &targetUser, privilege toGrant) {
     return privilege::none;
 }
 
-bool TrivialAccess::validateAction(privilege requested) {
+bool TrivialAccess::validateAction(user &targetUser, privilege requested) {
     return true;
 }
 
