@@ -60,6 +60,7 @@ class user {
     std::string iconPath;              /**< path to the user's icon in program installation folder */
     std::shared_ptr<directory> home;   /**< user's virtual filesystem */
 public:
+    user()= default;
     user(const std::string &username, const std::string &pwd, const std::string &nickname, const std::string &iconPath,
          int siteId, std::shared_ptr<directory> home);
 
@@ -67,6 +68,8 @@ public:
     int getSiteId() const;
     const std::string &getNickname() const;
     const std::string &getIconPath() const;
+
+    const std::shared_ptr<directory> &getHome() const;
 
     void setPwdHash(const std::string &pwdHash);
     void setNickname(const std::string &nickname);

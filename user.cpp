@@ -162,3 +162,7 @@ bool user::operator==(const user &rhs) const {
 bool user::operator!=(const user &rhs) const {
     return !(rhs == *this);
 }
+
+const std::shared_ptr<directory> &user::getHome() const {
+    return home;
+}

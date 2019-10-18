@@ -28,11 +28,22 @@
  * Created on 20 Giugno 2019, 21.30
  */
 #include "SymServer.h"
+#include <regex>
+
+int SymServer::idCounter=0;
 
 const user SymServer::addUser(const user &newUser) {
-    //TODO: to implement
-    return user("", "", "", "", 0,
-                std::shared_ptr<directory>());
+    user inserted;
+    if(userIsRegistered(newUser))
+        throw SymServerException("addUser: the user already exists");
+    if(!userIsValid(newUser)){
+        throw SymServerException("addUser: the user has wrong parameters");
+    }
+    //auto userDir=rootDir->addDirectory(newUser.getUsername());
+    inserted=registered[newUser.getUsername()]=std::move(newUser);
+    //inserted.setHome(userDir);
+    inserted.setSiteId(idCounter++);
+    return inserted;
 }
 
 const user SymServer::login(const std::string &username, const std::string &pwd) {
@@ -123,6 +134,20 @@ const user SymServer::logout(const std::string &username, const std::string &pwd
 std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, int resourceId) {
     //TODO: to implement
     return std::map<int, user>();
+}
+
+bool SymServer::userIsRegistered(const user &toCheck) {
+    return registered.find(toCheck.getUsername())!=registered.end();
+}
+
+bool SymServer::userIsValid(const user &toCheck) {
+    std::regex pathPattern{"\.?(/[a-zA-Z 0-9]*)+[a-zA-Z]*\.*"};
+    return toCheck.getUsername()!="" && toCheck.getNickname()!=""
+            && std::regex_match(toCheck.getIconPath(), pathPattern);
+}
+
+SymServer::SymServer() {
+rootDir=directory::getRoot();
 }
 
 

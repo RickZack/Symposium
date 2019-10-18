@@ -52,20 +52,26 @@
  * The client should confirm the action only if it has received a positive outcome.
  */
 class SymServer {
+protected:
     std::unordered_map<std::string, user> registered;                           /**< registered users, indexed by username */
     std::unordered_map<std::string, user*> active;                              /**< active users, indexed by username */
     std::unordered_map<std::string, std::forward_list<document*>> workingDoc;   /**< list of document each user is working on */
     std::unordered_map<int, std::queue<message>> workingQueue;                  /**< messages queue associated with every document @e resourceId */
     static int idCounter;                                                       /**< siteId to be assigned to the next registered user */
     std::shared_ptr<directory> rootDir;                                         /**< virtual filesystem of the Symposium server */
+private:
+    bool userIsRegistered(const user& toCheck);
+    bool userIsValid(const user& toCheck);
 public:
     //Some methods are virtual in order to use the mocks in tests
-    SymServer() {};
+    SymServer();
 
     /**
      * @brief adds a new user to the set of users registered to the system
      * @param newUser the user to be added to the system
      * @return the user just added
+     * @throws SymServerException thrown if @ref newUser is already registered
+     * @throws SymServerException thrown if @ref newUser data is not correct
      *
      * When a client asks for the registration of a new user via a @ref signUpMessage, the server validates the user data
      * received (a @ref signUpMessage contains a whole new user), assignes to it a subdirectory inside @e rootDir,
@@ -291,6 +297,15 @@ public:
     //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
     virtual ~SymServer()= default;
+};
+
+class SymServerException: public std::exception{
+    std::string msg;
+public:
+    SymServerException(std::string msg):msg{msg}{};
+    virtual const char* what() const noexcept {
+        return msg.c_str();
+    }
 };
 
 
