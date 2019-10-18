@@ -29,6 +29,7 @@
  */
 #include <tuple>
 #include "symbol.h"
+#include <iostream>
 
 symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos) : ch(ch), siteId(siteId),
                                                                                    counter(counter), pos(pos) {}
@@ -47,7 +48,7 @@ const std::vector<int> &symbol::getPos() const {
 
 bool symbol::operator<(const symbol &rhs) const {
     //TODO: implement
-	return true;
+	return false;
 }
 
 bool symbol::operator>(const symbol &rhs) const {
@@ -73,3 +74,13 @@ bool symbol::operator!=(const symbol &rhs) const {
     return !(rhs == *this);
 }
 
+/*
+ * Just to have a way to print the symbols in a intellegible way
+ * when the tests fail
+ */
+std::ostream& operator<<(std::ostream& os, symbol s){
+    os<<"char= "<<s.getCh()<<", siteId= "<<s.getSiteId()<<", pos= "<<"[";
+    for(auto val:s.getPos())
+        os<<" "<<val;
+    os<<" ]"<<std::endl;
+}

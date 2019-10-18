@@ -53,5 +53,10 @@ public:
     bool operator!=(const symbol &rhs) const;
 };
 
+/*
+ * Just to have a way to print the symbols in a intelligible way
+ * when the tests fail
+ */
+std::ostream& operator<<(std::ostream& os, symbol s);
 
 #endif //SYMPOSIUM_SYMBOL_H
