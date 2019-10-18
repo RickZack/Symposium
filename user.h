@@ -71,12 +71,12 @@ public:
 
     const std::shared_ptr<directory> &getHome() const;
 
-    void setPwdHash(const std::string &pwdHash);
+    void setPwd(const std::string &pwd);
     void setNickname(const std::string &nickname);
     void setSiteId(int siteId);
     void setIconPath(const std::string &iconPath);
     void setHome(std::shared_ptr<directory> home);
-
+    bool hasPwd(const std::string pwd);
     bool operator==(const user &rhs) const;
 
     bool operator!=(const user &rhs) const;

@@ -34,10 +34,10 @@ int SymServer::idCounter=0;
 
 const user SymServer::addUser(const user &newUser) {
     user inserted;
-    if(userIsRegistered(newUser))
-        throw SymServerException("addUser: the user already exists");
+    if(userIsRegistered(newUser.getUsername()))
+        throw SymServerException("SymServer::addUser: the user already exists");
     if(!userIsValid(newUser)){
-        throw SymServerException("addUser: the user has wrong parameters");
+        throw SymServerException("SymServer::addUser: the user has wrong parameters");
     }
     //auto userDir=rootDir->addDirectory(newUser.getUsername());
     inserted=registered[newUser.getUsername()]=std::move(newUser);
@@ -47,9 +47,15 @@ const user SymServer::addUser(const user &newUser) {
 }
 
 const user SymServer::login(const std::string &username, const std::string &pwd) {
-    //TODO: to implement
-    return user("", "", "", "", 0,
-                std::shared_ptr<directory>());
+    if(!userIsRegistered(username))
+        throw SymServerException("SymServer::login: the user is not registered");
+    user target=registered[username];
+    if(!target.hasPwd(pwd))
+        throw SymServerException("SymServer::login: wrong password");
+    if(userIsActive(username))
+        throw SymServerException("SymServer::login: user already active");
+    active[username]=&target;
+    return target;
 }
 
 document
@@ -136,8 +142,8 @@ std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, in
     return std::map<int, user>();
 }
 
-bool SymServer::userIsRegistered(const user &toCheck) {
-    return registered.find(toCheck.getUsername())!=registered.end();
+bool SymServer::userIsRegistered(const std::string &toCheck) {
+    return registered.find(toCheck)!=registered.end();
 }
 
 bool SymServer::userIsValid(const user &toCheck) {
@@ -148,6 +154,10 @@ bool SymServer::userIsValid(const user &toCheck) {
 
 SymServer::SymServer() {
 rootDir=directory::getRoot();
+}
+
+bool SymServer::userIsActive(const std::string &username) {
+    return active.find(username)!=active.end();
 }
 
 

@@ -38,15 +38,21 @@ struct SymServerAccesser: public SymServer{
     std::unordered_map<std::string, user> getRegistered(){
         return registered;
     }
+    bool userIsActive(const std::string& username, const user& toCheck){
+        auto entry=active.find(username);
+        return active.find(username)!=active.end() &&
+                *entry->second==toCheck;
+    }
 };
 
 struct SymServerTestUserFunctionality : testing::Test {
     user newUser, alreadyPresent, newDifferentUser;
     SymServerAccesser server;
     static const std::string validIconPath;
+    static const std::string newUserUsername, newUserPwd, wrongPwd;
 
     SymServerTestUserFunctionality():
-    newUser("mario", "a123@bty!!", "m@ario", validIconPath, 0, nullptr),
+    newUser(newUserUsername, newUserPwd, "m@ario", validIconPath, 0, nullptr),
     alreadyPresent(newUser),
     newDifferentUser("lucio", "a123@bty!!", "lupoLucio", validIconPath, 0, nullptr),
     server(){};
@@ -58,6 +64,9 @@ struct SymServerTestUserFunctionality : testing::Test {
     ~SymServerTestUserFunctionality() = default;
 };
 const std::string SymServerTestUserFunctionality::validIconPath="./userIcons/test.jpg";
+const std::string SymServerTestUserFunctionality::newUserUsername="mario";
+const std::string SymServerTestUserFunctionality::newUserPwd="a123@bty!!";
+const std::string SymServerTestUserFunctionality::wrongPwd="wrong";
 
 TEST_F(SymServerTestUserFunctionality, addUserAddingUserNotPresent){
     server.addUser(newUser);
@@ -88,4 +97,28 @@ TEST_F(SymServerTestUserFunctionality, addUserGivesDifferentSiteId){
     auto newUserComplete=server.addUser(newUser);
     auto newDifferentUserComplete=server.addUser(newDifferentUser);
     EXPECT_NE(newUserComplete.getSiteId(), newDifferentUserComplete.getSiteId());
+}
+
+TEST_F(SymServerTestUserFunctionality, loginOfRegisteredUser){
+    server.addUser(newUser);
+    auto logged=server.login(newUserUsername, newUserPwd);
+    EXPECT_TRUE(server.userIsActive(newUserUsername, logged));
+}
+
+TEST_F(SymServerTestUserFunctionality, loginOfRegisteredUserWithWrongPwd){
+    server.addUser(newUser);
+    user logged;
+    EXPECT_THROW(logged=server.login(newUserUsername, wrongPwd), SymServerException);
+    EXPECT_FALSE(server.userIsActive(newUserUsername, logged));
+}
+
+TEST_F(SymServerTestUserFunctionality, loginOfAlreadyLoggedUser){
+    server.addUser(newUser);
+    server.login(newUserUsername, newUserPwd);
+    EXPECT_THROW(server.login(newUserUsername, newUserPwd), SymServerException);
+}
+
+TEST_F(SymServerTestUserFunctionality, loginOfUnregisteredUser){
+    std::pair<std::string, std::string> userCredentials={newUserUsername, newUserPwd};
+    EXPECT_THROW(server.login(userCredentials.first, userCredentials.second), SymServerException);
 }

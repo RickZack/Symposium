@@ -60,8 +60,9 @@ protected:
     static int idCounter;                                                       /**< siteId to be assigned to the next registered user */
     std::shared_ptr<directory> rootDir;                                         /**< virtual filesystem of the Symposium server */
 private:
-    bool userIsRegistered(const user& toCheck);
+    bool userIsRegistered(const std::string &toCheck);
     bool userIsValid(const user& toCheck);
+    bool userIsActive(const std::string &username);
 public:
     //Some methods are virtual in order to use the mocks in tests
     SymServer();
@@ -86,6 +87,9 @@ public:
      * @param username the username of the user who is performing the log in
      * @param pwd the user's password
      * @return the logged in user
+     * @throws SymServerException thrown if the user with @ref username is not registered
+     * @throws SymServerException thrown if the @ref pwd is wrong
+     * @throws SymServerException thrown if the user with @ref username is already logged in
      *
      * When a client asks for the login via a @ref clientMessage, the server checks that the @e username and
      * @e password corresponds to a user contained in @e registered, then sends the retrieved user object to

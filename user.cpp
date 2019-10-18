@@ -57,8 +57,9 @@ const std::string &user::getIconPath() const {
     return iconPath;
 }
 
-void user::setPwdHash(const std::string &pwdHash) {
-    user::pwdHash = pwdHash;
+void user::setPwd(const std::string &pwd) {
+    //TODO: implement
+    user::pwdHash = pwd;
 }
 
 void user::setNickname(const std::string &nickname) {
@@ -165,4 +166,9 @@ bool user::operator!=(const user &rhs) const {
 
 const std::shared_ptr<directory> &user::getHome() const {
     return home;
+}
+
+bool user::hasPwd(const std::string pwd) {
+    //TODO: to implement
+    return pwd==pwdHash;
 }
