@@ -48,7 +48,7 @@ const user SymServer::addUser(const user &newUser) {
 const user SymServer::login(const std::string &username, const std::string &pwd) {
     if(!userIsRegistered(username))
         throw SymServerException("SymServer::login: the user is not registered");
-    user target=registered[username];
+    user& target=registered[username];
     if(!target.hasPwd(pwd))
         throw SymServerException("SymServer::login: wrong password");
     if(userIsActive(username))
@@ -62,7 +62,7 @@ SymServer::openSource(const user &opener, const std::string &path, const std::st
     if(!userIsActive(opener.getUsername()))
         throw SymServerException("SymServer::openSource: the user is not logged in");
     document docReq= opener.openFile(path, name, reqPriv);
-    workingDoc[opener.getUsername()].push_front({reqPriv, &docReq});
+    workingDoc[opener.getUsername()].push_front(&docReq);
     return docReq;
 }
 
@@ -73,20 +73,23 @@ SymServer::openNewSource(const user &opener, const std::string &path, const std:
         throw SymServerException("SymServer::openNewSource: the user is not logged in");
     std::shared_ptr<file> fileReq=opener.accessFile(path+"/"+name, destPath);
     document docReq=fileReq->access(opener, uri::getDefaultPrivilege());
-    workingDoc[opener.getUsername()].push_front({reqPriv, &docReq});
+    workingDoc[opener.getUsername()].push_front(&docReq);
     return docReq;
 }
 
 document SymServer::createNewSource(const user &opener, const std::string &path, const std::string &name) {
-    //TODO: to implement
-    return document(0);
+    if(!userIsActive(opener.getUsername()))
+        throw SymServerException("SymServer::createNewSource: the user is not logged in");
+    std::shared_ptr<file> fileCreated=opener.newFile(name, path);
+    document docReq=fileCreated->access(opener, privilege::owner);
+    workingDoc[opener.getUsername()].push_front(&docReq);
+    return docReq;
 }
 
 std::shared_ptr<directory> SymServer::createNewDir(const user &opener, const std::string &path, const std::string &name) {
-    //TODO: to implement
-    directory *d=new directory("root");
-    std::shared_ptr<directory> home(d);
-    return home; //ONLY FOR RETURN
+    if(!userIsActive(opener.getUsername()))
+        throw SymServerException("SymServer::createNewDir: the user is not logged in");
+    return opener.newDirectory(name, path);
 }
 
 void SymServer::remoteInsert(const std::string &inserter, int resourceId, const symbol &newSym) {
@@ -131,16 +134,24 @@ const user SymServer::editUser(const std::string &username, const std::string &p
                 std::shared_ptr<directory>());
 }
 
-user SymServer::removeUser(const std::string &username, const std::string &pwd) {
-    //TODO: to implement
-    return user("", "", "", "", 0,
-                std::shared_ptr<directory>());
+void SymServer::removeUser(const std::string &username, const std::string &pwd) {
+    if (!userIsRegistered(username))
+        throw SymServerException("SymServer::removeUser: the user is not registered");
+    auto listOfDocs=workingDoc[username];
+    for(document* doc: listOfDocs)
+        doc->close(registered[username]);
+    workingDoc.erase(username);
+    registered.erase(username);
 }
 
-const user SymServer::logout(const std::string &username, const std::string &pwd) {
-    //TODO: to implement
-    return user("", "", "", "", 0,
-                std::shared_ptr<directory>());
+void SymServer::logout(const std::string &username, const std::string &pwd) {
+    if(!userIsActive(username))
+        throw SymServerException("SymServer::logout: the user is not logged in");
+    auto listOfDocs=workingDoc[username];
+    for(document* doc: listOfDocs)
+        doc->close(registered[username]);
+    workingDoc.erase(username);
+    active.erase(username);
 }
 
 std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, int resourceId) {

@@ -93,14 +93,14 @@ public:
      * @param fileName name to be assigned to the new file
      * @param pathFromHome path inside the home to put the file. By default is the home itself
      */
-    void newFile(const std::string& fileName, const std::string& pathFromHome=".");
+    virtual std::shared_ptr<file> newFile(const std::string& fileName, const std::string& pathFromHome= ".") const;
 
     /**
      * @brief creates a new directory named @e dirName in @e pathFromHome
      * @param dirName name to be assigned to the new directory
      * @param pathFromHome path inside the home to put the directory. By default is the home itself
      */
-    void newDirectory(const std::string& dirName, const std::string& pathFromHome=".");
+    virtual std::shared_ptr<directory> newDirectory(const std::string& dirName, const std::string& pathFromHome= ".") const;
 
     /**
      * @brief adds a link to the resource for which the user has been granted a privilege

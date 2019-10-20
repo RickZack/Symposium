@@ -84,17 +84,17 @@ std::string user::showDir(bool recursive) const {
 
 }
 
-void user::newFile(const std::string &fileName, const std::string &pathFromHome) {
+std::shared_ptr<file> user::newFile(const std::string &fileName, const std::string &pathFromHome) const {
 
     std::shared_ptr<file> newF(nullptr);
     newF=home->addFile(pathFromHome, fileName);
-
+    return newF;
 }
 
-void user::newDirectory(const std::string &dirName, const std::string &pathFromHome) {
+std::shared_ptr<directory> user::newDirectory(const std::string &dirName, const std::string &pathFromHome) const{
     std::shared_ptr<directory> newD(nullptr);
     newD=home->addDirectory(dirName);
-
+    return newD;
 }
 
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {

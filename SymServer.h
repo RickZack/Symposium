@@ -55,7 +55,7 @@ class SymServer {
 protected:
     std::unordered_map<std::string, user> registered;                                                /**< registered users, indexed by username */
     std::unordered_map<std::string, user*> active;                                                   /**< active users, indexed by username */
-    std::unordered_map<std::string, std::forward_list<std::pair<privilege,document*>>> workingDoc;   /**< list of document each user is working on */
+    std::unordered_map<std::string, std::forward_list<document*>> workingDoc;   /**< list of document each user is working on */
     std::unordered_map<int, std::queue<message>> workingQueue;                                       /**< messages queue associated with every document @e resourceId */
     static int idCounter;                                                                            /**< siteId to be assigned to the next registered user */
     std::shared_ptr<directory> rootDir;                                                              /**< virtual filesystem of the Symposium server */
@@ -279,7 +279,7 @@ public:
     * @param pwd the user's password
     * @return the user just removed
      */
-    user removeUser(const std::string &username, const std::string &pwd);
+    void removeUser(const std::string &username, const std::string &pwd);
 
     /**
      * @brief performs a log out, removing the user from @e active
@@ -287,7 +287,7 @@ public:
      * @param pwd the user's password
      * @return the logged out user
      */
-    const user logout(const std::string &username, const std::string &pwd);
+    void logout(const std::string &username, const std::string &pwd);
 
     /**
      * @brief maps siteIds to users to allow a client to identify the owner of each change in a document

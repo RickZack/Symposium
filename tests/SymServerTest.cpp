@@ -47,22 +47,24 @@ struct SymServerAccesser: public SymServer{
     }
     bool userIsActive(const std::string& username, const user& toCheck){
         auto entry=active.find(username);
-        return entry!=active.end() &&
+        bool found= entry!=active.end() &&
                 *entry->second==toCheck;
+        return found;
     }
     void setRoot(std::shared_ptr<directory> newRoot){
         rootDir=newRoot;
     }
     bool userIsWorkingOnDocument(const user& targetUser, const document& targetDoc, privilege privilegeGranted){
         if(workingDoc.find(targetUser.getUsername())==workingDoc.end()) return false;
-        std::forward_list<std::pair<privilege, document*>> docQueue=workingDoc[targetUser.getUsername()];
-        for(auto element:docQueue){
-            auto priv=element.first;
-            auto doc=element.second;
-            if (doc->getId()==targetDoc.getId() && priv==privilegeGranted)
+        std::forward_list<document*> docQueue=workingDoc[targetUser.getUsername()];
+        for(auto doc:docQueue){
+            if (doc->getId()==targetDoc.getId())
                 return true;
         }
         return false;
+    }
+    bool userAlreadyRegistered(const user& toCheck){
+        return registered.find(toCheck.getUsername())!=registered.end();
     }
 };
 
@@ -83,10 +85,6 @@ struct SymServerTestUserFunctionality : testing::Test {
     server(){
         server.setRoot(fakeDir);
     };
-    bool userAlreadyPresent(user& toCheck){
-        auto users=server.getRegistered();
-        return users.find(toCheck.getUsername())!=users.end();
-    }
 
     ~SymServerTestUserFunctionality() = default;
 };
@@ -97,7 +95,7 @@ const std::string SymServerTestUserFunctionality::wrongPwd="wrong";
 
 TEST_F(SymServerTestUserFunctionality, addUserAddingUserNotPresent){
     server.addUser(newUser);
-    EXPECT_TRUE(userAlreadyPresent(newUser));
+    EXPECT_TRUE(server.userAlreadyRegistered(newUser));
 }
 
 TEST_F(SymServerTestUserFunctionality, addUserAddingUserAlreadyPresent){
@@ -151,6 +149,20 @@ TEST_F(SymServerTestUserFunctionality, loginOfUnregisteredUser){
     EXPECT_THROW(server.login(userCredentials.first, userCredentials.second), SymServerException);
 }
 
+TEST_F(SymServerTestUserFunctionality, logoutRemovesUserFromActive){
+    server.addUser(newUser);
+    server.login(newUserUsername, newUserPwd);
+    ASSERT_TRUE(server.userIsActive(newUserUsername, newUser));
+    server.logout(newUserUsername, newUserPwd);
+    EXPECT_FALSE(server.userIsActive(newUserUsername, newUser));
+}
+
+TEST_F(SymServerTestUserFunctionality, removeUserRemovesUserFromRegistered){
+    server.addUser(newUser);
+    ASSERT_TRUE(server.userAlreadyRegistered(newUser));
+    server.removeUser(newUserUsername, newUserPwd);
+    EXPECT_FALSE(server.userAlreadyRegistered(newUser));
+}
 struct SymServerUserMock: public user{
     SymServerUserMock(const std::string &username, const std::string &pwd, const std::string &nickname,
                       const std::string &iconPath, int siteId, std::shared_ptr<directory> home) : user(username, pwd,
@@ -159,6 +171,8 @@ struct SymServerUserMock: public user{
                                                                                                        home) {};
     MOCK_CONST_METHOD3(accessFile,  std::shared_ptr<file>(const std::string &resId, const std::string &path,  const std::string &fileName));
     MOCK_CONST_METHOD3(openFile, document(const std::string &path,  const std::string &fileName, privilege accessMode));
+    MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome));
+    MOCK_CONST_METHOD2(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome));
 };
 
 struct SymServerFileMock: public file{
@@ -168,7 +182,7 @@ struct SymServerFileMock: public file{
 };
 
 struct SymServerTestFilesystemFunctionality : testing::Test {
-    ::testing::NiceMock<SymServerUserMock> aUser, anotherUser;
+    ::testing::NiceMock<SymServerUserMock> loggedUser, anotherUser;
     SymServerAccesser server;
     std::shared_ptr<::testing::NiceMock<SymServerdirMock>> userDir;
     static const std::string filePath;
@@ -178,14 +192,14 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
 
 
     SymServerTestFilesystemFunctionality():
-            aUser("mario", "a123@bty!!", "m@ario", "./userIcons/test.jpg", 0, nullptr),
+            loggedUser("mario", "a123@bty!!", "m@ario", "./userIcons/test.jpg", 0, nullptr),
             anotherUser("lucio", "a123@bty!!", "lupoLucio", "./userIcons/test.jpg", 0, nullptr),
             server(),
             userDir(new ::testing::NiceMock<SymServerdirMock>("/")),
             fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")){
         server.setRoot(fakeDir);
-        //aUser.setHome(userDir);
-        server.addUser(aUser);
+        //loggedUser.setHome(userDir);
+        server.addUser(loggedUser);
         server.login("mario", "a123@bty!!");
     };
 
@@ -196,9 +210,9 @@ const std::string SymServerTestFilesystemFunctionality::fileName="testFile";
 const privilege SymServerTestFilesystemFunctionality::defaultPrivilege=uri::getDefaultPrivilege();
 
 TEST_F(SymServerTestFilesystemFunctionality, openSourceMakesTheUserWorkOnDocument){
-    EXPECT_CALL(aUser, openFile(filePath, fileName, defaultPrivilege));
-    auto doc=server.openSource(aUser, filePath, fileName, defaultPrivilege);
-    EXPECT_TRUE(server.userIsWorkingOnDocument(aUser, doc, defaultPrivilege));
+    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege));
+    auto doc=server.openSource(loggedUser, filePath, fileName, defaultPrivilege);
+    EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 }
 
 
@@ -208,17 +222,56 @@ TEST_F(SymServerTestFilesystemFunctionality, openSourceOfNotLoggedUser){
     EXPECT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, defaultPrivilege));
 }
 
+TEST_F(SymServerTestFilesystemFunctionality, logoutClosesOpenedDocuments){
+    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege));
+    auto doc=server.openSource(loggedUser, filePath, fileName, defaultPrivilege);
+    ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+
+    server.logout(loggedUser.getUsername(), "a123@bty!!");
+    EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
+    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege));
+    auto doc=server.openSource(loggedUser, filePath, fileName, defaultPrivilege);
+    ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+
+    server.removeUser(loggedUser.getUsername(), "a123@bty!!");
+    EXPECT_FALSE(server.userAlreadyRegistered(loggedUser));
+    EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+}
+
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceAccessesTheFile){
     std::shared_ptr<::testing::NiceMock<SymServerFileMock>> fileToReturn(new ::testing::NiceMock<SymServerFileMock>());
 
-    EXPECT_CALL(aUser, accessFile(filePath+"/"+fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
-    EXPECT_CALL(*fileToReturn, access(aUser, uri::getDefaultPrivilege()));
-    auto doc=server.openNewSource(aUser, filePath, fileName, defaultPrivilege, "./");
-    EXPECT_TRUE(server.userIsWorkingOnDocument(aUser, doc, defaultPrivilege));
+    EXPECT_CALL(loggedUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+    EXPECT_CALL(*fileToReturn, access(loggedUser, uri::getDefaultPrivilege()));
+    auto doc=server.openNewSource(loggedUser, filePath, fileName, defaultPrivilege, "./");
+    EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceOfNotLoggedUser){
     document doc;
     ASSERT_THROW(doc=server.openNewSource(anotherUser, filePath, fileName, defaultPrivilege, "./"), SymServerException);
     EXPECT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, defaultPrivilege));
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, createNewSourceCallsNewFile){
+    std::shared_ptr<::testing::NiceMock<SymServerFileMock>> fileToReturn(new ::testing::NiceMock<SymServerFileMock>());
+    EXPECT_CALL(loggedUser, newFile(fileName, filePath)).WillOnce(::testing::Return(fileToReturn));
+    auto doc=server.createNewSource(loggedUser, filePath, fileName);
+    EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, privilege::owner));
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, createNewSourceOfUnloggedUser){
+    EXPECT_THROW(server.createNewSource(anotherUser, filePath, fileName), SymServerException);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, createNewDirCallsNewDirectory){
+    EXPECT_CALL(loggedUser, newDirectory(fileName, filePath));
+    server.createNewDir(loggedUser, filePath, fileName);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, createNewDirOfUnloggedUser){
+    EXPECT_THROW(server.createNewDir(anotherUser, filePath, fileName), SymServerException);
 }
