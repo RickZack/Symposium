@@ -97,7 +97,7 @@ void user::newDirectory(const std::string &dirName, const std::string &pathFromH
 
 }
 
-std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ){
+std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
     std::string str1;
     std::string str2;
     std::string str3;
@@ -123,9 +123,9 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     return fi;
 }
 
-document user::openFile(const std::string &path, const std::string &fileName) {
+document user::openFile(const std::string &path, const std::string &fileName, privilege accessMode) const {
     document newD;
-    newD=home->access(*this, path, fileName);
+    newD= home->access(*this, path, fileName, accessMode);
     return newD;
 }
 

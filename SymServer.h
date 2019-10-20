@@ -53,12 +53,12 @@
  */
 class SymServer {
 protected:
-    std::unordered_map<std::string, user> registered;                           /**< registered users, indexed by username */
-    std::unordered_map<std::string, user*> active;                              /**< active users, indexed by username */
-    std::unordered_map<std::string, std::forward_list<document*>> workingDoc;   /**< list of document each user is working on */
-    std::unordered_map<int, std::queue<message>> workingQueue;                  /**< messages queue associated with every document @e resourceId */
-    static int idCounter;                                                       /**< siteId to be assigned to the next registered user */
-    std::shared_ptr<directory> rootDir;                                         /**< virtual filesystem of the Symposium server */
+    std::unordered_map<std::string, user> registered;                                                /**< registered users, indexed by username */
+    std::unordered_map<std::string, user*> active;                                                   /**< active users, indexed by username */
+    std::unordered_map<std::string, std::forward_list<std::pair<privilege,document*>>> workingDoc;   /**< list of document each user is working on */
+    std::unordered_map<int, std::queue<message>> workingQueue;                                       /**< messages queue associated with every document @e resourceId */
+    static int idCounter;                                                                            /**< siteId to be assigned to the next registered user */
+    std::shared_ptr<directory> rootDir;                                                              /**< virtual filesystem of the Symposium server */
 private:
     bool userIsRegistered(const std::string &toCheck);
     bool userIsValid(const user& toCheck);
@@ -122,6 +122,8 @@ public:
      * @param reqPriv the privilege requested opening the document
      * @param destPath the path where to put the @ref symlink to @e name, inside @e opener 's home directory
      * @return the document just retrieved
+     * @throws SymServerException thrown if the user @ref opener is not logged in
+     * @throws filesystemException rethrown if there are problems regarding the asked resource
      *
      * When a client asks for a document for which the user has no privilege with @ref askResMessage, the server
      * checks that the file named @e name in @e path is available and then that the file is shareable.

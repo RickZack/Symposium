@@ -109,17 +109,18 @@ public:
      * @param fileName the name of the new link
      * @return the file just added
      */
-    std::shared_ptr<file> accessFile(const std::string &resId, const std::string &path,  const std::string &fileName = "");
+    virtual std::shared_ptr<file> accessFile(const std::string &resId, const std::string &path,  const std::string &fileName = "") const;
 
     /**
      * @brief open a @link file file @endlink already present in the user's filesystem
      * @param path location of the file relative to the @e home directory
      * @param fileName name of the file to be opened
+     * @param accessMode the privilege asked by the user for opening the file
      * @return the document contained in the file
      *
      * This method calls the @ref directory::access method on @e home passing the current user as the one asking the action
      */
-    document openFile(const std::string& path, const std::string& fileName);
+    virtual document openFile(const std::string &path, const std::string &fileName, privilege accessMode) const;
 
     /**
      * @brief edit the privilege of @e otherUser user for the resource @e resName in @e resPath to @e newPrivilege

@@ -142,7 +142,7 @@ TEST_F(UserTest, callShowDir)
 TEST_F(UserTest, callOpenFile)
 {
     EXPECT_CALL(*homeDir, access(*u, ".", "dummyFile"));
-    u->openFile(".", "dummyFile");
+    u->openFile(".", "dummyFile", uri::getDefaultPrivilege());
 }
 
 TEST_F(UserTest, callShareResource){

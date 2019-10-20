@@ -194,7 +194,7 @@ public:
      * On client side, request the server to send a document object and, after
      * having received it, return it to the GUI
      */
-    document access(const user &targetUser, privilege accessMode);
+    virtual document access(const user &targetUser, privilege accessMode);
     void store(const std::string &storePath) const override;
     void load(const std::string &loadPath) override;
     void send() const override; //TODO: check connectivity requirements
@@ -280,9 +280,11 @@ public:
      * @param targetUser the user who asked for this action
      * @param path relative path to the resource from the current directory
      * @param resName the name of the resource to access (file or symlink)
+     * @param accessMode the privilege asked by the user for opening the file
      * @return the document contained in the file object
      */
-    virtual document access(const user &targetUser, const std::string &path, const std::string &resName);
+    virtual document
+    access(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode);
 
     /**
      * @brief traverse the filesystem and invoke @e remove on @e resName

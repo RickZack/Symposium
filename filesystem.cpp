@@ -160,7 +160,8 @@ resourceType directory::resType() const {
     return resourceType::directory;
 }
 
-document directory::access(const user &targetUser, const std::string &path, const std::string &resName) {
+document
+directory::access(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode) {
     //TODO: implement
     return document(0);
 }
