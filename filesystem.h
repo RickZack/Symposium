@@ -186,6 +186,7 @@ public:
     /**
      * @brief open the document associated with the current file
      * @param targetUser the user who asked for this action
+     * @param accessMode the privilege asked for the resource
      * @return the document contained in the file object
      *
      * On server side, send the document to the client that has requested it
@@ -193,7 +194,7 @@ public:
      * On client side, request the server to send a document object and, after
      * having received it, return it to the GUI
      */
-    document access(const user &targetUser);
+    document access(const user &targetUser, privilege accessMode);
     void store(const std::string &storePath) const override;
     void load(const std::string &loadPath) override;
     void send() const override; //TODO: check connectivity requirements

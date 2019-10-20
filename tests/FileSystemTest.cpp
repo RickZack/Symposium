@@ -61,7 +61,7 @@ TEST_F(FileSystemTestT, accessTest)
 
     user u("user", "", "", "", 0, std::shared_ptr<directory>());
     EXPECT_CALL(*document, access(u, privilege::owner));
-    f->access(u);
+    f->access(u, privilege::owner);
 }
 
 TEST(FileSystemTest, getSetFileTest)

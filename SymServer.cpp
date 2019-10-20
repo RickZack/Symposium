@@ -39,9 +39,9 @@ const user SymServer::addUser(const user &newUser) {
     if(!userIsValid(newUser)){
         throw SymServerException("SymServer::addUser: the user has wrong parameters");
     }
-    //auto userDir=rootDir->addDirectory(newUser.getUsername());
+    auto userDir=rootDir->addDirectory(newUser.getUsername());
     inserted=registered[newUser.getUsername()]=std::move(newUser);
-    //inserted.setHome(userDir);
+    inserted.setHome(userDir);
     inserted.setSiteId(idCounter++);
     return inserted;
 }
@@ -60,8 +60,13 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
 
 document
 SymServer::openSource(const user &opener, const std::string &path, const std::string &name, privilege reqPriv) {
-    //TODO: to implement
-    return document(0);
+    if(!userIsActive(opener.getUsername()))
+        throw SymServerException("SymServer::openSource: the user is not logged in");
+    auto userDir=rootDir->getDir("./", opener.getUsername());
+    std::shared_ptr<file> fileReq=userDir->getFile(path, name);
+    document docReq=fileReq->access(opener, reqPriv);
+    workingDoc[opener.getUsername()].push_front(&docReq);
+    return docReq;
 }
 
 document

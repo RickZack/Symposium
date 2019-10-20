@@ -104,6 +104,8 @@ public:
      * @param name the document's name
      * @param reqPriv the privilege requested opening the document
      * @return the document just retrieved
+     * @throws SymServerException thrown if the user @ref opener is not logged in
+     * @throws filesystemException rethrown if there are problems regarding the asked resource
      *
      * When a client asks for a document, the server checks that the file named @e name in @e path is
      * available and then that @e opener has a privilege less or equal to @e reqPriv on it. If these requirements are met,

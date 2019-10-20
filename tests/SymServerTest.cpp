@@ -31,6 +31,13 @@
 #include <gmock/gmock.h>
 #include "../SymServer.h"
 
+struct SymServerdirMock : public directory{
+    SymServerdirMock(const std::string &name) : directory(name) {};
+    MOCK_METHOD1(addDirectory, std::shared_ptr<directory>(const std::string &name));
+    MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
+    MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
+};
+
 /*
  * Used to access read-only the members of SymServer without adding getters in production class
  */
@@ -40,8 +47,20 @@ struct SymServerAccesser: public SymServer{
     }
     bool userIsActive(const std::string& username, const user& toCheck){
         auto entry=active.find(username);
-        return active.find(username)!=active.end() &&
+        return entry!=active.end() &&
                 *entry->second==toCheck;
+    }
+    void setRoot(std::shared_ptr<directory> newRoot){
+        rootDir=newRoot;
+    }
+    bool userIsWorkingOnDocument(const user& targetUser, const document& targetDoc){
+        if(workingDoc.find(targetUser.getUsername())==workingDoc.end()) return false;
+        std::forward_list<document*> docQueue=workingDoc[targetUser.getUsername()];
+        for(auto doc:docQueue){
+            if (doc->getId()==targetDoc.getId())
+                return true;
+        }
+        return false;
     }
 };
 
@@ -50,12 +69,18 @@ struct SymServerTestUserFunctionality : testing::Test {
     SymServerAccesser server;
     static const std::string validIconPath;
     static const std::string newUserUsername, newUserPwd, wrongPwd;
+    std::shared_ptr<::testing::NiceMock<SymServerdirMock>> fakeDir;
+    std::shared_ptr<::testing::NiceMock<SymServerdirMock>> userDir;
 
     SymServerTestUserFunctionality():
+    fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")),
+    userDir(new ::testing::NiceMock<SymServerdirMock>(newUserUsername)),
     newUser(newUserUsername, newUserPwd, "m@ario", validIconPath, 0, nullptr),
     alreadyPresent(newUser),
     newDifferentUser("lucio", "a123@bty!!", "lupoLucio", validIconPath, 0, nullptr),
-    server(){};
+    server(){
+        server.setRoot(fakeDir);
+    };
     bool userAlreadyPresent(user& toCheck){
         auto users=server.getRegistered();
         return users.find(toCheck.getUsername())!=users.end();
@@ -88,9 +113,10 @@ TEST_F(SymServerTestUserFunctionality, addUserAddingUserHavingWrongNickname){
     EXPECT_THROW(server.addUser(newUser), SymServerException);
 }
 
-TEST_F(SymServerTestUserFunctionality, DISABLED_addUserAssignesHomeToUser){
-    auto newUserComplete=server.addUser(newUser);
-    EXPECT_TRUE(newUserComplete.getHome()!= nullptr);
+TEST_F(SymServerTestUserFunctionality, addUserAssignesHomeToUser){
+    EXPECT_CALL(*fakeDir, addDirectory(newUserUsername)).WillOnce(::testing::Return(userDir));
+    auto userInserted=server.addUser(newUser);
+    EXPECT_TRUE(userInserted.getHome()==userDir);
 }
 
 TEST_F(SymServerTestUserFunctionality, addUserGivesDifferentSiteId){
@@ -121,4 +147,43 @@ TEST_F(SymServerTestUserFunctionality, loginOfAlreadyLoggedUser){
 TEST_F(SymServerTestUserFunctionality, loginOfUnregisteredUser){
     std::pair<std::string, std::string> userCredentials={newUserUsername, newUserPwd};
     EXPECT_THROW(server.login(userCredentials.first, userCredentials.second), SymServerException);
+}
+
+struct SymServerTestFilesystemFunctionality : testing::Test {
+    user aUser, anotherUser;
+    SymServerAccesser server;
+    std::shared_ptr<::testing::NiceMock<SymServerdirMock>> userDir;
+    static const std::string filePath;
+    static const std::string fileName;
+    std::shared_ptr<::testing::NiceMock<SymServerdirMock>> fakeDir;
+
+
+    SymServerTestFilesystemFunctionality():
+            aUser("mario", "a123@bty!!", "m@ario", "./userIcons/test.jpg", 0, nullptr),
+            anotherUser("lucio", "a123@bty!!", "lupoLucio", "./userIcons/test.jpg", 0, nullptr),
+            server(),
+            userDir(new ::testing::NiceMock<SymServerdirMock>("/")),
+            fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")){
+        server.setRoot(fakeDir);
+        //aUser.setHome(userDir);
+        server.addUser(aUser);
+        server.login("mario", "a123@bty!!");
+    };
+
+    ~SymServerTestFilesystemFunctionality() = default;
+};
+const std::string SymServerTestFilesystemFunctionality::filePath="./dir1";
+const std::string SymServerTestFilesystemFunctionality::fileName="testFile";
+
+TEST_F(SymServerTestFilesystemFunctionality, openSourceMakesTheUserWorkOnDocument){
+    EXPECT_CALL(*fakeDir, getDir("./", aUser.getUsername())).WillOnce(::testing::Return(userDir));
+    EXPECT_CALL(*userDir, getFile(filePath, fileName));
+    auto doc=server.openSource(aUser, filePath, fileName, privilege::readOnly);
+    EXPECT_TRUE(server.userIsWorkingOnDocument(aUser, doc));
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, openSourceOfNotLoggedUser){
+    document doc;
+    ASSERT_THROW(doc=server.openSource(anotherUser, filePath, fileName, privilege::readOnly), SymServerException);
+    EXPECT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc));
 }

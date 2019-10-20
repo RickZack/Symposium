@@ -86,7 +86,7 @@ uri file::setSharingPolicy(const user &actionUser, uri &newSharingPrefs) {
     return uri();
 }
 
-document file::access(const user &targetUser) {
+document file::access(const user &targetUser, privilege accessMode) {
     //TODO: implement
     return document(0);
 }
