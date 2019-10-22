@@ -86,13 +86,13 @@ public:
      * @brief insert a symbol in the document as consequence of a remote user's action
      * @param toInsert symbol to insert
      */
-    void remoteInsert(symbol& toInsert);
+    virtual void remoteInsert(symbol toInsert);
 
     /**
      * @brief remove a symbol in the document as consequence of a remote user's action
      * @param toRemove symbol to remove
      */
-    void remoteRemove(symbol& toRemove);
+    virtual void remoteRemove(const symbol &toRemove);
 
     /**
      * @brief give a representation of the document ad sequence of wide characters

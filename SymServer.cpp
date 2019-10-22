@@ -61,7 +61,7 @@ document
 SymServer::openSource(const user &opener, const std::string &path, const std::string &name, privilege reqPriv) {
     if(!userIsActive(opener.getUsername()))
         throw SymServerException("SymServer::openSource: the user is not logged in");
-    document docReq= opener.openFile(path, name, reqPriv);
+    document& docReq= opener.openFile(path, name, reqPriv);
     workingDoc[opener.getUsername()].push_front(&docReq);
     return docReq;
 }
@@ -72,7 +72,7 @@ SymServer::openNewSource(const user &opener, const std::string &path, const std:
     if(!userIsActive(opener.getUsername()))
         throw SymServerException("SymServer::openNewSource: the user is not logged in");
     std::shared_ptr<file> fileReq=opener.accessFile(path+"/"+name, destPath);
-    document docReq=fileReq->access(opener, uri::getDefaultPrivilege());
+    document& docReq=fileReq->access(opener, uri::getDefaultPrivilege());
     workingDoc[opener.getUsername()].push_front(&docReq);
     return docReq;
 }
@@ -81,7 +81,7 @@ document SymServer::createNewSource(const user &opener, const std::string &path,
     if(!userIsActive(opener.getUsername()))
         throw SymServerException("SymServer::createNewSource: the user is not logged in");
     std::shared_ptr<file> fileCreated=opener.newFile(name, path);
-    document docReq=fileCreated->access(opener, privilege::owner);
+    document& docReq=fileCreated->access(opener, privilege::owner);
     workingDoc[opener.getUsername()].push_front(&docReq);
     return docReq;
 }
@@ -92,12 +92,24 @@ std::shared_ptr<directory> SymServer::createNewDir(const user &opener, const std
     return opener.newDirectory(name, path);
 }
 
-void SymServer::remoteInsert(const std::string &inserter, int resourceId, const symbol &newSym) {
-    //TODO: to implement
+void SymServer::remoteInsert(const std::string &inserter, int resourceId, const symbolMessage &symMsg) {
+    if(!userIsActive(inserter))
+        throw SymServerException("SymServer::createNewDir: the user is not logged in");
+    std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(inserter, resourceId);
+    if(!docRetrieved.first)
+        throw SymServerException("SymServer::remoteInsert: the user is not working on that document");
+    docRetrieved.second->remoteInsert(symMsg.getSym());
+    workingQueue[resourceId].push(symMsg);
 }
 
-void SymServer::remoteRemove(const std::string &remover, int resourceId, const symbol &rmSym) {
-    //TODO: to implement
+void SymServer::remoteRemove(const std::string &remover, int resourceId, const symbolMessage &rmMsg) {
+    if(!userIsActive(remover))
+        throw SymServerException("SymServer::createNewDir: the user is not logged in");
+    std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(remover, resourceId);
+    if(!docRetrieved.first)
+        throw SymServerException("SymServer::remoteInsert: the user is not working on that document");
+    docRetrieved.second->remoteRemove(rmMsg.getSym());
+    workingQueue[resourceId].push(rmMsg);
 }
 
 privilege SymServer::editPrivilege(const user &actionUser, const user &targetUser, const std::string &resPath,
@@ -175,6 +187,17 @@ rootDir=directory::getRoot();
 
 bool SymServer::userIsActive(const std::string &username) {
     return active.find(username)!=active.end();
+}
+
+std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string &username, int resourceId) {
+    std::pair<bool, document*> result(false, nullptr);
+    if(workingDoc.find(username)==workingDoc.end()) return result;
+    for(auto doc:workingDoc[username])
+        if (doc->getId()==resourceId){
+            result.first=true; result.second=doc;
+            break;
+        }
+    return result;
 }
 
 

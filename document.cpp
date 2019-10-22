@@ -65,11 +65,11 @@ void document::localRemove(int indexes[2]) {
     //TODO:implement
 }
 
-void document::remoteInsert(symbol &toInsert) {
+void document::remoteInsert(symbol toInsert) {
     //TODO:implement
 }
 
-void document::remoteRemove(symbol &toRemove) {
+void document::remoteRemove(const symbol &toRemove) {
     //TODO:implement
 }
 

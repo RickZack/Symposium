@@ -86,9 +86,9 @@ uri file::setSharingPolicy(const user &actionUser, uri &newSharingPrefs) {
     return uri();
 }
 
-document file::access(const user &targetUser, privilege accessMode) {
+document & file::access(const user &targetUser, privilege accessMode) {
     //TODO: implement
-    return document(0);
+    return doc;
 }
 
 void file::store(const std::string &storePath) const {
@@ -160,10 +160,11 @@ resourceType directory::resType() const {
     return resourceType::directory;
 }
 
-document
+document &
 directory::access(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode) {
     //TODO: implement
-    return document(0);
+    static document doc;
+    return doc;
 }
 
 std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &path, const std::string &resName) {

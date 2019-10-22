@@ -63,6 +63,7 @@ private:
     bool userIsRegistered(const std::string &toCheck);
     bool userIsValid(const user& toCheck);
     bool userIsActive(const std::string &username);
+    std::pair<bool, document*> userIsWorkingOnDocument(const std::string &username, int resourceId);
 public:
     //Some methods are virtual in order to use the mocks in tests
     SymServer();
@@ -140,6 +141,8 @@ public:
      * @param path the relative path to the @e opener 's @e home directory where to create the file
      * @param name the name of the new file
      * @return the document just created
+     * @throws SymServerException thrown if the user @ref opener is not logged in
+     * @throws filesystemException rethrown if there are problems creating the resource
      *
      * When a client asks for a new directory, the server tries to do it and send back to the client a @ref sendResMessage
      * containing the resource just added to @e path.
@@ -152,6 +155,8 @@ public:
      * @param path the relative path to the @e opener 's @e home directory where to create the directory
      * @param name the name of the new directory
      * @return the directory just created
+     * @throws SymServerException thrown if the user @ref opener is not logged in
+     * @throws filesystemException rethrown if there are problems creating the resource
      *
      * When a client asks for a new directory, the server tries to do it and send back to the client a @ref sendResMessage
      * containing the directory just added to @e path.
@@ -162,7 +167,7 @@ public:
      * @brief update a document with a new symbol from a client
      * @param inserter the user who is working on the document
      * @param resourceId the id of the document inside @e workingDoc
-     * @param newSym symbol to be inserted
+     * @param symMsg message received containing the symbol to insert
      *
      * When a user client side inserts a new symbol, the client sends to the server a @ref symbolMessage containing
      * the symbol, the @e resourceId and the @e siteId. The server validates the message checking that @e inserter
@@ -170,13 +175,13 @@ public:
      * update its own copy of the document and propagate the update to the other clients putting the message in
      * @e workingQueue
      */
-    virtual void remoteInsert(const std::string& inserter, int  resourceId, const symbol& newSym);
+    virtual void remoteInsert(const std::string& inserter, int  resourceId, const symbolMessage &symMsg);
 
     /**
      * @brief update a document removing a symbol
      * @param remover the user who is working on the document
      * @param resourceId the id of the document inside @e workingDoc
-     * @param rmSym symbol to be removed
+     * @param rmMsg message received containing the symbol to remove
      *
      * When a user client side removes a symbol, the client sends to the server a @ref symbolMessage containing
      * the symbol, the @e resourceId and the @e siteId. The server validates the message checking that @e remover
@@ -184,7 +189,7 @@ public:
      * update its own copy of the document and propagate the update to the other clients putting the message in
      * @e workingQueue
      */
-    virtual void remoteRemove(const std::string& remover, int  resourceId, const symbol& rmSym);
+    virtual void remoteRemove(const std::string& remover, int  resourceId, const symbolMessage &rmMsg);
     //dispatchMessages ->function to be active in background to send messages from server to client
     //updateActiveUsers(); ->useful or just done inside other functions?
 

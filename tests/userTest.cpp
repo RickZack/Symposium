@@ -59,6 +59,11 @@ struct fileMock: public file{
     MOCK_METHOD2(setSharingPolicy, uri(const user&, uri& newSharingPrefs));
 };
 
+struct dummyFunctional{
+    bool operator()(){
+        return true;
+    }
+};
 
 struct UserTest: ::testing::Test{
     user *u;
@@ -66,6 +71,7 @@ struct UserTest: ::testing::Test{
     ::testing::NiceMock<dirMock> *Dir;
     ::testing::NiceMock<dirMock> *Root;
     ::testing::NiceMock<fileMock> *dummyFile;
+    static dummyFunctional dummyFunc;
 
     UserTest(){
         homeDir=new ::testing::NiceMock<dirMock>();
@@ -124,13 +130,13 @@ TEST_F(UserTest, callChangePrivilege){
 TEST_F(UserTest, callDeleteDirectory)
 {
     EXPECT_CALL(*homeDir, remove(*u, ".", "dir"));
-    u->deleteDirectory(".", "dir", "");
+    u->deleteDirectory(".", "dir", dummyFunc);
 }
 
 TEST_F(UserTest, callDeleteFile)
 {
     EXPECT_CALL(*homeDir, remove(*u, ".", "dummyFile"));
-    u->deleteFile(".", "dummyFile", "");
+    u->deleteFile(".", "dummyFile", dummyFunc);
 }
 
 TEST_F(UserTest, callShowDir)
@@ -155,7 +161,7 @@ TEST_F(UserTest, callShareResource){
     u->shareResource(".", "dummyFile", ur);
 }
 
-TEST_F(UserTest, callAccessFile){
+TEST_F(UserTest, DISABLED_callAccessFile){
     EXPECT_CALL(*homeDir, getDir("h", "h")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
     EXPECT_CALL(*Dir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
     EXPECT_CALL(*homeDir, addLink("h/h", "sym"));
