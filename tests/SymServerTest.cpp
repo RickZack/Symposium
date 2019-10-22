@@ -185,6 +185,8 @@ struct SymServerUserMock: public user{
     MOCK_CONST_METHOD3(openFile, document&(const std::string &path,  const std::string &fileName, privilege accessMode));
     MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome));
     MOCK_CONST_METHOD2(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome));
+    MOCK_CONST_METHOD4(editPrivilege, privilege(const user &otherUser, const std::string &resPath, const std::string &resName,
+            privilege newPrivilege));
 };
 
 struct SymServerFileMock: public file{
@@ -198,7 +200,7 @@ struct SymServerDocMock: public document{
 
     MOCK_METHOD1(remoteInsert, void(symbol toInsert));
     MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
-
+    MOCK_METHOD1(close, void(const user& noLongerActive));
     SymServerDocMock(const SymServerDocMock& mock){};
 };
 
@@ -215,18 +217,47 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     static const std::string anotherUserUsername;
     static const std::string anotherUserPwd;
     ::testing::NiceMock<SymServerDocMock> doc;
+    std::shared_ptr<::testing::NiceMock<SymServerFileMock>> fileToReturn;
 
     SymServerTestFilesystemFunctionality():
             loggedUser(loggedUserUsername, loggedUserPwd, "m@ario", "./userIcons/test.jpg", 0, nullptr),
             anotherUser(anotherUserUsername, anotherUserPwd, "lupoLucio", "./userIcons/test.jpg", 0, nullptr),
             server(),
             userDir(new ::testing::NiceMock<SymServerdirMock>("/")),
-            fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")){
+            fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")),
+            fileToReturn(new ::testing::NiceMock<SymServerFileMock>()){
         server.setRoot(fakeDir);
         //loggedUser.setHome(userDir);
         server.addUser(loggedUser);
         server.login("mario", "a123@bty!!");
     };
+    /*
+     * Make the owner user to access the file and open the document. Used to test that closeSource actually works
+     */
+    void setStageForHavingOpenedDoc(){
+        EXPECT_CALL(loggedUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+        EXPECT_CALL(*fileToReturn, access(loggedUser, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+        auto ret=server.openNewSource(loggedUser, filePath, fileName, privilege::owner, "./");
+        ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, privilege::owner));
+    }
+    void setAnotherUserActive(){
+        server.addUser(anotherUser);
+        server.login(anotherUserUsername, anotherUserPwd);
+        ASSERT_TRUE(server.userIsActive(anotherUserUsername, anotherUser));
+    }
+    /*
+     * Make anotherUser access the resource (as someone granted a privilege to him) and the close the document
+     * to enable the setting of another privilege to anotherUser by loggedUser (who is the owner)
+     */
+    void makeAnotherUserToHavePrivilege(privilege priv){
+        //anotherUser adds the file to its filesystem and closes the document
+        EXPECT_CALL(anotherUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+        EXPECT_CALL(*fileToReturn, access(anotherUser, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+        EXPECT_CALL(doc, close(anotherUser));
+        auto ret2=server.openNewSource(anotherUser, filePath, fileName, priv, "./");
+        server.closeSource(anotherUser, doc);
+        ASSERT_FALSE(server.userIsWorkingOnDocument(anotherUser, ret2, priv));
+    }
 
     ~SymServerTestFilesystemFunctionality() = default;
 };
@@ -271,8 +302,6 @@ TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceAccessesTheFile){
-    std::shared_ptr<::testing::NiceMock<SymServerFileMock>> fileToReturn(new ::testing::NiceMock<SymServerFileMock>());
-
     EXPECT_CALL(loggedUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
     auto doc=server.openNewSource(loggedUser, filePath, fileName, defaultPrivilege, "./");
@@ -286,7 +315,6 @@ TEST_F(SymServerTestFilesystemFunctionality, openNewSourceOfNotLoggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, createNewSourceCallsNewFile){
-    std::shared_ptr<::testing::NiceMock<SymServerFileMock>> fileToReturn(new ::testing::NiceMock<SymServerFileMock>());
     EXPECT_CALL(loggedUser, newFile(fileName, filePath)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     auto doc=server.createNewSource(loggedUser, filePath, fileName);
@@ -355,4 +383,23 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveOnDocumentNotOpened){
     symbol toRemove('a', 0, 0, {});
     symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
     EXPECT_THROW(server.remoteInsert(loggedUserUsername, doc.getId(), received), SymServerException);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, closeSourceClosesTheDocument){
+    setStageForHavingOpenedDoc();
+
+    EXPECT_CALL(doc, close(loggedUser));
+    server.closeSource(loggedUser, doc);
+    EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+}
+
+
+TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUser){
+    setStageForHavingOpenedDoc();
+    setAnotherUserActive();
+    makeAnotherUserToHavePrivilege(defaultPrivilege);
+
+    EXPECT_CALL(loggedUser, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
+    EXPECT_CALL(loggedUser, editPrivilege(anotherUser, filePath, fileName, privilege::readOnly));
+    server.editPrivilege(loggedUser, anotherUser, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly);
 }

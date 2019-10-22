@@ -106,7 +106,7 @@ public:
      *
      * This method is called when a client closes the document it is working on.
      */
-    void close(const user& noLongerActive);
+    virtual void close(const user& noLongerActive);
     void store(const std::string& storePath);
     void load(const std::string& loadPath);
 

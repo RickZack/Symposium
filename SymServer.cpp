@@ -114,8 +114,13 @@ void SymServer::remoteRemove(const std::string &remover, int resourceId, const s
 
 privilege SymServer::editPrivilege(const user &actionUser, const user &targetUser, const std::string &resPath,
                                    const std::string &resName, privilege newPrivilege) {
-    //TODO: to implement
-    return privilege::none;
+    if(!userIsActive(actionUser.getUsername()) || !userIsRegistered(targetUser.getUsername()))
+        throw SymServerException("SymServer::editPrivilege: actionUser is not logged in or targetUser is not registered");
+    std::string pathFromUserHome="./"+resPath.substr(strlen("./")+strlen(actionUser.getUsername().c_str())+strlen("/"));
+    document docReq=actionUser.openFile(pathFromUserHome, resName, privilege::owner);
+    if(userIsWorkingOnDocument(targetUser.getUsername(), docReq.getId()).first)
+        throw SymServerException("SymServer::editPrivilege: targetUser is working on the document");
+    return actionUser.editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
 }
 
 uri SymServer::shareResource(const user &actionUser, const std::string &resPath, const std::string &resName,
@@ -137,7 +142,10 @@ SymServer::removeResource(const user &remover, const std::string &resPath, const
 }
 
 void SymServer::closeSource(const user &actionUser, document &toClose) {
-    //TODO: to implement
+    if(!userIsWorkingOnDocument(actionUser.getUsername(),toClose.getId()).first)
+        throw SymServerException("SymServer::closeSource: the user is not working on that document");
+    toClose.close(actionUser);
+    workingDoc[actionUser.getUsername()].remove_if([&toClose](document* doc){return toClose.getId()==doc->getId();});
 }
 
 const user SymServer::editUser(const std::string &username, const std::string &pwd, user &newUserData) {

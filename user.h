@@ -134,8 +134,8 @@ public:
      * This method calls @ref directory::getFile method on the @e home, retrieving the file, and calls
      * @ref file::setUserPrivilege passing @e otherUser as the one on which take action
      */
-    privilege editPrivilege(const user &otherUser, const std::string &resPath, const std::string &resName,
-                            privilege newPrivilege);
+    virtual privilege editPrivilege(const user &otherUser, const std::string &resPath, const std::string &resName,
+                            privilege newPrivilege) const;
 
     /**
      * @brief edit the privilege of the current user for the resource @e resName in @e resPath

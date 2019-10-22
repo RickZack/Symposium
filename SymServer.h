@@ -205,7 +205,8 @@ public:
      * When a user client side want to edit the privilege of another user on a resource, it sends a
      * @ref PrivMessage and waits for an answer from the server. The server checks that @e actionUser is
      * in @e registered and in @e active, and that @e targetUser is in @e registered and is not working
-     * on the resource in @e resPath named @e resName; then calls @ref user::editPrivilege on @e actionUser
+     * on the resource in @e resPath named @e resName. Calls @ref user::openFile to get the document and
+     * then calls @ref user::editPrivilege on @e actionUser
      * At the end send a @ref serverMessage with the action outcome
      */
     virtual privilege editPrivilege(const user& actionUser, const user& targetUser, const std::string& resPath,

@@ -129,7 +129,7 @@ document & user::openFile(const std::string &path, const std::string &fileName, 
 }
 
 privilege user::editPrivilege(const user &otherUser, const std::string &resPath, const std::string &resName,
-                              privilege newPrivilege) {
+                              privilege newPrivilege) const {
     std::shared_ptr<file> newF(nullptr);
     newF=home->getFile(resPath, resName);
     privilege newP;
