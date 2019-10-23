@@ -209,6 +209,8 @@ struct SymServerUserMock: public user{
     MOCK_CONST_METHOD4(editPrivilege, privilege(const user &otherUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
     MOCK_CONST_METHOD3(shareResource, uri(const std::string &resPath, const std::string &resName, uri& newPrefs));
+    MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string& resPath, const std::string& resName, const std::string& newName));
+    MOCK_CONST_METHOD2(removeResource, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
 };
 
 struct SymServerFileMock: public file{
@@ -462,4 +464,26 @@ TEST_F(SymServerTestFilesystemFunctionality, shareResourceCallsShareResourceOnUs
 TEST_F(SymServerTestFilesystemFunctionality, shareResourceOfUnLoggedUser){
     uri newPref(uriPolicy::activeAlways);
     EXPECT_THROW(server.shareResource(anotherUser, filePath, fileName, newPref), SymServerException);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, renameResourceCallsRenameResourceOnUser){
+    setStageForHavingOpenedDoc(loggedUser);
+    EXPECT_CALL(loggedUser, renameResource(filePath, fileName, "newName")).WillOnce(::testing::Return(fileToReturn));
+    auto ret=server.renameResource(loggedUser, filePath, fileName, "newName");
+    EXPECT_EQ(fileToReturn, ret);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, renameResourceByUnloggedUser){
+    EXPECT_THROW(server.renameResource(anotherUser, filePath, fileName, "newName"), SymServerException);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, removeResourceCallsResourceFileOnUser){
+    setStageForHavingOpenedDoc(loggedUser);
+    EXPECT_CALL(loggedUser, removeResource(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
+    auto ret=server.removeResource(loggedUser, filePath, fileName);
+    EXPECT_EQ(fileToReturn, ret);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, removeResourceByUnloggedUser){
+    EXPECT_THROW(server.removeResource(anotherUser, filePath, fileName), SymServerException);
 }

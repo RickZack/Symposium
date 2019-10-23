@@ -127,16 +127,10 @@ TEST_F(UserTest, callChangePrivilege){
     u->changePrivilege(".", "dummyFile", privilege::owner);
 }
 
-TEST_F(UserTest, callDeleteDirectory)
+TEST_F(UserTest, callRemoveResource)
 {
     EXPECT_CALL(*homeDir, remove(*u, ".", "dir"));
-    u->deleteDirectory(".", "dir", dummyFunc);
-}
-
-TEST_F(UserTest, callDeleteFile)
-{
-    EXPECT_CALL(*homeDir, remove(*u, ".", "dummyFile"));
-    u->deleteFile(".", "dummyFile", dummyFunc);
+    u->removeResource(".", "dir");
 }
 
 TEST_F(UserTest, callShowDir)

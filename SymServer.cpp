@@ -133,14 +133,16 @@ uri SymServer::shareResource(const user &actionUser, const std::string &resPath,
 std::shared_ptr<filesystem>
 SymServer::renameResource(const user &renamer, const std::string &resPath, const std::string &resName,
                           const std::string &newName) {
-    //TODO: to implement
-    return std::shared_ptr<filesystem>();
+    if(!userIsActive(renamer.getUsername()))
+        throw SymServerException("SymServer::renameResource: the user is not logged in");
+    return renamer.renameResource(resPath, resName, newName);
 }
 
 std::shared_ptr<filesystem>
 SymServer::removeResource(const user &remover, const std::string &resPath, const std::string &resName) {
-    //TODO: to implement
-    return std::shared_ptr<filesystem>();
+    if(!userIsActive(remover.getUsername()))
+        throw SymServerException("SymServer::removeResource: the user is not logged in");
+    return remover.removeResource(resPath, resName);
 }
 
 void SymServer::closeSource(const user &actionUser, document &toClose) {

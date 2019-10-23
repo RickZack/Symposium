@@ -165,35 +165,27 @@ public:
     virtual uri shareResource(const std::string &resPath, const std::string &resName, uri& newPrefs) const;
 
     /**
-  * @brief removes a file object given a condition on it
-  * @tparam C a function or an object function that represent the condition
-  * @param path the path inside the user's home directory where the target file is located
-  * @param name the file name
-  * @param condition a condition that is to be meet to delete the target file
-  * @return the file just removed from the user's filesystem
-  */
-    template <typename C>
-    std::shared_ptr<file> deleteFile(const std::string &path, const std::string &name, C condition){
-        std::shared_ptr<file> newF(nullptr);
-        newF=std::dynamic_pointer_cast<file>(home->remove(*this, path, name));
-        return newF;
-
-    }
+     * @brief renames a resource
+     * @param resPath the relative path to the @e home directory where to find the resource
+     * @param resName the resource's name
+     * @param newName the new resource's name
+     * @return the resource just renamed
+     *
+     * Changes the attribute @e name of the filesystem object.
+     * Please note that, in case the filesystem object is a symlink, this method renames the symlink, not the resource pointed.
+     */
+    virtual std::shared_ptr<filesystem> renameResource(const std::string& resPath, const std::string& resName, const std::string& newName)const;
 
     /**
-     * @brief removes a file object given a condition on it
-     * @tparam C a function or an object function that represent the condition
-     * @param path path the path inside the user's home directory where the target directory is located
-     * @param name the directory name
-     * @param condition a condition that is to be meet to delete the target directory
+     * @brief removes a filesystem object
+     * @param path the path inside the user's home directory where the target file is located
+     * @param name the file name
+     * @return the filesystem object just removed from the user's filesystem
      */
-    template <typename C>
-    std::shared_ptr<directory> deleteDirectory(const std::string &path, const std::string &name, C condition){
-        std::shared_ptr<directory> newD(nullptr);
-        newD=std::dynamic_pointer_cast<directory>(home->remove(*this, path, name));
-        return newD;
-
+    virtual std::shared_ptr<filesystem> removeResource(const std::string &path, const std::string &name) const{
+        return home->remove(*this, path, name);
     }
+
 };
 
 

@@ -228,16 +228,17 @@ public:
     virtual uri shareResource(const user& actionUser, const std::string& resPath, const std::string& resName, uri& newPrefs);
 
     /**
-     * @brief removes a resource from @e remover 's @e home directory
-     * @param remover the user who is asking to remove its resource
-     * @param resPath the relative path to the @e remover 's @e home directory where to create the file
+     * @brief renames a resource from @e remover 's @e home directory
+     * @param renamer the user who is asking to rename its resource
+     * @param resPath the relative path to the @e renamer 's @e home directory where to find the resource
      * @param resName the resource's name
      * @param newName the new resource's name
      * @return the resource just renamed
      *
      * When a user client side wants to set a new name for a resource, it sends a @ref askResMessage and waits
      * for an answer from the server. The server checks that @e actionUser is in @e registered and in @e active,
-     * then calls @ref directory::get on @e rootDir and then filesystem::setName on the target resource.
+     * then calls @ref user::renameResource on @e renamer. Please note that, in case the filesystem object is a symlink,
+     * this method renames the symlink, not the resource pointed.
      * Sends back a @ref serveMessage, to indicate whether the action succeeded or not.
      */
     virtual std::shared_ptr<filesystem> renameResource(const user& renamer, const std::string& resPath, const std::string& resName, const std::string& newName);
@@ -250,8 +251,7 @@ public:
      * @return the resource just removed
      *
      * When a user client side wants remove a resource, it sends a @ref askResMessage and waits for an answer from the server.
-     * The server checks that @e actionUser is in @e registered and in @e active, then calls @ref directory::get on @e rootDir
-     * and then directory::remove on @e resPath.
+     * The server checks that @e actionUser is in @e registered and in @e active, then calls @ref user::renameResource on @e remover.
      */
     virtual std::shared_ptr<filesystem> removeResource(const user& remover, const std::string& resPath, const std::string& resName);
 

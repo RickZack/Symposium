@@ -180,3 +180,9 @@ void user::setNewData(const user &newData) {
 const std::string &user::getPwdHash() const {
     return pwdHash;
 }
+
+std::shared_ptr<filesystem>
+user::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) const {
+    //TODO: implement
+    return std::shared_ptr<filesystem>();
+}
