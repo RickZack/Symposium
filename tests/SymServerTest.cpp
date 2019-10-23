@@ -184,16 +184,16 @@ TEST_F(SymServerTestUserFunctionality, removeUserRemovesUserFromRegistered){
 }
 
 TEST_F(SymServerTestUserFunctionality, editUserChangesUserData){
-    server.addUser(newUser);
+    user oldUserData=server.addUser(newUser);
     server.login(newUserUsername, newUserPwd);
 
     user newData("giuseppe", "123@pwd@!", "peppuccio63", validIconPath, 0, nullptr);
-    user inserted=server.editUser(newUserUsername, newUserPwd, newData);
+    const user& inserted=server.editUser(newUserUsername, newUserPwd, newData);
     EXPECT_EQ("giuseppe", inserted.getUsername());
     EXPECT_EQ("peppuccio63", inserted.getNickname());
     EXPECT_EQ("123@pwd@!", inserted.getPwdHash());
-    EXPECT_EQ(newUser.getHome(), inserted.getHome());
-    EXPECT_EQ(newUser.getSiteId(), inserted.getSiteId());
+    EXPECT_EQ(oldUserData.getHome(), inserted.getHome());
+    EXPECT_EQ(oldUserData.getSiteId(), inserted.getSiteId());
 }
 
 struct SymServerUserMock: public user{
@@ -225,6 +225,8 @@ struct SymServerDocMock: public document{
     MOCK_METHOD1(remoteInsert, void(symbol toInsert));
     MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
+    MOCK_METHOD0(retrieveSiteIds, std::set<int>());
+
     SymServerDocMock(const SymServerDocMock& mock){};
 };
 
@@ -281,7 +283,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         //anotherUser adds the file to its filesystem and closes the document
         EXPECT_CALL(anotherUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
         EXPECT_CALL(*fileToReturn, access(anotherUser, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-        document ret2=server.openNewSource(anotherUser, filePath, fileName, priv, "./");
+        auto ret2=server.openNewSource(anotherUser, filePath, fileName, priv, "./");
     }
     void closeAfterPrivilegeAcquired(privilege priv){
         EXPECT_CALL(doc, close(anotherUser));
@@ -486,4 +488,27 @@ TEST_F(SymServerTestFilesystemFunctionality, removeResourceCallsResourceFileOnUs
 
 TEST_F(SymServerTestFilesystemFunctionality, removeResourceByUnloggedUser){
     EXPECT_THROW(server.removeResource(anotherUser, filePath, fileName), SymServerException);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCallsRetrieveSiteIdsOnDoc){
+    setStageForHavingOpenedDoc(loggedUser);
+    EXPECT_CALL(doc,retrieveSiteIds());
+    server.mapSiteIdToUser(loggedUserUsername, doc.getId());
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserOnClosedDoc){
+    EXPECT_THROW(server.mapSiteIdToUser(loggedUserUsername, doc.getId()),SymServerException);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCorrectMapping){
+    setStageForHavingOpenedDoc(loggedUser);
+    setAnotherUserActive();
+    makeAnotherUserToHavePrivilege(defaultPrivilege);
+    std::set<int> siteIdsToReturn({loggedUser.getSiteId(), anotherUser.getSiteId()});
+    EXPECT_CALL(doc,retrieveSiteIds()).WillOnce(::testing::Return(siteIdsToReturn));
+    auto mapping=server.mapSiteIdToUser(loggedUserUsername, doc.getId());
+    std::map<int, user> expected({
+        std::pair<int, user>(loggedUser.getSiteId(), loggedUser),
+        std::pair<int, user>(anotherUser.getSiteId(), anotherUser)});
+    EXPECT_EQ(expected, mapping);
 }

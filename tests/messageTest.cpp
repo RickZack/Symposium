@@ -245,8 +245,8 @@ class SymServerMock: public SymServer{
 public:
     MOCK_METHOD2(login, const user(const std::string&, const std::string&));
     MOCK_METHOD1(addUser, const user(const user&));
-    MOCK_METHOD3(createNewSource, document(const user&, const std::string&, const std::string&));
-    MOCK_METHOD5(openNewSource, document(const user&, const std::string&, const std::string&, privilege, const std::string&));
+    MOCK_METHOD3(createNewSource, document&(const user&, const std::string&, const std::string&));
+    MOCK_METHOD5(openNewSource, const document&(const user&, const std::string&, const std::string&, privilege, const std::string&));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const user&, const std::string&, const std::string&, const std::string&));
     MOCK_METHOD3(createNewDir, std::shared_ptr<directory>(const user&, const std::string&, const std::string&));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const user&, const std::string&, const std::string&));
@@ -256,7 +256,7 @@ public:
     MOCK_METHOD3(remoteInsert, void(const std::string&, int, const symbol&));
     MOCK_METHOD3(remoteRemove, void(const std::string&, int, const symbol&));
     MOCK_METHOD4(shareResource, uri(const user& actionUser, const std::string&, const std::string&, uri&));
-    MOCK_METHOD3(editUser, const user(const std::string&, const std::string&, user&));
+    MOCK_METHOD3(editUser, const user&(const std::string&, const std::string&, user&));
     MOCK_METHOD2(closeSource, void(const user&, document&));
 };
 
@@ -286,13 +286,15 @@ TEST_F(clientMessageTest, signUpMsgTestCallsAddUserOnServer){
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewSource){
     m=new askResMessage(msgType::createRes, {"", ""}, "", "", "");
-    EXPECT_CALL(server, createNewSource(u, "", "")).WillOnce(::testing::Return(document()));
+    document returned;
+    EXPECT_CALL(server, createNewSource(u, "", "")).WillOnce(::testing::ReturnRef(returned));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsOpenNewSource){
     m=new askResMessage(msgType::openNewRes, {"", ""}, "", "", "");
-    EXPECT_CALL(server, openNewSource(u, "", "", privilege::modify, "")).WillOnce(::testing::Return(document()));
+    document returned;
+    EXPECT_CALL(server, openNewSource(u, "", "", privilege::modify, "")).WillOnce(::testing::ReturnRef(returned));
     m->invokeMethod(server);
 }
 
@@ -560,7 +562,7 @@ TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUser){
     //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
     //(here we suppose it is the dummy user u)
     //Same thing with targetUser
-    EXPECT_CALL(server, editUser("", "", u)).WillOnce(::testing::Return(u));
+    EXPECT_CALL(server, editUser("", "", u)).WillOnce(::testing::ReturnRef(u));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::shareRes, msgOutcome::success, fromClient->getMsgId());

@@ -173,5 +173,5 @@ TEST_F(documentTest, canRetrieveSiteIds){
     expected.insert(1);
     expected.insert(2);
 
-    EXPECT_EQ(expected, d.retrieveSideIds());
+    EXPECT_EQ(expected, d.retrieveSiteIds());
 }

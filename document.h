@@ -114,7 +114,7 @@ public:
      * @brief retrieves the set of siteId in the current document
      * @return a set of siteIds
      */
-    std::set<int> retrieveSideIds();
+    virtual std::set<int> retrieveSiteIds();
 };
 
 

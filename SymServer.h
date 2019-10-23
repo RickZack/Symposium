@@ -64,6 +64,7 @@ private:
     bool userIsValid(const user& toCheck);
     bool userIsActive(const std::string &username);
     std::pair<bool, document*> userIsWorkingOnDocument(const std::string &username, int resourceId);
+    user findUserBySiteId(int id);
 public:
     //Some methods are virtual in order to use the mocks in tests
     SymServer();
@@ -81,7 +82,7 @@ public:
      * Note that the @e siteId of the user is assigned by the server, as the user's @e home directory structure and the
      * @e hashSalt (that mustn't be sent to the client inside the @ref loginMessage), so the user filled client side is always incomplete.
      */
-    virtual const user addUser(const user& newUser);
+    virtual const user addUser(user& newUser);
 
     /**
      * @brief log in an already registered user, adding it to @e active
@@ -113,7 +114,7 @@ public:
      * then the server sends the document inside a @ref sendResMessage
      * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
      */
-    virtual document openSource(const user& opener, const std::string& path, const std::string& name, privilege reqPriv);
+    virtual const document & openSource(const user& opener, const std::string& path, const std::string& name, privilege reqPriv);
 
     /**
      * @brief access a user's document via uri to the filesystem of the another user
@@ -133,7 +134,8 @@ public:
      * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
      * and send back to the client a @ref sendResMessage with the symlink just created
      */
-    virtual document openNewSource(const user& opener, const std::string& path, const std::string& name, privilege reqPriv, const std::string& destPath);
+    virtual const document &
+    openNewSource(const user& opener, const std::string& path, const std::string& name, privilege reqPriv, const std::string& destPath);
 
     /**
      * @brief creates a new file with an empty document inside
@@ -147,7 +149,7 @@ public:
      * When a client asks for a new directory, the server tries to do it and send back to the client a @ref sendResMessage
      * containing the resource just added to @e path.
      */
-    virtual document createNewSource(const user& opener, const std::string& path, const std::string& name);
+    virtual const document & createNewSource(const user& opener, const std::string& path, const std::string& name);
 
     /**
      * @brief creates a new directory in the user's filesystem
@@ -277,7 +279,7 @@ public:
      * The server must send a @ref userDataMessage to the users in @e active that share some files with the user
      * identified by @e username if the user changed the nickname or the icon
      */
-    virtual const user editUser(const std::string &username, const std::string &pwd, user& newUserData);
+    virtual const user & editUser(const std::string &username, const std::string &pwd, user& newUserData);
 
     /**
     * @brief removes an user to the set of users registered to the system

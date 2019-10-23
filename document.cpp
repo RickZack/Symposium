@@ -90,7 +90,7 @@ void document::load(const std::string &loadPath) {
     //TODO:implement
 }
 
-std::set<int> document::retrieveSideIds() {
+std::set<int> document::retrieveSiteIds() {
     //TODO:implement
     return std::set<int>();
 }

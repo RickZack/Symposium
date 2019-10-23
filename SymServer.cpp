@@ -32,16 +32,16 @@
 
 int SymServer::idCounter=0;
 
-const user SymServer::addUser(const user &newUser) {
+const user SymServer::addUser(user &newUser) {
     if(userIsRegistered(newUser.getUsername()))
         throw SymServerException("SymServer::addUser: the user already exists");
     if(!userIsValid(newUser)){
         throw SymServerException("SymServer::addUser: the user has wrong parameters");
     }
     auto userDir=rootDir->addDirectory(newUser.getUsername());
-    user inserted=registered[newUser.getUsername()]=std::move(newUser);
-    inserted.setHome(userDir);
-    inserted.setSiteId(idCounter++);
+    newUser.setHome(userDir);
+    newUser.setSiteId(idCounter++);
+    user& inserted=registered[newUser.getUsername()]=newUser;
     return inserted;
 }
 
@@ -57,7 +57,7 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
     return target;
 }
 
-document
+const document &
 SymServer::openSource(const user &opener, const std::string &path, const std::string &name, privilege reqPriv) {
     if(!userIsActive(opener.getUsername()))
         throw SymServerException("SymServer::openSource: the user is not logged in");
@@ -66,7 +66,7 @@ SymServer::openSource(const user &opener, const std::string &path, const std::st
     return docReq;
 }
 
-document
+const document &
 SymServer::openNewSource(const user &opener, const std::string &path, const std::string &name, privilege reqPriv,
                          const std::string &destPath) {
     if(!userIsActive(opener.getUsername()))
@@ -77,7 +77,7 @@ SymServer::openNewSource(const user &opener, const std::string &path, const std:
     return docReq;
 }
 
-document SymServer::createNewSource(const user &opener, const std::string &path, const std::string &name) {
+const document & SymServer::createNewSource(const user &opener, const std::string &path, const std::string &name) {
     if(!userIsActive(opener.getUsername()))
         throw SymServerException("SymServer::createNewSource: the user is not logged in");
     std::shared_ptr<file> fileCreated=opener.newFile(name, path);
@@ -152,10 +152,10 @@ void SymServer::closeSource(const user &actionUser, document &toClose) {
     workingDoc[actionUser.getUsername()].remove_if([&toClose](document* doc){return toClose.getId()==doc->getId();});
 }
 
-const user SymServer::editUser(const std::string &username, const std::string &pwd, user &newUserData) {
+const user & SymServer::editUser(const std::string &username, const std::string &pwd, user &newUserData) {
     if(!userIsActive(username))
         throw SymServerException("SymServer::editUser: the user is not logged in");
-    user target=registered[username];
+    user& target=registered[username];
     target.setNewData(newUserData);
     return target;
 }
@@ -181,8 +181,16 @@ void SymServer::logout(const std::string &username, const std::string &pwd) {
 }
 
 std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, int resourceId) {
-    //TODO: to implement
-    return std::map<int, user>();
+    std::pair<bool, document*> retrieved=userIsWorkingOnDocument(actionUser, resourceId);
+    if(!retrieved.first)
+        throw SymServerException("SymServer::mapSiteIdToUser: the user is not working on that document");
+    std::set<int> siteIds=retrieved.second->retrieveSiteIds();
+    std::map<int, user> result;
+    for(int siteId:siteIds){
+        user founded= findUserBySiteId(siteId);
+        result.emplace(siteId, founded);
+    }
+    return result;
 }
 
 bool SymServer::userIsRegistered(const std::string &toCheck) {
@@ -190,7 +198,7 @@ bool SymServer::userIsRegistered(const std::string &toCheck) {
 }
 
 bool SymServer::userIsValid(const user &toCheck) {
-    std::regex pathPattern{"\.?(/[a-zA-Z 0-9]*)+[a-zA-Z]*\.*"};
+    std::regex pathPattern{"\\.(\\/[a-zA-Z 0-9]*)*([a-zA-Z 0-9]*\\.((jpg|png|ico|bmp)))"};
     return toCheck.getUsername()!="" && toCheck.getNickname()!=""
             && std::regex_match(toCheck.getIconPath(), pathPattern);
 }
@@ -212,6 +220,12 @@ std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string 
             break;
         }
     return result;
+}
+
+user SymServer::findUserBySiteId(int id) {
+    for(auto elem:registered)
+        if(elem.second.getSiteId()==id)
+            return elem.second;
 }
 
 
