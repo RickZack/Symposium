@@ -28,13 +28,48 @@
  * Created on 05 Luglio 2019, 16.22
  */
 #include "AccessStrategy.h"
+#include "user.h"
+
 
 bool RMOAccess::validateAction(user &targetUser, privilege requested) {
+    std::string name=targetUser.getUsername();
+    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(name);
+    privilege attuale;
+    if ( got == permission.end() )
+    {
+        attuale=privilege::none;
+        return attuale==requested;
+    }
+    attuale=got->second;
+    if(attuale==privilege::owner)
+        return true;
+    if(attuale==privilege::modify)
+    {
+        if(requested==privilege::owner)
+            return false;
+        return true;
+    }
+    if(attuale==privilege::readOnly)
+    {
+        if(requested==privilege::owner || requested==privilege::modify)
+            return false;
+        return true;
+    }
     return false;
 }
 
 privilege RMOAccess::setPrivilege(user &targetUser, privilege toGrant) {
-    return privilege::none;
+    std::string name=targetUser.getUsername();
+    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(name);
+    if ( got == permission.end() )
+    {
+        permission.insert (std::make_pair(name, toGrant));
+        return privilege::none;
+    }
+    privilege vecchio=got->second;
+    permission.erase (name);
+    permission.insert(std::make_pair(name, toGrant));
+    return vecchio;
 }
 
 bool TrivialAccess::validateAction(user &targetUser, privilege requested) {

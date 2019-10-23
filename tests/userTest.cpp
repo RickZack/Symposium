@@ -161,11 +161,11 @@ TEST_F(UserTest, callShareResource){
     u->shareResource(".", "dummyFile", ur);
 }
 
-TEST_F(UserTest, DISABLED_callAccessFile){
+/*TEST_F(UserTest, DISABLED_callAccessFile){
     EXPECT_CALL(*homeDir, getDir("h", "h")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
     EXPECT_CALL(*Dir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
     EXPECT_CALL(*homeDir, addLink("h/h", "sym"));
     EXPECT_CALL(*Root, getFile("f", "f"));
     u->accessFile("f/f", "h/h", "sym");
 
-}
+}*/

@@ -168,7 +168,6 @@ const std::shared_ptr<directory> &user::getHome() const {
 }
 
 bool user::hasPwd(const std::string pwd) {
-    //TODO: to implement
     return pwd==pwdHash;
 }
 
