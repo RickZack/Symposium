@@ -37,8 +37,68 @@
 enum class privilege: char {
     none, readOnly, modify, owner
 };
-
+/**
+ * @brief output operator for @e privilege
+ *
+ * @relatesalso privilege
+ */
 std::ostream& operator<<(std::ostream& output, privilege priv);
+
+/**
+ * @brief pre-decrement operator for @e privilege
+ *
+ * @relatesalso privilege
+ */
+privilege& operator--(privilege& oldPriv);
+
+/**
+ * @brief pre-increment operator for @e privilege
+ *
+ * @relatesalso privilege
+ */
+privilege& operator++(privilege& oldPriv);
+
+/**
+ * @brief post-decrement operator for @e privilege
+ *
+ * @relatesalso privilege
+ */
+privilege operator--(privilege& oldPriv, int);
+
+/**
+ * @brief post-increment operator for @e privilege
+ *
+ * @relatesalso privilege
+ */
+privilege operator++(privilege& oldPriv, int);
+
+/**
+ * @brief operator == overload for @e privilege
+ *
+ * @relatesalso privilege
+ */
+bool operator==(const privilege a, const privilege b);
+
+/**
+ * @brief operator > overload for @e privilege
+ *
+ * @relatesalso privilege
+ */
+bool operator>(const privilege a, const privilege b);
+
+/**
+ * @brief operator < overload for @e privilege
+ *
+ * @relatesalso privilege
+ */
+bool operator<(const privilege a, const privilege b);
+
+/**
+ * @brief operator == overload for @e privilege
+ *
+ * @relatesalso privilege
+ */
+bool operator<=(const privilege a, const privilege b);
 
 
 #endif //SYMPOSIUM_PRIVILEGE_H

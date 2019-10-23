@@ -60,22 +60,56 @@ const privilege uri::getDefaultPrivilege() {
 }
 
 void uri::activateAlways(privilege newPrivilege) {
-    //TODO:implement
+    if(newPrivilege==privilege::none)
+        return;
+    granted=newPrivilege;
+    activePolicy=uriPolicy::activeAlways;
 }
 
 void uri::activateCount(int shares, privilege newPrivilege) {
-    //TODO:implement
+    if(shares<=0)
+    {
+        activePolicy=uriPolicy::inactive;
+        return;
+    }
+    activePolicy=uriPolicy::activeCount;
+    sharesLeft=shares;
+    granted=newPrivilege;
 }
 
 void uri::activateTimer(std::chrono::system_clock::time_point endTime, privilege newPrivilege) {
-    //TODO:implement
+    activePolicy=uriPolicy::activeTimer;
+    stopTime=endTime;
+    granted=newPrivilege;
 }
 
 void uri::deactivate() {
-    //TODO:implement
+    activePolicy=uriPolicy::inactive;
 }
 
 privilege uri::getShare(privilege requested) {
-    //TODO:implement
-    return granted;
+    if(activePolicy==uriPolicy::activeTimer)
+    {
+        std::chrono::system_clock::time_point ora = std::chrono::system_clock::now();
+        if(ora<stopTime)
+        {
+            if(requested<=granted)
+                return requested;
+            return granted;
+        }
+    }
+    else if(activePolicy==uriPolicy::activeCount && sharesLeft>0)
+        {
+            sharesLeft--;
+            if(requested<=granted)
+                return requested;
+            return granted;
+        }
+    else if(activePolicy==uriPolicy::activeAlways)
+    {
+        if(requested<=granted)
+            return requested;
+        return granted;
+    }
+    return privilege::none;
 }

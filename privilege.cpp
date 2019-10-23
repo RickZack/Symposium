@@ -30,38 +30,29 @@
 #include <iostream>
 #include "privilege.h"
 
-/**
- * @brief operator < overload for @e privilege
- *
- * @relatesalso privilege
- */
+
 bool operator<(const privilege a, const privilege b){
     return (static_cast<char>(a)- static_cast<char>(b))<0;
 }
 
-/**
- * @brief operator > overload for @e privilege
- *
- * @relatesalso privilege
- */
+
 bool operator>(const privilege a, const privilege b){
     return (static_cast<char>(a)- static_cast<char>(b))>0;
 }
 
-/**
- * @brief operator == overload for @e privilege
- *
- * @relatesalso privilege
- */
+
 bool operator==(const privilege a, const privilege b){
     return (static_cast<char>(a)- static_cast<char>(b))==0;
 }
 
-/**
- * @brief post-increment operator for @e privilege
- *
- * @relatesalso privilege
- */
+bool operator<=(const privilege a, const privilege b)
+{
+    if(a==b || a<b)
+        return true;
+    return false;
+}
+
+
 privilege operator++(privilege& oldPriv, int){
     privilege ret{oldPriv};
     switch(oldPriv){
@@ -72,11 +63,7 @@ privilege operator++(privilege& oldPriv, int){
     return ret;
 }
 
-/**
- * @brief post-decrement operator for @e privilege
- *
- * @relatesalso privilege
- */
+
 privilege operator--(privilege& oldPriv, int){
     privilege ret{oldPriv};
     switch(oldPriv){
@@ -87,11 +74,7 @@ privilege operator--(privilege& oldPriv, int){
     return ret;
 }
 
-/**
- * @brief pre-increment operator for @e privilege
- *
- * @relatesalso privilege
- */
+
 privilege& operator++(privilege& oldPriv){
     switch(oldPriv){
         case privilege::readOnly: return oldPriv=privilege::modify;
@@ -100,11 +83,7 @@ privilege& operator++(privilege& oldPriv){
     }
 }
 
-/**
- * @brief pre-decrement operator for @e privilege
- *
- * @relatesalso privilege
- */
+
 privilege& operator--(privilege& oldPriv){
     switch(oldPriv){
         case privilege::modify:   return oldPriv=privilege::readOnly;
@@ -113,11 +92,7 @@ privilege& operator--(privilege& oldPriv){
     }
 }
 
-/**
- * @brief output operator for @e privilege
- *
- * @relatesalso privilege
- */
+
 std::ostream& operator<<(std::ostream& output, privilege priv){
     switch(priv){
         case privilege::readOnly: return output<<"reader";
@@ -126,3 +101,4 @@ std::ostream& operator<<(std::ostream& output, privilege priv){
         default: return output<<"none";
     }
 }
+

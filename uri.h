@@ -66,20 +66,60 @@ public:
 
     privilege getGranted() const;
 
+    /**
+    * @brief operator == overload for @e uri
+    *
+    * @relatesalso uri
+    */
+
     bool operator==(const uri &rhs) const;
+
+    /**
+    * @brief operator != overload for @e uri
+    *
+    * @relatesalso uri
+    */
 
     bool operator!=(const uri &rhs) const;
 
     static const privilege getDefaultPrivilege();
 
+    /**
+     * @brief set activePolicy as activateAlways with @ref newPrivilege
+     * @param newPrivilege the privilege to set
+     */
+
     void activateAlways(privilege newPrivilege = defaultPrivilege);
+
+    /**
+     * @brief set activePolicy as activeCount with @ref newPrivilege
+     * @param shares the number of possible shares
+     * @param newPrivilege the privilege to set
+     */
 
     void activateCount(int shares, privilege newPrivilege = defaultPrivilege);
 
+    /**
+     * @brief set activePolicy as activeTimer with @ref newPrivilege
+     * @param endTime the end of the uri validity
+     * @param newPrivilege the privilege to set
+     */
+
     void activateTimer(std::chrono::system_clock::time_point endTime, privilege newPrivilege = defaultPrivilege);
+
+    /**
+     * @brief set activePolicy as inactive
+     */
     void deactivate();
+
+    /**
+     * @brief check uri validity with requested privilege @ref requested by user
+     * @param requested the privilege which user want
+     * @return or requested privilege if it is <= than granted privilege or granted privilege if requested privilege is > than granted
+     */
     privilege getShare(privilege requested);
 };
+
 
 
 #endif //SYMPOSIUM_URI_H
