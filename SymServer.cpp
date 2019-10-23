@@ -125,7 +125,9 @@ privilege SymServer::editPrivilege(const user &actionUser, const user &targetUse
 
 uri SymServer::shareResource(const user &actionUser, const std::string &resPath, const std::string &resName,
                              uri &newPrefs) {
-    return uri();
+    if(!userIsActive(actionUser.getUsername()))
+        throw SymServerException("SymServer::shareResource: the user is not logged in");
+    return actionUser.shareResource(resPath, resName, newPrefs);
 }
 
 std::shared_ptr<filesystem>
@@ -149,9 +151,11 @@ void SymServer::closeSource(const user &actionUser, document &toClose) {
 }
 
 const user SymServer::editUser(const std::string &username, const std::string &pwd, user &newUserData) {
-    //TODO: to implement
-    return user("", "", "", "", 0,
-                std::shared_ptr<directory>());
+    if(!userIsActive(username))
+        throw SymServerException("SymServer::editUser: the user is not logged in");
+    user target=registered[username];
+    target.setNewData(newUserData);
+    return target;
 }
 
 void SymServer::removeUser(const std::string &username, const std::string &pwd) {

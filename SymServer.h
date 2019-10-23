@@ -270,7 +270,7 @@ public:
      * @param username the username of the user whose data are to be changed
      * @param pwd the user's password
      * @param newUserData a user object filled with new data
-     * @return the old user data
+     * @return the new user data
      *
      * The server validates the new data and changes the user in @e registered and in @e active and sends back to the client
      * a @ref serverMessage with the outcome.

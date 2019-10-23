@@ -78,6 +78,13 @@ struct SymServerAccesser: public SymServer{
         }
         return false;
     }
+    /*
+     * Used to obtain the result of a logout (e.g. the user is no longer in active)
+     * without the calls to close() on all the logged's working documents
+     */
+    void hardWrongLogout(user& logged){
+        active.erase(logged.getUsername());
+    }
 };
 
 struct SymServerTestUserFunctionality : testing::Test {
@@ -175,6 +182,20 @@ TEST_F(SymServerTestUserFunctionality, removeUserRemovesUserFromRegistered){
     server.removeUser(newUserUsername, newUserPwd);
     EXPECT_FALSE(server.userAlreadyRegistered(newUser));
 }
+
+TEST_F(SymServerTestUserFunctionality, editUserChangesUserData){
+    server.addUser(newUser);
+    server.login(newUserUsername, newUserPwd);
+
+    user newData("giuseppe", "123@pwd@!", "peppuccio63", validIconPath, 0, nullptr);
+    user inserted=server.editUser(newUserUsername, newUserPwd, newData);
+    EXPECT_EQ("giuseppe", inserted.getUsername());
+    EXPECT_EQ("peppuccio63", inserted.getNickname());
+    EXPECT_EQ("123@pwd@!", inserted.getPwdHash());
+    EXPECT_EQ(newUser.getHome(), inserted.getHome());
+    EXPECT_EQ(newUser.getSiteId(), inserted.getSiteId());
+}
+
 struct SymServerUserMock: public user{
     SymServerUserMock(const std::string &username, const std::string &pwd, const std::string &nickname,
                       const std::string &iconPath, int siteId, std::shared_ptr<directory> home) : user(username, pwd,
@@ -187,6 +208,7 @@ struct SymServerUserMock: public user{
     MOCK_CONST_METHOD2(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome));
     MOCK_CONST_METHOD4(editPrivilege, privilege(const user &otherUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
+    MOCK_CONST_METHOD3(shareResource, uri(const std::string &resPath, const std::string &resName, uri& newPrefs));
 };
 
 struct SymServerFileMock: public file{
@@ -206,7 +228,7 @@ struct SymServerDocMock: public document{
 
 struct SymServerTestFilesystemFunctionality : testing::Test {
     ::testing::NiceMock<SymServerUserMock> loggedUser, anotherUser;
-    SymServerAccesser server;
+    ::testing::NiceMock<SymServerAccesser> server;
     std::shared_ptr<::testing::NiceMock<SymServerdirMock>> userDir;
     static const std::string filePath;
     static const std::string fileName;
@@ -234,11 +256,11 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     /*
      * Make the owner user to access the file and open the document. Used to test that closeSource actually works
      */
-    void setStageForHavingOpenedDoc(){
-        EXPECT_CALL(loggedUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
-        EXPECT_CALL(*fileToReturn, access(loggedUser, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-        auto ret=server.openNewSource(loggedUser, filePath, fileName, privilege::owner, "./");
-        ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, privilege::owner));
+    void setStageForHavingOpenedDoc(SymServerUserMock& userWhoOpens){
+        EXPECT_CALL(userWhoOpens, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+        EXPECT_CALL(*fileToReturn, access(userWhoOpens, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+        auto ret=server.openNewSource(userWhoOpens, filePath, fileName, privilege::owner, "./");
+        ASSERT_TRUE(server.userIsWorkingOnDocument(userWhoOpens, doc, privilege::owner));
     }
     void setAnotherUserActive(){
         server.addUser(anotherUser);
@@ -249,14 +271,20 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
      * Make anotherUser access the resource (as someone granted a privilege to him) and the close the document
      * to enable the setting of another privilege to anotherUser by loggedUser (who is the owner)
      */
+    void makeAnotherUserToHavePrivilegeAndCloseSource(privilege priv){
+        makeAnotherUserToHavePrivilege(priv);
+        closeAfterPrivilegeAcquired(priv);
+    }
     void makeAnotherUserToHavePrivilege(privilege priv){
         //anotherUser adds the file to its filesystem and closes the document
         EXPECT_CALL(anotherUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
         EXPECT_CALL(*fileToReturn, access(anotherUser, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+        document ret2=server.openNewSource(anotherUser, filePath, fileName, priv, "./");
+    }
+    void closeAfterPrivilegeAcquired(privilege priv){
         EXPECT_CALL(doc, close(anotherUser));
-        auto ret2=server.openNewSource(anotherUser, filePath, fileName, priv, "./");
         server.closeSource(anotherUser, doc);
-        ASSERT_FALSE(server.userIsWorkingOnDocument(anotherUser, ret2, priv));
+        ASSERT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, priv));
     }
 
     ~SymServerTestFilesystemFunctionality() = default;
@@ -386,7 +414,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveOnDocumentNotOpened){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, closeSourceClosesTheDocument){
-    setStageForHavingOpenedDoc();
+    setStageForHavingOpenedDoc(loggedUser);
 
     EXPECT_CALL(doc, close(loggedUser));
     server.closeSource(loggedUser, doc);
@@ -395,11 +423,43 @@ TEST_F(SymServerTestFilesystemFunctionality, closeSourceClosesTheDocument){
 
 
 TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUser){
-    setStageForHavingOpenedDoc();
+    setStageForHavingOpenedDoc(loggedUser);
     setAnotherUserActive();
-    makeAnotherUserToHavePrivilege(defaultPrivilege);
+    makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
 
     EXPECT_CALL(loggedUser, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_CALL(loggedUser, editPrivilege(anotherUser, filePath, fileName, privilege::readOnly));
     server.editPrivilege(loggedUser, anotherUser, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCalledByUnloggedUser){
+    setStageForHavingOpenedDoc(loggedUser);
+    setAnotherUserActive();
+    makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
+    server.hardWrongLogout(loggedUser);
+
+    EXPECT_THROW(server.editPrivilege(loggedUser, anotherUser, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly), SymServerException);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeOnUserWorkingOnDocument){
+    setStageForHavingOpenedDoc(loggedUser);
+    setAnotherUserActive();
+    makeAnotherUserToHavePrivilege(defaultPrivilege);
+    //call expected because we need to retrieve the document id of the document named fileName (in the loggedUser space)
+    //to check that anotherUser is not working on the same document
+    EXPECT_CALL(loggedUser, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
+    EXPECT_THROW(server.editPrivilege(loggedUser, anotherUser, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly), SymServerException);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, shareResourceCallsShareResourceOnUser){
+    uri oldPref;
+    uri newPref(uriPolicy::activeAlways);
+    EXPECT_CALL(loggedUser, shareResource(filePath, fileName, newPref)).WillOnce(::testing::Return(oldPref));
+    uri retPref=server.shareResource(loggedUser, filePath, fileName, newPref);
+    EXPECT_EQ(oldPref, retPref);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, shareResourceOfUnLoggedUser){
+    uri newPref(uriPolicy::activeAlways);
+    EXPECT_THROW(server.shareResource(anotherUser, filePath, fileName, newPref), SymServerException);
 }

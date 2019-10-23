@@ -71,11 +71,14 @@ public:
 
     const std::shared_ptr<directory> &getHome() const;
 
+    const std::string &getPwdHash() const;
+
     void setPwd(const std::string &pwd);
     void setNickname(const std::string &nickname);
     void setSiteId(int siteId);
     void setIconPath(const std::string &iconPath);
     void setHome(std::shared_ptr<directory> home);
+    void setNewData(const user& newData);
     bool hasPwd(const std::string pwd);
     bool operator==(const user &rhs) const;
 
@@ -159,7 +162,7 @@ public:
      *
      * Calls @ref directory::getFile on @e home and then file::setSharingPolicy on the retrieved file
      */
-    uri shareResource(const std::string &resPath, const std::string &resName, uri& newPrefs);
+    virtual uri shareResource(const std::string &resPath, const std::string &resName, uri& newPrefs) const;
 
     /**
   * @brief removes a file object given a condition on it

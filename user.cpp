@@ -145,7 +145,7 @@ privilege user::changePrivilege(const std::string &resPath, const std::string &r
     return newP;
 }
 
-uri user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
+uri user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const {
     std::shared_ptr<file> newF(nullptr);
     newF=home->getFile(resPath, resName);
     uri u;
@@ -170,4 +170,14 @@ const std::shared_ptr<directory> &user::getHome() const {
 bool user::hasPwd(const std::string pwd) {
     //TODO: to implement
     return pwd==pwdHash;
+}
+
+void user::setNewData(const user &newData) {
+    username=newData.username;
+    pwdHash=newData.pwdHash;
+    nickname=newData.nickname;
+}
+
+const std::string &user::getPwdHash() const {
+    return pwdHash;
 }
