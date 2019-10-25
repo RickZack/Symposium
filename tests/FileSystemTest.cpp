@@ -44,6 +44,11 @@ struct documentMock: public document {
 
 };
 
+struct fileMock: public file{
+    fileMock(): file("dummy", "."){};
+    MOCK_METHOD1(getUserPrivilege, privilege(const user&));
+};
+
 struct FileSystemTestT: ::testing::Test{
     file *f;
     ::testing::NiceMock<documentMock> *document;
@@ -60,8 +65,14 @@ TEST_F(FileSystemTestT, accessTest)
 {
 
     user u("user", "", "", "", 0, std::shared_ptr<directory>());
-    EXPECT_CALL(*document, access(u, privilege::owner));
-    f->access(u, privilege::owner);
+    fileMock *f=new fileMock();
+    /*EXPECT_CALL(*f, getUserPrivilege(u)).WillOnce(::testing::Return(privilege::none));
+    EXPECT_THROW(f->access(u, privilege::owner), filesystemException);
+    EXPECT_CALL(*f, getUserPrivilege(u)).WillOnce(::testing::Return(privilege::modify));
+    EXPECT_THROW(f->access(u, privilege::owner), filesystemException);*/
+    EXPECT_CALL(*f, getUserPrivilege(u)).WillOnce(::testing::Return(privilege::owner));
+    EXPECT_CALL(*document, access(u, privilege::modify));
+    f->access(u, privilege::modify);
 }
 
 TEST(FileSystemTest, getSetFileTest)
@@ -94,8 +105,9 @@ TEST(FileSystemTest, printFileTest)
     directory *d= new directory("root");
     std::shared_ptr<directory> home(d);
     user u1("", "", "", "", 0, home);
-    file f("file1", "");
-    EXPECT_EQ("file1", f.print(u1));
+    fileMock *f=new fileMock();
+    EXPECT_CALL(*f, getUserPrivilege(u1)).WillOnce(::testing::Return(privilege::none));
+    EXPECT_EQ("You no longer have the possibility to access the file in any mode", f->print(u1));
 }
 
 TEST(FileSystemTest, getDirectoryGetFileTest)

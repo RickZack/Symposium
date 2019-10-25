@@ -104,8 +104,23 @@ void file::send() const {
 }
 
 std::string file::print(const user &targetUser, bool recursive, int indent) const {
-    //TODO: implement
-    return "";
+    std::string nome=name;
+    privilege privileggio;
+    std::string priv="";
+    std::string ritorno;
+    privileggio=this->getUserPrivilege(targetUser);
+    if(privileggio==privilege::readOnly)
+        priv=" read only privilege";
+    if(privileggio==privilege::modify)
+        priv=" modify privilege";
+    if(privileggio==privilege::owner)
+        priv=" you are owner of the file";
+    if(priv!="")
+    {
+        ritorno=nome+priv;
+        return ritorno;
+    }
+    return "You no longer have the possibility to access the file in any mode";
 }
 
 directory::directory(const std::string &name) : filesystem(name) {
