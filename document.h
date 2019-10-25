@@ -68,7 +68,7 @@ public:
      * open a document, such as loading or storing it, and add @e newActiveUser to
      * @e activeUsers.
      */
-    virtual document access(const user &newActive, privilege accessPriv);
+    virtual document & access(const user &newActive, privilege accessPriv);
 
     /**
      * @brief insert a symbol in the document as consequence of an user's action on the GUI

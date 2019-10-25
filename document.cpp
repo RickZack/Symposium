@@ -51,9 +51,9 @@ int document::getNumchar() const {
     return numchar;
 }
 
-document document::access(const user &newActive, privilege accessPriv) {
+document & document::access(const user &newActive, privilege accessPriv) {
     //TODO:implement
-    return document(0);
+    return *this;
 }
 
 void document::localInsert(int indexes[2], symbol &toInsert) {
