@@ -41,21 +41,7 @@ bool RMOAccess::validateAction(user &targetUser, privilege requested) {
         return attuale==requested;
     }
     attuale=got->second;
-    if(attuale==privilege::owner)
-        return true;
-    if(attuale==privilege::modify)
-    {
-        if(requested==privilege::owner)
-            return false;
-        return true;
-    }
-    if(attuale==privilege::readOnly)
-    {
-        if(requested==privilege::owner || requested==privilege::modify)
-            return false;
-        return true;
-    }
-    return false;
+    return attuale >= requested;
 }
 
 privilege RMOAccess::setPrivilege(user &targetUser, privilege toGrant) {
