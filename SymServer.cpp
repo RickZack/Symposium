@@ -226,6 +226,7 @@ user SymServer::findUserBySiteId(int id) {
     for(auto elem:registered)
         if(elem.second.getSiteId()==id)
             return elem.second;
+    throw SymServerException("SymServer::findUserBySiteId: user not found");
 }
 
 

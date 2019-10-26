@@ -32,9 +32,10 @@
 
 user::user(const std::string &username, const std::string &pwd, const std::string &nickname,
            const std::string &iconPath,
-           int siteId, std::shared_ptr<directory> home) : username(username), pwdHash(pwd), siteId(siteId),
+           int siteId, std::shared_ptr<directory> home) : username(username), siteId(siteId),
                                                           nickname(nickname), iconPath(iconPath), home(home)
 {
+    pwdHash=sha256(pwd+hashSalt);
     //TODO: implement
 }
 
@@ -175,10 +176,10 @@ const std::shared_ptr<directory> &user::getHome() const {
     return home;
 }
 
-bool user::hasPwd(const std::string pwd) {
+bool user::hasPwd(const std::string &pwd) {
 
-    //return sha256(pwd+hashSalt)==pwdHash;
-    return pwd==pwdHash;
+    return sha256(pwd+hashSalt)==pwdHash;
+    //return pwd==pwdHash;
 }
 
 void user::setNewData(const user &newData) {

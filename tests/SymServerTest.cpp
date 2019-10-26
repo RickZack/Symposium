@@ -191,7 +191,7 @@ TEST_F(SymServerTestUserFunctionality, editUserChangesUserData){
     const user& inserted=server.editUser(newUserUsername, newUserPwd, newData);
     EXPECT_EQ("giuseppe", inserted.getUsername());
     EXPECT_EQ("peppuccio63", inserted.getNickname());
-    EXPECT_EQ("123@pwd@!", inserted.getPwdHash());
+    EXPECT_NE(oldUserData.getPwdHash(), inserted.getPwdHash());
     EXPECT_EQ(oldUserData.getHome(), inserted.getHome());
     EXPECT_EQ(oldUserData.getSiteId(), inserted.getSiteId());
 }
