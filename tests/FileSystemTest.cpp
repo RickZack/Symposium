@@ -44,11 +44,6 @@ struct documentMock: public document {
 
 };
 
-struct fileMock: public file{
-    fileMock(): file("dummy", "."){};
-    MOCK_METHOD1(getUserPrivilege, privilege(const user&));
-};
-
 struct FileSystemTestT: ::testing::Test{
     file *f;
     ::testing::NiceMock<documentMock> *document;
