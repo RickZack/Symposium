@@ -86,15 +86,17 @@ std::string user::showDir(bool recursive) const {
 
 std::shared_ptr<file> user::newFile(const std::string &fileName, const std::string &pathFromHome) const {
 
-    std::shared_ptr<file> newF(nullptr);
-    newF=home->addFile(pathFromHome, fileName);
-    return newF;
+    std::shared_ptr<file> newF=home->addFile(pathFromHome, fileName);
+    if(newF!= nullptr)
+        return newF;
+    throw userException("An error occurred while creating a new file");
 }
 
 std::shared_ptr<directory> user::newDirectory(const std::string &dirName, const std::string &pathFromHome) const{
-    std::shared_ptr<directory> newD(nullptr);
-    newD=home->addDirectory(dirName);
-    return newD;
+    std::shared_ptr<directory> newD=home->addDirectory(dirName);
+    if(newD!= nullptr)
+        return newD;
+    throw userException("An error occurred while creating a new directory");
 }
 
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
@@ -105,21 +107,24 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     std::size_t found = path.find_last_of("/\\");
     str1.append(path,0, found); //path to the directory of the current user
     str2.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
-    std::shared_ptr<directory> dir(nullptr);
-    dir=this->home->getDir(str1, str2);
-    std::shared_ptr<directory> root1(nullptr);
-    root1=dir->getRoot();
+    std::shared_ptr<directory> dir=this->home->getDir(str1, str2);
+    if(dir== nullptr)
+        throw userException("An error occurred while trying to access the directory where you want save the link");
 
-    std::shared_ptr<symlink> sym(nullptr);
-    sym=home->addLink(path, fileName);
+    std::shared_ptr<directory> root1=dir->getRoot();
+    if(root1== nullptr)
+        throw userException("A system error");
 
-
+    std::shared_ptr<symlink> sym=home->addLink(path, fileName);
+    if(sym ==nullptr)
+        throw userException("An error occurred while trying to add link");
 
     found = resId.find_last_of("/\\");
     str3.append(resId,0, found); //absolute path to the directory of the file to add
     str4.append(resId.begin()+found+1,resId.end()); //the id of file to add
-    std::shared_ptr<file> fi(nullptr);
-    fi=root1->getFile(str3, str4);
+    std::shared_ptr<file> fi=root1->getFile(str3, str4);;
+    if(fi == nullptr)
+        throw userException("An error occurred while trying to add link");
     return fi;
 }
 
@@ -130,24 +135,27 @@ document & user::openFile(const std::string &path, const std::string &fileName, 
 
 privilege user::editPrivilege(const user &otherUser, const std::string &resPath, const std::string &resName,
                               privilege newPrivilege) const {
-    std::shared_ptr<file> newF(nullptr);
-    newF=home->getFile(resPath, resName);
+    std::shared_ptr<file> newF=home->getFile(resPath, resName);
+    if(newF==nullptr)
+        throw userException("An error occurred while trying to edit privilege");
     privilege newP;
     newP=newF->setUserPrivilege(otherUser, newPrivilege);
     return newP;
 }
 
 privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) {
-    std::shared_ptr<file> newF(nullptr);
-    newF=home->getFile(resPath, resName);
+    std::shared_ptr<file> newF=home->getFile(resPath, resName);
+    if(newF==nullptr)
+        throw userException("An error occurred while trying to change privilege");
     privilege newP;
     newP=newF->setUserPrivilege(*this, newPrivilege);
     return newP;
 }
 
 uri user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const {
-    std::shared_ptr<file> newF(nullptr);
-    newF=home->getFile(resPath, resName);
+    std::shared_ptr<file> newF=home->getFile(resPath, resName);
+    if(newF==nullptr)
+        throw userException("An error occurred while trying to share resource");
     uri u;
     u=newF->setSharingPolicy(*this, newPrefs);
     return u;
@@ -168,6 +176,8 @@ const std::shared_ptr<directory> &user::getHome() const {
 }
 
 bool user::hasPwd(const std::string pwd) {
+
+    //return sha256(pwd+hashSalt)==pwdHash;
     return pwd==pwdHash;
 }
 

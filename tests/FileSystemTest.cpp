@@ -36,6 +36,7 @@
 #include "../user.h"
 #include "../document.h"
 #include "../uri.h"
+#include "../AccessStrategy.h"
 
 struct documentMock: public document {
     documentMock() : document(0) {};
@@ -44,35 +45,54 @@ struct documentMock: public document {
 
 };
 
+struct RMOAccessMock: public RMOAccess{
+    RMOAccessMock(): RMOAccess(){};
+    MOCK_METHOD2(validateAction, bool(user &targetUser, privilege requested));
+    MOCK_METHOD2(setPrivilege, privilege(user &targetUser, privilege toGrant));
+
+};
+
 struct FileSystemTestT: ::testing::Test{
     file *f;
     ::testing::NiceMock<documentMock> *document;
+    ::testing::NiceMock<RMOAccessMock> *rmo;
     FileSystemTestT(){
         document=new ::testing::NiceMock<documentMock>();
+        rmo=new ::testing::NiceMock<RMOAccessMock>();
         f=new file("f", ".");
     }
     ~FileSystemTestT(){
-        delete document;
+        delete f;
+        ::testing::Mock::AllowLeak(document);
+        ::testing::Mock::AllowLeak(rmo);
     }
 };
+
+TEST_F(FileSystemTestT, FileSetTest)
+{
+    user u("user", "", "", "", 0, std::shared_ptr<directory>());
+    EXPECT_CALL(*rmo, setPrivilege(u, privilege::modify));
+    f->setUserPrivilege(u, privilege::modify);
+}
+
+
 
 TEST_F(FileSystemTestT, accessTest)
 {
     user u("user", "", "", "", 0, std::shared_ptr<directory>());
-    file f("file1", "");
-    f.setUserPrivilege(u, privilege::owner);
+    f->setUserPrivilege(u, privilege::owner);
     EXPECT_CALL(*document, access(u, privilege::modify)).WillOnce(::testing::ReturnRef(*document));
-    f.access(u, privilege::modify);
-    f.setUserPrivilege(u, privilege::modify);
+    f->access(u, privilege::modify);
+    f->setUserPrivilege(u, privilege::modify);
     EXPECT_CALL(*document, access(u, privilege::modify)).WillOnce(::testing::ReturnRef(*document));
-    f.access(u, privilege::modify);
-    f.setUserPrivilege(u, privilege::readOnly);
-    EXPECT_THROW(f.access(u, privilege::owner), filesystemException);
-    f.setUserPrivilege(u, privilege::none);
-    EXPECT_THROW(f.access(u, privilege::modify), filesystemException);
+    f->access(u, privilege::modify);
+    f->setUserPrivilege(u, privilege::readOnly);
+    EXPECT_THROW(f->access(u, privilege::owner), filesystemException);
+    f->setUserPrivilege(u, privilege::none);
+    EXPECT_THROW(f->access(u, privilege::modify), filesystemException);
 }
 
-TEST(FileSystemTest, getSetFileTest)
+TEST(FileSystemTest, getSetDirSymTest)
 {
     directory d("d");
     class symlink sym("sym", ".", "f");

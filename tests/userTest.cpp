@@ -89,6 +89,15 @@ struct UserTest: ::testing::Test{
     }
 };
 
+TEST_F(UserTest, DISABLED_callAccessFile){
+    EXPECT_CALL(*homeDir, getDir("h", "h")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
+    EXPECT_CALL(*Dir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
+    EXPECT_CALL(*homeDir, addLink("h/h", "sym"));
+    EXPECT_CALL(*Root, getFile("f", "f"));
+    u->accessFile("f/f", "h/h", "sym");
+
+}
+
 TEST(userTest, makeNewFileMock){
     dirMock *dir=new dirMock();
     std::shared_ptr<directory> home(dir);
@@ -102,7 +111,8 @@ TEST(userTest, makeNewDirMock){
     dirMock *dir=new dirMock();
     std::shared_ptr<directory> home(dir);
     user u1("", "", "", "", 0, home);
-    EXPECT_CALL(*dir, addDirectory("ciao"));
+    directory *created=new directory("ciao");
+    EXPECT_CALL(*dir, addDirectory("ciao")).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
     u1.newDirectory("ciao");
 }
 
@@ -155,11 +165,3 @@ TEST_F(UserTest, callShareResource){
     u->shareResource(".", "dummyFile", ur);
 }
 
-/*TEST_F(UserTest, DISABLED_callAccessFile){
-    EXPECT_CALL(*homeDir, getDir("h", "h")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
-    EXPECT_CALL(*Dir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
-    EXPECT_CALL(*homeDir, addLink("h/h", "sym"));
-    EXPECT_CALL(*Root, getFile("f", "f"));
-    u->accessFile("f/f", "h/h", "sym");
-
-}*/

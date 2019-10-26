@@ -35,6 +35,7 @@
 #include "privilege.h" //for privileges on the resource
 #include "filesystem.h"
 #include "document.h"
+#include "lib/hash/sha256.h"
 
 //TODO: complete information about the functions: do they throw exceptions? What is the exception safety?
 
@@ -188,5 +189,13 @@ public:
 
 };
 
+class userException: public std::exception{
+    std::string msg;
+public:
+    userException(std::string msg):msg{msg}{};
+    virtual const char* what() const noexcept {
+        return msg.c_str();
+    }
+};
 
 #endif //SYMPOSIUM_USER_H
