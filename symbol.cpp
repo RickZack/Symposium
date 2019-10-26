@@ -83,4 +83,5 @@ std::ostream& operator<<(std::ostream& os, symbol s){
     for(auto val:s.getPos())
         os<<" "<<val;
     os<<" ]"<<std::endl;
+    return os;
 }

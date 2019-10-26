@@ -35,11 +35,13 @@
 #include <set>
 #include <map>
 #include <memory>
+#include <sstream>
 
 #include "privilege.h"
 #include "uri.h"
 #include "document.h"
 #include "AccessStrategy.h"
+
 
 /*
  * Forward declaration: filesystem must use "user" only with pointers.

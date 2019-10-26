@@ -87,8 +87,12 @@ uri file::setSharingPolicy(const user &actionUser, uri &newSharingPrefs) {
 }
 
 document & file::access(const user &targetUser, privilege accessMode) {
-    //TODO: implement
-    return doc;
+    privilege priv=this->getUserPrivilege(targetUser);
+    if(priv==privilege::none)
+        throw filesystemException("You no longer have the possibility to access the file in any mode");
+    if(priv>accessMode)
+        throw filesystemException("You have a lower privilege than you ask");
+    return doc.access(targetUser, accessMode);;
 }
 
 void file::store(const std::string &storePath) const {
@@ -104,23 +108,12 @@ void file::send() const {
 }
 
 std::string file::print(const user &targetUser, bool recursive, int indent) const {
-    std::string nome=name;
-    privilege privileggio;
-    std::string priv="";
-    std::string ritorno;
-    privileggio=this->getUserPrivilege(targetUser);
-    if(privileggio==privilege::readOnly)
-        priv=" read only privilege";
-    if(privileggio==privilege::modify)
-        priv=" modify privilege";
-    if(privileggio==privilege::owner)
-        priv=" you are owner of the file";
-    if(priv!="")
-    {
-        ritorno=nome+priv;
-        return ritorno;
-    }
-    return "You no longer have the possibility to access the file in any mode";
+
+    std::ostringstream priv;
+    if(getUserPrivilege(targetUser)==privilege::none)
+        return name+" You no longer have the possibility to access the file in any mode";
+    priv<<getUserPrivilege(targetUser);
+    return name + " " + priv.str();
 }
 
 directory::directory(const std::string &name) : filesystem(name) {
