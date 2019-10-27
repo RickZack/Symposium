@@ -176,10 +176,8 @@ const std::shared_ptr<directory> &user::getHome() const {
     return home;
 }
 
-bool user::hasPwd(const std::string &pwd) {
-
+bool user::hasPwd(const std::string &pwd) const {
     return sha256(pwd+hashSalt)==pwdHash;
-    //return pwd==pwdHash;
 }
 
 void user::setNewData(const user &newData) {

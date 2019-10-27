@@ -80,7 +80,7 @@ public:
     void setIconPath(const std::string &iconPath);
     void setHome(std::shared_ptr<directory> home);
     void setNewData(const user& newData);
-    bool hasPwd(const std::string &pwd);
+    virtual bool hasPwd(const std::string &pwd) const;
     bool operator==(const user &rhs) const;
 
     bool operator!=(const user &rhs) const;

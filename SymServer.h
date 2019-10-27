@@ -55,16 +55,11 @@ class SymServer {
 protected:
     std::unordered_map<std::string, user> registered;                                                /**< registered users, indexed by username */
     std::unordered_map<std::string, user*> active;                                                   /**< active users, indexed by username */
-    std::unordered_map<std::string, std::forward_list<document*>> workingDoc;   /**< list of document each user is working on */
+    std::unordered_map<std::string, std::forward_list<document*>> workingDoc;                        /**< list of document each user is working on */
     std::unordered_map<int, std::queue<message>> workingQueue;                                       /**< messages queue associated with every document @e resourceId */
     static int idCounter;                                                                            /**< siteId to be assigned to the next registered user */
     std::shared_ptr<directory> rootDir;                                                              /**< virtual filesystem of the Symposium server */
-private:
-    bool userIsRegistered(const std::string &toCheck);
-    bool userIsValid(const user& toCheck);
-    bool userIsActive(const std::string &username);
-    std::pair<bool, document*> userIsWorkingOnDocument(const std::string &username, int resourceId);
-    user findUserBySiteId(int id);
+
 public:
     //Some methods are virtual in order to use the mocks in tests
     SymServer();
@@ -82,7 +77,7 @@ public:
      * Note that the @e siteId of the user is assigned by the server, as the user's @e home directory structure and the
      * @e hashSalt (that mustn't be sent to the client inside the @ref loginMessage), so the user filled client side is always incomplete.
      */
-    virtual const user addUser(user& newUser);
+    virtual const user & addUser(user& newUser);
 
     /**
      * @brief log in an already registered user, adding it to @e active
@@ -114,7 +109,7 @@ public:
      * then the server sends the document inside a @ref sendResMessage
      * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
      */
-    virtual const document & openSource(const user& opener, const std::string& path, const std::string& name, privilege reqPriv);
+    virtual const document & openSource(const std::string &opener, const std::string& path, const std::string& name, privilege reqPriv);
 
     /**
      * @brief access a user's document via uri to the filesystem of the another user
@@ -135,7 +130,7 @@ public:
      * and send back to the client a @ref sendResMessage with the symlink just created
      */
     virtual const document &
-    openNewSource(const user& opener, const std::string& path, const std::string& name, privilege reqPriv, const std::string& destPath);
+    openNewSource(const std::string &opener, const std::string& path, const std::string& name, privilege reqPriv, const std::string& destPath);
 
     /**
      * @brief creates a new file with an empty document inside
@@ -265,7 +260,7 @@ public:
     * This method is invoked by receiving a @ref updateDocMessage and has the effect of calling
     * @ref document::close and the removal of @e actionUser from @e workingDoc for @e toClose
     */
-    virtual void closeSource(const user& actionUser, document& toClose);
+    virtual void closeSource(const std::string &actionUser, document& toClose);
 
     /**
      * @brief changes user's data
@@ -313,6 +308,30 @@ public:
     //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
     virtual ~SymServer()= default;
+
+protected:
+    /*
+     * These methods have been created for test suites to allow the mock class to access elements
+     */
+    virtual user &registerUser(user *toInsert);
+    virtual user &getRegistered(const std::string &username);
+    virtual void removeRegistered(const std::string &username);
+
+    /*
+     * These methods are for internal use, to simplify the body of public functions.
+     * Some of them are also virtual to be overridden in test suites (read ./tests/SymServerTest.cpp)
+     */
+    virtual bool userIsRegistered(const std::string &toCheck);
+    virtual user findUserBySiteId(int id);
+    virtual bool userIsActive(const std::string &username);
+
+    /*
+     * These are utility methods for internal use that don't need override
+     */
+private:
+    bool userIsValid(const user& toCheck);
+    std::pair<bool, document*> userIsWorkingOnDocument(const std::string &username, int resourceId);
+
 };
 
 class SymServerException: public std::exception{

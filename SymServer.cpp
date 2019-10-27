@@ -32,7 +32,7 @@
 
 int SymServer::idCounter=0;
 
-const user SymServer::addUser(user &newUser) {
+const user & SymServer::addUser(user &newUser) {
     if(userIsRegistered(newUser.getUsername()))
         throw SymServerException("SymServer::addUser: the user already exists");
     if(!userIsValid(newUser)){
@@ -41,14 +41,16 @@ const user SymServer::addUser(user &newUser) {
     auto userDir=rootDir->addDirectory(newUser.getUsername());
     newUser.setHome(userDir);
     newUser.setSiteId(idCounter++);
-    user& inserted=registered[newUser.getUsername()]=newUser;
+    user& inserted=registerUser(&newUser);
+    //user& inserted=registered[newUser.getUsername()]=newUser;
     return inserted;
 }
 
 const user SymServer::login(const std::string &username, const std::string &pwd) {
     if(!userIsRegistered(username))
         throw SymServerException("SymServer::login: the user is not registered");
-    user& target=registered[username];
+    user& target=getRegistered(username);
+    //user& target=registered[username];
     if(!target.hasPwd(pwd))
         throw SymServerException("SymServer::login: wrong password");
     if(userIsActive(username))
@@ -58,22 +60,23 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
 }
 
 const document &
-SymServer::openSource(const user &opener, const std::string &path, const std::string &name, privilege reqPriv) {
-    if(!userIsActive(opener.getUsername()))
+SymServer::openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv) {
+    if(!userIsActive(opener))
         throw SymServerException("SymServer::openSource: the user is not logged in");
-    document& docReq= opener.openFile(path, name, reqPriv);
-    workingDoc[opener.getUsername()].push_front(&docReq);
+    document& docReq= getRegistered(opener).openFile(path, name, reqPriv);
+    workingDoc[opener].push_front(&docReq);
     return docReq;
 }
 
 const document &
-SymServer::openNewSource(const user &opener, const std::string &path, const std::string &name, privilege reqPriv,
+SymServer::openNewSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
                          const std::string &destPath) {
-    if(!userIsActive(opener.getUsername()))
+    if(!userIsActive(opener))
         throw SymServerException("SymServer::openNewSource: the user is not logged in");
-    std::shared_ptr<file> fileReq=opener.accessFile(path+"/"+name, destPath);
-    document& docReq=fileReq->access(opener, uri::getDefaultPrivilege());
-    workingDoc[opener.getUsername()].push_front(&docReq);
+    const user& target=getRegistered(opener);
+    std::shared_ptr<file> fileReq=target.accessFile(path+"/"+name, destPath);
+    document& docReq=fileReq->access(target, uri::getDefaultPrivilege());
+    workingDoc[opener].push_front(&docReq);
     return docReq;
 }
 
@@ -145,17 +148,18 @@ SymServer::removeResource(const user &remover, const std::string &resPath, const
     return remover.removeResource(resPath, resName);
 }
 
-void SymServer::closeSource(const user &actionUser, document &toClose) {
-    if(!userIsWorkingOnDocument(actionUser.getUsername(),toClose.getId()).first)
+void SymServer::closeSource(const std::string &actionUser, document &toClose) {
+    if(!userIsWorkingOnDocument(actionUser,toClose.getId()).first)
         throw SymServerException("SymServer::closeSource: the user is not working on that document");
-    toClose.close(actionUser);
-    workingDoc[actionUser.getUsername()].remove_if([&toClose](document* doc){return toClose.getId()==doc->getId();});
+    toClose.close(getRegistered(actionUser));
+    workingDoc[actionUser].remove_if([&toClose](document* doc){return toClose.getId()==doc->getId();});
 }
 
 const user & SymServer::editUser(const std::string &username, const std::string &pwd, user &newUserData) {
     if(!userIsActive(username))
         throw SymServerException("SymServer::editUser: the user is not logged in");
-    user& target=registered[username];
+    user& target=getRegistered(username);
+    //user& target=registered[username];
     target.setNewData(newUserData);
     return target;
 }
@@ -165,9 +169,10 @@ void SymServer::removeUser(const std::string &username, const std::string &pwd) 
         throw SymServerException("SymServer::removeUser: the user is not registered");
     auto listOfDocs=workingDoc[username];
     for(document* doc: listOfDocs)
-        doc->close(registered[username]);
+        doc->close(getRegistered(username));
     workingDoc.erase(username);
-    registered.erase(username);
+    removeRegistered(username);
+    //registered.erase(username);
 }
 
 void SymServer::logout(const std::string &username, const std::string &pwd) {
@@ -198,6 +203,8 @@ bool SymServer::userIsRegistered(const std::string &toCheck) {
 }
 
 bool SymServer::userIsValid(const user &toCheck) {
+    //OPTIMIZE: correctness check of user data should be available within user class,
+    // here we should call that method(s), adding only the constrain on the icon path
     std::regex pathPattern{"\\.(\\/[a-zA-Z 0-9]*)*([a-zA-Z 0-9]*\\.((jpg|png|ico|bmp)))"};
     return toCheck.getUsername()!="" && toCheck.getNickname()!=""
             && std::regex_match(toCheck.getIconPath(), pathPattern);
@@ -227,6 +234,18 @@ user SymServer::findUserBySiteId(int id) {
         if(elem.second.getSiteId()==id)
             return elem.second;
     throw SymServerException("SymServer::findUserBySiteId: user not found");
+}
+
+user &SymServer::registerUser(user *toInsert) {
+    return registered[toInsert->getUsername()]=*toInsert;
+}
+
+user &SymServer::getRegistered(const std::string &username) {
+    return registered[username];
+}
+
+void SymServer::removeRegistered(const std::string &username) {
+    registered.erase(username);
 }
 
 

@@ -38,18 +38,52 @@ struct SymServerdirMock : public directory{
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
 };
 
+struct SymServerUserMock: public user{
+    SymServerUserMock() {};
+    SymServerUserMock(const std::string &username, const std::string &pwd, const std::string &nickname,
+                      const std::string &iconPath, int siteId, std::shared_ptr<directory> home) : user(username, pwd,
+                                                                                                       nickname,
+                                                                                                       iconPath, siteId,
+                                                                                                       home) {};
+    SymServerUserMock(const SymServerUserMock& other): user(other){};
+    MOCK_CONST_METHOD3(accessFile,  std::shared_ptr<file>(const std::string &resId, const std::string &path,  const std::string &fileName));
+    MOCK_CONST_METHOD3(openFile, document&(const std::string &path,  const std::string &fileName, privilege accessMode));
+    MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome));
+    MOCK_CONST_METHOD2(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome));
+    MOCK_CONST_METHOD4(editPrivilege, privilege(const user &otherUser, const std::string &resPath, const std::string &resName,
+            privilege newPrivilege));
+    MOCK_CONST_METHOD3(shareResource, uri(const std::string &resPath, const std::string &resName, uri& newPrefs));
+    MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string& resPath, const std::string& resName, const std::string& newName));
+    MOCK_CONST_METHOD2(removeResource, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
+    MOCK_CONST_METHOD1(hasPwd, bool(const std::string& pwd));
+};
+
+struct SymServerFileMock: public file{
+    SymServerFileMock() : file("test", "./aPath") {}
+    MOCK_METHOD2(access, document&(const user &targetUser, privilege accessMode));
+};
+
+struct SymServerDocMock: public document{
+    SymServerDocMock():document(){};
+    SymServerDocMock(const SymServerDocMock& mock){};
+    MOCK_METHOD1(remoteInsert, void(symbol toInsert));
+    MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
+    MOCK_METHOD1(close, void(const user& noLongerActive));
+    MOCK_METHOD0(retrieveSiteIds, std::set<int>());
+};
+
 /*
  * Used to access read-only the members of SymServer without adding getters in production class
  */
 struct SymServerAccesser: public SymServer{
-    std::unordered_map<std::string, user> getRegistered(){
-        return registered;
-    }
+    std::unordered_map<std::string, SymServerUserMock> registered;
+
+public:
     bool userIsActive(const std::string& username, const user& toCheck){
         auto entry=active.find(username);
         bool found= entry!=active.end() &&
                 *entry->second==toCheck;
-        return found;
+        return found && userIsActive(username);
     }
     void setRoot(std::shared_ptr<directory> newRoot){
         rootDir=newRoot;
@@ -78,6 +112,7 @@ struct SymServerAccesser: public SymServer{
         }
         return false;
     }
+
     /*
      * Used to obtain the result of a logout (e.g. the user is no longer in active)
      * without the calls to close() on all the logged's working documents
@@ -85,10 +120,49 @@ struct SymServerAccesser: public SymServer{
     void hardWrongLogout(user& logged){
         active.erase(logged.getUsername());
     }
+    /*
+     * These methods allow to redirect the calls to get registered users to the mock class:
+     * this permits to return objects of type SymServerUserMock, so to break the dependency
+     * from user mocking the called methods
+     */
+    user &registerUser(user *toInsert) override {
+        std::string username=toInsert->getUsername();
+        SymServerUserMock* mocked= dynamic_cast<SymServerUserMock*>(toInsert);
+        SymServerUserMock& toReturn=registered.insert({username, *mocked}).first->second;
+        return toReturn;
+    }
+
+    user &getRegistered(const std::string &username) override {
+        return registered[username];
+    }
+protected:
+    void removeRegistered(const std::string &username) override {
+        registered.erase(username);
+    }
+
+    bool userIsRegistered(const std::string &toCheck) override {
+        return registered.find(toCheck)!=registered.end();
+    }
+
+    bool userIsActive(const std::string &username) override {
+        return active.find(username)!=active.end();
+    }
+
+    /*
+     * It's identical to the utility function in SymServer class:
+     * here it's necessary to make the function SymServer::mapSiteIdToUser
+     * take the mocked user from SymServerAccesser in tests
+     */
+    user findUserBySiteId(int id) override {
+        for(auto elem:registered)
+            if(elem.second.getSiteId()==id)
+                return elem.second;
+        throw SymServerException("SymServer::findUserBySiteId: user not found");
+    }
 };
 
 struct SymServerTestUserFunctionality : testing::Test {
-    user newUser, alreadyPresent, newDifferentUser;
+    ::testing::NiceMock<SymServerUserMock> newUser, alreadyPresent, newDifferentUser;
     SymServerAccesser server;
     static const std::string validIconPath;
     static const std::string newUserUsername, newUserPwd, wrongPwd;
@@ -104,7 +178,6 @@ struct SymServerTestUserFunctionality : testing::Test {
     server(){
         server.setRoot(fakeDir);
     };
-
     ~SymServerTestUserFunctionality() = default;
 };
 const std::string SymServerTestUserFunctionality::validIconPath="./userIcons/test.jpg";
@@ -145,20 +218,23 @@ TEST_F(SymServerTestUserFunctionality, addUserGivesDifferentSiteId){
 }
 
 TEST_F(SymServerTestUserFunctionality, loginOfRegisteredUser){
-    server.addUser(newUser);
+    const SymServerUserMock& inserted= dynamic_cast<const SymServerUserMock&>(server.addUser(newUser));
+    EXPECT_CALL(inserted, hasPwd(newUserPwd)).WillOnce(::testing::Return(true));
     auto logged=server.login(newUserUsername, newUserPwd);
     EXPECT_TRUE(server.userIsActive(newUserUsername, logged));
 }
 
 TEST_F(SymServerTestUserFunctionality, loginOfRegisteredUserWithWrongPwd){
-    server.addUser(newUser);
+    const SymServerUserMock& inserted= dynamic_cast<const SymServerUserMock&>(server.addUser(newUser));
+    EXPECT_CALL(inserted, hasPwd(wrongPwd)).WillOnce(::testing::Return(false));
     user logged;
     EXPECT_THROW(logged=server.login(newUserUsername, wrongPwd), SymServerException);
     EXPECT_FALSE(server.userIsActive(newUserUsername, logged));
 }
 
 TEST_F(SymServerTestUserFunctionality, loginOfAlreadyLoggedUser){
-    server.addUser(newUser);
+    const SymServerUserMock& inserted= dynamic_cast<const SymServerUserMock&>(server.addUser(newUser));
+    EXPECT_CALL(inserted, hasPwd(newUserPwd)).WillRepeatedly(::testing::Return(true));
     server.login(newUserUsername, newUserPwd);
     EXPECT_THROW(server.login(newUserUsername, newUserPwd), SymServerException);
 }
@@ -169,7 +245,8 @@ TEST_F(SymServerTestUserFunctionality, loginOfUnregisteredUser){
 }
 
 TEST_F(SymServerTestUserFunctionality, logoutRemovesUserFromActive){
-    server.addUser(newUser);
+    const SymServerUserMock& inserted= dynamic_cast<const SymServerUserMock&>(server.addUser(newUser));
+    EXPECT_CALL(inserted, hasPwd(newUserPwd)).WillOnce(::testing::Return(true));
     server.login(newUserUsername, newUserPwd);
     ASSERT_TRUE(server.userIsActive(newUserUsername, newUser));
     server.logout(newUserUsername, newUserPwd);
@@ -184,7 +261,9 @@ TEST_F(SymServerTestUserFunctionality, removeUserRemovesUserFromRegistered){
 }
 
 TEST_F(SymServerTestUserFunctionality, editUserChangesUserData){
-    user oldUserData=server.addUser(newUser);
+    const SymServerUserMock& oldUser= dynamic_cast<const SymServerUserMock&>(server.addUser(newUser));
+    user oldUserData=oldUser; //copy of old user data, to be compared to new ones to see if the change hs benn done
+    EXPECT_CALL(oldUser, hasPwd(newUserPwd)).WillOnce(::testing::Return(true));
     server.login(newUserUsername, newUserPwd);
 
     user newData("giuseppe", "123@pwd@!", "peppuccio63", validIconPath, 0, nullptr);
@@ -196,43 +275,10 @@ TEST_F(SymServerTestUserFunctionality, editUserChangesUserData){
     EXPECT_EQ(oldUserData.getSiteId(), inserted.getSiteId());
 }
 
-struct SymServerUserMock: public user{
-    SymServerUserMock(const std::string &username, const std::string &pwd, const std::string &nickname,
-                      const std::string &iconPath, int siteId, std::shared_ptr<directory> home) : user(username, pwd,
-                                                                                                       nickname,
-                                                                                                       iconPath, siteId,
-                                                                                                       home) {};
-    MOCK_CONST_METHOD3(accessFile,  std::shared_ptr<file>(const std::string &resId, const std::string &path,  const std::string &fileName));
-    MOCK_CONST_METHOD3(openFile, document&(const std::string &path,  const std::string &fileName, privilege accessMode));
-    MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome));
-    MOCK_CONST_METHOD2(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome));
-    MOCK_CONST_METHOD4(editPrivilege, privilege(const user &otherUser, const std::string &resPath, const std::string &resName,
-            privilege newPrivilege));
-    MOCK_CONST_METHOD3(shareResource, uri(const std::string &resPath, const std::string &resName, uri& newPrefs));
-    MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string& resPath, const std::string& resName, const std::string& newName));
-    MOCK_CONST_METHOD2(removeResource, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
-};
-
-struct SymServerFileMock: public file{
-    SymServerFileMock() : file("test", "./aPath") {}
-
-    MOCK_METHOD2(access, document&(const user &targetUser, privilege accessMode));
-};
-
-struct SymServerDocMock: public document{
-    SymServerDocMock():document(){};
-
-    MOCK_METHOD1(remoteInsert, void(symbol toInsert));
-    MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
-    MOCK_METHOD1(close, void(const user& noLongerActive));
-    MOCK_METHOD0(retrieveSiteIds, std::set<int>());
-
-    SymServerDocMock(const SymServerDocMock& mock){};
-};
-
 struct SymServerTestFilesystemFunctionality : testing::Test {
     ::testing::NiceMock<SymServerUserMock> loggedUser, anotherUser;
     ::testing::NiceMock<SymServerAccesser> server;
+    const SymServerUserMock* inserted;
     std::shared_ptr<::testing::NiceMock<SymServerdirMock>> userDir;
     static const std::string filePath;
     static const std::string fileName;
@@ -253,24 +299,28 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
             fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")),
             fileToReturn(new ::testing::NiceMock<SymServerFileMock>()){
         server.setRoot(fakeDir);
-        //loggedUser.setHome(userDir);
-        server.addUser(loggedUser);
+        inserted= &dynamic_cast<const SymServerUserMock&>(server.addUser(loggedUser));
+        EXPECT_CALL(*inserted, hasPwd(loggedUserPwd)).WillOnce(::testing::Return(true));
         server.login("mario", "a123@bty!!");
     };
+
     /*
      * Make the owner user to access the file and open the document. Used to test that closeSource actually works
      */
     void setStageForHavingOpenedDoc(SymServerUserMock& userWhoOpens){
-        EXPECT_CALL(userWhoOpens, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
-        EXPECT_CALL(*fileToReturn, access(userWhoOpens, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-        auto ret=server.openNewSource(userWhoOpens, filePath, fileName, privilege::owner, "./");
-        ASSERT_TRUE(server.userIsWorkingOnDocument(userWhoOpens, doc, privilege::owner));
+        SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+        EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+        auto ret=server.openNewSource(target.getUsername(), filePath, fileName, privilege::owner, "./");
+        ASSERT_TRUE(server.userIsWorkingOnDocument(target, doc, privilege::owner));
     }
     void setAnotherUserActive(){
-        server.addUser(anotherUser);
+        inserted= &dynamic_cast<const SymServerUserMock&>(server.addUser(anotherUser));
+        EXPECT_CALL(*inserted, hasPwd(anotherUserPwd)).WillOnce(::testing::Return(true));
         server.login(anotherUserUsername, anotherUserPwd);
         ASSERT_TRUE(server.userIsActive(anotherUserUsername, anotherUser));
     }
+
     /*
      * Make anotherUser access the resource (as someone granted a privilege to him) and the close the document
      * to enable the setting of another privilege to anotherUser by loggedUser (who is the owner)
@@ -279,15 +329,19 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         makeAnotherUserToHavePrivilege(priv);
         closeAfterPrivilegeAcquired(priv);
     }
+
     void makeAnotherUserToHavePrivilege(privilege priv){
         //anotherUser adds the file to its filesystem and closes the document
-        EXPECT_CALL(anotherUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
-        EXPECT_CALL(*fileToReturn, access(anotherUser, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-        auto ret2=server.openNewSource(anotherUser, filePath, fileName, priv, "./");
+        SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(anotherUserUsername));
+        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+        EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+        auto ret2=server.openNewSource(anotherUserUsername, filePath, fileName, priv, "./");
     }
+
     void closeAfterPrivilegeAcquired(privilege priv){
+        SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(anotherUserUsername));
         EXPECT_CALL(doc, close(anotherUser));
-        server.closeSource(anotherUser, doc);
+        server.closeSource(anotherUserUsername, doc);
         ASSERT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, priv));
     }
 
@@ -302,21 +356,23 @@ const std::string SymServerTestFilesystemFunctionality::anotherUserPwd="a123@bty
 const std::string SymServerTestFilesystemFunctionality::anotherUserUsername="lucio";
 
 TEST_F(SymServerTestFilesystemFunctionality, openSourceMakesTheUserWorkOnDocument){
-    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    auto doc=server.openSource(loggedUser, filePath, fileName, defaultPrivilege);
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
+    auto doc=server.openSource(loggedUserUsername, filePath, fileName, defaultPrivilege);
     EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 }
 
 
 TEST_F(SymServerTestFilesystemFunctionality, openSourceOfNotLoggedUser){
     document doc;
-    ASSERT_THROW(doc=server.openSource(anotherUser, filePath, fileName, defaultPrivilege), SymServerException);
+    ASSERT_THROW(doc=server.openSource(anotherUserUsername, filePath, fileName, defaultPrivilege), SymServerException);
     EXPECT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, defaultPrivilege));
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, logoutClosesOpenedDocuments){
-    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    auto doc=server.openSource(loggedUser, filePath, fileName, defaultPrivilege);
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
+    auto doc=server.openSource(loggedUserUsername, filePath, fileName, defaultPrivilege);
     ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 
     server.logout(loggedUserUsername, loggedUserPwd);
@@ -324,8 +380,9 @@ TEST_F(SymServerTestFilesystemFunctionality, logoutClosesOpenedDocuments){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
-    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    auto doc=server.openSource(loggedUser, filePath, fileName, defaultPrivilege);
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
+    auto doc=server.openSource(loggedUserUsername, filePath, fileName, defaultPrivilege);
     ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 
     server.removeUser(loggedUserUsername, loggedUserPwd);
@@ -334,22 +391,24 @@ TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceAccessesTheFile){
-    EXPECT_CALL(loggedUser, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
-    EXPECT_CALL(*fileToReturn, access(loggedUser, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-    auto doc=server.openNewSource(loggedUser, filePath, fileName, defaultPrivilege, "./");
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+    EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+    auto doc=server.openNewSource(loggedUserUsername, filePath, fileName, defaultPrivilege, "./");
     EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceOfNotLoggedUser){
     document doc;
-    ASSERT_THROW(doc=server.openNewSource(anotherUser, filePath, fileName, defaultPrivilege, "./"), SymServerException);
+    ASSERT_THROW(doc=server.openNewSource(anotherUserUsername, filePath, fileName, defaultPrivilege, "./"), SymServerException);
     EXPECT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, defaultPrivilege));
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, createNewSourceCallsNewFile){
-    EXPECT_CALL(loggedUser, newFile(fileName, filePath)).WillOnce(::testing::Return(fileToReturn));
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, newFile(fileName, filePath)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
-    auto doc=server.createNewSource(loggedUser, filePath, fileName);
+    auto doc=server.createNewSource(target, filePath, fileName);
     EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, privilege::owner));
 }
 
@@ -367,8 +426,9 @@ TEST_F(SymServerTestFilesystemFunctionality, createNewDirOfUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDoc){
-    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    document ret=server.openSource(loggedUser, filePath, fileName, privilege::modify);
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
+    document ret=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
     symbol toInsert('a', 0, 0, {});
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
     EXPECT_CALL(doc, remoteInsert(toInsert));
@@ -388,8 +448,9 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertOnDocumentNotOpened){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertAppendesMessage){
-    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    auto doc=server.openSource(loggedUser, filePath, fileName, privilege::modify);
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
+    auto doc=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
     symbol toInsert('a', 0, 0, {});
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
     server.remoteInsert(loggedUserUsername, doc.getId(), received);
@@ -397,8 +458,9 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertAppendesMessage){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDoc){
-    EXPECT_CALL(loggedUser, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    document ret=server.openSource(loggedUser, filePath, fileName, privilege::modify);
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
+    document ret=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
     symbol toRemove('a', 0, 0, {});
     symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
     EXPECT_CALL(doc, remoteRemove(toRemove));
@@ -421,8 +483,9 @@ TEST_F(SymServerTestFilesystemFunctionality, closeSourceClosesTheDocument){
     setStageForHavingOpenedDoc(loggedUser);
 
     EXPECT_CALL(doc, close(loggedUser));
-    server.closeSource(loggedUser, doc);
-    EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(anotherUserUsername));
+    server.closeSource(loggedUserUsername, doc);
+    EXPECT_FALSE(server.userIsWorkingOnDocument(target, doc, defaultPrivilege));
 }
 
 
