@@ -17,9 +17,9 @@
  */
 
 /* 
- * File:   SymposiumNamespace.h
+ * File:   Symposium.h
  * Project: Symposium
-  * Authors: 
+ * Authors:
  *          Riccardo Zaccone <riccardo.zaccone at studenti.polito.it>
  *          Ksenia Del Conte Akimova <s256669 at studenti.polito.it>
  *          Cristian Gianetto <s265387 at studenti.polito.it>
