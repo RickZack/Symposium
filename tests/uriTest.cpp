@@ -29,9 +29,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include "../uri.h"
 #include <cstdlib>
+
+using namespace Symposium;
 
 TEST(uriTestBasic, StartsInactiveByDefault) {
     uri u;

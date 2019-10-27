@@ -30,13 +30,17 @@
 #ifndef SYMPOSIUM_PRIVILEGE_H
 #define SYMPOSIUM_PRIVILEGE_H
 #include <iostream>
+#include "Symposium.h"
 
-/**
- * @brief defines the possible privileges on a resource
- */
-enum class privilege: char {
-    none, readOnly, modify, owner
-};
+namespace Symposium {
+    /**
+     * @brief defines the possible privileges on a resource
+     */
+    enum class privilege : char {
+        none, readOnly, modify, owner
+    };
+}
+using namespace Symposium;
 /**
  * @brief output operator for @e privilege
  *

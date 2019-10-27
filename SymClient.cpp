@@ -28,6 +28,10 @@
  * Created on 24 Giugno 2019, 19.25
  */
 #include "SymClient.h"
+#include "uri.h"
+#include "message.h"
+
+using namespace Symposium;
 
 SymClient::SymClient() :loggedUser("", "", "", "", 0, std::shared_ptr<directory>()){
     //TODO: implement

@@ -28,7 +28,8 @@
  * Created on 22 Giugno 2019, 12.10
  */
 #include "document.h"
-
+#include "symbol.h"
+using namespace Symposium;
 int document::idCounter=0;
 
 document::document(int id) : id(id) {

@@ -28,6 +28,7 @@
  * Created on 17 Giugno 2019, 10.40
  */
 #include "uri.h"
+using namespace Symposium;
 
 uri::uri(uriPolicy activePolicy) : activePolicy(activePolicy) {}
 

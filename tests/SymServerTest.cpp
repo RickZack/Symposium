@@ -30,6 +30,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "../SymServer.h"
+#include "../message.h"
+#include "../filesystem.h"
+using namespace Symposium;
 
 struct SymServerdirMock : public directory{
     SymServerdirMock(const std::string &name) : directory(name) {};
@@ -311,7 +314,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
         EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
         EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-        auto ret=server.openNewSource(target.getUsername(), filePath, fileName, privilege::owner, "./");
+        auto ret=server.openNewSource(target.getUsername(), filePath, fileName, uri::getDefaultPrivilege(), "./");
         ASSERT_TRUE(server.userIsWorkingOnDocument(target, doc, privilege::owner));
     }
     void setAnotherUserActive(){

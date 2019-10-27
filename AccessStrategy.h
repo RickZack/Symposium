@@ -33,58 +33,60 @@
 
 #include "privilege.h"
 #include <unordered_map>
-
-class user;
-
+#include "Symposium.h"
 /*
  * OPTIMIZE: use template to implement strategy pattern
  */
 
+namespace Symposium {
 /**
  * @brief Defines how the permissions on objects of type @link filesystem are handled
  */
-class AccessStrategy {
-public:
-    /**
-     * @brief validate an action from user @ref targetUser that requires @ref requested
-     * @param targetUser the user who is doing the action
-     * @param requested the permission requested by the action
-     * @return true if the user is granted the privilege @ref requested
-     */
-    virtual bool validateAction(user &targetUser, privilege requested) =0;
+    class AccessStrategy {
+    public:
+        /**
+         * @brief validate an action from user @ref targetUser that requires @ref requested
+         * @param targetUser the user who is doing the action
+         * @param requested the permission requested by the action
+         * @return true if the user is granted the privilege @ref requested
+         */
+        virtual bool validateAction(user &targetUser, privilege requested) = 0;
 
-    /**
-     * @brief set the privilege of an user
-     * @param targetUser the user the privilege is to be granted
-     * @param toGrant the privilege to grant to @ref targetUser
-     * @return the privilege previously owned by @ref targetUser, none if no privilege previously owned
-     */
-    virtual privilege setPrivilege(user& targetUser, privilege toGrant)=0;
+        /**
+         * @brief set the privilege of an user
+         * @param targetUser the user the privilege is to be granted
+         * @param toGrant the privilege to grant to @ref targetUser
+         * @return the privilege previously owned by @ref targetUser, none if no privilege previously owned
+         */
+        virtual privilege setPrivilege(user &targetUser, privilege toGrant) = 0;
 
-    virtual privilege getPrivilege(user& targetUser)=0;
-};
+        virtual privilege getPrivilege(user &targetUser) = 0;
+    };
 
 /**
  * @brief class used to model a ReadModifyOwn privilege handling on a resource.
  */
-class RMOAccess: public AccessStrategy{
-    std::unordered_map<std::string, privilege> permission; /**< username and related privilege for the resource */
-public:
-    bool validateAction(user &targetUser, privilege requested) override;
-    privilege setPrivilege(user &targetUser, privilege toGrant) override;
-    privilege getPrivilege(user& targetUser) override;
-};
+    class RMOAccess : public AccessStrategy {
+        std::unordered_map<std::string, privilege> permission; /**< username and related privilege for the resource */
+    public:
+        bool validateAction(user &targetUser, privilege requested) override;
 
+        privilege setPrivilege(user &targetUser, privilege toGrant) override;
+
+        privilege getPrivilege(user &targetUser) override;
+    };
 
 
 /**
  * @brief class used to model the absence of privilege handling on a resource
  */
-class TrivialAccess: public AccessStrategy{
-public:
-    bool validateAction(user &targetUser, privilege requested) override;
-    privilege setPrivilege(user &targetUser, privilege toGrant) override;
-    privilege getPrivilege(user& targetUser) override;
-};
+    class TrivialAccess : public AccessStrategy {
+    public:
+        bool validateAction(user &targetUser, privilege requested) override;
 
+        privilege setPrivilege(user &targetUser, privilege toGrant) override;
+
+        privilege getPrivilege(user &targetUser) override;
+    };
+}
 #endif //SYMPOSIUM_ACCESSSTRATEGY_H

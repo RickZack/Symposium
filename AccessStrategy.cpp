@@ -30,6 +30,7 @@
 #include "AccessStrategy.h"
 #include "user.h"
 
+using namespace Symposium;
 
 bool RMOAccess::validateAction(user &targetUser, privilege requested) {
     std::string name=targetUser.getUsername();

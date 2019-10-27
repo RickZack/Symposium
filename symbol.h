@@ -32,31 +32,42 @@
 
 
 #include <vector>
+#include <iostream>
+#include "Symposium.h"
 
-class symbol {
-    wchar_t ch;
-    int siteId;
-    int counter;
-    std::vector<int> pos;
-public:
-    symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos);
-    wchar_t getCh() const;
-    int getSiteId() const;
-    const std::vector<int> &getPos() const;
+namespace Symposium {
+    class symbol {
+        wchar_t ch;
+        int siteId;
+        int counter;
+        std::vector<int> pos;
+    public:
+        symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos);
 
-    bool operator<(const symbol &rhs) const;
-    bool operator>(const symbol &rhs) const;
-    bool operator<=(const symbol &rhs) const;
-    bool operator>=(const symbol &rhs) const;
+        wchar_t getCh() const;
 
-    bool operator==(const symbol &rhs) const;
-    bool operator!=(const symbol &rhs) const;
-};
+        int getSiteId() const;
+
+        const std::vector<int> &getPos() const;
+
+        bool operator<(const symbol &rhs) const;
+
+        bool operator>(const symbol &rhs) const;
+
+        bool operator<=(const symbol &rhs) const;
+
+        bool operator>=(const symbol &rhs) const;
+
+        bool operator==(const symbol &rhs) const;
+
+        bool operator!=(const symbol &rhs) const;
+    };
+}
 
 /*
- * Just to have a way to print the symbols in a intelligible way
+ * Just to have a way to print the symbols in a intellegible way
  * when the tests fail
  */
-std::ostream& operator<<(std::ostream& os, symbol s);
+std::ostream& operator<<(std::ostream& os, Symposium::symbol s);
 
 #endif //SYMPOSIUM_SYMBOL_H

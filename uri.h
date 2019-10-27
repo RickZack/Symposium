@@ -34,12 +34,13 @@
 #include <chrono>
 #include "privilege.h"
 
+namespace Symposium {
 /**
  * @brief defines the policy on an object of class @link uri uri @endlink
  */
-enum class uriPolicy{
-    inactive, activeAlways, activeCount, activeTimer
-};
+    enum class uriPolicy {
+        inactive, activeAlways, activeCount, activeTimer
+    };
 
 /**
  * @brief class used to model resource sharing preferences
@@ -49,77 +50,77 @@ enum class uriPolicy{
  * a changing in a uri object does not affect users who already have a privilege on the resource
  * the uri object refers to
  */
-class uri {
-    int uriId;                 /**< unique identifier for the uri */
-    uriPolicy activePolicy;    /**< the policy currently active */
-    int sharesLeft;            /**< number of shares that can still be accepted */
-    std::chrono::system_clock::time_point stopTime; /**< end time of sharing */
-    privilege granted;         /**< privilege that the resource owner decided to grant via uri */
+    class uri {
+        int uriId;                 /**< unique identifier for the uri */
+        uriPolicy activePolicy;    /**< the policy currently active */
+        int sharesLeft;            /**< number of shares that can still be accepted */
+        std::chrono::system_clock::time_point stopTime; /**< end time of sharing */
+        privilege granted;         /**< privilege that the resource owner decided to grant via uri */
 
-    static constexpr privilege defaultPrivilege = privilege::modify;
-public:
-    uri(uriPolicy activePolicy=uriPolicy::inactive);
+        static constexpr privilege defaultPrivilege = privilege::modify;
+    public:
+        uri(uriPolicy activePolicy = uriPolicy::inactive);
 
-    uriPolicy getActivePolicy() const;
+        uriPolicy getActivePolicy() const;
 
-    int getSharesLeft() const;
+        int getSharesLeft() const;
 
-    privilege getGranted() const;
+        privilege getGranted() const;
 
-    /**
-    * @brief operator == overload for @e uri
-    *
-    * @relatesalso uri
-    */
+        /**
+        * @brief operator == overload for @e uri
+        *
+        * @relatesalso uri
+        */
 
-    bool operator==(const uri &rhs) const;
+        bool operator==(const uri &rhs) const;
 
-    /**
-    * @brief operator != overload for @e uri
-    *
-    * @relatesalso uri
-    */
+        /**
+        * @brief operator != overload for @e uri
+        *
+        * @relatesalso uri
+        */
 
-    bool operator!=(const uri &rhs) const;
+        bool operator!=(const uri &rhs) const;
 
-    static const privilege getDefaultPrivilege();
+        static const privilege getDefaultPrivilege();
 
-    /**
-     * @brief set activePolicy as activateAlways with @ref newPrivilege
-     * @param newPrivilege the privilege to set
-     */
+        /**
+         * @brief set activePolicy as activateAlways with @ref newPrivilege
+         * @param newPrivilege the privilege to set
+         */
 
-    void activateAlways(privilege newPrivilege = defaultPrivilege);
+        void activateAlways(privilege newPrivilege = defaultPrivilege);
 
-    /**
-     * @brief set activePolicy as activeCount with @ref newPrivilege
-     * @param shares the number of possible shares
-     * @param newPrivilege the privilege to set
-     */
+        /**
+         * @brief set activePolicy as activeCount with @ref newPrivilege
+         * @param shares the number of possible shares
+         * @param newPrivilege the privilege to set
+         */
 
-    void activateCount(int shares, privilege newPrivilege = defaultPrivilege);
+        void activateCount(int shares, privilege newPrivilege = defaultPrivilege);
 
-    /**
-     * @brief set activePolicy as activeTimer with @ref newPrivilege
-     * @param endTime the end of the uri validity
-     * @param newPrivilege the privilege to set
-     */
+        /**
+         * @brief set activePolicy as activeTimer with @ref newPrivilege
+         * @param endTime the end of the uri validity
+         * @param newPrivilege the privilege to set
+         */
 
-    void activateTimer(std::chrono::system_clock::time_point endTime, privilege newPrivilege = defaultPrivilege);
+        void activateTimer(std::chrono::system_clock::time_point endTime, privilege newPrivilege = defaultPrivilege);
 
-    /**
-     * @brief set activePolicy as inactive
-     */
-    void deactivate();
+        /**
+         * @brief set activePolicy as inactive
+         */
+        void deactivate();
 
-    /**
-     * @brief check uri validity with requested privilege @ref requested by user
-     * @param requested the privilege which user want
-     * @return or requested privilege if it is <= than granted privilege or granted privilege if requested privilege is > than granted
-     */
-    privilege getShare(privilege requested);
-};
-
+        /**
+         * @brief check uri validity with requested privilege @ref requested by user
+         * @param requested the privilege which user want
+         * @return or requested privilege if it is <= than granted privilege or granted privilege if requested privilege is > than granted
+         */
+        privilege getShare(privilege requested);
+    };
+}
 
 
 #endif //SYMPOSIUM_URI_H

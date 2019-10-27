@@ -31,7 +31,7 @@
 #include <gmock/gmock.h>
 #include "../user.h"
 #include "../filesystem.h"
-#include <cstdlib>
+using namespace Symposium;
 
 
 struct dirMock: public directory{

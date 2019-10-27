@@ -29,6 +29,9 @@
  */
 #include <iostream>
 #include "user.h"
+#include "filesystem.h"
+
+using namespace Symposium;
 
 user::user(const std::string &username, const std::string &pwd, const std::string &nickname,
            const std::string &iconPath,
@@ -205,4 +208,8 @@ std::shared_ptr<filesystem>
 user::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) const {
     //TODO: implement
     return std::shared_ptr<filesystem>();
+}
+
+std::shared_ptr<filesystem> user::removeResource(const std::string &path, const std::string &name) const {
+    return home->remove(*this, path, name);
 }

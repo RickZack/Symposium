@@ -33,6 +33,7 @@
 #include "SymServer.h"
 #include "SymClient.h"
 
+using namespace Symposium;
 message::message(msgType action, int msgId) {
     //TODO: implement
 }

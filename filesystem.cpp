@@ -28,6 +28,8 @@
  * Created on 18 Giugno 2019, 22.02
  */
 #include "filesystem.h"
+#include "symbol.h"
+using namespace Symposium;
 
 int filesystem::idCounter=0;
 

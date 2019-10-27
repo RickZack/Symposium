@@ -28,11 +28,12 @@
  * Created on 09 agosto 2019, 13:22
  */
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include "../document.h"
 #include "../symbol.h"
 #include "../user.h"
 
+
+using namespace Symposium;
 struct documentTest : testing::Test{
     document d;
     documentTest(){};

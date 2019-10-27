@@ -17,7 +17,7 @@
  */
 
 /* 
- * File:   symbolTest.cpp
+ * File:   SymposiumNamespace.h
  * Project: Symposium
   * Authors: 
  *          Riccardo Zaccone <riccardo.zaccone at studenti.polito.it>
@@ -25,21 +25,41 @@
  *          Cristian Gianetto <s265387 at studenti.polito.it>
  *          Martina Bellissimo <s257307 at studenti.polito.it>
  *
- * Created on 18 ottobre 2019, 15:52
+ * Created on 27 ottobre 2019, 14:10
  */
-#include <gtest/gtest.h>
-#include <iostream>
-#include "../symbol.h"
+#ifndef SYMPOSIUM_SYMPOSIUM_H
+#define SYMPOSIUM_SYMPOSIUM_H
 
-using namespace Symposium;
-TEST(symbolTest, symbolComparisonFromSameHost){
-    symbol s1('a',0,0, {1});
-    symbol s2('b', 0, 1, {1,5});
-    EXPECT_GT(s2, s1);
+/**
+ * @brief Contains the forward declaration of classes used in the original Symposium software.
+ *
+ * This namespace is used as a common place where to find the names used in the original project. It's intended to
+ * avoid conflicts that can be made if you want to user other classes in the context of Symposium, and to allow you
+ * to extend the project without the need to choose names unique in the global context
+ */
+namespace Symposium{
+    class SymServer;
+    class SymClient;
+    class message;
+    class symbolMessage;
+    class user;
+    class document;
+    class AccessStrategy;
+    class symbol;
+    class uri;
+
+    class filesystem;
+    class directory;
+    class file;
+    class symlink;
+
+    enum class msgOutcome:char;
+    enum class msgType;
+    enum class privilege:char;
 }
 
-TEST(symbolTest, symbolComparisonFromDifferentHost){
-    symbol s1('a',0,0, {1});
-    symbol s2('b', 1, 0, {1});
-    EXPECT_GT(s2, s1);
-}
+
+
+
+
+#endif //SYMPOSIUM_SYMPOSIUM_H

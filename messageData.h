@@ -30,38 +30,41 @@
 #ifndef SYMPOSIUM_MESSAGEDATA_H
 #define SYMPOSIUM_MESSAGEDATA_H
 
+#include "Symposium.h"
+
+namespace Symposium {
 /**
  * @brief defines the possible outcomes of an operation followed by a message
  */
 //TODO: specify more details about "success" and "failure", like messages that can be showed to the user or stored in a log file
-enum class msgOutcome: char {
-    failure, success
-};
+    enum class msgOutcome : char {
+        failure, success
+    };
 /**
  * @brief defines the possible type of messages, that corresponds to an action on server or client
  */
-enum class msgType{
-    registration,         /**< used by client, when asking for a new user registration, see @ref signUpMessage */
-    login,                /**< used by server and client, when asking or answering for login of existing user, see @ref clientMessage, @ref loginMessage */
-    changeUserNick,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
-    changeUserPwd,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
-    changeUserIcon,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
+    enum class msgType {
+        registration,         /**< used by client, when asking for a new user registration, see @ref signUpMessage */
+        login,                /**< used by server and client, when asking or answering for login of existing user, see @ref clientMessage, @ref loginMessage */
+        changeUserNick,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
+        changeUserPwd,        /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
+        changeUserIcon,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
 
-    createRes,            /**< used by server and client, when asking for creating a new document, see @ref sendResMessage, @ref askResMessage */
-    createNewDir,         /**< used by server and client, when asking for creating a new directory, see @ref sendResMessage, @ref askResMessage */
-    openNewRes,           /**< used by server and client, when asking for an existing resource via URI, @ref sendResMessage, @ref askResMessage */
-    changeResName,        /**< used by server and client, when asking for changing a resource's name, see @ref serverMessage, @ref askResMessage */
-    removeRes,            /**< used by client, when asking for a resource removal, @ref serverMessage, @ref askResMessage */
+        createRes,            /**< used by server and client, when asking for creating a new document, see @ref sendResMessage, @ref askResMessage */
+        createNewDir,         /**< used by server and client, when asking for creating a new directory, see @ref sendResMessage, @ref askResMessage */
+        openNewRes,           /**< used by server and client, when asking for an existing resource via URI, @ref sendResMessage, @ref askResMessage */
+        changeResName,        /**< used by server and client, when asking for changing a resource's name, see @ref serverMessage, @ref askResMessage */
+        removeRes,            /**< used by client, when asking for a resource removal, @ref serverMessage, @ref askResMessage */
 
-    mapChangesToUser,     /**< used by server and client, when asking for a siteId->username mapping, see @ref mapMessage, @ref updateDocMessage */
-    changePrivileges,     /**< used by server and client, when asking for updating or propagating privilege changes, see @ref privMessage */
-    shareRes,             /**< used by server and client, when asking for updating or propagating sharing changes, see @ref uriMessage */
-    insertSymbol,         /**< used by server and client, when asking for updating or propagating the insertion, see @ref symbolMessage */
-    removeSymbol,         /**< used by server and client, when asking for updating or propagating the deletion, see @ref symbolMessage */
+        mapChangesToUser,     /**< used by server and client, when asking for a siteId->username mapping, see @ref mapMessage, @ref updateDocMessage */
+        changePrivileges,     /**< used by server and client, when asking for updating or propagating privilege changes, see @ref privMessage */
+        shareRes,             /**< used by server and client, when asking for updating or propagating sharing changes, see @ref uriMessage */
+        insertSymbol,         /**< used by server and client, when asking for updating or propagating the insertion, see @ref symbolMessage */
+        removeSymbol,         /**< used by server and client, when asking for updating or propagating the deletion, see @ref symbolMessage */
 
-    addActiveUser,        /**< used by server, for propagating the document opening of an user, see @ref updateActiveMessage */
-    removeActiveUser,     /**< used by server, for propagating the document closing of an user, see @ref updateActiveMessage */
-    closeRes              /**< used by client, when a user wants to close a document, see @ref updateDocMessage */
-};
-
+        addActiveUser,        /**< used by server, for propagating the document opening of an user, see @ref updateActiveMessage */
+        removeActiveUser,     /**< used by server, for propagating the document closing of an user, see @ref updateActiveMessage */
+        closeRes              /**< used by client, when a user wants to close a document, see @ref updateDocMessage */
+    };
+}
 #endif //SYMPOSIUM_MESSAGEDATA_H

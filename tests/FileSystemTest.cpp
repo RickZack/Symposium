@@ -32,11 +32,13 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "../filesystem.h"
-#include <cstdlib>
 #include "../user.h"
 #include "../document.h"
 #include "../uri.h"
 #include "../AccessStrategy.h"
+#include "../symbol.h"
+
+using namespace Symposium;
 
 struct documentMock: public document {
     documentMock() : document(0) {};
@@ -62,7 +64,7 @@ struct FileSystemTestT: ::testing::Test{
         rmo=new ::testing::NiceMock<RMOAccessMock>();
         f=new file("f", ".");
     }
-    ~FileSystemTestT(){
+    ~FileSystemTestT() override{
         delete f;
         ::testing::Mock::AllowLeak(document);
         ::testing::Mock::AllowLeak(rmo);

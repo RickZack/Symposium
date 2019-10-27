@@ -29,7 +29,7 @@
  */
 #include <iostream>
 #include "privilege.h"
-
+using namespace Symposium;
 
 bool operator<(const privilege a, const privilege b){
     return (static_cast<char>(a)- static_cast<char>(b))<0;
@@ -47,9 +47,7 @@ bool operator==(const privilege a, const privilege b){
 
 bool operator<=(const privilege a, const privilege b)
 {
-    if(a==b || a<b)
-        return true;
-    return false;
+    return a == b || a < b;
 }
 
 

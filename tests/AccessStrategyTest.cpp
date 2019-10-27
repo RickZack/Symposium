@@ -28,10 +28,10 @@
  * Created on 17 ottobre 2019, 11:59
  */
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include "../AccessStrategy.h"
 #include "../user.h"
 
+using namespace Symposium;
 struct RMOAccessTest : testing::Test {
     AccessStrategy *s;
     user u;

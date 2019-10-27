@@ -28,7 +28,12 @@
  * Created on 20 Giugno 2019, 21.30
  */
 #include "SymServer.h"
+#include "message.h"
+#include "filesystem.h"
 #include <regex>
+
+using namespace Symposium;
+
 
 int SymServer::idCounter=0;
 
@@ -42,7 +47,6 @@ const user & SymServer::addUser(user &newUser) {
     newUser.setHome(userDir);
     newUser.setSiteId(idCounter++);
     user& inserted=registerUser(&newUser);
-    //user& inserted=registered[newUser.getUsername()]=newUser;
     return inserted;
 }
 
@@ -50,7 +54,6 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
     if(!userIsRegistered(username))
         throw SymServerException("SymServer::login: the user is not registered");
     user& target=getRegistered(username);
-    //user& target=registered[username];
     if(!target.hasPwd(pwd))
         throw SymServerException("SymServer::login: wrong password");
     if(userIsActive(username))
@@ -75,7 +78,7 @@ SymServer::openNewSource(const std::string &opener, const std::string &path, con
         throw SymServerException("SymServer::openNewSource: the user is not logged in");
     const user& target=getRegistered(opener);
     std::shared_ptr<file> fileReq=target.accessFile(path+"/"+name, destPath);
-    document& docReq=fileReq->access(target, uri::getDefaultPrivilege());
+    document& docReq=fileReq->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);
     return docReq;
 }
@@ -205,8 +208,8 @@ bool SymServer::userIsRegistered(const std::string &toCheck) {
 bool SymServer::userIsValid(const user &toCheck) {
     //OPTIMIZE: correctness check of user data should be available within user class,
     // here we should call that method(s), adding only the constrain on the icon path
-    std::regex pathPattern{"\\.(\\/[a-zA-Z 0-9]*)*([a-zA-Z 0-9]*\\.((jpg|png|ico|bmp)))"};
-    return toCheck.getUsername()!="" && toCheck.getNickname()!=""
+    std::regex pathPattern{R"(\.(\/[a-zA-Z 0-9]*)*([a-zA-Z 0-9]*\.((jpg|png|ico|bmp))))"};
+    return !toCheck.getUsername().empty() && !toCheck.getNickname().empty()
             && std::regex_match(toCheck.getIconPath(), pathPattern);
 }
 
@@ -230,7 +233,7 @@ std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string 
 }
 
 user SymServer::findUserBySiteId(int id) {
-    for(auto elem:registered)
+    for(const auto& elem:registered)
         if(elem.second.getSiteId()==id)
             return elem.second;
     throw SymServerException("SymServer::findUserBySiteId: user not found");

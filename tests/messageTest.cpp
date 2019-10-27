@@ -33,6 +33,9 @@
 #include "../message.h"
 #include "../SymServer.h"
 #include "../SymClient.h"
+#include "../filesystem.h"
+
+using namespace Symposium;
 
 TEST(messageTest, msgIdIsSet){
     clientMessage m(msgType::registration, {"", ""});
