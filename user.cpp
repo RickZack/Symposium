@@ -35,8 +35,19 @@ user::user(const std::string &username, const std::string &pwd, const std::strin
            int siteId, std::shared_ptr<directory> home) : username(username), siteId(siteId),
                                                           nickname(nickname), iconPath(iconPath), home(home)
 {
+    //generating random salt for user
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::srand(time(NULL));
+    std::uniform_int_distribution<> dis(20, 30);
+    std::poisson_distribution<int> distribution(rand());
+
+    for (size_t i = 0; i < dis(generator); i++)//salt have random lenght between 20 and 30
+    {
+        hashSalt+=static_cast<char>(distribution(generator));//the sequence of random characters used as salt
+    }
+    //saving the password with the use of hash algorithm sha256
     pwdHash=sha256(pwd+hashSalt);
-    //TODO: implement
 }
 
 

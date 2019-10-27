@@ -117,6 +117,7 @@ std::string file::print(const user &targetUser, bool recursive, int indent) cons
 }
 
 directory::directory(const std::string &name) : filesystem(name) {
+    //guardare lab 2
     //TODO: implement
 }
 
@@ -150,6 +151,7 @@ std::string& directory::setName(const std::string &path, const std::string &file
 }
 
 std::shared_ptr<directory> directory::addDirectory(const std::string &name) {
+    //assegnare qui la root
     //TODO: implement
     return std::shared_ptr<directory>();
 }

@@ -32,6 +32,11 @@
 
 #include <string>
 #include <memory>
+#include <random>
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include "privilege.h" //for privileges on the resource
 #include "filesystem.h"
 #include "document.h"
