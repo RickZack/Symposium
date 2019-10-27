@@ -49,6 +49,7 @@ struct RMOAccessMock: public RMOAccess{
     RMOAccessMock(): RMOAccess(){};
     MOCK_METHOD2(validateAction, bool(user &targetUser, privilege requested));
     MOCK_METHOD2(setPrivilege, privilege(user &targetUser, privilege toGrant));
+    MOCK_METHOD1(getPrivilege, privilege(user &targetUser));
 
 };
 
@@ -68,11 +69,13 @@ struct FileSystemTestT: ::testing::Test{
     }
 };
 
-TEST_F(FileSystemTestT, FileSetTest)
+TEST_F(FileSystemTestT, FileSetGetPrivilegeTest)
 {
     user u("user", "", "", "", 0, std::shared_ptr<directory>());
     EXPECT_CALL(*rmo, setPrivilege(u, privilege::modify));
     f->setUserPrivilege(u, privilege::modify);
+    EXPECT_CALL(*rmo, getPrivilege(u));
+    f->getUserPrivilege(u);
 }
 
 

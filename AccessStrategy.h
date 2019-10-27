@@ -60,6 +60,8 @@ public:
      * @return the privilege previously owned by @ref targetUser, none if no privilege previously owned
      */
     virtual privilege setPrivilege(user& targetUser, privilege toGrant)=0;
+
+    virtual privilege getPrivilege(user& targetUser)=0;
 };
 
 /**
@@ -70,7 +72,10 @@ class RMOAccess: public AccessStrategy{
 public:
     bool validateAction(user &targetUser, privilege requested) override;
     privilege setPrivilege(user &targetUser, privilege toGrant) override;
+    privilege getPrivilege(user& targetUser) override;
 };
+
+
 
 /**
  * @brief class used to model the absence of privilege handling on a resource
@@ -79,6 +84,7 @@ class TrivialAccess: public AccessStrategy{
 public:
     bool validateAction(user &targetUser, privilege requested) override;
     privilege setPrivilege(user &targetUser, privilege toGrant) override;
+    privilege getPrivilege(user& targetUser) override;
 };
 
 #endif //SYMPOSIUM_ACCESSSTRATEGY_H

@@ -58,10 +58,23 @@ privilege RMOAccess::setPrivilege(user &targetUser, privilege toGrant) {
     return vecchio;
 }
 
+privilege RMOAccess::getPrivilege(user& targetUser)
+{
+    std::string name=targetUser.getUsername();
+    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(name);
+    if ( got == permission.end() )
+            return privilege::none;
+    return got->second;
+}
+
 bool TrivialAccess::validateAction(user &targetUser, privilege requested) {
     return true;
 }
 
 privilege TrivialAccess::setPrivilege(user &targetUser, privilege toGrant) {
+    return privilege::none;
+}
+
+privilege TrivialAccess::getPrivilege(user &targetUser) {
     return privilege::none;
 }
