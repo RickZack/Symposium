@@ -31,6 +31,7 @@
 #include "message.h"
 #include "filesystem.h"
 #include <regex>
+#include "SymposiumException.h"
 
 using namespace Symposium;
 
@@ -39,9 +40,9 @@ int SymServer::idCounter=0;
 
 const user & SymServer::addUser(user &newUser) {
     if(userIsRegistered(newUser.getUsername()))
-        throw SymServerException("SymServer::addUser: the user already exists");
+        throw SymServerException(SymServerException::userAlreadyExist, UnpackFileLineFunction());
     if(!userIsValid(newUser)){
-        throw SymServerException("SymServer::addUser: the user has wrong parameters");
+        throw SymServerException(SymServerException::userWrongParam, UnpackFileLineFunction());
     }
     auto userDir=rootDir->addDirectory(newUser.getUsername());
     newUser.setHome(userDir);
@@ -52,12 +53,12 @@ const user & SymServer::addUser(user &newUser) {
 
 const user SymServer::login(const std::string &username, const std::string &pwd) {
     if(!userIsRegistered(username))
-        throw SymServerException("SymServer::login: the user is not registered");
+        throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
     user& target=getRegistered(username);
     if(!target.hasPwd(pwd))
-        throw SymServerException("SymServer::login: wrong password");
+        throw SymServerException(SymServerException::userWrongPwd, UnpackFileLineFunction());
     if(userIsActive(username))
-        throw SymServerException("SymServer::login: user already active");
+        throw SymServerException(SymServerException::userAlreadyActive, UnpackFileLineFunction());
     active[username]=&target;
     return target;
 }
@@ -65,7 +66,7 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
 const document &
 SymServer::openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv) {
     if(!userIsActive(opener))
-        throw SymServerException("SymServer::openSource: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     document& docReq= getRegistered(opener).openFile(path, name, reqPriv);
     workingDoc[opener].push_front(&docReq);
     return docReq;
@@ -75,7 +76,7 @@ const document &
 SymServer::openNewSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
                          const std::string &destPath) {
     if(!userIsActive(opener))
-        throw SymServerException("SymServer::openNewSource: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
     std::shared_ptr<file> fileReq=target.accessFile(path+"/"+name, destPath);
     document& docReq=fileReq->access(target, reqPriv);
@@ -85,7 +86,7 @@ SymServer::openNewSource(const std::string &opener, const std::string &path, con
 
 const document & SymServer::createNewSource(const user &opener, const std::string &path, const std::string &name) {
     if(!userIsActive(opener.getUsername()))
-        throw SymServerException("SymServer::createNewSource: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::shared_ptr<file> fileCreated=opener.newFile(name, path);
     document& docReq=fileCreated->access(opener, privilege::owner);
     workingDoc[opener.getUsername()].push_front(&docReq);
@@ -94,26 +95,26 @@ const document & SymServer::createNewSource(const user &opener, const std::strin
 
 std::shared_ptr<directory> SymServer::createNewDir(const user &opener, const std::string &path, const std::string &name) {
     if(!userIsActive(opener.getUsername()))
-        throw SymServerException("SymServer::createNewDir: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     return opener.newDirectory(name, path);
 }
 
 void SymServer::remoteInsert(const std::string &inserter, int resourceId, const symbolMessage &symMsg) {
     if(!userIsActive(inserter))
-        throw SymServerException("SymServer::createNewDir: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(inserter, resourceId);
     if(!docRetrieved.first)
-        throw SymServerException("SymServer::remoteInsert: the user is not working on that document");
+        throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     docRetrieved.second->remoteInsert(symMsg.getSym());
     workingQueue[resourceId].push(symMsg);
 }
 
 void SymServer::remoteRemove(const std::string &remover, int resourceId, const symbolMessage &rmMsg) {
     if(!userIsActive(remover))
-        throw SymServerException("SymServer::createNewDir: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(remover, resourceId);
     if(!docRetrieved.first)
-        throw SymServerException("SymServer::remoteInsert: the user is not working on that document");
+        throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     docRetrieved.second->remoteRemove(rmMsg.getSym());
     workingQueue[resourceId].push(rmMsg);
 }
@@ -121,18 +122,18 @@ void SymServer::remoteRemove(const std::string &remover, int resourceId, const s
 privilege SymServer::editPrivilege(const user &actionUser, const user &targetUser, const std::string &resPath,
                                    const std::string &resName, privilege newPrivilege) {
     if(!userIsActive(actionUser.getUsername()) || !userIsRegistered(targetUser.getUsername()))
-        throw SymServerException("SymServer::editPrivilege: actionUser is not logged in or targetUser is not registered");
+        throw SymServerException(SymServerException::actionUserNotLoggedOrTargetUserNotRegistered, UnpackFileLineFunction());
     std::string pathFromUserHome="./"+resPath.substr(strlen("./")+strlen(actionUser.getUsername().c_str())+strlen("/"));
     document docReq=actionUser.openFile(pathFromUserHome, resName, privilege::owner);
     if(userIsWorkingOnDocument(targetUser.getUsername(), docReq.getId()).first)
-        throw SymServerException("SymServer::editPrivilege: targetUser is working on the document");
+        throw SymServerException(SymServerException::userWorkingOnDoc, UnpackFileLineFunction());
     return actionUser.editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
 }
 
 uri SymServer::shareResource(const user &actionUser, const std::string &resPath, const std::string &resName,
                              uri &newPrefs) {
     if(!userIsActive(actionUser.getUsername()))
-        throw SymServerException("SymServer::shareResource: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     return actionUser.shareResource(resPath, resName, newPrefs);
 }
 
@@ -140,27 +141,27 @@ std::shared_ptr<filesystem>
 SymServer::renameResource(const user &renamer, const std::string &resPath, const std::string &resName,
                           const std::string &newName) {
     if(!userIsActive(renamer.getUsername()))
-        throw SymServerException("SymServer::renameResource: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     return renamer.renameResource(resPath, resName, newName);
 }
 
 std::shared_ptr<filesystem>
 SymServer::removeResource(const user &remover, const std::string &resPath, const std::string &resName) {
     if(!userIsActive(remover.getUsername()))
-        throw SymServerException("SymServer::removeResource: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     return remover.removeResource(resPath, resName);
 }
 
 void SymServer::closeSource(const std::string &actionUser, document &toClose) {
     if(!userIsWorkingOnDocument(actionUser,toClose.getId()).first)
-        throw SymServerException("SymServer::closeSource: the user is not working on that document");
+        throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     toClose.close(getRegistered(actionUser));
     workingDoc[actionUser].remove_if([&toClose](document* doc){return toClose.getId()==doc->getId();});
 }
 
 const user & SymServer::editUser(const std::string &username, const std::string &pwd, user &newUserData) {
     if(!userIsActive(username))
-        throw SymServerException("SymServer::editUser: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& target=getRegistered(username);
     //user& target=registered[username];
     target.setNewData(newUserData);
@@ -169,7 +170,7 @@ const user & SymServer::editUser(const std::string &username, const std::string 
 
 void SymServer::removeUser(const std::string &username, const std::string &pwd) {
     if (!userIsRegistered(username))
-        throw SymServerException("SymServer::removeUser: the user is not registered");
+        throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
     auto listOfDocs=workingDoc[username];
     for(document* doc: listOfDocs)
         doc->close(getRegistered(username));
@@ -180,7 +181,7 @@ void SymServer::removeUser(const std::string &username, const std::string &pwd) 
 
 void SymServer::logout(const std::string &username, const std::string &pwd) {
     if(!userIsActive(username))
-        throw SymServerException("SymServer::logout: the user is not logged in");
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     auto listOfDocs=workingDoc[username];
     for(document* doc: listOfDocs)
         doc->close(registered[username]);
@@ -191,7 +192,7 @@ void SymServer::logout(const std::string &username, const std::string &pwd) {
 std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, int resourceId) {
     std::pair<bool, document*> retrieved=userIsWorkingOnDocument(actionUser, resourceId);
     if(!retrieved.first)
-        throw SymServerException("SymServer::mapSiteIdToUser: the user is not working on that document");
+        throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     std::set<int> siteIds=retrieved.second->retrieveSiteIds();
     std::map<int, user> result;
     for(int siteId:siteIds){
@@ -236,7 +237,7 @@ user SymServer::findUserBySiteId(int id) {
     for(const auto& elem:registered)
         if(elem.second.getSiteId()==id)
             return elem.second;
-    throw SymServerException("SymServer::findUserBySiteId: user not found");
+    throw SymServerException(SymServerException::userNotFound, UnpackFileLineFunction());
 }
 
 user &SymServer::registerUser(user *toInsert) {

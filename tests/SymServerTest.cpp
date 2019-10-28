@@ -32,6 +32,7 @@
 #include "../SymServer.h"
 #include "../message.h"
 #include "../filesystem.h"
+#include "../SymposiumException.h"
 using namespace Symposium;
 
 struct SymServerdirMock : public directory{
@@ -160,7 +161,7 @@ protected:
         for(auto elem:registered)
             if(elem.second.getSiteId()==id)
                 return elem.second;
-        throw SymServerException("SymServer::findUserBySiteId: user not found");
+        throw SymServerException(SymServerException::userNotFound, UnpackFileLineFunction());
     }
 };
 

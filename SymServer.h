@@ -330,9 +330,7 @@
           * Some of them are also virtual to be overridden in test suites (read ./tests/SymServerTest.cpp)
           */
          virtual bool userIsRegistered(const std::string &toCheck);
-
          virtual user findUserBySiteId(int id);
-
          virtual bool userIsActive(const std::string &username);
 
          /*
@@ -340,19 +338,8 @@
           */
      private:
          static bool userIsValid(const user &toCheck);
-
          std::pair<bool, document *> userIsWorkingOnDocument(const std::string &username, int resourceId);
 
-     };
-
-     class SymServerException : public std::exception {
-         std::string msg;
-     public:
-         explicit SymServerException(const std::string& msg) : msg{msg} {};
-
-         const char *what() const noexcept override {
-             return msg.c_str();
-         }
      };
  }
 
