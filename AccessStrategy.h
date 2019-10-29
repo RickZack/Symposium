@@ -58,9 +58,9 @@ namespace Symposium {
          * @param toGrant the privilege to grant to @ref targetUser
          * @return the privilege previously owned by @ref targetUser, none if no privilege previously owned
          */
-        virtual privilege setPrivilege(user &targetUser, privilege toGrant) = 0;
+        virtual privilege setPrivilege(const user &targetUser, privilege toGrant) = 0;
 
-        virtual privilege getPrivilege(user &targetUser) = 0;
+        virtual privilege getPrivilege(const user &targetUser) = 0;
     };
 
 /**
@@ -71,9 +71,9 @@ namespace Symposium {
     public:
         bool validateAction(user &targetUser, privilege requested) override;
 
-        privilege setPrivilege(user &targetUser, privilege toGrant) override;
+        privilege setPrivilege(const user &targetUser, privilege toGrant) override;
 
-        privilege getPrivilege(user &targetUser) override;
+        privilege getPrivilege(const user &targetUser) override;
     };
 
 
@@ -84,9 +84,9 @@ namespace Symposium {
     public:
         bool validateAction(user &targetUser, privilege requested) override;
 
-        privilege setPrivilege(user &targetUser, privilege toGrant) override;
+        privilege setPrivilege(const user &targetUser, privilege toGrant) override;
 
-        privilege getPrivilege(user &targetUser) override;
+        privilege getPrivilege(const user &targetUser) override;
     };
 }
 #endif //SYMPOSIUM_ACCESSSTRATEGY_H

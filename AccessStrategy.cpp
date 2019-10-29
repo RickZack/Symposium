@@ -45,7 +45,7 @@ bool RMOAccess::validateAction(user &targetUser, privilege requested) {
     return attuale >= requested;
 }
 
-privilege RMOAccess::setPrivilege(user &targetUser, privilege toGrant) {
+privilege RMOAccess::setPrivilege(const user &targetUser, privilege toGrant) {
     std::string name=targetUser.getUsername();
     std::unordered_map<std::string,privilege >::const_iterator got = permission.find(name);
     if ( got == permission.end() )
@@ -59,7 +59,7 @@ privilege RMOAccess::setPrivilege(user &targetUser, privilege toGrant) {
     return vecchio;
 }
 
-privilege RMOAccess::getPrivilege(user& targetUser)
+privilege RMOAccess::getPrivilege(const user& targetUser)
 {
     std::string name=targetUser.getUsername();
     std::unordered_map<std::string,privilege >::const_iterator got = permission.find(name);
@@ -72,10 +72,10 @@ bool TrivialAccess::validateAction(user &targetUser, privilege requested) {
     return true;
 }
 
-privilege TrivialAccess::setPrivilege(user &targetUser, privilege toGrant) {
+privilege TrivialAccess::setPrivilege(const user &targetUser, privilege toGrant) {
     return privilege::none;
 }
 
-privilege TrivialAccess::getPrivilege(user &targetUser) {
+privilege TrivialAccess::getPrivilege(const user &targetUser) {
     return privilege::none;
 }

@@ -76,18 +76,22 @@ resourceType file::resType() const {
 
 privilege file::getUserPrivilege(const user &targetUser) const {
 
-    
-    //TODO: implement
-    return privilege::none;
+    privilege userPriv= strategy->getPrivilege(targetUser);
+    return userPriv;
 }
 
 privilege file::setUserPrivilege(const user &targetUser, privilege newPrivilege) {
-    //TODO: implement
-    return privilege::none;
+    //privilege oldUserPriv= strategy->getPrivilege(targetUser);
+    strategy->setPrivilege(targetUser,newPrivilege);
+    return newPrivilege;
 }
 
 uri file::setSharingPolicy(const user &actionUser, uri &newSharingPrefs) {
-    return uri();
+    privilege userPriv=strategy->getPrivilege(actionUser);
+    if(userPriv==privilege::owner) {
+        file::sharingPolicy = newSharingPrefs;
+    }
+    return newSharingPrefs;
 }
 
 document & file::access(const user &targetUser, privilege accessMode) {
