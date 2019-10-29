@@ -60,7 +60,7 @@ struct MessageActionTest: ::testing::TestWithParam<msgType>{
     file f;
     symbol s;
 
-    MessageActionTest(): u("", "","", "", 0, std::shared_ptr<directory>()),
+    MessageActionTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr),
                          f("", ""),
                          s('a', 0, 0, std::vector<int>()){
         m=nullptr;
@@ -267,7 +267,7 @@ struct clientMessageTest: public testing::Test{
     clientMessage *m;
     user u;
     ::testing::NiceMock<SymServerMock> server;
-    clientMessageTest(): u("", "","", "", 0, std::shared_ptr<directory>() ){
+    clientMessageTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr){
         m= nullptr;
     }
     ~clientMessageTest(){
@@ -352,7 +352,7 @@ struct serverMessageTest: public testing::Test{
     user u;
     ::testing::NiceMock<SymClientMock> client;
 
-    serverMessageTest(): u("", "","", "", 0, std::shared_ptr<directory>() ){
+    serverMessageTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr){
         m= nullptr;
     }
     ~serverMessageTest(){
@@ -433,7 +433,7 @@ struct DoubleEndMessageTest: public testing::Test{
     privilege priv;
 
     DoubleEndMessageTest(): dummySymbol('a', 0, 1, std::vector<int>()),
-                            u("", "","", "", 0, std::shared_ptr<directory>()),
+                            u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr),
                             priv(privilege::modify){
         fromServer=nullptr;
         fromClient= nullptr;

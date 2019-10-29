@@ -35,7 +35,7 @@ using namespace Symposium;
 struct RMOAccessTest : testing::Test {
     AccessStrategy *s;
     user u;
-    RMOAccessTest(): u("", "", "", "", 0, nullptr) {
+    RMOAccessTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr) {
         s=new RMOAccess();
     };
 
@@ -92,7 +92,7 @@ TEST_F(RMOAccessTest, AskingForHigherPrivilegeReturnFalse){
 struct TrivialAccessTest : testing::Test {
     AccessStrategy *s;
     user u;
-    TrivialAccessTest(): u("", "", "", "", 0, nullptr) {
+    TrivialAccessTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr) {
         s=new TrivialAccess();
     };
 

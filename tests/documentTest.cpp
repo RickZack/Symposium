@@ -46,13 +46,13 @@ TEST_F(documentTest, differentDocumentsHaveDifferentIds){
 }
 
 TEST_F(documentTest, userCanAccessDocument){
-    user someUser("", "", "", "", 0, nullptr);
+    user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
     d.access(someUser, privilege ::modify);
     EXPECT_FALSE(d.getActiveUsers().empty());
 }
 
 TEST_F(documentTest, userIsNoLongerInActiveListAfterClosing){
-    user someUser("", "", "", "", 0, nullptr);
+    user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
     d.access(someUser, privilege ::modify);
     d.close(someUser);
     EXPECT_TRUE(d.getActiveUsers().empty());
