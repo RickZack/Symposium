@@ -75,6 +75,8 @@ resourceType file::resType() const {
 }
 
 privilege file::getUserPrivilege(const user &targetUser) const {
+
+    
     //TODO: implement
     return privilege::none;
 }
