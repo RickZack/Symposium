@@ -55,22 +55,22 @@
  * any of the functions of "user"
  */
 namespace Symposium {
-/**
- * @brief defines the type of a filesystem object
- */
+    /**
+     * @brief defines the type of a filesystem object
+     */
     enum class resourceType {
         directory, file, symlink
     };
 
-/**
- * @interface filesystem filesystem.h filesystem
- * @brief class used as interface for a filesystem, made using @e Composite pattern
- *
- * In the application design only objects of subclass @link file file @endlink can be shared, but
- * @e sharingPolicy could refer to a directory. This is done on purpose to allow future extensions
- * of this module. As long as the mentioned behaviour is desired, for objects of subclasses @link directory directory @endlink
- * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
- */
+    /**
+     * @interface filesystem filesystem.h filesystem
+     * @brief class used as interface for a filesystem, made using @e Composite pattern
+     *
+     * In the application design only objects of subclass @link file file @endlink can be shared, but
+     * @e sharingPolicy could refer to a directory. This is done on purpose to allow future extensions
+     * of this module. As long as the mentioned behaviour is desired, for objects of subclasses @link directory directory @endlink
+     * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
+     */
     class filesystem {
         static int idCounter;      /**< id to be assigned to the next created filesystem object */
         int id;                    /**< unique identifier for the filesystem object, used also for identifying objects along a path */
@@ -228,13 +228,13 @@ namespace Symposium {
     };
 
 
-/**
- * @brief class used to model a pointer to an object of class @link file file @endlink
- *
- * In the application design only pointers to objects of class @link file file @enlink are allowed,
- * but @e pathToFile could point to a directory. As long as the mentioned behaviour is desired,
- * @e pathToFile must point to a @link file file @endlink
- */
+    /**
+     * @brief class used to model a pointer to an object of class @link file file @endlink
+     *
+     * In the application design only pointers to objects of class @link file file @enlink are allowed,
+     * but @e pathToFile could point to a directory. As long as the mentioned behaviour is desired,
+     * @e pathToFile must point to a @link file file @endlink
+     */
     class symlink : public filesystem {
         std::string pathToFile;    /**< absolute path to a @e file, obtained as concatenation of @e id */
         std::string fileName;      /**< name of the file pointed, meaning its @e id */

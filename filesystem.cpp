@@ -207,32 +207,32 @@ std::string directory::print(const user &targetUser, bool recursive, int indent)
     return "";
 }
 
-symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
+Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
     //TODO: implement
 }
 
-resourceType symlink::resType() const {
+resourceType Symposium::symlink::resType() const {
     return resourceType::symlink;
 }
 
-document symlink::access() {
+document Symposium::symlink::access() {
     //TODO: implement
     return document(0);
 }
 
-void symlink::store(const std::string &storePath) const {
+void Symposium::symlink::store(const std::string &storePath) const {
     //TODO: implement
 }
 
-void symlink::load(const std::string &loadPath) {
+void Symposium::symlink::load(const std::string &loadPath) {
     //TODO: implement
 }
 
-void symlink::send() const {
+void Symposium::symlink::send() const {
     //TODO: implement
 }
 
-std::string symlink::print(const user &targetUser, bool recursive, int indent) const {
+std::string Symposium::symlink::print(const user &targetUser, bool recursive, int indent) const {
     //TODO: implement
     return "";
 }

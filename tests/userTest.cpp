@@ -45,7 +45,6 @@ struct dirMock: public directory{
     MOCK_METHOD2(addLink, std::shared_ptr<class symlink>(const std::string &, const std::string &));
 
     MOCK_METHOD1(addDirectory, std::shared_ptr<directory>(const std::string &name));
-    MOCK_METHOD0(resType, const resourceType());
 
     MOCK_METHOD3(access, document(const user &targetUser, const std::string &path, const std::string &resName));
     MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &, const std::string &, const std::string &));
@@ -54,7 +53,7 @@ struct dirMock: public directory{
 };
 
 struct fileMock: public file{
-    fileMock(): file("dummy", "."){};
+    fileMock(): file("dummy", "./somedir"){};
     MOCK_METHOD2(setUserPrivilege, privilege(const user&, privilege));
     MOCK_METHOD2(setSharingPolicy, uri(const user&, uri& newSharingPrefs));
 };
@@ -102,7 +101,7 @@ TEST(userTest, makeNewFileMock){
     dirMock *dir=new dirMock();
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
-    file *created=new file("ciao", "");
+    file *created=new file("ciao", "./somedir");
     EXPECT_CALL(*dir, addFile(".", "ciao")).WillOnce(::testing::Return(std::shared_ptr<file>(created)));
     u1.newFile("ciao");
 }
@@ -230,6 +229,7 @@ struct UserTestRobust: ::testing::Test{
 
     virtual ~UserTestRobust() {
         delete u;
+        u=nullptr;
     }
 
 };

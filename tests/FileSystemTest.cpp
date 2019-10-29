@@ -62,7 +62,7 @@ struct FileSystemTestT: ::testing::Test{
     FileSystemTestT(){
         document=new ::testing::NiceMock<documentMock>();
         rmo=new ::testing::NiceMock<RMOAccessMock>();
-        f=new file("f", ".");
+        f=new file("f", "./somedir");
     }
     ~FileSystemTestT() override{
         delete f;
@@ -125,7 +125,7 @@ TEST(FileSystemTest, getSetDirSymTest)
 TEST(FileSystemTest, DISABLED_printFileTest)
 {
     user u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    file f("file", "");
+    file f("file", "./somedir");
     f.setUserPrivilege(u, privilege::owner);
     EXPECT_EQ("file owner", f.print(u));
     f.setUserPrivilege(u, privilege::none);
@@ -194,7 +194,7 @@ struct directoryAccesser: public directory{ //only to access the protected membe
 };
 
 struct fileAccesser: public file{ //only to access the protected members of directory from tests
-    fileAccesser(const std::string &name) : file(name, "") {};
+    fileAccesser(const std::string &name) : file(name, "./somedir") {};
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
@@ -208,26 +208,50 @@ struct symlinkAccesser: public symlink{ //only to access the protected members o
 };
 
 struct FileSystemTestRobust: ::testing::Test{
+    directoryAccesser dir;
+    symlinkAccesser sym;
+    fileAccesser f;
 
+    FileSystemTestRobust():dir("dir"), f("file"), sym("link"){};
 };
 
 TEST_F(FileSystemTestRobust, directoryUsesTrivialAccess){
-    directoryAccesser dir("name");
     AccessStrategy* used=dir.getStrategy();
     ASSERT_FALSE(used== nullptr);
     EXPECT_TRUE(dynamic_cast<RMOAccess*>(used)==nullptr);
 }
 
 TEST_F(FileSystemTestRobust, symlinkUsesTrivialAccess){
-    symlinkAccesser sym("name");
     AccessStrategy* used=sym.getStrategy();
     ASSERT_FALSE(used== nullptr);
     EXPECT_TRUE(dynamic_cast<RMOAccess*>(used)==nullptr);
 }
 
 TEST_F(FileSystemTestRobust, fileUsesRMOAccess){
-    directoryAccesser file("name");
-    AccessStrategy* used=file.getStrategy();
+    AccessStrategy* used=f.getStrategy();
     ASSERT_FALSE(used== nullptr);
     EXPECT_TRUE(dynamic_cast<TrivialAccess*>(used)==nullptr);
+}
+
+TEST_F(FileSystemTestRobust, returnCorrectResourceType){
+    EXPECT_EQ(resourceType::directory, dir.resType());
+    EXPECT_EQ(resourceType::file, f.resType());
+    EXPECT_EQ(resourceType::symlink, sym.resType());
+}
+
+TEST_F(FileSystemTestRobust, differentFilesystemObjectHaveDifferentId){
+    EXPECT_NE(dir.getId(), f.getId());
+}
+
+TEST_F(FileSystemTestRobust, FileThrowsOnMalformedRealPath){
+    file *f;
+    std::string someWrongFormats[]={"../", "..", ".", "./", "path", "./dir/file.jpg"};
+    for (auto& path:someWrongFormats)
+        EXPECT_THROW(f=new file("fileName", path), filesystemException);
+}
+
+TEST_F(FileSystemTestRobust, FileAcceptsWellFormedRealPath) {
+    std::string aGoodPath{"./dir1/dir2/dir3"};
+    file f("fileName", "./dir1/dir2/dir3");
+    EXPECT_EQ(aGoodPath, f.getName());
 }
