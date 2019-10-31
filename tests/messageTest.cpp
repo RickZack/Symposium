@@ -331,7 +331,7 @@ TEST_F(clientMessageTest, updateDocMsgTestCallsCloseSource){
 class SymClientMock: public SymClient{
 public:
     MOCK_METHOD1(setLoggedUser, void(const user&));
-    MOCK_METHOD1(setUserColors, void(const std::map<int, std::pair<user, MyColor>>&));
+    MOCK_METHOD1(setUserColors, void(const std::map<int, user>&));
     MOCK_METHOD2(createNewSource, document(const std::string&, const std::string&));
     MOCK_METHOD2(createNewDir, std::shared_ptr<directory>(const std::string&, const std::string&));
     MOCK_METHOD4(openNewSource, document(const std::string&, const std::string&, privilege, const std::string&));
@@ -367,8 +367,9 @@ TEST_F(serverMessageTest, loginMsgTestCallsSetLoggedUser){
 }
 
 TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
-    m=new mapMessage(msgType::mapChangesToUser, msgOutcome::success, std::map<int, user>());
-    EXPECT_CALL(client, setUserColors(std::map<int, std::pair<user, MyColor>>())).WillOnce(::testing::Return());
+    std::map<int, user> siteIdToUser;
+    m=new mapMessage(msgType::mapChangesToUser, msgOutcome::success, siteIdToUser);
+    EXPECT_CALL(client, setUserColors).WillOnce(::testing::Return());
     m->invokeMethod(client);
 }
 

@@ -37,6 +37,7 @@
 #include "Symposium.h"
 #include "user.h"
 #include "document.h"
+#include "message.h"
 
 
 namespace Symposium {
@@ -53,30 +54,48 @@ namespace Symposium {
         bool operator!=(const MyColor &rhs) const {
             return !(rhs == *this);
         }
+
     };
+    constexpr bool operator<(const std::tuple<int, int, MyColor>& lhs, const std::tuple<int, int, MyColor>& rhs){
+        return std::get<0>(lhs)<std::get<0>(rhs) && std::get<1>(lhs)<std::get<1>(rhs);
+    }
 
-/**
- * @brief class used to model a client of Symposium system
- *
- * An instance of this class is intended to represent a logged user working on some documents. If a user wants to open
- * multiple documents at the same time, then it can have multiple windows all sharing the same @e loggedUser object.
- * The server is enabled to accept request for different documents by the same user
- */
+    /**
+     * @brief class used to model a client of Symposium system
+     *
+     * An instance of this class is intended to represent a logged user working on some documents. If a user wants to open
+     * multiple documents at the same time, then it can have multiple windows all sharing the same @e loggedUser object.
+     * The server is enabled to accept request for different documents by the same user
+     */
     class SymClient {
+    protected:
         //ADD: stuff for connectivity, necessary to define constructor
-        user loggedUser;                                                        /**< logged user and its data */
-        std::forward_list<std::shared_ptr<file>> activeFile;                    /**< list of active documents */
+        user loggedUser;                                                          /**< logged user and its data */
+        std::forward_list<std::shared_ptr<file>> activeFile;                      /**< list of active documents */
         std::forward_list<document *> activeDoc;                                  /**< list of files the active documents are related to */
-        std::forward_list<std::map<int, std::pair<user, MyColor>>> userColors;   /**< map siteId->{user, color} for every active document */
+        std::map<std::pair<int, int>, std::pair<user, MyColor>> userColors;       /**< map {siteId, documentId}->{user, color}  */
 
-        std::queue<message> unanswered;                                         /**< messages sent by client that have not been received an answer */
+        std::queue<message> unanswered;                                           /**< messages sent by client that have not been received an answer */
     public:
         //Some methods are virtual in order to use the mocks in tests
         SymClient();
-
+        /**
+         * @brief set all the details of the user just logged
+         * @param loggedUser the user object containing all the information of the logged user
+         *
+         * When the client wants to perform login it calls the logIn method. When the server answers, the loginMessage
+         * calls setLoggedUser, passing the user object transmitted by the user
+         */
         virtual void setLoggedUser(const user &loggedUser);
 
-        virtual void setUserColors(const std::map<int, std::pair<user, MyColor>> &userColors);
+        /**
+         * @brief assign to each user working on the same document on which @e loggedUser is working a unique color
+         * @param siteIdToUser the mapping siteId->user asked to the server
+         *
+         * Receive the mapping siteId->user from the server and assigns to each user a unique color among the colors
+         * assigned to the users working on the same document.
+         */
+        virtual void setUserColors(const std::map<int, user> &siteIdToUser);
 
         void signUp(const std::string &username, const std::string &pwd);
 
@@ -255,11 +274,11 @@ namespace Symposium {
 // - sent, to understand what message the server is answering to and to detect errors. Then it will call
 // - the invokeMethod of the message to perform the action
 
-/**
- * @brief class used to create functional objects to be used in @ref SymClient::show
- *
- * Filter user's home directory print basing on the fact that a file has not been created by @e currentUser
- */
+    /**
+     * @brief class used to create functional objects to be used in @ref SymClient::show
+     *
+     * Filter user's home directory print basing on the fact that a file has not been created by @e currentUser
+     */
     class filterShared {
         const user &currentUser;
     public:
@@ -268,11 +287,11 @@ namespace Symposium {
         bool operator()(std::shared_ptr<file> file);
     };
 
-/**
- * @brief class used to create functional objects to be used in @ref SymClient::show
- *
- * Filter user's home directory print basing on the privilege that has been granted to @e currentUser
- */
+    /**
+     * @brief class used to create functional objects to be used in @ref SymClient::show
+     *
+     * Filter user's home directory print basing on the privilege that has been granted to @e currentUser
+     */
     class filterPrivilege {
         const user &currentUser;
         privilege filter;

@@ -41,7 +41,7 @@ void SymClient::setLoggedUser(const user &loggedUser) {
     //TODO:implement
 }
 
-void SymClient::setUserColors(const std::map<int, std::pair<user, MyColor>> &userColors) {
+void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
     //TODO:implement
 }
 
