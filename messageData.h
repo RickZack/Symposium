@@ -52,6 +52,7 @@ namespace Symposium {
 
         createRes,            /**< used by server and client, when asking for creating a new document, see @ref sendResMessage, @ref askResMessage */
         createNewDir,         /**< used by server and client, when asking for creating a new directory, see @ref sendResMessage, @ref askResMessage */
+        openRes,              /**< user by client, when asking for opening a document that is already in its filesystem, see @ref askResMessage */
         openNewRes,           /**< used by server and client, when asking for an existing resource via URI, @ref sendResMessage, @ref askResMessage */
         changeResName,        /**< used by server and client, when asking for changing a resource's name, see @ref serverMessage, @ref askResMessage */
         removeRes,            /**< used by client, when asking for a resource removal, @ref serverMessage, @ref askResMessage */

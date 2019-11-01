@@ -45,17 +45,29 @@ void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
     //TODO:implement
 }
 
-void SymClient::signUp(const std::string &username, const std::string &pwd) {
+signUpMessage SymClient::signUp(const std::string &username, const std::string &pwd, const std::string &nickname) {
+    return signUpMessage(msgType::login, {"", ""}, user("", "", "", "", -1, nullptr));
+}
+
+void SymClient::signUp(const user &logged) {
     //TODO:implement
 }
 
-void SymClient::logIn(const std::string &username, const std::string &pwd) {
-    //TODO:implement
+clientMessage SymClient::logIn(const std::string &username, const std::string &pwd) {
+    return clientMessage(msgType::login, {"", ""});
 }
 
-document SymClient::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
+void SymClient::logIn(const user &logged) {
+    //TODO: implement
+}
+
+askResMessage SymClient::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
     //TODO:implement
-    return document(0);
+    return askResMessage(msgType::openRes, {"", ""}, "", "");
+}
+
+void SymClient::openSource(const std::shared_ptr<file> fileAsked) {
+    //TODO:implement
 }
 
 document SymClient::openNewSource(const std::string &path, const std::string &name, privilege reqPriv,

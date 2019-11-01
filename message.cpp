@@ -46,6 +46,15 @@ msgType message::getAction() const {
     return action;
 }
 
+bool message::operator==(const message &rhs) const {
+    return msgId == rhs.msgId &&
+           action == rhs.action;
+}
+
+bool message::operator!=(const message &rhs) const {
+    return !(rhs == *this);
+}
+
 clientMessage::clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, int msgId)
         : message(action, msgId), actionOwner(actionOwner) {
     //TODO: implement
@@ -63,6 +72,15 @@ void clientMessage::completeAction(SymClient &client) {
     //TODO: implement
 }
 
+bool clientMessage::operator==(const clientMessage &rhs) const {
+    return static_cast<const message &>(*this) == static_cast<const message &>(rhs) &&
+           actionOwner == rhs.actionOwner;
+}
+
+bool clientMessage::operator!=(const clientMessage &rhs) const {
+    return !(rhs == *this);
+}
+
 askResMessage::askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                              const std::string &path,
                              const std::string &name, const std::string &resourceId, int msgId)
@@ -77,6 +95,17 @@ void askResMessage::invokeMethod(SymServer &server) {
 
 void askResMessage::completeAction(SymClient &client) {
     clientMessage::completeAction(client);
+}
+
+bool askResMessage::operator==(const askResMessage &rhs) const {
+    return static_cast<const clientMessage &>(*this) == static_cast<const clientMessage &>(rhs) &&
+           path == rhs.path &&
+           name == rhs.name &&
+           resourceId == rhs.resourceId;
+}
+
+bool askResMessage::operator!=(const askResMessage &rhs) const {
+    return !(rhs == *this);
 }
 
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,

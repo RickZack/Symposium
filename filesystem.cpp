@@ -124,6 +124,10 @@ std::string file::print(const user &targetUser, bool recursive, int indent) cons
     return name + " " + priv.str();
 }
 
+const document &file::getDoc() const {
+    return doc;
+}
+
 directory::directory(const std::string &name) : filesystem(name) {
     //guardare lab 2
     //TODO: implement

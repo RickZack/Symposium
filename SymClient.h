@@ -97,12 +97,48 @@ namespace Symposium {
          */
         virtual void setUserColors(const std::map<int, user> &siteIdToUser);
 
-        void signUp(const std::string &username, const std::string &pwd);
+        /**
+         * @brief constructs a @ref signUpMessage to send to the server to ask for registration
+         * @param username the username of the user to register
+         * @param pwd the password the user has chosen
+         * @return a properly constructed @ref signUpMessage to send to the server
+         */
+        signUpMessage signUp(const std::string &username, const std::string &pwd, const std::string &nickname);
 
-        void logIn(const std::string &username, const std::string &pwd);
+        /**
+         * @brief assign to @e loggedUser the user returned by the server after having sent a @ref signUpMessage
+         * @param logged the user sent back by the server in a @ref signUpMessage
+         */
+        void signUp(const user& logged);
 
+        /**
+         * @brief constructs a @ref clientMessage to send to the server to aks for authentication
+         * @param username the username of the user to login
+         * @param pwd he password the user chase
+         * @return a properly constructed @ref clientMessage to send to the server
+         */
+        clientMessage logIn(const std::string &username, const std::string &pwd);
 
-        document openSource(const std::string &path, const std::string &name, privilege reqPriv);
+        /**
+         * @brief assign to @e loggedUser the user returned by the server after having sent a @ref clientMessage
+         * @param logged the user sent back by the server in a @ref signUpMessage
+         */
+        void logIn(const user& logged);
+
+        /**
+         * @brief constructs a @ref askResMessage to send to the server to ask to open a document
+         * @param path the path of the file to open, relative to user's home directory
+         * @param name the name of the file to open
+         * @param reqPriv the privilege requested opening the file
+         * @return a properly constructed @ref askResMessage to send to the server
+         */
+        askResMessage openSource(const std::string &path, const std::string &name, privilege reqPriv);
+
+        /**
+         * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
+         * @param fileAsked the file sent back by the server in a @ref sendResMessage
+         */
+        void openSource(const std::shared_ptr<file> fileAsked);
 
         virtual document
         openNewSource(const std::string &path, const std::string &name, privilege reqPriv, const std::string &destPath);

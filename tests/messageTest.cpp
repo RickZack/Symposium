@@ -334,6 +334,7 @@ public:
     MOCK_METHOD1(setUserColors, void(const std::map<int, user>&));
     MOCK_METHOD2(createNewSource, document(const std::string&, const std::string&));
     MOCK_METHOD2(createNewDir, std::shared_ptr<directory>(const std::string&, const std::string&));
+    MOCK_METHOD1(openSource, void(std::shared_ptr<file>));
     MOCK_METHOD4(openNewSource, document(const std::string&, const std::string&, privilege, const std::string&));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, bool));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, bool));
@@ -383,6 +384,13 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
     m=new sendResMessage(msgType::createNewDir, msgOutcome::success, *directory::nullDir());
     EXPECT_CALL(client, createNewDir("", "")).WillOnce(::testing::Return(std::shared_ptr<directory>()));
+    m->invokeMethod(client);
+}
+
+TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
+    std::shared_ptr<file> dummyFile(new file("file", "./somedir"));
+    m=new sendResMessage(msgType::openRes, msgOutcome::success, *dummyFile);
+    EXPECT_CALL(client, openSource(std::shared_ptr<file>(dummyFile)));
     m->invokeMethod(client);
 }
 

@@ -56,6 +56,10 @@
 
          msgType getAction() const;
 
+         bool operator==(const message &rhs) const;
+
+         bool operator!=(const message &rhs) const;
+
          virtual ~message() = default;
      };
 
@@ -96,18 +100,22 @@
           */
          virtual void completeAction(SymClient &client);
 
-         ~clientMessage() override = default;
+         bool operator==(const clientMessage &rhs) const;
+
+         bool operator!=(const clientMessage &rhs) const;
+
+         virtual ~clientMessage() override = default;
      };
 
-/**
- * @brief class used to model a message sent by a client asking for a resource
- *
- * An instance of this type is use to ask to server to create a resource in @e path with name @e name
- * or to remove a resource named @e name from @e path or to open a resource already known.
- * It is used also to rename an existing resource.
- * This depends on the @e action. If @e action is "openNewRes" then @e resourceId contains the path to the resource (the uri).
- * If @e action is "changeResName" then @e resourceId is the new file name.
- */
+    /**
+     * @brief class used to model a message sent by a client asking for a resource
+     *
+     * An instance of this type is use to ask to server to create a resource in @e path with name @e name
+     * or to remove a resource named @e name from @e path or to open a resource already known.
+     * It is used also to rename an existing resource.
+     * This depends on the @e action. If @e action is "openNewRes" then @e resourceId contains the path to the resource (the uri).
+     * If @e action is "changeResName" then @e resourceId is the new file name.
+     */
      class askResMessage : public clientMessage {
          std::string path;          /**< path where to put the resource */
          std::string name;          /**< name to assign to the resource */
@@ -118,7 +126,7 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, const std::string &path,
-                       const std::string &name, const std::string &resourceId, int msgId = 0);
+                       const std::string &name, const std::string &resourceId="", int msgId = 0);
 
          /**
           * @brief perform an action regarding a resource for the user @e actionOwner
@@ -127,6 +135,9 @@
           * Depending on the value of @e action, the @e invokeMethod ask for different actions on the server:
           * @li <em> action=msgType::createRes </em>: calls @ref SymServer::createNewSource on @e server. A message of type
           * @ref sendResMessage is sent back to the client, containing the @ref file object created by the server.
+          *
+          * @li <em> action=msgType::openRes </em>: calls @ref SymServer::openSource on @e server. A message of type
+          * @ref sendResMessage is sent back to the client, containing the @ref file object stored by the server.
           *
           * @li <em> action=msgType::openNewRes </em>: calls @ref SymServer::openNewSource on @e server. A message of type
           * @ref sendResMessage is sent back to the client, containing the @ref symlink object created by the server.
@@ -150,6 +161,9 @@
           * with a serverMessage containing the outcome: in case it is positive, completeAction() performs the actual name change.
           */
          void completeAction(SymClient &client) override;
+
+         bool operator==(const askResMessage &rhs) const;
+         bool operator!=(const askResMessage &rhs) const;
 
          ~askResMessage() override = default;
      };
@@ -178,12 +192,12 @@
           */
          void invokeMethod(SymServer &server) override;
 
-         ~signUpMessage() override = default;
+         virtual ~signUpMessage() override{};
      };
 
-/**
- * @brief class used to model a message sent by a client to close a resource
- */
+    /**
+     * @brief class used to model a message sent by a client to close a resource
+     */
      class updateDocMessage : public clientMessage {
          int resourceId;            /**< identifier of the resource on which perform the action */
      public:

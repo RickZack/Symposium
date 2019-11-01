@@ -164,6 +164,8 @@ namespace Symposium {
     public:
         file(const std::string &name, const std::string &realPath);
 
+        const document &getDoc() const;
+
         /**
          * @brief retrieve the privilege of a user on the current file
          * @param targetUser the user whose privilege is to be retrieved
