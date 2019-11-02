@@ -72,9 +72,9 @@ namespace Symposium {
      * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
      */
     class filesystem {
+    protected:
         static int idCounter;      /**< id to be assigned to the next created filesystem object */
         int id;                    /**< unique identifier for the filesystem object, used also for identifying objects along a path */
-    protected:
         std::string name;          /**< resource name */
         uri sharingPolicy;         /**< sharing policy applied to the resource */
         std::unique_ptr<AccessStrategy> strategy;
@@ -295,7 +295,7 @@ namespace Symposium {
 
         std::string &
         setName(const std::string &path, const std::string &fileName, const std::string &newName); //FIXME: redundant
-        virtual std::shared_ptr<directory> addDirectory(const std::string &name);
+        virtual std::shared_ptr<directory> addDirectory(const std::string &name, int idToAssign=filesystem::idCounter);
 
         virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name);
 

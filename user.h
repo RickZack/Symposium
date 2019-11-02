@@ -121,7 +121,7 @@ namespace Symposium {
          * @param pathFromHome path inside the home to put the directory. By default is the home itself
          */
         virtual std::shared_ptr<directory>
-        newDirectory(const std::string &dirName, const std::string &pathFromHome = ".") const;
+        newDirectory(const std::string &dirName, const std::string &pathFromHome = ".", int idToAssign=-1) const;
 
         /**
          * @brief adds a link to the resource for which the user has been granted a privilege

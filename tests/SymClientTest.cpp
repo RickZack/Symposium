@@ -77,11 +77,18 @@ struct SymClientUserMock: public user{
                       const std::string &iconPath, int siteId, const std::shared_ptr<directory> &home) :
                       user(username, pwd, nickname, iconPath, siteId, home) {}
     MOCK_CONST_METHOD3(openFile, document&(const std::string& path, const std::string& filename, privilege accessMode));
+    MOCK_CONST_METHOD3(accessFile, std::shared_ptr<file>(const std::string &resId, const std::string &path, const std::string &fileName));
+    MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string &filename, const std::string &path));
+    MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string &filename, const std::string &path, int id));
 };
 
 struct SymClientFileMock: public file{
     SymClientFileMock(const std::string &name, const std::string &realPath) : file(name, realPath) {};
     MOCK_CONST_METHOD0(getDoc, document&());
+};
+
+struct SymClientDirMock: public directory{
+    SymClientDirMock(const std::string &name) : directory(name) {};
 };
 
 
@@ -94,7 +101,14 @@ struct SymClientTest : ::testing::Test{
     static const std::string path;
     static const std::string filename;
     static constexpr privilege aPrivilege=privilege::modify;
-    SymClientTest():userReceived(username, pwd, nickname, "", 0, nullptr){};
+    static const std::string destPath;
+    std::shared_ptr<SymClientFileMock> fileSentByServer;
+    std::shared_ptr<SymClientDirMock> dirSentByServer;
+    document docInUserFilesystem, docSentByServer;
+    SymClientTest(): userReceived(username, pwd, nickname, "", 0, nullptr),
+                     fileSentByServer(new SymClientFileMock(filename, "realPath")),
+                     docInUserFilesystem(0), docSentByServer(120),
+                     dirSentByServer(new SymClientDirMock(filename)){};
     bool everyUserHasDifferentColor(){
         auto mapped=client.getUserColors();
         std::set<std::tuple<int, int, MyColor>> colors; //{siteId, documentId, color}
@@ -125,6 +139,7 @@ const std::string SymClientTest::pwd="123abc!!";
 const std::string SymClientTest::nickname="nickname";
 const std::string SymClientTest::path="./dir1/dir2";
 const std::string SymClientTest::filename="file1";
+const std::string SymClientTest::destPath="./dir1/dir2";
 
 TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
     client.setLoggedUser(userReceived);
@@ -145,11 +160,13 @@ TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
 }
 
-TEST_F(SymClientTest, signUpAssignesLoggedUser){
+TEST_F(SymClientTest, signUpAssignesLoggedUserAndRemovesFromUnanswered){
+    auto mex= client.signUp(username, pwd, nickname);
     //just imagine that the server has answered with msgOutcome::success to client's signUpMessage, the response contain the
     //complete user data
     client.signUp(userReceived);
     EXPECT_EQ(client.getLoggedUser(), userReceived);
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
 }
 
 TEST_F(SymClientTest, loginConstructsGoodMessageAndInsertInUnanswered){
@@ -158,11 +175,13 @@ TEST_F(SymClientTest, loginConstructsGoodMessageAndInsertInUnanswered){
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
 }
 
-TEST_F(SymClientTest, loginAssignesLoggedUser){
+TEST_F(SymClientTest, loginAssignesLoggedUserAndRemovesFromUnanswered){
+    auto mex=client.logIn(username, pwd);
     //just imagine that the server has answered with msgOutcome::success to client's clientMessage, the response contain the
     //complete user data
     client.logIn(userReceived);
     EXPECT_EQ(client.getLoggedUser(), userReceived);
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
 }
 
 TEST_F(SymClientTest, openSourceConstructsGoodMessageAndInsertInUnanswered){
@@ -174,18 +193,85 @@ TEST_F(SymClientTest, openSourceConstructsGoodMessageAndInsertInUnanswered){
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
 }
 
-TEST_F(SymClientTest, openSourceOpensDocAndPutInActive)
+TEST_F(SymClientTest, openSourceOpensDocAndPutInActiveAndRemovesFromUnanswered)
 {
     setStageForLoggedUser();
+    auto mex=client.openSource(path, filename, privilege::readOnly);
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openSource on client
-    std::shared_ptr<SymClientFileMock> f(new SymClientFileMock(filename, "realPath"));
-    document docInUserFilesystem(0), docSentByServer(120);
     //the data use to call openFile must be taken from the relative askResMessage in unanswered
     EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::ReturnRef(docInUserFilesystem));
-    EXPECT_CALL(*f, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openSource(f);
-    correctInsertionOfFileAndDocumentInLists(120, &docInUserFilesystem, f->getId());
+    EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
+    client.openSource(fileSentByServer);
+    correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId());
     //tests that the document returned by openFile() has now the same content of the document sent by the server
     EXPECT_EQ(docInUserFilesystem, docSentByServer);
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath);
+    messageHasCorrectOwner(mex);
+    askResMessage expected(msgType::openNewRes, {username, pwd}, destPath, filename, path+"/"+filename);
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
+{
+    setStageForLoggedUser();
+    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath);
+    //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
+    //resource asked. sendResMessage has already been tested to call openNewSource on client
+    //the data use to call accessFile must be taken from the relative askResMessage in unanswered
+    EXPECT_CALL(userReceived, accessFile(path+"/"+filename, destPath, filename)).WillOnce(::testing::Return(fileSentByServer));
+    EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
+    client.openNewSource(fileSentByServer);
+    correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId());
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, createNewSourceConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.createNewSource(path, filename);
+    messageHasCorrectOwner(mex);
+    askResMessage expected(msgType::createRes, {username, pwd}, path, filename);
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, createNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
+{
+    setStageForLoggedUser();
+    auto mex=client.createNewSource(path, filename);
+    //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
+    //resource asked. sendResMessage has already been tested to call createNewSource on client
+    //the data use to call newFile must be taken from the relative askResMessage in unanswered
+    EXPECT_CALL(userReceived, newFile(filename, path)).WillOnce(::testing::Return(fileSentByServer));
+    EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
+    client.openNewSource(fileSentByServer);
+    correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId());
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, createNewDirConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.createNewDir(path, filename);
+    messageHasCorrectOwner(mex);
+    askResMessage expected(msgType::createNewDir, {username, pwd}, path, filename);
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, createNewDirOpensDocAndPutInActiveAndRemovesFromUnaswered)
+{
+    setStageForLoggedUser();
+    auto mex=client.createNewDir(path, filename);
+    //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
+    //resource asked. sendResMessage has already been tested to call createNewSource on client
+    //the data use to call newDirectory must be taken from the relative askResMessage in unanswered
+    EXPECT_CALL(userReceived, newDirectory(filename, path, dirSentByServer->getId())).WillOnce(::testing::Return(dirSentByServer));
+    client.createNewDir(dirSentByServer);
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
 }

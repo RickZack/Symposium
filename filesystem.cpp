@@ -162,7 +162,7 @@ std::string& directory::setName(const std::string &path, const std::string &file
     return name;
 }
 
-std::shared_ptr<directory> directory::addDirectory(const std::string &name) {
+std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
     //assegnare qui la root
     //TODO: implement
     return std::shared_ptr<directory>();

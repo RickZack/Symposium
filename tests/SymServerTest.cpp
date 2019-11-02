@@ -37,7 +37,7 @@ using namespace Symposium;
 
 struct SymServerdirMock : public directory{
     SymServerdirMock(const std::string &name) : directory(name) {};
-    MOCK_METHOD1(addDirectory, std::shared_ptr<directory>(const std::string &name));
+    MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, int idToAssign));
     MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
 };
@@ -53,7 +53,7 @@ struct SymServerUserMock: public user{
     MOCK_CONST_METHOD3(accessFile,  std::shared_ptr<file>(const std::string &resId, const std::string &path,  const std::string &fileName));
     MOCK_CONST_METHOD3(openFile, document&(const std::string &path,  const std::string &fileName, privilege accessMode));
     MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome));
-    MOCK_CONST_METHOD2(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome));
+    MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome, int id));
     MOCK_CONST_METHOD4(editPrivilege, privilege(const user &otherUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
     MOCK_CONST_METHOD3(shareResource, uri(const std::string &resPath, const std::string &resName, uri& newPrefs));
@@ -210,7 +210,7 @@ TEST_F(SymServerTestUserFunctionality, addUserAddingUserHavingWrongNickname){
 }
 
 TEST_F(SymServerTestUserFunctionality, addUserAssignesHomeToUser){
-    EXPECT_CALL(*fakeDir, addDirectory(newUserUsername)).WillOnce(::testing::Return(userDir));
+    EXPECT_CALL(*fakeDir, addDirectory(newUserUsername, 0)).WillOnce(::testing::Return(userDir));
     auto userInserted=server.addUser(newUser);
     EXPECT_TRUE(userInserted.getHome()==userDir);
 }
@@ -421,7 +421,7 @@ TEST_F(SymServerTestFilesystemFunctionality, createNewSourceOfUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, createNewDirCallsNewDirectory){
-    EXPECT_CALL(loggedUser, newDirectory(fileName, filePath));
+    EXPECT_CALL(loggedUser, newDirectory(fileName, filePath,0));
     server.createNewDir(loggedUser, filePath, fileName);
 }
 

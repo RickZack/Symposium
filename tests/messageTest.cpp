@@ -332,10 +332,10 @@ class SymClientMock: public SymClient{
 public:
     MOCK_METHOD1(setLoggedUser, void(const user&));
     MOCK_METHOD1(setUserColors, void(const std::map<int, user>&));
-    MOCK_METHOD2(createNewSource, document(const std::string&, const std::string&));
-    MOCK_METHOD2(createNewDir, std::shared_ptr<directory>(const std::string&, const std::string&));
-    MOCK_METHOD1(openSource, void(std::shared_ptr<file>));
-    MOCK_METHOD4(openNewSource, document(const std::string&, const std::string&, privilege, const std::string&));
+    MOCK_METHOD1(createNewSource, void(const std::shared_ptr<file>));
+    MOCK_METHOD1(createNewDir, void(const std::shared_ptr<directory> dirCreated));
+    MOCK_METHOD1(openSource, void(const std::shared_ptr<file>));
+    MOCK_METHOD1(openNewSource, void(std::shared_ptr<file>));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, bool));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, bool));
     MOCK_METHOD2(addActiveUser, void(int, user &));
@@ -375,29 +375,29 @@ TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
-    file dummyFile("file", "./somedir");
-    m=new sendResMessage(msgType::createRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, createNewSource("", "")).WillOnce(::testing::Return(document()));
+    std::shared_ptr<file> dummyFile(new file("file", "./somedir"));
+    m=new sendResMessage(msgType::createRes, msgOutcome::success, *dummyFile);
+    EXPECT_CALL(client, createNewSource(dummyFile));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
     m=new sendResMessage(msgType::createNewDir, msgOutcome::success, *directory::nullDir());
-    EXPECT_CALL(client, createNewDir("", "")).WillOnce(::testing::Return(std::shared_ptr<directory>()));
+    EXPECT_CALL(client, createNewDir(directory::nullDir()));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
     std::shared_ptr<file> dummyFile(new file("file", "./somedir"));
     m=new sendResMessage(msgType::openRes, msgOutcome::success, *dummyFile);
-    EXPECT_CALL(client, openSource(std::shared_ptr<file>(dummyFile)));
+    EXPECT_CALL(client, openSource(dummyFile));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
-    file dummyFile("file", "./somedir");
-    m=new sendResMessage(msgType::openNewRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, openNewSource("", "", privilege::modify, "")).WillOnce(::testing::Return(document()));
+    std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir"));
+    m=new sendResMessage(msgType::openNewRes, msgOutcome::success, *dummyFile);
+    EXPECT_CALL(client, openNewSource(std::dynamic_pointer_cast<file>(dummyFile)));
     m->invokeMethod(client);
 }
 

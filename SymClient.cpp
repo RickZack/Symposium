@@ -70,20 +70,32 @@ void SymClient::openSource(const std::shared_ptr<file> fileAsked) {
     //TODO:implement
 }
 
-document SymClient::openNewSource(const std::string &path, const std::string &name, privilege reqPriv,
-                                  const std::string &destPath) {
+askResMessage
+SymClient::openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName) {
     //TODO:implement
-    return document(0);
+    return askResMessage(msgType::openRes, {"", ""}, "", "");
 }
 
-document SymClient::createNewSource(const std::string &path, const std::string &name) {
+void SymClient::openNewSource(const std::shared_ptr<file> fileAsked) {
     //TODO:implement
-    return document(0);
 }
 
-std::shared_ptr<directory> SymClient::createNewDir(const std::string &path, const std::string &name) {
+askResMessage SymClient::createNewSource(const std::string &path, const std::string &name) {
     //TODO:implement
-    return std::shared_ptr<directory>();
+    return askResMessage(msgType::openRes, {"", ""}, "", "");
+}
+
+void SymClient::createNewSource(const std::shared_ptr<file> fileCreated) {
+    //TODO:implement
+}
+
+askResMessage SymClient::createNewDir(const std::string &path, const std::string &name) {
+    //TODO:implement
+    return askResMessage(msgType::openRes, {"", ""}, "", "");
+}
+
+void SymClient::createNewDir(const std::shared_ptr<directory> dirCreated) {
+    //TODO:implement
 }
 
 void SymClient::remoteInsert(int resourceId, const symbol &newSym) {

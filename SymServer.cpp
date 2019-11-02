@@ -96,7 +96,7 @@ const document & SymServer::createNewSource(const user &opener, const std::strin
 std::shared_ptr<directory> SymServer::createNewDir(const user &opener, const std::string &path, const std::string &name) {
     if(!userIsActive(opener.getUsername()))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    return opener.newDirectory(name, path);
+    return opener.newDirectory(name, path, 0);
 }
 
 void SymServer::remoteInsert(const std::string &inserter, int resourceId, const symbolMessage &symMsg) {

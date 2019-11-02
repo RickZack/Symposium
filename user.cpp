@@ -107,8 +107,13 @@ std::shared_ptr<file> user::newFile(const std::string &fileName, const std::stri
     throw userException("An error occurred while creating a new file");
 }
 
-std::shared_ptr<directory> user::newDirectory(const std::string &dirName, const std::string &pathFromHome) const{
-    std::shared_ptr<directory> newD=home->addDirectory(dirName);
+std::shared_ptr<directory>
+user::newDirectory(const std::string &dirName, const std::string &pathFromHome, int idToAssign) const{
+    std::shared_ptr<directory> newD;
+    if(idToAssign==-1)
+        newD=home->addDirectory(dirName, idToAssign);
+    else
+        newD=home->addDirectory(dirName);
     if(newD!= nullptr)
         return newD;
     throw userException("An error occurred while creating a new directory");

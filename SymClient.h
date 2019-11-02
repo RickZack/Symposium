@@ -138,14 +138,53 @@ namespace Symposium {
          * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
          * @param fileAsked the file sent back by the server in a @ref sendResMessage
          */
-        void openSource(const std::shared_ptr<file> fileAsked);
+        virtual void openSource(const std::shared_ptr<file> fileAsked);
 
-        virtual document
-        openNewSource(const std::string &path, const std::string &name, privilege reqPriv, const std::string &destPath);
+        /**
+         * @brief constructs a @ref askResMessage to send to the server to ask to open a document
+         * @param resourceId the universal resource identifier for the resource to open
+         * @param reqPriv the privilege requested opening the file
+         * @param destPath the path inside user's home directory where to put a symlink to the file
+         * @return a properly constructed @ref askResMessage to send to the server
+         */
+        virtual askResMessage
+        openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName="");
 
-        virtual document createNewSource(const std::string &path, const std::string &name);
+        /**
+         * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
+         * @param fileAsked the file sent back by the server in a @ref sendResMessage
+         */
+        virtual void openNewSource(const std::shared_ptr<file> fileAsked);
 
-        virtual std::shared_ptr<directory> createNewDir(const std::string &path, const std::string &name);
+        /**
+         * @brief constructs a @ref askResMessage to send to the server to ask to create a file
+         * @param path the path of the file to create, relative to user's home directory
+         * @param name the name of the file to create
+         * @return a properly constructed @ref askResMessage to send to the server
+         */
+        virtual askResMessage createNewSource(const std::string &path, const std::string &name);
+
+        /**
+         * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
+         * @param fileCreated the file sent back by the server in a @ref sendResMessage
+         */
+        virtual void createNewSource(const std::shared_ptr<file> fileCreated);
+
+        /**
+         * @brief constructs a @ref askResMessage to send to the server to ask to create a directory
+         * @param path the path of the directory to create, relative to user's home directory
+         * @param name the name of the directory to create
+         * @return the name of the file to create
+         */
+        virtual askResMessage createNewDir(const std::string &path, const std::string &name);
+
+        /**
+         * @brief add the directory to user's filesystem
+         * @param dirCreated the directory sent back by the server in a @ref sendResMessage
+         *
+         * The new directory is created by calling user::newDirectory with the data taken from @e dirCreated
+         */
+        virtual void createNewDir(const std::shared_ptr<directory> dirCreated);
 
         /**
          * @brief propagate a symbol insertion on document content made by another user
