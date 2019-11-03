@@ -96,15 +96,6 @@ namespace Symposium {
         virtual void setLoggedUser(const user &loggedUser);
 
         /**
-         * @brief assign to each user working on the same document on which @e loggedUser is working a unique color
-         * @param siteIdToUser the mapping siteId->user asked to the server
-         *
-         * Receive the mapping siteId->user from the server and assigns to each user a unique color among the colors
-         * assigned to the users working on the same document.
-         */
-        virtual void setUserColors(const std::map<int, user> &siteIdToUser);
-
-        /**
          * @brief constructs a @ref signUpMessage to send to the server to ask for registration
          * @param username the username of the user to register
          * @param pwd the password the user has chosen
@@ -378,23 +369,20 @@ namespace Symposium {
          */
         virtual const user editUser(user &newUserData, bool msgRcv);
 
-        void removeUser();
+        clientMessage removeUser();
 
-        void logout();
+        clientMessage logout();
+
+        updateDocMessage mapSiteIdToUser(const document &currentDoc);
 
         /**
-         * @brief maps a user's siteId with the user object and a random color to use in the GUI
-         * @param currentDoc the document fo which perform the mapping
-         * @param msgRcv indicates whether this method is called after having received a @ref mapMessage or by the user
-         * @return the mapping siteId->{user, color}
+         * @brief assign to each user working on the same document on which @e loggedUser is working a unique color
+         * @param siteIdToUser the mapping siteId->user asked to the server
          *
-         * This method provides a siteId->user mapping for @e currentDoc, first trying to use the data
-         * contained in the @ref file structure or asking the server for this mapping if in the document
-         * symbols belonging to users not anymore in any privilege set are found.
-         * To retrieve the set of user ids of the current document calls @ref document::retrieveSideIds
+         * Receive the mapping siteId->user from the server and assigns to each user a unique color among the colors
+         * assigned to the users working on the same document.
          */
-        std::map<int, std::pair<user, MyColor>> mapSiteIdToUser(const document &currentDoc, bool msgRcv);
-
+        virtual void setUserColors(const std::map<int, user> &siteIdToUser);
 
         void exportPDF(const std::string &resPath, const std::string &resName);
 

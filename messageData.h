@@ -49,6 +49,8 @@ namespace Symposium {
         changeUserNick,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
         changeUserPwd,        /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
         changeUserIcon,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
+        removeUser,           /**< used by client, when asking to remove the user it is logged with, see @ref clientMessage */
+        logout,
 
         createRes,            /**< used by server and client, when asking for creating a new document, see @ref sendResMessage, @ref askResMessage */
         createNewDir,         /**< used by server and client, when asking for creating a new directory, see @ref sendResMessage, @ref askResMessage */

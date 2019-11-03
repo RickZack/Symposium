@@ -78,6 +78,8 @@ std::ostream& operator<<(std::ostream& output, msgType m){
         case msgType::changeUserNick: return output<<"msgType::changeUserNick";
         case msgType::changeUserPwd: return output<<"msgType::changeUserPwd";
         case msgType::changeUserIcon: return output<<"msgType::changeUserIcon";
+        case msgType::removeUser: return output<<"msgType::removeUser";
+        case msgType::logout: return output<<"msgType::logout";
 
         case msgType::createRes: return output<<"msgType::createRes";
         case msgType::createNewDir: return output<<"msgType::createNewDir";
@@ -247,6 +249,8 @@ INSTANTIATE_TEST_CASE_P(userDataThrowExceptionInConstruction, MessageActionTest,
 class SymServerMock: public SymServer{
 public:
     MOCK_METHOD2(login, const user(const std::string&, const std::string&));
+    MOCK_METHOD2(logout, void(const std::string&, const std::string&));
+    MOCK_METHOD2(removeUser, void(const std::string&, const std::string&));
     MOCK_METHOD1(addUser, const user(const user&));
     MOCK_METHOD3(createNewSource, document&(const user&, const std::string&, const std::string&));
     MOCK_METHOD5(openNewSource, const document&(const user&, const std::string&, const std::string&, privilege, const std::string&));
@@ -278,6 +282,18 @@ struct clientMessageTest: public testing::Test{
 TEST_F(clientMessageTest, clientMessageTestCallsLoginOnServer){
     m=new clientMessage(msgType::login, {"", ""});
     EXPECT_CALL(server, login(m->getActionOwner().first, m->getActionOwner().second)).WillOnce(::testing::Return(u));
+    m->invokeMethod(server);
+}
+
+TEST_F(clientMessageTest, clientMessageTestCallsLogoutOnServer){
+    m=new clientMessage(msgType::logout, {"", ""});
+    EXPECT_CALL(server, logout(m->getActionOwner().first, m->getActionOwner().second));
+    m->invokeMethod(server);
+}
+
+TEST_F(clientMessageTest, clientMessageTestCallsRemoveUserOnServer){
+    m=new clientMessage(msgType::removeUser, {"", ""});
+    EXPECT_CALL(server, removeUser(m->getActionOwner().first, m->getActionOwner().second));
     m->invokeMethod(server);
 }
 
@@ -370,7 +386,7 @@ TEST_F(serverMessageTest, loginMsgTestCallsSetLoggedUser){
 TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
     std::map<int, user> siteIdToUser;
     m=new mapMessage(msgType::mapChangesToUser, msgOutcome::success, siteIdToUser);
-    EXPECT_CALL(client, setUserColors).WillOnce(::testing::Return());
+    EXPECT_CALL(client, setUserColors(siteIdToUser));
     m->invokeMethod(client);
 }
 

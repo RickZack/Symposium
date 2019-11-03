@@ -106,6 +106,7 @@ struct SymClientDocMock: public document{
     MOCK_METHOD1(remoteInsert, void(symbol toInsert));
     MOCK_METHOD1(remoteRemove, void(symbol toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
+    MOCK_METHOD2(access, document&(const user&, privilege));
 };
 
 struct SymClientTest : ::testing::Test{
@@ -173,13 +174,6 @@ uri SymClientTest::newPreferences(uriPolicy::activeAlways);
 TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
     client.setLoggedUser(userReceived);
     EXPECT_EQ(userReceived, client.getLoggedUser());
-}
-
-TEST_F(SymClientTest, setUserColorsAssignesDifferentColorToUsers){
-    //correctness of mapping has already been verified on SymServer class, here we don't care about the wrong mapping
-    std::map<int, user> sampleMapping({{0, userReceived},{1, userReceived}});
-    client.setUserColors(sampleMapping);
-    EXPECT_TRUE(everyUserHasDifferentColor());
 }
 
 TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){
@@ -407,4 +401,52 @@ TEST_F(SymClientTest, showDirCallsShowDirOnUserNotRecursive){
     SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
     EXPECT_CALL(logUser, showDir(false));
     client.showDir(false);
+}
+
+TEST_F(SymClientTest, removeUserConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.removeUser();
+    messageHasCorrectOwner(mex);
+    clientMessage expected(msgType::removeUser, {username, pwd});
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_NE(userReceived, client.getLoggedUser());
+}
+
+TEST_F(SymClientTest, logoutConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.logout();
+    messageHasCorrectOwner(mex);
+    clientMessage expected(msgType::logout, {username, pwd});
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_NE(userReceived, client.getLoggedUser());
+}
+
+TEST_F(SymClientTest, mapSiteIdToUserConstructsGoodMessageAndInsertInUnanswered){
+    auto mex=client.mapSiteIdToUser(docSentByServer);
+    messageHasCorrectOwner(mex);
+    updateDocMessage expected(msgType::mapChangesToUser, {username, pwd}, docSentByServer.getId());
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, setUserColorsAssignesDifferentColorToUsers){
+    //correctness of mapping has already been verified on SymServer class, here we don't care about the wrong mapping
+    std::map<int, user> sampleMapping({{0, userReceived},{1, userReceived}});
+    client.setUserColors(sampleMapping);
+    EXPECT_TRUE(everyUserHasDifferentColor());
+}
+
+TEST_F(SymClientTest, addActiveUserCallsAccessOnDoc){
+    setStageForOpenedDoc();
+    SymClientUserMock anotherUser(anotherUsername, pwd, "noempty", "", 0, nullptr);
+    EXPECT_CALL(docSentByServer, access(anotherUser, privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
+    client.addActiveUser(docSentByServer.getId(), anotherUser);
+}
+
+TEST_F(SymClientTest, removeActiveUserCallsCloseOnDoc){
+    setStageForOpenedDoc();
+    EXPECT_CALL(docSentByServer, close(userReceived));
+    client.addActiveUser(docSentByServer.getId(), userReceived);
 }

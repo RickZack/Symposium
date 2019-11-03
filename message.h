@@ -85,8 +85,15 @@
           * @brief make @e newUser an active user of the server the message is sent to
           * @param server the server to login to
           *
-          * When this message is received by the server, the @e invokeMethod calls @ref SymServer::login on the @e server
-          * passed as parameter.
+          * Depending on the value of @e action, the @e invokeMethod ask for different actions on the server:
+          * @li <em> action=msgType::login </em>: calls @ref SymServer::login on @e server. A message of type
+          * @ref loginMessage is sent back to the client, containing the @ref user object retrieved by the server.
+          *
+          * @li <em> action=msgType::removeUser </em>: calls @ref SymServer::removeUser on @e server. A message of type
+          * @ref serverMessage is sent back to the client, containing the outcome of the action.
+          *
+          * @li <em> action=msgType::logout </em>: calls @ref SymServer::logout on @e server. A message of type
+          * @ref serverMessage is sent back to the client, containing the outcome of the action.
           */
          virtual void invokeMethod(SymServer &server);
 

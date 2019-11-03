@@ -41,10 +41,6 @@ void SymClient::setLoggedUser(const user &loggedUser) {
     //TODO:implement
 }
 
-void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
-    //TODO:implement
-}
-
 signUpMessage SymClient::signUp(const std::string &username, const std::string &pwd, const std::string &nickname) {
     return signUpMessage(msgType::login, {"", ""}, user("", "", "", "", -1, nullptr));
 }
@@ -166,17 +162,23 @@ const user SymClient::editUser(user &newUserData, bool msgRcv) {
                 std::shared_ptr<directory>());
 }
 
-void SymClient::removeUser() {
+clientMessage SymClient::removeUser() {
     //TODO: to implement
+    return clientMessage(msgType::removeUser, {"", ""});
 }
 
-void SymClient::logout() {
+clientMessage SymClient::logout() {
     //TODO: to implement
+    return clientMessage(msgType::logout, {"", ""});
 }
 
-std::map<int, std::pair<user, MyColor>> SymClient::mapSiteIdToUser(const document &currentDoc, bool msgRcv) {
+updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
     //TODO: to implement
-    return std::map<int, std::pair<user, MyColor>>();
+    return updateDocMessage(msgType::mapChangesToUser, {"", ""}, 0);
+}
+
+void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
+    //TODO:implement
 }
 
 void SymClient::exportPDF(const std::string &resPath, const std::string &resName) {
