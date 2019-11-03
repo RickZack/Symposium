@@ -49,9 +49,9 @@ struct documentMock: public document {
 
 struct RMOAccessMock: public RMOAccess{
     RMOAccessMock(): RMOAccess(){};
-    MOCK_METHOD2(validateAction, bool(user &targetUser, privilege requested));
-    MOCK_METHOD2(setPrivilege, privilege(user &targetUser, privilege toGrant));
-    MOCK_METHOD1(getPrivilege, privilege(user &targetUser));
+    MOCK_METHOD2(validateAction, bool(const std::string &targetUser, privilege requested));
+    MOCK_METHOD2(setPrivilege, privilege(const std::string &targetUser, privilege toGrant));
+    MOCK_METHOD1(getPrivilege, privilege(const std::string &targetUser));
 
 };
 
@@ -73,7 +73,8 @@ struct FileSystemTestT: ::testing::Test{
 
 TEST_F(FileSystemTestT, DISABLED_FileSetGetPrivilegeTest)
 {
-    user u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    std::string u="username";
+    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
     EXPECT_CALL(*rmo, setPrivilege(u, privilege::modify));
     f->setUserPrivilege(u, privilege::modify);
     EXPECT_CALL(*rmo, getPrivilege(u));
@@ -85,15 +86,15 @@ TEST_F(FileSystemTestT, DISABLED_FileSetGetPrivilegeTest)
 TEST_F(FileSystemTestT, DISABLED_accessTest)
 {
     user u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    f->setUserPrivilege(u, privilege::owner);
+    f->setUserPrivilege(u.getUsername(), privilege::owner);
     EXPECT_CALL(*document, access(u, privilege::modify)).WillOnce(::testing::ReturnRef(*document));
     f->access(u, privilege::modify);
-    f->setUserPrivilege(u, privilege::modify);
+    f->setUserPrivilege(u.getUsername(), privilege::modify);
     EXPECT_CALL(*document, access(u, privilege::modify)).WillOnce(::testing::ReturnRef(*document));
     f->access(u, privilege::modify);
-    f->setUserPrivilege(u, privilege::readOnly);
+    f->setUserPrivilege(u.getUsername(), privilege::readOnly);
     EXPECT_THROW(f->access(u, privilege::owner), filesystemException);
-    f->setUserPrivilege(u, privilege::none);
+    f->setUserPrivilege(u.getUsername(), privilege::none);
     EXPECT_THROW(f->access(u, privilege::modify), filesystemException);
 }
 
@@ -101,7 +102,8 @@ TEST(FileSystemTest, getSetDirSymTest)
 {
     directory d("d");
     class symlink sym("sym", ".", "f");
-    user u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    std::string u="username";
+    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
     uri u1(uriPolicy::activeAlways);
     EXPECT_THROW(sym.getSharingPolicy(), filesystemException);
     std::cout << "SymLinkError "<< std::endl;
@@ -124,7 +126,8 @@ TEST(FileSystemTest, getSetDirSymTest)
 
 TEST(FileSystemTest, DISABLED_printFileTest)
 {
-    user u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    std::string u="username";
+    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
     file f("file", "./somedir");
     f.setUserPrivilege(u, privilege::owner);
     EXPECT_EQ("file owner", f.print(u));
@@ -151,13 +154,13 @@ TEST(FileSystemTest, addDirAddFileAddSymPrintTest)
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     std::shared_ptr<directory> dir=d->addDirectory("cart1");
     ASSERT_FALSE(dir==nullptr);
-    EXPECT_EQ("root\r\n-cart1\r\n", d->print(u1));
+    EXPECT_EQ("root\r\n-cart1\r\n", d->print(u1.getUsername()));
     std::shared_ptr<file> f=d->addFile(".", "file1");
     ASSERT_FALSE(f==nullptr);
-    EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n", d->print(u1));
+    EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n", d->print(u1.getUsername()));
     std::shared_ptr<class symlink> sym=d->addLink(".", "sym");
     ASSERT_FALSE(sym==nullptr);
-    EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n-sym\r\n", d->print(u1));
+    EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n-sym\r\n", d->print(u1.getUsername()));
 }
 
 TEST(FileSystemTest, removeTest)
@@ -169,7 +172,7 @@ TEST(FileSystemTest, removeTest)
     cart1=d->addDirectory("cart1");
     std::shared_ptr<filesystem> cart2;
     cart2=d->remove(u1, "/root", "cart1");
-    EXPECT_EQ("root\r\n", d->print(u1));
+    EXPECT_EQ("root\r\n", d->print(u1.getUsername()));
 }
 
 TEST(FileSystemTest, printSymTest)
@@ -180,7 +183,7 @@ TEST(FileSystemTest, printSymTest)
     std::shared_ptr<file> f1;
     f1=d->addFile("file1", "/root");
     class symlink sym("sym", "/root", "file1");
-    EXPECT_EQ("sym", sym.print(u1));
+    EXPECT_EQ("sym", sym.print(u1.getUsername()));
 }
 
 /*

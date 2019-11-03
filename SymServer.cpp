@@ -119,15 +119,15 @@ void SymServer::remoteRemove(const std::string &remover, int resourceId, const s
     workingQueue[resourceId].push(rmMsg);
 }
 
-privilege SymServer::editPrivilege(const user &actionUser, const user &targetUser, const std::string &resPath,
+privilege SymServer::editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
                                    const std::string &resName, privilege newPrivilege) {
-    if(!userIsActive(actionUser.getUsername()) || !userIsRegistered(targetUser.getUsername()))
+    if(!userIsActive(actionUser) || !userIsRegistered(targetUser))
         throw SymServerException(SymServerException::actionUserNotLoggedOrTargetUserNotRegistered, UnpackFileLineFunction());
-    std::string pathFromUserHome="./"+resPath.substr(strlen("./")+strlen(actionUser.getUsername().c_str())+strlen("/"));
-    document docReq=actionUser.openFile(pathFromUserHome, resName, privilege::owner);
-    if(userIsWorkingOnDocument(targetUser.getUsername(), docReq.getId()).first)
+    std::string pathFromUserHome="./"+resPath.substr(strlen("./")+strlen(actionUser.c_str())+strlen("/"));
+    document docReq=getRegistered(actionUser).openFile(pathFromUserHome, resName, privilege::owner);
+    if(userIsWorkingOnDocument(targetUser, docReq.getId()).first)
         throw SymServerException(SymServerException::userWorkingOnDoc, UnpackFileLineFunction());
-    return actionUser.editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
+    return getRegistered(actionUser).editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
 }
 
 uri SymServer::shareResource(const user &actionUser, const std::string &resPath, const std::string &resName,

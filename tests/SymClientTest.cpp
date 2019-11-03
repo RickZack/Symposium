@@ -37,9 +37,29 @@
 using namespace Symposium;
 
 
+struct SymClientUserMock: public user{
+    SymClientUserMock(const std::string &username, const std::string &pwd, const std::string &nickname,
+                      const std::string &iconPath, int siteId, const std::shared_ptr<directory> &home) :
+            user(username, pwd, nickname, iconPath, siteId, home) {}
+    MOCK_CONST_METHOD3(openFile, document&(const std::string& path, const std::string& filename, privilege accessMode));
+    MOCK_CONST_METHOD3(accessFile, std::shared_ptr<file>(const std::string &resId, const std::string &path, const std::string &fileName));
+    MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string &filename, const std::string &path));
+    MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string &filename, const std::string &path, int id));
+    MOCK_METHOD4(editPrivilege, privilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
+            privilege newPrivilege));
+    MOCK_CONST_METHOD3(shareResource, uri(const std::string &resPath, const std::string &resName, uri &newPrefs));
+    MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, const std::string &newName));
+    MOCK_CONST_METHOD2(removeResource, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
+    MOCK_CONST_METHOD1(showDir, std::string(bool rec));
+};
+
 struct SymClientAccesser: public SymClient{
-    user& getLoggedUser(){
-        return loggedUser;
+    SymClientUserMock userMock;
+
+    SymClientAccesser(): userMock("userbla", "p@assW0rd!!", "noempty", "", 0, nullptr){}
+
+    user& getLoggedUser() override {
+        return userMock;
     }
     std::map<std::pair<int, int>, std::pair<user, MyColor>>& getUserColors(){
         return userColors;
@@ -53,7 +73,7 @@ struct SymClientAccesser: public SymClient{
         }
     }
     void setUser(user& logged){
-        loggedUser=logged;
+        getLoggedUser()=logged;
     }
     std::pair<bool, document*> docIsInActive(int id){
         std::pair<bool, document*> result(false, nullptr);
@@ -72,16 +92,6 @@ struct SymClientAccesser: public SymClient{
     }
 };
 
-struct SymClientUserMock: public user{
-    SymClientUserMock(const std::string &username, const std::string &pwd, const std::string &nickname,
-                      const std::string &iconPath, int siteId, const std::shared_ptr<directory> &home) :
-                      user(username, pwd, nickname, iconPath, siteId, home) {}
-    MOCK_CONST_METHOD3(openFile, document&(const std::string& path, const std::string& filename, privilege accessMode));
-    MOCK_CONST_METHOD3(accessFile, std::shared_ptr<file>(const std::string &resId, const std::string &path, const std::string &fileName));
-    MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string &filename, const std::string &path));
-    MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string &filename, const std::string &path, int id));
-};
-
 struct SymClientFileMock: public file{
     SymClientFileMock(const std::string &name, const std::string &realPath) : file(name, realPath) {};
     MOCK_CONST_METHOD0(getDoc, document&());
@@ -91,9 +101,16 @@ struct SymClientDirMock: public directory{
     SymClientDirMock(const std::string &name) : directory(name) {};
 };
 
+struct SymClientDocMock: public document{
+    SymClientDocMock(int id):document(id) {};
+    MOCK_METHOD1(remoteInsert, void(symbol toInsert));
+    MOCK_METHOD1(remoteRemove, void(symbol toRemove));
+    MOCK_METHOD1(close, void(const user& noLongerActive));
+};
 
 struct SymClientTest : ::testing::Test{
     SymClientUserMock userReceived;
+    static const std::string anotherUsername;
     SymClientAccesser client;
     static const std::string username;
     static const std::string pwd;
@@ -102,9 +119,10 @@ struct SymClientTest : ::testing::Test{
     static const std::string filename;
     static constexpr privilege aPrivilege=privilege::modify;
     static const std::string destPath;
+    static uri newPreferences;
     std::shared_ptr<SymClientFileMock> fileSentByServer;
     std::shared_ptr<SymClientDirMock> dirSentByServer;
-    document docInUserFilesystem, docSentByServer;
+    SymClientDocMock docInUserFilesystem, docSentByServer;
     SymClientTest(): userReceived(username, pwd, nickname, "", 0, nullptr),
                      fileSentByServer(new SymClientFileMock(filename, "realPath")),
                      docInUserFilesystem(0), docSentByServer(120),
@@ -133,6 +151,15 @@ struct SymClientTest : ::testing::Test{
         EXPECT_TRUE(docActive.second==presentInUserFile);
         EXPECT_TRUE(client.fileIsInActive(idOfFileActive));
     }
+    void setStageForOpenedDoc(){
+        setStageForLoggedUser();
+        EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::ReturnRef(docInUserFilesystem));
+        EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
+        client.openSource(fileSentByServer);
+        correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId());
+        //tests that the document returned by openFile() has now the same content of the document sent by the server
+        EXPECT_EQ(docInUserFilesystem, docSentByServer);
+    }
 };
 const std::string SymClientTest::username="username";
 const std::string SymClientTest::pwd="123abc!!";
@@ -140,6 +167,8 @@ const std::string SymClientTest::nickname="nickname";
 const std::string SymClientTest::path="./dir1/dir2";
 const std::string SymClientTest::filename="file1";
 const std::string SymClientTest::destPath="./dir1/dir2";
+const std::string SymClientTest::anotherUsername="anotherUsername";
+uri SymClientTest::newPreferences(uriPolicy::activeAlways);
 
 TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
     client.setLoggedUser(userReceived);
@@ -274,4 +303,108 @@ TEST_F(SymClientTest, createNewDirOpensDocAndPutInActiveAndRemovesFromUnaswered)
     EXPECT_CALL(userReceived, newDirectory(filename, path, dirSentByServer->getId())).WillOnce(::testing::Return(dirSentByServer));
     client.createNewDir(dirSentByServer);
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, remoteInsertCallsremoteInsertOnRightDoc){
+    setStageForOpenedDoc();
+    symbol arrived('a', 1, 1, {});
+    //resouceId of the document to insert the symbol into is contained in the symbolMessage received by the client
+    EXPECT_CALL(docSentByServer, remoteInsert(arrived));
+    client.remoteInsert(docSentByServer.getId(), arrived);
+}
+
+TEST_F(SymClientTest, remoteRemoveCallsremoteRemoveOnRightDoc){
+    setStageForOpenedDoc();
+    symbol arrived('a', 1, 1, {});
+    //resouceId of the document to insert the symbol into is contained in the symbolMessage received by the client
+    EXPECT_CALL(docSentByServer, remoteRemove(arrived));
+    client.remoteRemove(docSentByServer.getId(), arrived);
+}
+
+TEST_F(SymClientTest, editPrivilegeConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.editPrivilege(anotherUsername, path, filename, privilege::modify);
+    messageHasCorrectOwner(mex);
+    privMessage expected(msgType::changePrivileges, {username, pwd}, msgOutcome::success, path+"/"+filename, anotherUsername, privilege::modify);
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, editPrivilegeCallsEditPrivilegeOnUser){
+    setStageForLoggedUser();
+    SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
+    EXPECT_CALL(logUser, editPrivilege(anotherUsername, path, filename, privilege::modify));
+    client.editPrivilege(anotherUsername, path, filename, privilege::modify, true);
+}
+
+TEST_F(SymClientTest, shareResourceConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.shareResource(path, filename, newPreferences);
+    messageHasCorrectOwner(mex);
+    uriMessage expected(msgType::shareRes, {username, pwd}, msgOutcome::success, newPreferences);
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, shareResourceCallsShareResourceOnUser){
+    setStageForLoggedUser();
+    SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
+    EXPECT_CALL(logUser, shareResource(path, filename, newPreferences));
+    client.shareResource(path, filename, newPreferences, true);
+}
+
+TEST_F(SymClientTest, renameResourceConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.renameResource(path, filename, "newName");
+    messageHasCorrectOwner(mex);
+    askResMessage expected(msgType::changeResName, {username, pwd}, path, filename, "newName");
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, renameResourceCallsRenameResourceOnUser){
+    setStageForLoggedUser();
+    SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
+    EXPECT_CALL(logUser, renameResource(path, filename, "newName"));
+    client.shareResource(path, filename, newPreferences, true);
+}
+
+TEST_F(SymClientTest, removeResourceConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    auto mex=client.removeResource(path, filename);
+    messageHasCorrectOwner(mex);
+    askResMessage expected(msgType::removeRes, {username, pwd}, path, filename);
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, removeResourceCallsRemoveResourceOnUser){
+    setStageForLoggedUser();
+    SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
+    EXPECT_CALL(logUser, removeResource(path, filename));
+    client.removeResource(path, filename, true);
+}
+
+TEST_F(SymClientTest, closeSourceConstructsGoodMessageAndNotInsertInUnanswered){
+    setStageForOpenedDoc();
+    EXPECT_CALL(docSentByServer, close(userReceived));
+    auto mex=client.closeSource(docSentByServer.getId());
+    messageHasCorrectOwner(mex);
+    updateDocMessage expected(msgType::closeRes, {username, pwd}, docSentByServer.getId());
+    EXPECT_EQ(expected, mex);
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+}
+
+TEST_F(SymClientTest, showDirCallsShowDirOnUserRecursive){
+    setStageForLoggedUser();
+    SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
+    EXPECT_CALL(logUser, showDir(true));
+    client.showDir(true);
+}
+
+TEST_F(SymClientTest, showDirCallsShowDirOnUserNotRecursive){
+    setStageForLoggedUser();
+    SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
+    EXPECT_CALL(logUser, showDir(false));
+    client.showDir(false);
 }

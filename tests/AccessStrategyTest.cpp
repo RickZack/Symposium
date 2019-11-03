@@ -34,8 +34,9 @@
 using namespace Symposium;
 struct RMOAccessTest : testing::Test {
     AccessStrategy *s;
-    user u;
-    RMOAccessTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr) {
+    user aUser;
+    static const std::string u;
+    RMOAccessTest(): aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr) {
         s=new RMOAccess();
     };
 
@@ -43,6 +44,7 @@ struct RMOAccessTest : testing::Test {
         delete s;
     }
 };
+const std::string RMOAccessTest::u="username";
 
 
 TEST_F(RMOAccessTest, StartsWithoutPriviledges){
@@ -91,8 +93,9 @@ TEST_F(RMOAccessTest, AskingForHigherPrivilegeReturnFalse){
 
 struct TrivialAccessTest : testing::Test {
     AccessStrategy *s;
-    user u;
-    TrivialAccessTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr) {
+    user aUser;
+    static const std::string u;
+    TrivialAccessTest(): aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr) {
         s=new TrivialAccess();
     };
 
@@ -100,6 +103,7 @@ struct TrivialAccessTest : testing::Test {
         delete s;
     }
 };
+const std::string TrivialAccessTest::u="username";
 
 TEST_F(TrivialAccessTest, DoesNotSetPrivilege){
     std::vector<privilege> priv({privilege::readOnly, privilege::modify, privilege::owner});

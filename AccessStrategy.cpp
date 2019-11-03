@@ -32,9 +32,8 @@
 
 using namespace Symposium;
 
-bool RMOAccess::validateAction(user &targetUser, privilege requested) {
-    std::string name=targetUser.getUsername();
-    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(name);
+bool RMOAccess::validateAction(const std::string &targetUser, privilege requested) {
+    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
     privilege attuale;
     if ( got == permission.end() )
     {
@@ -45,37 +44,35 @@ bool RMOAccess::validateAction(user &targetUser, privilege requested) {
     return attuale >= requested;
 }
 
-privilege RMOAccess::setPrivilege(const user &targetUser, privilege toGrant) {
-    std::string name=targetUser.getUsername();
-    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(name);
+privilege RMOAccess::setPrivilege(const std::string &targetUser, privilege toGrant) {
+    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
     if ( got == permission.end() )
     {
-        permission.insert (std::make_pair(name, toGrant));
+        permission.insert (std::make_pair(targetUser, toGrant));
         return privilege::none;
     }
     privilege vecchio=got->second;
-    permission.erase (name);
-    permission.insert(std::make_pair(name, toGrant));
+    permission.erase (targetUser);
+    permission.insert(std::make_pair(targetUser, toGrant));
     return vecchio;
 }
 
-privilege RMOAccess::getPrivilege(const user& targetUser)
+privilege RMOAccess::getPrivilege(const std::string &targetUser)
 {
-    std::string name=targetUser.getUsername();
-    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(name);
+    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
     if ( got == permission.end() )
             return privilege::none;
     return got->second;
 }
 
-bool TrivialAccess::validateAction(user &targetUser, privilege requested) {
+bool TrivialAccess::validateAction(const std::string &targetUser, privilege requested) {
     return true;
 }
 
-privilege TrivialAccess::setPrivilege(const user &targetUser, privilege toGrant) {
+privilege TrivialAccess::setPrivilege(const std::string &targetUser, privilege toGrant) {
     return privilege::none;
 }
 
-privilege TrivialAccess::getPrivilege(const user &targetUser) {
+privilege TrivialAccess::getPrivilege(const std::string &targetUser) {
     return privilege::none;
 }

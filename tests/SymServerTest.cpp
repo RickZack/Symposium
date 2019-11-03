@@ -54,7 +54,7 @@ struct SymServerUserMock: public user{
     MOCK_CONST_METHOD3(openFile, document&(const std::string &path,  const std::string &fileName, privilege accessMode));
     MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome));
     MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome, int id));
-    MOCK_CONST_METHOD4(editPrivilege, privilege(const user &otherUser, const std::string &resPath, const std::string &resName,
+    MOCK_CONST_METHOD4(editPrivilege, privilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
     MOCK_CONST_METHOD3(shareResource, uri(const std::string &resPath, const std::string &resName, uri& newPrefs));
     MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string& resPath, const std::string& resName, const std::string& newName));
@@ -294,6 +294,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     static const std::string anotherUserPwd;
     ::testing::NiceMock<SymServerDocMock> doc;
     std::shared_ptr<::testing::NiceMock<SymServerFileMock>> fileToReturn;
+    SymServerUserMock* justInserted;
 
     SymServerTestFilesystemFunctionality():
             loggedUser(loggedUserUsername, loggedUserPwd, "m@ario", "./userIcons/test.jpg", 0, nullptr),
@@ -317,6 +318,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
         auto ret=server.openNewSource(target.getUsername(), filePath, fileName, uri::getDefaultPrivilege(), "./");
         ASSERT_TRUE(server.userIsWorkingOnDocument(target, doc, privilege::owner));
+        justInserted=&target;
     }
     void setAnotherUserActive(){
         inserted= &dynamic_cast<const SymServerUserMock&>(server.addUser(anotherUser));
@@ -498,9 +500,9 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUs
     setAnotherUserActive();
     makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
 
-    EXPECT_CALL(loggedUser, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
-    EXPECT_CALL(loggedUser, editPrivilege(anotherUser, filePath, fileName, privilege::readOnly));
-    server.editPrivilege(loggedUser, anotherUser, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly);
+    EXPECT_CALL(*justInserted, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
+    EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
+    server.editPrivilege(loggedUserUsername, anotherUserUsername, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCalledByUnloggedUser){
@@ -509,7 +511,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCalledByUnloggedUser){
     makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
     server.hardWrongLogout(loggedUser);
 
-    EXPECT_THROW(server.editPrivilege(loggedUser, anotherUser, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly), SymServerException);
+    EXPECT_THROW(server.editPrivilege(loggedUserUsername, anotherUserUsername, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeOnUserWorkingOnDocument){
@@ -518,8 +520,8 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeOnUserWorkingOnDocumen
     makeAnotherUserToHavePrivilege(defaultPrivilege);
     //call expected because we need to retrieve the document id of the document named fileName (in the loggedUser space)
     //to check that anotherUser is not working on the same document
-    EXPECT_CALL(loggedUser, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
-    EXPECT_THROW(server.editPrivilege(loggedUser, anotherUser, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly), SymServerException);
+    EXPECT_CALL(*justInserted, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
+    EXPECT_THROW(server.editPrivilege(loggedUserUsername, anotherUserUsername, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, shareResourceCallsShareResourceOnUser){

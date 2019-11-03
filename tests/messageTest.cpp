@@ -341,10 +341,10 @@ public:
     MOCK_METHOD2(addActiveUser, void(int, user &));
     MOCK_METHOD2(removeActiveUser, void(int, user&));
 
-    MOCK_METHOD5(editPrivilege, privilege(const user&, const std::string&, const std::string&, privilege, bool));
+    MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, privilege, bool));
     MOCK_METHOD2(remoteInsert, void(int, const symbol&));
     MOCK_METHOD2(remoteRemove, void(int, const symbol&));
-    MOCK_METHOD3(shareResource, uri(const std::string&, const std::string&, uri&));
+    MOCK_METHOD4(shareResource, uri(const std::string&, const std::string&, uri&, bool msgRcv));
     MOCK_METHOD2(editUser, const user(user&, bool));
 };
 
@@ -466,7 +466,7 @@ TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilege){
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     //targetUser from fc->getTargetUser() (from std::string to user)
     //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, editPrivilege(u, "", "", fc->getNewPrivilege(), true)).WillOnce(::testing::Return(fc->getNewPrivilege()));
+    EXPECT_CALL(client, editPrivilege(u.getUsername(), "", "", fc->getNewPrivilege(), true)).WillOnce(::testing::Return(fc->getNewPrivilege()));
     //when a serverMessage is received, a related message from the client is searched and completeAction() called
     fromClient->completeAction(client);
 }
@@ -477,7 +477,7 @@ TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilegeOnOtherClient){
 
     //the message from client is forwarded to the other client, but the password is cleaned
     fromServer=new privMessage(msgType::changePrivileges,{"user", ""}, msgOutcome::success, "", "", privilege::modify);
-    EXPECT_CALL(client, editPrivilege(u, "", "", fc->getNewPrivilege(), true)).WillOnce(::testing::Return(fc->getNewPrivilege()));
+    EXPECT_CALL(client, editPrivilege(u.getUsername(), "", "", fc->getNewPrivilege(), true)).WillOnce(::testing::Return(fc->getNewPrivilege()));
     fromServer->invokeMethod(client);
 }
 
@@ -551,7 +551,7 @@ TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemove){
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     //targetUser from fc->getTargetUser() (from std::string to user)
     //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, shareResource("", "", const_cast<uri&>(fc->getSharingPrefs()))).WillOnce(::testing::Return(fc->getSharingPrefs()));
+    EXPECT_CALL(client, shareResource("", "", const_cast<uri&>(fc->getSharingPrefs()), true)).WillOnce(::testing::Return(fc->getSharingPrefs()));
     fromClient->completeAction(client);
 }
 
@@ -564,7 +564,7 @@ TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemoveOnOtherClient){
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     //targetUser from fc->getTargetUser() (from std::string to user)
     //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, shareResource("", "", const_cast<uri&>(fc->getSharingPrefs()))).WillOnce(::testing::Return(fc->getSharingPrefs()));
+    EXPECT_CALL(client, shareResource("", "", const_cast<uri&>(fc->getSharingPrefs()), false)).WillOnce(::testing::Return(fc->getSharingPrefs()));
     fromServer->invokeMethod(client);
 }
 

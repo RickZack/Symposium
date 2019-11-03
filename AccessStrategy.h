@@ -50,7 +50,7 @@ namespace Symposium {
          * @param requested the permission requested by the action
          * @return true if the user is granted the privilege @ref requested
          */
-        virtual bool validateAction(user &targetUser, privilege requested) = 0;
+        virtual bool validateAction(const std::string &targetUser, privilege requested) = 0;
 
         /**
          * @brief set the privilege of an user
@@ -58,9 +58,9 @@ namespace Symposium {
          * @param toGrant the privilege to grant to @ref targetUser
          * @return the privilege previously owned by @ref targetUser, none if no privilege previously owned
          */
-        virtual privilege setPrivilege(const user &targetUser, privilege toGrant) = 0;
+        virtual privilege setPrivilege(const std::string &targetUser, privilege toGrant) = 0;
 
-        virtual privilege getPrivilege(const user &targetUser) = 0;
+        virtual privilege getPrivilege(const std::string &targetUser) = 0;
     };
 
 /**
@@ -69,11 +69,11 @@ namespace Symposium {
     class RMOAccess : public AccessStrategy {
         std::unordered_map<std::string, privilege> permission; /**< username and related privilege for the resource */
     public:
-        bool validateAction(user &targetUser, privilege requested) override;
+        bool validateAction(const std::string &targetUser, privilege requested) override;
 
-        privilege setPrivilege(const user &targetUser, privilege toGrant) override;
+        privilege setPrivilege(const std::string &targetUser, privilege toGrant) override;
 
-        privilege getPrivilege(const user &targetUser) override;
+        privilege getPrivilege(const std::string &targetUser) override;
     };
 
 
@@ -82,11 +82,11 @@ namespace Symposium {
  */
     class TrivialAccess : public AccessStrategy {
     public:
-        bool validateAction(user &targetUser, privilege requested) override;
+        bool validateAction(const std::string &targetUser, privilege requested) override;
 
-        privilege setPrivilege(const user &targetUser, privilege toGrant) override;
+        privilege setPrivilege(const std::string &targetUser, privilege toGrant) override;
 
-        privilege getPrivilege(const user &targetUser) override;
+        privilege getPrivilege(const std::string &targetUser) override;
     };
 }
 #endif //SYMPOSIUM_ACCESSSTRATEGY_H

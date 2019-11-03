@@ -29,6 +29,7 @@
  */
 #include "filesystem.h"
 #include "symbol.h"
+#include "user.h"
 using namespace Symposium;
 
 int filesystem::idCounter=0;
@@ -45,7 +46,7 @@ const std::string &filesystem::getName() const {
     return name;
 }
 
-privilege filesystem::getUserPrivilege(const user &targetUser) const {
+privilege filesystem::getUserPrivilege(const std::string &targetUser) const {
     throw filesystemException("Object"+name+"is not shareable");
 }
 
@@ -53,7 +54,7 @@ const uri &filesystem::getSharingPolicy() const {
     return sharingPolicy;
 }
 
-privilege filesystem::setUserPrivilege(const user &targetUser, privilege newPrivilege) {
+privilege filesystem::setUserPrivilege(const std::string &targetUser, privilege newPrivilege) {
     throw filesystemException("Object"+name+"is not shareable");
 }
 
@@ -62,7 +63,7 @@ std::string filesystem::setName(const std::string &newName) {
     return name;
 }
 
-uri filesystem::setSharingPolicy(const user &actionUser, uri &newSharingPrefs) {
+uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) {
     throw filesystemException("Object"+name+"is not shareable");
 }
 
@@ -74,19 +75,19 @@ resourceType file::resType() const {
     return resourceType::file;
 }
 
-privilege file::getUserPrivilege(const user &targetUser) const {
+privilege file::getUserPrivilege(const std::string &targetUser) const {
 
     privilege userPriv= strategy->getPrivilege(targetUser);
     return userPriv;
 }
 
-privilege file::setUserPrivilege(const user &targetUser, privilege newPrivilege) {
+privilege file::setUserPrivilege(const std::string &targetUser, privilege newPrivilege) {
     //privilege oldUserPriv= strategy->getPrivilege(targetUser);
     strategy->setPrivilege(targetUser,newPrivilege);
     return newPrivilege;
 }
 
-uri file::setSharingPolicy(const user &actionUser, uri &newSharingPrefs) {
+uri file::setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) {
     privilege userPriv=strategy->getPrivilege(actionUser);
     if(userPriv==privilege::owner) {
         file::sharingPolicy = newSharingPrefs;
@@ -95,7 +96,7 @@ uri file::setSharingPolicy(const user &actionUser, uri &newSharingPrefs) {
 }
 
 document & file::access(const user &targetUser, privilege accessMode) {
-    privilege priv=this->getUserPrivilege(targetUser);
+    privilege priv=this->getUserPrivilege(targetUser.getUsername());
     if(priv==privilege::none)
         throw filesystemException("You no longer have the possibility to access the file in any mode");
     if(priv>accessMode)
@@ -115,7 +116,7 @@ void file::send() const {
     //TODO: implement
 }
 
-std::string file::print(const user &targetUser, bool recursive, int indent) const {
+std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
 
     std::ostringstream priv;
     if(getUserPrivilege(targetUser)==privilege::none)
@@ -206,7 +207,7 @@ void directory::send() const {
     //TODO: implement
 }
 
-std::string directory::print(const user &targetUser, bool recursive, int indent) const {
+std::string directory::print(const std::string &targetUser, bool recursive, int indent) const {
     //TODO: implement
     return "";
 }
@@ -236,7 +237,7 @@ void Symposium::symlink::send() const {
     //TODO: implement
 }
 
-std::string Symposium::symlink::print(const user &targetUser, bool recursive, int indent) const {
+std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
     //TODO: implement
     return "";
 }

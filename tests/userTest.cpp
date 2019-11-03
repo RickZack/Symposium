@@ -54,8 +54,8 @@ struct dirMock: public directory{
 
 struct fileMock: public file{
     fileMock(): file("dummy", "./somedir"){};
-    MOCK_METHOD2(setUserPrivilege, privilege(const user&, privilege));
-    MOCK_METHOD2(setSharingPolicy, uri(const user&, uri& newSharingPrefs));
+    MOCK_METHOD2(setUserPrivilege, privilege(const std::string&, privilege));
+    MOCK_METHOD2(setSharingPolicy, uri(const std::string&, uri& newSharingPrefs));
 };
 
 struct dummyFunctional{
@@ -122,8 +122,8 @@ TEST_F(UserTest, callEditPrivilege){
     //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
     EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
-    EXPECT_CALL(*dummyFile, setUserPrivilege(otherUser, privilege::owner));
-    u->editPrivilege(otherUser, ".", "dummyFile", privilege::owner);
+    EXPECT_CALL(*dummyFile, setUserPrivilege(otherUser.getUsername(), privilege::owner));
+    u->editPrivilege(otherUser.getUsername(), ".", "dummyFile", privilege::owner);
 }
 
 TEST_F(UserTest, callChangePrivilege){
@@ -132,7 +132,7 @@ TEST_F(UserTest, callChangePrivilege){
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
     //user otherUser("otherUser", "", "", "", 0, std::shared_ptr<directory>());
     EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
-    EXPECT_CALL(*dummyFile, setUserPrivilege(*u, privilege::owner));
+    EXPECT_CALL(*dummyFile, setUserPrivilege(u->getUsername(), privilege::owner));
     u->changePrivilege(".", "dummyFile", privilege::owner);
 }
 
@@ -160,7 +160,7 @@ TEST_F(UserTest, callShareResource){
     //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
     EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
-    EXPECT_CALL(*dummyFile, setSharingPolicy(*u, ur));
+    EXPECT_CALL(*dummyFile, setSharingPolicy(u->getUsername(), ur));
     u->shareResource(".", "dummyFile", ur);
 }
 

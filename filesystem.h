@@ -95,7 +95,7 @@ namespace Symposium {
          * each subclass must specify whether it is allowed to share objects of its type among users, overriding @e setUserPrivilege
          * and this method.
          */
-        virtual privilege getUserPrivilege(const user &targetUser) const;
+        virtual privilege getUserPrivilege(const std::string &targetUser) const;
 
         const uri &getSharingPolicy() const;
 
@@ -114,7 +114,7 @@ namespace Symposium {
          * each subclass must specify whether it is allowed to share objects of its type among users, overriding @e setUserPrivilege
          * and this method.
          */
-        virtual privilege setUserPrivilege(const user &targetUser, privilege newPrivilege);
+        virtual privilege setUserPrivilege(const std::string &targetUser, privilege newPrivilege);
 
 
         /**
@@ -145,14 +145,14 @@ namespace Symposium {
          * Calling @e setSharingPolicy on a filesystem object is considered an error, so an exception is raised, since
          * each subclass must specify whether it is allowed to share objects of its type among users, overriding this method.
          */
-        virtual uri setSharingPolicy(const user &actionUser, uri &newSharingPrefs);
+        virtual uri setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs);
 
         virtual void store(const std::string &storePath) const = 0;
 
         virtual void load(const std::string &loadPath) = 0;
 
         virtual void send() const = 0; //not clear how to set this
-        virtual std::string print(const user &targetUser, bool recursive = false, int indent = 0) const = 0;
+        virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const = 0;
     };
 
 /**
@@ -171,7 +171,7 @@ namespace Symposium {
          * @param targetUser the user whose privilege is to be retrieved
          * @return the privilege of @e targetUser
          */
-        privilege getUserPrivilege(const user &targetUser) const override;
+        privilege getUserPrivilege(const std::string &targetUser) const override;
 
         /**
          * @brief set the privilege of @e targetUser to @e newPrivilege for the current file
@@ -183,7 +183,7 @@ namespace Symposium {
          * otherwise revert it.
          * On server side validate the action, perform the action and send a @ref serverMessage with the outcome.
          */
-        virtual privilege setUserPrivilege(const user &targetUser, privilege newPrivilege) override;
+        virtual privilege setUserPrivilege(const std::string &targetUser, privilege newPrivilege) override;
 
         /**
          * @brief set new @e sharingPolicy for a file
@@ -193,7 +193,7 @@ namespace Symposium {
          *
          * Verifies that @e actionUser is enabled to make such an action and replace the old @e sharingPolicy
          */
-        virtual uri setSharingPolicy(const user &actionUser, uri &newSharingPrefs) override;
+        virtual uri setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) override;
 
         resourceType resType() const override;
 
@@ -226,7 +226,7 @@ namespace Symposium {
          * For a file, @e print(targetUser) shows the name of the file and the privilege
          * that @e targetUser has on it
          */
-        std::string print(const user &targetUser, bool recursive = false, int indent = 0) const override;
+        std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
     };
 
 
@@ -270,7 +270,7 @@ namespace Symposium {
          * For a symlink, @e print(targetUser) shows the name of the symlink and the
          * privileges granted to @e targetUser for the file pointed by the symlink
          */
-        std::string print(const user &targetUser, bool recursive = false, int indent = 0) const override;
+        virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
     };
 
 
@@ -341,7 +341,7 @@ namespace Symposium {
          * @param indent an optional identation level to distinguish nested objects
          * @return a string containing the representation
          */
-        virtual std::string print(const user &targetUser, bool recursive = true, int indent = 0) const override;
+        virtual std::string print(const std::string &targetUser, bool recursive = true, int indent = 0) const override;
 
         directory(const std::string &name);
     };

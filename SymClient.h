@@ -38,6 +38,7 @@
 #include "user.h"
 #include "document.h"
 #include "message.h"
+#include <type_traits>
 
 
 namespace Symposium {
@@ -75,7 +76,13 @@ namespace Symposium {
         std::forward_list<document *> activeDoc;                                  /**< list of files the active documents are related to */
         std::map<std::pair<int, int>, std::pair<user, MyColor>> userColors;       /**< map {siteId, documentId}->{user, color}  */
 
-        std::queue<message> unanswered;                                           /**< messages sent by client that have not been received an answer */
+        std::queue<clientMessage> unanswered;                                     /**< messages sent by client that have not been received an answer */
+
+        /*
+         * Use this function to access to loggedUser, because it allows the tests to work with a mock class
+         * of user and verify expectations about calls on loggedUser
+         */
+        virtual user& getLoggedUser();
     public:
         //Some methods are virtual in order to use the mocks in tests
         SymClient();
@@ -205,35 +212,83 @@ namespace Symposium {
         virtual void remoteRemove(int resourceId, const symbol &rmSym);
 
         /**
+         * @brief constructs a @ref privMessage to send to the server to ask to change privileges for a resource
+         * @param targetUser the user whose privilege has to be modified
+         * @param resPath the absolute path of the resource
+         * @param resName the name of the resource
+         * @param newPrivilege the new privilege to be granted to @e targetUser
+         * @return a properly constructed @ref privMessage to send to the server
+         *
+         * When a user client side want to edit the privilege of another user on a resource, it sends a
+         * @ref PrivMessage. The server will answer with a @ref serveMessage indicating if the action has been done successfully.
+         * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
+         * privilege SymClient::editPrivilege that will actually perform the privilege change.
+         */
+        virtual privMessage editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
+                                          privilege newPrivilege);
+
+        /**
          * @brief edit the privilege of @e targetUser user for the resource @e resName in @e resPath to @e newPrivilege
          * @param targetUser the user whose privilege has to be modified
          * @param resPath the absolute path of the resource
          * @param resName the name of the resource
          * @param newPrivilege the new privilege to be granted to @e targetUser
-         * @param msgRcv indicates whether this method is called after having received a @ref privMessage
+         * @param msgRcv indicate whether the method is called after having sent a @ref privMessage
          * @return the old privilege of @e targetUser had on the resource
          *
-         * When a user client side want to edit the privilege of another user on a resource, it sends a
-         * @ref PrivMessage. The server will answer with a @ref serveMessage indicating if the action has been done successfully.
-         * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
-         * again this function to actually perform the changing if the outcome is positive.
+         * When a server answers to a privMessage, it sends a @ref serverMessage indicating if the action has been done successfully.
+         * When a client receives this message, it searches for a related message in @e unanswered, and calls @e completeAction
+         * on it passing itself. The method @e completeAction of @ref privMessage calls this function with msgRcv=true, while
+         * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
+         * of this method and the one that returns a privMessage.
          */
-        virtual privilege editPrivilege(const user &targetUser, const std::string &resPath, const std::string &resName,
+        virtual privilege editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                         privilege newPrivilege, bool msgRcv);
+
+        /**
+         * @brief constructs a @ref uriMessage to send to the server to ask to change sharing preferences for a resource
+         * @param resPath the absolute path of the resource
+         * @param resName the name of the resource
+         * @param newPrefs new sharing preferences to set the resource to
+         * @return a properly constructed @ref uriMessage to send to the server
+         *
+         * When a user client side want to edit the privilege of another user on a resource, it sends a
+         * @ref uriMessage. The server will answer with a @ref serveMessage indicating if the action has been done successfully.
+         * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
+         * uri SymClient::shareResource that will actually perform the sharing preference change.
+         */
+        virtual uriMessage shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs);
 
         /**
          * @brief set new sharing preferences for a resource
          * @param resPath the absolute path of the resource
          * @param resName the name of the resource
          * @param newPrefs new sharing preferences for the resource
+         * @param msgRcv indicate whether the method is called after having sent a @ref uriMessage
          * @return the old @e sharingPolicy
          *
-         * When a user client side wants to set a new sharing policy for a resource, it sends a @ref uriMessage.
+         * When a server answers to a uriMessage, it sends a @ref serverMessage indicating if the action has been done successfully.
+         * When a client receives this message, it searches for a related message in @e unanswered, and calls @e completeAction
+         * on it passing itself. The method @e completeAction of @ref uriMessage calls this function with msgRcv=true, while
+         * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
+         * of this method and the one that returns a uriMessage.
+         */
+        virtual uri shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs, bool msgRcv);
+
+        /**
+         * @brief constructs a @ref uriMessage to send to the server to ask to change the name of a resource
+         * @param resPath the relative path to the user's @e home directory where to create the file
+         * @param resName the resource's name
+         * @param newName the new resource's name
+         * @return a properly constructed @ref askResMessage to send to the server
+         *
+         * When a user client side wants to set a new name for a resource, it sends a @ref askResMessage.
          * The server will answer with a @ref serveMessage indicating if the action has been done successfully.
          * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
-         * again this function to actually perform the changing if the outcome is positive.
+         * std::shared_ptr<filesystem> SymClient::renameResource that will actually perform the renaming.
          */
-        virtual uri shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs);
+        virtual askResMessage
+        renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
 
         /**
          * @brief removes a resource from @e remover 's @e home directory
@@ -243,13 +298,28 @@ namespace Symposium {
          * @param msgRcv indicates whether this method is called after having received a @ref serverMessage
          * @return the resource just renamed
          *
-         * When a user client side wants to set a new name for a resource, it sends a @ref askResMessage.
-         * The server will answer with a @ref serveMessage indicating if the action has been done successfully.
-         * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
-         * again this function to actually perform the changing if the outcome is positive.
+         * When a server answers to a askResMessage, it sends a @ref serverMessage indicating if the action has been done successfully.
+         * When a client receives this message, it searches for a related message in @e unanswered, and calls @e completeAction
+         * on it passing itself. The method @e completeAction of @ref askResMessage calls this function with msgRcv=true, while
+         * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
+         * of this method and the one that returns a askResMessage.
          */
         virtual std::shared_ptr<filesystem>
         renameResource(const std::string &resPath, const std::string &resName, const std::string &newName, bool msgRcv);
+
+        /**
+         * @brief constructs a @ref askResMessage to send to the server to ask to remove a resource
+         * @param resPath the relative path to the user's @e home directory where to create the file
+         * @param resName the resource's name
+         * @return a properly constructed @ref uriMessage to send to the server
+         *
+         * When a user client side wants remove a resource, it sends a @ref askResMessage.
+         * The server will answer with a @ref serveMessage indicating if the action has been done successfully.
+         * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
+         * std::shared_ptr<filesystem> SymClient::removeResource that will actually perform the removing.
+         */
+        virtual askResMessage
+        removeResource(const std::string &resPath, const std::string &resName);
 
         /**
          * @brief removes a resource from @e remover 's @e home directory
@@ -258,15 +328,16 @@ namespace Symposium {
          * @param msgRcv indicates whether this method is called after having received a @ref serverMessage
          * @return the resource just removed
          *
-         * When a user client side wants remove a resource, it sends a @ref askResMessage.
-         * The server will answer with a @ref serveMessage indicating if the action has been done successfully.
-         * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
-         * again this function to actually perform the changing if the outcome is positive.
+         * When a server answers to a askResMessage, it sends a @ref serverMessage indicating if the action has been done successfully.
+         * When a client receives this message, it searches for a related message in @e unanswered, and calls @e completeAction
+         * on it passing itself. The method @e completeAction of @ref askResMessage calls this function with msgRcv=true, while
+         * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
+         * of this method and the one that returns a askResMessage.
          */
         virtual std::shared_ptr<filesystem>
         removeResource(const std::string &resPath, const std::string &resName, bool msgRcv);
 
-        std::string printDir();
+        std::string showDir(bool recursive=false) const;
 
 
         /**
@@ -275,16 +346,16 @@ namespace Symposium {
          * @param condition a filter condition to apply to each document to decide whether to list it or not
          * @return the string containing the list of files that respect @e condition
          */
-        template<typename C>
-        std::string show(C condition);
+        template<typename C, typename=std::enable_if<std::is_invocable_r<bool,C>::value>>
+        std::string show(C condition){}
 
         /**
          * @brief visualize which user made which change in the document, using @e userColors
          * @tparam C a function or functional object
          * @param condition a filter condition to apply to document's text to decide what to show (e.g only changes made by a specific user)
          */
-        template<typename C>
-        void showChanges(C condition);
+        template<typename C, typename=std::enable_if<std::is_invocable_r<bool,C>::value>>
+        void showChanges(C condition){}
 
         /**
         * @brief close a @ref document for a user
@@ -293,7 +364,7 @@ namespace Symposium {
         * When a user client side wants to remove a resource, it sends a @ref updateDocMessage and removes the document with
         * id @e resourceId from @e activeDoc and @e activeFile.
         */
-        void closeSource(int resourceId);
+        updateDocMessage closeSource(int resourceId);
 
         /**
          * @brief changes user's data

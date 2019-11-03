@@ -95,7 +95,7 @@ void user::setHome(std::shared_ptr<directory> home) {
 
 std::string user::showDir(bool recursive) const {
 
-    return home->print(*this, recursive);
+    return home->print(username, recursive);
 
 }
 
@@ -153,7 +153,7 @@ document & user::openFile(const std::string &path, const std::string &fileName, 
     return newD;
 }
 
-privilege user::editPrivilege(const user &otherUser, const std::string &resPath, const std::string &resName,
+privilege user::editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
                               privilege newPrivilege) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     if(newF==nullptr)
@@ -168,7 +168,7 @@ privilege user::changePrivilege(const std::string &resPath, const std::string &r
     if(newF==nullptr)
         throw userException("An error occurred while trying to change privilege");
     privilege newP;
-    newP=newF->setUserPrivilege(*this, newPrivilege);
+    newP=newF->setUserPrivilege(username, newPrivilege);
     return newP;
 }
 
@@ -177,7 +177,7 @@ uri user::shareResource(const std::string &resPath, const std::string &resName, 
     if(newF==nullptr)
         throw userException("An error occurred while trying to share resource");
     uri u;
-    u=newF->setSharingPolicy(*this, newPrefs);
+    u=newF->setSharingPolicy(username, newPrefs);
     return u;
 }
 

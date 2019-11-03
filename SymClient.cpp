@@ -33,7 +33,7 @@
 
 using namespace Symposium;
 
-SymClient::SymClient() :loggedUser("", "", "", "", 0, std::shared_ptr<directory>()){
+SymClient::SymClient() :loggedUser("SomeUsername", "P@assW0rd!!", "noempty", "", 0, nullptr){
     //TODO: implement
 }
 
@@ -106,15 +106,31 @@ void SymClient::remoteRemove(int resourceId, const symbol &rmSym) {
     //TODO:implement
 }
 
-privilege SymClient::editPrivilege(const user &targetUser, const std::string &resPath, const std::string &resName,
+privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
+                                     privilege newPrivilege) {
+    return privMessage(msgType::openRes, {"",""}, msgOutcome::success, "", "", privilege::none);
+}
+
+privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                    privilege newPrivilege, bool msgRcv) {
     //TODO:implement
     return privilege::none;
 }
 
-uri SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
+uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
+    //TODO:implement
+    return uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, uri());
+}
+
+uri SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs, bool msgRcv) {
     //TODO:implement
     return uri();
+}
+
+askResMessage
+SymClient::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) {
+    //TODO:implement
+    return askResMessage(msgType::openRes, {"", ""}, "", "");
 }
 
 std::shared_ptr<filesystem>
@@ -124,29 +140,24 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
     return std::shared_ptr<filesystem>();
 }
 
+askResMessage SymClient::removeResource(const std::string &resPath, const std::string &resName) {
+    //TODO:implement
+    return askResMessage(msgType::openRes, {"", ""}, "", "");
+}
+
 std::shared_ptr<filesystem>
 SymClient::removeResource(const std::string &resPath, const std::string &resName, bool msgRcv) {
     //TODO:implement
     return std::shared_ptr<filesystem>();
 }
 
-std::string SymClient::printDir() {
+std::string SymClient::showDir(bool recursive) const {
     return "";
 }
 
-template<typename C>
-std::string SymClient::show(C condition) {
+updateDocMessage SymClient::closeSource(int resourceId) {
     //TODO:implement
-    return "";
-}
-
-template<typename C>
-void SymClient::showChanges(C condition) {
-    //TODO:implement
-}
-
-void SymClient::closeSource(int resourceId) {
-    //TODO:implement
+    return updateDocMessage(msgType::closeRes, {"",""}, 0);
 }
 
 const user SymClient::editUser(user &newUserData, bool msgRcv) {
@@ -178,6 +189,10 @@ void SymClient::addActiveUser(int resourceId, user &targetUser) {
 
 void SymClient::removeActiveUser(int resourceId, user &targetUser) {
     //TODO: to implement
+}
+
+user &SymClient::getLoggedUser() {
+    return loggedUser;
 }
 
 filterShared::filterShared(const user &currentUser): currentUser{currentUser} {

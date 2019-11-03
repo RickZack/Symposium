@@ -208,7 +208,7 @@
           * then calls @ref user::editPrivilege on @e actionUser
           * At the end send a @ref serverMessage with the action outcome
           */
-         virtual privilege editPrivilege(const user &actionUser, const user &targetUser, const std::string &resPath,
+         virtual privilege editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
                                          const std::string &resName, privilege newPrivilege);
 
          /**

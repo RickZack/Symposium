@@ -156,7 +156,7 @@ namespace Symposium {
          * This method calls @ref directory::getFile method on the @e home, retrieving the file, and calls
          * @ref file::setUserPrivilege passing @e otherUser as the one on which take action
          */
-        virtual privilege editPrivilege(const user &otherUser, const std::string &resPath, const std::string &resName,
+        virtual privilege editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
                                         privilege newPrivilege) const;
 
         /**
