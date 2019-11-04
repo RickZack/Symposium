@@ -28,6 +28,7 @@
  * Created on 17 ottobre 2019, 11:59
  */
 #include <gtest/gtest.h>
+#include <boost/serialization/unique_ptr.hpp>
 #include "../AccessStrategy.h"
 #include "../user.h"
 
@@ -115,4 +116,45 @@ TEST_F(TrivialAccessTest, ReturnAlwaysTrue){
     std::vector<privilege> priv({privilege::readOnly, privilege::modify, privilege::owner});
     for(auto p:priv)
         EXPECT_TRUE(s->validateAction(u, p));
+}
+
+
+struct AccessStrategySerializationTest: ::testing::Test{
+    //In the classes, AccessStrategy objects are handled through unique_ptr
+    std::unique_ptr<AccessStrategy> RMOtoStore, RMOtoLoad;
+    std::unique_ptr<AccessStrategy> TrivialToStore, TrivialToLoad;
+    std::stringstream stream;
+    std::string u1, u2;
+
+    AccessStrategySerializationTest(): u1("username1"), u2("username2"), stream(),
+                                        RMOtoStore(new RMOAccess()), RMOtoLoad(new RMOAccess()),
+                                        TrivialToStore(new TrivialAccess()), TrivialToLoad(new TrivialAccess()){
+    }
+
+    void storeAccessStrategy(std::unique_ptr<AccessStrategy> &as){
+        boost::archive::text_oarchive oa(stream);
+        oa<<as;
+    }
+    void loadAccessStrategy(std::unique_ptr<AccessStrategy> &as){
+        boost::archive::text_iarchive ia(stream);
+        ia>>as;
+    }
+};
+
+TEST_F(AccessStrategySerializationTest, RMOAccessSerialization){
+    RMOtoStore->setPrivilege(u1, privilege::owner);
+    RMOtoStore->setPrivilege(u2, privilege::readOnly);
+    ASSERT_NE(*dynamic_cast<RMOAccess*>(RMOtoStore.get()), *dynamic_cast<RMOAccess*>(RMOtoLoad.get()));
+    storeAccessStrategy(RMOtoStore);
+    loadAccessStrategy(RMOtoLoad);
+    EXPECT_EQ(*dynamic_cast<RMOAccess*>(RMOtoStore.get()), *dynamic_cast<RMOAccess*>(RMOtoLoad.get()));
+}
+
+TEST_F(AccessStrategySerializationTest, TrivialAccessSerialization){
+    TrivialToStore->setPrivilege(u1, privilege::owner);
+    TrivialToStore->setPrivilege(u2, privilege::readOnly);
+    storeAccessStrategy(RMOtoStore);
+    loadAccessStrategy(RMOtoLoad);
+    //if no compilation errors it works
+    SUCCEED();
 }

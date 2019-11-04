@@ -65,6 +65,14 @@ privilege RMOAccess::getPrivilege(const std::string &targetUser)
     return got->second;
 }
 
+bool RMOAccess::operator==(const RMOAccess &rhs) const {
+    return permission == rhs.permission;
+}
+
+bool RMOAccess::operator!=(const RMOAccess &rhs) const {
+    return !(rhs == *this);
+}
+
 bool TrivialAccess::validateAction(const std::string &targetUser, privilege requested) {
     return true;
 }
@@ -76,3 +84,5 @@ privilege TrivialAccess::setPrivilege(const std::string &targetUser, privilege t
 privilege TrivialAccess::getPrivilege(const std::string &targetUser) {
     return privilege::none;
 }
+//
+BOOST_CLASS_EXPORT(Symposium::RMOAccess)
