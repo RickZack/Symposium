@@ -68,6 +68,10 @@ struct MessageActionTest: ::testing::TestWithParam<msgType>{
     ~MessageActionTest(){
         delete m;
     }
+
+#define EXPECT_THROW_MESSAGE_CONSTRUCTION(statement, action, exceptionType) \
+        EXPECT_THROW(statement, exceptionType) \
+        <<"action: "<<action<<" should not be compatible with this message class";
 };
 
 //This is useful to print the enum names in case of test failing
@@ -103,8 +107,7 @@ std::ostream& operator<<(std::ostream& output, msgType m){
 
 TEST_P(MessageActionTest, askResMsgForbiddenActions){
     msgType action=GetParam();
-    EXPECT_THROW(m=new askResMessage(action, {"",""}, "", "", ""), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m=new askResMessage(action, {"",""}, "", "", ""), action, messageException);
 }
 msgType askResForbidden[]={
         msgType::registration, msgType::login, msgType::changeUserNick, msgType::changeUserPwd,
@@ -116,8 +119,7 @@ INSTANTIATE_TEST_CASE_P(askResThrowExceptionInConstruction, MessageActionTest, t
 
 TEST_P(MessageActionTest, signUpMsgForbiddenActions){
     msgType action=GetParam();
-    EXPECT_THROW(m=new signUpMessage(action, {"",""}, u), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m=new signUpMessage(action, {"",""}, u), action, messageException);
 }
 msgType signUpForbidden[]={
         msgType::login, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -129,8 +131,7 @@ INSTANTIATE_TEST_CASE_P(signUpThrowExceptionInConstruction, MessageActionTest, t
 
 TEST_P(MessageActionTest, updateDocMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new updateDocMessage(action, {"", ""}, 0), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new updateDocMessage(action, {"", ""}, 0), action, messageException);
 }
 msgType updateDocForbidden[]={
         msgType::registration, msgType::login, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -142,8 +143,7 @@ INSTANTIATE_TEST_CASE_P(updateDocThrowExceptionInConstruction, MessageActionTest
 
 TEST_P(MessageActionTest, loginMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new loginMessage(action, msgOutcome::success, u), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new loginMessage(action, msgOutcome::success, u), action, messageException);
 }
 msgType loginForbidden[]={
         msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -155,8 +155,7 @@ INSTANTIATE_TEST_CASE_P(loginThrowExceptionInConstruction, MessageActionTest, te
 
 TEST_P(MessageActionTest, mapMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new mapMessage(action, msgOutcome::success, std::map<int, user>()), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new mapMessage(action, msgOutcome::success, std::map<int, user>()), action, messageException);
 }
 msgType mapForbidden[]={
         msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -168,8 +167,7 @@ INSTANTIATE_TEST_CASE_P(mapThrowExceptionInConstruction, MessageActionTest, test
 
 TEST_P(MessageActionTest, sendResMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new sendResMessage(action, msgOutcome::success, f), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new sendResMessage(action, msgOutcome::success, f), action, messageException);
 }
 msgType sendResForbidden[]={
         msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd,
@@ -181,8 +179,7 @@ INSTANTIATE_TEST_CASE_P(sendResThrowExceptionInConstruction, MessageActionTest, 
 
 TEST_P(MessageActionTest, updateActiveMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new updateActiveMessage(action, msgOutcome::success, u, 0), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new updateActiveMessage(action, msgOutcome::success, u, 0), action, messageException);
 }
 msgType updateActiveForbidden[]={
         msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -194,8 +191,7 @@ INSTANTIATE_TEST_CASE_P(updateActiveThrowExceptionInConstruction, MessageActionT
 
 TEST_P(MessageActionTest, privMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new privMessage(action, {"", ""}, msgOutcome::success, 0, "", privilege::modify), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new privMessage(action, {"", ""}, msgOutcome::success, 0, "", privilege::modify), action, messageException);
 }
 msgType privMsgForbidden[]={
         msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -207,8 +203,7 @@ INSTANTIATE_TEST_CASE_P(privThrowExceptionInConstruction, MessageActionTest, tes
 
 TEST_P(MessageActionTest, symbolMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new symbolMessage(action, {"", ""}, msgOutcome::success, 0, 0, s), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new symbolMessage(action, {"", ""}, msgOutcome::success, 0, 0, s), action, messageException);
 }
 msgType symbolMsgForbidden[]={
         msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -220,8 +215,7 @@ INSTANTIATE_TEST_CASE_P(symbolThrowExceptionInConstruction, MessageActionTest, t
 
 TEST_P(MessageActionTest, uriMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new uriMessage(action, {"", ""}, msgOutcome::success, uri()), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new uriMessage(action, {"", ""}, msgOutcome::success, uri()), action, messageException);
 }
 msgType uriMsgForbidden[]={
         msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -233,8 +227,7 @@ INSTANTIATE_TEST_CASE_P(uriThrowExceptionInConstruction, MessageActionTest, test
 
 TEST_P(MessageActionTest, userDataMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW(m = new userDataMessage(action, {"", ""}, msgOutcome::success, u), messageException);
-    std::cout << "Param was " << action << std::endl;
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new userDataMessage(action, {"", ""}, msgOutcome::success, u), action, messageException);
 }
 msgType userDataMsgForbidden[]={
         msgType::registration, msgType::closeRes, msgType::createRes, msgType::createNewDir,

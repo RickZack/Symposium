@@ -157,7 +157,7 @@ struct SymClientTest : ::testing::Test{
         EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::ReturnRef(docInUserFilesystem));
         EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
         client.openSource(fileSentByServer);
-        correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId());
+        ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
         //tests that the document returned by openFile() has now the same content of the document sent by the server
         EXPECT_EQ(docInUserFilesystem, docSentByServer);
     }
@@ -226,7 +226,7 @@ TEST_F(SymClientTest, openSourceOpensDocAndPutInActiveAndRemovesFromUnanswered)
     EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::ReturnRef(docInUserFilesystem));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openSource(fileSentByServer);
-    correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId());
+    ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
     //tests that the document returned by openFile() has now the same content of the document sent by the server
     EXPECT_EQ(docInUserFilesystem, docSentByServer);
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
@@ -251,7 +251,7 @@ TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered
     EXPECT_CALL(userReceived, accessFile(path+"/"+filename, destPath, filename)).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openNewSource(fileSentByServer);
-    correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId());
+    ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
 }
 
@@ -274,7 +274,7 @@ TEST_F(SymClientTest, createNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswer
     EXPECT_CALL(userReceived, newFile(filename, path)).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openNewSource(fileSentByServer);
-    correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId());
+    ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
 }
 

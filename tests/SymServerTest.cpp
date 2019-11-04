@@ -333,7 +333,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
      */
     void makeAnotherUserToHavePrivilegeAndCloseSource(privilege priv){
         makeAnotherUserToHavePrivilege(priv);
-        closeAfterPrivilegeAcquired(priv);
+        ASSERT_NO_FATAL_FAILURE(closeAfterPrivilegeAcquired(priv));
     }
 
     void makeAnotherUserToHavePrivilege(privilege priv){
