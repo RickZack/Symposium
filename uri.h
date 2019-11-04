@@ -34,6 +34,10 @@
 #include <chrono>
 #include "privilege.h"
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include "boost/serialization/binary_object.hpp"
+
 namespace Symposium {
 /**
  * @brief defines the policy on an object of class @link uri uri @endlink
@@ -58,6 +62,14 @@ namespace Symposium {
         privilege granted;         /**< privilege that the resource owner decided to grant via uri */
 
         static constexpr privilege defaultPrivilege = privilege::modify;
+
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive & ar, const unsigned int /* file_version */){
+            ar & uriId & activePolicy & sharesLeft
+            & boost::serialization::make_binary_object(&stopTime, sizeof(stopTime))
+            & granted;
+        }
     public:
         uri(uriPolicy activePolicy = uriPolicy::inactive);
 

@@ -141,3 +141,42 @@ TEST_F(uriTest, reachingEndTimeGivesNoPrivilege) {
     u.activateTimer(now);
     EXPECT_EQ(privilege::none, u.getShare(uri::getDefaultPrivilege()));
 }
+
+struct uriSerializationTest: ::testing::Test{
+    uri toStore, toLoad;
+    std::stringstream stream;
+    std::chrono::time_point<std::chrono::system_clock> oneHourFromNow = std::chrono::system_clock::now() + std::chrono::hours(1);
+
+    void storeUri(const uri& u){
+        boost::archive::text_oarchive oa(stream);
+        oa<<u;
+    }
+    void loadUri(uri& u){
+        boost::archive::text_iarchive ia(stream);
+        ia>>u;
+    }
+};
+
+TEST_F(uriSerializationTest, saveAndLoadActivateAlways){
+    toStore.activateAlways();
+    ASSERT_NE(toStore, toLoad);
+    storeUri(toStore);
+    loadUri(toLoad);
+    EXPECT_EQ(toStore, toLoad);
+}
+
+TEST_F(uriSerializationTest, saveAndLoadActivateCount){
+    toStore.activateCount(10, privilege::readOnly);
+    ASSERT_NE(toStore, toLoad);
+    storeUri(toStore);
+    loadUri(toLoad);
+    EXPECT_EQ(toStore, toLoad);
+}
+
+TEST_F(uriSerializationTest, saveAndLoadActivateTimer){
+    toStore.activateTimer(oneHourFromNow);
+    ASSERT_NE(toStore, toLoad);
+    storeUri(toStore);
+    loadUri(toLoad);
+    EXPECT_EQ(toStore, toLoad);
+}
