@@ -136,7 +136,7 @@ namespace Symposium {
         /**
          * @brief open a @link file file @endlink already present in the user's filesystem
          * @param path location of the file relative to the @e home directory
-         * @param fileName name of the file to be opened
+         * @param fileName id of the file to be opened
          * @param accessMode the privilege asked by the user for opening the file
          * @return the document contained in the file
          *
@@ -148,7 +148,7 @@ namespace Symposium {
          * @brief edit the privilege of @e otherUser user for the resource @e resName in @e resPath to @e newPrivilege
          * @param otherUser the user whose privilege has to be modified
          * @param resPath relative path to the resource from the current user's @e home
-         * @param resName the name of the target resource
+         * @param resName the id of the target resource
          * @param newPrivilege the new privilege to be granted to @e targetUser
          * @return the old privilege of @e targetUser had on the resource
          * @warning the current user must be a owner of the target resource
@@ -162,7 +162,7 @@ namespace Symposium {
         /**
          * @brief edit the privilege of the current user for the resource @e resName in @e resPath
          * @param resPath the path to the target resource
-         * @param resName name of the target resource
+         * @param resName the id of the target resource
          * @param newPrivilege newPrivilege the new privilege to be granted
          * @return @e newPrivilege
          * @warning the current user must be a owner of the target resource
@@ -175,7 +175,7 @@ namespace Symposium {
         /**
          * @brief set new sharing preferences for a resource
          * @param resPath the absolute path of the resource
-         * @param resName the name of the resource
+         * @param resName the id of the resource
          * @param newPrefs new sharing preferences for the resource
          * @return the old @e sharingPolicy
          *
@@ -186,7 +186,7 @@ namespace Symposium {
         /**
          * @brief renames a resource
          * @param resPath the relative path to the @e home directory where to find the resource
-         * @param resName the resource's name
+         * @param resName the resource's id
          * @param newName the new resource's name
          * @return the resource just renamed
          *
@@ -199,21 +199,11 @@ namespace Symposium {
         /**
          * @brief removes a filesystem object
          * @param path the path inside the user's home directory where the target file is located
-         * @param name the file name
+         * @param name the file id
          * @return the filesystem object just removed from the user's filesystem
          */
         virtual std::shared_ptr<filesystem> removeResource(const std::string &path, const std::string &name) const;
 
-    };
-
-    class userException : public std::exception {
-        std::string msg;
-    public:
-        userException(std::string msg) : msg{msg} {};
-
-        virtual const char *what() const noexcept {
-            return msg.c_str();
-        }
     };
 }
 #endif //SYMPOSIUM_USER_H
