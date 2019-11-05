@@ -30,6 +30,7 @@
 #include <iostream>
 #include "user.h"
 #include "filesystem.h"
+#include "SymposiumException.h"
 
 using namespace Symposium;
 
@@ -104,7 +105,8 @@ std::shared_ptr<file> user::newFile(const std::string &fileName, const std::stri
     std::shared_ptr<file> newF=home->addFile(pathFromHome, fileName);
     if(newF!= nullptr)
         return newF;
-    throw userException("An error occurred while creating a new file");
+
+    throw userException(userException::newFile, UnpackFileLineFunction());
 }
 
 std::shared_ptr<directory>
@@ -116,7 +118,7 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
         newD=home->addDirectory(dirName);
     if(newD!= nullptr)
         return newD;
-    throw userException("An error occurred while creating a new directory");
+    throw userException(userException::newDir, UnpackFileLineFunction());
 }
 
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
@@ -129,22 +131,22 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     str2.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
     std::shared_ptr<directory> dir=this->home->getDir(str1, str2);
     if(dir== nullptr)
-        throw userException("An error occurred while trying to access the directory where you want save the link");
+        throw userException(userException::DirAccess, UnpackFileLineFunction());
 
     std::shared_ptr<directory> root1=dir->getRoot();
     if(root1== nullptr)
-        throw userException("A system error");
+        throw userException(userException::sysError, UnpackFileLineFunction());
 
     std::shared_ptr<symlink> sym=home->addLink(path, fileName);
     if(sym ==nullptr)
-        throw userException("An error occurred while trying to add link");
+        throw userException(userException::addLink, UnpackFileLineFunction());
 
     found = resId.find_last_of("/\\");
     str3.append(resId,0, found); //absolute path to the directory of the file to add
     str4.append(resId.begin()+found+1,resId.end()); //the id of file to add
     std::shared_ptr<file> fi=root1->getFile(str3, str4);;
     if(fi == nullptr)
-        throw userException("An error occurred while trying to add link");
+        throw userException(userException::addLink, UnpackFileLineFunction());
     return fi;
 }
 
@@ -157,7 +159,7 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
                               privilege newPrivilege) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     if(newF==nullptr)
-        throw userException("An error occurred while trying to edit privilege");
+        throw userException(userException::editPriv, UnpackFileLineFunction());
     privilege newP;
     newP=newF->setUserPrivilege(otherUser, newPrivilege);
     return newP;
@@ -166,7 +168,7 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
 privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     if(newF==nullptr)
-        throw userException("An error occurred while trying to change privilege");
+        throw userException(userException::changePriv, UnpackFileLineFunction());
     privilege newP;
     newP=newF->setUserPrivilege(username, newPrivilege);
     return newP;
@@ -175,7 +177,7 @@ privilege user::changePrivilege(const std::string &resPath, const std::string &r
 uri user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     if(newF==nullptr)
-        throw userException("An error occurred while trying to share resource");
+        throw userException(userException::shareRes, UnpackFileLineFunction());
     uri u;
     u=newF->setSharingPolicy(username, newPrefs);
     return u;
@@ -211,10 +213,13 @@ const std::string &user::getPwdHash() const {
 
 std::shared_ptr<filesystem>
 user::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) const {
-    //TODO: implement
-    return std::shared_ptr<filesystem>();
+    std::shared_ptr<filesystem> object=home->get(resPath, resName);
+    if(object==nullptr)
+        throw userException(userException::rename, UnpackFileLineFunction());
+    object->setName(newName);
+    return object;
 }
 
 std::shared_ptr<filesystem> user::removeResource(const std::string &path, const std::string &name) const {
-    return home->remove(*this, path, name);
+    return home->remove(*this, path, name);;
 }

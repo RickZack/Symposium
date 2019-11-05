@@ -69,6 +69,7 @@ uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingP
 
 file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0) {
     //TODO: implement
+    //settare id
 }
 
 resourceType file::resType() const {
@@ -131,6 +132,7 @@ const document &file::getDoc() const {
 
 directory::directory(const std::string &name) : filesystem(name) {
     //guardare lab 2
+    //settare id qui
     //TODO: implement
 }
 
@@ -164,19 +166,42 @@ std::string& directory::setName(const std::string &path, const std::string &file
 }
 
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
-    //assegnare qui la root
-    //TODO: implement
-    return std::shared_ptr<directory>();
+
+    for (unsigned i = 0; i < contained.size(); i++)
+    {
+    if (contained.at(i)->getName() == name)
+        throw filesystemException("You already have an element with the same name");
+    }
+    std::shared_ptr<directory> newDir(new directory(name));//directory deve essere protetto
+    newDir->parent=this->self;
+    newDir->self=newDir;
+    contained.push_back(newDir);
+    return newDir;
 }
 
 std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name) {
-    //TODO: implement
-    return nullptr;
+    for (unsigned i = 0; i < contained.size(); i++)
+    {
+        if (contained.at(i)->getName() == name)
+            throw filesystemException("You already have an element with the same name");
+    }
+    std::shared_ptr<file> newFile(new file(name, path));
+    contained.push_back(newFile);
+    idCounter++;
+    return newFile;
 }
+
 std::shared_ptr<Symposium::symlink> directory::addLink(const std::string &path, const std::string &name)
 {
-    //TODO: implement
-    return nullptr;
+    for (unsigned i = 0; i < contained.size(); i++)
+    {
+        if (contained.at(i)->getName() == name)
+            throw filesystemException("You already have an element with the same name");
+    }
+    std::shared_ptr<symlink> newSym(new symlink(name, path, name));
+    idCounter++;
+    contained.push_back(newSym);
+    return newSym;
 }
 
 resourceType directory::resType() const {
@@ -214,6 +239,7 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
 
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
     //TODO: implement
+    //settare id
 }
 
 resourceType Symposium::symlink::resType() const {

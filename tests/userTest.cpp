@@ -31,6 +31,7 @@
 #include <gmock/gmock.h>
 #include "../user.h"
 #include "../filesystem.h"
+#include "../SymposiumException.h"
 using namespace Symposium;
 
 
@@ -44,7 +45,7 @@ struct dirMock: public directory{
     MOCK_METHOD0(getRoot, std::shared_ptr<directory>());
     MOCK_METHOD2(addLink, std::shared_ptr<class symlink>(const std::string &, const std::string &));
 
-    MOCK_METHOD1(addDirectory, std::shared_ptr<directory>(const std::string &name));
+    MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, int idToAssign));
 
     MOCK_METHOD3(access, document(const user &targetUser, const std::string &path, const std::string &resName));
     MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &, const std::string &, const std::string &));
@@ -111,7 +112,7 @@ TEST(userTest, makeNewDirMock){
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     directory *created=new directory("ciao");
-    EXPECT_CALL(*dir, addDirectory("ciao")).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
+    EXPECT_CALL(*dir, addDirectory("ciao", -1)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
     u1.newDirectory("ciao");
 }
 

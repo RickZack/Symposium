@@ -51,7 +51,7 @@ namespace Symposium{
      * Function @e snprintf is used in constructor, so buffer overflow is avoided. No memory is allocated nor de-allocated in methods.
      */
     class SymposiumException: public std::exception{
-        static constexpr int msgMaxLen = 200;
+        static constexpr int msgMaxLen = 400;
         char errorMsg[msgMaxLen];
     protected:
         SymposiumException(const char *file, const int line, const char *func,
@@ -85,7 +85,17 @@ namespace Symposium{
         virtual ~SymServerException()=default;
     };
 
+    class userException : public SymposiumException {
+        static const char* userErrors[];
+    public:
+        /**
+         * @brief Specific error codes for @ref userException. They are used as indexes to the error table string
+         */
+        enum userExceptionCodes{newFile=0, newDir, DirAccess, sysError, addLink, editPriv, changePriv, shareRes, rename, remove};
 
+        explicit userException(userExceptionCodes exceptionCode, const char *file, int line, const char *func);
+        virtual ~userException()=default;
+    };
 
 
 }
