@@ -112,7 +112,7 @@ TEST(userTest, makeNewDirMock){
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     directory *created=new directory("ciao");
-    EXPECT_CALL(*dir, addDirectory("ciao", -1)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
+    EXPECT_CALL(*dir, addDirectory("ciao", 0)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
     u1.newDirectory("ciao");
 }
 
