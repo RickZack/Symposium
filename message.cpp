@@ -34,7 +34,7 @@
 #include "SymClient.h"
 
 using namespace Symposium;
-message::message(msgType action, int msgId) {
+message::message(msgType action, int msgId): action{action}, msgId{msgId} {
     //TODO: implement
 }
 
@@ -237,6 +237,16 @@ void symbolMessage::invokeMethod(SymServer &server) {
 
 void symbolMessage::invokeMethod(SymClient &client) {
     //TODO: implement
+}
+
+symbolMessage & symbolMessage::verifySym() {
+    sym.setVerified();
+    return *this;
+}
+
+void symbolMessage::completeAction(SymClient &client) {
+    //TODO: implement
+    clientMessage::completeAction(client);
 }
 
 uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,

@@ -57,16 +57,17 @@ document & document::access(const user &newActive, privilege accessPriv) {
     return *this;
 }
 
-void document::localInsert(int indexes[2], symbol &toInsert) {
+symbol document::localInsert(int *indexes, symbol &toInsert) {
     //TODO:implement
-
+    return symbol('z', 0, 0, {0,0});
 }
 
-void document::localRemove(int indexes[2]) {
+symbol document::localRemove(int *indexes) {
     //TODO:implement
+    return symbol('z', 0, 0, {0,0});
 }
 
-void document::remoteInsert(symbol toInsert) {
+void document::remoteInsert(const symbol &toInsert) {
     //TODO:implement
 }
 

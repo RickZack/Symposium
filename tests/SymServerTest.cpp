@@ -70,8 +70,8 @@ struct SymServerFileMock: public file{
 struct SymServerDocMock: public document{
     SymServerDocMock():document(){};
     SymServerDocMock(const SymServerDocMock& mock){};
-    MOCK_METHOD1(remoteInsert, void(symbol toInsert));
-    MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
+    MOCK_METHOD1(remoteInsert, void(const symbol &toInsert));
+    MOCK_METHOD1(remoteRemove, void(const symbol &toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_METHOD0(retrieveSiteIds, std::set<int>());
 };
@@ -104,17 +104,21 @@ public:
     bool userAlreadyRegistered(const user& toCheck){
         return registered.find(toCheck.getUsername())!=registered.end();
     }
-    bool thereIsMessageForResource(int resId, const message& msg){
+    std::pair<bool, std::shared_ptr<message>> thereIsMessageForResource(int resId, const message& msg){
+        std::pair<bool, std::shared_ptr<message>> result(false, nullptr);
         auto entry=workingQueue.find(resId);
         if(entry==workingQueue.end())
-            return false;
-        std::queue<message> messages=entry->second;
+            return result;
+        std::queue<std::shared_ptr<message>> messages=entry->second;
         while(!messages.empty()){
-            message m=messages.front();
-            if(m.getMsgId()==msg.getMsgId()) return true;
+            auto m=messages.front();
+            if(m->getMsgId()==msg.getMsgId()){
+                result.first=true; result.second=messages.front();
+                return result;
+            }
             messages.pop();
         }
-        return false;
+        return result;
     }
 
     /*
@@ -435,20 +439,25 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDoc)
     SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
     EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
     document ret=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
-    symbol toInsert('a', 0, 0, {});
+    symbol toInsert('a', 0, 0, {}, false);
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
-    EXPECT_CALL(doc, remoteInsert(toInsert));
+    //server must send and insert a symbol that is verified
+    symbolMessage toSend(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert.setVerified(), received.getMsgId());
+    EXPECT_CALL(doc, remoteInsert(toSend.getSym()));
     server.remoteInsert(loggedUserUsername, doc.getId(), received);
+    auto res=server.thereIsMessageForResource(doc.getId(), toSend);
+    EXPECT_TRUE(res.first);
+    EXPECT_TRUE(std::dynamic_pointer_cast<symbolMessage>(res.second)->getSym().isVerified());
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertOfUnloggedUser){
-    symbol toInsert('a', 0, 0, {});
+    symbol toInsert('a', 0, 0, {}, false);
     symbolMessage received(msgType::insertSymbol, {anotherUserUsername, anotherUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
     EXPECT_THROW(server.remoteInsert(anotherUserUsername, doc.getId(), received), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertOnDocumentNotOpened){
-    symbol toInsert('a', 0, 0, {});
+    symbol toInsert('a', 0, 0, {}, false);
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
     EXPECT_THROW(server.remoteInsert(loggedUserUsername, doc.getId(), received), SymServerException);
 }
@@ -457,30 +466,30 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertAppendesMessage){
     SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
     EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
     auto doc=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
-    symbol toInsert('a', 0, 0, {});
+    symbol toInsert('a', 0, 0, {}, false);
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
     server.remoteInsert(loggedUserUsername, doc.getId(), received);
-    EXPECT_TRUE(server.thereIsMessageForResource(doc.getId(), received));
+    EXPECT_TRUE(server.thereIsMessageForResource(doc.getId(), received).first);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDoc){
     SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
     EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
     document ret=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
-    symbol toRemove('a', 0, 0, {});
+    symbol toRemove('a', 0, 0, {}, false);
     symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
     EXPECT_CALL(doc, remoteRemove(toRemove));
     server.remoteRemove(loggedUserUsername, doc.getId(), received);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveOfUnloggedUser){
-    symbol toRemove('a', 0, 0, {});
+    symbol toRemove('a', 0, 0, {}, false);
     symbolMessage received(msgType::removeSymbol, {anotherUserUsername, anotherUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
     EXPECT_THROW(server.remoteRemove(anotherUserUsername, doc.getId(), received), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveOnDocumentNotOpened){
-    symbol toRemove('a', 0, 0, {});
+    symbol toRemove('a', 0, 0, {}, false);
     symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
     EXPECT_THROW(server.remoteInsert(loggedUserUsername, doc.getId(), received), SymServerException);
 }

@@ -60,9 +60,9 @@ TEST_F(documentTest, userIsNoLongerInActiveListAfterClosing){
 
 TEST_F(documentTest, localAddingSymbolsInSequence){
     int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
-    symbol s1('a', 0, 0, std::vector<int>()),
-           s2('b', 0, 1, std::vector<int>()),
-           s3('c', 0, 2, std::vector<int>());
+    symbol s1('a', 0, 0, std::vector<int>(), false),
+            s2('b', 0, 1, std::vector<int>(), false),
+            s3('c', 0, 2, std::vector<int>(), false);
     d.localInsert(i1, s1);
     d.localInsert(i2, s2);
     d.localInsert(i3, s3);
@@ -71,9 +71,9 @@ TEST_F(documentTest, localAddingSymbolsInSequence){
 
 TEST_F(documentTest, localAddingSymbolsInTheMiddle){
     int i1[]={0,0}, i2[]={0,1};
-    symbol s1('a', 0, 0, std::vector<int>()),
-            s2('b', 0, 1, std::vector<int>()),
-            s3('c', 0, 2, std::vector<int>());
+    symbol s1('a', 0, 0, std::vector<int>(), false),
+            s2('b', 0, 1, std::vector<int>(), false),
+            s3('c', 0, 2, std::vector<int>(), false);
     d.localInsert(i1, s1);
     d.localInsert(i2, s2);
     d.localInsert(i2, s3);
@@ -82,9 +82,9 @@ TEST_F(documentTest, localAddingSymbolsInTheMiddle){
 
 TEST_F(documentTest, localRemovingSymbolsFromBottom){
     int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
-    symbol s1('a', 0, 0, std::vector<int>()),
-            s2('b', 0, 1, std::vector<int>()),
-            s3('c', 0, 2, std::vector<int>());
+    symbol s1('a', 0, 0, std::vector<int>(), false),
+            s2('b', 0, 1, std::vector<int>(), false),
+            s3('c', 0, 2, std::vector<int>(), false);
     d.localInsert(i1, s1);
     d.localInsert(i2, s2);
     d.localInsert(i3, s3);
@@ -94,9 +94,9 @@ TEST_F(documentTest, localRemovingSymbolsFromBottom){
 
 TEST_F(documentTest, localRemovingSymbolsFromMiddle){
     int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
-    symbol s1('a', 0, 0, std::vector<int>()),
-            s2('b', 0, 1, std::vector<int>()),
-            s3('c', 0, 2, std::vector<int>());
+    symbol s1('a', 0, 0, std::vector<int>(), false),
+            s2('b', 0, 1, std::vector<int>(), false),
+            s3('c', 0, 2, std::vector<int>(), false);
     d.localInsert(i1, s1);
     d.localInsert(i2, s2);
     d.localInsert(i3, s3);
@@ -127,14 +127,14 @@ TEST_P(docRemoteSymbolTest, InsertionPosOrder){
     EXPECT_EQ(input.expected, d.getSymbols().front());
 }
 Insertion inserts[]={
-        Insertion(symbol('a', 0, 1, {1}), symbol('b', 1, 1, {2}),
-                { symbol('a', 0, 1, {1}), symbol('b', 0, 1, {2}) }),
+        Insertion(symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true),
+                  {symbol('a', 0, 1, {1}, true), symbol('b', 0, 1, {2}, true)}),
 
-        Insertion(symbol('a', 0, 1, {1}), symbol('b', 1, 1, {1}),
-                  { symbol('b', 1, 1, {1}), symbol('a', 0, 1, {1}) }),
+        Insertion(symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {1}, true),
+                  {symbol('b', 1, 1, {1}, true), symbol('a', 0, 1, {1}, true)}),
 
-        Insertion(symbol('a', 0, 1, {1}), symbol('b', 1, 1, {1,2}),
-                  { symbol('a', 0, 1, {1}), symbol('b', 0, 1, {1,2}) }),
+        Insertion(symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {1, 2}, true),
+                  {symbol('a', 0, 1, {1}, true), symbol('b', 0, 1, {1, 2}, true)}),
 };
 INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteSymbolTest, testing::ValuesIn(inserts));
 
@@ -149,22 +149,22 @@ TEST_P(docRemoteSymbolTest, RemovalPosOrder){
     EXPECT_EQ(input.expected, d.getSymbols().front());
 }
 Insertion inserts2[]={
-        Insertion(symbol('c', 1, 1, {1}), symbol('c', 1, 1, {1}),
+        Insertion(symbol('c', 1, 1, {1}, false), symbol('c', 1, 1, {1}, false),
                   std::vector<symbol>()),
 
-        Insertion(symbol('c', 1, 1, {1}), symbol('b', 1, 1, {1}),
-                  { symbol('c', 1, 1, {1})}),
+        Insertion(symbol('c', 1, 1, {1}, false), symbol('b', 1, 1, {1}, false),
+                  {symbol('c', 1, 1, {1}, false)}),
 
-        Insertion(symbol('c', 1, 1, {1}), symbol('c', 1, 1, {1,2}),
-                  { symbol('c', 1, 1, {1}), }),
+        Insertion(symbol('c', 1, 1, {1}, false), symbol('c', 1, 1, {1, 2}, false),
+                  {symbol('c', 1, 1, {1}, false), }),
 };
 INSTANTIATE_TEST_CASE_P(RemoveRemoteSymbols, docRemoteSymbolTest, testing::ValuesIn(inserts2));
 
 TEST_F(documentTest, canRetrieveSiteIds){
     int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
-    symbol s1('a', 0, 0, std::vector<int>()),
-            s2('b', 1, 0, std::vector<int>()),
-            s3('c', 2, 2, std::vector<int>());
+    symbol s1('a', 0, 0, std::vector<int>(), false),
+            s2('b', 1, 0, std::vector<int>(), false),
+            s3('c', 2, 2, std::vector<int>(), false);
     d.localInsert(i1, s1);
     d.localInsert(i2, s2);
     d.localInsert(i3, s3);

@@ -62,7 +62,7 @@ struct MessageActionTest: ::testing::TestWithParam<msgType>{
 
     MessageActionTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr),
                          f("name", "./somedir"),
-                         s('a', 0, 0, std::vector<int>()){
+                         s('a', 0, 0, std::vector<int>(), false) {
         m=nullptr;
     }
     ~MessageActionTest(){
@@ -253,7 +253,7 @@ public:
     MOCK_METHOD2(mapSiteIdToUser, std::map<int, user>(const std::string&, int));
 
     MOCK_METHOD5(editPrivilege, privilege(const user&, const user&, const std::string&, const std::string&, privilege));
-    MOCK_METHOD3(remoteInsert, void(const std::string&, int, const symbol&));
+    MOCK_METHOD3(remoteInsert, void(const std::string&, int, symbolMessage&));
     MOCK_METHOD3(remoteRemove, void(const std::string&, int, const symbol&));
     MOCK_METHOD4(shareResource, uri(const user& actionUser, const std::string&, const std::string&, uri&));
     MOCK_METHOD3(editUser, const user&(const std::string&, const std::string&, user&));
@@ -355,6 +355,7 @@ public:
     MOCK_METHOD2(remoteRemove, void(int, const symbol&));
     MOCK_METHOD4(shareResource, uri(const std::string&, const std::string&, uri&, bool msgRcv));
     MOCK_METHOD2(editUser, const user(user&, bool));
+    MOCK_METHOD2(verifySymbol, void(int, const symbol&));
 };
 
 struct serverMessageTest: public testing::Test{
@@ -450,7 +451,7 @@ struct DoubleEndMessageTest: public testing::Test{
     uri dummyUri;
     privilege priv;
 
-    DoubleEndMessageTest(): dummySymbol('a', 0, 1, std::vector<int>()),
+    DoubleEndMessageTest(): dummySymbol('a', 0, 1, std::vector<int>(), false),
                             u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr),
                             priv(privilege::modify){
         fromServer=nullptr;
@@ -490,13 +491,13 @@ TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilegeOnOtherClient){
     fromServer->invokeMethod(client);
 }
 
-TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsert){
+TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnSuccess){
     fromClient=new symbolMessage(msgType::insertSymbol,{"", ""}, msgOutcome::success, 0,0, dummySymbol);
     symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
     //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
     //(here we suppose it is the dummy user u)
     //Same thing with targetUser
-    EXPECT_CALL(server, remoteInsert("", 0, dummySymbol)).WillOnce(::testing::Return());
+    EXPECT_CALL(server, remoteInsert("", 0, *fc)).WillOnce(::testing::Return());
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::insertSymbol, msgOutcome::success, fromClient->getMsgId());
@@ -504,7 +505,28 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsert){
     //targetUser from fc->getTargetUser() (from std::string to user)
     //resPath and resName from fc->getResourceId
 
-    //We expect no function called by fromClient when the outcome is positive
+    //We expect verifySymbol to be called by fromClient when the outcome is positive
+    EXPECT_CALL(client, verifySymbol(0, fc->getSym()));
+    fromClient->completeAction(client);
+}
+
+TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnFailure){
+    fromClient=new symbolMessage(msgType::insertSymbol,{"", ""}, msgOutcome::success, 0,0, dummySymbol);
+    symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
+    //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
+    //(here we suppose it is the dummy user u)
+    //Same thing with targetUser
+    EXPECT_CALL(server, remoteInsert("", 0, *fc)).WillOnce(::testing::Return());
+    fromClient->invokeMethod(server);
+
+    //Suppose now that the server returns a failure
+    fromServer= new serverMessage(msgType::insertSymbol, msgOutcome::failure, fromClient->getMsgId());
+    //client uses the message previously sent to the server to retrieve the parameters for the required action:
+    //targetUser from fc->getTargetUser() (from std::string to user)
+    //resPath and resName from fc->getResourceId
+
+    //We expect remoteRemove to be called by fromClient when the outcome is negative!
+    EXPECT_CALL(client, remoteRemove(0, fc->getSym()));
     fromClient->completeAction(client);
 }
 
@@ -512,8 +534,9 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnOtherClient){
     fromClient=new symbolMessage(msgType::insertSymbol,{"user", "pwd"}, msgOutcome::success, 0,0, dummySymbol);
     symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
 
-    //the message from client is forwarded to the other client, but the password is cleaned
-    fromServer= new symbolMessage(msgType::insertSymbol,{"user", ""}, msgOutcome::success, 0,0, fc->getSym());
+    //the message from client is forwarded to the other client, but the password is cleaned and it's now verified
+    symbol s=fc->getSym();
+    fromServer= new symbolMessage(msgType::insertSymbol,{"user", ""}, msgOutcome::success, 0,0, s.setVerified());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     //targetUser from fc->getTargetUser() (from std::string to user)
     //resPath and resName from fc->getResourceId
@@ -521,7 +544,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnOtherClient){
     fromServer->invokeMethod(client);
 }
 
-TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemove){
+TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnSuccess){
     fromClient=new symbolMessage(msgType::removeSymbol,{"", ""}, msgOutcome::success, 0,0, dummySymbol);
     symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
 
@@ -531,6 +554,20 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemove){
     //resPath and resName from fc->getResourceId
 
     //We expect no function called by fromClient when the outcome is positive
+    fromClient->completeAction(client);
+}
+
+TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
+    fromClient=new symbolMessage(msgType::removeSymbol,{"", ""}, msgOutcome::success, 0,0, dummySymbol);
+    symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
+
+    fromServer= new serverMessage(msgType::removeSymbol, msgOutcome::failure, fromClient->getMsgId());
+    //client uses the message previously sent to the server to retrieve the parameters for the required action:
+    //targetUser from fc->getTargetUser() (from std::string to user)
+    //resPath and resName from fc->getResourceId
+
+    //We expect remoteInsert to be called by fromClient when the outcome is negative, so that the removal is annulled
+    EXPECT_CALL(client, remoteInsert(0, fc->getSym()));
     fromClient->completeAction(client);
 }
 

@@ -76,7 +76,7 @@ namespace Symposium {
         std::forward_list<document *> activeDoc;                                  /**< list of files the active documents are related to */
         std::map<std::pair<int, int>, std::pair<user, MyColor>> userColors;       /**< map {siteId, documentId}->{user, color}  */
 
-        std::queue<clientMessage> unanswered;                                     /**< messages sent by client that have not been received an answer */
+        std::forward_list<std::shared_ptr<clientMessage>> unanswered;             /**< messages sent by client that have not been received an answer */
 
         /*
          * Use this function to access to loggedUser, because it allows the tests to work with a mock class
@@ -185,6 +185,22 @@ namespace Symposium {
         virtual void createNewDir(const std::shared_ptr<directory> dirCreated);
 
         /**
+         * @brief insert a symbol on an opened document and constructs a message to sent to the server
+         * @param resourceId the document the insertion refers to
+         * @param newSym the symbol to insert
+         * @return a properly constructed @ref symbolMessage to send to the server
+         */
+        virtual symbolMessage localInsert(int resourceId, const symbol& newSym);
+
+        /**
+         * @brief remove a symbol on an opened document and constructs a message to sent to the server
+         * @param resourceId the document the deletion refers to
+         * @param newSym the symbol to remove
+         * @return a properly constructed @ref symbolMessage to send to the server
+         */
+        virtual symbolMessage localRemove(int resourceId, int indexes[2]);
+
+        /**
          * @brief propagate a symbol insertion on document content made by another user
          * @param resourceId the document the insertion refers to
          * @param newSym the symbol to insert
@@ -201,6 +217,18 @@ namespace Symposium {
          * This method is called after having received a @ref symbolMessage
          */
         virtual void remoteRemove(int resourceId, const symbol &rmSym);
+
+        /**
+         * @brief set the symbol of the opened document that has @e resourceId to "verified"
+         * @param resourceId the id of the document the symbol refers to
+         * @param sym the symbol to verify
+         *
+         * When the server answers to a client's @ref symbolMessage, it sends a @ref serverMessage containing
+         * the outcome of the action. When this message is received by the client, the related previously sent
+         * message is retrieved and @ref symbolMessage::completeAction is called: it calls this method if the
+         * outcome is positive.
+         */
+        virtual void verifySymbol(int resourceId, const symbol &sym);
 
         /**
          * @brief constructs a @ref privMessage to send to the server to ask to change privileges for a resource
@@ -400,6 +428,13 @@ namespace Symposium {
          */
         virtual void removeActiveUser(int resourceId, user &targetUser);
 
+        /**
+         * @brief retrieve a @ref clientMessage previously sent by the client related to @e smex
+         * @param smex the @ref serverMessage sent by the server that is supposed to be a response for a previous @ref clientMessage
+         * @return the clientMessage that is related to the received @e smex
+         */
+        virtual clientMessage & retrieveRelatedMessage(const serverMessage& smex);
+
         virtual ~SymClient() = default;
     };
 
@@ -433,6 +468,16 @@ namespace Symposium {
         explicit filterPrivilege(const user &currentUser, privilege filter = privilege::readOnly);
 
         bool operator()(std::shared_ptr<file> file);
+    };
+
+    class SymClientException: public std::exception{
+    public:
+        ~SymClientException() override {
+        }
+
+        const char *what() const noexcept override {
+            return exception::what();
+        }
     };
 }
 #endif //SYMPOSIUM_SYMCLIENT_H

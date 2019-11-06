@@ -76,19 +76,19 @@ namespace Symposium {
          * @brief insert a symbol in the document as consequence of an user's action on the GUI
          * @param toInsert symbol to insert
          */
-        void localInsert(int indexes[2], symbol &toInsert);
+        virtual symbol localInsert(int *indexes, symbol &toInsert);
 
         /**
          * @brief remove a symbol in the document as consequence of an user's action on the GUI
          * @param indexes symbol to remove
          */
-        void localRemove(int indexes[2]);
+        virtual symbol localRemove(int *indexes);
 
         /**
          * @brief insert a symbol in the document as consequence of a remote user's action
          * @param toInsert symbol to insert
          */
-        virtual void remoteInsert(symbol toInsert);
+        virtual void remoteInsert(const symbol &toInsert);
 
         /**
          * @brief remove a symbol in the document as consequence of a remote user's action

@@ -41,14 +41,18 @@ namespace Symposium {
         int siteId;
         int counter;
         std::vector<int> pos;
+        bool verified;  /**< true if the symbol has been verified by the server or has been inserted by remoteInsert */
     public:
-        symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos);
+        symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos, bool verified=false);
 
         wchar_t getCh() const;
 
         int getSiteId() const;
 
         const std::vector<int> &getPos() const;
+
+        bool isVerified() const;
+        symbol & setVerified();
 
         bool operator<(const symbol &rhs) const;
 

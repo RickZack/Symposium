@@ -32,8 +32,8 @@
 #include <iostream>
 using namespace Symposium;
 
-symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos) : ch(ch), siteId(siteId),
-                                                                                   counter(counter), pos(pos) {}
+symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos, bool verified) : ch(ch), siteId(siteId),
+                                                                                                  counter(counter), pos(pos) {}
 
 wchar_t symbol::getCh() const {
     return ch;
@@ -68,11 +68,21 @@ bool symbol::operator==(const symbol &rhs) const {
     return ch == rhs.ch &&
            siteId == rhs.siteId &&
            counter == rhs.counter &&
-           pos == rhs.pos;
+           pos == rhs.pos &&
+           verified == rhs.verified;
 }
 
 bool symbol::operator!=(const symbol &rhs) const {
     return !(rhs == *this);
+}
+
+symbol & symbol::setVerified() {
+    symbol::verified = true;
+    return *this;
+}
+
+bool symbol::isVerified() const{
+    return verified;
 }
 
 std::ostream& operator<<(std::ostream& os, symbol s){

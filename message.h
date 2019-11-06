@@ -466,6 +466,15 @@
 
          int getResourceId() const;
 
+         /**
+          * @brief set the contained symbol as "verified" calling @ref symbol::setVerified on @e sym
+          * @return a reference to the symbolMessage itself
+          */
+        symbolMessage & verifySym();
+         /**
+          * @brief normal getter for member @e sym, normally used to inspect the content
+          * @return a const reference to the @ref symbol hold by the message
+          */
          const symbol &getSym() const;
 
          /**
@@ -487,6 +496,27 @@
           * @li <em> action=msgType::removeSymbol </em>: calls @ref SymClient::remoteRemove
           */
          void invokeMethod(SymClient &client) override;
+
+         /**
+          * @brief confirm the insertion or deletion of a symbol made by a client or abort it
+          * @param client the client which sent the message
+          *
+          * Depending on the value of @e action and @e result, the @e invokeMethod ask for different actions on the client:
+          * <ul>
+          * <li> <em> result=msgOutcome::success </em>:
+          *  <ul>
+          *   <li> <em> action=msgType::insertSymbol </em>: calls @ref SymClient::verifySymbol
+          *   <li> <em> action=msgType::removeSymbol </em>: calls nothing
+          *  </ul>
+          * <li> <em> result=msgOutcome::failure </em>:
+          *  <ul>
+          *   <li> <em> action=msgType::insertSymbol </em>: calls @ref SymClient::remoteRemove
+          *   <li> <em> action=msgType::removeSymbol </em>: calls @ref SymClient::remoteInsert
+          *  </ul>
+          * </ul>
+          */
+          //TODO: complete description
+         void completeAction(SymClient &client) override;
 
          virtual ~symbolMessage() = default;
      };

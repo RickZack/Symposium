@@ -64,13 +64,15 @@ struct SymClientAccesser: public SymClient{
     std::map<std::pair<int, int>, std::pair<user, MyColor>>& getUserColors(){
         return userColors;
     };
-    bool thereIsUnansweredMex(int msgId){
-        while(!unanswered.empty()){
-            auto mex=unanswered.front();
-            if(mex.getMsgId()==msgId)
-                return true;
-            unanswered.pop();
+    std::pair<bool, std::shared_ptr<clientMessage>> thereIsUnansweredMex(int msgId){
+        std::pair<bool, std::shared_ptr<clientMessage>> result(false, nullptr);
+        auto m= std::find_if(unanswered.begin(), unanswered.end(),
+                            [&](std::shared_ptr<clientMessage>& cm){return cm->getMsgId()==msgId;});
+        if(m!=unanswered.end()){
+            result.first=true;
+            result.second=*m;
         }
+        return result;
     }
     void setUser(user& logged){
         getLoggedUser()=logged;
@@ -103,10 +105,12 @@ struct SymClientDirMock: public directory{
 
 struct SymClientDocMock: public document{
     SymClientDocMock(int id):document(id) {};
-    MOCK_METHOD1(remoteInsert, void(symbol toInsert));
-    MOCK_METHOD1(remoteRemove, void(symbol toRemove));
+    MOCK_METHOD1(remoteInsert, void(const symbol& toInsert));
+    MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_METHOD2(access, document&(const user&, privilege));
+    MOCK_METHOD2(localInsert, symbol(int indexes[2], symbol &toInsert));
+    MOCK_METHOD1(localRemove, symbol(int indexes[2]));
 };
 
 struct SymClientTest : ::testing::Test{
@@ -124,6 +128,7 @@ struct SymClientTest : ::testing::Test{
     std::shared_ptr<SymClientFileMock> fileSentByServer;
     std::shared_ptr<SymClientDirMock> dirSentByServer;
     SymClientDocMock docInUserFilesystem, docSentByServer;
+    static int indexes[2];
     SymClientTest(): userReceived(username, pwd, nickname, "", 0, nullptr),
                      fileSentByServer(new SymClientFileMock(filename, "realPath")),
                      docInUserFilesystem(0), docSentByServer(120),
@@ -161,6 +166,15 @@ struct SymClientTest : ::testing::Test{
         //tests that the document returned by openFile() has now the same content of the document sent by the server
         EXPECT_EQ(docInUserFilesystem, docSentByServer);
     }
+    /*
+     * Just impose that every time we generate a clientMessage the msgId is different
+     */
+    ::testing::AssertionResult messagesHaveDifferentIds(const char* m_expr, int previousMsgId) {
+        clientMessage cm(msgType::login, {"", ""});
+        if(cm.getMsgId()==previousMsgId)
+            return ::testing::AssertionFailure()<<"Unable to run this test because messages are constructed with the same msgId, so messages that are actually not related can be wrongly appear related";
+        else return ::testing::AssertionSuccess();
+    }
 };
 const std::string SymClientTest::username="username";
 const std::string SymClientTest::pwd="123abc!!";
@@ -170,6 +184,7 @@ const std::string SymClientTest::filename="file1";
 const std::string SymClientTest::destPath="./dir1/dir2";
 const std::string SymClientTest::anotherUsername="anotherUsername";
 uri SymClientTest::newPreferences(uriPolicy::activeAlways);
+int SymClientTest::indexes[2]={0,0};
 
 TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
     client.setLoggedUser(userReceived);
@@ -180,7 +195,7 @@ TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){
     auto mex= client.signUp(username, pwd, nickname);
     user expected(username, pwd, nickname, "", 0, nullptr);
     EXPECT_EQ(expected, mex.getNewUser());
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, signUpAssignesLoggedUserAndRemovesFromUnanswered){
@@ -189,13 +204,13 @@ TEST_F(SymClientTest, signUpAssignesLoggedUserAndRemovesFromUnanswered){
     //complete user data
     client.signUp(userReceived);
     EXPECT_EQ(client.getLoggedUser(), userReceived);
-    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, loginConstructsGoodMessageAndInsertInUnanswered){
     auto mex=client.logIn(username, pwd);
     messageHasCorrectOwner(mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, loginAssignesLoggedUserAndRemovesFromUnanswered){
@@ -204,7 +219,7 @@ TEST_F(SymClientTest, loginAssignesLoggedUserAndRemovesFromUnanswered){
     //complete user data
     client.logIn(userReceived);
     EXPECT_EQ(client.getLoggedUser(), userReceived);
-    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, openSourceConstructsGoodMessageAndInsertInUnanswered){
@@ -213,7 +228,7 @@ TEST_F(SymClientTest, openSourceConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     askResMessage expected(msgType::openRes, {username, pwd}, path, filename);
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, openSourceOpensDocAndPutInActiveAndRemovesFromUnanswered)
@@ -229,7 +244,7 @@ TEST_F(SymClientTest, openSourceOpensDocAndPutInActiveAndRemovesFromUnanswered)
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
     //tests that the document returned by openFile() has now the same content of the document sent by the server
     EXPECT_EQ(docInUserFilesystem, docSentByServer);
-    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
@@ -238,7 +253,7 @@ TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     askResMessage expected(msgType::openNewRes, {username, pwd}, destPath, filename, path+"/"+filename);
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
@@ -252,7 +267,7 @@ TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openNewSource(fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
-    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, createNewSourceConstructsGoodMessageAndInsertInUnanswered){
@@ -261,7 +276,7 @@ TEST_F(SymClientTest, createNewSourceConstructsGoodMessageAndInsertInUnanswered)
     messageHasCorrectOwner(mex);
     askResMessage expected(msgType::createRes, {username, pwd}, path, filename);
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, createNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
@@ -275,7 +290,7 @@ TEST_F(SymClientTest, createNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswer
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openNewSource(fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
-    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, createNewDirConstructsGoodMessageAndInsertInUnanswered){
@@ -284,7 +299,7 @@ TEST_F(SymClientTest, createNewDirConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     askResMessage expected(msgType::createNewDir, {username, pwd}, path, filename);
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, createNewDirOpensDocAndPutInActiveAndRemovesFromUnaswered)
@@ -296,12 +311,34 @@ TEST_F(SymClientTest, createNewDirOpensDocAndPutInActiveAndRemovesFromUnaswered)
     //the data use to call newDirectory must be taken from the relative askResMessage in unanswered
     EXPECT_CALL(userReceived, newDirectory(filename, path, dirSentByServer->getId())).WillOnce(::testing::Return(dirSentByServer));
     client.createNewDir(dirSentByServer);
-    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
+}
+
+TEST_F(SymClientTest, localInsertConstructsGoodMessageAndInsertInUnanswered){
+    setStageForOpenedDoc();
+    symbol toInsert('a', userReceived.getSiteId(), 0, {}, false);
+    symbol inserted('a', userReceived.getSiteId(), 0, {1}, false);
+    EXPECT_CALL(docSentByServer, localInsert(indexes, toInsert)).WillOnce(::testing::Return(inserted));
+    auto mex=client.localInsert(docSentByServer.getId(), toInsert);
+    std::pair<bool, std::shared_ptr<clientMessage>> res=client.thereIsUnansweredMex(mex.getMsgId());
+    ASSERT_TRUE(res.first);
+    EXPECT_EQ(mex, *res.second);
+}
+
+TEST_F(SymClientTest, localRemoveConstructsGoodMessageAndInsertInUnanswered){
+    setStageForOpenedDoc();
+    symbol removed('a', userReceived.getSiteId(), 0, {1}, false);
+    EXPECT_CALL(docSentByServer, localRemove(indexes)).WillOnce(::testing::Return(removed));
+    auto mex=client.localRemove(docSentByServer.getId(), indexes);
+    std::pair<bool, std::shared_ptr<clientMessage>> res=client.thereIsUnansweredMex(mex.getMsgId());
+    ASSERT_TRUE(res.first);
+    EXPECT_EQ(mex, *res.second);
+    EXPECT_EQ(removed, std::dynamic_pointer_cast<symbolMessage>(res.second)->getSym()); //the message contains the exact symbol to remove
 }
 
 TEST_F(SymClientTest, remoteInsertCallsremoteInsertOnRightDoc){
     setStageForOpenedDoc();
-    symbol arrived('a', 1, 1, {});
+    symbol arrived('a', 1, 1, {}, true);
     //resouceId of the document to insert the symbol into is contained in the symbolMessage received by the client
     EXPECT_CALL(docSentByServer, remoteInsert(arrived));
     client.remoteInsert(docSentByServer.getId(), arrived);
@@ -309,7 +346,7 @@ TEST_F(SymClientTest, remoteInsertCallsremoteInsertOnRightDoc){
 
 TEST_F(SymClientTest, remoteRemoveCallsremoteRemoveOnRightDoc){
     setStageForOpenedDoc();
-    symbol arrived('a', 1, 1, {});
+    symbol arrived('a', 1, 1, {}, true);
     //resouceId of the document to insert the symbol into is contained in the symbolMessage received by the client
     EXPECT_CALL(docSentByServer, remoteRemove(arrived));
     client.remoteRemove(docSentByServer.getId(), arrived);
@@ -321,7 +358,7 @@ TEST_F(SymClientTest, editPrivilegeConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     privMessage expected(msgType::changePrivileges, {username, pwd}, msgOutcome::success, path+"/"+filename, anotherUsername, privilege::modify);
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, editPrivilegeCallsEditPrivilegeOnUser){
@@ -337,7 +374,7 @@ TEST_F(SymClientTest, shareResourceConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     uriMessage expected(msgType::shareRes, {username, pwd}, msgOutcome::success, newPreferences);
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, shareResourceCallsShareResourceOnUser){
@@ -353,7 +390,7 @@ TEST_F(SymClientTest, renameResourceConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     askResMessage expected(msgType::changeResName, {username, pwd}, path, filename, "newName");
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, renameResourceCallsRenameResourceOnUser){
@@ -369,7 +406,7 @@ TEST_F(SymClientTest, removeResourceConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     askResMessage expected(msgType::removeRes, {username, pwd}, path, filename);
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, removeResourceCallsRemoveResourceOnUser){
@@ -386,7 +423,7 @@ TEST_F(SymClientTest, closeSourceConstructsGoodMessageAndNotInsertInUnanswered){
     messageHasCorrectOwner(mex);
     updateDocMessage expected(msgType::closeRes, {username, pwd}, docSentByServer.getId());
     EXPECT_EQ(expected, mex);
-    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, showDirCallsShowDirOnUserRecursive){
@@ -409,7 +446,7 @@ TEST_F(SymClientTest, removeUserConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     clientMessage expected(msgType::removeUser, {username, pwd});
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
     EXPECT_NE(userReceived, client.getLoggedUser());
 }
 
@@ -419,7 +456,7 @@ TEST_F(SymClientTest, logoutConstructsGoodMessageAndInsertInUnanswered){
     messageHasCorrectOwner(mex);
     clientMessage expected(msgType::logout, {username, pwd});
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
     EXPECT_NE(userReceived, client.getLoggedUser());
 }
 
@@ -428,7 +465,7 @@ TEST_F(SymClientTest, mapSiteIdToUserConstructsGoodMessageAndInsertInUnanswered)
     messageHasCorrectOwner(mex);
     updateDocMessage expected(msgType::mapChangesToUser, {username, pwd}, docSentByServer.getId());
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()));
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, setUserColorsAssignesDifferentColorToUsers){
@@ -449,4 +486,20 @@ TEST_F(SymClientTest, removeActiveUserCallsCloseOnDoc){
     setStageForOpenedDoc();
     EXPECT_CALL(docSentByServer, close(userReceived));
     client.addActiveUser(docSentByServer.getId(), userReceived);
+}
+
+TEST_F(SymClientTest, retrieveRelatedMessageReturnCorrectMessage){
+    auto mex=client.logIn(username, pwd);
+    ASSERT_PRED_FORMAT1(messagesHaveDifferentIds, mex.getMsgId());
+    ASSERT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
+    serverMessage responseFromServer(msgType::login, msgOutcome::success, mex.getMsgId());
+    auto retrieved=client.retrieveRelatedMessage(responseFromServer);
+    EXPECT_EQ(mex, retrieved);
+}
+
+TEST_F(SymClientTest, retrieveRelatedMessageThrowsOnMissingMessage){
+    //suppose that the server send a message not related to any sent by the server,
+    // the list of unanswered messages is empty at the moment
+    serverMessage responseFromServer(msgType::login, msgOutcome::success);
+    EXPECT_THROW(client.retrieveRelatedMessage(responseFromServer), SymClientException);
 }

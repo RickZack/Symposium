@@ -33,13 +33,13 @@
 
 using namespace Symposium;
 TEST(symbolTest, symbolComparisonFromSameHost){
-    symbol s1('a',0,0, {1});
-    symbol s2('b', 0, 1, {1,5});
+    symbol s1('a', 0, 0, {1}, false);
+    symbol s2('b', 0, 1, {1, 5}, false);
     EXPECT_GT(s2, s1);
 }
 
 TEST(symbolTest, symbolComparisonFromDifferentHost){
-    symbol s1('a',0,0, {1});
-    symbol s2('b', 1, 0, {1});
+    symbol s1('a', 0, 0, {1}, false);
+    symbol s2('b', 1, 0, {1}, false);
     EXPECT_GT(s2, s1);
 }

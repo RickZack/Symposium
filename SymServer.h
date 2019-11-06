@@ -55,7 +55,7 @@
          std::unordered_map<std::string, user> registered;                                                /**< registered users, indexed by username */
          std::unordered_map<std::string, user *> active;                                                   /**< active users, indexed by username */
          std::unordered_map<std::string, std::forward_list<document *>> workingDoc;                        /**< list of document each user is working on */
-         std::unordered_map<int, std::queue<message>> workingQueue;                                       /**< messages queue associated with every document @e resourceId */
+         std::unordered_map<int, std::queue<std::shared_ptr<message>>> workingQueue;                                       /**< messages queue associated with every document @e resourceId */
          static int idCounter;                                                                            /**< siteId to be assigned to the next registered user */
          std::shared_ptr<directory> rootDir;                                                              /**< virtual filesystem of the Symposium server */
 
@@ -174,7 +174,7 @@
           * update its own copy of the document and propagate the update to the other clients putting the message in
           * @e workingQueue
           */
-         virtual void remoteInsert(const std::string &inserter, int resourceId, const symbolMessage &symMsg);
+         virtual void remoteInsert(const std::string &inserter, int resourceId, symbolMessage &symMsg);
 
          /**
           * @brief update a document removing a symbol

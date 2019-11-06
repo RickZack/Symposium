@@ -94,6 +94,14 @@ void SymClient::createNewDir(const std::shared_ptr<directory> dirCreated) {
     //TODO:implement
 }
 
+symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym) {
+    return symbolMessage(msgType::insertSymbol, {"", ""}, msgOutcome::success, 0, 0, symbol('a', 0, 0, {}, false));
+}
+
+symbolMessage SymClient::localRemove(int resourceId, int indexes[2]) {
+    return symbolMessage(msgType::insertSymbol, {"", ""}, msgOutcome::success, 0, 0, symbol('a', 0, 0, {}, false));
+}
+
 void SymClient::remoteInsert(int resourceId, const symbol &newSym) {
     //TODO:implement
 }
@@ -195,6 +203,15 @@ void SymClient::removeActiveUser(int resourceId, user &targetUser) {
 
 user &SymClient::getLoggedUser() {
     return loggedUser;
+}
+
+clientMessage& SymClient::retrieveRelatedMessage(const serverMessage& smex) {
+    //TODO: to implement
+    throw std::exception();
+}
+
+void SymClient::verifySymbol(int resourceId, const symbol &sym) {
+    //TODO: to implement
 }
 
 filterShared::filterShared(const user &currentUser): currentUser{currentUser} {
