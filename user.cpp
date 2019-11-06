@@ -39,23 +39,29 @@ user::user(const std::string &username, const std::string &pwd, const std::strin
            int siteId, std::shared_ptr<directory> home) : username(username), siteId(siteId),
                                                           nickname(nickname), iconPath(iconPath), home(home)
 {
-    //generating random salt for user
-    std::random_device device;
-    std::mt19937 generator(device());
-    std::srand(time(NULL));
-    std::uniform_int_distribution<> dis(20, 30);
-    std::poisson_distribution<int> distribution(rand());
+    if(pwd.length()<=5)
+        throw userException(userException::shortPwd, UnpackFileLineFunction());
 
-    for (size_t i = 0; i < dis(generator); i++)//salt have random lenght between 20 and 30
-    {
-        hashSalt+=static_cast<char>(distribution(generator));//the sequence of random characters used as salt
-    }
+    if(pwd.length()>=22)
+        throw userException(userException::longPwd, UnpackFileLineFunction());
+
+    if(noCharPwd(pwd))
+        throw userException(userException::noCharPwd, UnpackFileLineFunction());
+
+    if(noNumPwd(pwd))
+        throw userException(userException::noNumPwd, UnpackFileLineFunction());
+
+    if(noSpecialCharPwd(pwd))
+        throw userException(userException::noSpecialCharPwd, UnpackFileLineFunction());
+
+    if(nickname=="")
+        throw userException(userException::nickname, UnpackFileLineFunction());
+
+    //generating random salt for user
+    hashSalt=saltGenerate();
     //saving the password with the use of hash algorithm sha256
     pwdHash=sha256(pwd+hashSalt);
 }
-
-
-
 
 const std::string &user::getUsername() const {
     return username;
@@ -74,8 +80,7 @@ const std::string &user::getIconPath() const {
 }
 
 void user::setPwd(const std::string &pwd) {
-    //TODO: implement
-    user::pwdHash = pwd;
+    pwdHash=sha256(pwd+hashSalt);
 }
 
 void user::setNickname(const std::string &nickname) {
@@ -105,7 +110,6 @@ std::shared_ptr<file> user::newFile(const std::string &fileName, const std::stri
     std::shared_ptr<file> newF=home->addFile(pathFromHome, fileName);
     if(newF!= nullptr)
         return newF;
-
     throw userException(userException::newFile, UnpackFileLineFunction());
 }
 
@@ -113,23 +117,23 @@ std::shared_ptr<directory>
 user::newDirectory(const std::string &dirName, const std::string &pathFromHome, int idToAssign) const{
     std::shared_ptr<directory> newD;
     if(idToAssign==-1)
-        newD=home->addDirectory(dirName, idToAssign);
-    else
         newD=home->addDirectory(dirName);
+    else
+        newD=home->addDirectory(dirName, idToAssign);
     if(newD!= nullptr)
         return newD;
     throw userException(userException::newDir, UnpackFileLineFunction());
 }
 
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
-    std::string str1;
-    std::string str2;
-    std::string str3;
-    std::string str4;
-    std::size_t found = path.find_last_of("/\\");
-    str1.append(path,0, found); //path to the directory of the current user
-    str2.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
-    std::shared_ptr<directory> dir=this->home->getDir(str1, str2);
+    std::string pathCurrent;
+    std::string idCurrent;
+    std::string pathAdd;
+    std::string idAdd;
+
+    tie(pathCurrent, idCurrent)= separate(path); //separate the current path and the id of directory where user want to create a symlink
+
+    std::shared_ptr<directory> dir=this->home->getDir(pathCurrent, idCurrent);
     if(dir== nullptr)
         throw userException(userException::DirAccess, UnpackFileLineFunction());
 
@@ -141,10 +145,9 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     if(sym ==nullptr)
         throw userException(userException::addLink, UnpackFileLineFunction());
 
-    found = resId.find_last_of("/\\");
-    str3.append(resId,0, found); //absolute path to the directory of the file to add
-    str4.append(resId.begin()+found+1,resId.end()); //the id of file to add
-    std::shared_ptr<file> fi=root1->getFile(str3, str4);;
+    tie(pathAdd, idAdd)= separate(path); //separate the path and the id of file which the user want
+
+    std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
     if(fi == nullptr)
         throw userException(userException::addLink, UnpackFileLineFunction());
     return fi;
@@ -221,5 +224,54 @@ user::renameResource(const std::string &resPath, const std::string &resName, con
 }
 
 std::shared_ptr<filesystem> user::removeResource(const std::string &path, const std::string &name) const {
-    return home->remove(*this, path, name);;
+    std::shared_ptr<filesystem> object=home->remove(*this, path, name);
+    if(object==nullptr)
+        throw userException(userException::remove, UnpackFileLineFunction());
+    return object;
+}
+
+
+
+std::string user::saltGenerate()
+{
+    std::string sale;
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::srand(time(NULL));
+    std::uniform_int_distribution<> dis(20, 30);
+    std::poisson_distribution<int> distribution(rand());
+
+    for (size_t i = 0; i < dis(generator); i++)//salt have random lenght between 20 and 30
+    {
+        sale+=static_cast<char>(distribution(generator));//the sequence of random characters used as salt
+    }
+    return sale;
+}
+
+bool user::noCharPwd(const std::string &pass)
+{
+    std::size_t found = pass.find_first_not_of("1234567890?!$+-/.,@ˆ_");
+    return found == std::string::npos;
+}
+
+bool user::noNumPwd(const std::string &pass)
+{
+    std::size_t found = pass.find_first_not_of("abcdefghijklmnopqrstuvwxyz?!$+-/.,@ˆ_");
+    return found == std::string::npos;
+}
+
+bool user::noSpecialCharPwd(const std::string &pass)
+{
+    std::size_t found = pass.find_first_not_of("abcdefghijklmnopqrstuvwxyz1234567890");
+    return found == std::string::npos;
+}
+
+std::tuple<std::string, std::string>  user::separate(const std::string &path)
+{
+    std::string path2;
+    std::string id;
+    std::size_t found = path.find_last_of("/\\");
+    path2.append(path,0, found); //path to the directory of the current user
+    id.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
+    return  std::make_tuple(path2, id);
 }
