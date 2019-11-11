@@ -118,7 +118,7 @@ TEST_F(TrivialAccessTest, ReturnAlwaysTrue){
         EXPECT_TRUE(s->validateAction(u, p));
 }
 
-
+/*
 struct AccessStrategySerializationTest: ::testing::Test{
     //In the classes, AccessStrategy objects are handled through unique_ptr
     std::unique_ptr<AccessStrategy> RMOtoStore, RMOtoLoad;
@@ -158,3 +158,4 @@ TEST_F(AccessStrategySerializationTest, TrivialAccessSerialization){
     //if no compilation errors it works
     SUCCEED();
 }
+ */

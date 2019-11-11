@@ -141,7 +141,7 @@ TEST_F(uriTest, reachingEndTimeGivesNoPrivilege) {
     u.activateTimer(now);
     EXPECT_EQ(privilege::none, u.getShare(uri::getDefaultPrivilege()));
 }
-
+/*
 struct uriSerializationTest: ::testing::Test{
     uri toStore, toLoad;
     std::stringstream stream;
@@ -180,3 +180,4 @@ TEST_F(uriSerializationTest, saveAndLoadActivateTimer){
     loadUri(toLoad);
     EXPECT_EQ(toStore, toLoad);
 }
+ */
