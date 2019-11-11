@@ -146,23 +146,53 @@ std::shared_ptr<directory> directory::getRoot() {
 }
 
 std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
-    //TODO: implement
-    return std::shared_ptr<filesystem>();
+    for (unsigned i = 0; i < contained.size(); i++) {
+        std::shared_ptr<filesystem> f = contained.at(i);
+        std::string name_f = f->getName();
+        if (name_f == name)
+            return f;
+        }
+    throw filesystemException("FileSystem not found");
 }
 
 std::shared_ptr<directory> directory::getDir(const std::string &path, const std::string &name) {
-    //TODO: implement
-    return nullptr;
+   if(name=="." && !self.expired())
+       return self.lock();
+   if(name==".." &&!parent.expired())
+       return parent.lock();
+    for(unsigned i=0;i<contained.size();i++){
+        std::shared_ptr<filesystem> f= contained.at(i);
+        std::string name_f= f->getName();
+        if(name_f==name)
+            return std::dynamic_pointer_cast<directory>(f);
+    }
+    throw filesystemException("Directory are you searching for, is not present");
+
 }
 
 std::shared_ptr<file> directory::getFile(const std::string &path, const std::string &name) {
-    //TODO: implement
-    return nullptr;
+    for(unsigned i=0;i<contained.size();i++){
+       std::shared_ptr<filesystem> f= contained.at(i);
+       std::string name_f= f->getName();
+       if(name_f==name)
+           return std::dynamic_pointer_cast<file>(f);
+    }
+    throw filesystemException("File are you searching for, is not present");
+
 }
 
 std::string& directory::setName(const std::string &path, const std::string &fileName, const std::string& newName) {
-    //TODO: implement
-    return name;
+    for(unsigned i=0;i<contained.size();i++) {
+        std::shared_ptr<filesystem> f = contained.at(i);
+        std::string name_f = f->getName();
+        if (name_f == name) {
+            f->setName(newName);
+            return name;
+        }
+    }
+   throw filesystemException("File are you searching for, is not present");
+   //this->addFile(path,newName);
+    //return name;
 }
 
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
@@ -210,14 +240,32 @@ resourceType directory::resType() const {
 
 document &
 directory::access(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode) {
-    //TODO: implement
     static document doc;
+    privilege user_priv=this->getUserPrivilege(targetUser.getUsername());
+    if(user_priv==privilege::none)
+        throw filesystemException("You no longer have the possibility to access the file in any mode");
+    if(user_priv>accessMode)
+        throw filesystemException("You have a lower privilege than you ask");
+    std::shared_ptr<file> newF= this->getFile(path,resName);
+    doc= newF->access(targetUser,accessMode);
     return doc;
 }
 
 std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &path, const std::string &resName) {
-    //TODO: implement
-    return std::shared_ptr<filesystem>();
+    privilege user_priv=this->getUserPrivilege(targetUser.getUsername());
+    if(user_priv==privilege::owner){
+        for (unsigned i = 0; i < contained.size(); i++)
+        {
+            if (contained.at(i)->getName() == resName) {
+                std::shared_ptr<filesystem> f = contained.at(i);
+                contained.erase(contained.begin()+i);
+                return f;
+            }
+
+        }
+        throw filesystemException("There is no file to remove");
+    }
+    throw filesystemException("You no longer have the possibility to remove the file in any mode");
 }
 
 void directory::store(const std::string &storePath) const {
@@ -233,8 +281,12 @@ void directory::send() const {
 }
 
 std::string directory::print(const std::string &targetUser, bool recursive, int indent) const {
-    //TODO: implement
-    return "";
+
+    std::ostringstream user_priv;
+    if(getUserPrivilege(targetUser)==privilege::none)
+        return name+" You no longer have the possibility to access the file in any mode";
+    user_priv<<getUserPrivilege(targetUser);
+    return name + " " + user_priv.str();
 }
 
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
