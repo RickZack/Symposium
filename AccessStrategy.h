@@ -36,14 +36,14 @@
 #include "Symposium.h"
 
 #include <string>
-/*
+
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include "boost/serialization/unordered_map.hpp"
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/assume_abstract.hpp>
 #include <boost/serialization/export.hpp>
- */
+
 /*
  * OPTIMIZE: use template to implement strategy pattern
  */
@@ -53,11 +53,9 @@ namespace Symposium {
  * @brief Defines how the permissions on objects of type @link filesystem are handled
  */
     class AccessStrategy {
-        /*
         friend class boost::serialization::access;
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version){};
-         */
     public:
         /**
          * @brief validate an action from user @ref targetUser that requires @ref requested
@@ -77,14 +75,14 @@ namespace Symposium {
 
         virtual privilege getPrivilege(const std::string &targetUser) =0;
     };
-    //BOOST_SERIALIZATION_ASSUME_ABSTRACT(AccessStrategy)
+    BOOST_SERIALIZATION_ASSUME_ABSTRACT(AccessStrategy)
 
     /**
      * @brief class used to model a ReadModifyOwn privilege handling on a resource.
      */
     class RMOAccess : public AccessStrategy {
         std::unordered_map<std::string, privilege> permission; /**< username and related privilege for the resource */
-/*
+
         friend class boost::serialization::access;
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version)
@@ -93,7 +91,7 @@ namespace Symposium {
             ar & boost::serialization::base_object<Symposium::AccessStrategy>(*this);
             ar & permission;
         }
-        */
+
     public:
         bool validateAction(const std::string &targetUser, privilege requested) override;
 
@@ -110,7 +108,6 @@ namespace Symposium {
      * @brief class used to model the absence of privilege handling on a resource
      */
     class TrivialAccess : public AccessStrategy {
-        /*
         friend class boost::serialization::access;
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version)
@@ -118,7 +115,7 @@ namespace Symposium {
             // save/load base class information
             ar & boost::serialization::base_object<Symposium::AccessStrategy>(*this);
         }
-         */
+
     public:
         bool validateAction(const std::string &targetUser, privilege requested) override;
 
