@@ -240,6 +240,7 @@ namespace Symposium {
     class symlink : public filesystem {
         std::string pathToFile;    /**< absolute path to a @e file, obtained as concatenation of @e id */
         std::string fileName;      /**< name of the file pointed, meaning its @e id */
+        
     public:
         symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName);
 
@@ -278,7 +279,7 @@ namespace Symposium {
  * @brief class used to model a directory, uses @e Singleton pattern
  */
     class directory : public filesystem {
-        std::shared_ptr<directory> root;                 /**< root directory of the system */
+        static std::shared_ptr<directory> root;                 /**< root directory of the system */
         std::vector<std::shared_ptr<filesystem> > contained;    /**< filesystem objects contained in the directory */
         std::weak_ptr<directory> parent;                        /**< pointer to the parent directory */
         std::weak_ptr<directory> self;                          /**< pointer to itself */

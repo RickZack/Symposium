@@ -33,9 +33,12 @@
 using namespace Symposium;
 
 int filesystem::idCounter=0;
+std::shared_ptr<directory> directory::root;
 
 filesystem::filesystem(const std::string &name) : name(name) {
-    //TODO: implement
+    id=idCounter;
+    idCounter++;
+    sharingPolicy=uri();
 }
 
 int filesystem::getId() const {
@@ -131,6 +134,7 @@ const document &file::getDoc() const {
 }
 
 directory::directory(const std::string &name) : filesystem(name) {
+
     //guardare lab 2
     //settare id qui
     //TODO: implement
@@ -140,8 +144,20 @@ std::shared_ptr<directory> directory::nullDir() {
     return std::shared_ptr<directory>();
 }
 
+
 std::shared_ptr<directory> directory::getRoot() {
-    return std::shared_ptr<directory>();
+
+    if(root){
+        return root;
+    }
+    std::string name="/";
+    std::shared_ptr<directory> new_root(new directory(name));
+    new_root->self=new_root;
+    root=new_root;
+    return root;
+
+   // return std::shared_ptr<directory>();
+
 }
 
 std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
@@ -280,16 +296,18 @@ void directory::send() const {
 }
 
 std::string directory::print(const std::string &targetUser, bool recursive, int indent) const {
-
-    std::ostringstream user_priv;
-    if(getUserPrivilege(targetUser)==privilege::none)
-        return name+" You no longer have the possibility to access the file in any mode";
-    user_priv<<getUserPrivilege(targetUser);
-    return name + " " + user_priv.str();
+    std::string new_string= "root\r\n";
+    for (unsigned i = 0; i < contained.size(); i++){
+        std::shared_ptr<filesystem> f = contained.at(i);
+        std::string name= f->getName();
+        new_string=new_string+"-"+name+"\r\n";
+    }
+    return new_string;
 }
 
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
     //TODO: implement
+
     //settare id
 }
 
@@ -298,7 +316,7 @@ resourceType Symposium::symlink::resType() const {
 }
 
 document Symposium::symlink::access() {
-    //TODO: implement
+
     return document(0);
 }
 
@@ -315,6 +333,7 @@ void Symposium::symlink::send() const {
 }
 
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
-    //TODO: implement
-    return "";
+    std::ostringstream priv;
+    priv<<strategy->getPrivilege(targetUser);
+    return name + " " + priv.str();
 }
