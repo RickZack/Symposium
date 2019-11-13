@@ -59,7 +59,7 @@ privilege filesystem::setUserPrivilege(const std::string &targetUser, privilege 
 }
 
 std::string filesystem::setName(const std::string &newName) {
-    //TODO: implement
+    filesystem::name=newName;
     return name;
 }
 
@@ -141,7 +141,6 @@ std::shared_ptr<directory> directory::nullDir() {
 }
 
 std::shared_ptr<directory> directory::getRoot() {
-    //TODO: implement
     return std::shared_ptr<directory>();
 }
 
