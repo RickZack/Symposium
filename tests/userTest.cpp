@@ -47,10 +47,10 @@ struct dirMock: public directory{
 
     MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, int idToAssign));
 
-    MOCK_METHOD3(access, document(const user &targetUser, const std::string &path, const std::string &resName));
+    MOCK_METHOD4(access, document&(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode));
     MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &, const std::string &, const std::string &));
 
-    MOCK_CONST_METHOD3(print, std::string(const user &targetUser, bool recursive, int indent));
+    MOCK_CONST_METHOD3(print, std::string(const std::string &targetUser, bool recursive, int indent));
 };
 
 struct fileMock: public file{
@@ -139,19 +139,20 @@ TEST_F(UserTest, callChangePrivilege){
 
 TEST_F(UserTest, callRemoveResource)
 {
-    EXPECT_CALL(*homeDir, remove(*u, ".", "dir"));
+    EXPECT_CALL(*homeDir, remove(*u, ".", "dir")).WillOnce(::testing::Return(std::shared_ptr<filesystem>(Dir)));
     u->removeResource(".", "dir");
 }
 
 TEST_F(UserTest, callShowDir)
 {
-    EXPECT_CALL(*homeDir, print(*u, true, 0));
+    EXPECT_CALL(*homeDir, print(u->getUsername(), false, 0));
     u->showDir(false);
 }
 
 TEST_F(UserTest, callOpenFile)
 {
-    EXPECT_CALL(*homeDir, access(*u, ".", "dummyFile"));
+    document expected;
+    EXPECT_CALL(*homeDir, access(*u, ".", "dummyFile", privilege::readOnly)).WillOnce(::testing::ReturnRef(expected));
     u->openFile(".", "dummyFile", uri::getDefaultPrivilege());
 }
 

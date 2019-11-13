@@ -33,11 +33,9 @@
 
 #include <chrono>
 #include "privilege.h"
-/*
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include "boost/serialization/binary_object.hpp"
- */
 
 namespace Symposium {
 /**
@@ -64,13 +62,13 @@ namespace Symposium {
 
         static constexpr privilege defaultPrivilege = privilege::modify;
 
-//        friend class boost::serialization::access;
-//        template<class Archive>
-//        void serialize(Archive & ar, const unsigned int /* file_version */){
-//            ar & uriId & activePolicy & sharesLeft
-//            & boost::serialization::make_binary_object(&stopTime, sizeof(stopTime))
-//            & granted;
-//        }
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive & ar, const unsigned int /* file_version */){
+            ar & uriId & activePolicy & sharesLeft
+            & boost::serialization::make_binary_object(&stopTime, sizeof(stopTime))
+            & granted;
+        }
     public:
         uri(uriPolicy activePolicy = uriPolicy::inactive);
 
