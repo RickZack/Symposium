@@ -353,9 +353,9 @@ resourceType Symposium::symlink::resType() const {
     return resourceType::symlink;
 }
 
-document Symposium::symlink::access() {
+document& Symposium::symlink::access(const user &targetUser, privilege accessMode) {
     //TODO: implement
-    return document(0);
+    throw std::exception();
 }
 
 void Symposium::symlink::store(const std::string &storePath) const {

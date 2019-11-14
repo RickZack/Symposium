@@ -73,6 +73,8 @@ struct fileMock: public file{
     void setMockPolicy(privilege privilege) {
         sharingPolicy=uriMock(privilege);
     }
+
+    virtual ~fileMock() override= default;
 };
 
 struct dummyFunctional{

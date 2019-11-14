@@ -154,6 +154,8 @@ namespace Symposium {
 
         virtual void send() const = 0; //not clear how to set this
         virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const = 0;
+
+        virtual ~filesystem()= default;
     };
 
 /**
@@ -228,6 +230,8 @@ namespace Symposium {
          * that @e targetUser has on it
          */
         std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
+
+        virtual ~file() override=default;
     };
 
 
@@ -254,7 +258,7 @@ namespace Symposium {
          * The resource should be a file, because pointers to directories are not allowed in this
          * system design and pointers to symlink are meaningless.
          */
-        document access();
+        document& access(const user &targetUser, privilege accessMode);
 
         void store(const std::string &storePath) const override;
 
@@ -273,6 +277,8 @@ namespace Symposium {
          * privileges granted to @e targetUser for the file pointed by the symlink
          */
         virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
+
+        ~symlink() override = default;
     };
 
 
@@ -346,8 +352,10 @@ namespace Symposium {
          * @return a string containing the representation
          */
         virtual std::string print(const std::string &targetUser, bool recursive = true, int indent = 0) const override;
-
+        //FIXME: directory is singleton, this constructor should be private
         directory(const std::string &name);
+
+        virtual ~directory() override= default;
     };
 
 
