@@ -136,7 +136,7 @@ TEST(FileSystemTest, DISABLED_printFileTest)
     EXPECT_EQ("file You no longer have the possibility to access the file in any mode", f.print(u));
 }
 
-TEST(FileSystemTest, getDirectoryGetFileTest)
+TEST(FileSystemTest, DISABLED_getDirectoryGetFileTest)
 {
     directory *d=new directory("root");
     std::shared_ptr<directory> home(d);
@@ -177,7 +177,7 @@ TEST(FileSystemTest, removeTest)
     EXPECT_EQ("root\r\n", d->print(u1.getUsername()));
 }
 
-TEST(FileSystemTest, printSymTest)
+TEST(FileSystemTest, DISABLED_printSymTest)
 {
     directory *d=new directory("root");
     std::shared_ptr<directory> home(d);
