@@ -28,6 +28,7 @@
  * Created on 17 Giugno 2019, 22.41
  */
 #include <iostream>
+#include <boost/random/random_device.hpp>
 #include "user.h"
 #include "filesystem.h"
 #include "SymposiumException.h"
@@ -125,6 +126,14 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
     throw userException(userException::newDir, UnpackFileLineFunction());
 }
 
+//FIXME: accessFile should check what privilege the resource pointed by [resId] can give to other users, using
+// the uri object of file pointed by [resId]
+// following the call stack for opening a file already inserted with a symlink:
+//      user::openFile -> called when a user will want to access the file pointed by the symlink
+//      directory::access -> called on user's home directory, searches the file and call access on it
+//      file::access -> called on the file retrieved
+//      RMOAccess::getUserPrivilege -> called by file::access, verify that the user obtained a privilege
+//      --> Ops, [file1] has never granted a privilege for the user, exception thrown
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
     std::string pathCurrent;
     std::string idCurrent;
@@ -141,11 +150,11 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     if(root1== nullptr)
         throw userException(userException::sysError, UnpackFileLineFunction());
 
-    std::shared_ptr<symlink> sym=home->addLink(path, fileName);
+    tie(pathAdd, idAdd)= separate(path); //separate the path and the id of file which the user want
+
+    std::shared_ptr<symlink> sym= home->addLink(path, fileName, path, idAdd);
     if(sym ==nullptr)
         throw userException(userException::addLink, UnpackFileLineFunction());
-
-    tie(pathAdd, idAdd)= separate(path); //separate the path and the id of file which the user want
 
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
     if(fi == nullptr)
@@ -235,7 +244,7 @@ std::shared_ptr<filesystem> user::removeResource(const std::string &path, const 
 std::string user::saltGenerate()
 {
     std::string sale;
-    std::random_device device;
+    boost::random::random_device device;
     std::mt19937 generator(device());
     std::srand(time(NULL));
     std::uniform_int_distribution<> dis(20, 30);

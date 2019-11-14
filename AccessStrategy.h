@@ -74,6 +74,8 @@ namespace Symposium {
         virtual privilege setPrivilege(const std::string &targetUser, privilege toGrant) =0;
 
         virtual privilege getPrivilege(const std::string &targetUser) =0;
+
+        virtual ~AccessStrategy()= default;
     };
     BOOST_SERIALIZATION_ASSUME_ABSTRACT(AccessStrategy)
 
@@ -102,6 +104,8 @@ namespace Symposium {
         bool operator==(const RMOAccess &rhs) const;
 
         bool operator!=(const RMOAccess &rhs) const;
+
+        ~RMOAccess() override = default;
     };
 
     /**
@@ -122,6 +126,8 @@ namespace Symposium {
         privilege setPrivilege(const std::string &targetUser, privilege toGrant) override;
 
         privilege getPrivilege(const std::string &targetUser) override;
+
+        ~TrivialAccess() override = default;
     };
 }
 #endif //SYMPOSIUM_ACCESSSTRATEGY_H

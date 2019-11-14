@@ -130,6 +130,8 @@ namespace Symposium {
          * @return or requested privilege if it is <= than granted privilege or granted privilege if requested privilege is > than granted
          */
         privilege getShare(privilege requested);
+
+        virtual ~uri()= default;
     };
 }
 

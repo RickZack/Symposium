@@ -84,5 +84,4 @@ privilege TrivialAccess::setPrivilege(const std::string &targetUser, privilege t
 privilege TrivialAccess::getPrivilege(const std::string &targetUser) {
     return privilege::none;
 }
-//
 BOOST_CLASS_EXPORT(Symposium::RMOAccess)

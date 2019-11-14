@@ -43,8 +43,8 @@ struct dirMock: public directory{
     MOCK_METHOD2(get, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
     MOCK_METHOD0(getRoot, std::shared_ptr<directory>());
-    MOCK_METHOD2(addLink, std::shared_ptr<class symlink>(const std::string &, const std::string &));
-
+    MOCK_METHOD4(addLink, std::shared_ptr<class symlink>(const std::string &path, const std::string &name, const std::string &filePath,
+            const std::string &fileName));
     MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, int idToAssign));
 
     MOCK_METHOD4(access, document&(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode));
@@ -53,10 +53,26 @@ struct dirMock: public directory{
     MOCK_CONST_METHOD3(print, std::string(const std::string &targetUser, bool recursive, int indent));
 };
 
+struct uriMock: public uri{
+    uriMock(privilege p){
+        uri::activateAlways(p);
+    }
+
+    MOCK_METHOD1(getShare, privilege(privilege));
+
+    virtual ~uriMock() override = default;
+};
+
 struct fileMock: public file{
     fileMock(): file("dummy", "./somedir"){};
     MOCK_METHOD2(setUserPrivilege, privilege(const std::string&, privilege));
     MOCK_METHOD2(setSharingPolicy, uri(const std::string&, uri& newSharingPrefs));
+    uri& getPolicy(){
+        return sharingPolicy;
+    }
+    void setMockPolicy(privilege privilege) {
+        sharingPolicy=uriMock(privilege);
+    }
 };
 
 struct dummyFunctional{
@@ -89,12 +105,22 @@ struct UserTest: ::testing::Test{
     }
 };
 
-TEST_F(UserTest, DISABLED_callAccessFile){
-    EXPECT_CALL(*homeDir, getDir("h", "h")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
+TEST_F(UserTest, callAccessFile){
+    /*
+     * -anotherDir (has id=1)
+     *   -file1 (has id=4)
+     * -homeDir (has id=0)
+     *   -dir1 (has id=2)
+     *     -sym1 (has id=decided internally)
+     */
+    std::shared_ptr<class symlink> returned(new class symlink("sym1", "/1", "4"));
+    EXPECT_CALL(*homeDir, getDir("./2", "3")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
     EXPECT_CALL(*Dir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
-    EXPECT_CALL(*homeDir, addLink("h/h", "sym"));//aggiungere valore di ritorno
-    EXPECT_CALL(*Root, getFile("f", "f"));
-    u->accessFile("f/f", "h/h", "sym");
+    EXPECT_CALL(*homeDir, addLink("./2", "sym1", "/1", "4")).WillOnce(::testing::Return(returned));
+    EXPECT_CALL(*Root, getFile("/1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
+    dummyFile->setMockPolicy(uri::getDefaultPrivilege());
+    EXPECT_CALL(static_cast<uriMock&>(dummyFile->getPolicy()), getShare(uri::getDefaultPrivilege()));
+    u->accessFile("/1/4", "/0/2", "sym1");
 
 }
 

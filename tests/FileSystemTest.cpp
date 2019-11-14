@@ -31,6 +31,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <cstdlib>
 #include "../filesystem.h"
 #include "../user.h"
 #include "../document.h"
@@ -146,7 +147,7 @@ TEST(FileSystemTest, getDirectoryGetFileTest)
     EXPECT_THROW(d->getDir("/root", "file1"), filesystemException);
     EXPECT_THROW(d->getFile("/root", "cart1"), filesystemException);
 }
-
+/*
 TEST(FileSystemTest, addDirAddFileAddSymPrintTest)
 {
     directory *d=new directory("root");
@@ -158,10 +159,11 @@ TEST(FileSystemTest, addDirAddFileAddSymPrintTest)
     std::shared_ptr<file> f=d->addFile(".", "file1");
     ASSERT_FALSE(f==nullptr);
     EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n", d->print(u1.getUsername()));
-    std::shared_ptr<class symlink> sym=d->addLink(".", "sym");
+    std::shared_ptr<class symlink> sym= d->addLink(".", "sym", <#initializer#>, <#initializer#>);
     ASSERT_FALSE(sym==nullptr);
     EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n-sym\r\n", d->print(u1.getUsername()));
 }
+ */
 
 TEST(FileSystemTest, removeTest)
 {
@@ -194,6 +196,7 @@ struct directoryAccesser: public directory{ //only to access the protected membe
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
+    MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
 };
 
 struct fileAccesser: public file{ //only to access the protected members of directory from tests
@@ -201,6 +204,11 @@ struct fileAccesser: public file{ //only to access the protected members of dire
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
+
+    void setDummyStrategy(RMOAccessMock *pMock) {
+        strategy.reset(pMock);
+    }
+    MOCK_METHOD2(access, document&(const user &targetUser, privilege accessMode));
 };
 
 struct symlinkAccesser: public symlink{ //only to access the protected members of directory from tests
@@ -257,4 +265,262 @@ TEST_F(FileSystemTestRobust, FileAcceptsWellFormedRealPath) {
     std::string aGoodPath{"./dir1/dir2/dir3"};
     file f("fileName", "./dir1/dir2/dir3");
     EXPECT_EQ(aGoodPath, f.getName());
+}
+
+struct FileSystemTestSharing: ::testing::Test{
+    directoryAccesser dir;
+    symlinkAccesser sym;
+    fileAccesser f;
+    uri expected;
+
+    static const std::string username;
+
+    FileSystemTestSharing():dir("dir"), f("file"), sym("link"){};
+
+    ::testing::AssertionResult getRootIsImplemented(const char* m_expr, std::shared_ptr<directory> root){
+        if(root.get()== nullptr || directory::getRoot()!=root)
+            return ::testing::AssertionFailure()<<"Unable to run this test since directory::getRoot() is not correctly implemented yet";
+        return ::testing::AssertionSuccess();
+    }
+
+    ::testing::AssertionResult strategyIsImplemented(const char* m_expr, AccessStrategy* nullStrategy){
+        if(f.getStrategy()== nullStrategy)
+            return ::testing::AssertionFailure()<<"Unable to run this test since AccessStrategy is not correctly implemented yet";
+        return ::testing::AssertionSuccess();
+    }
+    void verifySetPrivilegeOnFile(privilege toAssign=privilege::owner){
+        RMOAccessMock* dummyStrategy=new RMOAccessMock();
+        f.setDummyStrategy(dummyStrategy);
+        EXPECT_CALL(*dummyStrategy, setPrivilege(username, toAssign)).WillOnce(::testing::Return(toAssign));
+        f.setUserPrivilege(username, toAssign);
+    }
+
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUsername (another user's directory)
+     *     -file1
+     *   -someUser (user's directory)
+     *     -dir1
+     *       -sym1
+     *       -file2
+     * (expected is dir1)
+     */
+    void constructTree(){
+        auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
+        directory::getRoot()->addDirectory("anotherUsername", 2);
+        auto inserted=directory::getRoot()->addFile("./1/2", "file1");
+        /*
+         * Simulate the fact that the user obtains a [defaultPrivilege] on [file1]
+         */
+        inserted->setUserPrivilege(username, uri::getDefaultPrivilege());
+        directory::getRoot()->addFile("./1/7", "file2");
+        auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/1/2", "/1/7/"+std::to_string(inserted->getId()));
+        std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
+    }
+};
+const std::string FileSystemTestSharing::username="someUser";
+
+TEST_F(FileSystemTestSharing, setUserPrivilegeOnFileCallsStrategy) {
+    RMOAccessMock* dummyStrategy=new RMOAccessMock();
+    f.setDummyStrategy(dummyStrategy);
+    EXPECT_CALL(*dummyStrategy, setPrivilege(username, privilege::owner));
+    f.setUserPrivilege(username, privilege::owner);
+}
+
+TEST_F(FileSystemTestSharing, setSharingPolicyOnFile) {
+    //user u("username", "P@assW0rd!", "noempty", "", 0, directory::getRoot());
+    //Just to verify that doesn't return a default constructed uri
+    expected.activateCount(2);
+    ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile());
+    EXPECT_CALL(*dynamic_cast<RMOAccessMock*>(f.getStrategy()), getPrivilege(username));
+    uri returned=f.setSharingPolicy(username, expected);
+    EXPECT_EQ(expected, returned);
+}
+
+/*
+ * What happens if the strategy says that user has no right?
+ * setSharingPolicy should throw so we don't need an error return value to propagate up
+ * to the caller of the function
+ */
+TEST_F(FileSystemTestSharing, setSharingPolicyOnFileThrowsOnInsufficientPrivilege) {
+    //Just to verify that doesn't return a default constructed uri
+    expected.activateCount(2);
+    ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::modify));
+    EXPECT_CALL(*dynamic_cast<RMOAccessMock*>(f.getStrategy()), getPrivilege(username));
+    EXPECT_THROW(f.setSharingPolicy(username, expected), filesystemException);
+}
+
+TEST_F(FileSystemTestSharing, setSharingPolicyOnSymlinkThrows) {
+    EXPECT_THROW(sym.setSharingPolicy(username, expected), filesystemException);
+}
+
+TEST_F(FileSystemTestSharing, setSharingPolicyOnDirThrows) {
+    EXPECT_THROW(dir.setSharingPolicy(username, expected), filesystemException);
+}
+
+TEST_F(FileSystemTestSharing, accessOnFileCallsValidateAction){
+    user u(username, "P@assW0rd!", "noempty", "", 0, directory::getRoot());
+    ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::modify));
+    EXPECT_CALL(*dynamic_cast<RMOAccessMock*>(f.getStrategy()), validateAction(username, privilege::readOnly)).WillOnce(::testing::Return(true));
+    f.access(u,privilege::readOnly);
+}
+
+TEST_F(FileSystemTestSharing, accessOnFileThrowsWithAnInsufficientPrivilege){
+    user u(username, "P@assW0rd!", "noempty", "", 0, directory::getRoot());
+    ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::readOnly));
+    EXPECT_CALL(*dynamic_cast<RMOAccessMock*>(f.getStrategy()), validateAction(username, privilege::modify)).WillOnce(::testing::Return(false));
+    EXPECT_THROW(f.access(u,privilege::readOnly), filesystemException);
+}
+
+TEST_F(FileSystemTestSharing, printFileWithIndent){
+    ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::readOnly));
+    EXPECT_CALL(*dynamic_cast<RMOAccessMock*>(f.getStrategy()), getPrivilege(username)).WillRepeatedly(::testing::Return(privilege::readOnly));
+    std::ostringstream expected;
+    expected<<f.getName()<<" "<<privilege::readOnly;
+    unsigned  spaces=rand()%10+1; //expect n spaces
+    std::string ret=f.print(username, false, spaces);
+    EXPECT_EQ(expected.str().insert(0, spaces, ' '), ret);
+}
+
+TEST_F(FileSystemTestSharing, getSearchesRecursive){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -someUser (user's directory)
+     *     -dir1
+     * (expected is dir1)
+     */
+    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
+    auto ret=directory::getRoot()->get("./1/", "7");
+    EXPECT_EQ(expected, ret);
+}
+
+TEST_F(FileSystemTestSharing, setNameSearchesRecursive){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -someUser (user's directory)
+     *     -dir1
+     * (expected is dir1)
+     */
+    std::string newName="NewName";
+    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
+    std::string oldName=expected->getName();
+    std::string ret=directory::getRoot()->setName("./1/", "7", newName);
+    EXPECT_EQ(newName, expected->getName());
+    EXPECT_EQ(oldName, ret);
+}
+
+TEST_F(FileSystemTestSharing, AddFileInsertsRecursive){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -someUser (user's directory)
+     *     -dir1
+     *       -file1
+     * (expected is dir1)
+     */
+    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
+    auto inserted=directory::getRoot()->addFile("./1/7", "file1");
+    auto ret=directory::getRoot()->get("./1/7/", std::to_string(inserted->getId()));
+    EXPECT_EQ(inserted, ret);
+}
+
+TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUsername (another user's directory)
+     *     -sym1
+     *   -someUser (user's directory)
+     *     -dir1
+     *       -file1
+     * (expected is dir1)
+     */
+    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
+    directory::getRoot()->addDirectory("anotherUsername", 2);
+    auto inserted=directory::getRoot()->addFile("./1/7", "file1");
+    auto linkToInserted= directory::getRoot()->addLink("./1/2", "sym1", "/1/7/", std::to_string(inserted->getId()));
+    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
+    EXPECT_EQ(inserted, ret);
+}
+
+TEST_F(FileSystemTestSharing, accessOnFile){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    user u(username, "P@assW0rd!", "noempty", "", 0, directory::getRoot());
+    documentMock d;
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -someUser (user's directory)
+     *     -dir1
+     *       -file1
+     * (expected is dir1)
+     */
+    //These two following lines are only explanatory, not useful for the test but to understand this structure is used
+    auto expected=dir.addDirectory(username, 1)->addDirectory("dir1", 7);
+    auto inserted=dir.addFile("./1/7", "file1");
+    fileAccesser* dummy=new fileAccesser("dummyFile");
+    EXPECT_CALL(dir, getFile("./1/7", std::to_string(inserted->getId()))).WillOnce(::testing::Return(std::shared_ptr<file>(dummy)));
+    EXPECT_CALL(*dummy, access(u,privilege::readOnly)).WillOnce(::testing::ReturnRef(d));
+    EXPECT_CALL(d, access(u, privilege::readOnly));
+    dir.access(u, "./1/7/", std::to_string(inserted->getId()), privilege::readOnly);
+}
+
+TEST_F(FileSystemTestSharing, printDirectoryRecursive){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUsername (another user's directory)
+     *     -file1
+     *   -someUser (user's directory)
+     *     -dir1
+     *       -sym1
+     *       -file2
+     * (expected is dir1)
+     */
+    constructTree(); //set the tree above
+    std::ostringstream res; //will contain the print of someUser's directory
+    /*
+     * Explaining on why we expect this string as output:
+     * addLink() is usually called by user::accessFile, whose job is to obtain a privilege on the file whose resId
+     * (concatenation of ids) is given and create a symlink in its home directory. In constructTree() we simulated
+     * this behaviour setting the privilege for [username] to uri::getDefaultPrivilege() for file [file1]. In this
+     * way, we expect sym1 (that should point to file1) to return its name and the privilege that the user holds
+     * on [file1] (not on the symlink itself, that doesn't make much sense).
+     */
+    res<<"someUser"<<" "<<"dir1\r\n"<<"  "<<"sym1 "<<uri::getDefaultPrivilege()<<"\r\n"<<"  "<<"file2 "<<privilege::owner<<"\r\n";
+    EXPECT_EQ(res.str(), directory::getRoot()->getDir("./", "1")->print(username, true, 0));
+}
+
+TEST_F(FileSystemTestSharing, removeDirectoryRecursive){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    user u(username, "P@assW0rd!", "noempty", "", 0, directory::getRoot());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUsername (another user's directory)
+     *     -file1
+     *   -someUser (user's directory)
+     *     -dir1
+     *       -sym1
+     *       -file2
+     * (expected is dir1)
+     */
+    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
+    directory::getRoot()->addDirectory("anotherUsername", 2);
+    auto inserted=directory::getRoot()->addFile("./1/2", "file1");
+    auto file2=directory::getRoot()->addFile("./1/7", "file2");
+    auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/1/2", "/1/7/"+std::to_string(inserted->getId()));
+    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
+    //Remove file2, should not throw
+    directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId()));
+    //Try to remove again file2, should throw
+    EXPECT_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId())), filesystemException);
 }

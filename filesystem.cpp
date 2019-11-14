@@ -34,10 +34,12 @@ using namespace Symposium;
 
 int filesystem::idCounter=0;
 std::shared_ptr<directory> directory::root;
+uri filesystem::u;
 
-filesystem::filesystem(const std::string &name) : name(name) {
+filesystem::filesystem(const std::string &name) : name(name), sharingPolicy(u){
     id=idCounter;
     idCounter++;
+    //FIXME: this is not necessary
     sharingPolicy=uri();
 }
 
@@ -73,6 +75,7 @@ uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingP
 file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0) {
     //TODO: implement
     //settare id
+    //FIXME: set id only in filesystem constructor (that is called by subclasses' constructors)
 }
 
 resourceType file::resType() const {
@@ -97,6 +100,9 @@ uri file::setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) 
         file::sharingPolicy = newSharingPrefs;
     }
     return newSharingPrefs;
+    //FIXME: What happens if the strategy says that user has no right?
+    // if we return the prefs we should have assigned, then there is no way to
+    // detect the error
 }
 
 document & file::access(const user &targetUser, privilege accessMode) {
@@ -137,6 +143,7 @@ directory::directory(const std::string &name) : filesystem(name) {
 
     //guardare lab 2
     //settare id qui
+    //FIXME: set id only in filesystem constructor, set it private to avoid errors
     //TODO: implement
 }
 
@@ -161,6 +168,7 @@ std::shared_ptr<directory> directory::getRoot() {
 }
 
 std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
+    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
     for (unsigned i = 0; i < contained.size(); i++) {
         std::shared_ptr<filesystem> f = contained.at(i);
         std::string name_f = f->getName();
@@ -186,6 +194,7 @@ std::shared_ptr<directory> directory::getDir(const std::string &path, const std:
 }
 
 std::shared_ptr<file> directory::getFile(const std::string &path, const std::string &name) {
+    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
     for(unsigned i=0;i<contained.size();i++){
        std::shared_ptr<filesystem> f= contained.at(i);
        std::string name_f= f->getName();
@@ -197,6 +206,7 @@ std::shared_ptr<file> directory::getFile(const std::string &path, const std::str
 }
 
 std::string& directory::setName(const std::string &path, const std::string &fileName, const std::string& newName) {
+    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
     for(unsigned i=0;i<contained.size();i++) {
         std::shared_ptr<filesystem> f = contained.at(i);
         std::string name_f = f->getName();
@@ -211,7 +221,7 @@ std::string& directory::setName(const std::string &path, const std::string &file
 }
 
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
-
+    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
     for (unsigned i = 0; i < contained.size(); i++)
     {
     if (contained.at(i)->getName() == name)
@@ -225,6 +235,7 @@ std::shared_ptr<directory> directory::addDirectory(const std::string &name, int 
 }
 
 std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name) {
+    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
     for (unsigned i = 0; i < contained.size(); i++)
     {
         if (contained.at(i)->getName() == name)
@@ -232,11 +243,15 @@ std::shared_ptr<file> directory::addFile(const std::string &path, const std::str
     }
     std::shared_ptr<file> newFile(new file(name, path));
     contained.push_back(newFile);
+    //FIXME: multiple increment of idCounter (here and in filesystem constructor)
+    // idCounter should be private and touched only in constructor
     idCounter++;
     return newFile;
 }
 
-std::shared_ptr<Symposium::symlink> directory::addLink(const std::string &path, const std::string &name)
+std::shared_ptr<class symlink>
+directory::addLink(const std::string &path, const std::string &name, const std::string &filePath,
+                   const std::string &fileName)
 {
     for (unsigned i = 0; i < contained.size(); i++)
     {
@@ -244,6 +259,8 @@ std::shared_ptr<Symposium::symlink> directory::addLink(const std::string &path, 
             throw filesystemException("You already have an element with the same name");
     }
     std::shared_ptr<symlink> newSym(new symlink(name, path, name));
+    //FIXME: multiple increment of idCounter (here and in filesystem constructor)
+    // idCounter should be private and touched only in constructor
     idCounter++;
     contained.push_back(newSym);
     return newSym;
@@ -253,22 +270,31 @@ resourceType directory::resType() const {
     return resourceType::directory;
 }
 
+
 document &
 directory::access(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode) {
+    //FIXME: don't declare a static variable inside a method, it's not reentrant
     static document doc;
+    //FIXME: this line will always throw because you're calling getUserPrivilege against a directory
+    // this should be called against the file we actually want to access
     privilege user_priv=this->getUserPrivilege(targetUser.getUsername());
     if(user_priv==privilege::none)
         throw filesystemException("You no longer have the possibility to access the file in any mode");
     if(user_priv>accessMode)
         throw filesystemException("You have a lower privilege than you ask");
     std::shared_ptr<file> newF= this->getFile(path,resName);
+    //FIXME: why not:
+    // return newF->access(targetUser, accessMode);
     doc= newF->access(targetUser,accessMode);
     return doc;
 }
+//FIXME: for directory::access why not calling access against the retrieved file? This method would be two lines long
 
+//FIXME: pay attention when deleting a directory or a file: we should ensure that [targetUser] is the only owner of each file
 std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &path, const std::string &resName) {
     privilege user_priv=this->getUserPrivilege(targetUser.getUsername());
     if(user_priv==privilege::owner){
+        //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
         for (unsigned i = 0; i < contained.size(); i++)
         {
             if (contained.at(i)->getName() == resName) {
@@ -296,7 +322,18 @@ void directory::send() const {
 }
 
 std::string directory::print(const std::string &targetUser, bool recursive, int indent) const {
+    //FIXME: recursive and indent not used. What if we want to print the complete tree of user's filesystem?
+    /*
+     * For example:
+     * -/ (root directory)
+     *   -someUser (user's directory)
+     *     -dir1
+     *       -file1
+     *     -dir2
+     *       -file2
+     */
     std::string new_string= "root\r\n";
+    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
     for (unsigned i = 0; i < contained.size(); i++){
         std::shared_ptr<filesystem> f = contained.at(i);
         std::string name= f->getName();
@@ -309,6 +346,7 @@ Symposium::symlink::symlink(const std::string &name, const std::string &pathToFi
     //TODO: implement
 
     //settare id
+    //FIXME: id is set only in filesystem's constructor
 }
 
 resourceType Symposium::symlink::resType() const {
@@ -316,7 +354,7 @@ resourceType Symposium::symlink::resType() const {
 }
 
 document Symposium::symlink::access() {
-
+    //TODO: implement
     return document(0);
 }
 
@@ -333,6 +371,9 @@ void Symposium::symlink::send() const {
 }
 
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
+    //FIXME: symlinks always have TrivialAccess, that always return privilege::none with getPrivilege
+    // symlinks refer to the shared file they have the path of, so with print we want the privilege the
+    // [targetUser] has on that file
     std::ostringstream priv;
     priv<<strategy->getPrivilege(targetUser);
     return name + " " + priv.str();
