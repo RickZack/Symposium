@@ -39,8 +39,6 @@ uri filesystem::u;
 filesystem::filesystem(const std::string &name) : name(name), sharingPolicy(u){
     id=idCounter;
     idCounter++;
-    //FIXME: this is not necessary
-    sharingPolicy=uri();
 }
 
 int filesystem::getId() const {
@@ -74,8 +72,7 @@ uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingP
 
 file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0) {
     //TODO: implement
-    //settare id
-    //FIXME: set id only in filesystem constructor (that is called by subclasses' constructors)
+
 }
 
 resourceType file::resType() const {
@@ -89,7 +86,6 @@ privilege file::getUserPrivilege(const std::string &targetUser) const {
 }
 
 privilege file::setUserPrivilege(const std::string &targetUser, privilege newPrivilege) {
-    //privilege oldUserPriv= strategy->getPrivilege(targetUser);
     strategy->setPrivilege(targetUser,newPrivilege);
     return newPrivilege;
 }
@@ -142,8 +138,6 @@ const document &file::getDoc() const {
 directory::directory(const std::string &name) : filesystem(name) {
 
     //guardare lab 2
-    //settare id qui
-    //FIXME: set id only in filesystem constructor, set it private to avoid errors
     //TODO: implement
 }
 
@@ -163,7 +157,6 @@ std::shared_ptr<directory> directory::getRoot() {
     root=new_root;
     return root;
 
-   // return std::shared_ptr<directory>();
 
 }
 
@@ -221,12 +214,8 @@ std::string& directory::setName(const std::string &path, const std::string &file
 }
 
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
-    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
-    for (unsigned i = 0; i < contained.size(); i++)
-    {
-    if (contained.at(i)->getName() == name)
+    if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException("You already have an element with the same name");
-    }
     std::shared_ptr<directory> newDir(new directory(name));//directory deve essere protetto
     newDir->parent=this->self;
     newDir->self=newDir;
@@ -235,17 +224,10 @@ std::shared_ptr<directory> directory::addDirectory(const std::string &name, int 
 }
 
 std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name) {
-    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
-    for (unsigned i = 0; i < contained.size(); i++)
-    {
-        if (contained.at(i)->getName() == name)
-            throw filesystemException("You already have an element with the same name");
-    }
+    if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
+        throw filesystemException("You already have an element with the same name");
     std::shared_ptr<file> newFile(new file(name, path));
     contained.push_back(newFile);
-    //FIXME: multiple increment of idCounter (here and in filesystem constructor)
-    // idCounter should be private and touched only in constructor
-    idCounter++;
     return newFile;
 }
 
@@ -253,15 +235,9 @@ std::shared_ptr<class symlink>
 directory::addLink(const std::string &path, const std::string &name, const std::string &filePath,
                    const std::string &fileName)
 {
-    for (unsigned i = 0; i < contained.size(); i++)
-    {
-        if (contained.at(i)->getName() == name)
-            throw filesystemException("You already have an element with the same name");
-    }
+    if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
+        throw filesystemException("You already have an element with the same name");
     std::shared_ptr<symlink> newSym(new symlink(name, path, name));
-    //FIXME: multiple increment of idCounter (here and in filesystem constructor)
-    // idCounter should be private and touched only in constructor
-    idCounter++;
     contained.push_back(newSym);
     return newSym;
 }
@@ -345,8 +321,7 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
     //TODO: implement
 
-    //settare id
-    //FIXME: id is set only in filesystem's constructor
+
 }
 
 resourceType Symposium::symlink::resType() const {

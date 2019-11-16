@@ -114,7 +114,6 @@ namespace Symposium {
          * @param fileName name to be assigned to the new file
          * @param pathFromHome path inside the home to put the file. By default is the home itself
          * @return the pointer to the file just created
-         * @throws userException throws if there is some problems to create a new file
          */
         virtual std::shared_ptr<file> newFile(const std::string &fileName, const std::string &pathFromHome = ".") const;
 
@@ -123,7 +122,6 @@ namespace Symposium {
          * @param dirName name to be assigned to the new directory
          * @param pathFromHome path inside the home to put the directory. By default is the home itself
          * @return the pointer to the directory just created
-         * @throws userException throws if there is some problems to create a new directory
          */
         virtual std::shared_ptr<directory>
         newDirectory(const std::string &dirName, const std::string &pathFromHome = ".", int idToAssign=-1) const;
@@ -134,10 +132,6 @@ namespace Symposium {
          * @param path the path to put the resource into
          * @param fileName the name of the new link
          * @return the file just added
-         * @throws userException throws if there is some problems to access the directory where the user want to save new symlink
-         * @throws userException throws if there is some problems to access the root
-         * @throws userException throws if there is some problems to add a new symlink
-         * @throws userException throws if there is some problems to access the file
          */
         virtual std::shared_ptr<file>
         accessFile(const std::string &resId, const std::string &path, const std::string &fileName = "") const;
@@ -161,7 +155,6 @@ namespace Symposium {
          * @param newPrivilege the new privilege to be granted to @e targetUser
          * @return the old privilege of @e targetUser had on the resource
          * @warning the current user must be a owner of the target resource
-         * @throws userException throws if there is some problems to access the file
          *
          * This method calls @ref directory::getFile method on the @e home, retrieving the file, and calls
          * @ref file::setUserPrivilege passing @e otherUser as the one on which take action
@@ -188,7 +181,6 @@ namespace Symposium {
          * @param resName the id of the resource
          * @param newPrefs new sharing preferences for the resource
          * @return the old @e sharingPolicy
-         * @throws userException throws if there is some problems to access the file
          *
          * Calls @ref directory::getFile on @e home and then file::setSharingPolicy on the retrieved file
          */
@@ -200,7 +192,6 @@ namespace Symposium {
          * @param resName the resource's id
          * @param newName the new resource's name
          * @return the resource just renamed
-         * @throws userException throws if there is some problems to access the object
          *
          * Changes the attribute @e name of the filesystem object.
          * Please note that, in case the filesystem object is a symlink, this method renames the symlink, not the resource pointed.
@@ -213,7 +204,6 @@ namespace Symposium {
          * @param path the path inside the user's home directory where the target file is located
          * @param name the file id
          * @return the filesystem object just removed from the user's filesystem
-         * @throws userException throws if there is some problems to access the object
          */
         virtual std::shared_ptr<filesystem> removeResource(const std::string &path, const std::string &name) const;
 

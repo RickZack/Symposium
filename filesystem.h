@@ -36,6 +36,7 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <algorithm>
 
 #include "privilege.h"
 #include "Symposium.h"

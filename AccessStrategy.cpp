@@ -45,6 +45,8 @@ bool RMOAccess::validateAction(const std::string &targetUser, privilege requeste
 }
 
 privilege RMOAccess::setPrivilege(const std::string &targetUser, privilege toGrant) {
+    if(permission.empty() && toGrant==privilege::owner)
+        permission.insert (std::make_pair(targetUser, toGrant));
     std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
     if ( got == permission.end() )
     {

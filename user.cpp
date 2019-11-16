@@ -109,9 +109,7 @@ std::string user::showDir(bool recursive) const {
 std::shared_ptr<file> user::newFile(const std::string &fileName, const std::string &pathFromHome) const {
 
     std::shared_ptr<file> newF=home->addFile(pathFromHome, fileName);
-    if(newF!= nullptr)
-        return newF;
-    throw userException(userException::newFile, UnpackFileLineFunction());
+    return newF;
 }
 
 std::shared_ptr<directory>
@@ -121,9 +119,7 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
         newD=home->addDirectory(dirName);
     else
         newD=home->addDirectory(dirName, idToAssign);
-    if(newD!= nullptr)
-        return newD;
-    throw userException(userException::newDir, UnpackFileLineFunction());
+    return newD;
 }
 
 //FIXME: accessFile should check what privilege the resource pointed by [resId] can give to other users, using
@@ -143,22 +139,18 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     tie(pathCurrent, idCurrent)= separate(path); //separate the current path and the id of directory where user want to create a symlink
 
     std::shared_ptr<directory> dir=this->home->getDir(pathCurrent, idCurrent);
-    if(dir== nullptr)
-        throw userException(userException::DirAccess, UnpackFileLineFunction());
 
     std::shared_ptr<directory> root1=dir->getRoot();
-    if(root1== nullptr)
-        throw userException(userException::sysError, UnpackFileLineFunction());
 
-    tie(pathAdd, idAdd)= separate(path); //separate the path and the id of file which the user want
+    tie(pathAdd, idAdd)= separate(resId); //separate the path and the id of file which the user want
 
-    std::shared_ptr<symlink> sym= home->addLink(path, fileName, path, idAdd);
-    if(sym ==nullptr)
-        throw userException(userException::addLink, UnpackFileLineFunction());
+    std::shared_ptr<symlink> sym= home->addLink(pathCurrent, fileName, pathAdd, idAdd);
 
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
-    if(fi == nullptr)
-        throw userException(userException::addLink, UnpackFileLineFunction());
+
+    privilege priv=fi->getUserPrivilege(this->getUsername());
+    if(priv==privilege::none)
+        throw userException(userException::noPriv, UnpackFileLineFunction());
     return fi;
 }
 
@@ -170,8 +162,6 @@ document & user::openFile(const std::string &path, const std::string &fileName, 
 privilege user::editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
                               privilege newPrivilege) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
-    if(newF==nullptr)
-        throw userException(userException::editPriv, UnpackFileLineFunction());
     privilege newP;
     newP=newF->setUserPrivilege(otherUser, newPrivilege);
     return newP;
@@ -179,8 +169,6 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
 
 privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
-    if(newF==nullptr)
-        throw userException(userException::changePriv, UnpackFileLineFunction());
     privilege newP;
     newP=newF->setUserPrivilege(username, newPrivilege);
     return newP;
@@ -188,8 +176,6 @@ privilege user::changePrivilege(const std::string &resPath, const std::string &r
 
 uri user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
-    if(newF==nullptr)
-        throw userException(userException::shareRes, UnpackFileLineFunction());
     uri u;
     u=newF->setSharingPolicy(username, newPrefs);
     return u;
@@ -226,16 +212,12 @@ const std::string &user::getPwdHash() const {
 std::shared_ptr<filesystem>
 user::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) const {
     std::shared_ptr<filesystem> object=home->get(resPath, resName);
-    if(object==nullptr)
-        throw userException(userException::rename, UnpackFileLineFunction());
     object->setName(newName);
     return object;
 }
 
 std::shared_ptr<filesystem> user::removeResource(const std::string &path, const std::string &name) const {
     std::shared_ptr<filesystem> object=home->remove(*this, path, name);
-    if(object==nullptr)
-        throw userException(userException::remove, UnpackFileLineFunction());
     return object;
 }
 
@@ -259,19 +241,19 @@ std::string user::saltGenerate()
 
 bool user::noCharPwd(const std::string &pass)
 {
-    std::size_t found = pass.find_first_not_of("1234567890?!$+-/.,@ˆ_");
+    std::size_t found = pass.find_first_not_of("1234567890?!$+-/.,@ˆ_ ");
     return found == std::string::npos;
 }
 
 bool user::noNumPwd(const std::string &pass)
 {
-    std::size_t found = pass.find_first_not_of("abcdefghijklmnopqrstuvwxyz?!$+-/.,@ˆ_");
+    std::size_t found = pass.find_first_not_of("abcdefghijklmnopqrstuvwxyz?!$+-/.,@ˆ_ ");
     return found == std::string::npos;
 }
 
 bool user::noSpecialCharPwd(const std::string &pass)
 {
-    std::size_t found = pass.find_first_not_of("abcdefghijklmnopqrstuvwxyz1234567890");
+    std::size_t found = pass.find_first_not_of("abcdefghijklmnopqrstuvwxyz1234567890 ");
     return found == std::string::npos;
 }
 

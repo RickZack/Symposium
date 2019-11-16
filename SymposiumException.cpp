@@ -53,14 +53,10 @@ SymServerException::SymServerException(SymServerExceptionCodes exceptionCode, co
                                        const char *func) :
                                        SymposiumException(file, line, func, SymServerErrors[static_cast<int>(exceptionCode)]){};
 
-const char* userException::userErrors[]={"An error occurred while creating a new file", "An error occurred while creating a new directory",
-                                         "An error occurred while trying to access the directory where you want save the link",
-                                         "A system error", "An error occurred while trying to add link", "An error occurred while trying to edit privilege",
-                                         "An error occurred while trying to change privilege", "An error occurred while trying to share resource",
-                                         "An error occurred while trying to rename the object", "An error occurred while trying to remove the object",
-                                         "Too short password", "Too long password",
+const char* userException::userErrors[]={"Too short password", "Too long password",
                                          "You don't use any alphabetic character for password", "You don't use any number for password",
-                                         "You don't use any special character for password", "You can choose a nickname"};
+                                         "You don't use any special character for password", "You can choose a nickname",
+                                         "You don't have any privilege to this file anymore"};
 
 userException::userException(userExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
