@@ -304,6 +304,7 @@ namespace Symposium {
 
         std::string &
         setName(const std::string &path, const std::string &fileName, const std::string &newName); //FIXME: redundant
+
         virtual std::shared_ptr<directory> addDirectory(const std::string &name, int idToAssign=filesystem::idCounter);
 
         virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name);

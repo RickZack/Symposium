@@ -33,6 +33,7 @@
 
 #include <vector>
 #include <iostream>
+#include <algorithm>
 #include "Symposium.h"
 
 namespace Symposium {

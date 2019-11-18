@@ -237,7 +237,7 @@ directory::addLink(const std::string &path, const std::string &name, const std::
 {
     if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException("You already have an element with the same name");
-    std::shared_ptr<symlink> newSym(new symlink(name, path, name));
+    std::shared_ptr<symlink> newSym(new symlink(name, filePath, fileName));
     contained.push_back(newSym);
     return newSym;
 }

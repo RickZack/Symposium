@@ -48,8 +48,14 @@ const std::vector<int> &symbol::getPos() const {
 }
 
 bool symbol::operator<(const symbol &rhs) const {
-    //TODO: implement
-	return false;
+    int size=std::min(this->pos.size(), rhs.pos.size());
+    for(int i=0; i<size; i++) {
+        if (this->pos.at(i) < rhs.pos.at(i))
+            return true;
+        if (this->pos.at(i) > rhs.pos.at(i))
+            return false;
+    }
+	return true;
 }
 
 bool symbol::operator>(const symbol &rhs) const {
