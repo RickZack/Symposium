@@ -51,6 +51,10 @@ struct dirMock: public directory{
     MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &, const std::string &, const std::string &));
 
     MOCK_CONST_METHOD3(print, std::string(const std::string &targetUser, bool recursive, int indent));
+
+    static int getIdCounter(){
+        return idCounter;
+    }
 };
 
 struct uriMock: public uri{
@@ -116,9 +120,9 @@ TEST_F(UserTest, callAccessFile){
      *     -sym1 (has id=decided internally)
      */
     std::shared_ptr<class symlink> returned(new class symlink("sym1", "/1", "4"));
-    EXPECT_CALL(*homeDir, getDir("./2", "3")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
+    EXPECT_CALL(*homeDir, getDir("/0", "2")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
     EXPECT_CALL(*Dir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
-    EXPECT_CALL(*homeDir, addLink("./2", "sym1", "/1", "4")).WillOnce(::testing::Return(returned));
+    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "/1", "4")).WillOnce(::testing::Return(returned));
     EXPECT_CALL(*Root, getFile("/1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
     dummyFile->setMockPolicy(uri::getDefaultPrivilege());
     EXPECT_CALL(static_cast<uriMock&>(dummyFile->getPolicy()), getShare(uri::getDefaultPrivilege()));
@@ -140,7 +144,7 @@ TEST(userTest, makeNewDirMock){
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     directory *created=new directory("ciao");
-    EXPECT_CALL(*dir, addDirectory("ciao", 0)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
+    EXPECT_CALL(*dir, addDirectory("ciao", dirMock::getIdCounter())).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
     u1.newDirectory("ciao");
 }
 
@@ -304,4 +308,18 @@ TEST_F(UserTestRobust, applyTransformationOnGivenPwd){
     ASSERT_TRUE(isAGoodPwd(goodPwd));
     u=new user("username", goodPwd, "nickname", "", 0, nullptr);
     EXPECT_FALSE(u->getPwdHash()==goodPwd);
+}
+
+/*
+ * Introduced after the bug has been found by inspection, it stands
+ * here as documentation
+ */
+TEST_F(UserTestRobust, newDirUsesCorrectlyIdToAssign){
+    int id=rand()%100+1; //num in [1,100]
+    dirMock *dir=new dirMock();
+    std::shared_ptr<directory> home(dir);
+    user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
+    directory *created=new directory("ciao");
+    EXPECT_CALL(*dir, addDirectory("ciao", id)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
+    u1.newDirectory("ciao", "./", id);
 }

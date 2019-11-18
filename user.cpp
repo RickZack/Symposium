@@ -130,6 +130,7 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
 //      file::access -> called on the file retrieved
 //      RMOAccess::getUserPrivilege -> called by file::access, verify that the user obtained a privilege
 //      --> Ops, [file1] has never granted a privilege for the user, exception thrown
+//      --> Ops, [file1] has never granted a privilege for the user, exception thrown
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
     std::string pathCurrent;
     std::string idCurrent;
@@ -144,7 +145,7 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
 
     tie(pathAdd, idAdd)= separate(resId); //separate the path and the id of file which the user want
 
-    std::shared_ptr<symlink> sym= home->addLink(pathCurrent, fileName, pathAdd, idAdd);
+    std::shared_ptr<symlink> sym= home->addLink(idCurrent, fileName, pathAdd, idAdd);
 
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
 

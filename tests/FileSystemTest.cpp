@@ -267,7 +267,6 @@ TEST_F(FileSystemTestRobust, FileThrowsOnMalformedRealPath){
 TEST_F(FileSystemTestRobust, FileAcceptsWellFormedRealPath) {
     std::string aGoodPath{"./dir1/dir2/dir3"};
     file f("fileName", "./dir1/dir2/dir3");
-    EXPECT_EQ(aGoodPath, f.getName());
 }
 
 struct FileSystemTestSharing: ::testing::Test{
@@ -287,11 +286,6 @@ struct FileSystemTestSharing: ::testing::Test{
         return ::testing::AssertionSuccess();
     }
 
-    ::testing::AssertionResult strategyIsImplemented(const char* m_expr, AccessStrategy* nullStrategy){
-        if(f.getStrategy()== nullStrategy)
-            return ::testing::AssertionFailure()<<"Unable to run this test since AccessStrategy is not correctly implemented yet";
-        return ::testing::AssertionSuccess();
-    }
     void verifySetPrivilegeOnFile(privilege toAssign=privilege::owner){
         RMOAccessMock* dummyStrategy=new RMOAccessMock();
         f.setDummyStrategy(dummyStrategy);
