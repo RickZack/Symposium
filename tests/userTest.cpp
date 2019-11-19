@@ -112,6 +112,8 @@ struct UserTest: ::testing::Test{
 };
 
 TEST_F(UserTest, callAccessFile){
+    testing::InSequence forceOrder; //force the order of EXPECT_CALL
+    dummyFile->setMockPolicy(uri::getDefaultPrivilege());
     /*
      * -anotherDir (has id=1)
      *   -file1 (has id=4)
@@ -120,14 +122,12 @@ TEST_F(UserTest, callAccessFile){
      *     -sym1 (has id=decided internally)
      */
     std::shared_ptr<class symlink> returned(new class symlink("sym1", "/1", "4"));
-    EXPECT_CALL(*homeDir, getDir("/0", "2")).WillOnce(::testing::Return(std::shared_ptr<directory>(Dir)));
-    EXPECT_CALL(*Dir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
-    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "/1", "4")).WillOnce(::testing::Return(returned));
+    EXPECT_CALL(*homeDir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
     EXPECT_CALL(*Root, getFile("/1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
-    dummyFile->setMockPolicy(uri::getDefaultPrivilege());
     EXPECT_CALL(static_cast<uriMock&>(dummyFile->getPolicy()), getShare(uri::getDefaultPrivilege()));
-    u->accessFile("/1/4", "/0/2", "sym1");
+    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "/1", "4")).WillOnce(::testing::Return(returned));
 
+    u->accessFile("/1/4", "/0/2", "sym1");
 }
 
 TEST(userTest, makeNewFileMock){
@@ -321,5 +321,5 @@ TEST_F(UserTestRobust, newDirUsesCorrectlyIdToAssign){
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     directory *created=new directory("ciao");
     EXPECT_CALL(*dir, addDirectory("ciao", id)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
-    u1.newDirectory("ciao", "./", id);
+    u1.newDirectory("ciao", ".", id);
 }

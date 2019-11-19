@@ -42,4 +42,5 @@ TEST(symbolTest, symbolComparisonFromDifferentHost){
     symbol s1('a', 0, 0, {1}, false);
     symbol s2('b', 1, 0, {1}, false);
     EXPECT_GT(s2, s1);
+    EXPECT_FALSE(s2<s1);
 }

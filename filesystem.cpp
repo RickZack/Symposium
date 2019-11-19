@@ -72,6 +72,8 @@ uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingP
 
 file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0) {
     //TODO: implement
+    //TODO: check realPath to mach a valid path format, IT'S IMPORTANT!
+    // use a regex, you can look at SymServer.cpp, line 212
 
 }
 
@@ -122,6 +124,8 @@ void file::send() const {
     //TODO: implement
 }
 
+//FIXME: changing specification 18/11/2019
+// print must print the type of filesystem object, the name and the privilege of targetUser
 std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
 
     std::ostringstream priv;
@@ -159,7 +163,7 @@ std::shared_ptr<directory> directory::getRoot() {
 
 
 }
-
+//FIXME: must search inside contained directories using path
 std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
     //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
     for (unsigned i = 0; i < contained.size(); i++) {
@@ -171,6 +175,7 @@ std::shared_ptr<filesystem> directory::get(const std::string &path, const std::s
     throw filesystemException("FileSystem not found");
 }
 
+//FIXME: must search inside contained directories using path
 std::shared_ptr<directory> directory::getDir(const std::string &path, const std::string &name) {
    if(name=="." && !self.expired())
        return self.lock();
@@ -200,6 +205,8 @@ std::shared_ptr<file> directory::getFile(const std::string &path, const std::str
 
 std::string& directory::setName(const std::string &path, const std::string &fileName, const std::string& newName) {
     //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
+    // also this function must use path to retrieve the object whose name has to be changed
+    // You can also use other directory's functions as helper (for example directory::get())
     for(unsigned i=0;i<contained.size();i++) {
         std::shared_ptr<filesystem> f = contained.at(i);
         std::string name_f = f->getName();
@@ -223,6 +230,7 @@ std::shared_ptr<directory> directory::addDirectory(const std::string &name, int 
     return newDir;
 }
 
+//FIXME: must use path to insert in the correct location
 std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name) {
     if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException("You already have an element with the same name");
@@ -231,6 +239,7 @@ std::shared_ptr<file> directory::addFile(const std::string &path, const std::str
     return newFile;
 }
 
+//FIXME: must use path to insert in the correct location
 std::shared_ptr<class symlink>
 directory::addLink(const std::string &path, const std::string &name, const std::string &filePath,
                    const std::string &fileName)
@@ -296,7 +305,8 @@ void directory::load(const std::string &loadPath) {
 void directory::send() const {
     //TODO: implement
 }
-
+//FIXME: changing specification 18/11/2019
+// print must print the type of filesystem object and its name
 std::string directory::print(const std::string &targetUser, bool recursive, int indent) const {
     //FIXME: recursive and indent not used. What if we want to print the complete tree of user's filesystem?
     /*
@@ -320,7 +330,8 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
 
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
     //TODO: implement
-
+    //TODO: check pathToFile to mach a valid path format, IT'S IMPORTANT!
+    // use a regex, you can look at SymServer.cpp, line 212
 
 }
 
@@ -344,7 +355,9 @@ void Symposium::symlink::load(const std::string &loadPath) {
 void Symposium::symlink::send() const {
     //TODO: implement
 }
-
+//FIXME: changing specification 18/11/2019
+// print must print the type of filesystem object, its name and the privilege of targetUser on the resource pointed
+// by the symlink
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
     //FIXME: symlinks always have TrivialAccess, that always return privilege::none with getPrivilege
     // symlinks refer to the shared file they have the path of, so with print we want the privilege the
