@@ -138,11 +138,13 @@ std::string file::print(const std::string &targetUser, bool recursive, int inden
         for(int i=0; i<indent; i++)
             ritorno.append(" ");
     }
+    std::ostringstream typeres;
+    typeres<<resType();
     std::ostringstream priv;
     if(getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";
     priv<<getUserPrivilege(targetUser);
-    return ritorno+"1 "+name + " " + priv.str();
+    return ritorno+typeres.str()+" "+name + " " + priv.str();
 }
 
 bool file::pathIsValid(const std::string &toCheck) {
@@ -383,12 +385,16 @@ void Symposium::symlink::send() const {
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
     std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
     std::ostringstream priv;
+    std::ostringstream typeres;
+    typeres<<resType();
     std::string ritorno="";
     priv<<file->getUserPrivilege(targetUser);
+    if(file->getUserPrivilege(targetUser)==privilege::none)
+        return name+" You no longer have the possibility to access the file in any mode";
     if (indent>0)
     {
         for(int i=0; i<indent; i++)
             ritorno+="  ";
     }
-    return ritorno+"2 " +name + " " + priv.str();
+    return ritorno+typeres.str()+" " +name + " " + priv.str();
 }

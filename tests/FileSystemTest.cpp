@@ -393,7 +393,7 @@ TEST_F(FileSystemTestSharing, printFileWithIndent){
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::readOnly));
     EXPECT_CALL(*f.getStrategyMocked(), getPrivilege(username)).WillRepeatedly(::testing::Return(privilege::readOnly));
     std::ostringstream expected;
-    expected<<"1 "<<f.getName()<<" "<<privilege::readOnly;
+    expected<<resourceType::file<<" "<<f.getName()<<" "<<privilege::readOnly;
     unsigned  spaces=rand()%10+1; //expect n spaces
     std::string ret=f.print(username, false, spaces);
     EXPECT_EQ(expected.str().insert(0, spaces, ' '), ret);

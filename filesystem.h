@@ -41,7 +41,7 @@
 
 #include "privilege.h"
 #include "Symposium.h"
-
+#include "resourceType.h"
 #include "uri.h"
 
 #include "document.h"
@@ -57,14 +57,7 @@
  * any of the functions of "user"
  */
 namespace Symposium {
-    /**
-     * @brief defines the type of a filesystem object
-     */
-    enum class resourceType {
-        directory, file, symlink
-    };
-
-    /**
+   /**
      * @interface filesystem filesystem.h filesystem
      * @brief class used as interface for a filesystem, made using @e Composite pattern
      *
