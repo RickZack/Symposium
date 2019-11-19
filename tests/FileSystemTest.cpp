@@ -332,7 +332,7 @@ TEST_F(FileSystemTestSharing, setSharingPolicyOnFile) {
     //Just to verify that doesn't return a default constructed uri
     expected.activateCount(2);
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile());
-    EXPECT_CALL(*f.getStrategy(), getPrivilege(username));
+    EXPECT_CALL(*f.getStrategy(), getPrivilege(username)).WillOnce(::testing::Return(privilege::owner));
     uri returned=f.setSharingPolicy(username, expected);
     EXPECT_EQ(expected, returned);
 }
@@ -374,7 +374,7 @@ TEST_F(FileSystemTestSharing, printFileWithIndent){
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::readOnly));
     EXPECT_CALL(*f.getStrategy(), getPrivilege(username)).WillRepeatedly(::testing::Return(privilege::readOnly));
     std::ostringstream expected;
-    expected<<f.getName()<<" "<<privilege::readOnly;
+    expected<<"1 "<<f.getName()<<" "<<privilege::readOnly;
     unsigned  spaces=rand()%10+1; //expect n spaces
     std::string ret=f.print(username, false, spaces);
     EXPECT_EQ(expected.str().insert(0, spaces, ' '), ret);

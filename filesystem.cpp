@@ -70,10 +70,21 @@ uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingP
     throw filesystemException("Object"+name+"is not shareable");
 }
 
-file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0) {
-    //TODO: implement
-    //TODO: check realPath to mach a valid path format, IT'S IMPORTANT!
-    // use a regex, you can look at SymServer.cpp, line 212
+std::tuple<std::string, std::string>  filesystem::separate(const std::string &path)
+{
+    std::string path2;
+    std::string id2;
+    std::size_t found = path.find_last_of("/\\");
+    path2.append(path,0, found); //path to the directory of the current user
+    id2.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
+    return  std::make_tuple(path2, id2);
+}
+
+file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0){
+    if(!(pathIsValid(realPath)))
+        throw filesystemException("Path is not valid!");
+    std::unique_ptr<AccessStrategy> newStrategy(new RMOAccess());
+    strategy=std::move(newStrategy);
 
 }
 
@@ -95,20 +106,17 @@ privilege file::setUserPrivilege(const std::string &targetUser, privilege newPri
 uri file::setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) {
     privilege userPriv=strategy->getPrivilege(actionUser);
     if(userPriv==privilege::owner) {
-        file::sharingPolicy = newSharingPrefs;
+        this->sharingPolicy=newSharingPrefs;
     }
+    else
+        throw filesystemException("You are not an owner to share this file");
     return newSharingPrefs;
-    //FIXME: What happens if the strategy says that user has no right?
-    // if we return the prefs we should have assigned, then there is no way to
-    // detect the error
 }
 
 document & file::access(const user &targetUser, privilege accessMode) {
-    privilege priv=this->getUserPrivilege(targetUser.getUsername());
-    if(priv==privilege::none)
-        throw filesystemException("You no longer have the possibility to access the file in any mode");
-    if(priv>accessMode)
-        throw filesystemException("You have a lower privilege than you ask");
+    bool controllo=this->strategy->validateAction(targetUser.getUsername(), accessMode);
+    if(!controllo)
+        throw filesystemException("You have not permission to this file in this mode");
     return doc.access(targetUser, accessMode);;
 }
 
@@ -124,15 +132,26 @@ void file::send() const {
     //TODO: implement
 }
 
-//FIXME: changing specification 18/11/2019
-// print must print the type of filesystem object, the name and the privilege of targetUser
-std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
 
+std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
+    std::string ritorno="";
+    if (indent>0)
+    {
+        for(int i=0; i<indent; i++)
+            ritorno.append(" ");
+    }
     std::ostringstream priv;
     if(getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";
     priv<<getUserPrivilege(targetUser);
-    return name + " " + priv.str();
+    return ritorno+"1 "+name + " " + priv.str();
+}
+
+bool file::pathIsValid(const std::string &toCheck) {
+    //OPTIMIZE: correctness check of user data should be available within user class,
+    // here we should call that method(s), adding only the constrain on the icon path
+    std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
+    return !toCheck.empty() && std::regex_match(toCheck, pathPattern);
 }
 
 const document &file::getDoc() const {
@@ -141,7 +160,6 @@ const document &file::getDoc() const {
 
 directory::directory(const std::string &name) : filesystem(name) {
 
-    //guardare lab 2
     //TODO: implement
 }
 
@@ -221,9 +239,12 @@ std::string& directory::setName(const std::string &path, const std::string &file
 }
 
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
+    int idBackup=idCounter;
+    idCounter=idToAssign;
     if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException("You already have an element with the same name");
     std::shared_ptr<directory> newDir(new directory(name));//directory deve essere protetto
+    idCounter=idBackup;
     newDir->parent=this->self;
     newDir->self=newDir;
     contained.push_back(newDir);
@@ -232,10 +253,14 @@ std::shared_ptr<directory> directory::addDirectory(const std::string &name, int 
 
 //FIXME: must use path to insert in the correct location
 std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name) {
-    if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
+    std::string pathAdd;
+    std::string idAdd;
+    tie(pathAdd, idAdd)= separate(path);
+    std::shared_ptr<directory> save=getDir(pathAdd, idAdd);
+    if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException("You already have an element with the same name");
     std::shared_ptr<file> newFile(new file(name, path));
-    contained.push_back(newFile);
+    save->contained.push_back(newFile);
     return newFile;
 }
 
@@ -244,6 +269,7 @@ std::shared_ptr<class symlink>
 directory::addLink(const std::string &path, const std::string &name, const std::string &filePath,
                    const std::string &fileName)
 {
+    //std::shared_ptr<directory> daInserire=getDir()
     if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException("You already have an element with the same name");
     std::shared_ptr<symlink> newSym(new symlink(name, filePath, fileName));
@@ -355,14 +381,16 @@ void Symposium::symlink::load(const std::string &loadPath) {
 void Symposium::symlink::send() const {
     //TODO: implement
 }
-//FIXME: changing specification 18/11/2019
-// print must print the type of filesystem object, its name and the privilege of targetUser on the resource pointed
-// by the symlink
+
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
-    //FIXME: symlinks always have TrivialAccess, that always return privilege::none with getPrivilege
-    // symlinks refer to the shared file they have the path of, so with print we want the privilege the
-    // [targetUser] has on that file
+    std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
     std::ostringstream priv;
-    priv<<strategy->getPrivilege(targetUser);
-    return name + " " + priv.str();
+    std::string ritorno="";
+    priv<<file->getUserPrivilege(targetUser);
+    if (indent>0)
+    {
+        for(int i=0; i<indent; i++)
+            ritorno+="  ";
+    }
+    return ritorno+"2 " +name + " " + priv.str();
 }

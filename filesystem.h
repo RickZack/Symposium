@@ -37,6 +37,7 @@
 #include <memory>
 #include <sstream>
 #include <algorithm>
+#include <regex>
 
 #include "privilege.h"
 #include "Symposium.h"
@@ -155,6 +156,7 @@ namespace Symposium {
 
         virtual void send() const = 0; //not clear how to set this
         virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const = 0;
+        std::tuple<std::string, std::string> separate(const std::string &path);
 
         virtual ~filesystem()= default;
     };
@@ -233,6 +235,9 @@ namespace Symposium {
         std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
 
         virtual ~file() override=default;
+
+    private:
+        bool pathIsValid(const std::string &toCheck);
     };
 
 
