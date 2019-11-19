@@ -61,6 +61,11 @@ struct SymClientAccesser: public SymClient{
     user& getLoggedUser() override {
         return userMock;
     }
+
+    user& getLoggedUserNotMocked() {
+        return loggedUser;
+    }
+
     std::map<std::pair<int, int>, std::pair<user, MyColor>>& getUserColors(){
         return userColors;
     };
@@ -130,7 +135,7 @@ struct SymClientTest : ::testing::Test{
     SymClientDocMock docInUserFilesystem, docSentByServer;
     static int indexes[2];
     SymClientTest(): userReceived(username, pwd, nickname, "", 0, nullptr),
-                     fileSentByServer(new SymClientFileMock(filename, "realPath")),
+                     fileSentByServer(new SymClientFileMock(filename, "./dir1/dir2")),
                      docInUserFilesystem(0), docSentByServer(120),
                      dirSentByServer(new SymClientDirMock(filename)){};
     bool everyUserHasDifferentColor(){
@@ -188,7 +193,7 @@ int SymClientTest::indexes[2]={0,0};
 
 TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
     client.setLoggedUser(userReceived);
-    EXPECT_EQ(userReceived, client.getLoggedUser());
+    EXPECT_EQ(userReceived, client.getLoggedUserNotMocked());
 }
 
 TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){

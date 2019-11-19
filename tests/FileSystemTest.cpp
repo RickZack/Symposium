@@ -466,6 +466,38 @@ TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
     EXPECT_EQ(inserted, ret);
 }
 
+TEST_F(FileSystemTestSharing, printSymLink){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUsername (another user's directory)
+     *     -sym1
+     *   -someUser (user's directory)
+     *     -dir1
+     *       -file1
+     * (expected is dir1)
+     */
+    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
+    directory::getRoot()->addDirectory("anotherUsername", 2);
+    auto inserted=directory::getRoot()->addFile("./1/7", "file1");
+
+    /*
+     * Fake authorization, the normal stack is:
+     * from user::accessFile call getFile()
+     * from user::accessFile call getShare() on the uri contained into the retrieved file
+     * from user::accessFile call setUserPrivilege() on the retrieved file with the privilege that is possible to grant
+     * from user::accessFile call addLink()
+     */
+    inserted->setUserPrivilege(username, privilege::readOnly);
+
+    auto linkToInserted= directory::getRoot()->addLink("./1/2", "sym1", "/1/7/", std::to_string(inserted->getId()));
+    std::ostringstream out; int n_space=rand()%100+1;
+    std::string spaces; spaces.insert(0, n_space, ' ');
+    out<<spaces<<resourceType::symlink<<" "<<linkToInserted->getName()<<privilege::readOnly;
+    EXPECT_EQ( out.str(), linkToInserted->print(username, false, n_space));
+}
+
 TEST_F(FileSystemTestSharing, accessOnFile){
     ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
     documentMock d;
