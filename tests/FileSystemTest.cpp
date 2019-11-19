@@ -201,17 +201,36 @@ struct directoryAccesser: public directory{ //only to access the protected membe
 
 struct fileAccesser: public file{ //only to access the protected members of directory from tests
     fileAccesser(const std::string &name) : file(name, "./somedir") {};
-    RMOAccessMock* getStrategy(){
+    /*
+     * Used in tests when we want to set expectations on the strategy object, that normally
+     * is an internal detail of file
+     */
+    RMOAccessMock* getStrategyMocked(){
         auto ptr=dynamic_cast<RMOAccessMock*>(strategy.get());
         if(ptr==nullptr)
             throw std::exception();
         return ptr;
     }
 
+    /*
+     * Used when we want to retrieve the strategy object set and hold by file
+     */
+    AccessStrategy* getStrategy(){
+        return strategy.get();
+    }
+
     void setDummyStrategy(RMOAccessMock *pMock) {
         strategy.reset(pMock);
     }
     MOCK_METHOD2(access, document&(const user &targetUser, privilege accessMode));
+
+    /*
+     * Used when we are testing not that a function calls file::access, but when we want to test
+     * if file::access does what we expect
+     */
+    document& accessNotMocked(const user &targetUser, privilege accessMode){
+        return file::access(targetUser, accessMode);
+    }
 };
 
 struct symlinkAccesser: public symlink{ //only to access the protected members of directory from tests
@@ -332,7 +351,7 @@ TEST_F(FileSystemTestSharing, setSharingPolicyOnFile) {
     //Just to verify that doesn't return a default constructed uri
     expected.activateCount(2);
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile());
-    EXPECT_CALL(*f.getStrategy(), getPrivilege(username)).WillOnce(::testing::Return(privilege::owner));
+    EXPECT_CALL(*f.getStrategyMocked(), getPrivilege(username)).WillOnce(::testing::Return(privilege::owner));
     uri returned=f.setSharingPolicy(username, expected);
     EXPECT_EQ(expected, returned);
 }
@@ -346,7 +365,7 @@ TEST_F(FileSystemTestSharing, setSharingPolicyOnFileThrowsOnInsufficientPrivileg
     //Just to verify that doesn't return a default constructed uri
     expected.activateCount(2);
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::modify));
-    EXPECT_CALL(*f.getStrategy(), getPrivilege(username));
+    EXPECT_CALL(*f.getStrategyMocked(), getPrivilege(username));
     EXPECT_THROW(f.setSharingPolicy(username, expected), filesystemException);
 }
 
@@ -360,19 +379,19 @@ TEST_F(FileSystemTestSharing, setSharingPolicyOnDirThrows) {
 
 TEST_F(FileSystemTestSharing, accessOnFileCallsValidateAction){
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::modify));
-    EXPECT_CALL(*f.getStrategy(), validateAction(username, privilege::readOnly)).WillOnce(::testing::Return(true));
-    f.access(u,privilege::readOnly);
+    EXPECT_CALL(*f.getStrategyMocked(), validateAction(username, privilege::readOnly)).WillOnce(::testing::Return(true));
+    f.accessNotMocked(u,privilege::readOnly);
 }
 
 TEST_F(FileSystemTestSharing, accessOnFileThrowsWithAnInsufficientPrivilege){
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::readOnly));
-    EXPECT_CALL(*f.getStrategy(), validateAction(username, privilege::modify)).WillOnce(::testing::Return(false));
-    EXPECT_THROW(f.access(u,privilege::readOnly), filesystemException);
+    EXPECT_CALL(*f.getStrategyMocked(), validateAction(username, privilege::modify)).WillOnce(::testing::Return(false));
+    EXPECT_THROW(f.accessNotMocked(u,privilege::modify), filesystemException);
 }
 
 TEST_F(FileSystemTestSharing, printFileWithIndent){
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::readOnly));
-    EXPECT_CALL(*f.getStrategy(), getPrivilege(username)).WillRepeatedly(::testing::Return(privilege::readOnly));
+    EXPECT_CALL(*f.getStrategyMocked(), getPrivilege(username)).WillRepeatedly(::testing::Return(privilege::readOnly));
     std::ostringstream expected;
     expected<<"1 "<<f.getName()<<" "<<privilege::readOnly;
     unsigned  spaces=rand()%10+1; //expect n spaces

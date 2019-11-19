@@ -83,9 +83,7 @@ std::tuple<std::string, std::string>  filesystem::separate(const std::string &pa
 file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0){
     if(!(pathIsValid(realPath)))
         throw filesystemException("Path is not valid!");
-    std::unique_ptr<AccessStrategy> newStrategy(new RMOAccess());
-    strategy=std::move(newStrategy);
-
+    strategy=std::make_unique<RMOAccess>();
 }
 
 resourceType file::resType() const {
@@ -134,7 +132,7 @@ void file::send() const {
 
 
 std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
-    std::string ritorno="";
+    std::string ritorno;
     if (indent>0)
     {
         for(int i=0; i<indent; i++)
