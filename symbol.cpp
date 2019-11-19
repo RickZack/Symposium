@@ -47,9 +47,7 @@ const std::vector<int> &symbol::getPos() const {
     return pos;
 }
 
-//FIXME: consider siteId, no "default" value
-// why use vector::at()? You are surely accessing a
-// valid position, use vector::operator[] instead
+
 bool symbol::operator<(const symbol &rhs) const {
     int size=std::min(this->pos.size(), rhs.pos.size());
     for(int i=0; i<size; i++) {
@@ -58,6 +56,8 @@ bool symbol::operator<(const symbol &rhs) const {
         if (this->pos.at(i) > rhs.pos.at(i))
             return false;
     }
+    if(this->siteId>rhs.siteId)
+        return false;
 	return true;
 }
 
