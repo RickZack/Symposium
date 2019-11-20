@@ -150,6 +150,7 @@ namespace Symposium {
         virtual void send() const = 0; //not clear how to set this
         virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const = 0;
         std::tuple<std::string, std::string> separate(const std::string &path);
+        bool pathIsValid2(const std::string &toCheck);
 
         virtual ~filesystem()= default;
     };
@@ -229,8 +230,6 @@ namespace Symposium {
 
         virtual ~file() override=default;
 
-    private:
-        bool pathIsValid(const std::string &toCheck);
     };
 
 
@@ -300,8 +299,9 @@ namespace Symposium {
 
         virtual std::shared_ptr<file> getFile(const std::string &path, const std::string &name);
 
-        std::string &
-        setName(const std::string &path, const std::string &fileName, const std::string &newName); //FIXME: redundant
+        std::string
+        setName(const std::string &path, const std::string &fileName, const std::string &newName);
+
 
         virtual std::shared_ptr<directory> addDirectory(const std::string &name, int idToAssign=filesystem::idCounter);
 
@@ -356,6 +356,9 @@ namespace Symposium {
         directory(const std::string &name);
 
         virtual ~directory() override= default;
+
+    private:
+        std::tuple<std::string, std::string> separateFirst(std::string path);
     };
 
 

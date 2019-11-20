@@ -80,8 +80,15 @@ std::tuple<std::string, std::string>  filesystem::separate(const std::string &pa
     return  std::make_tuple(path2, id2);
 }
 
+bool filesystem::pathIsValid2(const std::string &toCheck) {
+    //OPTIMIZE: correctness check of user data should be available within user class,
+    // here we should call that method(s), adding only the constrain on the icon path
+    std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
+    return !toCheck.empty() && std::regex_match(toCheck, pathPattern);
+}
+
 file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0){
-    if(!(pathIsValid(realPath)))
+    if(!(pathIsValid2(realPath)))
         throw filesystemException("Path is not valid!");
     strategy=std::make_unique<RMOAccess>();
 }
@@ -147,20 +154,14 @@ std::string file::print(const std::string &targetUser, bool recursive, int inden
     return ritorno+typeres.str()+" "+name + " " + priv.str();
 }
 
-bool file::pathIsValid(const std::string &toCheck) {
-    //OPTIMIZE: correctness check of user data should be available within user class,
-    // here we should call that method(s), adding only the constrain on the icon path
-    std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
-    return !toCheck.empty() && std::regex_match(toCheck, pathPattern);
-}
+
 
 const document &file::getDoc() const {
     return doc;
 }
 
 directory::directory(const std::string &name) : filesystem(name) {
-
-    //TODO: implement
+    strategy=std::make_unique<TrivialAccess>();
 }
 
 std::shared_ptr<directory> directory::nullDir() {
@@ -181,61 +182,78 @@ std::shared_ptr<directory> directory::getRoot() {
 
 
 }
-//FIXME: must search inside contained directories using path
-std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
-    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
-    for (unsigned i = 0; i < contained.size(); i++) {
-        std::shared_ptr<filesystem> f = contained.at(i);
-        std::string name_f = f->getName();
-        if (name_f == name)
-            return f;
-        }
-    throw filesystemException("FileSystem not found");
+
+std::tuple<std::string, std::string> directory::separateFirst(std::string path)
+{
+    std::string path2;
+    std::string id;
+    if(path.at(0) == '.' || path.at(0) == '/')
+    {
+        path.erase(path.begin()+0);
+        return separateFirst(path);
+    }
+    std::size_t found = path.find_first_of("/\\");
+    if(found==std::string::npos)
+    {
+        id.append(path);
+        path.clear();
+        return std::make_tuple(path, id);
+    }
+    path2.append(path,found, path.size());
+    id.append(path, 0, found);
+    return  std::make_tuple(path2, id);
 }
 
-//FIXME: must search inside contained directories using path
-std::shared_ptr<directory> directory::getDir(const std::string &path, const std::string &name) {
-   if(name=="." && !self.expired())
-       return self.lock();
-   if(name==".." &&!parent.expired())
-       return parent.lock();
-    for(unsigned i=0;i<contained.size();i++){
-        std::shared_ptr<filesystem> f= contained.at(i);
-        std::string name_f= f->getName();
-        if(name_f==name)
-            return std::dynamic_pointer_cast<directory>(f);
+
+std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
+    if(path=="")
+    {
+        auto it=std::find_if(contained.begin(), contained.end(),
+                [name](std::shared_ptr<filesystem> i){return std::to_string(i->getId())==name;});
+        if(it==contained.end())
+            throw filesystemException("The element has not been found with get");
+        return *it;
     }
-    throw filesystemException("Directory are you searching for, is not present");
+    std::string idRes;
+    std::string pathRes;
+    if(path.back()=='/')
+        pathRes.append(path.begin(),path.end()-1);
+    else
+        pathRes.append(path);
+    tie(pathRes, idRes)= separateFirst(pathRes);
+    auto it=std::find_if(contained.begin(), contained.end(),
+                         [idRes](std::shared_ptr<filesystem> i){return std::to_string(i->getId())==idRes;});
+
+    if(it==contained.end())
+        throw filesystemException("The element has not been found with get");
+    if((*it)->resType()!=resourceType::directory)
+        throw filesystemException("The element has not been found with get");
+    std::shared_ptr <directory> dir=std::dynamic_pointer_cast<directory>(*it);
+    return dir->get(pathRes, name);
+}
+
+
+std::shared_ptr<directory> directory::getDir(const std::string &path, const std::string &name) {
+    std::shared_ptr<filesystem> res=this->get(path, name);
+    if(res->resType()!=resourceType::directory)
+        filesystemException("File are you searching for, is not present");
+    return std::dynamic_pointer_cast<directory>(res);
 
 }
 
 std::shared_ptr<file> directory::getFile(const std::string &path, const std::string &name) {
-    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
-    for(unsigned i=0;i<contained.size();i++){
-       std::shared_ptr<filesystem> f= contained.at(i);
-       std::string name_f= f->getName();
-       if(name_f==name)
-           return std::dynamic_pointer_cast<file>(f);
-    }
-    throw filesystemException("File are you searching for, is not present");
+    std::shared_ptr<filesystem> res=this->get(path, name);
+    if(res->resType()!=resourceType::file)
+        filesystemException("File are you searching for, is not present");
+    return std::dynamic_pointer_cast<file>(res);
 
 }
 
-std::string& directory::setName(const std::string &path, const std::string &fileName, const std::string& newName) {
-    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
-    // also this function must use path to retrieve the object whose name has to be changed
-    // You can also use other directory's functions as helper (for example directory::get())
-    for(unsigned i=0;i<contained.size();i++) {
-        std::shared_ptr<filesystem> f = contained.at(i);
-        std::string name_f = f->getName();
-        if (name_f == name) {
-            f->setName(newName);
-            return name;
-        }
-    }
-   throw filesystemException("File are you searching for, is not present");
-   //this->addFile(path,newName);
-    //return name;
+std::string directory::setName(const std::string &path, const std::string &fileName, const std::string& newName) {
+    std::shared_ptr<filesystem> res=this->get(path, fileName);
+    std::string old=res->getName();
+    std::string newN=res->setName(newName);
+    return old;
 }
 
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
@@ -355,9 +373,13 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
 }
 
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
-    //TODO: implement
-    //TODO: check pathToFile to mach a valid path format, IT'S IMPORTANT!
-    // use a regex, you can look at SymServer.cpp, line 212
+
+    //if(!pathIsValid2(pathToFile))
+        //throw filesystemException("Invalid path to symlink");
+    std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
+    if(!pathToFile.empty() && std::regex_match(pathToFile, pathPattern))
+            throw filesystemException("Invalid path to symlink");
+    strategy=std::make_unique<TrivialAccess>();
 
 }
 
@@ -398,3 +420,5 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool recurs
     }
     return ritorno+typeres.str()+" " +name + " " + priv.str();
 }
+
+
