@@ -74,16 +74,16 @@ SymServer::openSource(const std::string &opener, const std::string &path, const 
     return fileReq;
 }
 
-const document &
-SymServer::openNewSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
-                         const std::string &destPath) {
+std::shared_ptr<file>
+SymServer::openNewSource(const std::string &opener, const std::string &resourceId, const std::string &destPath,
+                         const std::string &destName, privilege reqPriv) {
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
-    std::shared_ptr<file> fileReq=target.accessFile(path+"/"+name, destPath);
+    std::shared_ptr<file> fileReq=target.accessFile(resourceId, destPath, destName);
     document& docReq=fileReq->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);
-    return docReq;
+    return fileReq;
 }
 
 const document & SymServer::createNewSource(const user &opener, const std::string &path, const std::string &name) {

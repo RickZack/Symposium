@@ -318,9 +318,10 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
      */
     void setStageForHavingOpenedDoc(SymServerUserMock& userWhoOpens){
         SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
-        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName)).WillOnce(::testing::Return(fileToReturn));
         EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-        auto ret=server.openNewSource(target.getUsername(), filePath, fileName, uri::getDefaultPrivilege(), "./");
+        auto ret= server.openNewSource(target.getUsername(), filePath + "/" + fileName, "./", fileName,
+                                       uri::getDefaultPrivilege());
         ASSERT_TRUE(server.userIsWorkingOnDocument(target, doc, privilege::owner));
         justInserted=&target;
     }
@@ -343,9 +344,9 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     void makeAnotherUserToHavePrivilege(privilege priv){
         //anotherUser adds the file to its filesystem and closes the document
         SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(anotherUserUsername));
-        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName)).WillOnce(::testing::Return(fileToReturn));
         EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-        auto ret2=server.openNewSource(anotherUserUsername, filePath, fileName, priv, "./");
+        auto ret2= server.openNewSource(anotherUserUsername, filePath + "/" + fileName, "./", fileName, priv);
     }
 
     void closeAfterPrivilegeAcquired(privilege priv){
@@ -405,15 +406,15 @@ TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
 
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceAccessesTheFile){
     SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
-    EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", "")).WillOnce(::testing::Return(fileToReturn));
+    EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
-    auto doc=server.openNewSource(loggedUserUsername, filePath, fileName, defaultPrivilege, "./");
-    EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+    auto f= server.openNewSource(loggedUserUsername, filePath + "/" + fileName, "./", fileName, defaultPrivilege);
+    EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, f->getDoc(), defaultPrivilege));
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceOfNotLoggedUser){
-    document doc;
-    ASSERT_THROW(doc=server.openNewSource(anotherUserUsername, filePath, fileName, defaultPrivilege, "./"), SymServerException);
+    std::shared_ptr<file> f;
+    ASSERT_THROW(f= server.openNewSource(anotherUserUsername, filePath + "/" + fileName, "./", fileName, defaultPrivilege), SymServerException);
     EXPECT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, defaultPrivilege));
 }
 

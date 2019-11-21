@@ -129,7 +129,7 @@
         <bpmn:targetRef>DataStoreReference_0eo62tp</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:task>
-    <bpmn:task id="Task_0frp8l0" name="Dislpay error">
+    <bpmn:task id="Task_0frp8l0" name="Display error">
       <bpmn:incoming>SequenceFlow_0wgemu8</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1i2vg8m</bpmn:outgoing>
     </bpmn:task>
