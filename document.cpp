@@ -53,17 +53,51 @@ int document::getNumchar() const {
 }
 
 document & document::access(const user &newActive, privilege accessPriv) {
-    //TODO:implement
+    std::pair<user*, privilege> p{const_cast<user*>(&newActive),accessPriv};
+    activeUsers.push_front(p);
     return *this;
 }
 
+
 symbol document::localInsert(int *indexes, symbol &toInsert) {
-    //TODO:implement
+    int i0=indexes[0];
+    int i1=indexes[1];
+    symbol def_symb (' ', 0, 0, {0,0});
+
+    //vector is empty or i0 is greater than its dimension
+    if(symbols.empty()|| i0>symbols.size()) {
+        symbols.resize(i0+1);
+        symbols[i0].resize(i1+1,def_symb);
+       // symbols[i0].reserve(i1+1);
+        std::vector<symbol> s=symbols.at(i0);
+       // symbols.erase(symbols.begin()+i0);
+        s.insert(s.begin()+i1,toInsert);
+        symbols.insert(symbols.begin()+i0,s);
+        }
+
+    else {
+        std::vector<symbol> s=symbols.at(i0);
+        if(i1<s.size()+1){
+
+          s.resize(i1+1,def_symb);
+          //s.reserve(i1+1);
+        }
+
+        s.insert(s.begin()+i1,toInsert);
+        symbols.insert(symbols.begin()+i0,s);
+    }
+
     return symbol('z', 0, 0, {0,0});
 }
 
 symbol document::localRemove(int *indexes) {
-    //TODO:implement
+    int i0=indexes[0];
+    int i1=indexes[1];
+
+    std::vector<symbol> s= symbols.at(i0);
+    s.erase(s.begin()+i1);
+    symbols.insert(symbols.begin()+i0,s);
+
     return symbol('z', 0, 0, {0,0});
 }
 
@@ -82,6 +116,7 @@ std::wstring document::toText() {
 
 void document::close(const user &noLongerActive) {
     //TODO:implement
+
 }
 
 void document::store(const std::string &storePath) {
@@ -98,8 +133,8 @@ std::set<int> document::retrieveSiteIds() {
 }
 
 bool document::operator==(const document &rhs) const {
-    //TODO: implement
-    return true;
+    return(this->id==rhs.id);
+
 }
 
 bool document::operator!=(const document &rhs) const {
