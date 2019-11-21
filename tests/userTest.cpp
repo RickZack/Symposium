@@ -184,7 +184,7 @@ TEST_F(UserTest, callShowDir)
 TEST_F(UserTest, callOpenFile)
 {
     document expected;
-    EXPECT_CALL(*homeDir, access(*u, ".", "dummyFile", privilege::readOnly)).WillOnce(::testing::ReturnRef(expected));
+    EXPECT_CALL(*homeDir, getFile(".", "dummyFile"));
     u->openFile(".", "dummyFile", uri::getDefaultPrivilege());
 }
 

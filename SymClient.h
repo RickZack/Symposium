@@ -99,9 +99,12 @@ namespace Symposium {
          * @brief constructs a @ref signUpMessage to send to the server to ask for registration
          * @param username the username of the user to register
          * @param pwd the password the user has chosen
+         * @param nickname the nickName chosen by the user
+         * @param iconPath the path (relative to the software directory) of the chosen icon
          * @return a properly constructed @ref signUpMessage to send to the server
          */
-        signUpMessage signUp(const std::string &username, const std::string &pwd, const std::string &nickname);
+        signUpMessage signUp(const std::string &username, const std::string &pwd, const std::string &nickname,
+                             const std::string &iconPath);
 
         /**
          * @brief assign to @e loggedUser the user returned by the server after having sent a @ref signUpMessage

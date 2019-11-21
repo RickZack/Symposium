@@ -107,7 +107,7 @@ std::ostream& operator<<(std::ostream& output, msgType m){
 
 TEST_P(MessageActionTest, askResMsgForbiddenActions){
     msgType action=GetParam();
-    EXPECT_THROW_MESSAGE_CONSTRUCTION(m=new askResMessage(action, {"",""}, "", "", ""), action, messageException);
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m= new askResMessage(action, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0), action, messageException);
 }
 msgType askResForbidden[]={
         msgType::registration, msgType::login, msgType::changeUserNick, msgType::changeUserPwd,
@@ -297,27 +297,27 @@ TEST_F(clientMessageTest, signUpMsgTestCallsAddUserOnServer){
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewSource){
-    m=new askResMessage(msgType::createRes, {"", ""}, "", "", "");
+    m= new askResMessage(msgType::createRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
     document returned;
     EXPECT_CALL(server, createNewSource(u, "", "")).WillOnce(::testing::ReturnRef(returned));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsOpenNewSource){
-    m=new askResMessage(msgType::openNewRes, {"", ""}, "", "", "");
+    m= new askResMessage(msgType::openNewRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
     document returned;
     EXPECT_CALL(server, openNewSource(u, "", "", privilege::modify, "")).WillOnce(::testing::ReturnRef(returned));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsRenameResource){
-    m=new askResMessage(msgType::changeResName, {"", ""}, "", "", "");
+    m= new askResMessage(msgType::changeResName, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
     EXPECT_CALL(server, renameResource(u, "", "", "")).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewDir){
-    m=new askResMessage(msgType::createNewDir, {"", ""}, "", "", "");
+    m= new askResMessage(msgType::createNewDir, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
     EXPECT_CALL(server, createNewDir(u, "", "")).WillOnce(::testing::Return(std::shared_ptr<directory>()));
     m->invokeMethod(server);
 }

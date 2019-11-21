@@ -41,7 +41,8 @@ void SymClient::setLoggedUser(const user &loggedUser) {
     //TODO:implement
 }
 
-signUpMessage SymClient::signUp(const std::string &username, const std::string &pwd, const std::string &nickname) {
+signUpMessage SymClient::signUp(const std::string &username, const std::string &pwd, const std::string &nickname,
+                                const std::string &iconPath) {
     return signUpMessage(msgType::login, {"", ""}, user("", "", "", "", -1, nullptr));
 }
 
@@ -59,7 +60,7 @@ void SymClient::logIn(const user &logged) {
 
 askResMessage SymClient::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
     //TODO:implement
-    return askResMessage(msgType::openRes, {"", ""}, "", "");
+    return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
 void SymClient::openSource(const std::shared_ptr<file> fileAsked) {
@@ -69,7 +70,7 @@ void SymClient::openSource(const std::shared_ptr<file> fileAsked) {
 askResMessage
 SymClient::openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName) {
     //TODO:implement
-    return askResMessage(msgType::openRes, {"", ""}, "", "");
+    return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
 void SymClient::openNewSource(const std::shared_ptr<file> fileAsked) {
@@ -78,7 +79,7 @@ void SymClient::openNewSource(const std::shared_ptr<file> fileAsked) {
 
 askResMessage SymClient::createNewSource(const std::string &path, const std::string &name) {
     //TODO:implement
-    return askResMessage(msgType::openRes, {"", ""}, "", "");
+    return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
 void SymClient::createNewSource(const std::shared_ptr<file> fileCreated) {
@@ -87,7 +88,7 @@ void SymClient::createNewSource(const std::shared_ptr<file> fileCreated) {
 
 askResMessage SymClient::createNewDir(const std::string &path, const std::string &name) {
     //TODO:implement
-    return askResMessage(msgType::openRes, {"", ""}, "", "");
+    return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
 void SymClient::createNewDir(const std::shared_ptr<directory> dirCreated) {
@@ -134,7 +135,7 @@ uri SymClient::shareResource(const std::string &resPath, const std::string &resN
 askResMessage
 SymClient::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) {
     //TODO:implement
-    return askResMessage(msgType::openRes, {"", ""}, "", "");
+    return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
 std::shared_ptr<filesystem>
@@ -146,7 +147,7 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
 
 askResMessage SymClient::removeResource(const std::string &resPath, const std::string &resName) {
     //TODO:implement
-    return askResMessage(msgType::openRes, {"", ""}, "", "");
+    return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
 std::shared_ptr<filesystem>

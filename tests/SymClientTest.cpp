@@ -41,7 +41,7 @@ struct SymClientUserMock: public user{
     SymClientUserMock(const std::string &username, const std::string &pwd, const std::string &nickname,
                       const std::string &iconPath, int siteId, const std::shared_ptr<directory> &home) :
             user(username, pwd, nickname, iconPath, siteId, home) {}
-    MOCK_CONST_METHOD3(openFile, document&(const std::string& path, const std::string& filename, privilege accessMode));
+    MOCK_CONST_METHOD3(openFile, std::shared_ptr<file>(const std::string& path, const std::string& filename, privilege accessMode));
     MOCK_CONST_METHOD3(accessFile, std::shared_ptr<file>(const std::string &resId, const std::string &path, const std::string &fileName));
     MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string &filename, const std::string &path));
     MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string &filename, const std::string &path, int id));
@@ -102,6 +102,7 @@ struct SymClientAccesser: public SymClient{
 struct SymClientFileMock: public file{
     SymClientFileMock(const std::string &name, const std::string &realPath) : file(name, realPath) {};
     MOCK_CONST_METHOD0(getDoc, document&());
+    MOCK_METHOD2(access, document&(const user& u, privilege requested));
 };
 
 struct SymClientDirMock: public directory{
@@ -131,6 +132,7 @@ struct SymClientTest : ::testing::Test{
     static const std::string destPath;
     static uri newPreferences;
     std::shared_ptr<SymClientFileMock> fileSentByServer;
+    std::shared_ptr<SymClientFileMock> fileInUserFilesystem;
     std::shared_ptr<SymClientDirMock> dirSentByServer;
     SymClientDocMock docInUserFilesystem, docSentByServer;
     static int indexes[2];
@@ -164,7 +166,7 @@ struct SymClientTest : ::testing::Test{
     }
     void setStageForOpenedDoc(){
         setStageForLoggedUser();
-        EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::ReturnRef(docInUserFilesystem));
+        EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege));
         EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
         client.openSource(fileSentByServer);
         ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
@@ -197,14 +199,14 @@ TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
 }
 
 TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){
-    auto mex= client.signUp(username, pwd, nickname);
+    auto mex= client.signUp(username, pwd, nickname, path);
     user expected(username, pwd, nickname, "", 0, nullptr);
     EXPECT_EQ(expected, mex.getNewUser());
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, signUpAssignesLoggedUserAndRemovesFromUnanswered){
-    auto mex= client.signUp(username, pwd, nickname);
+    auto mex= client.signUp(username, pwd, nickname, path);
     //just imagine that the server has answered with msgOutcome::success to client's signUpMessage, the response contain the
     //complete user data
     client.signUp(userReceived);
@@ -231,7 +233,7 @@ TEST_F(SymClientTest, openSourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
     auto mex=client.openSource(path, filename, privilege::readOnly);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::openRes, {username, pwd}, path, filename);
+    askResMessage expected(msgType::openRes, {username, pwd}, path, filename, "", uri::getDefaultPrivilege(), 0);
     EXPECT_EQ(expected, mex);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -243,7 +245,7 @@ TEST_F(SymClientTest, openSourceOpensDocAndPutInActiveAndRemovesFromUnanswered)
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openSource on client
     //the data use to call openFile must be taken from the relative askResMessage in unanswered
-    EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::ReturnRef(docInUserFilesystem));
+    EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::Return(fileInUserFilesystem));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openSource(fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
@@ -256,7 +258,7 @@ TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
     auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::openNewRes, {username, pwd}, destPath, filename, path+"/"+filename);
+    askResMessage expected(msgType::openNewRes, {username, pwd}, destPath, filename, path + "/" + filename, uri::getDefaultPrivilege(), 0);
     EXPECT_EQ(expected, mex);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -279,7 +281,7 @@ TEST_F(SymClientTest, createNewSourceConstructsGoodMessageAndInsertInUnanswered)
     setStageForLoggedUser();
     auto mex=client.createNewSource(path, filename);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::createRes, {username, pwd}, path, filename);
+    askResMessage expected(msgType::createRes, {username, pwd}, path, filename, "", uri::getDefaultPrivilege(), 0);
     EXPECT_EQ(expected, mex);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -302,7 +304,7 @@ TEST_F(SymClientTest, createNewDirConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
     auto mex=client.createNewDir(path, filename);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::createNewDir, {username, pwd}, path, filename);
+    askResMessage expected(msgType::createNewDir, {username, pwd}, path, filename, "", uri::getDefaultPrivilege(), 0);
     EXPECT_EQ(expected, mex);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -393,7 +395,7 @@ TEST_F(SymClientTest, renameResourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
     auto mex=client.renameResource(path, filename, "newName");
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::changeResName, {username, pwd}, path, filename, "newName");
+    askResMessage expected(msgType::changeResName, {username, pwd}, path, filename, "newName", uri::getDefaultPrivilege(), 0);
     EXPECT_EQ(expected, mex);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -409,7 +411,7 @@ TEST_F(SymClientTest, removeResourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
     auto mex=client.removeResource(path, filename);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::removeRes, {username, pwd}, path, filename);
+    askResMessage expected(msgType::removeRes, {username, pwd}, path, filename, "", uri::getDefaultPrivilege(), 0);
     EXPECT_EQ(expected, mex);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }

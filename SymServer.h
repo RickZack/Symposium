@@ -108,7 +108,7 @@
           * then the server sends the document inside a @ref sendResMessage
           * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
           */
-         virtual const document &
+         virtual std::shared_ptr<file>
          openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv);
 
          /**

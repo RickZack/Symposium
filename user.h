@@ -145,7 +145,7 @@ namespace Symposium {
          *
          * This method calls the @ref directory::access method on @e home passing the current user as the one asking the action
          */
-        virtual document &openFile(const std::string &path, const std::string &fileName, privilege accessMode) const;
+        virtual std::shared_ptr<file> openFile(const std::string &path, const std::string &fileName, privilege accessMode) const;
 
         /**
          * @brief edit the privilege of @e otherUser user for the resource @e resName in @e resPath to @e newPrivilege

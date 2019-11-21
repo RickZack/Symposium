@@ -156,9 +156,10 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     return fi;
 }
 
-document & user::openFile(const std::string &path, const std::string &fileName, privilege accessMode) const {
-    document& newD= home->access(*this, path, fileName, accessMode);
-    return newD;
+std::shared_ptr<file> user::openFile(const std::string &path, const std::string &fileName, privilege accessMode) const {
+    auto f=home->getFile(path, fileName);
+    //document& newD= home->access(*this, path, fileName, accessMode);
+    return f;
 }
 
 privilege user::editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,

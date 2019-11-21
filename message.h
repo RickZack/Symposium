@@ -127,13 +127,15 @@
          std::string path;          /**< path where to put the resource */
          std::string name;          /**< name to assign to the resource */
          std::string resourceId;    /**< when a sharing request is made, contains the path to the resource (the uri). */
+         privilege accessMode;      /**< the privilege requested opening the resource */
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
          askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, const std::string &path,
-                       const std::string &name, const std::string &resourceId="", int msgId = 0);
+                       const std::string &name, const std::string &resourceId = "", privilege accessMode=uri::getDefaultPrivilege(),
+                       int msgId = 0);
 
          /**
           * @brief perform an action regarding a resource for the user @e actionOwner

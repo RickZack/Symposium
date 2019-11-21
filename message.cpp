@@ -83,7 +83,7 @@ bool clientMessage::operator!=(const clientMessage &rhs) const {
 
 askResMessage::askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                              const std::string &path,
-                             const std::string &name, const std::string &resourceId, int msgId)
+                             const std::string &name, const std::string &resourceId, privilege accessMode, int msgId)
         : message(action, msgId), clientMessage(action, actionOwner, msgId), path(path), name(name),
           resourceId(resourceId) {
     //TODO: implement

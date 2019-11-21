@@ -63,13 +63,15 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
     return target;
 }
 
-const document &
+std::shared_ptr<file>
 SymServer::openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv) {
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    document& docReq= getRegistered(opener).openFile(path, name, reqPriv);
+    const user& target=getRegistered(opener);
+    std::shared_ptr<file> fileReq= target.openFile(path, name, reqPriv);
+    document& docReq= fileReq->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);
-    return docReq;
+    return fileReq;
 }
 
 const document &
@@ -124,10 +126,12 @@ privilege SymServer::editPrivilege(const std::string &actionUser, const std::str
     if(!userIsActive(actionUser) || !userIsRegistered(targetUser))
         throw SymServerException(SymServerException::actionUserNotLoggedOrTargetUserNotRegistered, UnpackFileLineFunction());
     std::string pathFromUserHome="./"+resPath.substr(strlen("./")+strlen(actionUser.c_str())+strlen("/"));
-    document docReq=getRegistered(actionUser).openFile(pathFromUserHome, resName, privilege::owner);
+    const user& actionU=getRegistered(actionUser);
+    std::shared_ptr<file> fileReq= actionU.openFile(pathFromUserHome, resName, privilege::owner);
+    document& docReq=fileReq->access(actionU, privilege::owner);
     if(userIsWorkingOnDocument(targetUser, docReq.getId()).first)
         throw SymServerException(SymServerException::userWorkingOnDoc, UnpackFileLineFunction());
-    return getRegistered(actionUser).editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
+    return actionU.editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
 }
 
 uri SymServer::shareResource(const user &actionUser, const std::string &resPath, const std::string &resName,
