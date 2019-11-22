@@ -80,6 +80,13 @@ std::tuple<std::string, std::string>  filesystem::separate(const std::string &pa
     return  std::make_tuple(path2, id2);
 }
 
+//FIXME: choose a better name, here I don't understand what is checked,
+// realPath is an attribute of file, so it's better to write this method to file class
+// it can be also static, because we don't need to have the file instance (only realPath, that is passed).
+// Here some ideas:
+//  - make it static;
+//  - don't make it static, but change the signature in [bool file::NewName() const], you can access realPath read-only
+// Anyway, it should be private to keep the interface clean
 bool filesystem::pathIsValid2(const std::string &toCheck) {
     //OPTIMIZE: correctness check of user data should be available within user class,
     // here we should call that method(s), adding only the constrain on the icon path
@@ -137,14 +144,19 @@ void file::send() const {
     //TODO: implement
 }
 
-
+//FIXME: try to clean a little, too many lines for what it does
 std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
     std::string ritorno;
+    //FIXME: try always to use std::string methods before coding a solution by hand
+    // for example in tests I wrote something like this loop with:
+    // ritorno.insert(0, indent, ' ');
     if (indent>0)
     {
         for(int i=0; i<indent; i++)
             ritorno.append(" ");
     }
+    //FIXME: you can put a string in a ostringstream with <<, so you can try to put all the contents
+    // in a ostringstream and only at the end call obj.str()
     std::ostringstream typeres;
     typeres<<resType();
     std::ostringstream priv;
@@ -183,6 +195,10 @@ std::shared_ptr<directory> directory::getRoot() {
 
 }
 
+//FIXME: difficult to understand and long. Advice: more explanatory names, avoid strange operations
+// as possible and, if something remains obscure, write some comments
+// More important: be sure that this does not throw any exception that is not SymposiumException
+// (it would be difficult to catch the specific type at the handler)
 std::tuple<std::string, std::string> directory::separateFirst(std::string path)
 {
     std::string path2;
@@ -204,7 +220,10 @@ std::tuple<std::string, std::string> directory::separateFirst(std::string path)
     return  std::make_tuple(path2, id);
 }
 
-
+//FIXME: way too long and difficult to understand. Also WBT testing would be very difficult.
+// Advices: isolate the condition on "here" path, put inside a private helper function
+// lines that are common in this method (es. 229-233, 242-248).
+// make a clear distinction between the "get something that is here" and "I need to call again recursively"
 std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
     if(path=="")
     {
@@ -221,6 +240,8 @@ std::shared_ptr<filesystem> directory::get(const std::string &path, const std::s
     else
         pathRes.append(path);
     tie(pathRes, idRes)= separateFirst(pathRes);
+    //FIXME: for example you can add "&& i->resType()==resourceType::directory" to condition
+    // to avoid another if, if this is the recursive part
     auto it=std::find_if(contained.begin(), contained.end(),
                          [idRes](std::shared_ptr<filesystem> i){return std::to_string(i->getId())==idRes;});
 
@@ -255,7 +276,14 @@ std::string directory::setName(const std::string &path, const std::string &fileN
     std::string newN=res->setName(newName);
     return old;
 }
-
+//FIXME: why this sequence?
+// -idBackup=idCounter;
+// -idCounter=idToAssign;
+// -idCounter=idBackup;
+// Moreover, if exception is raised, why idCounter of this directory should be equal to idToAssign? -> broken code
+// idCounter should be private, handled only by filesystem constructor, do not touch it in other places
+// To assign a custom id to a new directory you can either change directory's and filesystem constructors to accept an
+// optional parameter that is idToAssign or create a function in filesystem that changes the id.
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
     int idBackup=idCounter;
     idCounter=idToAssign;
@@ -403,7 +431,7 @@ void Symposium::symlink::load(const std::string &loadPath) {
 void Symposium::symlink::send() const {
     //TODO: implement
 }
-
+//FIXME: same thing of file::print
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
     std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
     std::ostringstream priv;
