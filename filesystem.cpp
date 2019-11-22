@@ -282,10 +282,18 @@ std::shared_ptr<directory> directory::getDir(const std::string &path, const std:
 
 std::shared_ptr<file> directory::getFile(const std::string &path, const std::string &name) {
     std::shared_ptr<filesystem> res=this->get(path, name);
-    if(res->resType()!=resourceType::file)
-        filesystemException("File are you searching for, is not present");
-    return std::dynamic_pointer_cast<file>(res);
-
+    if(res->resType()==resourceType::file)
+        return std::dynamic_pointer_cast<file>(res);
+    if(res->resType()==resourceType::symlink)
+    {
+        std::shared_ptr<symlink> sym=std::dynamic_pointer_cast<symlink>(res);
+        std::string pathSym=sym->getPath();
+        std::string pathRes;
+        std::string idRes;
+        tie(pathRes, idRes)= separate(pathSym);
+        return getFile(pathRes, idRes);
+    }
+   throw filesystemException("File are you searching for, is not present");
 }
 
 std::string directory::setName(const std::string &path, const std::string &fileName, const std::string& newName) {
@@ -359,24 +367,28 @@ directory::access(const user &targetUser, const std::string &path, const std::st
 }
 //FIXME: for directory::access why not calling access against the retrieved file? This method would be two lines long
 
-//FIXME: pay attention when deleting a directory or a file: we should ensure that [targetUser] is the only owner of each file
+
 std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &path, const std::string &resName) {
     std::shared_ptr<filesystem> obj=this->get(path, resName);
-    std::string pathRem;
     std::string idRem;
-    tie(pathRem, idRem)= separate(path);
-    std::shared_ptr<directory> dir=this->getDir(pathRem, idRem);
-
+    if(path!="./" && !path.empty())
+    {
+        std::string pathRem;
+        tie(pathRem, idRem)= separate(path);
+        std::shared_ptr<directory> dir=this->getDir(pathRem, idRem);
+        return dir->remove(targetUser, "", resName);
+    }
+    idRem=resName;
     if(obj->resType()==resourceType::file)
     {
         std::shared_ptr<file> f=std::dynamic_pointer_cast<file>(obj);
         if(f->moreOwner())
             throw filesystemException("You are not the only owner of this file, so you cannot delete it");
-        //if(!(f->deleteFromStrategy(targetUser.getUsername())))
-            //throw filesystemException("You have some error while you try deleting a file");
-        auto it=std::find_if(dir->contained.begin(), dir->contained.end(),
-                             [idRem, f](std::shared_ptr<filesystem> i){return i->getId()==f->getId();});
-        dir->contained.erase(it);
+        if(!(f->deleteFromStrategy(targetUser.getUsername())))
+            throw filesystemException("You have some error while you try deleting a file");
+        auto it=std::find_if(contained.begin(), contained.end(),
+                             [idRem, f](const std::shared_ptr<filesystem>& i){return i->getId()==f->getId();});
+        contained.erase(it);
         return obj;
     }
 
@@ -390,10 +402,10 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
         std::shared_ptr<file> f=getRoot()->getFile(pathFile, idFile);
         if(!(f->deleteFromStrategy(targetUser.getUsername())))
             throw filesystemException("You have some error while you try deleting a symlink");
-        auto it=std::find_if(dir->contained.begin(), dir->contained.end(),
+        auto it=std::find_if(contained.begin(), contained.end(),
                              [idRem, s](std::shared_ptr<filesystem> i){return i->getId()==s->getId();});
 
-        dir->contained.erase(it);
+        contained.erase(it);
         return obj;
     }
     std::shared_ptr<directory> d=std::dynamic_pointer_cast<directory>(obj);
@@ -401,10 +413,10 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
     {
         std::shared_ptr<filesystem> rem=d->remove(targetUser, "", std::to_string(iterator->getId()));
     }
-    auto it=std::find_if(dir->contained.begin(), dir->contained.end(),
+    auto it=std::find_if(contained.begin(), contained.end(),
                          [idRem, d](std::shared_ptr<filesystem> i){return i->getId()==d->getId();});
 
-    dir->contained.erase(it);
+    contained.erase(it);
     return obj;
 }
 
@@ -475,7 +487,7 @@ void Symposium::symlink::send() const {
 }
 
 std::string Symposium::symlink::getPath() {
-    return pathToFile;
+    return pathToFile+"/"+fileName;
 }
 
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {

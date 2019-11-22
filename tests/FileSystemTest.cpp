@@ -413,6 +413,7 @@ TEST_F(FileSystemTestSharing, getSearchesRecursive){
     auto ret2=directory::getRoot()->getDir("./", "1")->get("./", "7");
     EXPECT_EQ(ret2, ret);
     EXPECT_EQ(expected, ret);
+    directory::getRoot()->remove(u, "./", "1");
 }
 
 TEST_F(FileSystemTestSharing, setNameSearchesRecursive){
@@ -430,6 +431,7 @@ TEST_F(FileSystemTestSharing, setNameSearchesRecursive){
     std::string ret=directory::getRoot()->setName("./1/", "7", newName);
     EXPECT_EQ(newName, expected->getName());
     EXPECT_EQ(oldName, ret);
+    directory::getRoot()->remove(u, "./", "1");
 }
 
 TEST_F(FileSystemTestSharing, AddFileInsertsRecursive){
@@ -446,6 +448,7 @@ TEST_F(FileSystemTestSharing, AddFileInsertsRecursive){
     auto inserted=directory::getRoot()->addFile("./1/7", "file1");
     auto ret=directory::getRoot()->get("./1/7/", std::to_string(inserted->getId()));
     EXPECT_EQ(inserted, ret);
+    directory::getRoot()->remove(u, "./", "1");
 }
 
 TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
@@ -464,8 +467,10 @@ TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
     directory::getRoot()->addDirectory("anotherUsername", 2);
     auto inserted=directory::getRoot()->addFile("./1/7", "file1");
     auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "/1/7/", std::to_string(inserted->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./2/", std::to_string(inserted->getId())));
+    std::shared_ptr<file> ret=directory::getRoot()->getFile("./2/", std::to_string(linkToInserted->getId()));
     EXPECT_EQ(inserted, ret);
+    directory::getRoot()->remove(u, "./", "1");
+    //directory::getRoot()->remove(u, "./", "2");
 }
 
 TEST_F(FileSystemTestSharing, printSymLink){
@@ -568,9 +573,11 @@ TEST_F(FileSystemTestSharing, removeDirectoryRecursive){
     auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/2", "/1/7/"+std::to_string(inserted->getId()));
     std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./2/", std::to_string(inserted->getId())));
     //Remove file2, should not throw
+    //EXPECT_CALL(file2, deleteFromStrategy("username"));
     directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId()));
     //Try to remove again file2, should throw
     EXPECT_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId())), filesystemException);
+    directory::getRoot()->remove(u, "./", "2");
 }
 
 TEST_F(FileSystemTestSharing, accessOnSymlink){
