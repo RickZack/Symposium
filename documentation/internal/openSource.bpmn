@@ -129,7 +129,7 @@
         <bpmn:targetRef>DataStoreReference_0g88ao6</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:task>
-    <bpmn:task id="Task_14kcb7x" name="Dislpay error">
+    <bpmn:task id="Task_14kcb7x" name="Display error">
       <bpmn:incoming>SequenceFlow_1x4jjjs</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0u03g8a</bpmn:outgoing>
     </bpmn:task>
@@ -137,7 +137,7 @@
       <bpmn:incoming>SequenceFlow_0u03g8a</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:dataStoreReference id="DataStoreReference_0g88ao6" name="unanswered" />
-    <bpmn:subProcess id="SubProcess_15gtywk" name="Call askResMessage::openSource(username, pwd, nickname, iconPath)">
+    <bpmn:subProcess id="SubProcess_15gtywk" name="Call askResMessage::openSource(path, name, reqPriv)">
       <bpmn:incoming>SequenceFlow_14cd176</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_030ga9q</bpmn:outgoing>
       <bpmn:task id="Task_0s0a6or" name="constructs a askResMessage">
@@ -290,7 +290,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_0m9oqmo" sourceRef="Task_07cc3ch" targetRef="ExclusiveGateway_0mris0m" />
     <bpmn:sequenceFlow id="SequenceFlow_1mfgwmy" sourceRef="Task_07qb6w2" targetRef="ExclusiveGateway_0mris0m" />
     <bpmn:sequenceFlow id="SequenceFlow_0p90sqd" sourceRef="StartEvent_13s3j26" targetRef="SubProcess_048rzub" />
-    <bpmn:task id="Task_0rdusr1" name="Call file&#38;::openFile(path, name, accessMode)">
+    <bpmn:task id="Task_0rdusr1" name="Call file::openFile(path, name, accessMode)">
       <bpmn:incoming>SequenceFlow_04mhtb7</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_1e2d2xp</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0p5rzlu</bpmn:outgoing>

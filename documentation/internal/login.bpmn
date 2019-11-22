@@ -170,7 +170,7 @@
         <bpmn:targetRef>DataStoreReference_06m0tww</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:task>
-    <bpmn:task id="Task_1d2pbx8" name="Dislpay error">
+    <bpmn:task id="Task_1d2pbx8" name="Display error">
       <bpmn:incoming>SequenceFlow_175kyer</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1q1yeq9</bpmn:outgoing>
     </bpmn:task>

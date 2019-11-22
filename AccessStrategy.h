@@ -75,6 +75,10 @@ namespace Symposium {
 
         virtual privilege getPrivilege(const std::string &targetUser) =0;
 
+        virtual bool moreOwner() =0;
+
+        virtual bool deleteUser(const std::string &targetUser) =0;
+
         virtual ~AccessStrategy()= default;
     };
     BOOST_SERIALIZATION_ASSUME_ABSTRACT(AccessStrategy)
@@ -101,6 +105,10 @@ namespace Symposium {
 
         privilege getPrivilege(const std::string &targetUser) override;
 
+        bool moreOwner() override;
+
+        bool deleteUser(const std::string &targetUser) override;
+
         bool operator==(const RMOAccess &rhs) const;
 
         bool operator!=(const RMOAccess &rhs) const;
@@ -126,6 +134,10 @@ namespace Symposium {
         privilege setPrivilege(const std::string &targetUser, privilege toGrant) override;
 
         privilege getPrivilege(const std::string &targetUser) override;
+
+        bool deleteUser(const std::string &targetUser) override;
+
+        bool moreOwner() override;
 
         ~TrivialAccess() override = default;
     };

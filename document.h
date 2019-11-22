@@ -38,6 +38,8 @@
 #include "privilege.h"
 #include "Symposium.h"
 #include "symbol.h"
+
+
 namespace Symposium {
     class document {
         static int idCounter;                                           /**< id to be assigned to the next created document */
@@ -47,6 +49,8 @@ namespace Symposium {
         int numchar;                                                    /**< number of printable characters */
     public:
         document(int id = document::idCounter);
+
+
 
         int getId() const;
 

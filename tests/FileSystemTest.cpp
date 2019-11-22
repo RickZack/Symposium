@@ -410,6 +410,8 @@ TEST_F(FileSystemTestSharing, getSearchesRecursive){
      */
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     auto ret=directory::getRoot()->get("./1/", "7");
+    auto ret2=directory::getRoot()->getDir("./", "1")->get("./", "7");
+    EXPECT_EQ(ret2, ret);
     EXPECT_EQ(expected, ret);
 }
 

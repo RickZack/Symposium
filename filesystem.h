@@ -164,6 +164,7 @@ namespace Symposium {
     public:
         file(const std::string &name, const std::string &realPath);
 
+
         const document &getDoc() const;
 
         /**
@@ -246,6 +247,8 @@ namespace Symposium {
         
     public:
         symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName);
+
+        std::string getPath();
 
         resourceType resType() const override;
 

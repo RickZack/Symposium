@@ -114,24 +114,24 @@
          /**
           * @brief access a user's document via uri to the filesystem of the another user
           * @param opener the user who made the request
-          * @param path the absolute path of the requested document
-          * @param name the name of the document
-          * @param reqPriv the privilege requested opening the document
+          * @param resourceId the absolute path of the requested document
           * @param destPath the path where to put the @ref symlink to @e name, inside @e opener 's home directory
+          * @param destName the name to assign to the symlink
+          * @param reqPriv the privilege requested opening the document
           * @return the document just retrieved
           * @throws SymServerException thrown if the user @ref opener is not logged in
           * @throws filesystemException rethrown if there are problems regarding the asked resource
           *
           * When a client asks for a document for which the user has no privilege with @ref askResMessage, the server
-          * checks that the file named @e name in @e path is available and then that the file is shareable.
+          * checks that the file in @e resourceId is available and then that the file is shareable.
           * Under these conditions, the server adds the @e opener to the subset of users who have @e reqPriv privilege,
-          * adds a @ref symlink to the file in @e destPath named @name and send the document inside a @ref sendResMessage
+          * adds a @ref symlink to the file in @e destPath named @e destName and send the document inside a @ref sendResMessage
           * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
           * and send back to the client a @ref sendResMessage with the symlink just created
           */
-         virtual const document &
-         openNewSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
-                       const std::string &destPath);
+         virtual std::shared_ptr<file>
+         openNewSource(const std::string &opener, const std::string &resourceId, const std::string &destPath,
+                       const std::string &destName, privilege reqPriv);
 
          /**
           * @brief creates a new file with an empty document inside
