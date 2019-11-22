@@ -76,6 +76,7 @@ namespace Symposium {
         std::unique_ptr<AccessStrategy> strategy;
     public:
         filesystem(const std::string &name);
+        filesystem(const std::string &name, const int &idToAssign);
 
         int getId() const;
 
@@ -150,7 +151,7 @@ namespace Symposium {
         virtual void send() const = 0; //not clear how to set this
         virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const = 0;
         std::tuple<std::string, std::string> separate(const std::string &path);
-        bool pathIsValid2(const std::string &toCheck);
+        static bool pathIsValid2(const std::string &toCheck);
 
         virtual ~filesystem()= default;
     };
@@ -229,6 +230,10 @@ namespace Symposium {
          */
         std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
 
+        bool moreOwner();
+
+        bool deleteFromStrategy(const std::string &userName);
+
         virtual ~file() override=default;
 
     };
@@ -293,6 +298,7 @@ namespace Symposium {
         std::weak_ptr<directory> self;                          /**< pointer to itself */
 
     public:
+        directory(const std::string &name, const int &idToAssign);
         static std::shared_ptr<directory> nullDir(); //necessary to build a new user client side
         static std::shared_ptr<directory> getRoot();
 

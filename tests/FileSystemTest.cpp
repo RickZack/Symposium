@@ -463,8 +463,8 @@ TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     directory::getRoot()->addDirectory("anotherUsername", 2);
     auto inserted=directory::getRoot()->addFile("./1/7", "file1");
-    auto linkToInserted= directory::getRoot()->addLink("./1/2", "sym1", "/1/7/", std::to_string(inserted->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
+    auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "/1/7/", std::to_string(inserted->getId()));
+    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./2/", std::to_string(inserted->getId())));
     EXPECT_EQ(inserted, ret);
 }
 
@@ -563,10 +563,10 @@ TEST_F(FileSystemTestSharing, removeDirectoryRecursive){
      */
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto inserted=directory::getRoot()->addFile("./1/2", "file1");
+    auto inserted=directory::getRoot()->addFile("./2", "file1");
     auto file2=directory::getRoot()->addFile("./1/7", "file2");
-    auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/1/2", "/1/7/"+std::to_string(inserted->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
+    auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/2", "/1/7/"+std::to_string(inserted->getId()));
+    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./2/", std::to_string(inserted->getId())));
     //Remove file2, should not throw
     directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId()));
     //Try to remove again file2, should throw
