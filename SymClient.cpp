@@ -73,7 +73,9 @@ SymClient::openNewSource(const std::string &resourceId, privilege reqPriv, const
     return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
-void SymClient::openNewSource(const std::shared_ptr<file> fileAsked) {
+void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
+                              const std::string &destName,
+                              int idToAssign, const std::shared_ptr<file> fileAsked) {
     //TODO:implement
 }
 
@@ -82,7 +84,7 @@ askResMessage SymClient::createNewSource(const std::string &path, const std::str
     return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
-void SymClient::createNewSource(const std::shared_ptr<file> fileCreated) {
+void SymClient::createNewSource(const std::string &path, const std::string &name, int idToAssign) {
     //TODO:implement
 }
 
@@ -91,7 +93,7 @@ askResMessage SymClient::createNewDir(const std::string &path, const std::string
     return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
-void SymClient::createNewDir(const std::shared_ptr<directory> dirCreated) {
+void SymClient::createNewDir(const std::string &path, const std::string &name, int idToAssign) {
     //TODO:implement
 }
 

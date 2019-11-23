@@ -113,6 +113,15 @@ std::shared_ptr<file> user::newFile(const std::string &fileName, const std::stri
     return newF;
 }
 
+//FIXME: new directory must be inserted in [pathFromHome], not directly inside the home.
+// Advice:
+//  1) augment addDirectory to take a path as argument and then inside it search the directory with
+// getDir
+// or
+// 2) use getDir here and then call addDirectory on the retrieved directory
+// Solution 1 is more similar to what we already do (for files for example), the transaction flow will be more uniform
+// with respect to other operations (see Camunda diagrams in documentation/internal)
+// in both cases, pay attention to other tests that will need to be corrected
 std::shared_ptr<directory>
 user::newDirectory(const std::string &dirName, const std::string &pathFromHome, int idToAssign) const{
     std::shared_ptr<directory> newD;

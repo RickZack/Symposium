@@ -266,13 +266,13 @@ TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
 {
     setStageForLoggedUser();
-    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath);
+    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym");
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openNewSource on client
     //the data use to call accessFile must be taken from the relative askResMessage in unanswered
     EXPECT_CALL(userReceived, accessFile(path+"/"+filename, destPath, filename)).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openNewSource(fileSentByServer);
+    client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym", fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -289,13 +289,14 @@ TEST_F(SymClientTest, createNewSourceConstructsGoodMessageAndInsertInUnanswered)
 TEST_F(SymClientTest, createNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
 {
     setStageForLoggedUser();
+    auto cmex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath);
     auto mex=client.createNewSource(path, filename);
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call createNewSource on client
-    //the data use to call newFile must be taken from the relative askResMessage in unanswered
+    //the data used to call newFile must be taken from the relative askResMessage in unanswered (cmex)
     EXPECT_CALL(userReceived, newFile(filename, path)).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openNewSource(fileSentByServer);
+    client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym", fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -317,7 +318,7 @@ TEST_F(SymClientTest, createNewDirOpensDocAndPutInActiveAndRemovesFromUnaswered)
     //resource asked. sendResMessage has already been tested to call createNewSource on client
     //the data use to call newDirectory must be taken from the relative askResMessage in unanswered
     EXPECT_CALL(userReceived, newDirectory(filename, path, dirSentByServer->getId())).WillOnce(::testing::Return(dirSentByServer));
-    client.createNewDir(dirSentByServer);
+    client.createNewDir(path, filename, dirSentByServer->getId());
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 

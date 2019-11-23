@@ -422,21 +422,21 @@ TEST_F(SymServerTestFilesystemFunctionality, createNewSourceCallsNewFile){
     SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
     EXPECT_CALL(target, newFile(fileName, filePath)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
-    auto doc=server.createNewSource(target, filePath, fileName);
+    auto doc=server.createNewSource(loggedUserUsername, filePath, fileName);
     EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, privilege::owner));
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, createNewSourceOfUnloggedUser){
-    EXPECT_THROW(server.createNewSource(anotherUser, filePath, fileName), SymServerException);
+    EXPECT_THROW(server.createNewSource(anotherUserUsername, filePath, fileName), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, createNewDirCallsNewDirectory){
-    EXPECT_CALL(loggedUser, newDirectory(fileName, filePath,0));
-    server.createNewDir(loggedUser, filePath, fileName);
+    EXPECT_CALL(*inserted, newDirectory(fileName, filePath,-1));
+    server.createNewDir(loggedUserUsername, filePath, fileName);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, createNewDirOfUnloggedUser){
-    EXPECT_THROW(server.createNewDir(anotherUser, filePath, fileName), SymServerException);
+    EXPECT_THROW(server.createNewDir(anotherUserUsername, filePath, fileName), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDoc){

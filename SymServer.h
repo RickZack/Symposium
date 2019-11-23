@@ -145,7 +145,7 @@
           * When a client asks for a new directory, the server tries to do it and send back to the client a @ref sendResMessage
           * containing the resource just added to @e path.
           */
-         virtual const document &createNewSource(const user &opener, const std::string &path, const std::string &name);
+         virtual const document &createNewSource(const std::string &opener, const std::string &path, const std::string &name);
 
          /**
           * @brief creates a new directory in the user's filesystem
@@ -160,7 +160,7 @@
           * containing the directory just added to @e path.
           */
          virtual std::shared_ptr<directory>
-         createNewDir(const user &opener, const std::string &path, const std::string &name);
+         createNewDir(const std::string &opener, const std::string &path, const std::string &name);
 
          /**
           * @brief update a document with a new symbol from a client
@@ -231,8 +231,8 @@
           * @brief renames a resource from @e remover 's @e home directory
           * @param renamer the user who is asking to rename its resource
           * @param resPath the relative path to the @e renamer 's @e home directory where to find the resource
-          * @param resName the resource's name
-          * @param newName the new resource's name
+          * @param resName the resource's name (meaning the its unique id)
+          * @param newName the new resource's name (not the id)
           * @return the resource just renamed
           *
           * When a user client side wants to set a new name for a resource, it sends a @ref askResMessage and waits
