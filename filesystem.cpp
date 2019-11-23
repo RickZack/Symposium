@@ -177,7 +177,6 @@ std::string file::print(const std::string &targetUser, bool recursive, int inden
     //FIXME: try always to use std::string methods before coding a solution by hand
     // for example in tests I wrote something like this loop with:
     // ritorno.insert(0, indent, ' ');
-    // INDENT DOESN'T NEED TO BE >0, THE CALL IS CORRECT ANYWAY
     if (indent>0)
     {
         for(int i=0; i<indent; i++)
@@ -508,7 +507,6 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool recurs
     priv<<file->getUserPrivilege(targetUser);
     if(file->getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";
-    //FIXME: no need for this if, you can call it even with indent=0
     if (indent>0)
     {
         ritorno.insert(0, indent, ' ');
