@@ -34,14 +34,13 @@ using namespace Symposium;
 
 int filesystem::idCounter=0;
 std::shared_ptr<directory> directory::root;
-uri filesystem::u;
 
-filesystem::filesystem(const std::string &name) : name(name), sharingPolicy(u){
+filesystem::filesystem(const std::string &name) : name(name){
     id=idCounter;
     idCounter++;
 }
 
-filesystem::filesystem(const std::string &name, const int &idToAssign) : name(name), sharingPolicy(u), id(idToAssign){
+filesystem::filesystem(const std::string &name, const int &idToAssign) : name(name), id(idToAssign){
 }
 
 int filesystem::getId() const {
@@ -73,6 +72,9 @@ uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingP
     throw filesystemException("Object"+name+"is not shareable");
 }
 
+//FIXME: again, I must quickly understand what this method does. It needs to be much shorter
+// max 7-10 lines. Make sure that doesn't throw, the call at() can throw ad we will never catch
+// that type of exception -> the program crashes
 std::tuple<std::string, std::string>  filesystem::separate(const std::string &path)
 {
     std::string path2;
@@ -98,7 +100,8 @@ std::tuple<std::string, std::string>  filesystem::separate(const std::string &pa
     return  std::make_tuple(path2, id2);
 }
 
-//FIXME:
+//FIXME: choose a better name, here I don't understand what is checked,
+// realPath is an attribute of file, so it's better to write this method to file class
 //  - make it static;
 // Anyway, it should be private to keep the interface clean
 bool filesystem::pathIsValid2(const std::string &toCheck) {
@@ -168,15 +171,20 @@ bool file::deleteFromStrategy(const std::string &userName)
    return strategy->deleteUser(userName);
 }
 
+//FIXME: try to clean a little, too many lines for what it does
 std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
     std::string ritorno;
-    //FIXME:
+    //FIXME: try always to use std::string methods before coding a solution by hand
+    // for example in tests I wrote something like this loop with:
     // ritorno.insert(0, indent, ' ');
+    // INDENT DOESN'T NEED TO BE >0, THE CALL IS CORRECT ANYWAY
     if (indent>0)
     {
         for(int i=0; i<indent; i++)
             ritorno.append(" ");
     }
+    //FIXME: you can put a string in a ostringstream with <<, so you can try to put all the contents
+    // in a ostringstream and only at the end call obj.str()
     std::ostringstream typeres;
     typeres<<resType();
     std::ostringstream priv;
@@ -220,7 +228,11 @@ std::shared_ptr<directory> directory::getRoot() {
 
 }
 
-
+//FIXME: difficult to understand and long. Advice: more explanatory names, avoid strange operations
+// as possible and, if something remains obscure, write some COMMENTS
+// More important: be sure that this does not throw any exception that is not SymposiumException
+// (it would be difficult to catch the specific type at the handler)
+// for example at() can throw, but we will not catch this type of exception and the program crashes
 std::tuple<std::string, std::string> directory::separateFirst(std::string path)
 {
     std::string path2;
@@ -243,6 +255,10 @@ std::tuple<std::string, std::string> directory::separateFirst(std::string path)
 }
 
 
+//FIXME: way too long and difficult to understand. Also WBT testing would be very difficult.
+// Advices: isolate the condition on "here" path, put inside a private helper function
+// lines that are common in this method (es. 229-233, 242-248).
+// make a clear distinction between the "get something that is here" and "I need to call again recursively"
 std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
     if(path==""||path=="./")
     {
@@ -355,7 +371,10 @@ directory::access(const user &targetUser, const std::string &path, const std::st
 }
 
 
-
+//FIXME: way too too long! Methods should be at maximum 7-10 lines long
+// Simplify, extract blocks in private methods and make all the thing understandable
+// identify what a single block must do, this may help to simplify and reduce the code
+// Please note that someday (soon) we will have to achieve some parallelization, it's impossible with a method this long
 std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &path, const std::string &resName) {
     std::shared_ptr<filesystem> obj=this->get(path, resName);
     std::string idRem;
@@ -442,6 +461,7 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
     return new_string;
 }
 
+//FIXME: clean what is unuseful.
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName(fileName) {
 
     //if(!pathIsValid2(pathToFile))
@@ -478,6 +498,7 @@ std::string Symposium::symlink::getPath() {
     return pathToFile+"/"+fileName;
 }
 
+//FIXME: same thing of file::print
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
     std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
     std::ostringstream priv;
@@ -487,6 +508,7 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool recurs
     priv<<file->getUserPrivilege(targetUser);
     if(file->getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";
+    //FIXME: no need for this if, you can call it even with indent=0
     if (indent>0)
     {
         ritorno.insert(0, indent, ' ');

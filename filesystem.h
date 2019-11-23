@@ -67,12 +67,11 @@ namespace Symposium {
      * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
      */
     class filesystem {
-        static uri u;
     protected:
         static int idCounter;      /**< id to be assigned to the next created filesystem object */
         int id;                    /**< unique identifier for the filesystem object, used also for identifying objects along a path */
         std::string name;          /**< resource name */
-        uri& sharingPolicy;        /**< sharing policy applied to the resource */
+        uri sharingPolicy;         /**< sharing policy applied to the resource */
         std::unique_ptr<AccessStrategy> strategy;
     public:
         filesystem(const std::string &name);

@@ -83,9 +83,7 @@ namespace Symposium {
          * of user and verify expectations about calls on loggedUser
          */
         virtual user& getLoggedUser();
-    public:
-        //Some methods are virtual in order to use the mocks in tests
-        SymClient();
+
         /**
          * @brief set all the details of the user just logged
          * @param loggedUser the user object containing all the information of the logged user
@@ -94,6 +92,10 @@ namespace Symposium {
          * calls setLoggedUser, passing the user object transmitted by the user
          */
         virtual void setLoggedUser(const user &loggedUser);
+
+    public:
+        //Some methods are virtual in order to use the mocks in tests
+        SymClient();
 
         /**
          * @brief constructs a @ref signUpMessage to send to the server to ask for registration

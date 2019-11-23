@@ -296,10 +296,14 @@ struct FileSystemTestSharing: ::testing::Test{
     fileAccesser f;
     uri expected;
     static const user u;
-
+    static const std::string iconPath;
     static const std::string username;
+    static const std::string pwd;
+    static const std::string nickname;
+    static const std::string path;
+    static const std::string filename;
 
-    FileSystemTestSharing():dir("dir"), f("file"), sym("link"){};
+    FileSystemTestSharing():dir("dir"), f(filename), sym("link"){};
 
     ::testing::AssertionResult getRootIsImplemented(const char* m_expr, std::shared_ptr<directory> root){
         if(root.get()== nullptr || directory::getRoot()!=root)
@@ -339,8 +343,13 @@ struct FileSystemTestSharing: ::testing::Test{
         std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
     }
 };
-const std::string FileSystemTestSharing::username="someUser";
-const user FileSystemTestSharing::u(username, "P@assW0rd!", "noempty", "", 0, directory::getRoot());
+const std::string FileSystemTestSharing::iconPath="./icons/icon1.jpg";
+const std::string FileSystemTestSharing::username="username";
+const std::string FileSystemTestSharing::pwd="AP@ssw0rd!";
+const std::string FileSystemTestSharing::nickname="nickname";
+const std::string FileSystemTestSharing::path="./dir1/dir2";
+const std::string FileSystemTestSharing::filename="file1";
+const user FileSystemTestSharing::u(username, pwd, nickname, iconPath, 0, directory::getRoot());
 
 TEST_F(FileSystemTestSharing, setUserPrivilegeOnFileCallsStrategy) {
     RMOAccessMock* dummyStrategy=new RMOAccessMock();

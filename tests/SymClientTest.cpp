@@ -54,12 +54,14 @@ struct SymClientUserMock: public user{
 };
 
 struct SymClientAccesser: public SymClient{
-    SymClientUserMock userMock;
+    SymClientUserMock *userMock;
 
-    SymClientAccesser(): userMock("userbla", "p@assW0rd!!", "noempty", "", 0, nullptr){}
+    SymClientAccesser(){}
 
     user& getLoggedUser() override {
-        return userMock;
+        if(userMock== nullptr)
+            throw std::exception();
+        return *userMock;
     }
 
     user& getLoggedUserNotMocked() {
@@ -79,6 +81,11 @@ struct SymClientAccesser: public SymClient{
         }
         return result;
     }
+
+    virtual void setLoggedUser(const user &loggedUser) override{
+        userMock= (SymClientUserMock *) &loggedUser;
+    }
+
     void setUser(user& logged){
         getLoggedUser()=logged;
     }
@@ -123,6 +130,7 @@ struct SymClientTest : ::testing::Test{
     SymClientUserMock userReceived;
     static const std::string anotherUsername;
     SymClientAccesser client;
+    static const std::string iconPath;
     static const std::string username;
     static const std::string pwd;
     static const std::string nickname;
@@ -136,7 +144,7 @@ struct SymClientTest : ::testing::Test{
     std::shared_ptr<SymClientDirMock> dirSentByServer;
     SymClientDocMock docInUserFilesystem, docSentByServer;
     static int indexes[2];
-    SymClientTest(): userReceived(username, pwd, nickname, "", 0, nullptr),
+    SymClientTest(): userReceived(username, pwd, nickname, iconPath, 0, nullptr),
                      fileSentByServer(new SymClientFileMock(filename, "./dir1/dir2")),
                      docInUserFilesystem(0), docSentByServer(120),
                      dirSentByServer(new SymClientDirMock(filename)){};
@@ -183,8 +191,9 @@ struct SymClientTest : ::testing::Test{
         else return ::testing::AssertionSuccess();
     }
 };
+const std::string SymClientTest::iconPath="./icons/icon1.jpg";
 const std::string SymClientTest::username="username";
-const std::string SymClientTest::pwd="123abc!!";
+const std::string SymClientTest::pwd="AP@ssw0rd!";
 const std::string SymClientTest::nickname="nickname";
 const std::string SymClientTest::path="./dir1/dir2";
 const std::string SymClientTest::filename="file1";
@@ -200,11 +209,11 @@ TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
 
 TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){
     auto mex= client.signUp(username, pwd, nickname, path);
-    user expected(username, pwd, nickname, "", 0, nullptr);
+    user expected(username, pwd, nickname, iconPath, 0, nullptr);
     EXPECT_EQ(expected, mex.getNewUser());
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
-
+//FIXME: this won't work
 TEST_F(SymClientTest, signUpAssignesLoggedUserAndRemovesFromUnanswered){
     auto mex= client.signUp(username, pwd, nickname, path);
     //just imagine that the server has answered with msgOutcome::success to client's signUpMessage, the response contain the
