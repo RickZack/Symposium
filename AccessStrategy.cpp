@@ -67,16 +67,21 @@ privilege RMOAccess::getPrivilege(const std::string &targetUser)
     return got->second;
 }
 
-bool RMOAccess::moreOwner()
+bool RMOAccess::moreOwner(std::string username)
 {
     int i=0;
+    bool own=false;
     for(auto& tuple : permission)
     {
         if(tuple.second==privilege::owner)
+        {
             i++;
+            if(tuple.first==username)
+                own=true;
+        }
     }
 
-    return i > 1;
+    return ((i > 1)&&own);
 }
 
 bool RMOAccess::deleteUser(const std::string &targetUser)
@@ -108,7 +113,7 @@ privilege TrivialAccess::getPrivilege(const std::string &targetUser) {
     return privilege::none;
 }
 
-bool TrivialAccess::moreOwner(){
+bool TrivialAccess::moreOwner(std::string username){
     return false;
 }
 

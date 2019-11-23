@@ -56,6 +56,8 @@ struct RMOAccessMock: public RMOAccess{
 
 };
 
+
+
 struct FileSystemTestT: ::testing::Test{
     file *f;
     ::testing::NiceMock<documentMock> *document;
@@ -466,7 +468,7 @@ TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     directory::getRoot()->addDirectory("anotherUsername", 2);
     auto inserted=directory::getRoot()->addFile("./1/7", "file1");
-    auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "/1/7/", std::to_string(inserted->getId()));
+    auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "./1/7/", std::to_string(inserted->getId()));
     std::shared_ptr<file> ret=directory::getRoot()->getFile("./2/", std::to_string(linkToInserted->getId()));
     EXPECT_EQ(inserted, ret);
     directory::getRoot()->remove(u, "./", "1");
@@ -498,10 +500,10 @@ TEST_F(FileSystemTestSharing, printSymLink){
      */
     inserted->setUserPrivilege(username, privilege::readOnly);
 
-    auto linkToInserted= directory::getRoot()->addLink("./1/2", "sym1", "/1/7/", std::to_string(inserted->getId()));
+    auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "./1/7/", std::to_string(inserted->getId()));
     std::ostringstream out; int n_space=rand()%100+1;
     std::string spaces; spaces.insert(0, n_space, ' ');
-    out<<spaces<<resourceType::symlink<<" "<<linkToInserted->getName()<<privilege::readOnly;
+    out<<spaces<<resourceType::symlink<<" "<<linkToInserted->getName()<<" "<<privilege::readOnly;
     EXPECT_EQ( out.str(), linkToInserted->print(username, false, n_space));
 }
 
@@ -520,9 +522,9 @@ TEST_F(FileSystemTestSharing, accessOnFile){
     auto expected=dir.addDirectory(username, 1)->addDirectory("dir1", 7);
     auto inserted=dir.addFile("./1/7", "file1");
     fileAccesser* dummy=new fileAccesser("dummyFile");
-    EXPECT_CALL(dir, getFile("./1/7", std::to_string(inserted->getId()))).WillOnce(::testing::Return(std::shared_ptr<file>(dummy)));
+    EXPECT_CALL(dir, getFile("./1/7/", std::to_string(inserted->getId()))).WillOnce(::testing::Return(std::shared_ptr<file>(dummy)));
     EXPECT_CALL(*dummy, access(u,privilege::readOnly)).WillOnce(::testing::ReturnRef(d));
-    EXPECT_CALL(d, access(u, privilege::readOnly));
+    //EXPECT_CALL(d, access(u, privilege::readOnly));
     dir.access(u, "./1/7/", std::to_string(inserted->getId()), privilege::readOnly);
 }
 
@@ -594,9 +596,9 @@ TEST_F(FileSystemTestSharing, accessOnSymlink){
      */
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto file1=directory::getRoot()->addFile("./1/2", "file1");
-    auto sym1= directory::getRoot()->addLink("./1/7", "sym1", "/1/2", "/1/7/"+std::to_string(file1->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(file1->getId())));
+    auto file1=directory::getRoot()->addFile("./2", "file1");
+    auto sym1= directory::getRoot()->addLink("./1/7", "sym1", "./2", std::to_string(file1->getId()));
+    std::shared_ptr<file> ret=directory::getRoot()->getFile("./1/7", std::to_string(sym1->getId()));
     //if symlink::access (and file::access) are correctly implemented, they should return the same document
     document& fromFile1=file1->access(u, uri::getDefaultPrivilege());
     document& fromSym1= sym1->access(u, uri::getDefaultPrivilege());

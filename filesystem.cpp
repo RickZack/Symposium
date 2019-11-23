@@ -143,7 +143,7 @@ document & file::access(const user &targetUser, privilege accessMode) {
     bool controllo=this->strategy->validateAction(targetUser.getUsername(), accessMode);
     if(!controllo)
         throw filesystemException("You have not permission to this file in this mode");
-    return doc.access(targetUser, accessMode);;
+    return doc.access(targetUser, accessMode);
 }
 
 void file::store(const std::string &storePath) const {
@@ -158,9 +158,9 @@ void file::send() const {
     //TODO: implement
 }
 
-bool file::moreOwner()
+bool file::moreOwner(std::string username)
 {
-   return strategy->moreOwner();
+   return strategy->moreOwner(username);
 }
 
 bool file::deleteFromStrategy(const std::string &userName)
@@ -350,22 +350,10 @@ resourceType directory::resType() const {
 
 document &
 directory::access(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode) {
-    //FIXME: don't declare a static variable inside a method, it's not reentrant
-    static document doc;
-    //FIXME: this line will always throw because you're calling getUserPrivilege against a directory
-    // this should be called against the file we actually want to access
-    privilege user_priv=this->getUserPrivilege(targetUser.getUsername());
-    if(user_priv==privilege::none)
-        throw filesystemException("You no longer have the possibility to access the file in any mode");
-    if(user_priv>accessMode)
-        throw filesystemException("You have a lower privilege than you ask");
-    std::shared_ptr<file> newF= this->getFile(path,resName);
-    //FIXME: why not:
-    // return newF->access(targetUser, accessMode);
-    doc= newF->access(targetUser,accessMode);
-    return doc;
+   std::shared_ptr<file> f=getFile(path, resName);
+    return f->access(targetUser, accessMode);
 }
-//FIXME: for directory::access why not calling access against the retrieved file? This method would be two lines long
+
 
 
 std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &path, const std::string &resName) {
@@ -382,10 +370,8 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
     if(obj->resType()==resourceType::file)
     {
         std::shared_ptr<file> f=std::dynamic_pointer_cast<file>(obj);
-        if(f->moreOwner())
+        if(f->moreOwner(targetUser.getUsername()))
             throw filesystemException("You are not the only owner of this file, so you cannot delete it");
-        if(!(f->deleteFromStrategy(targetUser.getUsername())))
-            throw filesystemException("You have some error while you try deleting a file");
         auto it=std::find_if(contained.begin(), contained.end(),
                              [idRem, f](const std::shared_ptr<filesystem>& i){return i->getId()==f->getId();});
         contained.erase(it);
@@ -400,6 +386,8 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
         std::string idFile;
         tie(pathFile, idFile)= separate(s->getPath());
         std::shared_ptr<file> f=getRoot()->getFile(pathFile, idFile);
+        if(f->moreOwner(targetUser.getUsername()))
+            throw filesystemException("You are not the only owner of this file, so you cannot delete it");
         if(!(f->deleteFromStrategy(targetUser.getUsername())))
             throw filesystemException("You have some error while you try deleting a symlink");
         auto it=std::find_if(contained.begin(), contained.end(),
@@ -454,13 +442,13 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
     return new_string;
 }
 
-Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName{fileName} {
+Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName(fileName) {
 
     //if(!pathIsValid2(pathToFile))
         //throw filesystemException("Invalid path to symlink");
-    std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
-    if(!pathToFile.empty() && std::regex_match(pathToFile, pathPattern))
-            throw filesystemException("Invalid path to symlink");
+    //std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
+    //if(std::regex_match(pathToFile, pathPattern))
+            //throw filesystemException("Invalid path to symlink");
     strategy=std::make_unique<TrivialAccess>();
 
 }
@@ -470,8 +458,8 @@ resourceType Symposium::symlink::resType() const {
 }
 
 document& Symposium::symlink::access(const user &targetUser, privilege accessMode) {
-    //TODO: implement
-    throw std::exception();
+    std::shared_ptr<file> f=directory::getRoot()->getFile(pathToFile, fileName);
+    return f->access(targetUser, accessMode);
 }
 
 void Symposium::symlink::store(const std::string &storePath) const {
@@ -501,8 +489,7 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool recurs
         return name+" You no longer have the possibility to access the file in any mode";
     if (indent>0)
     {
-        for(int i=0; i<indent; i++)
-            ritorno+="  ";
+        ritorno.insert(0, indent, ' ');
     }
     return ritorno+typeres.str()+" " +name + " " + priv.str();
 }

@@ -75,7 +75,7 @@ namespace Symposium {
 
         virtual privilege getPrivilege(const std::string &targetUser) =0;
 
-        virtual bool moreOwner() =0;
+        virtual bool moreOwner(std::string username) =0;
 
         virtual bool deleteUser(const std::string &targetUser) =0;
 
@@ -105,7 +105,7 @@ namespace Symposium {
 
         privilege getPrivilege(const std::string &targetUser) override;
 
-        bool moreOwner() override;
+        bool moreOwner(std::string username) override;
 
         bool deleteUser(const std::string &targetUser) override;
 
@@ -137,7 +137,7 @@ namespace Symposium {
 
         bool deleteUser(const std::string &targetUser) override;
 
-        bool moreOwner() override;
+        bool moreOwner(std::string username) override;
 
         ~TrivialAccess() override = default;
     };

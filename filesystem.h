@@ -230,7 +230,7 @@ namespace Symposium {
          */
         std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
 
-        bool moreOwner();
+        bool moreOwner(std::string username);
 
         bool deleteFromStrategy(const std::string &userName);
 
