@@ -29,11 +29,14 @@
  */
 #include "document.h"
 #include "symbol.h"
+#include "user.h"
+
 using namespace Symposium;
 int document::idCounter=0;
 
 document::document(int id) : id(id) {
-    //TODO: implement
+    id=idCounter;
+    idCounter++;
 }
 
 int document::getId() const {
@@ -60,43 +63,31 @@ document & document::access(const user &newActive, privilege accessPriv) {
 
 
 symbol document::localInsert(int *indexes, symbol &toInsert) {
+
     int i0=indexes[0];
     int i1=indexes[1];
-    symbol def_symb (' ', 0, 0, {0,0});
+    float mul_fct=1.5; //just to avoid too many reallocations
+    symbol def_symbol('~', 0, 0, {0,0});
 
-    //vector is empty or i0 is greater than its dimension
-    if(symbols.empty()|| i0>symbols.size()) {
-        symbols.resize(i0+1);
-        symbols[i0].resize(i1+1,def_symb);
-       // symbols[i0].reserve(i1+1);
-        std::vector<symbol> s=symbols.at(i0);
-       // symbols.erase(symbols.begin()+i0);
-        s.insert(s.begin()+i1,toInsert);
-        symbols.insert(symbols.begin()+i0,s);
-        }
+    if(i0>=symbols.capacity())
+        symbols.resize((i0+1)*mul_fct);
+    if(i1>=symbols[i0].capacity())
+        symbols[i0].resize((i1 + 1) * mul_fct, def_symbol);
 
+    char sym=symbols[i0][i1].getCh();
+    if(sym=='~'){ symbols[i0][i1]=toInsert;}
     else {
-        std::vector<symbol> s=symbols.at(i0);
-        if(i1<s.size()+1){
-
-          s.resize(i1+1,def_symb);
-          //s.reserve(i1+1);
-        }
-
-        s.insert(s.begin()+i1,toInsert);
-        symbols.insert(symbols.begin()+i0,s);
+        symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
     }
-
     return symbol('z', 0, 0, {0,0});
+
 }
 
 symbol document::localRemove(int *indexes) {
     int i0=indexes[0];
     int i1=indexes[1];
 
-    std::vector<symbol> s= symbols.at(i0);
-    s.erase(s.begin()+i1);
-    symbols.insert(symbols.begin()+i0,s);
+    symbols[i0].erase(symbols[i0].begin()+i1);
 
     return symbol('z', 0, 0, {0,0});
 }
@@ -110,13 +101,30 @@ void document::remoteRemove(const symbol &toRemove) {
 }
 
 std::wstring document::toText() {
-    //TODO:implement
-    return std::wstring();
+    std::wstring str;
+    int size= symbols.size();
+    int i=0;
+    int sizes= symbols[i].size();
+    for (int i=0;i<symbols.size();i++){
+        for(int j=0;j<symbols[i].size();j++){
+          wchar_t value= symbols[i][j].getCh();
+          if(value!='~')
+            str=str+value;
+          }
+
+        }
+   return str;
 }
 
 void document::close(const user &noLongerActive) {
     //TODO:implement
-
+    std::forward_list<std::pair<user *, privilege>>::const_iterator iter;
+    for(iter=activeUsers.begin();iter!=activeUsers.end();iter++){
+        std::pair<user*,privilege> p=*iter;
+        user oldUser= reinterpret_cast<const user &>(p.first);
+        if(oldUser==noLongerActive)
+            activeUsers.remove(p);
+    }
 }
 
 void document::store(const std::string &storePath) {
@@ -128,8 +136,15 @@ void document::load(const std::string &loadPath) {
 }
 
 std::set<int> document::retrieveSiteIds() {
-    //TODO:implement
-    return std::set<int>();
+    std::set<int> siteIds;
+    std::set<int>::iterator it=siteIds.begin();
+    for(int i=0;i<symbols.size();i++){
+        for(int j=0;j<symbols[i].size();j++){
+            siteIds.insert(it,symbols[i][j].getSiteId());
+            it++;
+        }
+    }
+    return siteIds;
 }
 
 bool document::operator==(const document &rhs) const {
