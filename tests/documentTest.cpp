@@ -61,13 +61,13 @@ TEST_F(documentTest, userIsNoLongerInActiveListAfterClosing){
 TEST_F(documentTest, localAddingSymbolsInSequence){
     int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
     symbol s1('a', 0, 0, std::vector<int>(), false),
-            s2('b', 0, 1, std::vector<int>(), false),
-            s3('c', 0, 2, std::vector<int>(), false);
+          s2('b', 0, 1, std::vector<int>(), false),
+    s3('c', 0, 2, std::vector<int>(), false);
     d.localInsert(i1, s1);
     d.localInsert(i2, s2);
     d.localInsert(i3, s3);
     EXPECT_EQ(L"abc", d.toText());
-}
+ }
 
 TEST_F(documentTest, localAddingSymbolsInTheMiddle){
     int i1[]={0,0}, i2[]={0,1};
