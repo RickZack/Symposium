@@ -33,6 +33,7 @@
 
 using namespace Symposium;
 int document::idCounter=0;
+const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 
 document::document(int id) : id(id) {
     id=idCounter;
@@ -55,30 +56,34 @@ int document::getNumchar() const {
     return numchar;
 }
 
+//FIXME: discuss to change the forward list to <const user*, privilege>,
+// avoid casts as much as possible
 document & document::access(const user &newActive, privilege accessPriv) {
     std::pair<user*, privilege> p{const_cast<user*>(&newActive),accessPriv};
     activeUsers.push_front(p);
     return *this;
 }
 
-
+//FIXME: don't rely solely on tests. Did you read how this thing is implemented
+// in Conclave? You need to copy that logic, where do you calculate and assign
+// the position vectors to the symbol to insert?
 symbol document::localInsert(int *indexes, symbol &toInsert) {
 
     int i0=indexes[0];
     int i1=indexes[1];
     float mul_fct=1.5; //just to avoid too many reallocations
-    symbol def_symbol('~', 0, 0, {0,0});
 
     if(i0>=symbols.capacity())
         symbols.resize((i0+1)*mul_fct);
     if(i1>=symbols[i0].capacity())
-        symbols[i0].resize((i1 + 1) * mul_fct, def_symbol);
+        symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
 
     char sym=symbols[i0][i1].getCh();
-    if(sym=='~'){ symbols[i0][i1]=toInsert;}
+    if(sym==emptyChar){ symbols[i0][i1]=toInsert;}
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
     }
+    //FIXME: what does it mean?
     return symbol('z', 0, 0, {0,0});
 
 }
@@ -89,6 +94,7 @@ symbol document::localRemove(int *indexes) {
 
     symbols[i0].erase(symbols[i0].begin()+i1);
 
+    //FIXME: what does it mean?
     return symbol('z', 0, 0, {0,0});
 }
 
@@ -101,6 +107,8 @@ void document::remoteRemove(const symbol &toRemove) {
 }
 
 std::wstring document::toText() {
+    //FIXME: better to concatenate all in a wostringstream
+    // and then return the wstring from that
     std::wstring str;
     int size= symbols.size();
     int i=0;
@@ -108,7 +116,7 @@ std::wstring document::toText() {
     for (int i=0;i<symbols.size();i++){
         for(int j=0;j<symbols[i].size();j++){
           wchar_t value= symbols[i][j].getCh();
-          if(value!='~')
+          if(value!=emptyChar)
             str=str+value;
           }
 
@@ -116,6 +124,7 @@ std::wstring document::toText() {
    return str;
 }
 
+//FIXME: Read the documentation well before coding solutions by hand
 void document::close(const user &noLongerActive) {
     //TODO:implement
     std::forward_list<std::pair<user *, privilege>>::const_iterator iter;

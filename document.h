@@ -47,6 +47,10 @@ namespace Symposium {
         std::vector<std::vector<symbol> > symbols;                      /**< container of characters and metadata for CRDT*/
         std::forward_list<std::pair<user *, privilege>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
         int numchar;                                                    /**< number of printable characters */
+
+        static constexpr wchar_t  emptyChar='~';
+        static const symbol emptySymbol;
+
     public:
         document(int id = document::idCounter);
 
