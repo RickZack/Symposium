@@ -74,31 +74,33 @@ SymServer::openSource(const std::string &opener, const std::string &path, const 
     return fileReq;
 }
 
-const document &
-SymServer::openNewSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
-                         const std::string &destPath) {
+std::shared_ptr<file>
+SymServer::openNewSource(const std::string &opener, const std::string &resourceId, const std::string &destPath,
+                         const std::string &destName, privilege reqPriv) {
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
-    std::shared_ptr<file> fileReq=target.accessFile(path+"/"+name, destPath);
+    std::shared_ptr<file> fileReq=target.accessFile(resourceId, destPath, destName);
     document& docReq=fileReq->access(target, reqPriv);
+    workingDoc[opener].push_front(&docReq);
+    return fileReq;
+}
+
+const document & SymServer::createNewSource(const std::string &opener, const std::string &path, const std::string &name) {
+    if(!userIsActive(opener))
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
+    user& target=getRegistered(opener);
+    std::shared_ptr<file> fileCreated=target.newFile(name, path);
+    document& docReq=fileCreated->access(target, privilege::owner);
     workingDoc[opener].push_front(&docReq);
     return docReq;
 }
 
-const document & SymServer::createNewSource(const user &opener, const std::string &path, const std::string &name) {
-    if(!userIsActive(opener.getUsername()))
+std::shared_ptr<directory> SymServer::createNewDir(const std::string &opener, const std::string &path, const std::string &name) {
+    if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    std::shared_ptr<file> fileCreated=opener.newFile(name, path);
-    document& docReq=fileCreated->access(opener, privilege::owner);
-    workingDoc[opener.getUsername()].push_front(&docReq);
-    return docReq;
-}
-
-std::shared_ptr<directory> SymServer::createNewDir(const user &opener, const std::string &path, const std::string &name) {
-    if(!userIsActive(opener.getUsername()))
-        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    return opener.newDirectory(name, path, 0);
+    user& target=getRegistered(opener);
+    return target.newDirectory(name, path);
 }
 
 void SymServer::remoteInsert(const std::string &inserter, int resourceId, symbolMessage &symMsg) {

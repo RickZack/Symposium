@@ -341,10 +341,10 @@ class SymClientMock: public SymClient{
 public:
     MOCK_METHOD1(setLoggedUser, void(const user&));
     MOCK_METHOD1(setUserColors, void(const std::map<int, user>&));
-    MOCK_METHOD1(createNewSource, void(const std::shared_ptr<file>));
-    MOCK_METHOD1(createNewDir, void(const std::shared_ptr<directory> dirCreated));
+    MOCK_METHOD3(createNewSource, void(const std::string&, const std::string&, int));
+    MOCK_METHOD3(createNewDir, void(const std::string&, const std::string&, int));
     MOCK_METHOD1(openSource, void(const std::shared_ptr<file>));
-    MOCK_METHOD1(openNewSource, void(std::shared_ptr<file>));
+    MOCK_METHOD6(openNewSource, void(const std::string &resId, privilege reqPriv, const std::string &destPath, const std::string &destName, int idToAssign, const std::shared_ptr<file> fileAsked));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, bool));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, bool));
     MOCK_METHOD2(addActiveUser, void(int, user &));
@@ -387,13 +387,13 @@ TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
     std::shared_ptr<file> dummyFile(new file("file", "./somedir"));
     m=new sendResMessage(msgType::createRes, msgOutcome::success, *dummyFile);
-    EXPECT_CALL(client, createNewSource(dummyFile));
+    EXPECT_CALL(client, createNewSource(::testing::_, ::testing::_, ::testing::_));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
     m=new sendResMessage(msgType::createNewDir, msgOutcome::success, *directory::nullDir());
-    EXPECT_CALL(client, createNewDir(directory::nullDir()));
+    EXPECT_CALL(client, createNewDir(::testing::_, ::testing::_, ::testing::_));
     m->invokeMethod(client);
 }
 
@@ -407,7 +407,7 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
     std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir"));
     m=new sendResMessage(msgType::openNewRes, msgOutcome::success, *dummyFile);
-    EXPECT_CALL(client, openNewSource(std::dynamic_pointer_cast<file>(dummyFile)));
+    EXPECT_CALL(client, openNewSource(::testing::_, ::testing::_, ::testing::_, "file", dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
     m->invokeMethod(client);
 }
 

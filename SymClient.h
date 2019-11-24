@@ -83,9 +83,7 @@ namespace Symposium {
          * of user and verify expectations about calls on loggedUser
          */
         virtual user& getLoggedUser();
-    public:
-        //Some methods are virtual in order to use the mocks in tests
-        SymClient();
+
         /**
          * @brief set all the details of the user just logged
          * @param loggedUser the user object containing all the information of the logged user
@@ -94,6 +92,10 @@ namespace Symposium {
          * calls setLoggedUser, passing the user object transmitted by the user
          */
         virtual void setLoggedUser(const user &loggedUser);
+
+    public:
+        //Some methods are virtual in order to use the mocks in tests
+        SymClient();
 
         /**
          * @brief constructs a @ref signUpMessage to send to the server to ask for registration
@@ -153,9 +155,16 @@ namespace Symposium {
 
         /**
          * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
+         * @param resId the unique resource identifier (URI) of the asked resource
+         * @param reqPriv the privilege requested opening the file
+         * @param destPath the path where to put the @ref symlink to @e name, inside @e opener 's home directory
+         * @param destName the name to assign to the symlink
+         * @param idToAssign is the id assigned to the file from the server
          * @param fileAsked the file sent back by the server in a @ref sendResMessage
          */
-        virtual void openNewSource(const std::shared_ptr<file> fileAsked);
+        virtual void openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
+                                   const std::string &destName,
+                                   int idToAssign, const std::shared_ptr<file> fileAsked);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to create a file
@@ -167,9 +176,15 @@ namespace Symposium {
 
         /**
          * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
-         * @param fileCreated the file sent back by the server in a @ref sendResMessage
+         * @param path is the path where the user want to put the file into
+         * @param name is the name to assign to the new file
+         * @param idToAssign is the id assigned to the file from the server
+         *
+         * The new file is created by calling user::newFile with the (@e path, @e name) taken from
+         * the previously sent @ref askResMessage and @e idToAssign taken from the file object contained
+         * in the @ref sendResMessage just received
          */
-        virtual void createNewSource(const std::shared_ptr<file> fileCreated);
+        virtual void createNewSource(const std::string &path, const std::string &name, int idToAssign);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to create a directory
@@ -181,11 +196,15 @@ namespace Symposium {
 
         /**
          * @brief add the directory to user's filesystem
-         * @param dirCreated the directory sent back by the server in a @ref sendResMessage
+         * @param path is the path where the user want to put the directory into
+         * @param name is the name to assign to the new directory
+         * @param idToAssign is the id assigned to the directory from the server
          *
-         * The new directory is created by calling user::newDirectory with the data taken from @e dirCreated
+         * The new directory is created by calling user::newDirectory with the (@e path, @e name) taken from
+         * the previously sent @ref askResMessage and @e idToAssign taken from the directory object contained
+         * in the @ref sendResMessage just received
          */
-        virtual void createNewDir(const std::shared_ptr<directory> dirCreated);
+        virtual void createNewDir(const std::string &path, const std::string &name, int idToAssign);
 
         /**
          * @brief insert a symbol on an opened document and constructs a message to sent to the server
@@ -300,8 +319,8 @@ namespace Symposium {
         /**
          * @brief constructs a @ref uriMessage to send to the server to ask to change the name of a resource
          * @param resPath the relative path to the user's @e home directory where to create the file
-         * @param resName the resource's name
-         * @param newName the new resource's name
+         * @param resName the resource's name (meaning its unique id)
+         * @param newName the new resource's name (not the id)
          * @return a properly constructed @ref askResMessage to send to the server
          *
          * When a user client side wants to set a new name for a resource, it sends a @ref askResMessage.
@@ -432,7 +451,7 @@ namespace Symposium {
         virtual void removeActiveUser(int resourceId, user &targetUser);
 
         /**
-         * @brief retrieve a @ref clientMessage previously sent by the client related to @e smex
+         * @brief retrieve a @ref clientMessage previously sent by the client related to @e smex, removing it from @e unanswered
          * @param smex the @ref serverMessage sent by the server that is supposed to be a response for a previous @ref clientMessage
          * @return the clientMessage that is related to the received @e smex
          */

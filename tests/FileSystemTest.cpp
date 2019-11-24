@@ -56,6 +56,8 @@ struct RMOAccessMock: public RMOAccess{
 
 };
 
+
+
 struct FileSystemTestT: ::testing::Test{
     file *f;
     ::testing::NiceMock<documentMock> *document;
@@ -294,10 +296,14 @@ struct FileSystemTestSharing: ::testing::Test{
     fileAccesser f;
     uri expected;
     static const user u;
-
+    static const std::string iconPath;
     static const std::string username;
+    static const std::string pwd;
+    static const std::string nickname;
+    static const std::string path;
+    static const std::string filename;
 
-    FileSystemTestSharing():dir("dir"), f("file"), sym("link"){};
+    FileSystemTestSharing():dir("dir"), f(filename), sym("link"){};
 
     ::testing::AssertionResult getRootIsImplemented(const char* m_expr, std::shared_ptr<directory> root){
         if(root.get()== nullptr || directory::getRoot()!=root)
@@ -337,8 +343,13 @@ struct FileSystemTestSharing: ::testing::Test{
         std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
     }
 };
-const std::string FileSystemTestSharing::username="someUser";
-const user FileSystemTestSharing::u(username, "P@assW0rd!", "noempty", "", 0, directory::getRoot());
+const std::string FileSystemTestSharing::iconPath="./icons/icon1.jpg";
+const std::string FileSystemTestSharing::username="username";
+const std::string FileSystemTestSharing::pwd="AP@ssw0rd!";
+const std::string FileSystemTestSharing::nickname="nickname";
+const std::string FileSystemTestSharing::path="./dir1/dir2";
+const std::string FileSystemTestSharing::filename="file1";
+const user FileSystemTestSharing::u(username, pwd, nickname, iconPath, 0, directory::getRoot());
 
 TEST_F(FileSystemTestSharing, setUserPrivilegeOnFileCallsStrategy) {
     RMOAccessMock* dummyStrategy=new RMOAccessMock();
@@ -410,7 +421,10 @@ TEST_F(FileSystemTestSharing, getSearchesRecursive){
      */
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     auto ret=directory::getRoot()->get("./1/", "7");
+    auto ret2=directory::getRoot()->getDir("./", "1")->get("./", "7");
+    EXPECT_EQ(ret2, ret);
     EXPECT_EQ(expected, ret);
+    directory::getRoot()->remove(u, "./", "1");
 }
 
 TEST_F(FileSystemTestSharing, setNameSearchesRecursive){
@@ -428,6 +442,7 @@ TEST_F(FileSystemTestSharing, setNameSearchesRecursive){
     std::string ret=directory::getRoot()->setName("./1/", "7", newName);
     EXPECT_EQ(newName, expected->getName());
     EXPECT_EQ(oldName, ret);
+    directory::getRoot()->remove(u, "./", "1");
 }
 
 TEST_F(FileSystemTestSharing, AddFileInsertsRecursive){
@@ -444,6 +459,7 @@ TEST_F(FileSystemTestSharing, AddFileInsertsRecursive){
     auto inserted=directory::getRoot()->addFile("./1/7", "file1");
     auto ret=directory::getRoot()->get("./1/7/", std::to_string(inserted->getId()));
     EXPECT_EQ(inserted, ret);
+    directory::getRoot()->remove(u, "./", "1");
 }
 
 TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
@@ -461,9 +477,11 @@ TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     directory::getRoot()->addDirectory("anotherUsername", 2);
     auto inserted=directory::getRoot()->addFile("./1/7", "file1");
-    auto linkToInserted= directory::getRoot()->addLink("./1/2", "sym1", "/1/7/", std::to_string(inserted->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
+    auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "./1/7/", std::to_string(inserted->getId()));
+    std::shared_ptr<file> ret=directory::getRoot()->getFile("./2/", std::to_string(linkToInserted->getId()));
     EXPECT_EQ(inserted, ret);
+    directory::getRoot()->remove(u, "./", "1");
+    //directory::getRoot()->remove(u, "./", "2");
 }
 
 TEST_F(FileSystemTestSharing, printSymLink){
@@ -491,10 +509,10 @@ TEST_F(FileSystemTestSharing, printSymLink){
      */
     inserted->setUserPrivilege(username, privilege::readOnly);
 
-    auto linkToInserted= directory::getRoot()->addLink("./1/2", "sym1", "/1/7/", std::to_string(inserted->getId()));
+    auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "./1/7/", std::to_string(inserted->getId()));
     std::ostringstream out; int n_space=rand()%100+1;
     std::string spaces; spaces.insert(0, n_space, ' ');
-    out<<spaces<<resourceType::symlink<<" "<<linkToInserted->getName()<<privilege::readOnly;
+    out<<spaces<<resourceType::symlink<<" "<<linkToInserted->getName()<<" "<<privilege::readOnly;
     EXPECT_EQ( out.str(), linkToInserted->print(username, false, n_space));
 }
 
@@ -513,9 +531,9 @@ TEST_F(FileSystemTestSharing, accessOnFile){
     auto expected=dir.addDirectory(username, 1)->addDirectory("dir1", 7);
     auto inserted=dir.addFile("./1/7", "file1");
     fileAccesser* dummy=new fileAccesser("dummyFile");
-    EXPECT_CALL(dir, getFile("./1/7", std::to_string(inserted->getId()))).WillOnce(::testing::Return(std::shared_ptr<file>(dummy)));
+    EXPECT_CALL(dir, getFile("./1/7/", std::to_string(inserted->getId()))).WillOnce(::testing::Return(std::shared_ptr<file>(dummy)));
     EXPECT_CALL(*dummy, access(u,privilege::readOnly)).WillOnce(::testing::ReturnRef(d));
-    EXPECT_CALL(d, access(u, privilege::readOnly));
+    //EXPECT_CALL(d, access(u, privilege::readOnly));
     dir.access(u, "./1/7/", std::to_string(inserted->getId()), privilege::readOnly);
 }
 
@@ -561,14 +579,16 @@ TEST_F(FileSystemTestSharing, removeDirectoryRecursive){
      */
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto inserted=directory::getRoot()->addFile("./1/2", "file1");
+    auto inserted=directory::getRoot()->addFile("./2", "file1");
     auto file2=directory::getRoot()->addFile("./1/7", "file2");
-    auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/1/2", "/1/7/"+std::to_string(inserted->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
+    auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/2", "/1/7/"+std::to_string(inserted->getId()));
+    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./2/", std::to_string(inserted->getId())));
     //Remove file2, should not throw
+    //EXPECT_CALL(file2, deleteFromStrategy("username"));
     directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId()));
     //Try to remove again file2, should throw
     EXPECT_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId())), filesystemException);
+    directory::getRoot()->remove(u, "./", "2");
 }
 
 TEST_F(FileSystemTestSharing, accessOnSymlink){
@@ -585,9 +605,9 @@ TEST_F(FileSystemTestSharing, accessOnSymlink){
      */
     auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
     directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto file1=directory::getRoot()->addFile("./1/2", "file1");
-    auto sym1= directory::getRoot()->addLink("./1/7", "sym1", "/1/2", "/1/7/"+std::to_string(file1->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(file1->getId())));
+    auto file1=directory::getRoot()->addFile("./2", "file1");
+    auto sym1= directory::getRoot()->addLink("./1/7", "sym1", "./2", std::to_string(file1->getId()));
+    std::shared_ptr<file> ret=directory::getRoot()->getFile("./1/7", std::to_string(sym1->getId()));
     //if symlink::access (and file::access) are correctly implemented, they should return the same document
     document& fromFile1=file1->access(u, uri::getDefaultPrivilege());
     document& fromSym1= sym1->access(u, uri::getDefaultPrivilege());

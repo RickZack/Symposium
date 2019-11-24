@@ -54,12 +54,14 @@ struct SymClientUserMock: public user{
 };
 
 struct SymClientAccesser: public SymClient{
-    SymClientUserMock userMock;
+    SymClientUserMock *userMock;
 
-    SymClientAccesser(): userMock("userbla", "p@assW0rd!!", "noempty", "", 0, nullptr){}
+    SymClientAccesser(){}
 
     user& getLoggedUser() override {
-        return userMock;
+        if(userMock== nullptr)
+            throw std::exception();
+        return *userMock;
     }
 
     user& getLoggedUserNotMocked() {
@@ -79,6 +81,11 @@ struct SymClientAccesser: public SymClient{
         }
         return result;
     }
+
+    virtual void setLoggedUser(const user &loggedUser) override{
+        userMock= (SymClientUserMock *) &loggedUser;
+    }
+
     void setUser(user& logged){
         getLoggedUser()=logged;
     }
@@ -123,6 +130,7 @@ struct SymClientTest : ::testing::Test{
     SymClientUserMock userReceived;
     static const std::string anotherUsername;
     SymClientAccesser client;
+    static const std::string iconPath;
     static const std::string username;
     static const std::string pwd;
     static const std::string nickname;
@@ -136,7 +144,7 @@ struct SymClientTest : ::testing::Test{
     std::shared_ptr<SymClientDirMock> dirSentByServer;
     SymClientDocMock docInUserFilesystem, docSentByServer;
     static int indexes[2];
-    SymClientTest(): userReceived(username, pwd, nickname, "", 0, nullptr),
+    SymClientTest(): userReceived(username, pwd, nickname, iconPath, 0, nullptr),
                      fileSentByServer(new SymClientFileMock(filename, "./dir1/dir2")),
                      docInUserFilesystem(0), docSentByServer(120),
                      dirSentByServer(new SymClientDirMock(filename)){};
@@ -183,8 +191,9 @@ struct SymClientTest : ::testing::Test{
         else return ::testing::AssertionSuccess();
     }
 };
+const std::string SymClientTest::iconPath="./icons/icon1.jpg";
 const std::string SymClientTest::username="username";
-const std::string SymClientTest::pwd="123abc!!";
+const std::string SymClientTest::pwd="AP@ssw0rd!";
 const std::string SymClientTest::nickname="nickname";
 const std::string SymClientTest::path="./dir1/dir2";
 const std::string SymClientTest::filename="file1";
@@ -200,11 +209,11 @@ TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
 
 TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){
     auto mex= client.signUp(username, pwd, nickname, path);
-    user expected(username, pwd, nickname, "", 0, nullptr);
+    user expected(username, pwd, nickname, iconPath, 0, nullptr);
     EXPECT_EQ(expected, mex.getNewUser());
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
-
+//FIXME: this won't work
 TEST_F(SymClientTest, signUpAssignesLoggedUserAndRemovesFromUnanswered){
     auto mex= client.signUp(username, pwd, nickname, path);
     //just imagine that the server has answered with msgOutcome::success to client's signUpMessage, the response contain the
@@ -266,13 +275,13 @@ TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
 {
     setStageForLoggedUser();
-    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath);
+    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym");
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openNewSource on client
     //the data use to call accessFile must be taken from the relative askResMessage in unanswered
     EXPECT_CALL(userReceived, accessFile(path+"/"+filename, destPath, filename)).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openNewSource(fileSentByServer);
+    client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym", fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -289,13 +298,14 @@ TEST_F(SymClientTest, createNewSourceConstructsGoodMessageAndInsertInUnanswered)
 TEST_F(SymClientTest, createNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
 {
     setStageForLoggedUser();
+    auto cmex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath);
     auto mex=client.createNewSource(path, filename);
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call createNewSource on client
-    //the data use to call newFile must be taken from the relative askResMessage in unanswered
+    //the data used to call newFile must be taken from the relative askResMessage in unanswered (cmex)
     EXPECT_CALL(userReceived, newFile(filename, path)).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openNewSource(fileSentByServer);
+    client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym", fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -317,7 +327,7 @@ TEST_F(SymClientTest, createNewDirOpensDocAndPutInActiveAndRemovesFromUnaswered)
     //resource asked. sendResMessage has already been tested to call createNewSource on client
     //the data use to call newDirectory must be taken from the relative askResMessage in unanswered
     EXPECT_CALL(userReceived, newDirectory(filename, path, dirSentByServer->getId())).WillOnce(::testing::Return(dirSentByServer));
-    client.createNewDir(dirSentByServer);
+    client.createNewDir(path, filename, dirSentByServer->getId());
     EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 

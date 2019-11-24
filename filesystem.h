@@ -67,15 +67,15 @@ namespace Symposium {
      * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
      */
     class filesystem {
-        static uri u;
     protected:
         static int idCounter;      /**< id to be assigned to the next created filesystem object */
         int id;                    /**< unique identifier for the filesystem object, used also for identifying objects along a path */
         std::string name;          /**< resource name */
-        uri& sharingPolicy;        /**< sharing policy applied to the resource */
+        uri sharingPolicy;         /**< sharing policy applied to the resource */
         std::unique_ptr<AccessStrategy> strategy;
     public:
         filesystem(const std::string &name);
+        filesystem(const std::string &name, const int &idToAssign);
 
         int getId() const;
 
@@ -150,7 +150,7 @@ namespace Symposium {
         virtual void send() const = 0; //not clear how to set this
         virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const = 0;
         std::tuple<std::string, std::string> separate(const std::string &path);
-        bool pathIsValid2(const std::string &toCheck);
+        static bool pathIsValid2(const std::string &toCheck);
 
         virtual ~filesystem()= default;
     };
@@ -163,6 +163,7 @@ namespace Symposium {
         document doc;              /**< document to handle */
     public:
         file(const std::string &name, const std::string &realPath);
+
 
         const document &getDoc() const;
 
@@ -228,6 +229,10 @@ namespace Symposium {
          */
         std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
 
+        bool moreOwner(std::string username);
+
+        bool deleteFromStrategy(const std::string &userName);
+
         virtual ~file() override=default;
 
     };
@@ -246,6 +251,8 @@ namespace Symposium {
         
     public:
         symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName);
+
+        std::string getPath();
 
         resourceType resType() const override;
 
@@ -290,6 +297,7 @@ namespace Symposium {
         std::weak_ptr<directory> self;                          /**< pointer to itself */
 
     public:
+        directory(const std::string &name, const int &idToAssign);
         static std::shared_ptr<directory> nullDir(); //necessary to build a new user client side
         static std::shared_ptr<directory> getRoot();
 

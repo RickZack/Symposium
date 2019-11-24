@@ -43,10 +43,11 @@ void SymClient::setLoggedUser(const user &loggedUser) {
 
 signUpMessage SymClient::signUp(const std::string &username, const std::string &pwd, const std::string &nickname,
                                 const std::string &iconPath) {
-    return signUpMessage(msgType::login, {"", ""}, user("", "", "", "", -1, nullptr));
+    return signUpMessage(msgType::login, {"", ""}, user("SomeUsername", "P@assW0rd!!", "noempty", "./icons/a.jpg", -1, nullptr));
 }
 
 void SymClient::signUp(const user &logged) {
+    setLoggedUser(logged);
     //TODO:implement
 }
 
@@ -73,7 +74,9 @@ SymClient::openNewSource(const std::string &resourceId, privilege reqPriv, const
     return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
-void SymClient::openNewSource(const std::shared_ptr<file> fileAsked) {
+void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
+                              const std::string &destName,
+                              int idToAssign, const std::shared_ptr<file> fileAsked) {
     //TODO:implement
 }
 
@@ -82,7 +85,7 @@ askResMessage SymClient::createNewSource(const std::string &path, const std::str
     return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
-void SymClient::createNewSource(const std::shared_ptr<file> fileCreated) {
+void SymClient::createNewSource(const std::string &path, const std::string &name, int idToAssign) {
     //TODO:implement
 }
 
@@ -91,7 +94,7 @@ askResMessage SymClient::createNewDir(const std::string &path, const std::string
     return askResMessage(msgType::openRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
 }
 
-void SymClient::createNewDir(const std::shared_ptr<directory> dirCreated) {
+void SymClient::createNewDir(const std::string &path, const std::string &name, int idToAssign) {
     //TODO:implement
 }
 

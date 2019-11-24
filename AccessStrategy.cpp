@@ -67,6 +67,32 @@ privilege RMOAccess::getPrivilege(const std::string &targetUser)
     return got->second;
 }
 
+bool RMOAccess::moreOwner(std::string username)
+{
+    int i=0;
+    bool own=false;
+    for(auto& tuple : permission)
+    {
+        if(tuple.second==privilege::owner)
+        {
+            i++;
+            if(tuple.first==username)
+                own=true;
+        }
+    }
+
+    return ((i > 1)&&own);
+}
+
+bool RMOAccess::deleteUser(const std::string &targetUser)
+{
+    auto it=permission.find(targetUser);
+    if(it==permission.end())
+        return false;
+    permission.erase(targetUser);
+    return true;
+}
+
 bool RMOAccess::operator==(const RMOAccess &rhs) const {
     return permission == rhs.permission;
 }
@@ -85,5 +111,14 @@ privilege TrivialAccess::setPrivilege(const std::string &targetUser, privilege t
 
 privilege TrivialAccess::getPrivilege(const std::string &targetUser) {
     return privilege::none;
+}
+
+bool TrivialAccess::moreOwner(std::string username){
+    return false;
+}
+
+bool TrivialAccess::deleteUser(const std::string &targetUser)
+{
+    return true;
 }
 BOOST_CLASS_EXPORT(Symposium::RMOAccess)

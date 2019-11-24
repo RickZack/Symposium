@@ -114,24 +114,24 @@
          /**
           * @brief access a user's document via uri to the filesystem of the another user
           * @param opener the user who made the request
-          * @param path the absolute path of the requested document
-          * @param name the name of the document
-          * @param reqPriv the privilege requested opening the document
+          * @param resourceId the absolute path of the requested document
           * @param destPath the path where to put the @ref symlink to @e name, inside @e opener 's home directory
+          * @param destName the name to assign to the symlink
+          * @param reqPriv the privilege requested opening the document
           * @return the document just retrieved
           * @throws SymServerException thrown if the user @ref opener is not logged in
           * @throws filesystemException rethrown if there are problems regarding the asked resource
           *
           * When a client asks for a document for which the user has no privilege with @ref askResMessage, the server
-          * checks that the file named @e name in @e path is available and then that the file is shareable.
+          * checks that the file in @e resourceId is available and then that the file is shareable.
           * Under these conditions, the server adds the @e opener to the subset of users who have @e reqPriv privilege,
-          * adds a @ref symlink to the file in @e destPath named @name and send the document inside a @ref sendResMessage
+          * adds a @ref symlink to the file in @e destPath named @e destName and send the document inside a @ref sendResMessage
           * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
           * and send back to the client a @ref sendResMessage with the symlink just created
           */
-         virtual const document &
-         openNewSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
-                       const std::string &destPath);
+         virtual std::shared_ptr<file>
+         openNewSource(const std::string &opener, const std::string &resourceId, const std::string &destPath,
+                       const std::string &destName, privilege reqPriv);
 
          /**
           * @brief creates a new file with an empty document inside
@@ -145,7 +145,7 @@
           * When a client asks for a new directory, the server tries to do it and send back to the client a @ref sendResMessage
           * containing the resource just added to @e path.
           */
-         virtual const document &createNewSource(const user &opener, const std::string &path, const std::string &name);
+         virtual const document &createNewSource(const std::string &opener, const std::string &path, const std::string &name);
 
          /**
           * @brief creates a new directory in the user's filesystem
@@ -160,7 +160,7 @@
           * containing the directory just added to @e path.
           */
          virtual std::shared_ptr<directory>
-         createNewDir(const user &opener, const std::string &path, const std::string &name);
+         createNewDir(const std::string &opener, const std::string &path, const std::string &name);
 
          /**
           * @brief update a document with a new symbol from a client
@@ -231,8 +231,8 @@
           * @brief renames a resource from @e remover 's @e home directory
           * @param renamer the user who is asking to rename its resource
           * @param resPath the relative path to the @e renamer 's @e home directory where to find the resource
-          * @param resName the resource's name
-          * @param newName the new resource's name
+          * @param resName the resource's name (meaning the its unique id)
+          * @param newName the new resource's name (not the id)
           * @return the resource just renamed
           *
           * When a user client side wants to set a new name for a resource, it sends a @ref askResMessage and waits
