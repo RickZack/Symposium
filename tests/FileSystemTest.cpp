@@ -296,8 +296,12 @@ struct FileSystemTestSharing: ::testing::Test{
     fileAccesser f;
     uri expected;
     static const user u;
+    static const user anotherUser;
+    static const user anotherUser2;
     static const std::string iconPath;
     static const std::string username;
+    static const std::string anotherUsername;
+    static const std::string anotherUsername2;
     static const std::string pwd;
     static const std::string nickname;
     static const std::string path;
@@ -345,11 +349,15 @@ struct FileSystemTestSharing: ::testing::Test{
 };
 const std::string FileSystemTestSharing::iconPath="./icons/icon1.jpg";
 const std::string FileSystemTestSharing::username="username";
+const std::string FileSystemTestSharing::anotherUsername="anotherUsername";
+const std::string FileSystemTestSharing::anotherUsername2="anotherUsername2";
 const std::string FileSystemTestSharing::pwd="AP@ssw0rd!";
 const std::string FileSystemTestSharing::nickname="nickname";
 const std::string FileSystemTestSharing::path="./dir1/dir2";
 const std::string FileSystemTestSharing::filename="file1";
 const user FileSystemTestSharing::u(username, pwd, nickname, iconPath, 0, directory::getRoot());
+const user FileSystemTestSharing::anotherUser2(anotherUsername2, pwd, nickname, iconPath, 0, nullptr);
+const user FileSystemTestSharing::anotherUser(anotherUsername, pwd, nickname, iconPath, 0, nullptr);
 
 TEST_F(FileSystemTestSharing, setUserPrivilegeOnFileCallsStrategy) {
     RMOAccessMock* dummyStrategy=new RMOAccessMock();
@@ -589,6 +597,61 @@ TEST_F(FileSystemTestSharing, removeDirectoryRecursive){
     //Try to remove again file2, should throw
     EXPECT_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId())), filesystemException);
     directory::getRoot()->remove(u, "./", "2");
+}
+
+/*
+ * Test explanation
+ * The problem is: what should happen when we try to remove a symlink that points to a file that has more than one owner?
+ * 1) We can always reject the operation, but it's not so good because this means that a user will have a symlink even
+ * if he doesn't want the resource anymore.
+ * 2) We can copy from Google Docs: we always allow to remove the symlink, but we remove the resource only if the user that
+ * asks for the action is the only owner. We could carry a text in the response message that say something like "There are still
+ * other users that can access the file", but forget about it at the moment: no explanations.
+ *
+ * This test uses the second assumption.
+ */
+TEST_F(FileSystemTestSharing, removeFileWithMoreOwners){
+    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUsermame2 (id=3)
+     *     -sym2
+     *   -anotherUsername (another user's directory) (id=2)
+     *     -file1
+     *   -someUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -sym1
+     *       -file2
+     * (expected is dir1)
+     */
+
+    //Preconditions: create that tree
+    auto someUser=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
+    directory::getRoot()->addDirectory("anotherUsername", 2);
+    auto anotherUsername2Dir=directory::getRoot()->addDirectory("anotherUsername2", 3);
+    auto file1=directory::getRoot()->addFile("./2", "file1"); //insert into "anotherUsername"
+    auto file2=directory::getRoot()->addFile("./1/7", "file2"); //insert into "someUser/dir1"
+    //insert link into /someUser/dir1
+    auto sym1= directory::getRoot()->addLink("./1/7", "sym1", "/2", "/1/7/"+std::to_string(file1->getId()));
+    //insert link into /anotherUsername2
+    auto sym2= directory::getRoot()->addLink("./3", "sym2", "/2", "/3/"+std::to_string(file1->getId()));
+    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./2/", std::to_string(file1->getId())));
+
+    //Fake assignment of privileges, they are set into user's class
+    file1->setUserPrivilege(anotherUsername, privilege::modify); //just imagine that who created the file release it's owner privilege
+    file1->setUserPrivilege(anotherUsername2, privilege::owner);
+    file1->setUserPrivilege(username, privilege::owner);
+
+
+    //Now a call from user "someUser" should delete the symlink but not the file itself (because anotherUser2 is also an owner)
+    directory::getRoot()->remove(u, "./1/7", std::to_string(sym1->getId()));
+    EXPECT_THROW(directory::getRoot()->get("/1/7", std::to_string(sym1->getId())), filesystemException);
+    EXPECT_NO_THROW(directory::getRoot()->get("/2", std::to_string(file1->getId())));
+
+    //Now anotherUsername2 is the only owner, so a call to remove should remove both symlink and the file
+    directory::getRoot()->remove(u, "./3", std::to_string(sym2->getId()));
+    EXPECT_THROW(directory::getRoot()->get("/2", std::to_string(file1->getId())), filesystemException); //file1 shouldn't exixst anymore
 }
 
 TEST_F(FileSystemTestSharing, accessOnSymlink){

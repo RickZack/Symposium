@@ -47,7 +47,7 @@
       <bpmn:outgoing>SequenceFlow_122fhqu</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_1fqsyk6</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:intermediateThrowEvent id="IntermediateThrowEvent_1pmxiec" name="ask server for create a resource">
+    <bpmn:intermediateThrowEvent id="IntermediateThrowEvent_1pmxiec" name="ask server for rename a resource">
       <bpmn:incoming>SequenceFlow_1if35xj</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1bd2sux</bpmn:outgoing>
       <bpmn:property id="Property_1t6qlvb" name="__targetRef_placeholder" />
@@ -90,9 +90,9 @@
     <bpmn:startEvent id="StartEvent_014islq" name="form of &#34;rename resource&#34; filled">
       <bpmn:outgoing>SequenceFlow_08hnl9c</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:dataObjectReference id="DataObjectReference_03su966" name="sendResMessage(messageType::createNewDir, msgOutcome::success, directory)" dataObjectRef="DataObject_1m8ago4" />
+    <bpmn:dataObjectReference id="DataObjectReference_03su966" name="serverMessage(messageType::changeResName, msgOutcome::success)" dataObjectRef="DataObject_1m8ago4" />
     <bpmn:dataObject id="DataObject_1m8ago4" />
-    <bpmn:dataObjectReference id="DataObjectReference_1jh59ry" name="askResMessage(msgType::createNewDir, {username, pwd}, path, name)" dataObjectRef="DataObject_0k54auv" />
+    <bpmn:dataObjectReference id="DataObjectReference_1jh59ry" name="askResMessage(msgType::changeResName, {username, pwd}, path, name)" dataObjectRef="DataObject_0k54auv" />
     <bpmn:dataObject id="DataObject_0k54auv" />
     <bpmn:startEvent id="StartEvent_0jw372l" name="no response">
       <bpmn:outgoing>SequenceFlow_0hf3gs3</bpmn:outgoing>
@@ -337,7 +337,7 @@
       <bpmn:outgoing>SequenceFlow_1un202t</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1lq4bd5" />
     </bpmn:boundaryEvent>
-    <bpmn:subProcess id="SubProcess_1umyue0" name="Call file::renameResource(resPath, resName, newName)">
+    <bpmn:subProcess id="SubProcess_1umyue0" name="Call filesystem::renameResource(resPath, resName, newName)">
       <bpmn:incoming>SequenceFlow_051ao11</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_198cjds</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0rzonh6</bpmn:outgoing>
@@ -356,7 +356,7 @@
       <bpmn:outgoing>SequenceFlow_19sbbqq</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1v09xvw" />
     </bpmn:boundaryEvent>
-    <bpmn:subProcess id="SubProcess_1v2x29i" name="Call file::renameResource(resPath, resName, newName)">
+    <bpmn:subProcess id="SubProcess_1v2x29i" name="Call filesystem::renameResource(resPath, resName, newName)">
       <bpmn:incoming>SequenceFlow_1uuwhuo</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_0v1cxyy</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1rbfage</bpmn:outgoing>
@@ -421,7 +421,7 @@
       <bpmndi:BPMNShape id="IntermediateThrowEvent_1pmxiec_di" bpmnElement="IntermediateThrowEvent_1pmxiec">
         <dc:Bounds x="-618" y="-318" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-704" y="-314" width="86" height="27" />
+          <dc:Bounds x="-694" y="-314" width="67" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EventBasedGateway_1e7pc22_di" bpmnElement="EventBasedGateway_1e7pc22">
@@ -463,7 +463,7 @@
       <bpmndi:BPMNShape id="DataObjectReference_03su966_di" bpmnElement="DataObjectReference_03su966">
         <dc:Bounds x="272" y="-546" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="176" y="-561" width="89" height="66" />
+          <dc:Bounds x="176" y="-561" width="90" height="66" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="DataObjectReference_1jh59ry_di" bpmnElement="DataObjectReference_1jh59ry">

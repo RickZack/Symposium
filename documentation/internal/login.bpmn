@@ -128,7 +128,7 @@
     <bpmn:startEvent id="StartEvent_1" name="login form filled">
       <bpmn:outgoing>SequenceFlow_0x6a91f</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:dataObjectReference id="DataObjectReference_05ng7rr" name="loginMessage(messageType::login, msgOutcome::success | msgOutcome::failure, user)" dataObjectRef="DataObject_1h8q8qo" />
+    <bpmn:dataObjectReference id="DataObjectReference_05ng7rr" name="loginMessage(messageType::login, msgOutcome::success, user)" dataObjectRef="DataObject_1h8q8qo" />
     <bpmn:dataObject id="DataObject_1h8q8qo" />
     <bpmn:sequenceFlow id="SequenceFlow_1fokq12" sourceRef="StartEvent_0p9k9j8" targetRef="Task_15nr9ek" />
     <bpmn:dataObjectReference id="DataObjectReference_0tpor5r" name="clientMessage(messageType::login, {username, pwd})" dataObjectRef="DataObject_16u9340" />
@@ -419,7 +419,7 @@
       <bpmndi:BPMNShape id="DataObjectReference_05ng7rr_di" bpmnElement="DataObjectReference_05ng7rr">
         <dc:Bounds x="1613" y="60" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1517" y="45" width="87" height="80" />
+          <dc:Bounds x="1516" y="45" width="90" height="53" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOutputAssociation_1mk09k8_di" bpmnElement="DataOutputAssociation_1mk09k8">
