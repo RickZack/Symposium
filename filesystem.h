@@ -291,6 +291,7 @@ namespace Symposium {
  * @brief class used to model a directory, uses @e Singleton pattern
  */
     class directory : public filesystem {
+    protected:
         static std::shared_ptr<directory> root;                 /**< root directory of the system */
         std::vector<std::shared_ptr<filesystem> > contained;    /**< filesystem objects contained in the directory */
         std::weak_ptr<directory> parent;                        /**< pointer to the parent directory */

@@ -198,6 +198,19 @@ struct directoryAccesser: public directory{ //only to access the protected membe
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
+    /*
+     * Used to achieve independence of tests while directory is a singleton class
+     * resets all the parameters to the ones predefined when the filesystem is originally created
+     */
+    void resetFreshFilesystem(){
+        auto r= static_cast<directoryAccesser*>(this->root.get());
+        if(r){
+            r->idCounter=0;
+            r->contained.clear();
+            this->root.reset(); //the static object is now free (root removed)
+            //Note:: r is not valid at this point
+        }
+    }
     MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
 };
 
@@ -236,7 +249,7 @@ struct fileAccesser: public file{ //only to access the protected members of dire
 };
 
 struct symlinkAccesser: public symlink{ //only to access the protected members of directory from tests
-    symlinkAccesser(const std::string &name) : symlink(name, "", "") {};
+    symlinkAccesser(const std::string &name) : symlink(name, "./dir/dir2", "fakesym") {};
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
@@ -295,9 +308,13 @@ struct FileSystemTestSharing: ::testing::Test{
     symlinkAccesser sym;
     fileAccesser f;
     uri expected;
+
+    //users
     static const user u;
     static const user anotherUser;
     static const user anotherUser2;
+
+    //data used for user initialization
     static const std::string iconPath;
     static const std::string username;
     static const std::string anotherUsername;
@@ -307,7 +324,19 @@ struct FileSystemTestSharing: ::testing::Test{
     static const std::string path;
     static const std::string filename;
 
+    //pointers to filesystem objects created in the tests
+    std::shared_ptr<directory> anotherUser2_d;
+    std::shared_ptr<directory> anotherUser_d;
+    std::shared_ptr<directory> aUser_d;
+    std::shared_ptr<directory> dir1;
+    std::shared_ptr<file> file1;
+    std::shared_ptr<file> file2;
+    std::shared_ptr<class symlink> sym1;
+    std::shared_ptr<class symlink> sym2;
+
+
     FileSystemTestSharing():dir("dir"), f(filename), sym("link"){};
+
 
     ::testing::AssertionResult getRootIsImplemented(const char* m_expr, std::shared_ptr<directory> root){
         if(root.get()== nullptr || directory::getRoot()!=root)
@@ -323,29 +352,91 @@ struct FileSystemTestSharing: ::testing::Test{
     }
 
     /*
+     * ConstructTreeN functions create sample filesystem tree, setting also fake privileges on files
+     * These authorizations are fake, the normal stack is:
+     * from user::accessFile call getFile()
+     * from user::accessFile call getShare() on the uri contained into the retrieved file
+     * from user::accessFile call setUserPrivilege() on the retrieved file with the privilege that is possible to grant
+     * from user::accessFile call addLink()
+     */
+
+    /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -anotherUsername (another user's directory)
-     *     -file1
-     *   -someUser (user's directory)
-     *     -dir1
-     *       -sym1
-     *       -file2
-     * (expected is dir1)
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
      */
-    void constructTree(){
+    void constructTree0(){
         ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
-        auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-        directory::getRoot()->addDirectory("anotherUsername", 2);
-        auto inserted=directory::getRoot()->addFile("./1/2", "file1");
-        /*
-         * Simulate the fact that the user obtains a [defaultPrivilege] on [file1]
-         */
-        inserted->setUserPrivilege(username, uri::getDefaultPrivilege());
-        directory::getRoot()->addFile("./1/7", "file2");
-        auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/1/2", "/1/7/"+std::to_string(inserted->getId()));
-        std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(inserted->getId())));
+        aUser_d=directory::getRoot()->addDirectory(username, 1);
+        dir1=aUser_d->addDirectory("dir1", 7);
     }
+
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -file1
+     */
+    void constructTree1(){
+        ASSERT_NO_FATAL_FAILURE(constructTree0());
+        file1=directory::getRoot()->addFile("./1/7", "file1");
+        /*
+         * Simulate the fact that the user created the file, so he has [privilege::owner] on [file1]
+         */
+        file1->setUserPrivilege(username, privilege::owner);
+    }
+
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -file1
+     */
+    void constructTree2(){
+        ASSERT_NO_FATAL_FAILURE(constructTree1());
+        anotherUser_d=directory::getRoot()->addDirectory("anotherUsername", 2);
+        sym1=directory::getRoot()->addLink("./2", "sym1", "./1/7", std::to_string(file1->getId()));
+        /*
+         * Simulate the fact that the privilege acquired adding a symlink
+         */
+        file1->setUserPrivilege(anotherUsername, uri::getDefaultPrivilege());
+    }
+
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -file2
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -sym2
+     *       -file1
+     */
+    void constructTree3(){
+        ASSERT_NO_FATAL_FAILURE(constructTree2());
+        file2=directory::getRoot()->addFile("./2", "file2");
+        sym2=directory::getRoot()->addLink("./1/7", "sym2", "/2", "/1/7/"+std::to_string(file2->getId()));
+        /*
+         * Simulate the fact that the user created the file, so he has [privilege::owner] on [file2]
+         * Simulate the fact that the privilege acquired adding a symlink
+         */
+        file2->setUserPrivilege(anotherUsername, privilege::owner);
+        file2->setUserPrivilege(username, uri::getDefaultPrivilege());
+        //std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(file1->getId())));
+    }
+
+    virtual ~FileSystemTestSharing(){
+        //release the content of root directory and the root itself, so all the trees constructed are destroyed
+        dir.resetFreshFilesystem();
+    }
+
+
 };
 const std::string FileSystemTestSharing::iconPath="./icons/icon1.jpg";
 const std::string FileSystemTestSharing::username="username";
@@ -355,9 +446,10 @@ const std::string FileSystemTestSharing::pwd="AP@ssw0rd!";
 const std::string FileSystemTestSharing::nickname="nickname";
 const std::string FileSystemTestSharing::path="./dir1/dir2";
 const std::string FileSystemTestSharing::filename="file1";
-const user FileSystemTestSharing::u(username, pwd, nickname, iconPath, 0, directory::getRoot());
+const user FileSystemTestSharing::u(username, pwd, nickname, iconPath, 0, nullptr);
 const user FileSystemTestSharing::anotherUser2(anotherUsername2, pwd, nickname, iconPath, 0, nullptr);
 const user FileSystemTestSharing::anotherUser(anotherUsername, pwd, nickname, iconPath, 0, nullptr);
+
 
 TEST_F(FileSystemTestSharing, setUserPrivilegeOnFileCallsStrategy) {
     RMOAccessMock* dummyStrategy=new RMOAccessMock();
@@ -419,261 +511,235 @@ TEST_F(FileSystemTestSharing, printFileWithIndent){
 }
 
 TEST_F(FileSystemTestSharing, getSearchesRecursive){
-    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    ASSERT_NO_FATAL_FAILURE(constructTree0());
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -someUser (user's directory)
-     *     -dir1
-     * (expected is dir1)
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
      */
-    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-    auto ret=directory::getRoot()->get("./1/", "7");
-    auto ret2=directory::getRoot()->getDir("./", "1")->get("./", "7");
-    EXPECT_EQ(ret2, ret);
-    EXPECT_EQ(expected, ret);
-    directory::getRoot()->remove(u, "./", "1");
+    auto ret_rec=directory::getRoot()->get("./1", "7");
+    auto ret_nrec=directory::getRoot()->getDir("./", "1")->get("./", "7");
+    EXPECT_EQ(ret_nrec, ret_rec);
+    EXPECT_EQ(dir1, ret_rec);
 }
 
 TEST_F(FileSystemTestSharing, setNameSearchesRecursive){
-    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    ASSERT_NO_FATAL_FAILURE(constructTree0());
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -someUser (user's directory)
-     *     -dir1
-     * (expected is dir1)
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
      */
     std::string newName="NewName";
-    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-    std::string oldName=expected->getName();
-    std::string ret=directory::getRoot()->setName("./1/", "7", newName);
-    EXPECT_EQ(newName, expected->getName());
+    std::string oldName=dir1->getName();
+    std::string ret=directory::getRoot()->setName("./1", "7", newName);
+    EXPECT_EQ(newName, dir1->getName());
     EXPECT_EQ(oldName, ret);
-    directory::getRoot()->remove(u, "./", "1");
 }
 
 TEST_F(FileSystemTestSharing, AddFileInsertsRecursive){
-    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    ASSERT_NO_FATAL_FAILURE(constructTree1());
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -someUser (user's directory)
-     *     -dir1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
      *       -file1
-     * (expected is dir1)
      */
-    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-    auto inserted=directory::getRoot()->addFile("./1/7", "file1");
-    auto ret=directory::getRoot()->get("./1/7/", std::to_string(inserted->getId()));
-    EXPECT_EQ(inserted, ret);
-    directory::getRoot()->remove(u, "./", "1");
+    auto ret=directory::getRoot()->get("./1/7", std::to_string(file1->getId()));
+    EXPECT_EQ(file1, ret);
 }
 
 TEST_F(FileSystemTestSharing, AddLinkInsertsRecursive){
-    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    ASSERT_NO_FATAL_FAILURE(constructTree2());
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -anotherUsername (another user's directory)
+     *   -anotherUser (another user's directory) (id=2)
      *     -sym1
-     *   -someUser (user's directory)
-     *     -dir1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
      *       -file1
-     * (expected is dir1)
      */
-    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-    directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto inserted=directory::getRoot()->addFile("./1/7", "file1");
-    auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "./1/7/", std::to_string(inserted->getId()));
-    std::shared_ptr<file> ret=directory::getRoot()->getFile("./2/", std::to_string(linkToInserted->getId()));
-    EXPECT_EQ(inserted, ret);
+    std::shared_ptr<file> ret=directory::getRoot()->getFile("./2", std::to_string(sym1->getId()));
+    EXPECT_EQ(file1, ret);
     directory::getRoot()->remove(u, "./", "1");
-    //directory::getRoot()->remove(u, "./", "2");
+
 }
 
 TEST_F(FileSystemTestSharing, printSymLink){
-    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    ASSERT_NO_FATAL_FAILURE(constructTree2());
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -anotherUsername (another user's directory)
+     *   -anotherUser (another user's directory) (id=2)
      *     -sym1
-     *   -someUser (user's directory)
-     *     -dir1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
      *       -file1
-     * (expected is dir1)
      */
-    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-    directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto inserted=directory::getRoot()->addFile("./1/7", "file1");
+    file1->setUserPrivilege(username, uri::getDefaultPrivilege());
 
-    /*
-     * Fake authorization, the normal stack is:
-     * from user::accessFile call getFile()
-     * from user::accessFile call getShare() on the uri contained into the retrieved file
-     * from user::accessFile call setUserPrivilege() on the retrieved file with the privilege that is possible to grant
-     * from user::accessFile call addLink()
-     */
-    inserted->setUserPrivilege(username, privilege::readOnly);
-
-    auto linkToInserted= directory::getRoot()->addLink("./2", "sym1", "./1/7/", std::to_string(inserted->getId()));
     std::ostringstream out; int n_space=rand()%100+1;
     std::string spaces; spaces.insert(0, n_space, ' ');
-    out<<spaces<<resourceType::symlink<<" "<<linkToInserted->getName()<<" "<<privilege::readOnly;
-    EXPECT_EQ( out.str(), linkToInserted->print(username, false, n_space));
+    out<<spaces<<resourceType::symlink<<" "<<sym1->getName()<<" "<<uri::getDefaultPrivilege();
+    EXPECT_EQ( out.str(), sym1->print(username, false, n_space));
 }
 
 TEST_F(FileSystemTestSharing, accessOnFile){
     ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
     documentMock d;
     /*
-     * Create a tree like this:
-     * -/ (root directory)
-     *   -someUser (user's directory)
-     *     -dir1
-     *       -file1
-     * (expected is dir1)
-     */
-    //These two following lines are only explanatory, not useful for the test but to understand this structure is used
-    auto expected=dir.addDirectory(username, 1)->addDirectory("dir1", 7);
-    auto inserted=dir.addFile("./1/7", "file1");
+    * Create a tree like this:
+    * -/ (root directory)
+    *   -aUser (user's directory) (id=1)
+    *     -dir1 (id=7)
+    *       -file1
+    */
+    ASSERT_NO_FATAL_FAILURE(constructTree1());
     fileAccesser* dummy=new fileAccesser("dummyFile");
-    EXPECT_CALL(dir, getFile("./1/7/", std::to_string(inserted->getId()))).WillOnce(::testing::Return(std::shared_ptr<file>(dummy)));
+    EXPECT_CALL(dir, getFile("./1/7", std::to_string(file1->getId()))).WillOnce(::testing::Return(std::shared_ptr<file>(dummy)));
     EXPECT_CALL(*dummy, access(u,privilege::readOnly)).WillOnce(::testing::ReturnRef(d));
     //EXPECT_CALL(d, access(u, privilege::readOnly));
-    dir.access(u, "./1/7/", std::to_string(inserted->getId()), privilege::readOnly);
+    dir.access(u, "./1/7", std::to_string(file1->getId()), privilege::readOnly);
 }
 
 TEST_F(FileSystemTestSharing, printDirectoryRecursive){
-    ASSERT_NO_FATAL_FAILURE(constructTree()); //set the following tree
+    ASSERT_NO_FATAL_FAILURE(constructTree3()); //set the following tree
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -anotherUsername (another user's directory)
-     *     -file1
-     *   -someUser (user's directory)
-     *     -dir1
-     *       -sym1
-     *       -file2
-     * (expected is dir1)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -file2
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -sym2
+     *       -file1
      */
 
     std::ostringstream res; //will contain the print of someUser's directory
     /*
      * Explaining on why we expect this string as output:
      * addLink() is usually called by user::accessFile, whose job is to obtain a privilege on the file whose resId
-     * (concatenation of ids) is given and create a symlink in its home directory. In constructTree() we simulated
+     * (concatenation of ids) is given and create a symlink in its home directory. In constructTree3() we simulated
      * this behaviour setting the privilege for [username] to uri::getDefaultPrivilege() for file [file1]. In this
      * way, we expect sym1 (that should point to file1) to return its name and the privilege that the user holds
      * on [file1] (not on the symlink itself, that doesn't make much sense).
      */
-    res<<"someUser"<<" "<<"dir1\r\n"<<"  "<<"sym1 "<<uri::getDefaultPrivilege()<<"\r\n"<<"  "<<"file2 "<<privilege::owner<<"\r\n";
+    res<<username<<" "<<"dir1\r\n"<<"  "<<"sym2 "<<uri::getDefaultPrivilege()<<"\r\n"<<"  "<<"file1 "<<privilege::owner<<"\r\n";
     EXPECT_EQ(res.str(), directory::getRoot()->getDir("./", "1")->print(username, true, 0));
 }
-
+//FIXME: review the following tests
 TEST_F(FileSystemTestSharing, removeDirectoryRecursive){
-    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+    ASSERT_NO_FATAL_FAILURE(constructTree3()); //set the following tree
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -anotherUsername (another user's directory)
-     *     -file1
-     *   -someUser (user's directory)
-     *     -dir1
-     *       -sym1
-     *       -file2
-     * (expected is dir1)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -file2
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -sym2
+     *       -file1
      */
-    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-    directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto inserted=directory::getRoot()->addFile("./2", "file1");
-    auto file2=directory::getRoot()->addFile("./1/7", "file2");
-    auto linkToInserted= directory::getRoot()->addLink("./1/7", "sym1", "/2", "/1/7/"+std::to_string(inserted->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./2/", std::to_string(inserted->getId())));
-    //Remove file2, should not throw
-    //EXPECT_CALL(file2, deleteFromStrategy("username"));
-    directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId()));
-    //Try to remove again file2, should throw
-    EXPECT_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file2->getId())), filesystemException);
-    directory::getRoot()->remove(u, "./", "2");
+    //Remove file1, should not throw
+    EXPECT_NO_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file1->getId())));
+    //Try to remove again file1, should throw
+    EXPECT_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file1->getId())), filesystemException);
 }
 
 /*
- * Test explanation
- * The problem is: what should happen when we try to remove a symlink that points to a file that has more than one owner?
- * 1) We can always reject the operation, but it's not so good because this means that a user will have a symlink even
- * if he doesn't want the resource anymore.
- * 2) We can copy from Google Docs: we always allow to remove the symlink, but we remove the resource only if the user that
- * asks for the action is the only owner. We could carry a text in the response message that say something like "There are still
- * other users that can access the file", but forget about it at the moment: no explanations.
- *
- * This test uses the second assumption.
+ * Tests explanation
+ * The creator of the file must remain owner for the entire life of the file.
+ * A call to remove on a symlink deletes only the symlink.
+ * A file can't be removed if someone has owner privilege.
  */
-TEST_F(FileSystemTestSharing, removeFileWithMoreOwners){
-    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+TEST_F(FileSystemTestSharing, removeFileNotRemoveFileWithMoreOwners){
+    ASSERT_NO_FATAL_FAILURE(constructTree3()); //set the following tree
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -anotherUsermame2 (id=3)
-     *     -sym2
-     *   -anotherUsername (another user's directory) (id=2)
-     *     -file1
-     *   -someUser (user's directory) (id=1)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -file2
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
      *     -dir1 (id=7)
-     *       -sym1
-     *       -file2
-     * (expected is dir1)
+     *       -sym2
+     *       -file1
      */
-
-    //Preconditions: create that tree
-    auto someUser=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-    directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto anotherUsername2Dir=directory::getRoot()->addDirectory("anotherUsername2", 3);
-    auto file1=directory::getRoot()->addFile("./2", "file1"); //insert into "anotherUsername"
-    auto file2=directory::getRoot()->addFile("./1/7", "file2"); //insert into "someUser/dir1"
-    //insert link into /someUser/dir1
-    auto sym1= directory::getRoot()->addLink("./1/7", "sym1", "/2", "/1/7/"+std::to_string(file1->getId()));
-    //insert link into /anotherUsername2
-    auto sym2= directory::getRoot()->addLink("./3", "sym2", "/2", "/3/"+std::to_string(file1->getId()));
-    std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./2/", std::to_string(file1->getId())));
 
     //Fake assignment of privileges, they are set into user's class
-    file1->setUserPrivilege(anotherUsername, privilege::modify); //just imagine that who created the file release it's owner privilege
-    file1->setUserPrivilege(anotherUsername2, privilege::owner);
-    file1->setUserPrivilege(username, privilege::owner);
+    file2->setUserPrivilege(username, privilege::owner);
 
-
-    //Now a call from user "someUser" should delete the symlink but not the file itself (because anotherUser2 is also an owner)
-    directory::getRoot()->remove(u, "./1/7", std::to_string(sym1->getId()));
-    EXPECT_THROW(directory::getRoot()->get("/1/7", std::to_string(sym1->getId())), filesystemException);
-    EXPECT_NO_THROW(directory::getRoot()->get("/2", std::to_string(file1->getId())));
-
-    //Now anotherUsername2 is the only owner, so a call to remove should remove both symlink and the file
-    directory::getRoot()->remove(u, "./3", std::to_string(sym2->getId()));
-    EXPECT_THROW(directory::getRoot()->get("/2", std::to_string(file1->getId())), filesystemException); //file1 shouldn't exixst anymore
+    //file2 has more than one owner, can't be deleted
+    EXPECT_THROW(directory::getRoot()->remove(u, "./2", std::to_string(file2->getId())), filesystemException);
 }
 
-TEST_F(FileSystemTestSharing, accessOnSymlink){
-    ASSERT_PRED_FORMAT1(getRootIsImplemented, directory::getRoot());
+TEST_F(FileSystemTestSharing, removeSymlinkRemoveOnlySymlinkNotTheFilePointed){
+    ASSERT_NO_FATAL_FAILURE(constructTree3()); //set the following tree
     /*
      * Create a tree like this:
      * -/ (root directory)
-     *   -anotherUsername (another user's directory)
-     *     -file1
-     *   -someUser (user's directory)
-     *     -dir1
-     *       -sym1
-     * (expected is dir1)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -file2
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -sym2
+     *       -file1
      */
-    auto expected=directory::getRoot()->addDirectory(username, 1)->addDirectory("dir1", 7);
-    directory::getRoot()->addDirectory("anotherUsername", 2);
-    auto file1=directory::getRoot()->addFile("./2", "file1");
-    auto sym1= directory::getRoot()->addLink("./1/7", "sym1", "./2", std::to_string(file1->getId()));
-    std::shared_ptr<file> ret=directory::getRoot()->getFile("./1/7", std::to_string(sym1->getId()));
+
+    //Fake assignment of privileges, they are set into user's class
+    file2->setUserPrivilege(username, privilege::owner);
+
+    //Now a call from user "aUser" should delete the symlink but not the file itself (because anotherUser is also an owner)
+    directory::getRoot()->remove(u, "./1/7", std::to_string(sym2->getId()));
+    EXPECT_THROW(directory::getRoot()->get("/1/7", std::to_string(sym2->getId())), filesystemException); //sym2 removed
+    EXPECT_NO_THROW(directory::getRoot()->get("/2", std::to_string(file2->getId()))); //file2 still there
+    EXPECT_EQ(privilege::none,file2->getUserPrivilege(username));
+}
+
+TEST_F(FileSystemTestSharing, removeFileRemoveIfNoMoreOwners){
+    ASSERT_NO_FATAL_FAILURE(constructTree3()); //set the following tree
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -file2
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -sym2
+     *       -file1
+     */
+
+    //Fake assignment of privileges, they are set into user's class
+    file2->setUserPrivilege(username, privilege::owner);
+
+    directory::getRoot()->remove(u, "./1/7", std::to_string(sym2->getId()));
+    //If there are no more owners, the file can be deleted
+    EXPECT_NO_THROW(directory::getRoot()->remove(anotherUser, "./2", std::to_string(file2->getId())));
+}
+
+
+TEST_F(FileSystemTestSharing, accessOnSymlink){
+    ASSERT_NO_FATAL_FAILURE(constructTree2());
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -file1
+     */
     //if symlink::access (and file::access) are correctly implemented, they should return the same document
     document& fromFile1=file1->access(u, uri::getDefaultPrivilege());
-    document& fromSym1= sym1->access(u, uri::getDefaultPrivilege());
+    document& fromSym1= sym1->access(anotherUser, uri::getDefaultPrivilege());
     //test against the pointers, to avoid that, if document is not implemented yet, two different document can appear to be the same
     EXPECT_EQ(&fromFile1, &fromSym1);
 }

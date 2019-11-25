@@ -463,11 +463,8 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
 //FIXME: clean what is unuseful.
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName(fileName) {
 
-    //if(!pathIsValid2(pathToFile))
-        //throw filesystemException("Invalid path to symlink");
-    //std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
-    //if(std::regex_match(pathToFile, pathPattern))
-            //throw filesystemException("Invalid path to symlink");
+    if(!pathIsValid2(pathToFile))
+        throw filesystemException("Invalid path to symlink");
     strategy=std::make_unique<TrivialAccess>();
 
 }

@@ -44,6 +44,7 @@ bool RMOAccess::validateAction(const std::string &targetUser, privilege requeste
     return attuale >= requested;
 }
 
+//FIXME: un owner non si cambia
 privilege RMOAccess::setPrivilege(const std::string &targetUser, privilege toGrant) {
     if(permission.empty() && toGrant==privilege::owner)
         permission.insert (std::make_pair(targetUser, toGrant));
