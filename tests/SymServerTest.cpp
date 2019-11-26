@@ -378,7 +378,7 @@ TEST_F(SymServerTestFilesystemFunctionality, openSourceMakesTheUserWorkOnDocumen
 TEST_F(SymServerTestFilesystemFunctionality, openSourceOfNotLoggedUser){
     std::shared_ptr<file> f;
     ASSERT_THROW(f=server.openSource(anotherUserUsername, filePath, fileName, defaultPrivilege), SymServerException);
-    EXPECT_FALSE(server.userIsWorkingOnDocument(anotherUser, f->getDoc(), defaultPrivilege));
+    EXPECT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, defaultPrivilege));
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, logoutClosesOpenedDocuments){
@@ -386,7 +386,7 @@ TEST_F(SymServerTestFilesystemFunctionality, logoutClosesOpenedDocuments){
     EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
     auto f=server.openSource(loggedUserUsername, filePath, fileName, defaultPrivilege);
-    ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, f->getDoc(), defaultPrivilege));
+    ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 
     server.logout(loggedUserUsername, loggedUserPwd);
     EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
@@ -397,7 +397,7 @@ TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
     EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
     auto f=server.openSource(loggedUserUsername, filePath, fileName, defaultPrivilege);
-    ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, f->getDoc(), defaultPrivilege));
+    ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 
     server.removeUser(loggedUserUsername, loggedUserPwd);
     EXPECT_FALSE(server.userAlreadyRegistered(loggedUser));
@@ -409,7 +409,7 @@ TEST_F(SymServerTestFilesystemFunctionality, openNewSourceAccessesTheFile){
     EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
     auto f= server.openNewSource(loggedUserUsername, filePath + "/" + fileName, "./", fileName, defaultPrivilege);
-    EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, f->getDoc(), defaultPrivilege));
+    EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceOfNotLoggedUser){
@@ -474,8 +474,8 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertAppendesMessage){
     auto f=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
     symbol toInsert('a', 0, 0, {}, false);
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
-    server.remoteInsert(loggedUserUsername, f->getDoc().getId(), received);
-    EXPECT_TRUE(server.thereIsMessageForResource(f->getDoc().getId(), received).first);
+    server.remoteInsert(loggedUserUsername, doc.getId(), received);
+    EXPECT_TRUE(server.thereIsMessageForResource(doc.getId(), received).first);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDoc){

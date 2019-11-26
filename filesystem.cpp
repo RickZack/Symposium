@@ -35,12 +35,13 @@ using namespace Symposium;
 int filesystem::idCounter=0;
 std::shared_ptr<directory> directory::root;
 
-filesystem::filesystem(const std::string &name) : name(name){
-    id=idCounter;
-    idCounter++;
-}
-
-filesystem::filesystem(const std::string &name, const int &idToAssign) : name(name), id(idToAssign){
+filesystem::filesystem(const std::string &name, const int idToAssign) : name(name){
+    if(idToAssign==0){
+        id=idCounter;
+        idCounter++;
+    }
+    else
+        id=idToAssign;
 }
 
 int filesystem::getId() const {
@@ -111,7 +112,7 @@ bool filesystem::pathIsValid2(const std::string &toCheck) {
     return !toCheck.empty() && std::regex_match(toCheck, pathPattern);
 }
 
-file::file(const std::string &name, const std::string &realPath) : filesystem(name), realPath(realPath), doc(0){
+file::file(const std::string &name, const std::string &realPath) : filesystem(name, 0), realPath(realPath), doc(0){
     if(!(pathIsValid2(realPath)))
         throw filesystemException("Path is not valid!");
     strategy=std::make_unique<RMOAccess>();
@@ -197,10 +198,6 @@ std::string file::print(const std::string &targetUser, bool recursive, int inden
 
 const document &file::getDoc() const {
     return doc;
-}
-
-directory::directory(const std::string &name) : filesystem(name) {
-    strategy=std::make_unique<TrivialAccess>();
 }
 
 directory::directory(const std::string &name, const int &idToAssign) : filesystem(name, idToAssign) {
@@ -345,7 +342,7 @@ std::shared_ptr<file> directory::addFile(const std::string &path, const std::str
 
 std::shared_ptr<class symlink>
 directory::addLink(const std::string &path, const std::string &name, const std::string &filePath,
-                   const std::string &fileName)
+                   const std::string &fileName, int idToAssign)
 {
     std::string pathAdd;
     std::string idAdd;
@@ -353,7 +350,7 @@ directory::addLink(const std::string &path, const std::string &name, const std::
     std::shared_ptr<directory> save=getDir(pathAdd, idAdd);
     if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException("You already have an element with the same name");
-    std::shared_ptr<symlink> newSym(new symlink(name, filePath, fileName));
+    std::shared_ptr<symlink> newSym(new symlink(name, filePath, fileName, idToAssign));
     save->contained.push_back(newSym);
     return newSym;
 }
@@ -461,7 +458,8 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
 }
 
 //FIXME: clean what is unuseful.
-Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName) : filesystem(name), pathToFile(pathToFile), fileName(fileName) {
+Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
+                            int idToAssign) : filesystem(name, idToAssign), pathToFile(pathToFile), fileName(fileName) {
 
     if(!pathIsValid2(pathToFile))
         throw filesystemException("Invalid path to symlink");

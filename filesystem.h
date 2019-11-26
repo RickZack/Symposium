@@ -74,8 +74,7 @@ namespace Symposium {
         uri sharingPolicy;         /**< sharing policy applied to the resource */
         std::unique_ptr<AccessStrategy> strategy;
     public:
-        filesystem(const std::string &name);
-        filesystem(const std::string &name, const int &idToAssign);
+        filesystem(const std::string &name, const int idToAssign=0);
 
         int getId() const;
 
@@ -250,7 +249,8 @@ namespace Symposium {
         std::string fileName;      /**< name of the file pointed, meaning its @e id */
         
     public:
-        symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName);
+        symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
+                int idToAssign=0);
 
         std::string getPath();
 
@@ -297,8 +297,9 @@ namespace Symposium {
         std::weak_ptr<directory> parent;                        /**< pointer to the parent directory */
         std::weak_ptr<directory> self;                          /**< pointer to itself */
 
+    protected:
+        directory(const std::string &name, const int &idToAssign=0);
     public:
-        directory(const std::string &name, const int &idToAssign);
         static std::shared_ptr<directory> nullDir(); //necessary to build a new user client side
         static std::shared_ptr<directory> getRoot();
 
@@ -318,7 +319,7 @@ namespace Symposium {
 
         virtual std::shared_ptr<class symlink>
         addLink(const std::string &path, const std::string &name, const std::string &filePath,
-                const std::string &fileName);
+                const std::string &fileName, int idToAssign=0);
 
         virtual resourceType resType() const override;
 
@@ -361,9 +362,6 @@ namespace Symposium {
          * @return a string containing the representation
          */
         virtual std::string print(const std::string &targetUser, bool recursive = true, int indent = 0) const override;
-        //FIXME: directory is singleton, this constructor should be private
-        directory(const std::string &name);
-
         virtual ~directory() override= default;
 
     private:

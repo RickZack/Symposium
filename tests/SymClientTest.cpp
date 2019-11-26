@@ -86,9 +86,6 @@ struct SymClientAccesser: public SymClient{
         userMock= (SymClientUserMock *) &loggedUser;
     }
 
-    void setUser(user& logged){
-        getLoggedUser()=logged;
-    }
     std::pair<bool, document*> docIsInActive(int id){
         std::pair<bool, document*> result(false, nullptr);
         for(auto doc:activeDoc)
@@ -104,6 +101,11 @@ struct SymClientAccesser: public SymClient{
                 return true;
          return false;
     }
+
+    virtual ~SymClientAccesser() {
+        //avoid to point to objects that don't exist anymore
+        userMock=nullptr;
+    }
 };
 
 struct SymClientFileMock: public file{
@@ -114,6 +116,7 @@ struct SymClientFileMock: public file{
 
 struct SymClientDirMock: public directory{
     SymClientDirMock(const std::string &name) : directory(name) {};
+    MOCK_METHOD5(addLink, std::shared_ptr<class symlink>(const std::string&, const std::string&, const std::string&, const std::string&, int));
 };
 
 struct SymClientDocMock: public document{
@@ -144,7 +147,7 @@ struct SymClientTest : ::testing::Test{
     std::shared_ptr<SymClientDirMock> dirSentByServer;
     SymClientDocMock docInUserFilesystem, docSentByServer;
     static int indexes[2];
-    SymClientTest(): userReceived(username, pwd, nickname, iconPath, 0, nullptr),
+    SymClientTest(): userReceived(username, pwd, nickname, iconPath, 0, std::shared_ptr<SymClientDirMock>(new SymClientDirMock(username))),
                      fileSentByServer(new SymClientFileMock(filename, "./dir1/dir2")),
                      docInUserFilesystem(0), docSentByServer(120),
                      dirSentByServer(new SymClientDirMock(filename)){};
@@ -160,7 +163,7 @@ struct SymClientTest : ::testing::Test{
         })!=mapped.end();
     }
     void setStageForLoggedUser(){
-        client.setUser(userReceived);
+        client.setLoggedUser(userReceived);
     }
     void messageHasCorrectOwner(const clientMessage& mex){
         std::pair<std::string, std::string> credentials(username, pwd);
@@ -279,7 +282,7 @@ TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openNewSource on client
     //the data use to call accessFile must be taken from the relative askResMessage in unanswered
-    EXPECT_CALL(userReceived, accessFile(path+"/"+filename, destPath, filename)).WillOnce(::testing::Return(fileSentByServer));
+    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink(::testing::_, ::testing::_, path, filename, ::testing::_));
     EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym", fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));

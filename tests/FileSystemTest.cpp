@@ -56,143 +56,6 @@ struct RMOAccessMock: public RMOAccess{
 
 };
 
-
-
-struct FileSystemTestT: ::testing::Test{
-    file *f;
-    ::testing::NiceMock<documentMock> *document;
-    ::testing::NiceMock<RMOAccessMock> *rmo;
-    FileSystemTestT(){
-        document=new ::testing::NiceMock<documentMock>();
-        rmo=new ::testing::NiceMock<RMOAccessMock>();
-        f=new file("f", "./somedir");
-    }
-    ~FileSystemTestT() override{
-        delete f;
-        ::testing::Mock::AllowLeak(document);
-        ::testing::Mock::AllowLeak(rmo);
-    }
-};
-
-TEST_F(FileSystemTestT, DISABLED_FileSetGetPrivilegeTest)
-{
-    std::string u="username";
-    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    EXPECT_CALL(*rmo, setPrivilege(u, privilege::modify));
-    f->setUserPrivilege(u, privilege::modify);
-    EXPECT_CALL(*rmo, getPrivilege(u));
-    f->getUserPrivilege(u);
-}
-
-
-
-TEST_F(FileSystemTestT, DISABLED_accessTest)
-{
-    user u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    f->setUserPrivilege(u.getUsername(), privilege::owner);
-    EXPECT_CALL(*document, access(u, privilege::modify)).WillOnce(::testing::ReturnRef(*document));
-    f->access(u, privilege::modify);
-    f->setUserPrivilege(u.getUsername(), privilege::modify);
-    EXPECT_CALL(*document, access(u, privilege::modify)).WillOnce(::testing::ReturnRef(*document));
-    f->access(u, privilege::modify);
-    f->setUserPrivilege(u.getUsername(), privilege::readOnly);
-    EXPECT_THROW(f->access(u, privilege::owner), filesystemException);
-    f->setUserPrivilege(u.getUsername(), privilege::none);
-    EXPECT_THROW(f->access(u, privilege::modify), filesystemException);
-}
-
-TEST(FileSystemTest, getSetDirSymTest)
-{
-    directory d("d");
-    class symlink sym("sym", ".", "f");
-    std::string u="username";
-    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    uri u1(uriPolicy::activeAlways);
-    EXPECT_THROW(sym.getSharingPolicy(), filesystemException);
-    std::cout << "SymLinkError "<< std::endl;
-    EXPECT_THROW(sym.getUserPrivilege(u), filesystemException);
-    std::cout << "SymLinkError "<< std::endl;
-    EXPECT_THROW(sym.setUserPrivilege(u, privilege::owner), filesystemException);
-    std::cout << "SymLinkError "<< std::endl;
-    EXPECT_THROW(sym.setSharingPolicy(u, u1), filesystemException);
-    std::cout << "SymLinkError "<< std::endl;
-
-    EXPECT_THROW(d.getSharingPolicy(), filesystemException);
-    std::cout << "DirectoryError "<< std::endl;
-    EXPECT_THROW(d.getUserPrivilege(u), filesystemException);
-    std::cout << "DirectoryError "<< std::endl;
-    EXPECT_THROW(d.setUserPrivilege(u, privilege::owner), filesystemException);
-    std::cout << "DirectoryError "<< std::endl;
-    EXPECT_THROW(d.setSharingPolicy(u, u1), filesystemException);
-    std::cout << "DirectoryError "<< std::endl;
-}
-
-TEST(FileSystemTest, DISABLED_printFileTest)
-{
-    std::string u="username";
-    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    file f("file", "./somedir");
-    f.setUserPrivilege(u, privilege::owner);
-    EXPECT_EQ("file owner", f.print(u));
-    f.setUserPrivilege(u, privilege::none);
-    EXPECT_EQ("file You no longer have the possibility to access the file in any mode", f.print(u));
-}
-
-TEST(FileSystemTest, DISABLED_getDirectoryGetFileTest)
-{
-    directory *d=new directory("root");
-    std::shared_ptr<directory> home(d);
-    std::shared_ptr<directory>cart1;
-    cart1=d->addDirectory("cart1");
-    std::shared_ptr<file> f1;
-    f1=d->addFile("file1", "/root");
-    EXPECT_THROW(d->getDir("/root", "file1"), filesystemException);
-    EXPECT_THROW(d->getFile("/root", "cart1"), filesystemException);
-}
-/*
-TEST(FileSystemTest, addDirAddFileAddSymPrintTest)
-{
-    directory *d=new directory("root");
-    std::shared_ptr<directory> home(d);
-    user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
-    std::shared_ptr<directory> dir=d->addDirectory("cart1");
-    ASSERT_FALSE(dir==nullptr);
-    EXPECT_EQ("root\r\n-cart1\r\n", d->print(u1.getUsername()));
-    std::shared_ptr<file> f=d->addFile(".", "file1");
-    ASSERT_FALSE(f==nullptr);
-    EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n", d->print(u1.getUsername()));
-    std::shared_ptr<class symlink> sym= d->addLink(".", "sym", <#initializer#>, <#initializer#>);
-    ASSERT_FALSE(sym==nullptr);
-    EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n-sym\r\n", d->print(u1.getUsername()));
-}
- */
-
-TEST(FileSystemTest, removeTest)
-{
-    directory *d=new directory("root");
-    std::shared_ptr<directory> home(d);
-    user u1("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    std::shared_ptr<directory>cart1;
-    cart1=d->addDirectory("cart1");
-    std::shared_ptr<filesystem> cart2;
-    cart2=d->remove(u1, "/root", "cart1");
-    EXPECT_EQ("root\r\n", d->print(u1.getUsername()));
-}
-
-TEST(FileSystemTest, DISABLED_printSymTest)
-{
-    directory *d=new directory("root");
-    std::shared_ptr<directory> home(d);
-    user u1("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    std::shared_ptr<file> f1;
-    f1=d->addFile("file1", "/root");
-    class symlink sym("sym", "/root", "file1");
-    EXPECT_EQ("sym", sym.print(u1.getUsername()));
-}
-
-/*
- * More tests to prove robustness
- */
 struct directoryAccesser: public directory{ //only to access the protected members of directory from tests
     directoryAccesser(const std::string &name) : directory(name) {};
     AccessStrategy* getStrategy(){
@@ -249,7 +112,7 @@ struct fileAccesser: public file{ //only to access the protected members of dire
 };
 
 struct symlinkAccesser: public symlink{ //only to access the protected members of directory from tests
-    symlinkAccesser(const std::string &name) : symlink(name, "./dir/dir2", "fakesym") {};
+    symlinkAccesser(const std::string &name) : symlink(name, "./dir/dir2", "fakesym", 0) {};
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
@@ -400,7 +263,7 @@ struct FileSystemTestSharing: ::testing::Test{
     void constructTree2(){
         ASSERT_NO_FATAL_FAILURE(constructTree1());
         anotherUser_d=directory::getRoot()->addDirectory("anotherUsername", 2);
-        sym1=directory::getRoot()->addLink("./2", "sym1", "./1/7", std::to_string(file1->getId()));
+        sym1= directory::getRoot()->addLink("./2", "sym1", "./1/7", std::to_string(file1->getId()), 0);
         /*
          * Simulate the fact that the privilege acquired adding a symlink
          */
@@ -421,7 +284,7 @@ struct FileSystemTestSharing: ::testing::Test{
     void constructTree3(){
         ASSERT_NO_FATAL_FAILURE(constructTree2());
         file2=directory::getRoot()->addFile("./2", "file2");
-        sym2=directory::getRoot()->addLink("./1/7", "sym2", "/2", "/1/7/"+std::to_string(file2->getId()));
+        sym2= directory::getRoot()->addLink("./1/7", "sym2", "/2", "/1/7/" + std::to_string(file2->getId()), 0);
         /*
          * Simulate the fact that the user created the file, so he has [privilege::owner] on [file2]
          * Simulate the fact that the privilege acquired adding a symlink
@@ -742,4 +605,138 @@ TEST_F(FileSystemTestSharing, accessOnSymlink){
     document& fromSym1= sym1->access(anotherUser, uri::getDefaultPrivilege());
     //test against the pointers, to avoid that, if document is not implemented yet, two different document can appear to be the same
     EXPECT_EQ(&fromFile1, &fromSym1);
+}
+
+
+//Old tests
+struct FileSystemTestT: ::testing::Test{
+    file *f;
+    ::testing::NiceMock<documentMock> *document;
+    ::testing::NiceMock<RMOAccessMock> *rmo;
+    FileSystemTestT(){
+        document=new ::testing::NiceMock<documentMock>();
+        rmo=new ::testing::NiceMock<RMOAccessMock>();
+        f=new file("f", "./somedir");
+    }
+    ~FileSystemTestT() override{
+        delete f;
+        ::testing::Mock::AllowLeak(document);
+        ::testing::Mock::AllowLeak(rmo);
+    }
+};
+
+TEST_F(FileSystemTestT, DISABLED_FileSetGetPrivilegeTest)
+{
+    std::string u="username";
+    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    EXPECT_CALL(*rmo, setPrivilege(u, privilege::modify));
+    f->setUserPrivilege(u, privilege::modify);
+    EXPECT_CALL(*rmo, getPrivilege(u));
+    f->getUserPrivilege(u);
+}
+
+
+
+TEST_F(FileSystemTestT, DISABLED_accessTest)
+{
+    user u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    f->setUserPrivilege(u.getUsername(), privilege::owner);
+    EXPECT_CALL(*document, access(u, privilege::modify)).WillOnce(::testing::ReturnRef(*document));
+    f->access(u, privilege::modify);
+    f->setUserPrivilege(u.getUsername(), privilege::modify);
+    EXPECT_CALL(*document, access(u, privilege::modify)).WillOnce(::testing::ReturnRef(*document));
+    f->access(u, privilege::modify);
+    f->setUserPrivilege(u.getUsername(), privilege::readOnly);
+    EXPECT_THROW(f->access(u, privilege::owner), filesystemException);
+    f->setUserPrivilege(u.getUsername(), privilege::none);
+    EXPECT_THROW(f->access(u, privilege::modify), filesystemException);
+}
+
+TEST(FileSystemTest, getSetDirSymTest)
+{
+    directoryAccesser d("d");
+    class symlink sym("sym", ".", "f", 0);
+    std::string u="username";
+    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    uri u1(uriPolicy::activeAlways);
+    EXPECT_THROW(sym.getSharingPolicy(), filesystemException);
+    std::cout << "SymLinkError "<< std::endl;
+    EXPECT_THROW(sym.getUserPrivilege(u), filesystemException);
+    std::cout << "SymLinkError "<< std::endl;
+    EXPECT_THROW(sym.setUserPrivilege(u, privilege::owner), filesystemException);
+    std::cout << "SymLinkError "<< std::endl;
+    EXPECT_THROW(sym.setSharingPolicy(u, u1), filesystemException);
+    std::cout << "SymLinkError "<< std::endl;
+
+    EXPECT_THROW(d.getSharingPolicy(), filesystemException);
+    std::cout << "DirectoryError "<< std::endl;
+    EXPECT_THROW(d.getUserPrivilege(u), filesystemException);
+    std::cout << "DirectoryError "<< std::endl;
+    EXPECT_THROW(d.setUserPrivilege(u, privilege::owner), filesystemException);
+    std::cout << "DirectoryError "<< std::endl;
+    EXPECT_THROW(d.setSharingPolicy(u, u1), filesystemException);
+    std::cout << "DirectoryError "<< std::endl;
+}
+
+TEST(FileSystemTest, DISABLED_printFileTest)
+{
+    std::string u="username";
+    user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    file f("file", "./somedir");
+    f.setUserPrivilege(u, privilege::owner);
+    EXPECT_EQ("file owner", f.print(u));
+    f.setUserPrivilege(u, privilege::none);
+    EXPECT_EQ("file You no longer have the possibility to access the file in any mode", f.print(u));
+}
+
+TEST(FileSystemTest, DISABLED_getDirectoryGetFileTest)
+{
+    directory *d=new directoryAccesser("root");
+    std::shared_ptr<directory> home(d);
+    std::shared_ptr<directory>cart1;
+    cart1=d->addDirectory("cart1");
+    std::shared_ptr<file> f1;
+    f1=d->addFile("file1", "/root");
+    EXPECT_THROW(d->getDir("/root", "file1"), filesystemException);
+    EXPECT_THROW(d->getFile("/root", "cart1"), filesystemException);
+}
+/*
+TEST(FileSystemTest, addDirAddFileAddSymPrintTest)
+{
+    directory *d=new directory("root");
+    std::shared_ptr<directory> home(d);
+    user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
+    std::shared_ptr<directory> dir=d->addDirectory("cart1");
+    ASSERT_FALSE(dir==nullptr);
+    EXPECT_EQ("root\r\n-cart1\r\n", d->print(u1.getUsername()));
+    std::shared_ptr<file> f=d->addFile(".", "file1");
+    ASSERT_FALSE(f==nullptr);
+    EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n", d->print(u1.getUsername()));
+    std::shared_ptr<class symlink> sym= d->addLink(".", "sym", <#initializer#>, <#initializer#>);
+    ASSERT_FALSE(sym==nullptr);
+    EXPECT_EQ("root\r\n-cart1\r\n-file1\r\n-sym\r\n", d->print(u1.getUsername()));
+}
+ */
+
+TEST(FileSystemTest, removeTest)
+{
+    directory *d=new directoryAccesser("root");
+    std::shared_ptr<directory> home(d);
+    user u1("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    std::shared_ptr<directory>cart1;
+    cart1=d->addDirectory("cart1");
+    std::shared_ptr<filesystem> cart2;
+    cart2=d->remove(u1, "/root", "cart1");
+    EXPECT_EQ("root\r\n", d->print(u1.getUsername()));
+}
+
+TEST(FileSystemTest, DISABLED_printSymTest)
+{
+    directory *d=new directoryAccesser("root");
+    std::shared_ptr<directory> home(d);
+    user u1("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    std::shared_ptr<file> f1;
+    f1=d->addFile("file1", "/root");
+    class symlink sym("sym", "/root", "file1", 0);
+    EXPECT_EQ("sym", sym.print(u1.getUsername()));
 }

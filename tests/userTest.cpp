@@ -36,7 +36,7 @@ using namespace Symposium;
 
 
 struct dirMock: public directory{
-    dirMock(): directory("dummy"){};
+    dirMock(const std::string& name="dummy"): directory(name){};
 
     MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
     MOCK_METHOD2(addFile, std::shared_ptr<file>(const std::string&, const std::string&));
@@ -143,7 +143,7 @@ TEST(userTest, makeNewDirMock){
     dirMock *dir=new dirMock();
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
-    directory *created=new directory("ciao");
+    directory *created=new dirMock("ciao");
     EXPECT_CALL(*dir, addDirectory("ciao", dirMock::getIdCounter())).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
     u1.newDirectory("ciao");
 }
@@ -319,7 +319,7 @@ TEST_F(UserTestRobust, newDirUsesCorrectlyIdToAssign){
     dirMock *dir=new dirMock();
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
-    directory *created=new directory("ciao");
+    directory *created=new dirMock("ciao");
     EXPECT_CALL(*dir, addDirectory("ciao", id)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
     u1.newDirectory("ciao", ".", id);
 }

@@ -328,13 +328,14 @@
  * @brief class used to model an answer message sent by a server for a @link askResMessage askResMessage @endlink
  */
      class sendResMessage : public serverMessage {
+         int symId;             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
          filesystem &resource;
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         sendResMessage(msgType action, msgOutcome result, filesystem &resource, int msgId = 0);
+         sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId=0, int msgId = 0);
 
          const filesystem &getResource() const;
 
