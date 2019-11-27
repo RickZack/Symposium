@@ -3,8 +3,10 @@
   <bpmn:collaboration id="Collaboration_1lzk15q">
     <bpmn:participant id="Participant_1ij3133" name="Client side" processRef="Process_1" />
     <bpmn:participant id="Participant_1mx5gmx" name="Server side" processRef="Process_0slmxb8" />
+    <bpmn:participant id="Participant_1futpq1" name="Client side (other clients)" processRef="Process_172dc0u" />
     <bpmn:messageFlow id="MessageFlow_070icou" sourceRef="IntermediateThrowEvent_0p9jglg" targetRef="StartEvent_13s3j26" />
     <bpmn:messageFlow id="MessageFlow_0adoe32" sourceRef="IntermediateThrowEvent_00plgm5" targetRef="IntermediateCatchEvent_1hn7fsn" />
+    <bpmn:messageFlow id="MessageFlow_0u5a02k" sourceRef="SendTask_1sqpfng" targetRef="StartEvent_1n32jw4" />
   </bpmn:collaboration>
   <bpmn:process id="Process_1" isExecutable="true">
     <bpmn:laneSet id="LaneSet_0u6cust">
@@ -94,8 +96,6 @@
     <bpmn:startEvent id="StartEvent_0mpehgj" name="file to open selected">
       <bpmn:outgoing>SequenceFlow_14cd176</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:dataObjectReference id="DataObjectReference_01c0iux" name="sendResMessage(messageType::openRes, msgOutcome::success, file)" dataObjectRef="DataObject_1vhtz78" />
-    <bpmn:dataObject id="DataObject_1vhtz78" />
     <bpmn:dataObjectReference id="DataObjectReference_01bfaii" name="askResMessage(msgType::openRes, {username, pwd}, path, name)" dataObjectRef="DataObject_1gv94b4" />
     <bpmn:dataObject id="DataObject_1gv94b4" />
     <bpmn:startEvent id="StartEvent_12ee1qy" name="no response">
@@ -167,17 +167,6 @@
         <bpmn:targetRef>Property_0dcbb5w</bpmn:targetRef>
       </bpmn:dataInputAssociation>
     </bpmn:task>
-    <bpmn:task id="Task_1akig7r" name="Call invokeMethod(client) on the sendResMessage">
-      <bpmn:incoming>SequenceFlow_0mucd7e</bpmn:incoming>
-      <bpmn:incoming>SequenceFlow_0iwr6ur</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_08egknj</bpmn:outgoing>
-      <bpmn:outgoing>SequenceFlow_1rw4j2t</bpmn:outgoing>
-      <bpmn:property id="Property_11kmn7k" name="__targetRef_placeholder" />
-      <bpmn:dataInputAssociation id="DataInputAssociation_1vj9fs6">
-        <bpmn:sourceRef>DataObjectReference_01c0iux</bpmn:sourceRef>
-        <bpmn:targetRef>Property_11kmn7k</bpmn:targetRef>
-      </bpmn:dataInputAssociation>
-    </bpmn:task>
     <bpmn:sequenceFlow id="SequenceFlow_08egknj" sourceRef="Task_1akig7r" targetRef="SubProcess_06k2nwg" />
     <bpmn:sequenceFlow id="SequenceFlow_1rw4j2t" sourceRef="Task_1akig7r" targetRef="Task_0wf6slb" />
     <bpmn:sequenceFlow id="SequenceFlow_0mucd7e" name="return" sourceRef="Task_0wf6slb" targetRef="Task_1akig7r" />
@@ -202,33 +191,55 @@
     <bpmn:sequenceFlow id="SequenceFlow_0cytkom" sourceRef="Task_1wf4ozn" targetRef="ExclusiveGateway_0f94uw0" />
     <bpmn:sequenceFlow id="SequenceFlow_0wvmapq" sourceRef="ExclusiveGateway_0f94uw0" targetRef="EndEvent_0ou8t0t" />
     <bpmn:sequenceFlow id="SequenceFlow_0rehsij" sourceRef="SubProcess_06k2nwg" targetRef="Task_00rmauq" />
+    <bpmn:dataObjectReference id="DataObjectReference_01c0iux" name="sendResMessage(messageType::openRes, msgOutcome::success, file)" dataObjectRef="DataObject_1vhtz78" />
+    <bpmn:dataObject id="DataObject_1vhtz78" />
+    <bpmn:task id="Task_1akig7r" name="Call invokeMethod(client) on the sendResMessage">
+      <bpmn:incoming>SequenceFlow_0mucd7e</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0iwr6ur</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_08egknj</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1rw4j2t</bpmn:outgoing>
+      <bpmn:property id="Property_11kmn7k" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataInputAssociation_1vj9fs6">
+        <bpmn:sourceRef>DataObjectReference_01c0iux</bpmn:sourceRef>
+        <bpmn:targetRef>Property_11kmn7k</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+    </bpmn:task>
   </bpmn:process>
   <bpmn:process id="Process_0slmxb8" isExecutable="false">
     <bpmn:laneSet id="LaneSet_1ok1uk1">
       <bpmn:lane id="Lane_10rmaon" name="SymServer">
-        <bpmn:flowNodeRef>SubProcess_048rzub</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>BoundaryEvent_12mg97u</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>SubProcess_0wgu0ze</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>ExclusiveGateway_0dp0tje</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>ExclusiveGateway_1yvrdze</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SubProcess_048rzub</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SubProcess_0wgu0ze</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BoundaryEvent_12mg97u</bpmn:flowNodeRef>
         <bpmn:childLaneSet id="LaneSet_0iz3d78" />
       </bpmn:lane>
       <bpmn:lane id="Lane_0q9sety" name="server dispatcher">
+        <bpmn:flowNodeRef>StartEvent_13s3j26</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_07qb6w2</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_07cc3ch</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>ExclusiveGateway_0mris0m</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>StartEvent_13s3j26</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ExclusiveGateway_0e5bikp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_03n90bq</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_1xyjpq0</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_0enxg9m</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ExclusiveGateway_0qzg6nn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ExclusiveGateway_19dgiai</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_0w38tze</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SendTask_1sqpfng</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>IntermediateThrowEvent_00plgm5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>StartEvent_0oa3ufe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ExclusiveGateway_123snwj</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>IntermediateCatchEvent_1xpj1cb</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_1s7asuo" name="user">
         <bpmn:flowNodeRef>Task_0rdusr1</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>BoundaryEvent_10mocrh</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>ExclusiveGateway_1ow4zk3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BoundaryEvent_10mocrh</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_0ic6xr4" name="directory">
         <bpmn:flowNodeRef>Task_01ze3mi</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>BoundaryEvent_1p64vdk</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>ExclusiveGateway_03snp85</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BoundaryEvent_1p64vdk</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_1hqcgt1" name="file">
         <bpmn:flowNodeRef>ExclusiveGateway_0y60l3p</bpmn:flowNodeRef>
@@ -240,68 +251,6 @@
         <bpmn:flowNodeRef>BoundaryEvent_0j4ddo7</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:task id="Task_07qb6w2" name="constructs a sendResMessage (msgOutcome=success, file)">
-      <bpmn:incoming>SequenceFlow_1xt6mbj</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_1mfgwmy</bpmn:outgoing>
-      <bpmn:property id="Property_1d95t4a" name="__targetRef_placeholder" />
-      <bpmn:dataInputAssociation id="DataInputAssociation_019egej">
-        <bpmn:sourceRef>DataObjectReference_10he795</bpmn:sourceRef>
-        <bpmn:targetRef>Property_1d95t4a</bpmn:targetRef>
-      </bpmn:dataInputAssociation>
-      <bpmn:dataOutputAssociation id="DataOutputAssociation_17hg420">
-        <bpmn:targetRef>DataObjectReference_01c0iux</bpmn:targetRef>
-      </bpmn:dataOutputAssociation>
-    </bpmn:task>
-    <bpmn:task id="Task_07cc3ch" name="constructs a serverMessage (msgOutcome=failure)">
-      <bpmn:incoming>SequenceFlow_1vfgggq</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0m9oqmo</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:exclusiveGateway id="ExclusiveGateway_0mris0m">
-      <bpmn:incoming>SequenceFlow_0m9oqmo</bpmn:incoming>
-      <bpmn:incoming>SequenceFlow_1mfgwmy</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0z25ewa</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:startEvent id="StartEvent_13s3j26" name="askResMessage arrived">
-      <bpmn:outgoing>SequenceFlow_0p90sqd</bpmn:outgoing>
-      <bpmn:dataOutputAssociation id="DataOutputAssociation_0wpefhj">
-        <bpmn:targetRef>DataObjectReference_028aq75</bpmn:targetRef>
-      </bpmn:dataOutputAssociation>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_0zc5al0" />
-    </bpmn:startEvent>
-    <bpmn:intermediateThrowEvent id="IntermediateThrowEvent_00plgm5" name="send serverMessage to client">
-      <bpmn:incoming>SequenceFlow_0z25ewa</bpmn:incoming>
-      <bpmn:property id="Property_1bogpfo" name="__targetRef_placeholder" />
-      <bpmn:dataInputAssociation id="DataInputAssociation_0yei38q">
-        <bpmn:sourceRef>DataObjectReference_01c0iux</bpmn:sourceRef>
-        <bpmn:targetRef>Property_1bogpfo</bpmn:targetRef>
-      </bpmn:dataInputAssociation>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_08flyqw" />
-    </bpmn:intermediateThrowEvent>
-    <bpmn:subProcess id="SubProcess_048rzub" name="Call document&#38;::openSource(username, path, name, accessMode)">
-      <bpmn:incoming>SequenceFlow_0p90sqd</bpmn:incoming>
-      <bpmn:incoming>SequenceFlow_1s8fh1z</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_04mhtb7</bpmn:outgoing>
-      <bpmn:outgoing>SequenceFlow_1q1nwz8</bpmn:outgoing>
-      <bpmn:property id="Property_04ywdld" name="__targetRef_placeholder" />
-      <bpmn:dataInputAssociation id="DataInputAssociation_0b01hvp">
-        <bpmn:sourceRef>DataObjectReference_028aq75</bpmn:sourceRef>
-        <bpmn:targetRef>Property_04ywdld</bpmn:targetRef>
-      </bpmn:dataInputAssociation>
-      <bpmn:dataInputAssociation id="DataInputAssociation_0aklkbq">
-        <bpmn:sourceRef>DataObjectReference_1l6w3oy</bpmn:sourceRef>
-        <bpmn:targetRef>Property_04ywdld</bpmn:targetRef>
-      </bpmn:dataInputAssociation>
-      <bpmn:task id="Task_0lxnavv" name="Verify user is active (logged in)">
-        <bpmn:outgoing>SequenceFlow_0gonier</bpmn:outgoing>
-      </bpmn:task>
-      <bpmn:task id="Task_15hqaip" name="retrieve user object">
-        <bpmn:incoming>SequenceFlow_0gonier</bpmn:incoming>
-      </bpmn:task>
-      <bpmn:sequenceFlow id="SequenceFlow_0gonier" sourceRef="Task_0lxnavv" targetRef="Task_15hqaip" />
-    </bpmn:subProcess>
-    <bpmn:sequenceFlow id="SequenceFlow_0z25ewa" sourceRef="ExclusiveGateway_0mris0m" targetRef="IntermediateThrowEvent_00plgm5" />
-    <bpmn:sequenceFlow id="SequenceFlow_0m9oqmo" sourceRef="Task_07cc3ch" targetRef="ExclusiveGateway_0mris0m" />
-    <bpmn:sequenceFlow id="SequenceFlow_1mfgwmy" sourceRef="Task_07qb6w2" targetRef="ExclusiveGateway_0mris0m" />
     <bpmn:sequenceFlow id="SequenceFlow_0p90sqd" sourceRef="StartEvent_13s3j26" targetRef="SubProcess_048rzub" />
     <bpmn:task id="Task_0rdusr1" name="Call file::openFile(path, name, accessMode)">
       <bpmn:incoming>SequenceFlow_04mhtb7</bpmn:incoming>
@@ -337,43 +286,16 @@
       <bpmn:outgoing>SequenceFlow_1vbnsdr</bpmn:outgoing>
       <bpmn:errorEventDefinition />
     </bpmn:boundaryEvent>
-    <bpmn:dataObjectReference id="DataObjectReference_1l6w3oy" name="file" dataObjectRef="DataObject_17x54q8" />
-    <bpmn:dataObject id="DataObject_17x54q8" />
-    <bpmn:sequenceFlow id="SequenceFlow_1vfgggq" sourceRef="ExclusiveGateway_1yvrdze" targetRef="Task_07cc3ch" />
     <bpmn:sequenceFlow id="SequenceFlow_0eb3r8n" name="exception propagation" sourceRef="BoundaryEvent_0j4ddo7" targetRef="ExclusiveGateway_0y60l3p" />
     <bpmn:sequenceFlow id="SequenceFlow_1tosq4q" name="exception propagation" sourceRef="BoundaryEvent_1sk0kzm" targetRef="ExclusiveGateway_0y60l3p" />
     <bpmn:sequenceFlow id="SequenceFlow_1vbnsdr" name="exception propagation" sourceRef="BoundaryEvent_1p64vdk" targetRef="ExclusiveGateway_03snp85" />
     <bpmn:sequenceFlow id="SequenceFlow_1rtkjal" name="exception propagation" sourceRef="BoundaryEvent_10mocrh" targetRef="ExclusiveGateway_1ow4zk3" />
     <bpmn:sequenceFlow id="SequenceFlow_1afam15" name="exception propagation" sourceRef="BoundaryEvent_12mg97u" targetRef="ExclusiveGateway_0dp0tje" />
-    <bpmn:sequenceFlow id="SequenceFlow_0s0id5i" sourceRef="ExclusiveGateway_0dp0tje" targetRef="ExclusiveGateway_1yvrdze" />
-    <bpmn:dataObjectReference id="DataObjectReference_028aq75" name="username, path, name, accessMode of the document" dataObjectRef="DataObject_16x9m9j" />
-    <bpmn:dataObject id="DataObject_16x9m9j" />
+    <bpmn:sequenceFlow id="SequenceFlow_0s0id5i" sourceRef="ExclusiveGateway_0dp0tje" targetRef="Task_07cc3ch" />
     <bpmn:sequenceFlow id="SequenceFlow_1wwxzmo" sourceRef="SubProcess_0wgu0ze" targetRef="Task_0u170o1" />
-    <bpmn:dataObjectReference id="DataObjectReference_10he795" name="file" dataObjectRef="DataObject_1byp4r4" />
-    <bpmn:dataObject id="DataObject_1byp4r4" />
     <bpmn:sequenceFlow id="SequenceFlow_1g52yae" name="return doc" sourceRef="Task_0u170o1" targetRef="SubProcess_0wgu0ze" />
     <bpmn:sequenceFlow id="SequenceFlow_1xt6mbj" sourceRef="SubProcess_0wgu0ze" targetRef="Task_07qb6w2" />
     <bpmn:sequenceFlow id="SequenceFlow_1s8fh1z" name="return file" sourceRef="Task_0rdusr1" targetRef="SubProcess_048rzub" />
-    <bpmn:sequenceFlow id="SequenceFlow_1q1nwz8" sourceRef="SubProcess_048rzub" targetRef="SubProcess_0wgu0ze" />
-    <bpmn:subProcess id="SubProcess_0wgu0ze" name="Call document&#38;::openSource(username, path, name, accessMode)">
-      <bpmn:incoming>SequenceFlow_1g52yae</bpmn:incoming>
-      <bpmn:incoming>SequenceFlow_1q1nwz8</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_1wwxzmo</bpmn:outgoing>
-      <bpmn:outgoing>SequenceFlow_1xt6mbj</bpmn:outgoing>
-      <bpmn:property id="Property_0qyuhxs" name="__targetRef_placeholder" />
-      <bpmn:dataInputAssociation id="DataInputAssociation_0e76ngn">
-        <bpmn:sourceRef>DataObjectReference_0g8dz87</bpmn:sourceRef>
-        <bpmn:targetRef>Property_0qyuhxs</bpmn:targetRef>
-      </bpmn:dataInputAssociation>
-      <bpmn:dataOutputAssociation id="DataOutputAssociation_1d38mxx">
-        <bpmn:targetRef>DataObjectReference_10he795</bpmn:targetRef>
-      </bpmn:dataOutputAssociation>
-      <bpmn:task id="Task_1tag8c4" name="retrieve document and insert in working list" />
-    </bpmn:subProcess>
-    <bpmn:boundaryEvent id="BoundaryEvent_12mg97u" attachedToRef="SubProcess_048rzub">
-      <bpmn:outgoing>SequenceFlow_1afam15</bpmn:outgoing>
-      <bpmn:errorEventDefinition />
-    </bpmn:boundaryEvent>
     <bpmn:exclusiveGateway id="ExclusiveGateway_03snp85">
       <bpmn:incoming>SequenceFlow_18t9vqp</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_1vbnsdr</bpmn:incoming>
@@ -432,10 +354,208 @@
     <bpmn:sequenceFlow id="SequenceFlow_1iwggq9" name="return doc" sourceRef="Task_1262hag" targetRef="Task_0u170o1" />
     <bpmn:dataObjectReference id="DataObjectReference_0g8dz87" name="document" dataObjectRef="DataObject_1x1coxr" />
     <bpmn:dataObject id="DataObject_1x1coxr" />
-    <bpmn:exclusiveGateway id="ExclusiveGateway_1yvrdze">
+    <bpmn:dataObjectReference id="DataObjectReference_028aq75" name="username, path, name, accessMode of the document" dataObjectRef="DataObject_16x9m9j" />
+    <bpmn:dataObject id="DataObject_16x9m9j" />
+    <bpmn:task id="Task_07qb6w2" name="constructs a sendResMessage (msgOutcome=success, file)">
+      <bpmn:incoming>SequenceFlow_1xt6mbj</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_02ph4go</bpmn:outgoing>
+      <bpmn:property id="Property_1d95t4a" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataInputAssociation_019egej">
+        <bpmn:sourceRef>DataObjectReference_10he795</bpmn:sourceRef>
+        <bpmn:targetRef>Property_1d95t4a</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_17hg420">
+        <bpmn:targetRef>DataObjectReference_01c0iux</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:task id="Task_07cc3ch" name="constructs a serverMessage (msgOutcome=failure)">
       <bpmn:incoming>SequenceFlow_0s0id5i</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_1vfgggq</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1mwb1j8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateThrowEvent id="IntermediateThrowEvent_00plgm5" name="send serverMessage to client">
+      <bpmn:incoming>SequenceFlow_1klsufi</bpmn:incoming>
+      <bpmn:property id="Property_1bogpfo" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataInputAssociation_0yei38q">
+        <bpmn:sourceRef>DataObjectReference_01c0iux</bpmn:sourceRef>
+        <bpmn:targetRef>Property_1bogpfo</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_08flyqw" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:dataObjectReference id="DataObjectReference_10he795" name="file" dataObjectRef="DataObject_1byp4r4" />
+    <bpmn:dataObject id="DataObject_1byp4r4" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0e5bikp">
+      <bpmn:incoming>SequenceFlow_007a4n0</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1mwb1j8</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1klsufi</bpmn:outgoing>
     </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_03n90bq" name="Insert this message in a queue to dispatch it to other clients">
+      <bpmn:incoming>SequenceFlow_1joq5ss</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_007a4n0</bpmn:outgoing>
+      <bpmn:property id="Property_1caik90" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataInputAssociation_08ncc5i">
+        <bpmn:sourceRef>DataObjectReference_1szr1kn</bpmn:sourceRef>
+        <bpmn:targetRef>Property_1caik90</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_0z93pq4">
+        <bpmn:targetRef>DataStoreReference_17dpv5y</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataStoreReference id="DataStoreReference_17dpv5y" name="workingQueue" />
+    <bpmn:task id="Task_1xyjpq0" name="Constructs a updateActive for other clients">
+      <bpmn:incoming>SequenceFlow_02ph4go</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1joq5ss</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_1cz84tz">
+        <bpmn:targetRef>DataObjectReference_1szr1kn</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataObjectReference id="DataObjectReference_1szr1kn" name="updateActiveMessage(messageType::addActiveUser, msgOutcome::success, user, resourceId, userprivilege)" dataObjectRef="DataObject_1tdjoih" />
+    <bpmn:dataObject id="DataObject_1tdjoih" />
+    <bpmn:sequenceFlow id="SequenceFlow_1mwb1j8" sourceRef="Task_07cc3ch" targetRef="ExclusiveGateway_0e5bikp" />
+    <bpmn:sequenceFlow id="SequenceFlow_1klsufi" sourceRef="ExclusiveGateway_0e5bikp" targetRef="IntermediateThrowEvent_00plgm5" />
+    <bpmn:sequenceFlow id="SequenceFlow_007a4n0" sourceRef="Task_03n90bq" targetRef="ExclusiveGateway_0e5bikp" />
+    <bpmn:sequenceFlow id="SequenceFlow_1joq5ss" sourceRef="Task_1xyjpq0" targetRef="Task_03n90bq" />
+    <bpmn:startEvent id="StartEvent_13s3j26" name="askResMessage arrived">
+      <bpmn:outgoing>SequenceFlow_0p90sqd</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_0wpefhj">
+        <bpmn:targetRef>DataObjectReference_028aq75</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0zc5al0" />
+    </bpmn:startEvent>
+    <bpmn:startEvent id="StartEvent_0oa3ufe" name="dispatch messages to other clients">
+      <bpmn:outgoing>SequenceFlow_0tbdaiy</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_0enxg9m" name="remove the message from the queue">
+      <bpmn:incoming>SequenceFlow_07spk2i</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1qf7dsg</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_123snwj" name="The queue is not empty">
+      <bpmn:incoming>SequenceFlow_1o614su</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0b5tpq0</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_10qtr31</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_1xpj1cb" name="timer for dispatching">
+      <bpmn:incoming>SequenceFlow_0b5tpq0</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1bb1ov0</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_11czge3" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0qzg6nn">
+      <bpmn:incoming>SequenceFlow_1qf7dsg</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1bb1ov0</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_02d0eru</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_19dgiai">
+      <bpmn:incoming>SequenceFlow_0tbdaiy</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_02d0eru</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1o614su</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_0w38tze" name="Pick up a message from the queue">
+      <bpmn:incoming>SequenceFlow_10qtr31</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_19mn6xm</bpmn:outgoing>
+      <bpmn:property id="Property_1b9i4r9" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataInputAssociation_0kqulpk">
+        <bpmn:sourceRef>DataStoreReference_1eh5pjt</bpmn:sourceRef>
+        <bpmn:targetRef>Property_1b9i4r9</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+    </bpmn:task>
+    <bpmn:sendTask id="SendTask_1sqpfng" name="Dispatch the message to proper clients">
+      <bpmn:incoming>SequenceFlow_19mn6xm</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_07spk2i</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0tbdaiy" sourceRef="StartEvent_0oa3ufe" targetRef="ExclusiveGateway_19dgiai" />
+    <bpmn:sequenceFlow id="SequenceFlow_07spk2i" sourceRef="SendTask_1sqpfng" targetRef="Task_0enxg9m" />
+    <bpmn:sequenceFlow id="SequenceFlow_1qf7dsg" sourceRef="Task_0enxg9m" targetRef="ExclusiveGateway_0qzg6nn" />
+    <bpmn:sequenceFlow id="SequenceFlow_1o614su" sourceRef="ExclusiveGateway_19dgiai" targetRef="ExclusiveGateway_123snwj" />
+    <bpmn:sequenceFlow id="SequenceFlow_0b5tpq0" name="No" sourceRef="ExclusiveGateway_123snwj" targetRef="IntermediateCatchEvent_1xpj1cb" />
+    <bpmn:sequenceFlow id="SequenceFlow_10qtr31" name="Yes" sourceRef="ExclusiveGateway_123snwj" targetRef="Task_0w38tze" />
+    <bpmn:sequenceFlow id="SequenceFlow_1bb1ov0" sourceRef="IntermediateCatchEvent_1xpj1cb" targetRef="ExclusiveGateway_0qzg6nn" />
+    <bpmn:sequenceFlow id="SequenceFlow_02d0eru" sourceRef="ExclusiveGateway_0qzg6nn" targetRef="ExclusiveGateway_19dgiai" />
+    <bpmn:sequenceFlow id="SequenceFlow_19mn6xm" sourceRef="Task_0w38tze" targetRef="SendTask_1sqpfng" />
+    <bpmn:subProcess id="SubProcess_048rzub" name="Call document&#38;::openSource(username, path, name, accessMode)">
+      <bpmn:incoming>SequenceFlow_0p90sqd</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1s8fh1z</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_04mhtb7</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1q1nwz8</bpmn:outgoing>
+      <bpmn:property id="Property_04ywdld" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataInputAssociation_0b01hvp">
+        <bpmn:sourceRef>DataObjectReference_028aq75</bpmn:sourceRef>
+        <bpmn:targetRef>Property_04ywdld</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataInputAssociation_0aklkbq">
+        <bpmn:sourceRef>DataObjectReference_1l6w3oy</bpmn:sourceRef>
+        <bpmn:targetRef>Property_04ywdld</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:task id="Task_0lxnavv" name="Verify user is active (logged in)">
+        <bpmn:outgoing>SequenceFlow_0gonier</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:task id="Task_15hqaip" name="retrieve user object">
+        <bpmn:incoming>SequenceFlow_0gonier</bpmn:incoming>
+      </bpmn:task>
+      <bpmn:sequenceFlow id="SequenceFlow_0gonier" sourceRef="Task_0lxnavv" targetRef="Task_15hqaip" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess_0wgu0ze" name="Call document&#38;::openSource(username, path, name, accessMode)">
+      <bpmn:incoming>SequenceFlow_1g52yae</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1q1nwz8</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1wwxzmo</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1xt6mbj</bpmn:outgoing>
+      <bpmn:property id="Property_0qyuhxs" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataInputAssociation_0e76ngn">
+        <bpmn:sourceRef>DataObjectReference_0g8dz87</bpmn:sourceRef>
+        <bpmn:targetRef>Property_0qyuhxs</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_1d38mxx">
+        <bpmn:targetRef>DataObjectReference_10he795</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+      <bpmn:task id="Task_1tag8c4" name="retrieve document and insert in working list" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="BoundaryEvent_12mg97u" attachedToRef="SubProcess_048rzub">
+      <bpmn:outgoing>SequenceFlow_1afam15</bpmn:outgoing>
+      <bpmn:errorEventDefinition />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1q1nwz8" sourceRef="SubProcess_048rzub" targetRef="SubProcess_0wgu0ze" />
+    <bpmn:dataStoreReference id="DataStoreReference_1eh5pjt" name="workingQueue" />
+    <bpmn:dataObjectReference id="DataObjectReference_1l6w3oy" name="file" dataObjectRef="DataObject_17x54q8" />
+    <bpmn:dataObject id="DataObject_17x54q8" />
+    <bpmn:sequenceFlow id="SequenceFlow_02ph4go" sourceRef="Task_07qb6w2" targetRef="Task_1xyjpq0" />
+  </bpmn:process>
+  <bpmn:process id="Process_172dc0u" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_0zetal6">
+      <bpmn:lane id="Lane_19oma6a" name="client dispatcher">
+        <bpmn:flowNodeRef>EndEvent_0sezw3h</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_1bd48sx</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>StartEvent_1n32jw4</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_0dbn2k5" name="SymClient">
+        <bpmn:flowNodeRef>SubProcess_092n7uh</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1n32jw4" name="updateActiveMessage from a server arrived">
+      <bpmn:outgoing>SequenceFlow_189e9ar</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0vn3ovo" />
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_0sezw3h">
+      <bpmn:incoming>SequenceFlow_1kjb4tk</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="Task_1bd48sx" name="Call invokeMethod(client) on the updateActiveMessage">
+      <bpmn:incoming>SequenceFlow_1auz6vj</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_189e9ar</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1o07cw7</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1kjb4tk</bpmn:outgoing>
+      <bpmn:property id="Property_0z15my7" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataInputAssociation_030zhaz">
+        <bpmn:sourceRef>DataObjectReference_0pvjvb5</bpmn:sourceRef>
+        <bpmn:targetRef>Property_0z15my7</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+    </bpmn:task>
+    <bpmn:dataObjectReference id="DataObjectReference_0pvjvb5" name="updateActiveMessage(messageType::addActiveUser, msgOutcome::success, user, resourceId, userprivilege)" dataObjectRef="DataObject_1c3fwoq" />
+    <bpmn:dataObject id="DataObject_1c3fwoq" />
+    <bpmn:subProcess id="SubProcess_092n7uh" name="Call void::addActiveUser(resouceId, targetUser)">
+      <bpmn:incoming>SequenceFlow_1o07cw7</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1auz6vj</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SequenceFlow_1o07cw7" sourceRef="Task_1bd48sx" targetRef="SubProcess_092n7uh" />
+    <bpmn:sequenceFlow id="SequenceFlow_1auz6vj" name="return" sourceRef="SubProcess_092n7uh" targetRef="Task_1bd48sx" />
+    <bpmn:sequenceFlow id="SequenceFlow_189e9ar" sourceRef="StartEvent_1n32jw4" targetRef="Task_1bd48sx" />
+    <bpmn:sequenceFlow id="SequenceFlow_1kjb4tk" sourceRef="Task_1bd48sx" targetRef="EndEvent_0sezw3h" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1lzk15q">
@@ -443,7 +563,7 @@
         <dc:Bounds x="-811" y="-537" width="2062" height="774" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Participant_1mx5gmx_di" bpmnElement="Participant_1mx5gmx">
-        <dc:Bounds x="-812" y="319" width="2068" height="1577" />
+        <dc:Bounds x="-812" y="316" width="2059" height="1580" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_1xsghw3_di" bpmnElement="Lane_1xsghw3">
         <dc:Bounds x="-781" y="10" width="2032" height="227" />
@@ -554,25 +674,22 @@
         <dc:Bounds x="-644" y="-376" width="334" height="144" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_10rmaon_di" bpmnElement="Lane_10rmaon">
-        <dc:Bounds x="-782" y="569" width="2038" height="358" />
+        <dc:Bounds x="-782" y="655" width="2029" height="272" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_0q9sety_di" bpmnElement="Lane_0q9sety">
-        <dc:Bounds x="-782" y="319" width="2038" height="250" />
+        <dc:Bounds x="-782" y="316" width="2029" height="339" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_07qb6w2_di" bpmnElement="Task_07qb6w2">
-        <dc:Bounds x="264" y="347" width="100" height="80" />
+        <dc:Bounds x="445" y="347" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="DataObjectReference_028aq75_di" bpmnElement="DataObjectReference_028aq75">
-        <dc:Bounds x="-382" y="436" width="36" height="50" />
+        <dc:Bounds x="-717" y="532" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-383" y="492" width="80" height="53" />
+          <dc:Bounds x="-739" y="587" width="80" height="53" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_07cc3ch_di" bpmnElement="Task_07cc3ch">
-        <dc:Bounds x="264" y="471" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ExclusiveGateway_0mris0m_di" bpmnElement="ExclusiveGateway_0mris0m" isMarkerVisible="true">
-        <dc:Bounds x="441" y="427" width="50" height="50" />
+        <dc:Bounds x="445" y="471" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_13s3j26_di" bpmnElement="StartEvent_13s3j26">
         <dc:Bounds x="-594" y="434" width="36" height="36" />
@@ -581,13 +698,13 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="IntermediateThrowEvent_00plgm5_di" bpmnElement="IntermediateThrowEvent_00plgm5">
-        <dc:Bounds x="623" y="434" width="36" height="36" />
+        <dc:Bounds x="1059" y="434" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="598" y="477" width="88" height="40" />
+          <dc:Bounds x="1034" y="477" width="88" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="SubProcess_048rzub_di" bpmnElement="SubProcess_048rzub" isExpanded="true">
-        <dc:Bounds x="-681" y="669" width="348" height="135" />
+        <dc:Bounds x="-681" y="716" width="348" height="135" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0u03g8a_di" bpmnElement="SequenceFlow_0u03g8a">
         <di:waypoint x="-118" y="-57" />
@@ -689,50 +806,36 @@
         <di:waypoint x="-576" y="434" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="MessageFlow_0adoe32_di" bpmnElement="MessageFlow_0adoe32">
-        <di:waypoint x="641" y="434" />
-        <di:waypoint x="641" y="255" />
+        <di:waypoint x="1077" y="434" />
+        <di:waypoint x="1077" y="255" />
         <di:waypoint x="-268" y="255" />
         <di:waypoint x="-268" y="189" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOutputAssociation_17hg420_di" bpmnElement="DataOutputAssociation_17hg420">
-        <di:waypoint x="314" y="347" />
-        <di:waypoint x="314" y="-74" />
+        <di:waypoint x="480" y="347" />
+        <di:waypoint x="323" y="-74" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_0yei38q_di" bpmnElement="DataInputAssociation_0yei38q">
-        <di:waypoint x="320" y="-74" />
-        <di:waypoint x="393" y="209" />
-        <di:waypoint x="628" y="440" />
+        <di:waypoint x="326" y="-74" />
+        <di:waypoint x="500" y="302" />
+        <di:waypoint x="1014" y="302" />
+        <di:waypoint x="1070" y="436" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOutputAssociation_15u8qlx_di" bpmnElement="DataOutputAssociation_15u8qlx">
         <di:waypoint x="-277" y="-88" />
         <di:waypoint x="42" y="-285" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_0z25ewa_di" bpmnElement="SequenceFlow_0z25ewa">
-        <di:waypoint x="491" y="452" />
-        <di:waypoint x="623" y="452" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_0m9oqmo_di" bpmnElement="SequenceFlow_0m9oqmo">
-        <di:waypoint x="364" y="511" />
-        <di:waypoint x="466" y="511" />
-        <di:waypoint x="466" y="477" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_1mfgwmy_di" bpmnElement="SequenceFlow_1mfgwmy">
-        <di:waypoint x="364" y="387" />
-        <di:waypoint x="466" y="387" />
-        <di:waypoint x="466" y="427" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0p90sqd_di" bpmnElement="SequenceFlow_0p90sqd">
         <di:waypoint x="-576" y="470" />
-        <di:waypoint x="-576" y="584" />
-        <di:waypoint x="-576" y="665" />
+        <di:waypoint x="-576" y="716" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOutputAssociation_0wpefhj_di" bpmnElement="DataOutputAssociation_0wpefhj">
-        <di:waypoint x="-558" y="450" />
-        <di:waypoint x="-382" y="464" />
+        <di:waypoint x="-591" y="462" />
+        <di:waypoint x="-681" y="545" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_0b01hvp_di" bpmnElement="DataInputAssociation_0b01hvp">
-        <di:waypoint x="-382" y="481" />
-        <di:waypoint x="-479" y="669" />
+        <di:waypoint x="-686" y="582" />
+        <di:waypoint x="-572" y="716" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Task_0s0a6or_di" bpmnElement="Task_0s0a6or">
         <dc:Bounds x="-622" y="-332" width="100" height="80" />
@@ -741,10 +844,10 @@
         <dc:Bounds x="-472" y="-332" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_0lxnavv_di" bpmnElement="Task_0lxnavv">
-        <dc:Bounds x="-659" y="704" width="100" height="80" />
+        <dc:Bounds x="-659" y="751" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_15hqaip_di" bpmnElement="Task_15hqaip">
-        <dc:Bounds x="-520" y="704" width="100" height="80" />
+        <dc:Bounds x="-520" y="751" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_17qp47c_di" bpmnElement="SequenceFlow_17qp47c">
         <di:waypoint x="-522" y="-292" />
@@ -763,29 +866,29 @@
         <di:waypoint x="42" y="-300" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0gonier_di" bpmnElement="SequenceFlow_0gonier">
-        <di:waypoint x="-559" y="744" />
-        <di:waypoint x="-520" y="744" />
+        <di:waypoint x="-559" y="791" />
+        <di:waypoint x="-520" y="791" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Lane_1s7asuo_di" bpmnElement="Lane_1s7asuo">
-        <dc:Bounds x="-782" y="927" width="2038" height="295" />
+        <dc:Bounds x="-782" y="927" width="2029" height="295" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_0rdusr1_di" bpmnElement="Task_0rdusr1">
         <dc:Bounds x="-557" y="1016" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_0ic6xr4_di" bpmnElement="Lane_0ic6xr4">
-        <dc:Bounds x="-782" y="1222" width="2038" height="268" />
+        <dc:Bounds x="-782" y="1222" width="2029" height="268" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_1hqcgt1_di" bpmnElement="Lane_1hqcgt1">
-        <dc:Bounds x="-782" y="1490" width="2038" height="226" />
+        <dc:Bounds x="-782" y="1490" width="2029" height="226" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="SubProcess_0wgu0ze_di" bpmnElement="SubProcess_0wgu0ze" isExpanded="true">
-        <dc:Bounds x="-254" y="666" width="285" height="141" />
+        <dc:Bounds x="-254" y="713" width="285" height="141" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_1tag8c4_di" bpmnElement="Task_1tag8c4">
-        <dc:Bounds x="-165" y="707" width="100" height="80" />
+        <dc:Bounds x="-165" y="754" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_0cj6xlm_di" bpmnElement="Lane_0cj6xlm">
-        <dc:Bounds x="-782" y="1716" width="2038" height="180" />
+        <dc:Bounds x="-782" y="1716" width="2029" height="180" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_18nci72_di" bpmnElement="SequenceFlow_18nci72">
         <di:waypoint x="-100" y="1651" />
@@ -795,7 +898,7 @@
         <dc:Bounds x="-150" y="1778" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_04mhtb7_di" bpmnElement="SequenceFlow_04mhtb7">
-        <di:waypoint x="-507" y="804" />
+        <di:waypoint x="-507" y="851" />
         <di:waypoint x="-507" y="1016" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0p5rzlu_di" bpmnElement="SequenceFlow_0p5rzlu">
@@ -855,37 +958,34 @@
         <di:waypoint x="-554" y="1093" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DataObjectReference_1l6w3oy_di" bpmnElement="DataObjectReference_1l6w3oy">
-        <dc:Bounds x="-407" y="846" width="36" height="50" />
+        <dc:Bounds x="-407" y="961" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-396" y="903" width="15" height="14" />
+          <dc:Bounds x="-396" y="1018" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOutputAssociation_09w8rzx_di" bpmnElement="DataOutputAssociation_09w8rzx">
-        <di:waypoint x="-481" y="1016" />
-        <di:waypoint x="-405" y="896" />
+        <di:waypoint x="-457" y="1027" />
+        <di:waypoint x="-407" y="997" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_0aklkbq_di" bpmnElement="DataInputAssociation_0aklkbq">
-        <di:waypoint x="-389" y="846" />
-        <di:waypoint x="-389" y="804" />
+        <di:waypoint x="-389" y="961" />
+        <di:waypoint x="-389" y="851" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DataObjectReference_10he795_di" bpmnElement="DataObjectReference_10he795">
-        <dc:Bounds x="-50" y="427" width="36" height="50" />
+        <dc:Bounds x="383" y="571" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-39" y="484" width="15" height="14" />
+          <dc:Bounds x="394" y="628" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOutputAssociation_1d38mxx_di" bpmnElement="DataOutputAssociation_1d38mxx">
-        <di:waypoint x="-92" y="666" />
-        <di:waypoint x="-39" y="477" />
+        <di:waypoint x="31" y="732" />
+        <di:waypoint x="383" y="603" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_019egej_di" bpmnElement="DataInputAssociation_019egej">
-        <di:waypoint x="-14" y="452" />
-        <di:waypoint x="209" y="450" />
-        <di:waypoint x="264" y="417" />
+        <di:waypoint x="401" y="571" />
+        <di:waypoint x="401" y="468" />
+        <di:waypoint x="450" y="426" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ExclusiveGateway_1yvrdze_di" bpmnElement="ExclusiveGateway_1yvrdze" isMarkerVisible="true">
-        <dc:Bounds x="289" y="712" width="50" height="50" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_0ysfzxm_di" bpmnElement="BoundaryEvent_10mocrh">
         <dc:Bounds x="-475" y="1078" width="36" height="36" />
       </bpmndi:BPMNShape>
@@ -899,12 +999,8 @@
         <dc:Bounds x="-68" y="1840" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_0f5dw8w_di" bpmnElement="BoundaryEvent_12mg97u">
-        <dc:Bounds x="-351" y="786" width="36" height="36" />
+        <dc:Bounds x="-351" y="833" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_1vfgggq_di" bpmnElement="SequenceFlow_1vfgggq">
-        <di:waypoint x="314" y="712" />
-        <di:waypoint x="314" y="551" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ExclusiveGateway_0y60l3p_di" bpmnElement="ExclusiveGateway_0y60l3p" isMarkerVisible="true">
         <dc:Bounds x="289" y="1626" width="50" height="50" />
       </bpmndi:BPMNShape>
@@ -959,48 +1055,50 @@
         <di:waypoint x="314" y="896" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1afam15_di" bpmnElement="SequenceFlow_1afam15">
-        <di:waypoint x="-333" y="822" />
-        <di:waypoint x="-333" y="871" />
+        <di:waypoint x="-315" y="851" />
+        <di:waypoint x="-13" y="851" />
+        <di:waypoint x="-13" y="871" />
         <di:waypoint x="289" y="871" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="388.9999999999998" y="876" width="59" height="27" />
+          <dc:Bounds x="389" y="876" width="59" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0s0id5i_di" bpmnElement="SequenceFlow_0s0id5i">
         <di:waypoint x="314" y="846" />
-        <di:waypoint x="314" y="762" />
+        <di:waypoint x="314" y="511" />
+        <di:waypoint x="445" y="511" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1wwxzmo_di" bpmnElement="SequenceFlow_1wwxzmo">
-        <di:waypoint x="-100" y="807" />
+        <di:waypoint x="-100" y="854" />
         <di:waypoint x="-100" y="1571" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1g52yae_di" bpmnElement="SequenceFlow_1g52yae">
         <di:waypoint x="-50" y="1611" />
         <di:waypoint x="122" y="1611" />
-        <di:waypoint x="122" y="784" />
-        <di:waypoint x="37" y="784" />
+        <di:waypoint x="122" y="831" />
+        <di:waypoint x="31" y="831" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="55" y="1588" width="51" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1xt6mbj_di" bpmnElement="SequenceFlow_1xt6mbj">
-        <di:waypoint x="31" y="737" />
-        <di:waypoint x="123" y="737" />
-        <di:waypoint x="123" y="387" />
-        <di:waypoint x="264" y="387" />
+        <di:waypoint x="31" y="784" />
+        <di:waypoint x="281" y="784" />
+        <di:waypoint x="281" y="387" />
+        <di:waypoint x="445" y="387" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1s8fh1z_di" bpmnElement="SequenceFlow_1s8fh1z">
         <di:waypoint x="-457" y="1056" />
         <di:waypoint x="-298" y="1056" />
-        <di:waypoint x="-298" y="770" />
-        <di:waypoint x="-328" y="770" />
+        <di:waypoint x="-298" y="817" />
+        <di:waypoint x="-333" y="817" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="-356" y="1040" width="46" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1q1nwz8_di" bpmnElement="SequenceFlow_1q1nwz8">
-        <di:waypoint x="-333" y="737" />
-        <di:waypoint x="-254" y="737" />
+        <di:waypoint x="-333" y="784" />
+        <di:waypoint x="-254" y="784" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DataObjectReference_0g8dz87_di" bpmnElement="DataObjectReference_0g8dz87">
         <dc:Bounds x="-232" y="961" width="36" height="50" />
@@ -1013,8 +1111,8 @@
         <di:waypoint x="-209" y="1011" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_0e76ngn_di" bpmnElement="DataInputAssociation_0e76ngn">
-        <di:waypoint x="-204" y="961" />
-        <di:waypoint x="-140" y="807" />
+        <di:waypoint x="-201" y="961" />
+        <di:waypoint x="-147" y="854" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Lane_0lrrrma_di" bpmnElement="Lane_0lrrrma">
         <dc:Bounds x="-781" y="-537" width="2032" height="120" />
@@ -1026,30 +1124,30 @@
         <dc:Bounds x="585" y="-294" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_1akig7r_di" bpmnElement="Task_1akig7r">
-        <dc:Bounds x="416" y="-506" width="100" height="80" />
+        <dc:Bounds x="416" y="-516" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_08egknj_di" bpmnElement="SequenceFlow_08egknj">
-        <di:waypoint x="516" y="-466" />
-        <di:waypoint x="782" y="-466" />
+        <di:waypoint x="516" y="-476" />
+        <di:waypoint x="782" y="-476" />
         <di:waypoint x="782" y="-294" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1rw4j2t_di" bpmnElement="SequenceFlow_1rw4j2t">
-        <di:waypoint x="488" y="-426" />
+        <di:waypoint x="488" y="-436" />
         <di:waypoint x="488" y="-254" />
         <di:waypoint x="585" y="-254" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0mucd7e_di" bpmnElement="SequenceFlow_0mucd7e">
         <di:waypoint x="685" y="-254" />
         <di:waypoint x="710" y="-254" />
-        <di:waypoint x="710" y="-434" />
-        <di:waypoint x="515" y="-434" />
+        <di:waypoint x="710" y="-444" />
+        <di:waypoint x="515" y="-444" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="678" y="-315" width="29" height="14" />
+          <dc:Bounds x="678" y="-318" width="29" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0iwr6ur_di" bpmnElement="SequenceFlow_0iwr6ur">
         <di:waypoint x="466" y="97" />
-        <di:waypoint x="466" y="-426" />
+        <di:waypoint x="466" y="-436" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="472" y="63" width="84" height="27" />
         </bpmndi:BPMNLabel>
@@ -1067,7 +1165,216 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_1vj9fs6_di" bpmnElement="DataInputAssociation_1vj9fs6">
         <di:waypoint x="324" y="-124" />
-        <di:waypoint x="449" y="-426" />
+        <di:waypoint x="450" y="-436" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Participant_1futpq1_di" bpmnElement="Participant_1futpq1">
+        <dc:Bounds x="1330" y="319" width="683" height="455" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_19oma6a_di" bpmnElement="Lane_19oma6a">
+        <dc:Bounds x="1360" y="319" width="653" height="272" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0dbn2k5_di" bpmnElement="Lane_0dbn2k5">
+        <dc:Bounds x="1360" y="591" width="653" height="183" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1n32jw4_di" bpmnElement="StartEvent_1n32jw4">
+        <dc:Bounds x="1460" y="414" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1437" y="457" width="85" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0sezw3h_di" bpmnElement="EndEvent_0sezw3h">
+        <dc:Bounds x="1764" y="414" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_1bd48sx_di" bpmnElement="Task_1bd48sx">
+        <dc:Bounds x="1580" y="392" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_0pvjvb5_di" bpmnElement="DataObjectReference_0pvjvb5">
+        <dc:Bounds x="1783" y="494" width="36" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1834" y="472" width="87" height="106" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_092n7uh_di" bpmnElement="SubProcess_092n7uh">
+        <dc:Bounds x="1580" y="674" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1o07cw7_di" bpmnElement="SequenceFlow_1o07cw7">
+        <di:waypoint x="1630" y="472" />
+        <di:waypoint x="1630" y="674" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1auz6vj_di" bpmnElement="SequenceFlow_1auz6vj">
+        <di:waypoint x="1680" y="714" />
+        <di:waypoint x="1726" y="714" />
+        <di:waypoint x="1726" y="449" />
+        <di:waypoint x="1682" y="449" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1688" y="719.5" width="29" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_189e9ar_di" bpmnElement="SequenceFlow_189e9ar">
+        <di:waypoint x="1496" y="432" />
+        <di:waypoint x="1580" y="432" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1kjb4tk_di" bpmnElement="SequenceFlow_1kjb4tk">
+        <di:waypoint x="1680" y="432" />
+        <di:waypoint x="1764" y="432" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataInputAssociation_030zhaz_di" bpmnElement="DataInputAssociation_030zhaz">
+        <di:waypoint x="1783" y="510" />
+        <di:waypoint x="1680" y="457" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0e5bikp_di" bpmnElement="ExclusiveGateway_0e5bikp" isMarkerVisible="true">
+        <dc:Bounds x="853" y="427" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_03n90bq_di" bpmnElement="Task_03n90bq">
+        <dc:Bounds x="748" y="347" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_17dpv5y_di" bpmnElement="DataStoreReference_17dpv5y">
+        <dc:Bounds x="884" y="532" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="874" y="589" width="70" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_1xyjpq0_di" bpmnElement="Task_1xyjpq0">
+        <dc:Bounds x="601" y="347" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_1szr1kn_di" bpmnElement="DataObjectReference_1szr1kn">
+        <dc:Bounds x="633" y="541" width="36" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="685" y="531" width="87" height="106" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_007a4n0_di" bpmnElement="SequenceFlow_007a4n0">
+        <di:waypoint x="848" y="387" />
+        <di:waypoint x="878" y="387" />
+        <di:waypoint x="878" y="427" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1joq5ss_di" bpmnElement="SequenceFlow_1joq5ss">
+        <di:waypoint x="701" y="387" />
+        <di:waypoint x="748" y="387" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataInputAssociation_08ncc5i_di" bpmnElement="DataInputAssociation_08ncc5i">
+        <di:waypoint x="661" y="541" />
+        <di:waypoint x="782" y="427" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_0z93pq4_di" bpmnElement="DataOutputAssociation_0z93pq4">
+        <di:waypoint x="810" y="427" />
+        <di:waypoint x="901" y="532" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_1cz84tz_di" bpmnElement="DataOutputAssociation_1cz84tz">
+        <di:waypoint x="667" y="427" />
+        <di:waypoint x="641" y="541" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1mwb1j8_di" bpmnElement="SequenceFlow_1mwb1j8">
+        <di:waypoint x="545" y="511" />
+        <di:waypoint x="878" y="511" />
+        <di:waypoint x="878" y="477" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1klsufi_di" bpmnElement="SequenceFlow_1klsufi">
+        <di:waypoint x="903" y="452" />
+        <di:waypoint x="1059" y="452" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_0oa3ufe_di" bpmnElement="StartEvent_0oa3ufe">
+        <dc:Bounds x="-525" y="434" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-538" y="477" width="63" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_0enxg9m_di" bpmnElement="Task_0enxg9m">
+        <dc:Bounds x="65" y="347" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_123snwj_di" bpmnElement="ExclusiveGateway_123snwj" isMarkerVisible="true">
+        <dc:Bounds x="-314" y="427" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-376" y="415.5" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1xpj1cb_di" bpmnElement="IntermediateCatchEvent_1xpj1cb">
+        <dc:Bounds x="-183" y="493" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-192" y="536" width="56" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0qzg6nn_di" bpmnElement="ExclusiveGateway_0qzg6nn" isMarkerVisible="true">
+        <dc:Bounds x="192" y="427" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_19dgiai_di" bpmnElement="ExclusiveGateway_19dgiai" isMarkerVisible="true">
+        <dc:Bounds x="-427" y="427" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_0w38tze_di" bpmnElement="Task_0w38tze">
+        <dc:Bounds x="-215" y="347" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask_1sqpfng_di" bpmnElement="SendTask_1sqpfng">
+        <dc:Bounds x="-64" y="347" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_1eh5pjt_di" bpmnElement="DataStoreReference_1eh5pjt">
+        <dc:Bounds x="-521" y="532" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-531" y="589" width="70" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0tbdaiy_di" bpmnElement="SequenceFlow_0tbdaiy">
+        <di:waypoint x="-489" y="452" />
+        <di:waypoint x="-427" y="452" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_07spk2i_di" bpmnElement="SequenceFlow_07spk2i">
+        <di:waypoint x="36" y="387" />
+        <di:waypoint x="65" y="387" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1qf7dsg_di" bpmnElement="SequenceFlow_1qf7dsg">
+        <di:waypoint x="165" y="387" />
+        <di:waypoint x="217" y="387" />
+        <di:waypoint x="217" y="427" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1o614su_di" bpmnElement="SequenceFlow_1o614su">
+        <di:waypoint x="-377" y="452" />
+        <di:waypoint x="-314" y="452" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0b5tpq0_di" bpmnElement="SequenceFlow_0b5tpq0">
+        <di:waypoint x="-289" y="477" />
+        <di:waypoint x="-289" y="511" />
+        <di:waypoint x="-183" y="511" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-281" y="490" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_10qtr31_di" bpmnElement="SequenceFlow_10qtr31">
+        <di:waypoint x="-289" y="427" />
+        <di:waypoint x="-289" y="387" />
+        <di:waypoint x="-215" y="387" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-283" y="366" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1bb1ov0_di" bpmnElement="SequenceFlow_1bb1ov0">
+        <di:waypoint x="-147" y="511" />
+        <di:waypoint x="217" y="511" />
+        <di:waypoint x="217" y="477" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_02d0eru_di" bpmnElement="SequenceFlow_02d0eru">
+        <di:waypoint x="242" y="452" />
+        <di:waypoint x="268" y="452" />
+        <di:waypoint x="268" y="622" />
+        <di:waypoint x="-402" y="622" />
+        <di:waypoint x="-402" y="477" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataInputAssociation_0kqulpk_di" bpmnElement="DataInputAssociation_0kqulpk">
+        <di:waypoint x="-471" y="557" />
+        <di:waypoint x="-294" y="557" />
+        <di:waypoint x="-189" y="427" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_19mn6xm_di" bpmnElement="SequenceFlow_19mn6xm">
+        <di:waypoint x="-115" y="387" />
+        <di:waypoint x="-64" y="387" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_02ph4go_di" bpmnElement="SequenceFlow_02ph4go">
+        <di:waypoint x="545" y="387" />
+        <di:waypoint x="601" y="387" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MessageFlow_0u5a02k_di" bpmnElement="MessageFlow_0u5a02k">
+        <di:waypoint x="-14" y="347" />
+        <di:waypoint x="-14" y="285" />
+        <di:waypoint x="1427" y="285" />
+        <di:waypoint x="1472" y="415" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
