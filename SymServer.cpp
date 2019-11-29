@@ -37,6 +37,7 @@ using namespace Symposium;
 
 
 int SymServer::idCounter=0;
+const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", "./icons/1.png", -1, nullptr);
 
 const user & SymServer::addUser(user &newUser) {
     if(userIsRegistered(newUser.getUsername()))
@@ -243,7 +244,7 @@ user SymServer::findUserBySiteId(int id) {
     for(const auto& elem:registered)
         if(elem.second.getSiteId()==id)
             return elem.second;
-    throw SymServerException(SymServerException::userNotFound, UnpackFileLineFunction());
+    return unknownUser;
 }
 
 user &SymServer::registerUser(user *toInsert) {

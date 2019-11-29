@@ -60,6 +60,8 @@
          std::shared_ptr<directory> rootDir;                                                              /**< virtual filesystem of the Symposium server */
 
      public:
+         static const user unknownUser;
+
          //Some methods are virtual in order to use the mocks in tests
          SymServer();
 

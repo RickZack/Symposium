@@ -162,10 +162,10 @@ protected:
      * take the mocked user from SymServerAccesser in tests
      */
     user findUserBySiteId(int id) override {
-        for(auto elem:registered)
+        for(const auto& elem:registered)
             if(elem.second.getSiteId()==id)
                 return elem.second;
-        throw SymServerException(SymServerException::userNotFound, UnpackFileLineFunction());
+        return unknownUser;
     }
 };
 
@@ -302,7 +302,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
 
     SymServerTestFilesystemFunctionality():
             loggedUser(loggedUserUsername, loggedUserPwd, "m@ario", "./userIcons/test.jpg", 0, nullptr),
-            anotherUser(anotherUserUsername, anotherUserPwd, "lupoLucio", "./userIcons/test.jpg", 0, nullptr),
+            anotherUser(anotherUserUsername, anotherUserPwd, "lupoLucio", "./userIcons/test.jpg", 1, nullptr),
             server(),
             userDir(new ::testing::NiceMock<SymServerdirMock>("/")),
             fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")),
@@ -597,5 +597,22 @@ TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCorrectMapping){
     std::map<int, user> expected({
         std::pair<int, user>(loggedUser.getSiteId(), loggedUser),
         std::pair<int, user>(anotherUser.getSiteId(), anotherUser)});
+    EXPECT_EQ(expected, mapping);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdWithUnknownSiteId){
+    setStageForHavingOpenedDoc(loggedUser);
+    setAnotherUserActive();
+    makeAnotherUserToHavePrivilege(defaultPrivilege);
+    //loggedUser and anotherUser have siteId 0 and 1,
+    // so 2 and 3 are siteId without association with registered users in SymServer
+    std::set<int> siteIdsToReturn({loggedUser.getSiteId(), anotherUser.getSiteId(), 2,3});
+    EXPECT_CALL(doc,retrieveSiteIds()).WillOnce(::testing::Return(siteIdsToReturn));
+    auto mapping=server.mapSiteIdToUser(loggedUserUsername, doc.getId());
+    std::map<int, user> expected({
+                                         std::pair<int, user>(loggedUser.getSiteId(), loggedUser),
+                                         std::pair<int, user>(anotherUser.getSiteId(), anotherUser),
+                                         std::pair<int, user>(2, SymServer::unknownUser),
+                                         std::pair<int, user>(3, SymServer::unknownUser)});
     EXPECT_EQ(expected, mapping);
 }
