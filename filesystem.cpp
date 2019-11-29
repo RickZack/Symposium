@@ -53,7 +53,7 @@ const std::string &filesystem::getName() const {
 }
 
 privilege filesystem::getUserPrivilege(const std::string &targetUser) const {
-    throw filesystemException("Object"+name+"is not shareable");
+    throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
 const uri &filesystem::getSharingPolicy() const {
@@ -61,7 +61,7 @@ const uri &filesystem::getSharingPolicy() const {
 }
 
 privilege filesystem::setUserPrivilege(const std::string &targetUser, privilege newPrivilege) {
-    throw filesystemException("Object"+name+"is not shareable");
+    throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
 std::string filesystem::setName(const std::string &newName) {
@@ -70,51 +70,45 @@ std::string filesystem::setName(const std::string &newName) {
 }
 
 uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) {
-    throw filesystemException("Object"+name+"is not shareable");
+    throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
-//FIXME: again, I must quickly understand what this method does. It needs to be much shorter
-// max 7-10 lines. Make sure that doesn't throw, the call at() can throw ad we will never catch
-// that type of exception -> the program crashes
+
 std::tuple<std::string, std::string>  filesystem::separate(const std::string &path)
 {
+    if(path.empty())
+        throw filesystemException(filesystemException::pathEmpty, UnpackFileLineFunction());
     std::string path2;
     std::string path3;
     path3.append(path);
     std::string id2;
-    if(path3.back()=='/')
+    if(path3.back()=='/') //if path terminate with "/", we need to remove it for separate correctly the id
         path3.pop_back();
     if(path3.at(0)=='.'||path3.at(0)=='/')
     {
         path3.erase(path3.begin()+0);
         return separate(path3);
     }
-    std::size_t found = path3.find_last_of("/\\");
-    if(found==std::string::npos)
+    std::size_t found = path3.find_last_of("/\\");//find the last number which represent the id
+    if(found==std::string::npos)//if there isn't any "/" it means that I', alredy in the correct directory and the path represent only id
     {
         id2.append(path3);
         path3.clear();
-        return std::make_tuple(path3, id2);
+        return std::make_tuple(path3, id2); //return clear path and the id
     }
     path2.append(path3,0, found); //path to the directory of the current user
     id2.append(path3.begin()+found+1,path3.end()); //the id of directory where the current user want to insert the file
     return  std::make_tuple(path2, id2);
 }
 
-//FIXME: choose a better name, here I don't understand what is checked,
-// realPath is an attribute of file, so it's better to write this method to file class
-//  - make it static;
-// Anyway, it should be private to keep the interface clean
 bool filesystem::pathIsValid2(const std::string &toCheck) {
-    //OPTIMIZE: correctness check of user data should be available within user class,
-    // here we should call that method(s), adding only the constrain on the icon path
     std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
     return !toCheck.empty() && std::regex_match(toCheck, pathPattern);
 }
 
 file::file(const std::string &name, const std::string &realPath) : filesystem(name, 0), realPath(realPath), doc(0){
     if(!(pathIsValid2(realPath)))
-        throw filesystemException("Path is not valid!");
+        throw filesystemException(filesystemException::pathNvalid, UnpackFileLineFunction());
     strategy=std::make_unique<RMOAccess>();
 }
 
@@ -129,6 +123,9 @@ privilege file::getUserPrivilege(const std::string &targetUser) const {
 }
 
 privilege file::setUserPrivilege(const std::string &targetUser, privilege newPrivilege) {
+    privilege oldPrivilege=getUserPrivilege(targetUser);
+    if(oldPrivilege==privilege::owner)
+        throw filesystemException(filesystemException::changePriv, UnpackFileLineFunction());
     strategy->setPrivilege(targetUser,newPrivilege);
     return newPrivilege;
 }
@@ -139,14 +136,14 @@ uri file::setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) 
         this->sharingPolicy=newSharingPrefs;
     }
     else
-        throw filesystemException("You are not an owner to share this file");
+        throw filesystemException(filesystemException::notOwn, UnpackFileLineFunction());
     return newSharingPrefs;
 }
 
 document & file::access(const user &targetUser, privilege accessMode) {
     bool controllo=this->strategy->validateAction(targetUser.getUsername(), accessMode);
     if(!controllo)
-        throw filesystemException("You have not permission to this file in this mode");
+        throw filesystemException(filesystemException::noPermission, UnpackFileLineFunction());
     return doc.access(targetUser, accessMode);
 }
 
@@ -162,7 +159,7 @@ void file::send() const {
     //TODO: implement
 }
 
-bool file::moreOwner(std::string username)
+bool file::moreOwner(const std::string &username)
 {
    return strategy->moreOwner(username);
 }
@@ -172,25 +169,16 @@ bool file::deleteFromStrategy(const std::string &userName)
    return strategy->deleteUser(userName);
 }
 
-//FIXME: try to clean a little, too many lines for what it does
 std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
     std::string ritorno;
-    //FIXME: try always to use std::string methods before coding a solution by hand
-    // for example in tests I wrote something like this loop with:
-    // ritorno.insert(0, indent, ' ');
     if (indent>0)
-    {
-        for(int i=0; i<indent; i++)
-            ritorno.append(" ");
-    }
-    //FIXME: you can put a string in a ostringstream with <<, so you can try to put all the contents
-    // in a ostringstream and only at the end call obj.str()
+        ritorno.insert(0, indent, ' '); //first need to insert indent
     std::ostringstream typeres;
-    typeres<<resType();
+    typeres<<resType(); //then the typer of the resource
     std::ostringstream priv;
     if(getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";
-    priv<<getUserPrivilege(targetUser);
+    priv<<getUserPrivilege(targetUser); //the privilege
     return ritorno+typeres.str()+" "+name + " " + priv.str();
 }
 
@@ -224,13 +212,11 @@ std::shared_ptr<directory> directory::getRoot() {
 
 }
 
-//FIXME: difficult to understand and long. Advice: more explanatory names, avoid strange operations
-// as possible and, if something remains obscure, write some COMMENTS
-// More important: be sure that this does not throw any exception that is not SymposiumException
-// (it would be difficult to catch the specific type at the handler)
-// for example at() can throw, but we will not catch this type of exception and the program crashes
+
 std::tuple<std::string, std::string> directory::separateFirst(std::string path)
 {
+    if(path.empty())
+        throw filesystemException(filesystemException::pathEmpty, UnpackFileLineFunction());
     std::string path2;
     std::string id;
     if(path.at(0) == '.' || path.at(0) == '/')
@@ -238,12 +224,12 @@ std::tuple<std::string, std::string> directory::separateFirst(std::string path)
         path.erase(path.begin()+0);
         return separateFirst(path);
     }
-    std::size_t found = path.find_first_of("/\\");
-    if(found==std::string::npos)
+    std::size_t found = path.find_first_of("/\\"); //find first character "/" in order to separate the first directory of the path
+    if(found==std::string::npos)//if there is none of "/" it means that the path is composed by only one directory
     {
         id.append(path);
         path.clear();
-        return std::make_tuple(path, id);
+        return std::make_tuple(path, id);// return clear path and the id
     }
     path2.append(path,found, path.size());
     id.append(path, 0, found);
@@ -251,17 +237,14 @@ std::tuple<std::string, std::string> directory::separateFirst(std::string path)
 }
 
 
-//FIXME: way too long and difficult to understand. Also WBT testing would be very difficult.
-// Advices: isolate the condition on "here" path, put inside a private helper function
-// lines that are common in this method (es. 229-233, 242-248).
-// make a clear distinction between the "get something that is here" and "I need to call again recursively"
+
 std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
-    if(path==""||path=="./")
+    if(path==""||path=="./")//if path is "here" so I only need to get the object with the id represented by name
     {
         auto it=std::find_if(contained.begin(), contained.end(),
-                [name](std::shared_ptr<filesystem> i){return std::to_string(i->getId())==name;});
+                             [name](std::shared_ptr<filesystem> i){return std::to_string(i->getId())==name;});
         if(it==contained.end())
-            throw filesystemException("The element has not been found with get");
+            throw filesystemException(filesystemException::noGet, UnpackFileLineFunction());
         return *it;
     }
     std::string idRes;
@@ -270,15 +253,15 @@ std::shared_ptr<filesystem> directory::get(const std::string &path, const std::s
         pathRes.append(path.begin(),path.end()-1);
     else
         pathRes.append(path);
-    tie(pathRes, idRes)= separateFirst(pathRes);
+    tie(pathRes, idRes)= separateFirst(pathRes);//otherwise need to separate the first directory and move into it
 
     auto it=std::find_if(contained.begin(), contained.end(),
                          [idRes](std::shared_ptr<filesystem> i){return std::to_string(i->getId())==idRes;});
 
     if(it==contained.end())
-        throw filesystemException("The element has not been found with get");
-    if((*it)->resType()!=resourceType::directory)
-        throw filesystemException("The element has not been found with get");
+        throw filesystemException(filesystemException::noGet, UnpackFileLineFunction());
+    if((*it)->resType()!=resourceType::directory)//if the element is not a directory, there is some error in path
+        throw filesystemException(filesystemException::noGet, UnpackFileLineFunction());
     std::shared_ptr <directory> dir=std::dynamic_pointer_cast<directory>(*it);
     return dir->get(pathRes, name);
 }
@@ -287,7 +270,7 @@ std::shared_ptr<filesystem> directory::get(const std::string &path, const std::s
 std::shared_ptr<directory> directory::getDir(const std::string &path, const std::string &name) {
     std::shared_ptr<filesystem> res=this->get(path, name);
     if(res->resType()!=resourceType::directory)
-        filesystemException("File are you searching for, is not present");
+        throw filesystemException(filesystemException::noGetDir, UnpackFileLineFunction());
     return std::dynamic_pointer_cast<directory>(res);
 
 }
@@ -296,7 +279,7 @@ std::shared_ptr<file> directory::getFile(const std::string &path, const std::str
     std::shared_ptr<filesystem> res=this->get(path, name);
     if(res->resType()==resourceType::file)
         return std::dynamic_pointer_cast<file>(res);
-    if(res->resType()==resourceType::symlink)
+    if(res->resType()==resourceType::symlink) //is used also for symlink because symlink is the reference to the file object
     {
         std::shared_ptr<symlink> sym=std::dynamic_pointer_cast<symlink>(res);
         std::string pathSym=sym->getPath();
@@ -305,7 +288,7 @@ std::shared_ptr<file> directory::getFile(const std::string &path, const std::str
         tie(pathRes, idRes)= separate(pathSym);
         return getFile(pathRes, idRes);
     }
-   throw filesystemException("File are you searching for, is not present");
+    throw filesystemException(filesystemException::noGetFile, UnpackFileLineFunction());
 }
 
 std::string directory::setName(const std::string &path, const std::string &fileName, const std::string& newName) {
@@ -319,7 +302,7 @@ std::string directory::setName(const std::string &path, const std::string &fileN
 
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
     if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> &i){return i->getName()==name;}))
-        throw filesystemException("You already have an element with the same name");
+        throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
     std::shared_ptr<directory> newDir(new directory(name, idToAssign));//directory deve essere protetto
     newDir->parent=this->self;
     newDir->self=newDir;
@@ -334,7 +317,7 @@ std::shared_ptr<file> directory::addFile(const std::string &path, const std::str
     tie(pathAdd, idAdd)= separate(path);
     std::shared_ptr<directory> save=getDir(pathAdd, idAdd);
     if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
-        throw filesystemException("You already have an element with the same name");
+        throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
     std::shared_ptr<file> newFile(new file(name, path));
     save->contained.push_back(newFile);
     return newFile;
@@ -349,7 +332,7 @@ directory::addLink(const std::string &path, const std::string &name, const std::
     tie(pathAdd, idAdd)= separate(path);
     std::shared_ptr<directory> save=getDir(pathAdd, idAdd);
     if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
-        throw filesystemException("You already have an element with the same name");
+        throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
     std::shared_ptr<symlink> newSym(new symlink(name, filePath, fileName, idToAssign));
     save->contained.push_back(newSym);
     return newSym;
@@ -367,59 +350,54 @@ directory::access(const user &targetUser, const std::string &path, const std::st
 }
 
 
-//FIXME: way too too long! Methods should be at maximum 7-10 lines long
-// Simplify, extract blocks in private methods and make all the thing understandable
-// identify what a single block must do, this may help to simplify and reduce the code
-// Please note that someday (soon) we will have to achieve some parallelization, it's impossible with a method this long
+
 std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &path, const std::string &resName) {
-    std::shared_ptr<filesystem> obj=this->get(path, resName);
+    std::shared_ptr<filesystem> obj=this->get(path, resName); //take the object to remove
     std::string idRem;
     if(path!="./" && !path.empty())
     {
         std::string pathRem;
         tie(pathRem, idRem)= separate(path);
         std::shared_ptr<directory> dir=this->getDir(pathRem, idRem);
-        return dir->remove(targetUser, "", resName);
+        return dir->remove(targetUser, "", resName); //call remove recursivly if the path is not "here" in order to take the right directory of the object to remove
     }
-    idRem=resName;
-    if(obj->resType()==resourceType::file)
+    idRem=resName;//otherwise the path is "here"
+    if(obj->resType()==resourceType::file)//if the object to remove is the file
     {
         std::shared_ptr<file> f=std::dynamic_pointer_cast<file>(obj);
-        if(f->moreOwner(targetUser.getUsername()))
-            throw filesystemException("You are not the only owner of this file, so you cannot delete it");
+        if(f->moreOwner(targetUser.getUsername()))//check if targetUser is the only user, only in this case the file can be deleted
+            throw filesystemException(filesystemException::notOnlyOwn, UnpackFileLineFunction());
         auto it=std::find_if(contained.begin(), contained.end(),
                              [idRem, f](const std::shared_ptr<filesystem>& i){return i->getId()==f->getId();});
-        contained.erase(it);
+        contained.erase(it);//cancel from the container the object
         return obj;
     }
 
-    if(obj->resType()==resourceType::symlink)
+    if(obj->resType()==resourceType::symlink)//if the object is symlink
     {
         std::shared_ptr<symlink> s=std::dynamic_pointer_cast<symlink>(obj);
 
         std::string pathFile;
         std::string idFile;
-        tie(pathFile, idFile)= separate(s->getPath());
+        tie(pathFile, idFile)= separate(s->getPath());//need to have a pointer for the file and not a symlink in order to operate on file strategy
         std::shared_ptr<file> f=getRoot()->getFile(pathFile, idFile);
-        if(f->moreOwner(targetUser.getUsername()))
-            throw filesystemException("You are not the only owner of this file, so you cannot delete it");
-        if(!(f->deleteFromStrategy(targetUser.getUsername())))
-            throw filesystemException("You have some error while you try deleting a symlink");
+        if(!(f->deleteFromStrategy(targetUser.getUsername())))//delete from strategy target user
+            throw filesystemException(filesystemException::someError, UnpackFileLineFunction());
         auto it=std::find_if(contained.begin(), contained.end(),
                              [idRem, s](std::shared_ptr<filesystem> i){return i->getId()==s->getId();});
 
-        contained.erase(it);
+        contained.erase(it);//delete the object symlink in the right directory of the user
         return obj;
     }
-    std::shared_ptr<directory> d=std::dynamic_pointer_cast<directory>(obj);
+    std::shared_ptr<directory> d=std::dynamic_pointer_cast<directory>(obj);//otherwise the object is a directory
     for(auto iterator: d->contained)
     {
-        std::shared_ptr<filesystem> rem=d->remove(targetUser, "", std::to_string(iterator->getId()));
+        std::shared_ptr<filesystem> rem=d->remove(targetUser, "", std::to_string(iterator->getId()));//call remove recursively in order to remove any object in the directory
     }
     auto it=std::find_if(contained.begin(), contained.end(),
                          [idRem, d](std::shared_ptr<filesystem> i){return i->getId()==d->getId();});
 
-    contained.erase(it);
+    contained.erase(it);//in the end remove the directory
     return obj;
 }
 
@@ -434,35 +412,55 @@ void directory::load(const std::string &loadPath) {
 void directory::send() const {
     //TODO: implement
 }
-//FIXME: changing specification 18/11/2019
-// print must print the type of filesystem object and its name
 std::string directory::print(const std::string &targetUser, bool recursive, int indent) const {
-    //FIXME: recursive and indent not used. What if we want to print the complete tree of user's filesystem?
-    /*
-     * For example:
-     * -/ (root directory)
-     *   -someUser (user's directory)
-     *     -dir1
-     *       -file1
-     *     -dir2
-     *       -file2
-     */
-    std::string new_string= "root\r\n";
-    //FIXME: use std::find_if to search in a container, see cppreference or code in SymServer
-    for (unsigned i = 0; i < contained.size(); i++){
-        std::shared_ptr<filesystem> f = contained.at(i);
-        std::string name= f->getName();
-        new_string=new_string+"-"+name+"\r\n";
+    std::string result;
+    if(indent==0)
+        result.append(targetUser);
+    if(!recursive) //if recursive is false, need only the elements of the directory, not a subdirectory elements
+    {
+        for(const auto & it : contained)
+            result+=" "+printElement(it, targetUser, 0);
+
     }
-    return new_string;
+    else { //otherwise need to invoke recursively the method prints for all subdirectory
+        for(const auto & it : contained)
+        {
+            resourceType type=it->resType();
+            if(type==resourceType::directory)
+            {
+                result+=" "+printElement(it, targetUser, indent);
+                indent=indent+1;//need to add the indent if it is a subdirectory
+                std::shared_ptr<directory> dir=std::dynamic_pointer_cast<directory>(it);
+                result+=dir->print(targetUser, true, indent);
+                indent=indent-1;//when finished the recursion need to restore the original indent
+            }
+            else
+                result+=" "+printElement(it, targetUser, indent);
+        }
+    }
+    return result;
 }
 
-//FIXME: clean what is unuseful.
+std::string directory::printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, int indent)
+{
+    resourceType type=it->resType();
+    std::string result;
+    result.insert(0, indent, ' ');
+    if(type==resourceType::file)
+        return result+std::dynamic_pointer_cast<file>(it)->print(targetUser)+"\r\n";
+    if(type==resourceType::symlink)
+        return result+std::dynamic_pointer_cast<symlink>(it)->print(targetUser)+"\r\n";
+    std::shared_ptr<directory> dir=std::dynamic_pointer_cast<directory>(it);
+    std::ostringstream typeres;
+    typeres<<dir->resType();
+    return result+typeres.str()+" "+dir->name+"\r\n";
+}
+
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
                             int idToAssign) : filesystem(name, idToAssign), pathToFile(pathToFile), fileName(fileName) {
 
     if(!pathIsValid2(pathToFile))
-        throw filesystemException("Invalid path to symlink");
+        throw filesystemException(filesystemException::pathNvalid, UnpackFileLineFunction());
     strategy=std::make_unique<TrivialAccess>();
 
 }
@@ -492,13 +490,12 @@ std::string Symposium::symlink::getPath() {
     return pathToFile+"/"+fileName;
 }
 
-//FIXME: same thing of file::print
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
     std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
     std::ostringstream priv;
     std::ostringstream typeres;
     typeres<<resType();
-    std::string ritorno="";
+    std::string ritorno;
     priv<<file->getUserPrivilege(targetUser);
     if(file->getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";

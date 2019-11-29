@@ -62,3 +62,16 @@ userException::userException(userExceptionCodes exceptionCode, const char *file,
                                        const char *func) :
         SymposiumException(file, line, func, userErrors[static_cast<int>(exceptionCode)]){};
 
+
+
+const char* filesystemException::filesystemErrors[]={"Object is not shareable", "The path is empty", "The format of path is not valid",
+                                                     "You are an owner, so you cannot change your privilege", "You are not an owner to share this file",
+                                                     "You have not permission to access this file in this mode", "The element has not been found with get",
+                                                     "Directory are you searching for, is not present", "File are you searching for, is not present",
+                                                     "You already have an element with the same name", "You are not the only owner of this file, so you cannot delete it",
+                                                     "You have some error while you trying to delete your symlink"};
+
+filesystemException::filesystemException(filesystemExceptionCodes exceptionCode, const char *file, int line,
+                             const char *func) :
+        SymposiumException(file, line, func, filesystemErrors[static_cast<int>(exceptionCode)]){};
+
