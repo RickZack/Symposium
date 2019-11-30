@@ -284,7 +284,7 @@ struct FileSystemTestSharing: ::testing::Test{
     void constructTree3(){
         ASSERT_NO_FATAL_FAILURE(constructTree2());
         file2=directory::getRoot()->addFile("./2", "file2");
-        sym2= directory::getRoot()->addLink("./1/7", "sym2", "/2", "/1/7/" + std::to_string(file2->getId()), 0);
+        sym2= directory::getRoot()->addLink("./1/7", "sym2", "./2", std::to_string(file2->getId()), 0);
         /*
          * Simulate the fact that the user created the file, so he has [privilege::owner] on [file2]
          * Simulate the fact that the privilege acquired adding a symlink
@@ -492,7 +492,7 @@ TEST_F(FileSystemTestSharing, printDirectoryRecursive){
      * way, we expect sym1 (that should point to file1) to return its name and the privilege that the user holds
      * on [file1] (not on the symlink itself, that doesn't make much sense).
      */
-    res<<username<<" "<<"dir1\r\n"<<"  "<<"sym2 "<<uri::getDefaultPrivilege()<<"\r\n"<<"  "<<"file1 "<<privilege::owner<<"\r\n";
+    res<<username<<" "<<"directory "<<"dir1\r\n"<<"  "<<"file "<<"file1 "<<privilege::owner<<"\r\n"<<"  "<<"symlink "<<"sym2 "<<uri::getDefaultPrivilege()<<"\r\n";
     EXPECT_EQ(res.str(), directory::getRoot()->getDir("./", "1")->print(username, true, 0));
 }
 //FIXME: review the following tests
@@ -652,7 +652,7 @@ TEST_F(FileSystemTestT, DISABLED_accessTest)
     EXPECT_THROW(f->access(u, privilege::modify), filesystemException);
 }
 
-TEST(FileSystemTest, getSetDirSymTest)
+TEST(FileSystemTest, DISABLED_getSetDirSymTest)
 {
     directoryAccesser d("d");
     class symlink sym("sym", ".", "f", 0);
@@ -718,7 +718,7 @@ TEST(FileSystemTest, addDirAddFileAddSymPrintTest)
 }
  */
 
-TEST(FileSystemTest, removeTest)
+TEST(FileSystemTest, DISABLED_removeTest)
 {
     directory *d=new directoryAccesser("root");
     std::shared_ptr<directory> home(d);
