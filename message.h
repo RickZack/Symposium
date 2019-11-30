@@ -531,6 +531,8 @@
  * The server forwards this message to other clients that are enabled to see the sharing preferences of a document.
  */
      class uriMessage : public clientMessage, public serverMessage {
+         std::string path;
+         std::string name;
          uri sharingPrefs;
      public:
 
@@ -538,7 +540,7 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                    const uri &sharingPrefs, int msgId = 0);
+                    const std::string &path, const std::string &name, const uri &sharingPrefs, int msgId = 0);
 
          const uri &getSharingPrefs() const;
 

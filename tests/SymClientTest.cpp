@@ -51,6 +51,7 @@ struct SymClientUserMock: public user{
     MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, const std::string &newName));
     MOCK_CONST_METHOD2(removeResource, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
     MOCK_CONST_METHOD1(showDir, std::string(bool rec));
+    MOCK_METHOD2(editUser, user(user&, bool));
 };
 
 struct SymClientAccesser: public SymClient{
@@ -392,7 +393,8 @@ TEST_F(SymClientTest, shareResourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
     auto mex=client.shareResource(path, filename, newPreferences);
     messageHasCorrectOwner(mex);
-    uriMessage expected(msgType::shareRes, {username, pwd}, msgOutcome::success, newPreferences);
+    uriMessage expected(msgType::shareRes, {username, pwd}, msgOutcome::success, "", "",
+                        newPreferences, 0);
     EXPECT_EQ(expected, mex);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -506,6 +508,24 @@ TEST_F(SymClientTest, removeActiveUserCallsCloseOnDoc){
     setStageForOpenedDoc();
     EXPECT_CALL(docSentByServer, close(userReceived));
     client.addActiveUser(docSentByServer.getId(), userReceived);
+}
+
+TEST_F(SymClientTest, editUserConstructsGoodMessageAndInsertInUnanswered){
+    setStageForLoggedUser();
+    user newData; newData.setNickname("newNickname");
+    auto mex=client.editUser(newData);
+    messageHasCorrectOwner(mex);
+    userDataMessage expected(msgType::changeUserNick, {username, pwd}, msgOutcome::success, newData);
+    EXPECT_EQ(expected, mex);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
+}
+
+TEST_F(SymClientTest, editUserCallsSetNewDataOnLoggedUser){
+    setStageForLoggedUser();
+    SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
+    user newData; newData.setNickname("newNickname");
+    EXPECT_CALL(logUser, editUser(newData, true));
+    client.removeResource(path, filename, true);
 }
 
 TEST_F(SymClientTest, retrieveRelatedMessageReturnCorrectMessage){

@@ -215,7 +215,8 @@ INSTANTIATE_TEST_CASE_P(symbolThrowExceptionInConstruction, MessageActionTest, t
 
 TEST_P(MessageActionTest, uriMsgForbiddenActions) {
     msgType action = GetParam();
-    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new uriMessage(action, {"", ""}, msgOutcome::success, uri()), action, messageException);
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new uriMessage(action, {"", ""}, msgOutcome::success, "path",
+                                                         "name", uri(), 0), action, messageException);
 }
 msgType uriMsgForbidden[]={
         msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
@@ -585,32 +586,36 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnOtherClient){
 }
 
 TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemove){
-    fromClient=new uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, dummyUri);
+    fromClient= new uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, "path", "name",
+                               dummyUri, 0);
     uriMessage* fc= dynamic_cast<uriMessage*>(fromClient);
     //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
     //(here we suppose it is the dummy user u)
     //Same thing with targetUser
-    EXPECT_CALL(server, shareResource(u, "", "", const_cast<uri&>(fc->getSharingPrefs()))).WillOnce(::testing::Return(fc->getSharingPrefs()));
+    EXPECT_CALL(server, shareResource(u, "path", "name", const_cast<uri&>(fc->getSharingPrefs()))).WillOnce(::testing::Return(fc->getSharingPrefs()));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::shareRes, msgOutcome::success, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     //targetUser from fc->getTargetUser() (from std::string to user)
     //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, shareResource("", "", const_cast<uri&>(fc->getSharingPrefs()), true)).WillOnce(::testing::Return(fc->getSharingPrefs()));
+    EXPECT_CALL(client, shareResource("path", "name", const_cast<uri&>(fc->getSharingPrefs()), true)).WillOnce(::testing::Return(fc->getSharingPrefs()));
     fromClient->completeAction(client);
 }
 
 TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemoveOnOtherClient){
-    fromClient=new uriMessage(msgType::shareRes, {"user", "pwd"}, msgOutcome::success, dummyUri);
+    fromClient= new uriMessage(msgType::shareRes, {"user", "pwd"}, msgOutcome::success, "path",
+                               "name",
+                               dummyUri, 0);
     uriMessage* fc= dynamic_cast<uriMessage*>(fromClient);
 
     //the message from client is forwarded to the other client, but the password is cleaned
-    fromServer= new uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, dummyUri, fc->getMsgId());
+    fromServer= new uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, "path", "name",
+                               dummyUri, fc->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     //targetUser from fc->getTargetUser() (from std::string to user)
     //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, shareResource("", "", const_cast<uri&>(fc->getSharingPrefs()), false)).WillOnce(::testing::Return(fc->getSharingPrefs()));
+    EXPECT_CALL(client, shareResource("path", "name", const_cast<uri&>(fc->getSharingPrefs()), false)).WillOnce(::testing::Return(fc->getSharingPrefs()));
     fromServer->invokeMethod(client);
 }
 

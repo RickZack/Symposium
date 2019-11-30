@@ -250,7 +250,7 @@ void symbolMessage::completeAction(SymClient &client) {
 }
 
 uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                       const uri &sharingPrefs, int msgId)
+                       const std::string &path, const std::string &name, const uri &sharingPrefs, int msgId)
                        : message(action, msgId), clientMessage(action, actionOwner, msgId),
                          serverMessage(action, result, msgId), sharingPrefs(sharingPrefs) {
     //TODO:implement

@@ -342,6 +342,11 @@
          static bool userIsValid(const user &toCheck);
          std::pair<bool, document *> userIsWorkingOnDocument(const std::string &username, int resourceId);
 
+         int
+         handleAccessToDoc(const std::string &actionUser, const std::string &targetUser, const std::string &resName,
+                           const std::string &pathFromUserHome, const user &actionU);
+
+         void handleUserState(const std::string &targetUser, int docId);
      };
  }
 

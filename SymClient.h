@@ -415,7 +415,18 @@ namespace Symposium {
          * When a user client side wants to change its data, it sends a @ref userDataMessage.
          * The server will answer with a @ref serveMessage indicating if the action has been done successfully.
          * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
-         * again this function to actually perform the changing if the outcome is positive.
+         * the analogous function @e editUser(user&, bool) to actually perform the changing if the outcome is positive.
+         */
+        virtual userDataMessage editUser(user &newUserData);
+
+        /**
+         * @brief changes user's data
+         * @param newUserData a user object filled with new data
+         * @param msgRcv indicates if the function is called because a userDataMessage was sent or not
+         * @return the old user data
+         *
+         * When the response for a userDataMessage is received, this function is called with msgRcv=true, elseif
+         * the function is called because a changing in user data has to be propagated to this client msgRcv=false
          */
         virtual const user editUser(user &newUserData, bool msgRcv);
 

@@ -130,11 +130,31 @@ privilege SymServer::editPrivilege(const std::string &actionUser, const std::str
         throw SymServerException(SymServerException::actionUserNotLoggedOrTargetUserNotRegistered, UnpackFileLineFunction());
     std::string pathFromUserHome="./"+resPath.substr(strlen("./")+strlen(actionUser.c_str())+strlen("/"));
     const user& actionU=getRegistered(actionUser);
+    int docId=handleAccessToDoc(actionUser, targetUser, resName, pathFromUserHome, actionU);
+    handleUserState(targetUser, docId);
+    return actionU.editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
+}
+
+/*
+ * Handles the access of actionUser to the document to change the privileges of targetUser
+ */
+int
+SymServer::handleAccessToDoc(const std::string &actionUser, const std::string &targetUser, const std::string &resName,
+                             const std::string &pathFromUserHome, const user &actionU) {
     std::shared_ptr<file> fileReq= actionU.openFile(pathFromUserHome, resName, privilege::owner);
     document& docReq=fileReq->access(actionU, privilege::owner);
-    if(userIsWorkingOnDocument(targetUser, docReq.getId()).first)
+    int docId=docReq.getId();
+    if(!userIsWorkingOnDocument(actionUser, docId).first)
+        docReq.close(actionU);
+    return docId;
+}
+
+/*
+ * Handles control on targetUser, that shouldn't be working on the document
+ */
+void SymServer::handleUserState(const std::string &targetUser, int docId) {
+    if(userIsWorkingOnDocument(targetUser, docId).first)
         throw SymServerException(SymServerException::userWorkingOnDoc, UnpackFileLineFunction());
-    return actionU.editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
 }
 
 uri SymServer::shareResource(const user &actionUser, const std::string &resPath, const std::string &resName,

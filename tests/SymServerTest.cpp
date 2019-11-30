@@ -356,6 +356,13 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         ASSERT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, priv));
     }
 
+    void makeLoggedUserNotWorkingOnDoc(){
+        SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+        EXPECT_CALL(doc, close(loggedUser));
+        server.closeSource(loggedUserUsername, doc);
+        ASSERT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, privilege::owner));
+    }
+
     ~SymServerTestFilesystemFunctionality() = default;
 };
 const std::string SymServerTestFilesystemFunctionality::filePath="./dir1";
@@ -519,6 +526,19 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUs
     EXPECT_CALL(*justInserted, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
+    server.editPrivilege(loggedUserUsername, anotherUserUsername, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeClosesDocumentIfNotPreviouslyOpened){
+    setStageForHavingOpenedDoc(loggedUser);
+    setAnotherUserActive();
+    makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
+    makeLoggedUserNotWorkingOnDoc();
+
+    EXPECT_CALL(*justInserted, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::Return(fileToReturn));
+    EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
+    EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
+    EXPECT_CALL(doc, close(loggedUser));
     server.editPrivilege(loggedUserUsername, anotherUserUsername, "./"+loggedUserUsername+"/"+filePath.substr(2), fileName, privilege::readOnly);
 }
 

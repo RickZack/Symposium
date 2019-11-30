@@ -127,7 +127,7 @@ privilege SymClient::editPrivilege(const std::string &targetUser, const std::str
 
 uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
     //TODO:implement
-    return uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, uri());
+    return uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, "", "", uri(), 0);
 }
 
 uri SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs, bool msgRcv) {
@@ -166,6 +166,11 @@ std::string SymClient::showDir(bool recursive) const {
 updateDocMessage SymClient::closeSource(int resourceId) {
     //TODO:implement
     return updateDocMessage(msgType::closeRes, {"",""}, 0);
+}
+//FIXME: add and review tests for editUser
+userDataMessage SymClient::editUser(user &newUserData) {
+    //TODO: to implement
+    return userDataMessage(msgType::changeUserNick, std::pair("", ""), msgOutcome::success, Symposium::user());
 }
 
 const user SymClient::editUser(user &newUserData, bool msgRcv) {
