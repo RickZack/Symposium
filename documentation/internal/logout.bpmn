@@ -228,7 +228,7 @@
         <bpmn:targetRef>DataObjectReference_0essqjo</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:task>
-    <bpmn:task id="Task_1c0pymi" name="constructs a loginMessage (msgOutcome=failure)">
+    <bpmn:task id="Task_1c0pymi" name="constructs a serverMessage (msgOutcome=failure)">
       <bpmn:incoming>SequenceFlow_0z9plqe</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1e6u0lb</bpmn:outgoing>
     </bpmn:task>
@@ -266,16 +266,11 @@
       <bpmn:task id="Task_1wmsot3" name="Verify user is registered">
         <bpmn:outgoing>SequenceFlow_0yo1ozp</bpmn:outgoing>
       </bpmn:task>
-      <bpmn:task id="Task_0i75fgh" name="Verify correct password">
-        <bpmn:incoming>SequenceFlow_0yo1ozp</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_1dk426b</bpmn:outgoing>
-      </bpmn:task>
       <bpmn:task id="Task_1cfuj0t" name="Verify user is logged in">
-        <bpmn:incoming>SequenceFlow_1dk426b</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_0yo1ozp</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0xn7ip3</bpmn:outgoing>
       </bpmn:task>
-      <bpmn:sequenceFlow id="SequenceFlow_1dk426b" sourceRef="Task_0i75fgh" targetRef="Task_1cfuj0t" />
-      <bpmn:sequenceFlow id="SequenceFlow_0yo1ozp" sourceRef="Task_1wmsot3" targetRef="Task_0i75fgh" />
+      <bpmn:sequenceFlow id="SequenceFlow_0yo1ozp" sourceRef="Task_1wmsot3" targetRef="Task_1cfuj0t" />
       <bpmn:task id="Task_1o3h1zk" name="Remove the user from active list in documents he&#39;s working on">
         <bpmn:incoming>SequenceFlow_04hfdhx</bpmn:incoming>
       </bpmn:task>
@@ -653,11 +648,8 @@
       <bpmndi:BPMNShape id="Task_1wmsot3_di" bpmnElement="Task_1wmsot3">
         <dc:Bounds x="-532" y="636" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_0i75fgh_di" bpmnElement="Task_0i75fgh">
-        <dc:Bounds x="-406" y="636" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_1cfuj0t_di" bpmnElement="Task_1cfuj0t">
-        <dc:Bounds x="-275" y="636" width="100" height="80" />
+        <dc:Bounds x="-352" y="636" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_15x6lah_di" bpmnElement="SequenceFlow_15x6lah">
         <di:waypoint x="-371" y="-362" />
@@ -675,13 +667,9 @@
         <di:waypoint x="-221" y="-363" />
         <di:waypoint x="193" y="-370" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_1dk426b_di" bpmnElement="SequenceFlow_1dk426b">
-        <di:waypoint x="-306" y="676" />
-        <di:waypoint x="-275" y="676" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0yo1ozp_di" bpmnElement="SequenceFlow_0yo1ozp">
         <di:waypoint x="-432" y="676" />
-        <di:waypoint x="-406" y="676" />
+        <di:waypoint x="-352" y="676" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Task_1o3h1zk_di" bpmnElement="Task_1o3h1zk">
         <dc:Bounds x="7" y="636" width="100" height="80" />
@@ -693,14 +681,14 @@
         <dc:Bounds x="-263" y="921" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_0sj2hwm_di" bpmnElement="Task_0sj2hwm">
-        <dc:Bounds x="-144" y="636" width="100" height="80" />
+        <dc:Bounds x="-157" y="636" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0xn7ip3_di" bpmnElement="SequenceFlow_0xn7ip3">
-        <di:waypoint x="-175" y="676" />
-        <di:waypoint x="-144" y="676" />
+        <di:waypoint x="-252" y="676" />
+        <di:waypoint x="-157" y="676" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_04hfdhx_di" bpmnElement="SequenceFlow_04hfdhx">
-        <di:waypoint x="-44" y="676" />
+        <di:waypoint x="-57" y="676" />
         <di:waypoint x="7" y="676" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0qrqavt_di" bpmnElement="SequenceFlow_0qrqavt">

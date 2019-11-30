@@ -167,7 +167,7 @@ void mapMessage::invokeMethod(SymClient &client) {
     //TODO: implement
 }
 
-sendResMessage::sendResMessage(msgType action, msgOutcome result, filesystem &resource, int msgId)
+sendResMessage::sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId, int msgId)
         : message(action, msgId), serverMessage(action, result, msgId), resource{resource} {
     //TODO: implement
 }

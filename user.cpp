@@ -178,7 +178,7 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
     newP=newF->setUserPrivilege(otherUser, newPrivilege);
     return newP;
 }
-
+//FIXME: se sei owner non puoi scendere
 privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     privilege newP;

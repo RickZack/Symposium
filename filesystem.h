@@ -47,6 +47,7 @@
 #include "document.h"
 
 #include "AccessStrategy.h"
+#include "SymposiumException.h"
 
 
 
@@ -74,8 +75,7 @@ namespace Symposium {
         uri sharingPolicy;         /**< sharing policy applied to the resource */
         std::unique_ptr<AccessStrategy> strategy;
     public:
-        filesystem(const std::string &name);
-        filesystem(const std::string &name, const int &idToAssign);
+        filesystem(const std::string &name, const int idToAssign=0);
 
         int getId() const;
 
@@ -148,8 +148,20 @@ namespace Symposium {
         virtual void load(const std::string &loadPath) = 0;
 
         virtual void send() const = 0; //not clear how to set this
+
         virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const = 0;
+        /**
+         * @brief separate the last part of path which indicate the id of the resource, example: path=./1/2/3 result 1/2 and 3
+         * @param path the path to divide
+         * @return path to resource and id of the resource
+         */
         std::tuple<std::string, std::string> separate(const std::string &path);
+
+        /**
+         * @brief check if the path has a valid format
+         * @param toCheck path to check
+         * @return true if the format is ok, false instead
+         */
         static bool pathIsValid2(const std::string &toCheck);
 
         virtual ~filesystem()= default;
@@ -229,7 +241,19 @@ namespace Symposium {
          */
         std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
 
-        bool moreOwner(std::string username);
+        /**
+         * @brief check if the file has other owners besides the name of the username pass as parameter
+         * @param username
+         * @return true if there is only one user and this user is @e username, false instead
+         */
+
+        bool moreOwner(const std::string &username);
+
+        /**
+         * @brief invoke @ref AccessStrategy::deleteUser
+         * @param userName to delete from strategy object
+         * @return true if the operation was successful, false instead
+         */
 
         bool deleteFromStrategy(const std::string &userName);
 
@@ -250,7 +274,8 @@ namespace Symposium {
         std::string fileName;      /**< name of the file pointed, meaning its @e id */
         
     public:
-        symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName);
+        symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
+                int idToAssign=0);
 
         std::string getPath();
 
@@ -291,13 +316,15 @@ namespace Symposium {
  * @brief class used to model a directory, uses @e Singleton pattern
  */
     class directory : public filesystem {
+    protected:
         static std::shared_ptr<directory> root;                 /**< root directory of the system */
         std::vector<std::shared_ptr<filesystem> > contained;    /**< filesystem objects contained in the directory */
         std::weak_ptr<directory> parent;                        /**< pointer to the parent directory */
         std::weak_ptr<directory> self;                          /**< pointer to itself */
 
+    protected:
+        directory(const std::string &name, const int &idToAssign=0);
     public:
-        directory(const std::string &name, const int &idToAssign);
         static std::shared_ptr<directory> nullDir(); //necessary to build a new user client side
         static std::shared_ptr<directory> getRoot();
 
@@ -317,7 +344,7 @@ namespace Symposium {
 
         virtual std::shared_ptr<class symlink>
         addLink(const std::string &path, const std::string &name, const std::string &filePath,
-                const std::string &fileName);
+                const std::string &fileName, int idToAssign=0);
 
         virtual resourceType resType() const override;
 
@@ -360,24 +387,26 @@ namespace Symposium {
          * @return a string containing the representation
          */
         virtual std::string print(const std::string &targetUser, bool recursive = true, int indent = 0) const override;
-        //FIXME: directory is singleton, this constructor should be private
-        directory(const std::string &name);
-
         virtual ~directory() override= default;
 
     private:
+        /**
+         * @brief separate the first part of the path which indicate the id of the directory, example: path=./1/2/3 result 1 and 2/3
+         * @param path the path to divide
+         * @return path that has remained and the id of the directory
+         */
         std::tuple<std::string, std::string> separateFirst(std::string path);
+
+        /**
+         * @brief print the single element, this method is used in the @ref directory::print
+         * @param it the resource
+         * @param targetUser the owner of the resource
+         * @param indent indent if present
+         * @return the string which represent the name of the resource
+         */
+        static std::string printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, int indent);
     };
 
 
-    class filesystemException : public std::exception {
-        std::string msg;
-    public:
-        filesystemException(std::string msg) : msg{msg} {};
-
-        virtual const char *what() const noexcept {
-            return msg.c_str();
-        }
-    };
 }
 #endif //SYMPOSIUM_FILESYSTEM_H
