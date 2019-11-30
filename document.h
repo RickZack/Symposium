@@ -127,6 +127,15 @@ namespace Symposium {
          * @return a set of siteIds
          */
         virtual std::set<int> retrieveSiteIds();
+
+    private:
+        void generatePosition(int *indexes);
+
+        int * findInsertIndex(const symbol &symbol);
+
+        int * findEndPosition(char aChar, std::vector<Symposium::symbol> vector, int lines);
+
+        int findInsertInLine(wchar_t ch, std::vector<Symposium::symbol> vector);
     };
 }
 

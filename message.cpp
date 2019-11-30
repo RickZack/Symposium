@@ -66,6 +66,7 @@ const std::pair<std::string, std::string> &clientMessage::getActionOwner() const
 
 void clientMessage::invokeMethod(SymServer &server) {
     //TODO: implement
+
 }
 
 void clientMessage::completeAction(SymClient &client) {
