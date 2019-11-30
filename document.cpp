@@ -28,7 +28,8 @@
  * Created on 22 Giugno 2019, 12.10
  */
 
-#include <c++/8.2.0/sstream>
+//#include <c++/8.2.0/sstream>
+#include <sstream>
 #include "document.h"
 #include "symbol.h"
 #include "user.h"
@@ -153,6 +154,7 @@ void document::remoteInsert(const symbol &toInsert) {
     }
 }
 
+//FIXME: test docRemoteSymbolTest_RemovalPosOrder fails because this is not implemented
 void document::remoteRemove(const symbol &toRemove) {
     //TODO:implement
 }
@@ -184,11 +186,22 @@ void document::close(const user &noLongerActive) {
         user old_User = *p.first;
         if (old_User == noLongerActive) {
             activeUsers.remove(p);
+            //FIXME: after remove all the iterators are invalid
+            // so the next time *p.first is incorrect
             first++;
+            //FIXME: by construction there are no duplicates, so once the element
+            // is removed you can terminate this loop (this will make the method
+            // work, but anyway is better to avoid this type of code)
         } else {
             first++;
         }
     }
+    //FIXME: alternatives
+    // for(auto p:activeUsers){ stesso codice del corpo del while, ma devi uscire appena hai fatto remove}
+    // or
+    // activeUsers.remove_if(lambda expression that returns true when the user in the pair is equal to noLongerActive)
+    // or
+    // find_if + remove
 }
 
 
@@ -225,7 +238,7 @@ bool document::operator!=(const document &rhs) const {
 
 
 int * document::findInsertIndex(const symbol &symbol) {
-    int *indixes;
+    int *indixes; //FIXME: I'm scared of this
     int i0=0; int i1=0;
     int minLine=0;
     int totalLines=symbols.size();
@@ -239,7 +252,7 @@ int * document::findInsertIndex(const symbol &symbol) {
     char lastChar;
 
     // check if struct is empty or char is less than first char
-    if (symbols.empty()||symbol.getCh()<symbols[0][0].getCh()) {indixes[0]=0; indixes[1]=0; return indixes;}
+    if (symbols.empty()||symbol.getCh()<symbols[0][0].getCh()) {indixes[0]=0; indixes[1]=0 /* FIXME: WTF?*/; return indixes;}
 
     lastChar=lastLine[lastLine.size()-1].getCh();
 
