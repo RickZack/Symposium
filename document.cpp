@@ -27,6 +27,8 @@
  *
  * Created on 22 Giugno 2019, 12.10
  */
+
+#include <c++/8.2.0/sstream>
 #include "document.h"
 #include "symbol.h"
 #include "user.h"
@@ -35,9 +37,10 @@ using namespace Symposium;
 int document::idCounter=0;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 
-document::document(int id) : id(id) {
+document::document(int id) : id(id), symbols(10,std::vector<symbol>(10,emptySymbol)) {
     id=idCounter;
     idCounter++;
+
 }
 
 int document::getId() const {
@@ -64,9 +67,7 @@ document & document::access(const user &newActive, privilege accessPriv) {
     return *this;
 }
 
-//FIXME: don't rely solely on tests. Did you read how this thing is implemented
-// in Conclave? You need to copy that logic, where do you calculate and assign
-// the position vectors to the symbol to insert?
+
 symbol document::localInsert(int *indexes, symbol &toInsert) {
 
     int i0=indexes[0];
@@ -78,13 +79,47 @@ symbol document::localInsert(int *indexes, symbol &toInsert) {
     if(i1>=symbols[i0].capacity())
         symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
 
+    generatePosition(indexes);
     char sym=symbols[i0][i1].getCh();
+
     if(sym==emptyChar){ symbols[i0][i1]=toInsert;}
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
     }
-    //FIXME: what does it mean?
-    return symbol('z', 0, 0, {0,0});
+
+    return toInsert;
+
+}
+
+void document::generatePosition(int *indexes) {
+    int i0=indexes[0];
+    int i1=indexes[1];
+    int c=symbols[i0].size();
+
+    // vectors that maintain the position for all the rows of symbols.
+    std::vector<int> posA;
+    std::vector<int> posB;
+
+    int siteIdB; int siteIdA;
+
+    if(!symbols.empty()) {
+        posA = symbols[i0][i1].getPos();
+    }
+
+        else if (i1 >= symbols[i0].size()) {
+            int ind_new = symbols[i0].size() - 1;
+            posB = symbols[i0][ind_new].getPos();
+        } else {
+            // I have to generate the pos after and the pos before
+            int i1_new = i1 - 1;
+            posB = symbols[i0][i1_new].getPos();
+            siteIdB = symbols[i0][i1_new].getSiteId();
+
+            posA = symbols[i0][i1].getPos();
+            siteIdA = symbols[i0][i1].getSiteId();
+
+        }
+
 
 }
 
@@ -92,14 +127,30 @@ symbol document::localRemove(int *indexes) {
     int i0=indexes[0];
     int i1=indexes[1];
 
+    symbol sym=symbols[i0][i1];
     symbols[i0].erase(symbols[i0].begin()+i1);
 
-    //FIXME: what does it mean?
-    return symbol('z', 0, 0, {0,0});
+    return sym;
 }
 
 void document::remoteInsert(const symbol &toInsert) {
-    //TODO:implement
+    int *indexes=findInsertIndex(toInsert);
+    int i0=indexes[0];
+    int i1=indexes[1];
+    float mul_fct=1.5; //just to avoid too many reallocations
+
+    if(i0>=symbols.capacity())
+        symbols.resize((i0+1)*mul_fct);
+    if(i1>=symbols[i0].capacity())
+        symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
+
+    generatePosition(indexes);
+    char sym=symbols[i0][i1].getCh();
+
+    if(sym==emptyChar){ symbols[i0][i1]=toInsert;}
+    else {
+        symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
+    }
 }
 
 void document::remoteRemove(const symbol &toRemove) {
@@ -107,37 +158,43 @@ void document::remoteRemove(const symbol &toRemove) {
 }
 
 std::wstring document::toText() {
-    //FIXME: better to concatenate all in a wostringstream
-    // and then return the wstring from that
     std::wstring str;
+    std::wostringstream str1;
     int size= symbols.size();
     int i=0;
     int sizes= symbols[i].size();
-    for (int i=0;i<symbols.size();i++){
-        for(int j=0;j<symbols[i].size();j++){
-          wchar_t value= symbols[i][j].getCh();
-          if(value!=emptyChar)
-            str=str+value;
-          }
+    for (int i=0;i<symbols.size();i++) {
+        for (int j = 0; j < symbols[i].size(); j++) {
+            wchar_t value = symbols[i][j].getCh();
+            if (value != emptyChar)
+                str1.put(value);
 
         }
+    }
+    str=str1.str();
    return str;
 }
 
-//FIXME: Read the documentation well before coding solutions by hand
 void document::close(const user &noLongerActive) {
-    //TODO:implement
-    std::forward_list<std::pair<user *, privilege>>::const_iterator iter;
-    for(iter=activeUsers.begin();iter!=activeUsers.end();iter++){
-        std::pair<user*,privilege> p=*iter;
-        user oldUser= reinterpret_cast<const user &>(p.first);
-        if(oldUser==noLongerActive)
+    auto first = activeUsers.begin();
+    auto last = activeUsers.end();
+
+    while (first != last) {
+        std::pair<user *, privilege> p = *first;
+        user old_User = *p.first;
+        if (old_User == noLongerActive) {
             activeUsers.remove(p);
+            first++;
+        } else {
+            first++;
+        }
     }
 }
 
+
 void document::store(const std::string &storePath) {
     //TODO:implement
+
 }
 
 void document::load(const std::string &loadPath) {
@@ -164,4 +221,116 @@ bool document::operator==(const document &rhs) const {
 bool document::operator!=(const document &rhs) const {
     return !(rhs == *this);
 }
+
+
+
+int * document::findInsertIndex(const symbol &symbol) {
+    int *indixes;
+    int i0=0; int i1=0;
+    int minLine=0;
+    int totalLines=symbols.size();
+    int maxLine= totalLines-1;
+    std::vector<Symposium::symbol> lastLine= symbols[maxLine];
+
+    int midLine=0,charIdx=0,minLastChar=0, maxLastChar=0;
+    std::vector<Symposium::symbol> maxCurrentLine;
+    std::vector<Symposium::symbol> minCurrentLine;
+    std::vector<Symposium::symbol> currentLine;
+    char lastChar;
+
+    // check if struct is empty or char is less than first char
+    if (symbols.empty()||symbol.getCh()<symbols[0][0].getCh()) {indixes[0]=0; indixes[1]=0; return indixes;}
+
+    lastChar=lastLine[lastLine.size()-1].getCh();
+
+    //char is greater than all existing chars (insert and end)
+
+    if(symbol.getCh()>lastChar){
+        indixes= findEndPosition(lastChar,lastLine,totalLines);
+        return indixes;
+    }
+
+    //binary search
+    while(minLine+1<maxLine){
+        midLine=minLine+(maxLine-minLine)/2;
+        currentLine=symbols[midLine];
+        lastChar=currentLine[currentLine.size()-1].getCh();
+
+        if(symbol.getCh()==lastChar){
+            i0=midLine; i1=currentLine.size()-1;
+        } else if(symbol.getCh()<lastChar){
+            maxLine=midLine;
+        } else{
+            minLine=midLine;
+        }
+    }
+
+    //check between min and max line
+    minCurrentLine=symbols[minLine];
+    minLastChar=minCurrentLine[minCurrentLine.size()-1].getCh();
+    maxCurrentLine=symbols[maxLine];
+    maxLastChar=maxCurrentLine[maxCurrentLine.size()-1].getCh();
+
+    if(symbol.getCh()<=minLastChar){
+        charIdx=findInsertInLine(symbol.getCh(),minCurrentLine);
+        i0=minLine; i1=charIdx;
+        indixes[0]=i0; indixes[1]=i1;
+        return indixes;
+
+    } else{
+        charIdx=findInsertInLine(symbol.getCh(),maxCurrentLine);
+        i0=maxLine; i1=charIdx;
+        indixes[0]=i0; indixes[1]=i1;
+        return indixes;
+    }
+
+}
+
+int* document::findEndPosition(char aChar, std::vector<Symposium::symbol> vector, int lines) {
+    int *indixes;
+    if(reinterpret_cast<const char *>(aChar) == "\n"){
+        indixes[0]=lines; indixes[1]=0; return indixes;
+    } else{
+        indixes[0]=lines-1; indixes[1]=vector.size();
+    }
+    return indixes;
+
+}
+
+int document::findInsertInLine(wchar_t ch, std::vector<Symposium::symbol> vector) {
+    int ind=0;
+    int left=0;
+    int right= vector.size()-1;
+    int mid;
+
+    if(vector.size()==0 ||ch>vector[left].getCh()){
+        ind=left;
+        return ind;
+    } else if(ch>vector[right].getCh()){
+        ind=vector.size();
+        return ind;
+    }
+
+    while(left+1<right){
+        mid=left-(right-left)/2;
+
+        if(ch==vector[mid].getCh()){
+            id=mid; return id;
+        } else if(ch>vector[mid].getCh()){
+            left=mid;
+        } else{
+            right=mid;
+        }
+    }
+
+    if(ch==vector[left].getCh()){
+        id=left; return id;
+    } else{
+        id=right; return right;
+    }
+
+}
+
+
+
 
