@@ -443,7 +443,7 @@
         <bpmn:flowNodeRef>StartEvent_1erblgf</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:dataObjectReference id="DataObjectReference_0yclpz1" name="symbolMessage(messageType::insertSymbo {&#34;&#34;, &#34;&#34;}, resourceId, newSym)" dataObjectRef="DataObject_0yqsbcm" />
+    <bpmn:dataObjectReference id="DataObjectReference_0yclpz1" name="symbolMessage(messageType::removeSymbol {&#34;&#34;, &#34;&#34;}, resourceId, symToRemove)" dataObjectRef="DataObject_0yqsbcm" />
     <bpmn:dataObject id="DataObject_0yqsbcm" />
     <bpmn:task id="Task_0vmb8ff" name="Call invokeMethod(client) on the uriMessage">
       <bpmn:incoming>SequenceFlow_0rtmftg</bpmn:incoming>
@@ -729,7 +729,7 @@
       <bpmndi:BPMNShape id="DataObjectReference_0yclpz1_di" bpmnElement="DataObjectReference_0yclpz1">
         <dc:Bounds x="2060" y="586" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2102" y="584" width="90" height="66" />
+          <dc:Bounds x="2103" y="584" width="88" height="66" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_0vmb8ff_di" bpmnElement="Task_0vmb8ff">
