@@ -190,7 +190,7 @@
           * update its own copy of the document and propagate the update to the other clients putting the message in
           * @e workingQueue
           */
-         virtual void remoteRemove(const std::string &remover, int resourceId, const symbolMessage &rmMsg);
+         virtual void remoteRemove(const std::string &remover, int resourceId, symbolMessage &rmMsg);
          //dispatchMessages ->function to be active in background to send messages from server to client
          //updateActiveUsers(); ->useful or just done inside other functions?
 

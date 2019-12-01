@@ -110,18 +110,20 @@ void SymServer::remoteInsert(const std::string &inserter, int resourceId, symbol
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(inserter, resourceId);
     if(!docRetrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
+    symMsg.clearAuthParam();
     docRetrieved.second->remoteInsert(symMsg.verifySym().getSym());
     workingQueue[resourceId].push(std::shared_ptr<message>(new symbolMessage(symMsg)));
 }
 
-void SymServer::remoteRemove(const std::string &remover, int resourceId, const symbolMessage &rmMsg) {
+void SymServer::remoteRemove(const std::string &remover, int resourceId, symbolMessage &rmMsg) {
     if(!userIsActive(remover))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(remover, resourceId);
     if(!docRetrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
-    docRetrieved.second->remoteRemove(rmMsg.getSym());
-    //workingQueue[resourceId].push(rmMsg);
+    rmMsg.clearAuthParam();
+    docRetrieved.second->remoteRemove(rmMsg.verifySym().getSym());
+    workingQueue[resourceId].push(std::shared_ptr<message>(new symbolMessage(rmMsg)));
 }
 
 privilege SymServer::editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,

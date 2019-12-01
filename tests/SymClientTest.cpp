@@ -340,7 +340,7 @@ TEST_F(SymClientTest, localInsertConstructsGoodMessageAndInsertInUnanswered){
     symbol toInsert('a', userReceived.getSiteId(), 0, {}, false);
     symbol inserted('a', userReceived.getSiteId(), 0, {1}, false);
     EXPECT_CALL(docSentByServer, localInsert(indexes, toInsert)).WillOnce(::testing::Return(inserted));
-    auto mex=client.localInsert(docSentByServer.getId(), toInsert);
+    auto mex= client.localInsert(docSentByServer.getId(), toInsert, {0,0});
     std::pair<bool, std::shared_ptr<clientMessage>> res=client.thereIsUnansweredMex(mex.getMsgId());
     ASSERT_TRUE(res.first);
     EXPECT_EQ(mex, *res.second);

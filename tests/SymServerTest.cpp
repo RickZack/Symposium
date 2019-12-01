@@ -316,7 +316,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     /*
      * Make the owner user to access the file and open the document. Used to test that closeSource actually works
      */
-    void setStageForHavingOpenedDoc(SymServerUserMock& userWhoOpens){
+    void setStageForAccessedDoc(SymServerUserMock& userWhoOpens){
         SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
         EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName)).WillOnce(::testing::Return(fileToReturn));
         EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
@@ -330,6 +330,13 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         EXPECT_CALL(*inserted, hasPwd(anotherUserPwd)).WillOnce(::testing::Return(true));
         server.login(anotherUserUsername, anotherUserPwd);
         ASSERT_TRUE(server.userIsActive(anotherUserUsername, anotherUser));
+    }
+
+    void setStageForOpenedDocForLoggedUser(){
+        SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+        EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::Return(fileToReturn));
+        EXPECT_CALL(*fileToReturn, access(loggedUser, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
+        auto ret=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
     }
 
     /*
@@ -361,6 +368,17 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         EXPECT_CALL(doc, close(loggedUser));
         server.closeSource(loggedUserUsername, doc);
         ASSERT_FALSE(server.userIsWorkingOnDocument(anotherUser, doc, privilege::owner));
+    }
+
+    ::testing::AssertionResult symbolMessageInQueueIsCorrect(const char* arg1, const char* arg2, std::pair<bool, std::shared_ptr<message>> res, symbolMessage toSend){
+        if(!res.first)
+            return ::testing::AssertionFailure()<<"The message is not present is the sending queue";
+        if(std::dynamic_pointer_cast<symbolMessage>(res.second)->getActionOwner()!=std::pair<std::string, std::string>())
+            return ::testing::AssertionFailure()<<"The actionOwner attribute is not clear"
+            <<", the server should forward messages without the authentication parameters";
+        if(!std::dynamic_pointer_cast<symbolMessage>(res.second)->getSym().isVerified())
+            return ::testing::AssertionFailure()<<"The server should send the symbol as verified";
+        return ::testing::AssertionSuccess();
     }
 
     ~SymServerTestFilesystemFunctionality() = default;
@@ -446,20 +464,16 @@ TEST_F(SymServerTestFilesystemFunctionality, createNewDirOfUnloggedUser){
     EXPECT_THROW(server.createNewDir(anotherUserUsername, filePath, fileName), SymServerException);
 }
 
-TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDoc){
-    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
-    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::Return(fileToReturn));
-    EXPECT_CALL(*fileToReturn, access(loggedUser, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    auto ret=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
+TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDocAndInsertMessageInQueue){
+    setStageForOpenedDocForLoggedUser();
     symbol toInsert('a', 0, 0, {}, false);
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
-    //server must send and insert a symbol that is verified
-    symbolMessage toSend(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert.setVerified(), received.getMsgId());
+    //server must send and insert a symbol that is verified, but without the authentication parameters
+    symbolMessage toSend(msgType::insertSymbol, {{}, {}}, msgOutcome::success, 0, doc.getId(), toInsert.setVerified(), received.getMsgId());
     EXPECT_CALL(doc, remoteInsert(toSend.getSym()));
     server.remoteInsert(loggedUserUsername, doc.getId(), received);
     auto res=server.thereIsMessageForResource(doc.getId(), toSend);
-    EXPECT_TRUE(res.first);
-    EXPECT_TRUE(std::dynamic_pointer_cast<symbolMessage>(res.second)->getSym().isVerified());
+    EXPECT_PRED_FORMAT2(symbolMessageInQueueIsCorrect, res, toSend);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertOfUnloggedUser){
@@ -474,26 +488,15 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertOnDocumentNotOpened){
     EXPECT_THROW(server.remoteInsert(loggedUserUsername, doc.getId(), received), SymServerException);
 }
 
-TEST_F(SymServerTestFilesystemFunctionality, remoteInsertAppendesMessage){
-    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
-    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::Return(fileToReturn));
-    EXPECT_CALL(*fileToReturn, access(loggedUser, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    auto f=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
-    symbol toInsert('a', 0, 0, {}, false);
-    symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
-    server.remoteInsert(loggedUserUsername, doc.getId(), received);
-    EXPECT_TRUE(server.thereIsMessageForResource(doc.getId(), received).first);
-}
-
-TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDoc){
-    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
-    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::Return(fileToReturn));
-    EXPECT_CALL(*fileToReturn, access(loggedUser, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
-    auto ret=server.openSource(loggedUserUsername, filePath, fileName, privilege::modify);
+TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDocAndInsertMessageInQueue){
+    setStageForOpenedDocForLoggedUser();
     symbol toRemove('a', 0, 0, {}, false);
     symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
-    EXPECT_CALL(doc, remoteRemove(toRemove));
+    symbolMessage toSend(msgType::removeSymbol, {{}, {}}, msgOutcome::success, 0, doc.getId(), toRemove.setVerified(), received.getMsgId());
+    EXPECT_CALL(doc, remoteRemove(toSend.getSym()));
     server.remoteRemove(loggedUserUsername, doc.getId(), received);
+    auto res=server.thereIsMessageForResource(doc.getId(), toSend);
+    EXPECT_PRED_FORMAT2(symbolMessageInQueueIsCorrect, res, toSend);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveOfUnloggedUser){
@@ -509,7 +512,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveOnDocumentNotOpened){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, closeSourceClosesTheDocument){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
 
     EXPECT_CALL(doc, close(loggedUser));
     SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(anotherUserUsername));
@@ -519,7 +522,7 @@ TEST_F(SymServerTestFilesystemFunctionality, closeSourceClosesTheDocument){
 
 
 TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUser){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
 
@@ -530,7 +533,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUs
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeClosesDocumentIfNotPreviouslyOpened){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
     makeLoggedUserNotWorkingOnDoc();
@@ -543,7 +546,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeClosesDocumentIfNotPre
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCalledByUnloggedUser){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
     server.hardWrongLogout(loggedUser);
@@ -552,7 +555,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCalledByUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeOnUserWorkingOnDocument){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilege(defaultPrivilege);
     //call expected because we need to retrieve the document id of the document named fileName (in the loggedUser space)
@@ -576,7 +579,7 @@ TEST_F(SymServerTestFilesystemFunctionality, shareResourceOfUnLoggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, renameResourceCallsRenameResourceOnUser){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     EXPECT_CALL(loggedUser, renameResource(filePath, fileName, "newName")).WillOnce(::testing::Return(fileToReturn));
     auto ret=server.renameResource(loggedUser, filePath, fileName, "newName");
     EXPECT_EQ(fileToReturn, ret);
@@ -587,7 +590,7 @@ TEST_F(SymServerTestFilesystemFunctionality, renameResourceByUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, removeResourceCallsResourceFileOnUser){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     EXPECT_CALL(loggedUser, removeResource(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
     auto ret=server.removeResource(loggedUser, filePath, fileName);
     EXPECT_EQ(fileToReturn, ret);
@@ -598,7 +601,7 @@ TEST_F(SymServerTestFilesystemFunctionality, removeResourceByUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCallsRetrieveSiteIdsOnDoc){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     EXPECT_CALL(doc,retrieveSiteIds());
     server.mapSiteIdToUser(loggedUserUsername, doc.getId());
 }
@@ -608,7 +611,7 @@ TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserOnClosedDoc){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCorrectMapping){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilege(defaultPrivilege);
     std::set<int> siteIdsToReturn({loggedUser.getSiteId(), anotherUser.getSiteId()});
@@ -621,7 +624,7 @@ TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCorrectMapping){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdWithUnknownSiteId){
-    setStageForHavingOpenedDoc(loggedUser);
+    setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilege(defaultPrivilege);
     //loggedUser and anotherUser have siteId 0 and 1,

@@ -98,7 +98,7 @@ void SymClient::createNewDir(const std::string &path, const std::string &name, i
     //TODO:implement
 }
 
-symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym) {
+symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index) {
     return symbolMessage(msgType::insertSymbol, {"", ""}, msgOutcome::success, 0, 0, symbol('a', 0, 0, {}, false));
 }
 
@@ -196,10 +196,6 @@ updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
 
 void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
     //TODO:implement
-}
-
-void SymClient::exportPDF(const std::string &resPath, const std::string &resName) {
-    //TODO: to implement
 }
 
 void SymClient::addActiveUser(int resourceId, user &targetUser) {

@@ -212,7 +212,7 @@ namespace Symposium {
          * @param newSym the symbol to insert
          * @return a properly constructed @ref symbolMessage to send to the server
          */
-        virtual symbolMessage localInsert(int resourceId, const symbol& newSym);
+        virtual symbolMessage localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index);
 
         /**
          * @brief remove a symbol on an opened document and constructs a message to sent to the server
@@ -444,8 +444,6 @@ namespace Symposium {
          * assigned to the users working on the same document.
          */
         virtual void setUserColors(const std::map<int, user> &siteIdToUser);
-
-        void exportPDF(const std::string &resPath, const std::string &resName);
 
         /**
          * @brief add @e targetUser to the list of active users of the document
