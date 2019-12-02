@@ -443,12 +443,11 @@ TEST_F(FileSystemTestSharing, printSymLink){
      *     -dir1 (id=7)
      *       -file1
      */
-    file1->setUserPrivilege(username, uri::getDefaultPrivilege());
 
     std::ostringstream out; int n_space=rand()%100+1;
     std::string spaces; spaces.insert(0, n_space, ' ');
     out<<spaces<<resourceType::symlink<<" "<<sym1->getName()<<" "<<uri::getDefaultPrivilege();
-    EXPECT_EQ( out.str(), sym1->print(username, false, n_space));
+    EXPECT_EQ( out.str(), sym1->print(anotherUsername, false, n_space));
 }
 
 TEST_F(FileSystemTestSharing, accessOnFile){
