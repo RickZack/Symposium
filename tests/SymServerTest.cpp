@@ -52,7 +52,7 @@ struct SymServerUserMock: public user{
     SymServerUserMock(const SymServerUserMock& other): user(other){};
     MOCK_CONST_METHOD3(accessFile,  std::shared_ptr<file>(const std::string &resId, const std::string &path,  const std::string &fileName));
     MOCK_CONST_METHOD3(openFile, std::shared_ptr<file>(const std::string &path,  const std::string &fileName, privilege accessMode));
-    MOCK_CONST_METHOD2(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome));
+    MOCK_CONST_METHOD3(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome, int));
     MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome, int id));
     MOCK_CONST_METHOD4(editPrivilege, privilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
@@ -63,7 +63,7 @@ struct SymServerUserMock: public user{
 };
 
 struct SymServerFileMock: public file{
-    SymServerFileMock() : file("test", "./aPath") {}
+    SymServerFileMock() : file("test", "./aPath", 0) {}
     MOCK_METHOD2(access, document&(const user &targetUser, privilege accessMode));
 };
 
@@ -445,7 +445,7 @@ TEST_F(SymServerTestFilesystemFunctionality, openNewSourceOfNotLoggedUser){
 
 TEST_F(SymServerTestFilesystemFunctionality, createNewSourceCallsNewFile){
     SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
-    EXPECT_CALL(target, newFile(fileName, filePath)).WillOnce(::testing::Return(fileToReturn));
+    EXPECT_CALL(target, newFile(fileName, filePath,0)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     auto doc=server.createNewSource(loggedUserUsername, filePath, fileName);
     EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, privilege::owner));

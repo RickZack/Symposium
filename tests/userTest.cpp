@@ -39,7 +39,7 @@ struct dirMock: public directory{
     dirMock(const std::string& name="dummy"): directory(name){};
 
     MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
-    MOCK_METHOD2(addFile, std::shared_ptr<file>(const std::string&, const std::string&));
+    MOCK_METHOD3(addFile, std::shared_ptr<file>(const std::string&, const std::string&, int));
     MOCK_METHOD2(get, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
     MOCK_METHOD0(getRoot, std::shared_ptr<directory>());
@@ -68,7 +68,7 @@ struct uriMock: public uri{
 };
 
 struct fileMock: public file{
-    fileMock(): file("dummy", "./somedir"){};
+    fileMock(): file("dummy", "./somedir", 0) {};
     MOCK_METHOD2(setUserPrivilege, privilege(const std::string&, privilege));
     MOCK_METHOD2(setSharingPolicy, uri(const std::string&, uri& newSharingPrefs));
     uri& getPolicy(){
@@ -134,8 +134,8 @@ TEST(userTest, makeNewFileMock){
     dirMock *dir=new dirMock();
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
-    file *created=new file("ciao", "./somedir");
-    EXPECT_CALL(*dir, addFile(".", "ciao")).WillOnce(::testing::Return(std::shared_ptr<file>(created)));
+    file *created= new file("ciao", "./somedir", 0);
+    EXPECT_CALL(*dir, addFile(".", "ciao",0)).WillOnce(::testing::Return(std::shared_ptr<file>(created)));
     u1.newFile("ciao");
 }
 

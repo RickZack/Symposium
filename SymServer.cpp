@@ -91,7 +91,7 @@ const document & SymServer::createNewSource(const std::string &opener, const std
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& target=getRegistered(opener);
-    std::shared_ptr<file> fileCreated=target.newFile(name, path);
+    std::shared_ptr<file> fileCreated= target.newFile(name, path, 0);
     document& docReq=fileCreated->access(target, privilege::owner);
     workingDoc[opener].push_front(&docReq);
     return docReq;

@@ -174,7 +174,7 @@ namespace Symposium {
         std::string realPath;      /**< file's path internal to the actual working directory of the system */
         document doc;              /**< document to handle */
     public:
-        file(const std::string &name, const std::string &realPath);
+        file(const std::string &name, const std::string &realPath, int idToAssign=0);
 
 
         const document &getDoc() const;
@@ -340,7 +340,7 @@ namespace Symposium {
 
         virtual std::shared_ptr<directory> addDirectory(const std::string &name, int idToAssign=filesystem::idCounter);
 
-        virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name);
+        virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name, int idToAssign=0);
 
         virtual std::shared_ptr<class symlink>
         addLink(const std::string &path, const std::string &name, const std::string &filePath,

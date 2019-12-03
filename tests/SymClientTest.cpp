@@ -110,7 +110,7 @@ struct SymClientAccesser: public SymClient{
 };
 
 struct SymClientFileMock: public file{
-    SymClientFileMock(const std::string &name, const std::string &realPath) : file(name, realPath) {};
+    SymClientFileMock(const std::string &name, const std::string &realPath) : file(name, realPath, 0) {};
     MOCK_CONST_METHOD0(getDoc, document&());
     MOCK_METHOD2(access, document&(const user& u, privilege requested));
 };

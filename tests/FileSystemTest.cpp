@@ -78,7 +78,7 @@ struct directoryAccesser: public directory{ //only to access the protected membe
 };
 
 struct fileAccesser: public file{ //only to access the protected members of directory from tests
-    fileAccesser(const std::string &name) : file(name, "./somedir") {};
+    fileAccesser(const std::string &name) : file(name, "./somedir", 0) {};
     /*
      * Used in tests when we want to set expectations on the strategy object, that normally
      * is an internal detail of file
@@ -158,12 +158,12 @@ TEST_F(FileSystemTestRobust, FileThrowsOnMalformedRealPath){
     file *f;
     std::string someWrongFormats[]={"../", "..", ".", "./", "path", "./dir/file.jpg"};
     for (auto& path:someWrongFormats)
-        EXPECT_THROW(f=new file("fileName", path), filesystemException);
+        EXPECT_THROW(f= new file("fileName", path, 0), filesystemException);
 }
 
 TEST_F(FileSystemTestRobust, FileAcceptsWellFormedRealPath) {
     std::string aGoodPath{"./dir1/dir2/dir3"};
-    file f("fileName", "./dir1/dir2/dir3");
+    file f("fileName", "./dir1/dir2/dir3", 0);
 }
 
 struct FileSystemTestSharing: ::testing::Test{
@@ -244,7 +244,7 @@ struct FileSystemTestSharing: ::testing::Test{
      */
     void constructTree1(){
         ASSERT_NO_FATAL_FAILURE(constructTree0());
-        file1=directory::getRoot()->addFile("./1/7", "file1");
+        file1= directory::getRoot()->addFile("./1/7", "file1", 0);
         /*
          * Simulate the fact that the user created the file, so he has [privilege::owner] on [file1]
          */
@@ -283,7 +283,7 @@ struct FileSystemTestSharing: ::testing::Test{
      */
     void constructTree3(){
         ASSERT_NO_FATAL_FAILURE(constructTree2());
-        file2=directory::getRoot()->addFile("./2", "file2");
+        file2= directory::getRoot()->addFile("./2", "file2", 0);
         sym2= directory::getRoot()->addLink("./1/7", "sym2", "./2", std::to_string(file2->getId()), 0);
         /*
          * Simulate the fact that the user created the file, so he has [privilege::owner] on [file2]
@@ -615,7 +615,7 @@ struct FileSystemTestT: ::testing::Test{
     FileSystemTestT(){
         document=new ::testing::NiceMock<documentMock>();
         rmo=new ::testing::NiceMock<RMOAccessMock>();
-        f=new file("f", "./somedir");
+        f= new file("f", "./somedir", 0);
     }
     ~FileSystemTestT() override{
         delete f;
@@ -681,7 +681,7 @@ TEST(FileSystemTest, DISABLED_printFileTest)
 {
     std::string u="username";
     user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    file f("file", "./somedir");
+    file f("file", "./somedir", 0);
     f.setUserPrivilege(u, privilege::owner);
     EXPECT_EQ("file owner", f.print(u));
     f.setUserPrivilege(u, privilege::none);
@@ -695,7 +695,7 @@ TEST(FileSystemTest, DISABLED_getDirectoryGetFileTest)
     std::shared_ptr<directory>cart1;
     cart1=d->addDirectory("cart1");
     std::shared_ptr<file> f1;
-    f1=d->addFile("file1", "/root");
+    f1= d->addFile("file1", "/root", 0);
     EXPECT_THROW(d->getDir("/root", "file1"), filesystemException);
     EXPECT_THROW(d->getFile("/root", "cart1"), filesystemException);
 }
@@ -735,7 +735,7 @@ TEST(FileSystemTest, DISABLED_printSymTest)
     std::shared_ptr<directory> home(d);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
     std::shared_ptr<file> f1;
-    f1=d->addFile("file1", "/root");
+    f1= d->addFile("file1", "/root", 0);
     class symlink sym("sym", "/root", "file1", 0);
     EXPECT_EQ("sym", sym.print(u1.getUsername()));
 }

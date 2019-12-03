@@ -115,7 +115,8 @@ namespace Symposium {
          * @param pathFromHome path inside the home to put the file. By default is the home itself
          * @return the pointer to the file just created
          */
-        virtual std::shared_ptr<file> newFile(const std::string &fileName, const std::string &pathFromHome = ".") const;
+        virtual std::shared_ptr<file>
+        newFile(const std::string &fileName, const std::string &pathFromHome=".", int idToAssign=0) const;
 
         /**
          * @brief creates a new directory named @e dirName in @e pathFromHome
