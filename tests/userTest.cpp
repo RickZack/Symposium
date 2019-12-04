@@ -121,13 +121,13 @@ TEST_F(UserTest, callAccessFile){
      *   -dir1 (has id=2)
      *     -sym1 (has id=decided internally)
      */
-    std::shared_ptr<class symlink> returned(new class symlink("sym1", "/1", "4"));
+    std::shared_ptr<class symlink> returned(new class symlink("sym1", "./1", "4"));
     EXPECT_CALL(*homeDir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
-    EXPECT_CALL(*Root, getFile("/1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
+    EXPECT_CALL(*Root, getFile("./1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
     EXPECT_CALL(static_cast<uriMock&>(dummyFile->getPolicy()), getShare(uri::getDefaultPrivilege()));
-    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "/1", "4")).WillOnce(::testing::Return(returned));
+    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "./1", "4")).WillOnce(::testing::Return(returned));
 
-    u->accessFile("/1/4", "/0/2", "sym1");
+    u->accessFile("./1/4", "/2", "sym1");
 }
 
 TEST(userTest, makeNewFileMock){

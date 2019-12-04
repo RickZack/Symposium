@@ -113,18 +113,14 @@ std::shared_ptr<file> user::newFile(const std::string &fileName, const std::stri
     return newF;
 }
 
-//FIXME: new directory must be inserted in [pathFromHome], not directly inside the home.
-// Advice:
-//  1) augment addDirectory to take a path as argument and then inside it search the directory with
-// getDir
-// or
-// 2) use getDir here and then call addDirectory on the retrieved directory
-// Solution 1 is more similar to what we already do (for files for example), the transaction flow will be more uniform
-// with respect to other operations (see Camunda diagrams in documentation/internal)
-// in both cases, pay attention to other tests that will need to be corrected
+
 std::shared_ptr<directory>
 user::newDirectory(const std::string &dirName, const std::string &pathFromHome, int idToAssign) const{
     std::shared_ptr<directory> newD;
+    std::string pathToDir;
+    std::string idDir;
+    tie(pathToDir, idDir)= separate(pathFromHome);
+    newD=home->getDir(pathToDir, idDir);
     if(idToAssign==-1)
         newD=home->addDirectory(dirName);
     else
@@ -138,9 +134,7 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
 //      user::openFile -> called when a user will want to access the file pointed by the symlink
 //      directory::access -> called on user's home directory, searches the file and call access on it
 //      file::access -> called on the file retrieved
-//      RMOAccess::getUserPrivilege -> called by file::access, verify that the user obtained a privilege
-//      --> Ops, [file1] has never granted a privilege for the user, exception thrown
-//      --> Ops, [file1] has never granted a privilege for the user, exception thrown
+
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
     std::string pathCurrent;
     std::string idCurrent;
@@ -155,13 +149,14 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
 
     tie(pathAdd, idAdd)= separate(resId); //separate the path and the id of file which the user want
 
-    std::shared_ptr<symlink> sym= home->addLink(idCurrent, fileName, pathAdd, idAdd);
-
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
 
     privilege priv=fi->getUserPrivilege(this->getUsername());
     if(priv==privilege::none)
         throw userException(userException::noPriv, UnpackFileLineFunction());
+
+    std::shared_ptr<symlink> sym= dir->addLink(path, fileName, pathAdd, idAdd);
+
     return fi;
 }
 
@@ -178,7 +173,7 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
     newP=newF->setUserPrivilege(otherUser, newPrivilege);
     return newP;
 }
-//FIXME: se sei owner non puoi scendere
+
 privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     privilege newP;
@@ -274,7 +269,10 @@ std::tuple<std::string, std::string>  user::separate(const std::string &path)
     std::string path2;
     std::string id;
     std::size_t found = path.find_last_of("/\\");
-    path2.append(path,0, found); //path to the directory of the current user
+    if(found==0)
+        path2="";
+    else
+        path2.append(path,0, found); //path to the directory of the current user
     id.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
     return  std::make_tuple(path2, id);
 }
