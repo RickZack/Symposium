@@ -61,7 +61,7 @@ struct MessageActionTest: ::testing::TestWithParam<msgType>{
     symbol s;
 
     MessageActionTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr),
-                         f("name", "./somedir"),
+                         f("name", "./somedir", 0),
                          s('a', 0, 0, std::vector<int>(), false) {
         m=nullptr;
     }
@@ -386,7 +386,7 @@ TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
-    std::shared_ptr<file> dummyFile(new file("file", "./somedir"));
+    std::shared_ptr<file> dummyFile(new file("file", "./somedir", 0));
     m=new sendResMessage(msgType::createRes, msgOutcome::success, *dummyFile);
     EXPECT_CALL(client, createNewSource(::testing::_, ::testing::_, ::testing::_));
     m->invokeMethod(client);
@@ -399,28 +399,28 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
-    std::shared_ptr<file> dummyFile(new file("file", "./somedir"));
+    std::shared_ptr<file> dummyFile(new file("file", "./somedir", 0));
     m=new sendResMessage(msgType::openRes, msgOutcome::success, *dummyFile);
     EXPECT_CALL(client, openSource(dummyFile));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
-    std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir"));
+    std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir", 0));
     m=new sendResMessage(msgType::openNewRes, msgOutcome::success, *dummyFile);
     EXPECT_CALL(client, openNewSource(::testing::_, ::testing::_, ::testing::_, "file", dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsRenameResource){
-    file dummyFile("file", "./somedir");
+    file dummyFile("file", "./somedir", 0);
     m=new sendResMessage(msgType::changeResName, msgOutcome::success, dummyFile);
     EXPECT_CALL(client, renameResource("", "", "", true)).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsRemoveResource){
-    file dummyFile("file", "./somedir");
+    file dummyFile("file", "./somedir", 0);
     m=new sendResMessage(msgType::removeRes, msgOutcome::success, dummyFile);
     EXPECT_CALL(client, removeResource("", "", true)).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
     m->invokeMethod(client);

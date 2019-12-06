@@ -33,7 +33,7 @@
 using namespace Symposium;
 
 symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos, bool verified) : ch(ch), siteId(siteId),
-                                                                                                  counter(counter), pos(pos) {}
+                                                                                                  counter(counter), pos(pos), verified(verified) {}
 
 wchar_t symbol::getCh() const {
     return ch;

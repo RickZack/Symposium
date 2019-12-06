@@ -106,7 +106,7 @@ bool filesystem::pathIsValid2(const std::string &toCheck) {
     return !toCheck.empty() && std::regex_match(toCheck, pathPattern);
 }
 
-file::file(const std::string &name, const std::string &realPath) : filesystem(name, 0), realPath(realPath), doc(0){
+file::file(const std::string &name, const std::string &realPath, int idToAssign) : filesystem(name, idToAssign), realPath(realPath), doc(0){
     if(!(pathIsValid2(realPath)))
         throw filesystemException(filesystemException::pathNvalid, UnpackFileLineFunction());
     strategy=std::make_unique<RMOAccess>();
@@ -311,14 +311,14 @@ std::shared_ptr<directory> directory::addDirectory(const std::string &name, int 
 }
 
 
-std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name) {
+std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name, int idToAssign) {
     std::string pathAdd;
     std::string idAdd;
     tie(pathAdd, idAdd)= separate(path);
     std::shared_ptr<directory> save=getDir(pathAdd, idAdd);
     if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
-    std::shared_ptr<file> newFile(new file(name, path));
+    std::shared_ptr<file> newFile(new file(name, path, idToAssign));
     save->contained.push_back(newFile);
     return newFile;
 }

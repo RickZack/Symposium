@@ -82,6 +82,15 @@
          const std::pair<std::string, std::string> &getActionOwner() const;
 
          /**
+          * @brief clear the authentication parameters of the the user who sent this message
+          * @return the message itself
+          *
+          * This method is needed when the server has to forward the message to other clients, that
+          * mustn't know the authentication parameters of the user who sent this message in the first place
+          */
+         clientMessage & clearAuthParam();
+
+         /**
           * @brief make @e newUser an active user of the server the message is sent to
           * @param server the server to login to
           *
@@ -246,7 +255,7 @@
           */
          serverMessage(msgType action, msgOutcome result, int msgId = 0);
 
-         msgOutcome getResult() const;
+         void setResult(msgOutcome outcome);
 
          /**
           * @brief invoke an action on the SymClient given as parameter

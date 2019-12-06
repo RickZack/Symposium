@@ -82,6 +82,12 @@ bool clientMessage::operator!=(const clientMessage &rhs) const {
     return !(rhs == *this);
 }
 
+clientMessage & clientMessage::clearAuthParam() {
+    actionOwner.first.clear();
+    actionOwner.second.clear();
+    return *this;
+}
+
 askResMessage::askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                              const std::string &path,
                              const std::string &name, const std::string &resourceId, privilege accessMode, int msgId)
@@ -128,8 +134,8 @@ serverMessage::serverMessage(msgType action, msgOutcome result, int msgId) : mes
     //TODO: implement
 }
 
-msgOutcome serverMessage::getResult() const {
-    return result;
+void serverMessage::setResult(msgOutcome outcome) {
+    result=outcome;
 }
 
 void serverMessage::invokeMethod(SymClient &client) {
