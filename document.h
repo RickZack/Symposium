@@ -131,11 +131,15 @@ namespace Symposium {
     private:
         void generatePosition(int *indexes);
 
-        int * findInsertIndex(const symbol &symbol);
+        std::pair<int, int> findInsertIndex(const symbol &symbol);
 
-        int * findEndPosition(char aChar, std::vector<Symposium::symbol> vector, int lines);
+        std::pair<int,int> findEndPosition(symbol aChar, std::vector<Symposium::symbol> vector, int lines);
 
-        int findInsertInLine(wchar_t ch, std::vector<Symposium::symbol> vector);
+        int findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector);
+
+        std::pair<int, int> findPosition(const symbol &symbol);
+
+        int findIndexInLine(const symbol &symbol, std::vector<Symposium::symbol> vector);
     };
 }
 

@@ -38,7 +38,8 @@ using namespace Symposium;
 int document::idCounter=0;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 
-document::document(int id) : id(id), symbols(10,std::vector<symbol>(10,emptySymbol)) {
+
+document::document(int id) : id(id), symbols(1,std::vector<symbol>(1,emptySymbol)) {
     id=idCounter;
     idCounter++;
 
@@ -86,8 +87,7 @@ symbol document::localInsert(int *indexes, symbol &toInsert) {
     if(sym==emptyChar){ symbols[i0][i1]=toInsert;}
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
-    }
-
+        }
     return toInsert;
 
 }
@@ -135,28 +135,35 @@ symbol document::localRemove(int *indexes) {
 }
 
 void document::remoteInsert(const symbol &toInsert) {
-    int *indexes=findInsertIndex(toInsert);
-    int i0=indexes[0];
-    int i1=indexes[1];
+    std::pair<int,int> indexes=findInsertIndex(toInsert);
+    int i0=indexes.first;
+    int i1=indexes.second;
+
     float mul_fct=1.5; //just to avoid too many reallocations
 
     if(i0>=symbols.capacity())
         symbols.resize((i0+1)*mul_fct);
+
     if(i1>=symbols[i0].capacity())
         symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
 
-    generatePosition(indexes);
     char sym=symbols[i0][i1].getCh();
 
     if(sym==emptyChar){ symbols[i0][i1]=toInsert;}
+
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
     }
+
 }
 
 //FIXME: test docRemoteSymbolTest_RemovalPosOrder fails because this is not implemented
 void document::remoteRemove(const symbol &toRemove) {
-    //TODO:implement
+    std::pair<int,int> pos=findPosition(toRemove);
+    int i0=pos.first;
+    int i1=pos.second;
+    symbol sym=symbols[i0][i1];
+    symbols[i0].erase(symbols[i0].begin()+i1);
 }
 
 std::wstring document::toText() {
@@ -179,29 +186,14 @@ std::wstring document::toText() {
 
 void document::close(const user &noLongerActive) {
     auto first = activeUsers.begin();
-    auto last = activeUsers.end();
-
-    while (first != last) {
-        std::pair<user *, privilege> p = *first;
+    for(auto p:activeUsers) {
+        std::pair<user *, privilege> c = *first;
         user old_User = *p.first;
         if (old_User == noLongerActive) {
             activeUsers.remove(p);
-            //FIXME: after remove all the iterators are invalid
-            // so the next time *p.first is incorrect
-            first++;
-            //FIXME: by construction there are no duplicates, so once the element
-            // is removed you can terminate this loop (this will make the method
-            // work, but anyway is better to avoid this type of code)
-        } else {
-            first++;
+            return;
         }
     }
-    //FIXME: alternatives
-    // for(auto p:activeUsers){ stesso codice del corpo del while, ma devi uscire appena hai fatto remove}
-    // or
-    // activeUsers.remove_if(lambda expression that returns true when the user in the pair is equal to noLongerActive)
-    // or
-    // find_if + remove
 }
 
 
@@ -237,41 +229,41 @@ bool document::operator!=(const document &rhs) const {
 
 
 
-int * document::findInsertIndex(const symbol &symbol) {
-    int *indixes; //FIXME: I'm scared of this
+std::pair<int, int> document::findInsertIndex(const symbol &symbol) {
+    std::pair<int,int> ind;
     int i0=0; int i1=0;
     int minLine=0;
     int totalLines=symbols.size();
     int maxLine= totalLines-1;
     std::vector<Symposium::symbol> lastLine= symbols[maxLine];
 
-    int midLine=0,charIdx=0,minLastChar=0, maxLastChar=0;
+    int midLine=0;int charIdx=0;
     std::vector<Symposium::symbol> maxCurrentLine;
     std::vector<Symposium::symbol> minCurrentLine;
     std::vector<Symposium::symbol> currentLine;
-    char lastChar;
+
 
     // check if struct is empty or char is less than first char
-    if (symbols.empty()||symbol.getCh()<symbols[0][0].getCh()) {indixes[0]=0; indixes[1]=0 /* FIXME: WTF?*/; return indixes;}
+    if (symbols.empty()||symbol.getCh()<symbols[0][0].getCh()) {ind={i0,i1};return ind;}
 
-    lastChar=lastLine[lastLine.size()-1].getCh();
+    auto lastSymbol=lastLine[lastLine.size() - 1];
 
     //char is greater than all existing chars (insert and end)
 
-    if(symbol.getCh()>lastChar){
-        indixes= findEndPosition(lastChar,lastLine,totalLines);
-        return indixes;
+    if(symbol>lastSymbol){
+        ind= findEndPosition(lastSymbol,lastLine,totalLines);
+        return ind;
     }
 
     //binary search
     while(minLine+1<maxLine){
         midLine=minLine+(maxLine-minLine)/2;
         currentLine=symbols[midLine];
-        lastChar=currentLine[currentLine.size()-1].getCh();
+        lastSymbol=currentLine[currentLine.size()-1];
 
-        if(symbol.getCh()==lastChar){
+        if(symbol==lastSymbol){
             i0=midLine; i1=currentLine.size()-1;
-        } else if(symbol.getCh()<lastChar){
+        } else if(symbol<lastSymbol){
             maxLine=midLine;
         } else{
             minLine=midLine;
@@ -280,46 +272,46 @@ int * document::findInsertIndex(const symbol &symbol) {
 
     //check between min and max line
     minCurrentLine=symbols[minLine];
-    minLastChar=minCurrentLine[minCurrentLine.size()-1].getCh();
+    auto minLastSymbol=minCurrentLine[minCurrentLine.size()-1];
     maxCurrentLine=symbols[maxLine];
-    maxLastChar=maxCurrentLine[maxCurrentLine.size()-1].getCh();
+    auto maxLastSymbol=maxCurrentLine[maxCurrentLine.size()-1];
 
-    if(symbol.getCh()<=minLastChar){
-        charIdx=findInsertInLine(symbol.getCh(),minCurrentLine);
+    if(symbol<=minLastSymbol){
+        charIdx=findInsertInLine(symbol,minCurrentLine);
         i0=minLine; i1=charIdx;
-        indixes[0]=i0; indixes[1]=i1;
-        return indixes;
+        ind={i0,i1};
+        return ind;
 
     } else{
-        charIdx=findInsertInLine(symbol.getCh(),maxCurrentLine);
+        charIdx=findInsertInLine(symbol,maxCurrentLine);
         i0=maxLine; i1=charIdx;
-        indixes[0]=i0; indixes[1]=i1;
-        return indixes;
+        ind={i0,i1};
+        return ind;
     }
 
 }
 
-int* document::findEndPosition(char aChar, std::vector<Symposium::symbol> vector, int lines) {
-    int *indixes;
-    if(reinterpret_cast<const char *>(aChar) == "\n"){
-        indixes[0]=lines; indixes[1]=0; return indixes;
+std::pair<int, int> document::findEndPosition(symbol aChar, std::vector<Symposium::symbol> vector, int lines) {
+    std::pair<int,int> ind;
+    if(aChar== emptySymbol){
+        ind={lines,0}; return ind;
     } else{
-        indixes[0]=lines-1; indixes[1]=vector.size();
+        ind={lines-1,vector.size()};
     }
-    return indixes;
+    return ind;
 
 }
 
-int document::findInsertInLine(wchar_t ch, std::vector<Symposium::symbol> vector) {
+int document::findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector) {
     int ind=0;
     int left=0;
     int right= vector.size()-1;
     int mid;
 
-    if(vector.size()==0 ||ch>vector[left].getCh()){
+    if(vector.size()==0 ||ch>vector[left]){
         ind=left;
         return ind;
-    } else if(ch>vector[right].getCh()){
+    } else if(ch>vector[right]){
         ind=vector.size();
         return ind;
     }
@@ -327,21 +319,97 @@ int document::findInsertInLine(wchar_t ch, std::vector<Symposium::symbol> vector
     while(left+1<right){
         mid=left-(right-left)/2;
 
-        if(ch==vector[mid].getCh()){
+        if(ch==vector[mid]){
             id=mid; return id;
-        } else if(ch>vector[mid].getCh()){
+        } else if(ch>vector[mid]){
             left=mid;
         } else{
             right=mid;
         }
     }
 
-    if(ch==vector[left].getCh()){
+    if(ch==vector[left]){
         id=left; return id;
     } else{
         id=right; return right;
     }
 
+}
+
+std::pair<int, int> document::findPosition(const symbol &symbol) {
+    std::pair<int,int> ind;
+    int minLine=0;
+    int totalLines=symbols.size();
+    int maxLine=totalLines-1;
+    std::vector<Symposium::symbol> lastLine= symbols[maxLine];
+    int midLine=0;int charIdx=0;
+    char minLastChar,maxLastChar;
+    std::vector<Symposium::symbol> maxCurrentLine;
+    std::vector<Symposium::symbol> minCurrentLine;
+    std::vector<Symposium::symbol> currentLine;
+
+    char lastChar=lastLine[lastLine.size()-1].getCh();
+
+    // binary search
+    while(minLine+1<maxLine){
+        midLine=minLine+(maxLine-minLine)/2;
+        currentLine=symbols[midLine];
+        lastChar=currentLine[currentLine.size()-1].getCh();
+
+        if(symbol.getCh()==lastChar){
+            ind={midLine,currentLine.size()-1}; return ind;
+        } else if(symbol.getCh()<lastChar){
+            maxLine=midLine;
+        } else{
+            minLine=midLine;
+        }
+    }
+
+    // Check between min and max line
+    minCurrentLine=symbols[minLine];
+    minLastChar=minCurrentLine[minCurrentLine.size()-1].getCh();
+    maxCurrentLine=symbols[maxLine];
+    maxLastChar=maxCurrentLine[maxCurrentLine.size()-1].getCh();
+
+    if(symbol.getCh()<=minLastChar){
+        charIdx=findIndexInLine(symbol,minCurrentLine);
+        ind={minLine,charIdx};
+        return ind;
+    } else{
+        charIdx=findIndexInLine(symbol,maxCurrentLine);
+        ind={maxLine,charIdx};
+        return ind;
+    }
+
+}
+
+int document::findIndexInLine(const symbol &symbol, std::vector<Symposium::symbol> vector) {
+    int left=0;
+    int right=vector.size()-1;
+    int mid;
+
+    if(vector.size()==0||symbol.getCh()<vector[left].getCh()){
+        return left;
+    } else if(symbol.getCh()>vector[right].getCh()){
+        return symbols.size();
+    }
+    while(left+1<right){
+        mid=left+(right-left)/2;
+
+        if(symbol.getCh()==vector[left].getCh()){
+            return mid;
+        } else if(symbol.getCh()>vector[left].getCh()){
+            left=mid;
+        } else{
+            right=mid;
+        }
+    }
+
+    if(symbol.getCh()==vector[left].getCh()){
+        return left;
+    } else if(symbol.getCh()==vector[left].getCh()){
+        return right;
+    }
 }
 
 

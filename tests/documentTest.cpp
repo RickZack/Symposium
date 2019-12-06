@@ -112,33 +112,39 @@ struct Insertion{
     Insertion(symbol s1, symbol s2, std::vector<symbol> result): s1{s1}, s2{s2}, expected{result}{};
 };
 
-struct docRemoteSymbolTest: public testing::TestWithParam<Insertion>{
+struct docRemoteInsertSymbolTest: public testing::TestWithParam<Insertion>{
     document d;
-    docRemoteSymbolTest()= default;
+    docRemoteInsertSymbolTest()= default;
 };
 
-TEST_P(docRemoteSymbolTest, InsertionPosOrder){
+TEST_P(docRemoteInsertSymbolTest, InsertionPosOrder){
     Insertion input=GetParam();
     d.remoteInsert(input.s1);
     d.remoteInsert(input.s2);
     ASSERT_FALSE(d.getSymbols().empty());
     ASSERT_FALSE(d.getSymbols().front().empty());
-
-    EXPECT_EQ(input.expected, d.getSymbols().front());
+    // bisogna considerare solo i primi due perchè gli altri sono emptyChar.
+    EXPECT_EQ(input.expected[0].getCh(), d.getSymbols().front()[0].getCh());
+    EXPECT_EQ(input.expected[1].getCh(), d.getSymbols().front()[1].getCh());
 }
 Insertion inserts[]={
         Insertion(symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true),
-                  {symbol('a', 0, 1, {1}, true), symbol('b', 0, 1, {2}, true)}),
+                  {symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true)}),
 
-        Insertion(symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {1}, true),
-                  {symbol('b', 1, 1, {1}, true), symbol('a', 0, 1, {1}, true)}),
+        Insertion(symbol('a', 1, 1, {1}, true), symbol('b', 0, 1, {1}, true),
+                  {symbol('b', 0, 1, {1}, true), symbol('a', 1, 1, {1}, true)}),
 
         Insertion(symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {1, 2}, true),
                   {symbol('a', 0, 1, {1}, true), symbol('b', 0, 1, {1, 2}, true)}),
 };
-INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteSymbolTest, testing::ValuesIn(inserts));
+INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertSymbolTest, testing::ValuesIn(inserts));
 
-TEST_P(docRemoteSymbolTest, RemovalPosOrder){
+struct docRemoteRemoveSymbolTest: public testing::TestWithParam<Insertion>{
+    document d;
+    docRemoteRemoveSymbolTest()= default;
+};
+
+TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrder){
     Insertion input=GetParam();
     d.remoteInsert(input.s1);
     d.remoteRemove(input.s2);
@@ -158,7 +164,7 @@ Insertion inserts2[]={
         Insertion(symbol('c', 1, 1, {1}, false), symbol('c', 1, 1, {1, 2}, false),
                   {symbol('c', 1, 1, {1}, false), }),
 };
-INSTANTIATE_TEST_CASE_P(RemoveRemoteSymbols, docRemoteSymbolTest, testing::ValuesIn(inserts2));
+INSTANTIATE_TEST_CASE_P(RemoveRemoteSymbols, docRemoteRemoveSymbolTest, testing::ValuesIn(inserts2));
 
 TEST_F(documentTest, canRetrieveSiteIds){
     int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
