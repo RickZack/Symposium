@@ -128,24 +128,13 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
     return newD;
 }
 
-//FIXME: accessFile should check what privilege the resource pointed by [resId] can give to other users, using
-// the uri object of file pointed by [resId]
-// following the call stack for opening a file already inserted with a symlink:
-//      user::openFile -> called when a user will want to access the file pointed by the symlink
-//      directory::access -> called on user's home directory, searches the file and call access on it
-//      file::access -> called on the file retrieved
+
 
 std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
-    std::string pathCurrent;
-    std::string idCurrent;
     std::string pathAdd;
     std::string idAdd;
 
-    tie(pathCurrent, idCurrent)= separate(path); //separate the current path and the id of directory where user want to create a symlink
-
-    std::shared_ptr<directory> dir=this->home->getDir(pathCurrent, idCurrent);
-
-    std::shared_ptr<directory> root1=dir->getRoot();
+    std::shared_ptr<directory> root1=this->home->getRoot();
 
     tie(pathAdd, idAdd)= separate(resId); //separate the path and the id of file which the user want
 
@@ -155,8 +144,12 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     if(priv==privilege::none)
         throw userException(userException::noPriv, UnpackFileLineFunction());
 
-    std::shared_ptr<symlink> sym= dir->addLink(path, fileName, pathAdd, idAdd);
+    uri uriFile=fi->getSharingPolicy();
+    privilege priv2=uriFile.getShare(priv);
+    if(priv2==privilege::none)
+        throw userException(userException::noPriv, UnpackFileLineFunction());
 
+    std::shared_ptr<symlink> sym= home->addLink(path, fileName, pathAdd, idAdd);
     return fi;
 }
 

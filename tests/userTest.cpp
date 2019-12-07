@@ -52,6 +52,7 @@ struct dirMock: public directory{
 
     MOCK_CONST_METHOD3(print, std::string(const std::string &targetUser, bool recursive, int indent));
 
+
     static int getIdCounter(){
         return idCounter;
     }
@@ -101,6 +102,7 @@ struct UserTest: ::testing::Test{
         Dir=new ::testing::NiceMock<dirMock>();
         Root=new ::testing::NiceMock<dirMock>();
         u=new user("username", "AP@ssw0rd!", "noempty", "", 0, std::shared_ptr<directory>(homeDir));
+
     }
     ~UserTest(){
         delete u;
