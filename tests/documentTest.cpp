@@ -150,7 +150,6 @@ TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrder){
     d.remoteRemove(input.s2);
 
     ASSERT_FALSE(d.getSymbols().empty());
-    ASSERT_FALSE(d.getSymbols().front().empty());
 
     EXPECT_EQ(input.expected, d.getSymbols().front());
 }

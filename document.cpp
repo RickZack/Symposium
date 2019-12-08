@@ -163,11 +163,9 @@ void document::remoteRemove(const symbol &toRemove) {
     int i0=pos.first;
     int i1=pos.second;
     symbol sym=symbols[i0][i1];
-    symbols[i0].erase(symbols[i0].begin()+i1);
-    if(symbols[i0].size()==0){
-        symbols.erase(symbols.begin()+i0);
-    }
-
+    if(i0==-1 && i1==-1){
+        return;
+    }else {symbols[i0].erase(symbols[i0].begin()+i1);}
 }
 
 std::wstring document::toText() {
@@ -353,7 +351,17 @@ std::pair<int, int> document::findPosition(const symbol &symbol) {
     std::vector<Symposium::symbol> minCurrentLine;
     std::vector<Symposium::symbol> currentLine;
 
+    //if the struct is empty or char is less than first char
+    if(symbols.empty()||symbol.getCh()<symbols[0][0].getCh()){
+        i0=-1; i1=-1; ind={i0,i1}; return ind;
+    }
+
     auto lastChar=lastLine[lastLine.size()-1];
+
+    //char is greater than all existing chars(insert at end)
+    if(symbol>lastChar){
+        i0=-1; i1=-1; ind={i0,i1}; return ind;
+    }
 
     // binary search
     while(minLine+1<maxLine){
@@ -415,6 +423,7 @@ int document::findIndexInLine(const symbol &symbol, std::vector<Symposium::symbo
     } else if(symbol==vector[left]){
         return right;
     }
+
 }
 
 
