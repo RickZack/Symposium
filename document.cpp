@@ -157,13 +157,17 @@ void document::remoteInsert(const symbol &toInsert) {
 
 }
 
-//FIXME: test docRemoteSymbolTest_RemovalPosOrder fails because this is not implemented
+
 void document::remoteRemove(const symbol &toRemove) {
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
     symbol sym=symbols[i0][i1];
     symbols[i0].erase(symbols[i0].begin()+i1);
+    if(symbols[i0].size()==0){
+        symbols.erase(symbols.begin()+i0);
+    }
+
 }
 
 std::wstring document::toText() {
@@ -338,27 +342,28 @@ int document::findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector)
 
 std::pair<int, int> document::findPosition(const symbol &symbol) {
     std::pair<int,int> ind;
+    int i0=0; int i1=0;
     int minLine=0;
     int totalLines=symbols.size();
-    int maxLine=totalLines-1;
+    int maxLine= totalLines-1;
     std::vector<Symposium::symbol> lastLine= symbols[maxLine];
+
     int midLine=0;int charIdx=0;
-    char minLastChar,maxLastChar;
     std::vector<Symposium::symbol> maxCurrentLine;
     std::vector<Symposium::symbol> minCurrentLine;
     std::vector<Symposium::symbol> currentLine;
 
-    char lastChar=lastLine[lastLine.size()-1].getCh();
+    auto lastChar=lastLine[lastLine.size()-1];
 
     // binary search
     while(minLine+1<maxLine){
         midLine=minLine+(maxLine-minLine)/2;
         currentLine=symbols[midLine];
-        lastChar=currentLine[currentLine.size()-1].getCh();
+        lastChar=currentLine[currentLine.size()-1];
 
-        if(symbol.getCh()==lastChar){
+        if(symbol==lastChar){
             ind={midLine,currentLine.size()-1}; return ind;
-        } else if(symbol.getCh()<lastChar){
+        } else if(symbol<lastChar){
             maxLine=midLine;
         } else{
             minLine=midLine;
@@ -367,11 +372,11 @@ std::pair<int, int> document::findPosition(const symbol &symbol) {
 
     // Check between min and max line
     minCurrentLine=symbols[minLine];
-    minLastChar=minCurrentLine[minCurrentLine.size()-1].getCh();
+    auto minLastSymbol=minCurrentLine[minCurrentLine.size()-1];
     maxCurrentLine=symbols[maxLine];
-    maxLastChar=maxCurrentLine[maxCurrentLine.size()-1].getCh();
+    auto maxLastSymbol=maxCurrentLine[maxCurrentLine.size()-1];
 
-    if(symbol.getCh()<=minLastChar){
+    if(symbol<=minLastSymbol){
         charIdx=findIndexInLine(symbol,minCurrentLine);
         ind={minLine,charIdx};
         return ind;
@@ -388,26 +393,26 @@ int document::findIndexInLine(const symbol &symbol, std::vector<Symposium::symbo
     int right=vector.size()-1;
     int mid;
 
-    if(vector.size()==0||symbol.getCh()<vector[left].getCh()){
+    if(vector.size()==0||symbol<vector[left]){
         return left;
-    } else if(symbol.getCh()>vector[right].getCh()){
+    } else if(symbol>vector[right]){
         return symbols.size();
     }
     while(left+1<right){
         mid=left+(right-left)/2;
 
-        if(symbol.getCh()==vector[left].getCh()){
+        if(symbol==vector[left]){
             return mid;
-        } else if(symbol.getCh()>vector[left].getCh()){
+        } else if(symbol>vector[left]){
             left=mid;
         } else{
             right=mid;
         }
     }
 
-    if(symbol.getCh()==vector[left].getCh()){
+    if(symbol==vector[left]){
         return left;
-    } else if(symbol.getCh()==vector[left].getCh()){
+    } else if(symbol==vector[left]){
         return right;
     }
 }
