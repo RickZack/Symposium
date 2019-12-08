@@ -477,7 +477,7 @@ namespace Symposium {
          * @param smex the @ref serverMessage sent by the server that is supposed to be a response for a previous @ref clientMessage
          * @return the clientMessage that is related to the received @e smex
          */
-        virtual clientMessage & retrieveRelatedMessage(const serverMessage& smex);
+        virtual clientMessage retrieveRelatedMessage(const serverMessage& smex);
 
         virtual ~SymClient() = default;
 

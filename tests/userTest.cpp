@@ -43,8 +43,8 @@ struct dirMock: public directory{
     MOCK_METHOD2(get, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
     MOCK_METHOD0(getRoot, std::shared_ptr<directory>());
-    MOCK_METHOD4(addLink, std::shared_ptr<class symlink>(const std::string &path, const std::string &name, const std::string &filePath,
-            const std::string &fileName));
+    MOCK_METHOD5(addLink, std::shared_ptr<Symposium::symlink>(const std::string &path, const std::string &name, const std::string &filePath,
+            const std::string &fileName, int));
     MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, int idToAssign));
 
     MOCK_METHOD4(access, document&(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode));
@@ -55,6 +55,10 @@ struct dirMock: public directory{
 
     static int getIdCounter(){
         return idCounter;
+    }
+
+    void setRootOfHome(std::shared_ptr<dirMock> root){
+        this->root=root;
     }
 };
 
@@ -69,14 +73,15 @@ struct uriMock: public uri{
 };
 
 struct fileMock: public file{
-    fileMock(): file("dummy", "./somedir", 0) {};
+    uriMock policyMocked;
+
+    fileMock(): file("dummy", "./somedir", 0), policyMocked(uri::getDefaultPrivilege()) {};
     MOCK_METHOD2(setUserPrivilege, privilege(const std::string&, privilege));
     MOCK_METHOD2(setSharingPolicy, uri(const std::string&, uri& newSharingPrefs));
-    uri& getPolicy(){
-        return sharingPolicy;
-    }
+    MOCK_CONST_METHOD1(getUserPrivilege, privilege(const std::string&));
+    MOCK_METHOD0(getSharingPolicy, uri&());
     void setMockPolicy(privilege privilege) {
-        sharingPolicy=uriMock(privilege);
+        policyMocked.activateAlways(privilege);
     }
 
     virtual ~fileMock() override= default;
@@ -101,11 +106,15 @@ struct UserTest: ::testing::Test{
         dummyFile= new ::testing::NiceMock<fileMock>();
         Dir=new ::testing::NiceMock<dirMock>();
         Root=new ::testing::NiceMock<dirMock>();
+        homeDir->setRootOfHome(std::shared_ptr<dirMock>(Root));
         u=new user("username", "AP@ssw0rd!", "noempty", "", 0, std::shared_ptr<directory>(homeDir));
 
     }
     ~UserTest(){
-        delete u;
+        if(u!= nullptr) {
+            delete u;
+            u=nullptr;
+        }
         ::testing::Mock::AllowLeak(homeDir);
         ::testing::Mock::AllowLeak(Root);
         ::testing::Mock::AllowLeak(Dir);
@@ -114,8 +123,8 @@ struct UserTest: ::testing::Test{
 };
 
 TEST_F(UserTest, callAccessFile){
-    testing::InSequence forceOrder; //force the order of EXPECT_CALL
-    dummyFile->setMockPolicy(uri::getDefaultPrivilege());
+    //this will make the call to getShare to return the requested privilege
+    uri um; um.activateAlways();
     /*
      * -anotherDir (has id=1)
      *   -file1 (has id=4)
@@ -123,11 +132,11 @@ TEST_F(UserTest, callAccessFile){
      *   -dir1 (has id=2)
      *     -sym1 (has id=decided internally)
      */
-    std::shared_ptr<class symlink> returned(new class symlink("sym1", "./1", "4"));
-    EXPECT_CALL(*homeDir, getRoot()).WillOnce(::testing::Return(std::shared_ptr<directory>(Root)));
+    std::shared_ptr<class symlink> returned(new Symposium::symlink("sym1", "./1", "4"));
     EXPECT_CALL(*Root, getFile("./1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
-    EXPECT_CALL(static_cast<uriMock&>(dummyFile->getPolicy()), getShare(uri::getDefaultPrivilege()));
-    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "./1", "4")).WillOnce(::testing::Return(returned));
+    EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
+    EXPECT_CALL(*dummyFile, getSharingPolicy()).WillOnce(::testing::ReturnRef(um));
+    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "./1", "4",0)).WillOnce(::testing::Return(returned));
 
     u->accessFile("./1/4", "/2", "sym1");
 }
@@ -263,6 +272,20 @@ struct UserTestRobust: ::testing::Test{
                && !testPwdIfNoSpecialChar(pwd);
     }
 
+    ::testing::AssertionResult newDataChangesUserParameters(const char* arg0, const char* arg1, const char* arg3, const user& userModified, const user& oldData, const user& newData){
+        if(userModified.getUsername()!=oldData.getUsername())
+            return ::testing::AssertionFailure() << "Username of an user cannot be changed";
+        if(userModified.getSiteId()!=oldData.getSiteId())
+            return ::testing::AssertionFailure() << "SiteId of an user cannot be changed";
+        if(newData.getNickname().empty() && userModified.getNickname().empty())
+            return ::testing::AssertionFailure() << "Nickname cannot be changed to the empty string";
+        if(newData.getIconPath().empty() && userModified.getNickname().empty())
+            return ::testing::AssertionFailure() << "IconPath cannot be changed to the empty string";
+        if(oldData.getHome()!=userModified.getHome())
+            return ::testing::AssertionFailure() << "User's home cannot be changed";
+        return ::testing::AssertionSuccess();
+    }
+
     virtual ~UserTestRobust() {
         delete u;
         u=nullptr;
@@ -310,6 +333,38 @@ TEST_F(UserTestRobust, applyTransformationOnGivenPwd){
     ASSERT_TRUE(isAGoodPwd(goodPwd));
     u=new user("username", goodPwd, "nickname", "", 0, nullptr);
     EXPECT_FALSE(u->getPwdHash()==goodPwd);
+}
+
+TEST_F(UserTestRobust, setNewDataDoesntChangeUsername){
+    u=new user("username", goodPwd, "nickname", "", 0, nullptr);
+    user newData("anotherUsername", goodPwd, "nickname", "", 0, nullptr);
+    user modified(*u);
+    modified.setNewData(newData);
+    EXPECT_PRED_FORMAT3(newDataChangesUserParameters, modified, *u, newData);
+}
+
+TEST_F(UserTestRobust, setNewDataDoesntChangeSiteId){
+    u=new user("username", goodPwd, "nickname", "", 0, nullptr);
+    user newData("username", goodPwd, "nickname", "", 1, nullptr);
+    user modified(*u);
+    modified.setNewData(newData);
+    EXPECT_PRED_FORMAT3(newDataChangesUserParameters, modified, *u, newData);
+}
+
+TEST_F(UserTestRobust, setNewDataDoesntChangeHome){
+    u=new user("username", goodPwd, "nickname", "", 0, directory::getRoot());
+    user newData("username", goodPwd, "nickname", "", 1, nullptr);
+    user modified(*u);
+    modified.setNewData(newData);
+    EXPECT_PRED_FORMAT3(newDataChangesUserParameters, modified, *u, newData);
+}
+
+TEST_F(UserTestRobust, setNewDataDoesntChangeWithEmptyStrings){
+    u=new user("username", goodPwd, "nickname", "", 0, nullptr);
+    user newData;
+    user modified(*u);
+    modified.setNewData(newData);
+    EXPECT_PRED_FORMAT3(newDataChangesUserParameters, modified, *u, newData);
 }
 
 /*

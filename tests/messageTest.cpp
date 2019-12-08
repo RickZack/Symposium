@@ -79,9 +79,8 @@ std::ostream& operator<<(std::ostream& output, msgType m){
     switch(m){
         case msgType::registration: return output<<"msgType::registration";
         case msgType::login: return output<<"msgType::login";
-        case msgType::changeUserNick: return output<<"msgType::changeUserNick";
         case msgType::changeUserPwd: return output<<"msgType::changeUserPwd";
-        case msgType::changeUserIcon: return output<<"msgType::changeUserIcon";
+        case msgType::changeUserData: return output<<"msgType::changeUserData";
         case msgType::removeUser: return output<<"msgType::removeUser";
         case msgType::logout: return output<<"msgType::logout";
 
@@ -110,8 +109,8 @@ TEST_P(MessageActionTest, askResMsgForbiddenActions){
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m= new askResMessage(action, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0), action, messageException);
 }
 msgType askResForbidden[]={
-        msgType::registration, msgType::login, msgType::changeUserNick, msgType::changeUserPwd,
-        msgType::changeUserIcon, msgType::mapChangesToUser, msgType::changePrivileges, msgType::shareRes,
+        msgType::registration, msgType::login, msgType::changeUserPwd,
+         msgType::mapChangesToUser, msgType::changePrivileges, msgType::shareRes,
         msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::closeRes
 };
@@ -122,8 +121,8 @@ TEST_P(MessageActionTest, signUpMsgForbiddenActions){
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m=new signUpMessage(action, {"",""}, u), action, messageException);
 }
 msgType signUpForbidden[]={
-        msgType::login, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-        msgType::changeUserIcon, msgType::mapChangesToUser, msgType::changePrivileges, msgType::shareRes,
+        msgType::login, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
+         msgType::mapChangesToUser, msgType::changePrivileges, msgType::shareRes,
         msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::closeRes, msgType::openNewRes, msgType::changeResName, msgType::removeRes
 };
@@ -134,8 +133,8 @@ TEST_P(MessageActionTest, updateDocMsgForbiddenActions) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new updateDocMessage(action, {"", ""}, 0), action, messageException);
 }
 msgType updateDocForbidden[]={
-        msgType::registration, msgType::login, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-        msgType::changeUserIcon, msgType::changePrivileges, msgType::shareRes,
+        msgType::registration, msgType::login, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
+         msgType::changePrivileges, msgType::shareRes,
         msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::openNewRes, msgType::changeResName, msgType::removeRes
 };
@@ -146,8 +145,8 @@ TEST_P(MessageActionTest, loginMsgForbiddenActions) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new loginMessage(action, msgOutcome::success, u), action, messageException);
 }
 msgType loginForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-        msgType::changeUserIcon, msgType::changePrivileges, msgType::shareRes,
+        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
+         msgType::changePrivileges, msgType::shareRes,
         msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
 };
@@ -158,8 +157,8 @@ TEST_P(MessageActionTest, mapMsgForbiddenActions) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new mapMessage(action, msgOutcome::success, std::map<int, user>()), action, messageException);
 }
 msgType mapForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-        msgType::changeUserIcon, msgType::changePrivileges, msgType::shareRes,
+        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
+         msgType::changePrivileges, msgType::shareRes,
         msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::login
 };
@@ -170,8 +169,8 @@ TEST_P(MessageActionTest, sendResMsgForbiddenActions) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new sendResMessage(action, msgOutcome::success, f), action, messageException);
 }
 msgType sendResForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd,
-        msgType::changeUserIcon, msgType::changePrivileges, msgType::shareRes,
+        msgType::registration, msgType::closeRes, msgType::changeUserPwd,
+         msgType::changePrivileges, msgType::shareRes,
         msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::mapChangesToUser
 };
@@ -182,8 +181,8 @@ TEST_P(MessageActionTest, updateActiveMsgForbiddenActions) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new updateActiveMessage(action, msgOutcome::success, u, 0), action, messageException);
 }
 msgType updateActiveForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-        msgType::changeUserIcon, msgType::changePrivileges, msgType::shareRes,
+        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
+         msgType::changePrivileges, msgType::shareRes,
         msgType::insertSymbol, msgType::removeSymbol, msgType::mapChangesToUser,
         msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::login
 };
@@ -194,8 +193,8 @@ TEST_P(MessageActionTest, privMsgForbiddenActions) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new privMessage(action, {"", ""}, msgOutcome::success, 0, "", privilege::modify), action, messageException);
 }
 msgType privMsgForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-        msgType::changeUserIcon, msgType::login, msgType::shareRes,
+        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
+         msgType::login, msgType::shareRes,
         msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
 };
@@ -206,8 +205,8 @@ TEST_P(MessageActionTest, symbolMsgForbiddenActions) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new symbolMessage(action, {"", ""}, msgOutcome::success, 0, 0, s), action, messageException);
 }
 msgType symbolMsgForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-        msgType::changeUserIcon, msgType::login, msgType::shareRes,
+        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
+         msgType::login, msgType::shareRes,
         msgType::changePrivileges, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
 };
@@ -219,8 +218,8 @@ TEST_P(MessageActionTest, uriMsgForbiddenActions) {
                                                          "name", uri(), 0), action, messageException);
 }
 msgType uriMsgForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserNick, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-        msgType::changeUserIcon, msgType::changePrivileges, msgType::login,
+        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
+         msgType::changePrivileges, msgType::login,
         msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
         msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
 };
@@ -256,7 +255,7 @@ public:
     MOCK_METHOD5(editPrivilege, privilege(const user&, const user&, const std::string&, const std::string&, privilege));
     MOCK_METHOD3(remoteInsert, void(const std::string&, int, symbolMessage&));
     MOCK_METHOD3(remoteRemove, void(const std::string&, int, const symbol&));
-    MOCK_METHOD4(shareResource, uri(const user& actionUser, const std::string&, const std::string&, uri&));
+    MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const user& actionUser, const std::string&, const std::string&, uri&));
     MOCK_METHOD3(editUser, const user&(const std::string&, const std::string&, user&));
     MOCK_METHOD2(closeSource, void(const user&, document&));
 };
@@ -592,7 +591,7 @@ TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemove){
     //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
     //(here we suppose it is the dummy user u)
     //Same thing with targetUser
-    EXPECT_CALL(server, shareResource(u, "path", "name", const_cast<uri&>(fc->getSharingPrefs()))).WillOnce(::testing::Return(fc->getSharingPrefs()));
+    EXPECT_CALL(server, shareResource(u, "path", "name", const_cast<uri&>(fc->getSharingPrefs())));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::shareRes, msgOutcome::success, fromClient->getMsgId());

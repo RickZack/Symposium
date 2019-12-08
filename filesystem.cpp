@@ -56,7 +56,7 @@ privilege filesystem::getUserPrivilege(const std::string &targetUser) const {
     throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
-const uri &filesystem::getSharingPolicy() const {
+uri &filesystem::getSharingPolicy() {
     return sharingPolicy;
 }
 

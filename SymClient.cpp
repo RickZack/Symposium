@@ -115,6 +115,7 @@ void SymClient::createNewDir(const std::string &path, const std::string &name, i
     getLoggedUser().newDirectory(name,path,idToAssign);
 }
 
+
 symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index) {
     document d = this->getActiveDocumentbyID(resourceId);
     if (d==NULL)
@@ -163,11 +164,13 @@ uriMessage SymClient::shareResource(const std::string &resPath, const std::strin
 }
 
 uri SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs, bool msgRcv) {
-    return SymClient::getLoggedUser().shareResource(resPath, resName, newPrefs);
+    //TODO: modified this method, return the file
+    //return SymClient::getLoggedUser().shareResource(resPath, resName, newPrefs);
 }
 
 askResMessage
 SymClient::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) {
+    //FIXME: mess is not in dynamic memory, assign its pointer to a shared_ptr is wrong
     askResMessage mess = askResMessage(msgType::changeResName, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, newName, uri::getDefaultPrivilege(), 0);
     unanswered.push_front(std::shared_ptr<askResMessage>(&mess));
     return mess;
@@ -198,6 +201,7 @@ std::string SymClient::showDir(bool recursive) const {
 
 updateDocMessage SymClient::closeSource(int resourceId) {
     document d = getActiveDocumentbyID(resourceId);
+    //FIXME: attenzione, confronti un oggetto con NULL?
     if (d==NULL)
         throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
     activeFile.remove_if([resourceId](std::shared_ptr<file> it){return (it->getDoc().getId() == resourceId);});
@@ -206,7 +210,7 @@ updateDocMessage SymClient::closeSource(int resourceId) {
 }
 //FIXME: add and review tests for editUser
 userDataMessage SymClient::editUser(user &newUserData) {
-    userDataMessage mess = userDataMessage(msgType::changeUserNick, std::pair(SymClient::getLoggedUser().getUsername(), ""), msgOutcome::success, newUserData);
+    userDataMessage mess = userDataMessage(msgType::changeUserData, std::pair(SymClient::getLoggedUser().getUsername(), ""), msgOutcome::success, newUserData);
     unanswered.push_front(std::shared_ptr<userDataMessage>(&mess));
     return mess;
 }
@@ -251,7 +255,7 @@ user &SymClient::getLoggedUser() {
 }
 //RIVEDERE: Il metodo getMsgId() mi fornisce l'ID al quale il messaggio è correlato (quindi l'ID del clientMessage)? oppure l'ID di smex? In questo secondo caso
 //come ottengo l'ID del messaggio correlato? con il metodo isreleatedto, controllare la correttezza del metodo (ritorno un puntatore di qualcosa che è stato rimosso). Usare la removeif o findif
-clientMessage& SymClient::retrieveRelatedMessage(const serverMessage& smex) {
+clientMessage SymClient::retrieveRelatedMessage(const serverMessage& smex) {
     serverMessage mess = smex;
     for (std::shared_ptr<clientMessage> it:SymClient::unanswered){
         if(mess.isRelatedTo(*it)){

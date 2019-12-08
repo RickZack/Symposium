@@ -38,6 +38,7 @@
 #include <map>
 #include "Symposium.h"
 #include "user.h"
+#include "message.h"
 
 
 /**
@@ -52,12 +53,13 @@
  namespace Symposium {
      class SymServer {
      protected:
-         std::unordered_map<std::string, user> registered;                                                /**< registered users, indexed by username */
-         std::unordered_map<std::string, user *> active;                                                   /**< active users, indexed by username */
+         std::unordered_map<std::string, user> registered;                                                 /**< registered users, indexed by username */
+         std::unordered_map<std::string, const user *> active;                                                   /**< active users, indexed by username */
          std::unordered_map<std::string, std::forward_list<document *>> workingDoc;                        /**< list of document each user is working on */
-         std::unordered_map<int, std::queue<std::shared_ptr<message>>> workingQueue;                                       /**< messages queue associated with every document @e resourceId */
-         static int idCounter;                                                                            /**< siteId to be assigned to the next registered user */
-         std::shared_ptr<directory> rootDir;                                                              /**< virtual filesystem of the Symposium server */
+         std::unordered_map<int, std::queue<std::shared_ptr<serverMessage>>> siteIdToMex;                        /**< messages queues associated with every user by means of @e siteId */
+         std::unordered_map<int, std::forward_list<int>> resIdToSiteId;                                    /**< list of users involved in a document, by means of @e siteIds and @e resIds */
+         static int idCounter;                                                                             /**< siteId to be assigned to the next registered user */
+         std::shared_ptr<directory> rootDir;                                                               /**< virtual filesystem of the Symposium server */
 
      public:
          static const user unknownUser;
@@ -226,7 +228,7 @@
           * in @e active, then calls @ref user::shareResource on @e actionUser
           * At the end send a @ref serverMessage with the action outcome
           */
-         virtual uri
+         virtual std::shared_ptr<filesystem>
          shareResource(const user &actionUser, const std::string &resPath, const std::string &resName, uri &newPrefs);
 
          /**
@@ -263,12 +265,12 @@
          /**
          * @brief close a @ref document for a user
          * @param actionUser the user who wants to close the document
-         * @param toClose document to be closed
+         * @param resIdtoClose document to be closed
          *
          * This method is invoked by receiving a @ref updateDocMessage and has the effect of calling
          * @ref document::close and the removal of @e actionUser from @e workingDoc for @e toClose
          */
-         virtual void closeSource(const std::string &actionUser, document &toClose);
+         virtual void closeSource(const std::string &actionUser, int resIdtoClose);
 
          /**
           * @brief changes user's data
@@ -319,7 +321,8 @@
 
      protected:
          /*
-          * These methods have been created for test suites to allow the mock class to access elements
+          * These methods have been created for test suites to allow the mock class to access elements.
+          * They must be used in code to allow tests to verify expectations
           */
          virtual user &registerUser(user *toInsert);
 
@@ -340,13 +343,80 @@
           */
      private:
          static bool userIsValid(const user &toCheck);
+         /**
+          * @brief searches in the @e workingDoc map for the document that has the given @e resourceId
+          * @param username the username of the user whose working state on a document is to be checked
+          * @param resourceId the id of the resource we want to know if the user is working on
+          * @return a pair that containt {false, nulltpr} if the user is not working on the resource that has the given
+          * @e resourceId, or {true, pointer to document} if the user is working on the resource
+          */
          std::pair<bool, document *> userIsWorkingOnDocument(const std::string &username, int resourceId);
 
+        /**
+         * @brief Handles the access of @e actionUser to the document to change the privileges of a target user
+         * @param actionUser the name of the user who is changing the privileges of the target user
+         * @param resName the resource name
+         * @param pathFromUserHome the resource path, stating form @e actionUser's home directory
+         * @param actionU the user who is changing the privileges of the target user
+         * @return the resId of the document involved in the privilege change
+         */
          int
-         handleAccessToDoc(const std::string &actionUser, const std::string &targetUser, const std::string &resName,
+         handleAccessToDoc(const std::string &actionUser, const std::string &resName,
                            const std::string &pathFromUserHome, const user &actionU);
 
-         void handleUserState(const std::string &targetUser, int docId);
+        /**
+         * @brief Handles control on the state of @e targetUser, to impose that it should or should not work on the resource
+         * @param targetUser the user whose state is to be controlled
+         * @param docId the resource for which the working state of the user should be controlled
+         * @param working indicates whether an exception is to be raised if the user work or do not work on the resource
+         * @throws SymServerException thrown if @e targetUser has state @e working on resource @e docId
+         */
+         void handleUserState(const std::string &targetUser, int docId, bool working=true);
+
+         /**
+          * @brief extract the siteIds associated to the given @e resId, excluding @e siteIdToExclude from the result
+          * @param resId the resource id of the resource we want the siteIds associated with
+          * @param siteIdToExclude a siteId to exclude from the result, tipically the one of the user who asked for this
+          * @return a list of siteIds
+          */
+         virtual std::forward_list<int> siteIdsFor(int resId, int siteIdToExclude=-1);
+
+         /**
+          * @brief extract the resIds of the documents associated with the user names @e username
+          * @param username the name of the user for which the mapping is needed
+          * @return a list of resIds
+          */
+         virtual std::forward_list<int> resIdOfDocOfUser(const std::string& username);
+
+         /**
+          * @brief extract the siteIds of the users that are associated with at least one of resIds in @e resIds
+          * @param resIds a list of resource ids for which a mapping with the working user's siteId is needed
+          * @param siteIdToExclude a siteId to exclude from the result, tipically the one of the user who asked for this
+          * @return a list of siteIds
+          */
+         virtual std::forward_list<int> siteIdOfUserOfDoc(const std::forward_list<int> &resIds, int siteIdToExclude=-1);
+
+         /**
+          * @brief Insert a copy of the message @e toSend in the message queue associated with every siteIds in @e siteIds
+          * @param siteIds the list of user (by means of their siteId) the message @e toSend should be forwarded to
+          * @param toSend the message to send to every user that has siteId in @e siteIds
+          */
+         void insertMessageForSiteIds(std::forward_list<int> siteIds, std::shared_ptr<serverMessage> toSend);
+
+        /**
+         * @brief Call document::close on all the documents left opened by the user that just logged out and propagate
+         * the message about the disjoin of the user on that documents
+         * @param loggedOut the user that just logged out
+         * @param listOfDocs the user of docs the user was working on
+         */
+         void closeAllDocsAndPropagateMex(const user &loggedOut, std::forward_list<document*> listOfDocs);
+
+         /**
+          * @brief Removes the siteId of the user that just logged out from the list
+          * of siteIds associated with every resource that the user left opened
+          * @param loggedOut the user that just logged out
+          */
+         void settleResIdToSiteId(const user &loggedOut);
      };
  }
 

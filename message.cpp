@@ -147,6 +147,10 @@ bool serverMessage::isRelatedTo(const clientMessage &other) {
     return false;
 }
 
+msgOutcome serverMessage::getResult() const {
+    return result;
+}
+
 loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId)
                            : message(action, msgId), serverMessage(action, result, msgId), loggedUser(loggedUser) {
     //TODO: implement

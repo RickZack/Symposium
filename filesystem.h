@@ -93,7 +93,7 @@ namespace Symposium {
          */
         virtual privilege getUserPrivilege(const std::string &targetUser) const;
 
-        const uri &getSharingPolicy() const;
+        virtual uri &getSharingPolicy();
 
         /**
          * @brief set the privilege of @e targetUser to @e newPrivilege for the current filesystem object
@@ -184,7 +184,7 @@ namespace Symposium {
          * @param targetUser the user whose privilege is to be retrieved
          * @return the privilege of @e targetUser
          */
-        privilege getUserPrivilege(const std::string &targetUser) const override;
+        virtual privilege getUserPrivilege(const std::string &targetUser) const override;
 
         /**
          * @brief set the privilege of @e targetUser to @e newPrivilege for the current file
@@ -342,7 +342,7 @@ namespace Symposium {
 
         virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name, int idToAssign=0);
 
-        virtual std::shared_ptr<class symlink>
+        virtual std::shared_ptr<Symposium::symlink>
         addLink(const std::string &path, const std::string &name, const std::string &filePath,
                 const std::string &fileName, int idToAssign=0);
 

@@ -257,6 +257,8 @@
 
          void setResult(msgOutcome outcome);
 
+         msgOutcome getResult() const;
+
          /**
           * @brief invoke an action on the SymClient given as parameter
           * @param client the client instance on which perform the action
@@ -605,10 +607,8 @@
           *
           * When this message is received by the client, the @e invokeMethod calls @ref SymClient::editUser on the
           * @e client passed as parameter.
-          * A message of this type is sent from the server to clients only if one or more of this conditions are met on the
-          * @e userDataMessage sent by the client who requested the change:
-          * @li <em> action==msgType::changeUserNick </em>;
-          * @li <em> action==msgType::changeUserIcon </em>;
+          * A message of this type is sent from the server to clients only if:
+          * @li <em> action==msgType::changeUserData </em>;
           */
          void invokeMethod(SymClient &client) override;
 

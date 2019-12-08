@@ -47,7 +47,7 @@ struct SymClientUserMock: public user{
     MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string &filename, const std::string &path, int id));
     MOCK_METHOD4(editPrivilege, privilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
-    MOCK_CONST_METHOD3(shareResource, uri(const std::string &resPath, const std::string &resName, uri &newPrefs));
+    MOCK_CONST_METHOD3(shareResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, uri &newPrefs));
     MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, const std::string &newName));
     MOCK_CONST_METHOD2(removeResource, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
     MOCK_CONST_METHOD1(showDir, std::string(bool rec));
@@ -521,7 +521,7 @@ TEST_F(SymClientTest, editUserConstructsGoodMessageAndInsertInUnanswered){
     user newData; newData.setNickname("newNickname");
     auto mex=client.editUser(newData);
     messageHasCorrectOwner(mex);
-    userDataMessage expected(msgType::changeUserNick, {username, ""}, msgOutcome::success, newData);
+    userDataMessage expected(msgType::changeUserData, {username, ""}, msgOutcome::success, newData);
     EXPECT_EQ(expected, mex);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }

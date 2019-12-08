@@ -191,7 +191,7 @@
       <bpmn:outgoing>SequenceFlow_14gkdyo</bpmn:outgoing>
       <bpmn:errorEventDefinition />
     </bpmn:boundaryEvent>
-    <bpmn:dataObjectReference id="DataObjectReference_0pwkoe1" name="sendResMessage(messageType::openRes, msgOutcome::success, file)" dataObjectRef="DataObject_0jeo1z5" />
+    <bpmn:dataObjectReference id="DataObjectReference_0pwkoe1" name="sendResMessage(messageType::openNewRes, msgOutcome::success, file)" dataObjectRef="DataObject_0jeo1z5" />
     <bpmn:dataObject id="DataObject_0jeo1z5" />
     <bpmn:sequenceFlow id="SequenceFlow_0odwbhq" sourceRef="ExclusiveGateway_1y2hjpn" targetRef="ExclusiveGateway_0euxy2m" />
     <bpmn:sequenceFlow id="SequenceFlow_0h8ojos" name="msgOucome::failure" sourceRef="ExclusiveGateway_0euxy2m" targetRef="ExclusiveGateway_04z4pf3" />

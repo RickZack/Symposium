@@ -46,9 +46,8 @@ namespace Symposium {
     enum class msgType {
         registration,         /**< used by client, when asking for a new user registration, see @ref signUpMessage */
         login,                /**< used by server and client, when asking or answering for login of existing user, see @ref clientMessage, @ref loginMessage */
-        changeUserNick,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
+        changeUserData,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
         changeUserPwd,        /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
-        changeUserIcon,       /**< used by server and client, when asking for changing the data of an user, see @ref userDataMessage */
         removeUser,           /**< used by client, when asking to remove the user it is logged with, see @ref clientMessage */
         logout,
 

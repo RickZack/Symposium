@@ -484,7 +484,7 @@
 											"top": 105,
 											"width": 129.34619140625,
 											"height": 13,
-											"text": "changeUserNick",
+											"text": "changeUserData",
 											"horizontalAlignment": 0
 										},
 										{
@@ -518,7 +518,7 @@
 											"top": 135,
 											"width": 129.34619140625,
 											"height": 13,
-											"text": "changeUserIcon",
+											"text": "changeUserData",
 											"horizontalAlignment": 0
 										},
 										{
@@ -6682,7 +6682,7 @@
 									"_parent": {
 										"$ref": "AAAAAAFrUWP0PbGMxMc="
 									},
-									"name": "changeUserNick"
+									"name": "changeUserData"
 								},
 								{
 									"_type": "UMLEnumerationLiteral",
@@ -6698,7 +6698,7 @@
 									"_parent": {
 										"$ref": "AAAAAAFrUWP0PbGMxMc="
 									},
-									"name": "changeUserIcon"
+									"name": "changeUserData"
 								},
 								{
 									"_type": "UMLEnumerationLiteral",

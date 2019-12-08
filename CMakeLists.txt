@@ -11,6 +11,7 @@ if(WIN32)
     endif (CMAKE_COMPILER_IS_MINGW)
 endif(WIN32)
 
+add_compile_options(-Werror=conversion-null)
 add_subdirectory(lib/googletest-master)
 include_directories(lib/googletest-master/googletest/include)
 include_directories(lib/googletest-master/googlemock/include)

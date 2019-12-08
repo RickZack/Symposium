@@ -94,7 +94,7 @@ namespace Symposium {
 
         void setHome(std::shared_ptr<directory> home);
 
-        void setNewData(const user &newData);
+        virtual void setNewData(const user &newData);
 
         virtual bool hasPwd(const std::string &pwd) const;
 
@@ -185,7 +185,7 @@ namespace Symposium {
          *
          * Calls @ref directory::getFile on @e home and then file::setSharingPolicy on the retrieved file
          */
-        virtual uri shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const;
+        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const;
 
         /**
          * @brief renames a resource
@@ -207,6 +207,12 @@ namespace Symposium {
          * @return the filesystem object just removed from the user's filesystem
          */
         virtual std::shared_ptr<filesystem> removeResource(const std::string &path, const std::string &name) const;
+
+        /**
+         * @brief constructs a copy of the current user object clearing the @e pwdHash and the @e hashSalt
+         * @return the constructed copy
+         */
+        user makeCopyNoPwd() const;
 
     private:
         /**

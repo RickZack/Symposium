@@ -144,12 +144,11 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
     if(priv==privilege::none)
         throw userException(userException::noPriv, UnpackFileLineFunction());
 
-    uri uriFile=fi->getSharingPolicy();
-    privilege priv2=uriFile.getShare(priv);
+    privilege priv2=fi->getSharingPolicy().getShare(priv);
     if(priv2==privilege::none)
         throw userException(userException::noPriv, UnpackFileLineFunction());
 
-    std::shared_ptr<symlink> sym= home->addLink(path, fileName, pathAdd, idAdd);
+    std::shared_ptr<symlink> sym= home->addLink(path, fileName, pathAdd, idAdd,0);
     return fi;
 }
 
@@ -174,11 +173,11 @@ privilege user::changePrivilege(const std::string &resPath, const std::string &r
     return newP;
 }
 
-uri user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const {
+std::shared_ptr<filesystem> user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     uri u;
     u=newF->setSharingPolicy(username, newPrefs);
-    return u;
+    return newF;
 }
 
 
@@ -200,9 +199,14 @@ bool user::hasPwd(const std::string &pwd) const {
 }
 
 void user::setNewData(const user &newData) {
-    username=newData.username;
-    pwdHash=newData.pwdHash;
-    nickname=newData.nickname;
+    if(!newData.iconPath.empty())
+        iconPath=newData.iconPath;
+    if(!newData.pwdHash.empty()) {
+        pwdHash = newData.pwdHash;
+        hashSalt=newData.hashSalt;
+    }
+    if(!newData.nickname.empty())
+        nickname=newData.nickname;
 }
 
 const std::string &user::getPwdHash() const {
@@ -268,4 +272,11 @@ std::tuple<std::string, std::string>  user::separate(const std::string &path)
         path2.append(path,0, found); //path to the directory of the current user
     id.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
     return  std::make_tuple(path2, id);
+}
+
+user user::makeCopyNoPwd() const {
+    user copy(*this);
+    copy.pwdHash.clear();
+    copy.hashSalt.clear();
+    return copy;
 }
