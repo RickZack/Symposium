@@ -110,6 +110,18 @@ namespace Symposium{
         virtual ~filesystemException()=default;
     };
 
+    class SymClientException : public SymposiumException {
+        static const char* SymClientErrors[];
+    public:
+        /**
+         * @brief Specific error codes for @ref SymClientException. They are used as indexes to the error table string
+         */
+        enum SymClientExceptionCodes{noActiveDocument};
+
+        explicit SymClientException(SymClientExceptionCodes exceptionCode, const char *file, int line, const char *func);
+        virtual ~SymClientException()=default;
+    };
+
 
 }
 

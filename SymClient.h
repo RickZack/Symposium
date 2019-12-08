@@ -217,7 +217,7 @@ namespace Symposium {
         /**
          * @brief remove a symbol on an opened document and constructs a message to sent to the server
          * @param resourceId the document the deletion refers to
-         * @param newSym the symbol to remove
+         * @param indexes the position of the symbol to remove
          * @return a properly constructed @ref symbolMessage to send to the server
          */
         virtual symbolMessage localRemove(int resourceId, int indexes[2]);
@@ -293,7 +293,7 @@ namespace Symposium {
          * @param newPrefs new sharing preferences to set the resource to
          * @return a properly constructed @ref uriMessage to send to the server
          *
-         * When a user client side want to edit the privilege of another user on a resource, it sends a
+         * When a user client side want to share a resource with another user, it sends a
          * @ref uriMessage. The server will answer with a @ref serveMessage indicating if the action has been done successfully.
          * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
          * uri SymClient::shareResource that will actually perform the sharing preference change.
@@ -352,7 +352,7 @@ namespace Symposium {
          * @brief constructs a @ref askResMessage to send to the server to ask to remove a resource
          * @param resPath the relative path to the user's @e home directory where to create the file
          * @param resName the resource's name
-         * @return a properly constructed @ref uriMessage to send to the server
+         * @return a properly constructed @ref askResMessage to send to the server
          *
          * When a user client side wants remove a resource, it sends a @ref askResMessage.
          * The server will answer with a @ref serveMessage indicating if the action has been done successfully.
@@ -430,10 +430,23 @@ namespace Symposium {
          */
         virtual const user editUser(user &newUserData, bool msgRcv);
 
+        /**
+         * @brief delete a user from the system
+         * @return a properly constructed @ref clientMessage to send to the server
+         */
         clientMessage removeUser();
 
+        /**
+         * @brief disconnect a user from the system
+         * @return a properly constructed @ref clientMessage to send to the server
+         */
         clientMessage logout();
 
+        /**
+         * @brief create a @ref updateDocMessage to get from the server the mapping between username ad siteID of @e currentDoc 's activeUsers
+         * @param currentDoc document you are working on
+         * @return a properly constructed @ref updateDocMessage to send to the server
+         */
         updateDocMessage mapSiteIdToUser(const document &currentDoc);
 
         /**
@@ -467,6 +480,9 @@ namespace Symposium {
         virtual clientMessage & retrieveRelatedMessage(const serverMessage& smex);
 
         virtual ~SymClient() = default;
+
+    private:
+        document getActiveDocumentbyID(int id);
     };
 
 //TODO: add methods to allow consumption of messages sent by server as answer to client messages. E.g:
@@ -499,16 +515,6 @@ namespace Symposium {
         explicit filterPrivilege(const user &currentUser, privilege filter = privilege::readOnly);
 
         bool operator()(std::shared_ptr<file> file);
-    };
-
-    class SymClientException: public std::exception{
-    public:
-        ~SymClientException() override {
-        }
-
-        const char *what() const noexcept override {
-            return exception::what();
-        }
     };
 }
 #endif //SYMPOSIUM_SYMCLIENT_H

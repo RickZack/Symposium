@@ -75,3 +75,8 @@ filesystemException::filesystemException(filesystemExceptionCodes exceptionCode,
                              const char *func) :
         SymposiumException(file, line, func, filesystemErrors[static_cast<int>(exceptionCode)]){};
 
+const char* SymClientException::SymClientErrors[]={"No active document with that ID"};
+
+SymClientException::SymClientException(SymClientExceptionCodes exceptionCode, const char *file, int line,
+                                       const char *func) :
+        SymposiumException(file, line, func, SymClientErrors[static_cast<int>(exceptionCode)]){};
