@@ -118,8 +118,6 @@ void SymClient::createNewDir(const std::string &path, const std::string &name, i
 
 symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index) {
     document d = this->getActiveDocumentbyID(resourceId);
-    if (d==NULL)
-        throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
     int pos[2] = {index.first,index.second};
     d.localInsert(pos, const_cast<symbol &>(newSym));
     return symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, newSym);
@@ -132,48 +130,46 @@ symbolMessage SymClient::localRemove(int resourceId, int indexes[2]) {
 
 void SymClient::remoteInsert(int resourceId, const symbol &newSym) {
     document d = this->getActiveDocumentbyID(resourceId);
-    if (d==NULL)
-        throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
     d.remoteInsert(newSym);
 }
 
 void SymClient::remoteRemove(int resourceId, const symbol &rmSym) {
     document d = this->getActiveDocumentbyID(resourceId);
-    if (d==NULL)
-        throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
     d.remoteRemove(rmSym);
 }
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                      privilege newPrivilege) {
     std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
-    privMessage mess = privMessage(msgType::changePrivileges, {SymClient::getLoggedUser().getUsername(),""}, msgOutcome::success, idres, targetUser, newPrivilege);
-    unanswered.push_front(std::shared_ptr<privMessage>(&mess));
-    return mess;
+    privMessage *mess = new privMessage(msgType::changePrivileges, {SymClient::getLoggedUser().getUsername(),""}, msgOutcome::success, idres, targetUser, newPrivilege);
+    unanswered.push_front(std::shared_ptr<privMessage>(mess));
+    return *mess;
 }
 
 privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                    privilege newPrivilege, bool msgRcv) {
-    return SymClient::getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege);
+    return this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege);
 }
 
 uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
-    uriMessage mess = uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0);
-    unanswered.push_front(std::shared_ptr<uriMessage>(&mess));
-    return mess;
+    uriMessage *mess = new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0);
+    unanswered.push_front(std::shared_ptr<uriMessage>(mess));
+    return *mess;
 }
-
+//FIXME: Metodo non funzionante
 uri SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs, bool msgRcv) {
     //TODO: modified this method, return the file
-    //return SymClient::getLoggedUser().shareResource(resPath, resName, newPrefs);
+    std::shared_ptr<filesystem> fil = this->getLoggedUser().shareResource(resPath, resName, newPrefs);
+   // return fil->getSharingPolicy();
+    return newPrefs;
 }
 
 askResMessage
 SymClient::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) {
     //FIXME: mess is not in dynamic memory, assign its pointer to a shared_ptr is wrong
-    askResMessage mess = askResMessage(msgType::changeResName, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, newName, uri::getDefaultPrivilege(), 0);
-    unanswered.push_front(std::shared_ptr<askResMessage>(&mess));
-    return mess;
+    askResMessage *mess = new askResMessage(msgType::changeResName, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, newName, uri::getDefaultPrivilege(), 0);
+    unanswered.push_front(std::shared_ptr<askResMessage>(mess));
+    return *mess;
 }
 
 std::shared_ptr<filesystem>
@@ -184,9 +180,9 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
 
 askResMessage SymClient::removeResource(const std::string &resPath, const std::string &resName) {
     std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
-    askResMessage mess = askResMessage(msgType::removeRes, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, idres, uri::getDefaultPrivilege(), 0);
-    unanswered.push_front(std::shared_ptr<askResMessage>(&mess));
-    return mess;
+    askResMessage *mess = new askResMessage(msgType::removeRes, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, idres, uri::getDefaultPrivilege(), 0);
+    unanswered.push_front(std::shared_ptr<askResMessage>(mess));
+    return *mess;
 }
 
 std::shared_ptr<filesystem>
@@ -194,25 +190,22 @@ SymClient::removeResource(const std::string &resPath, const std::string &resName
     return getLoggedUser().getHome()->remove(getLoggedUser(),resPath,resName);
 }
 //RIVEDERE: Cosa deve fare questo metodo?
-//la funzione stampa l'albero dell'utente
+//la funzione stampa l'albero filesyste dell'utente
 std::string SymClient::showDir(bool recursive) const {
     return "";
 }
 
 updateDocMessage SymClient::closeSource(int resourceId) {
     document d = getActiveDocumentbyID(resourceId);
-    //FIXME: attenzione, confronti un oggetto con NULL?
-    if (d==NULL)
-        throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
     activeFile.remove_if([resourceId](std::shared_ptr<file> it){return (it->getDoc().getId() == resourceId);});
     activeDoc.remove(&d);
     return updateDocMessage(msgType::closeRes, {SymClient::getLoggedUser().getUsername(), ""}, resourceId);
 }
 //FIXME: add and review tests for editUser
 userDataMessage SymClient::editUser(user &newUserData) {
-    userDataMessage mess = userDataMessage(msgType::changeUserData, std::pair(SymClient::getLoggedUser().getUsername(), ""), msgOutcome::success, newUserData);
-    unanswered.push_front(std::shared_ptr<userDataMessage>(&mess));
-    return mess;
+    userDataMessage *mess = new userDataMessage(msgType::changeUserData, std::pair(SymClient::getLoggedUser().getUsername(), ""), msgOutcome::success, newUserData);
+    unanswered.push_front(std::shared_ptr<userDataMessage>(mess));
+    return *mess;
 }
 
 const user SymClient::editUser(user &newUserData, bool msgRcv) {
@@ -227,9 +220,7 @@ clientMessage SymClient::removeUser() {
 
 clientMessage SymClient::logout() {
     std::string user = SymClient::getLoggedUser().getUsername();
-    std::string pw = SymClient::getLoggedUser().getPwdHash();
-    this->~SymClient();
-    return clientMessage(msgType::logout, {user, pw});
+    return clientMessage(msgType::logout, {user, ""});
 }
 
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
@@ -253,17 +244,17 @@ void SymClient::removeActiveUser(int resourceId, user &targetUser) {
 user &SymClient::getLoggedUser() {
     return loggedUser;
 }
-//RIVEDERE: Il metodo getMsgId() mi fornisce l'ID al quale il messaggio è correlato (quindi l'ID del clientMessage)? oppure l'ID di smex? In questo secondo caso
-//come ottengo l'ID del messaggio correlato? con il metodo isreleatedto, controllare la correttezza del metodo (ritorno un puntatore di qualcosa che è stato rimosso). Usare la removeif o findif
+
 clientMessage SymClient::retrieveRelatedMessage(const serverMessage& smex) {
     serverMessage mess = smex;
     for (std::shared_ptr<clientMessage> it:SymClient::unanswered){
         if(mess.isRelatedTo(*it)){
-            clientMessage cmess = clientMessage(*it); //costruttore di copia
+            clientMessage *cmess = new clientMessage(*it); //costruttore di copia
             unanswered.remove(it);
-            return cmess;
+            return *cmess;
         }
     }
+    throw SymClientException(SymClientException::noRelatedMessage, UnpackFileLineFunction());
 }
 
 void SymClient::verifySymbol(int resourceId, const symbol &sym) {

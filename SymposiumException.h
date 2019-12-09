@@ -116,7 +116,7 @@ namespace Symposium{
         /**
          * @brief Specific error codes for @ref SymClientException. They are used as indexes to the error table string
          */
-        enum SymClientExceptionCodes{noActiveDocument};
+        enum SymClientExceptionCodes{noActiveDocument, noRelatedMessage};
 
         explicit SymClientException(SymClientExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~SymClientException()=default;

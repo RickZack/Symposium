@@ -477,14 +477,15 @@ TEST_F(SymClientTest, removeUserConstructsGoodMessageAndInsertInUnanswered){
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
     EXPECT_NE(userReceived, client.getLoggedUser());
 }
-
+//FIXME: Perchè questo test controlla che il messaggio di logout venga inserito tra quelli non risposti?
+//Non abbiamo bisogno della risposta dal server
 TEST_F(SymClientTest, logoutConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
     auto mex=client.logout();
     messageHasCorrectOwner(mex);
     clientMessage expected(msgType::logout, {username, ""});
     EXPECT_EQ(expected, mex);
-    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
+    //EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
     EXPECT_NE(userReceived, client.getLoggedUser());
 }
 
