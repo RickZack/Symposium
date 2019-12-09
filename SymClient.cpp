@@ -69,11 +69,11 @@ askResMessage SymClient::openSource(const std::string &path, const std::string &
     unanswered.push_front(mess);
     return *mess;
 }
-//TEST FALLISCE
+//FIXME: TEST FALLISCE
 void SymClient::openSource(const std::shared_ptr<file> fileAsked) {
-    std::string nome_file = fileAsked->getName();
     activeFile.push_front(fileAsked);
-    activeDoc.push_front(const_cast<document *>(&(fileAsked->getDoc())));
+    document& doc = fileAsked->access(this->getLoggedUser(), privilege::owner);
+    activeDoc.push_front(&doc);
 }
 
 askResMessage
@@ -82,14 +82,14 @@ SymClient::openNewSource(const std::string &resourceId, privilege reqPriv, const
     unanswered.push_front(mess);
     return *mess;
 }
-//TEST FALLISCE
+//FIXME: TEST FALLISCE
 void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
                               const std::string &destName,
                               int idToAssign, const std::shared_ptr<file> fileAsked) {
-    activeFile.push_front(fileAsked);
-    activeDoc.push_front(const_cast<document *>(&(fileAsked->getDoc())));
-    std::shared_ptr<directory> ut = SymClient::getLoggedUser().getHome();   //TEST FALLISCE: il metodo gethome() mi restituisce puntatore a null
     this->getLoggedUser().getHome()->addLink(destPath, destName, resId, (*fileAsked).getName(), idToAssign);
+    activeFile.push_front(this->getLoggedUser().getHome()->getFile(destPath, destName));
+    document *doc = new document((this->getLoggedUser().getHome()->getFile(destPath, destName))->getDoc());
+    activeDoc.push_front(doc);
 }
 
 askResMessage SymClient::createNewSource(const std::string &path, const std::string &name) {
@@ -97,12 +97,12 @@ askResMessage SymClient::createNewSource(const std::string &path, const std::str
     unanswered.push_front(mess);
     return *mess;
 }
-
+//FIXME: TEST FALLISCE
 void SymClient::createNewSource(const std::string &path, const std::string &name, int idToAssign) {
-    std::shared_ptr<file> nfile = getLoggedUser().newFile(name, path, idToAssign);
-    activeFile.push_front(nfile);
-    document d = nfile->getDoc();
-    activeDoc.push_front(&d);
+    std::shared_ptr<file> file = this->getLoggedUser().newFile(name, path, idToAssign);
+    activeFile.push_front(file);
+    document& docReq = file->access(this->getLoggedUser(), privilege::owner);
+    activeDoc.push_front(&docReq);
 }
 
 askResMessage SymClient::createNewDir(const std::string &path, const std::string &name) {
@@ -112,30 +112,30 @@ askResMessage SymClient::createNewDir(const std::string &path, const std::string
 }
 
 void SymClient::createNewDir(const std::string &path, const std::string &name, int idToAssign) {
-    getLoggedUser().newDirectory(name,path,idToAssign);
+    this->getLoggedUser().newDirectory(name,path,idToAssign);
 }
 
-
+//FIXME: TEST FALLISCE
 symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index) {
-    document d = this->getActiveDocumentbyID(resourceId);
+    document* d = this->getActiveDocumentbyID(resourceId);
     int pos[2] = {index.first,index.second};
-    d.localInsert(pos, const_cast<symbol &>(newSym));
+    d->localInsert(pos, const_cast<symbol &>(newSym));
     return symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, newSym);
 }
-//RIVEDERE: non abbiamo il simbolo da eliminare, ma nel messaggio dobbiamo inserire perforza il simbolo, quindi ne ho creato uno a caso ma impostato con la posizione in cui dobbiamo eliminare, va bene?
+//FIXME: non abbiamo il simbolo da eliminare, ma nel messaggio dobbiamo inserire perforza il simbolo, quindi ne ho creato uno a caso ma impostato con la posizione in cui dobbiamo eliminare, corretto?
 symbolMessage SymClient::localRemove(int resourceId, int indexes[2]) {
-    std::vector<int> pos = {indexes[0], indexes[1]};
-    return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, symbol('a', 0, 0, pos, false));
+    std::vector<int> *pos = new std::vector<int>({indexes[0], indexes[1]});
+    return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, symbol('a', 0, 0, *pos, false));
 }
 
 void SymClient::remoteInsert(int resourceId, const symbol &newSym) {
-    document d = this->getActiveDocumentbyID(resourceId);
-    d.remoteInsert(newSym);
+    document* d = this->getActiveDocumentbyID(resourceId);
+    d->remoteInsert(newSym);
 }
 
 void SymClient::remoteRemove(int resourceId, const symbol &rmSym) {
-    document d = this->getActiveDocumentbyID(resourceId);
-    d.remoteRemove(rmSym);
+    document* d = this->getActiveDocumentbyID(resourceId);
+    d->remoteRemove(rmSym);
 }
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
@@ -196,9 +196,9 @@ std::string SymClient::showDir(bool recursive) const {
 }
 
 updateDocMessage SymClient::closeSource(int resourceId) {
-    document d = getActiveDocumentbyID(resourceId);
+    document* d = getActiveDocumentbyID(resourceId);
     activeFile.remove_if([resourceId](std::shared_ptr<file> it){return (it->getDoc().getId() == resourceId);});
-    activeDoc.remove(&d);
+    activeDoc.remove(d);
     return updateDocMessage(msgType::closeRes, {SymClient::getLoggedUser().getUsername(), ""}, resourceId);
 }
 //FIXME: add and review tests for editUser
@@ -233,12 +233,12 @@ void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
 //RIVEDERE: per aggiungere il nuovo utente alla lista di utenti attivi sul documento uso la funzione access di document?
 //Se si, non dovrei avere il livello di privilegio dell'utente da aggiungere? SI, il parametro è da aggiungere
 void SymClient::addActiveUser(int resourceId, user &targetUser) {
-    document d = getActiveDocumentbyID(resourceId);
+    document* d = getActiveDocumentbyID(resourceId);
 }
 
 void SymClient::removeActiveUser(int resourceId, user &targetUser) {
-    document d = getActiveDocumentbyID(resourceId);
-    d.close(targetUser);
+    document* d = getActiveDocumentbyID(resourceId);
+    d->close(targetUser);
 }
 
 user &SymClient::getLoggedUser() {
@@ -279,10 +279,10 @@ bool filterPrivilege::operator()(std::shared_ptr<file> file) {
     return false;
 }
 
-document SymClient::getActiveDocumentbyID(int id){
+document* SymClient::getActiveDocumentbyID(int id){
     for (document *it:this->activeDoc){
         if((*it).getId() == id)
-            return (*it);
+            return (it);
     }
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
 }

@@ -482,7 +482,7 @@ namespace Symposium {
         virtual ~SymClient() = default;
 
     private:
-        document getActiveDocumentbyID(int id);
+        document* getActiveDocumentbyID(int id);
     };
 
 //TODO: add methods to allow consumption of messages sent by server as answer to client messages. E.g:
