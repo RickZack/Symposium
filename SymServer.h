@@ -292,7 +292,7 @@
          * @param pwd the user's password
          * @return the user just removed
           */
-         void removeUser(const std::string &username, const std::string &pwd);
+         virtual void removeUser(const std::string &username, const std::string &pwd);
 
          /**
           * @brief performs a log out, removing the user from @e active
@@ -300,7 +300,7 @@
           * @param pwd the user's password
           * @return the logged out user
           */
-         void logout(const std::string &username, const std::string &pwd);
+         virtual void logout(const std::string &username, const std::string &pwd);
 
          /**
           * @brief maps siteIds to users to allow a client to identify the owner of each change in a document

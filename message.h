@@ -46,10 +46,11 @@
  namespace Symposium {
      class message {
      protected:
+         static int msgCounter;
          int msgId;                 /**< random identifier for the message, used when a message is followed by an answer*/
          msgType action;            /**< Defines the action for the current message */
 
-         message(msgType action, int msgId);
+         message(int msgId);
 
      public:
          int getMsgId() const;
@@ -78,6 +79,7 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
+         clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
 
          const std::pair<std::string, std::string> &getActionOwner() const;
 
@@ -254,6 +256,8 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          serverMessage(msgType action, msgOutcome result, int msgId = 0);
+
+         serverMessage(msgOutcome result, int msgId = 0);
 
          void setResult(msgOutcome outcome);
 

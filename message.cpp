@@ -34,8 +34,16 @@
 #include "SymClient.h"
 
 using namespace Symposium;
-message::message(msgType action, int msgId): action{action}, msgId{msgId} {
-    //TODO: implement
+int message::msgCounter=1;
+
+message::message(int msgId){
+    if(msgId==0)
+    {
+        this->msgId=msgCounter;
+        msgCounter++;
+    }
+    else
+        this->msgId=msgId;
 }
 
 int message::getMsgId() const {
@@ -56,8 +64,14 @@ bool message::operator!=(const message &rhs) const {
 }
 
 clientMessage::clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, int msgId)
-        : message(action, msgId), actionOwner(actionOwner) {
-    //TODO: implement
+        : message(msgId), actionOwner(actionOwner) {
+    if(action!=msgType::login && action!=msgType::removeUser && action!=msgType::logout)
+        throw messageException("Action is not consistent with the message type");
+    this->action=action;
+}
+
+clientMessage::clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId)
+        : message(msgId), actionOwner(actionOwner) {
 }
 
 const std::pair<std::string, std::string> &clientMessage::getActionOwner() const {
@@ -65,7 +79,23 @@ const std::pair<std::string, std::string> &clientMessage::getActionOwner() const
 }
 
 void clientMessage::invokeMethod(SymServer &server) {
-    //TODO: implement
+    switch(action)
+    {
+        case msgType::login:{
+            user us=server.login(actionOwner.first, actionOwner.second);
+            break;
+        }
+        case msgType::removeUser:{
+            server.removeUser(actionOwner.first, actionOwner.second);
+            break;
+        }
+        case msgType::logout:{
+            server.logout(actionOwner.first, actionOwner.second);
+            break;
+        }
+        default:
+            throw messageException("This is not a client message");
+    }
 
 }
 
@@ -91,7 +121,7 @@ clientMessage & clientMessage::clearAuthParam() {
 askResMessage::askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                              const std::string &path,
                              const std::string &name, const std::string &resourceId, privilege accessMode, int msgId)
-        : message(action, msgId), clientMessage(action, actionOwner, msgId), path(path), name(name),
+        : message(msgId), clientMessage( actionOwner, msgId), path(path), name(name),
           resourceId(resourceId) {
     //TODO: implement
 }
@@ -118,7 +148,7 @@ bool askResMessage::operator!=(const askResMessage &rhs) const {
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                              const user &newUser,
                              int msgId)
-                             : message(action, msgId), clientMessage(action, actionOwner, msgId), newUser(newUser) {
+                             : message(msgId), clientMessage(actionOwner, msgId), newUser(newUser) {
     //TODO:implement
 }
 
@@ -130,7 +160,11 @@ const user &signUpMessage::getNewUser() const {
     return newUser;
 }
 
-serverMessage::serverMessage(msgType action, msgOutcome result, int msgId) : message(action, msgId), result(result) {
+serverMessage::serverMessage(msgType action, msgOutcome result, int msgId) : message(msgId), result(result) {
+    //TODO: implement
+}
+
+serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), result(result) {
     //TODO: implement
 }
 
@@ -152,7 +186,7 @@ msgOutcome serverMessage::getResult() const {
 }
 
 loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId)
-                           : message(action, msgId), serverMessage(action, result, msgId), loggedUser(loggedUser) {
+                           : message(msgId), serverMessage(result, msgId), loggedUser(loggedUser) {
     //TODO: implement
 }
 
@@ -165,7 +199,7 @@ void loginMessage::invokeMethod(SymClient &client) {
 }
 
 mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<int, user> &siteIdToUser, int msgId)
-        : message(action, msgId), serverMessage(action, result, msgId), siteIdToUser(siteIdToUser) {
+        : message(msgId), serverMessage(result, msgId), siteIdToUser(siteIdToUser) {
     //TODO: implement
 }
 
@@ -178,7 +212,7 @@ void mapMessage::invokeMethod(SymClient &client) {
 }
 
 sendResMessage::sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId, int msgId)
-        : message(action, msgId), serverMessage(action, result, msgId), resource{resource} {
+        : message(msgId), serverMessage(result, msgId), resource{resource} {
     //TODO: implement
 }
 
@@ -193,8 +227,8 @@ void sendResMessage::invokeMethod(SymClient &client) {
 privMessage::privMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                          const std::string &resourceId, const std::string &targetUser, privilege newPrivilege,
                          int msgId)
-                         : message(action, msgId), clientMessage(action, actionOwner, msgId),
-                           serverMessage(action, result, msgId), resourceId(resourceId), targetUser(targetUser), newPrivilege(newPrivilege) {
+                         : message(msgId), clientMessage(actionOwner, msgId),
+                           serverMessage(result, msgId), resourceId(resourceId), targetUser(targetUser), newPrivilege(newPrivilege) {
     //TODO:implement
 }
 
@@ -225,8 +259,8 @@ void privMessage::completeAction(SymClient &client) {
 symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                              int siteId,
                              int resourceId, const symbol &sym, int msgId)
-                             : message(action, msgId), clientMessage(action, actionOwner, msgId),
-                               serverMessage(action, result, msgId), siteId(siteId), resourceId(resourceId), sym(sym) {
+                             : message(msgId), clientMessage(actionOwner, msgId),
+                               serverMessage(result, msgId), siteId(siteId), resourceId(resourceId), sym(sym) {
     //TODO:implement
 }
 
@@ -262,8 +296,8 @@ void symbolMessage::completeAction(SymClient &client) {
 
 uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                        const std::string &path, const std::string &name, const uri &sharingPrefs, int msgId)
-                       : message(action, msgId), clientMessage(action, actionOwner, msgId),
-                         serverMessage(action, result, msgId), sharingPrefs(sharingPrefs) {
+                       : message(msgId), clientMessage(actionOwner, msgId),
+                         serverMessage(result, msgId), sharingPrefs(sharingPrefs) {
     //TODO:implement
 }
 
@@ -286,7 +320,7 @@ void uriMessage::completeAction(SymClient &client) {
 updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, const user &newUser, int resourceId,
                                          privilege priv,
                                          int msgId)
-                                         : message(action, msgId), serverMessage(action, result, msgId),
+                                         : message(msgId), serverMessage(result, msgId),
                                            newUser(newUser), resourceId(resourceId), userPrivilege(priv) {
     //TODO: implement
 }
@@ -310,7 +344,7 @@ void updateActiveMessage::invokeMethod(SymClient &client) {
 
 updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                                    int resourceId, int msgId)
-                                 : message(action, msgId), clientMessage(action, actionOwner, msgId),
+                                 : message(msgId), clientMessage(actionOwner, msgId),
                                    resourceId(resourceId) {
     //TODO: implement
 }
@@ -328,7 +362,7 @@ void updateDocMessage::invokeMethod(SymServer &server) {
 userDataMessage::userDataMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                                  msgOutcome result,
                                  const user &newUserData, int msgId)
-                                 : message(action, msgId), clientMessage(action, actionOwner, msgId),
+                                 : message(msgId), clientMessage(actionOwner, msgId),
                                    serverMessage(action, result, msgId), newUserData(newUserData) {
     //TODO: implement
 }
