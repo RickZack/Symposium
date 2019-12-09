@@ -38,12 +38,12 @@
 using namespace Symposium;
 
 TEST(messageTest, msgIdIsSet){
-    clientMessage m(msgType::registration, {"", ""});
+    clientMessage m(msgType::login, {"", ""});
     EXPECT_NE(0, m.getMsgId());
 }
 
 TEST(messageTest, relatedMessagesHasSameId){
-    clientMessage m(msgType::registration, {"", ""});
+    clientMessage m(msgType::login, {"", ""});
     serverMessage m2(m.getAction(), msgOutcome::failure, m.getMsgId());
 
     ASSERT_EQ(m.getAction(), m2.getAction());
