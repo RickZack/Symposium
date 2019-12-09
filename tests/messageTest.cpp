@@ -52,26 +52,42 @@ TEST(messageTest, relatedMessagesHasSameId){
     EXPECT_TRUE(m2.isRelatedTo(m));
 }
 
-//Tests for action consistency with the type of message
+/*
+ * Tests for action consistency with the type of message
+ */
 
-struct MessageActionTest: ::testing::TestWithParam<msgType>{
-    message *m;
-    user u;
-    file f;
-    symbol s;
+/*
+ * Data vectors with msgType variables
+ * Names firstGroup, secondGroup, ... are with reference to groups of msgType in messageData.h
+ */
+const std::vector<msgType> firstGroup={msgType::registration, msgType::login, msgType::changeUserPwd, msgType::changeUserData, msgType::removeUser,
+                      msgType::logout};
+const std::vector<msgType> secondGroup={msgType::createRes, msgType::createNewDir, msgType::openRes, msgType::openNewRes, msgType::changeResName,
+                                  msgType::removeRes};
+const std::vector<msgType> thirdGroup={msgType::mapChangesToUser, msgType::changePrivileges, msgType::shareRes,
+                                 msgType::insertSymbol, msgType::removeSymbol};
+const std::vector<msgType> fourthGroup={msgType::addActiveUser, msgType::removeActiveUser, msgType::closeRes};
 
-    MessageActionTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr),
-                         f("name", "./somedir", 0),
-                         s('a', 0, 0, std::vector<int>(), false) {
-        m=nullptr;
-    }
-    ~MessageActionTest(){
-        delete m;
-    }
-
+/*
+ * An EXPECT_THROW by Google Test that also prints the action the caused the not-throwing
+ */
 #define EXPECT_THROW_MESSAGE_CONSTRUCTION(statement, action, exceptionType) \
         EXPECT_THROW(statement, exceptionType) \
-        <<"action: "<<action<<" should not be compatible with this message class";
+        <<"action: "<<action<<" should not be compatible with message class";
+
+struct simpleMsgTypeTest: ::testing::TestWithParam<msgType>{
+    message *m;
+
+    simpleMsgTypeTest(){
+        m=nullptr;
+    }
+    virtual ~simpleMsgTypeTest(){
+        /*
+         * If construction succeed (and it shouldn't), m points to some memory that has to be freed
+         */
+        if(m!= nullptr)
+            delete m;
+    }
 };
 
 //This is useful to print the enum names in case of test failing
@@ -104,139 +120,144 @@ std::ostream& operator<<(std::ostream& output, msgType m){
     }
 }
 
-TEST_P(MessageActionTest, askResMsgForbiddenActions){
+struct askResMsgForbiddenActions: simpleMsgTypeTest{};
+
+TEST_P(askResMsgForbiddenActions, askResThrowExceptionInConstruction){
     msgType action=GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m= new askResMessage(action, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0), action, messageException);
 }
-msgType askResForbidden[]={
-        msgType::registration, msgType::login, msgType::changeUserPwd,
-         msgType::mapChangesToUser, msgType::changePrivileges, msgType::shareRes,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::closeRes
-};
-INSTANTIATE_TEST_CASE_P(askResThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(askResForbidden));
 
-TEST_P(MessageActionTest, signUpMsgForbiddenActions){
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+
+struct signUpMsgForbiddenActions: simpleMsgTypeTest {
+    user u;
+
+    signUpMsgForbiddenActions() : u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr) {}
+    ~signUpMsgForbiddenActions()=default;
+};
+
+TEST_P(signUpMsgForbiddenActions, signUpThrowExceptionInConstruction){
     msgType action=GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m=new signUpMessage(action, {"",""}, u), action, messageException);
 }
-msgType signUpForbidden[]={
-        msgType::login, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-         msgType::mapChangesToUser, msgType::changePrivileges, msgType::shareRes,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::closeRes, msgType::openNewRes, msgType::changeResName, msgType::removeRes
-};
-INSTANTIATE_TEST_CASE_P(signUpThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(signUpForbidden));
+INSTANTIATE_TEST_CASE_P(AllButRegistrationFromFirstGroup, signUpMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(firstGroup.begin()+1, firstGroup.end())));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
-TEST_P(MessageActionTest, updateDocMsgForbiddenActions) {
+
+struct updateDocMsgForbiddenActions: simpleMsgTypeTest {};
+
+TEST_P(updateDocMsgForbiddenActions, updateDocThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new updateDocMessage(action, {"", ""}, 0), action, messageException);
 }
-msgType updateDocForbidden[]={
-        msgType::registration, msgType::login, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-         msgType::changePrivileges, msgType::shareRes,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::openNewRes, msgType::changeResName, msgType::removeRes
-};
-INSTANTIATE_TEST_CASE_P(updateDocThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(updateDocForbidden));
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(AllButMapChangesFromThirdGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
+INSTANTIATE_TEST_CASE_P(AllButCloseResFromFourthGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-1)));
 
-TEST_P(MessageActionTest, loginMsgForbiddenActions) {
+struct loginMsgForbiddenActions: signUpMsgForbiddenActions {};
+TEST_P(loginMsgForbiddenActions, loginThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new loginMessage(action, msgOutcome::success, u), action, messageException);
 }
-msgType loginForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-         msgType::changePrivileges, msgType::shareRes,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
-};
-INSTANTIATE_TEST_CASE_P(loginThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(loginForbidden));
+INSTANTIATE_TEST_CASE_P(AllButRegistrationAndLoginFromFirstGroup, loginMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(firstGroup.begin()+2, firstGroup.end())));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
-TEST_P(MessageActionTest, mapMsgForbiddenActions) {
+
+struct mapMsgForbiddenActions: simpleMsgTypeTest {};
+TEST_P(mapMsgForbiddenActions, mapThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new mapMessage(action, msgOutcome::success, std::map<int, user>()), action, messageException);
 }
-msgType mapForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-         msgType::changePrivileges, msgType::shareRes,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::login
-};
-INSTANTIATE_TEST_CASE_P(mapThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(mapForbidden));
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(AllButMapChangesFromThirdGroup, mapMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
-TEST_P(MessageActionTest, sendResMsgForbiddenActions) {
+struct sendResMsgForbiddenActions: simpleMsgTypeTest {
+    file f;
+    sendResMsgForbiddenActions(): f("name", "./somedir", 0){};
+    ~sendResMsgForbiddenActions()=default;
+};
+TEST_P(sendResMsgForbiddenActions, sendResThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new sendResMessage(action, msgOutcome::success, f), action, messageException);
 }
-msgType sendResForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserPwd,
-         msgType::changePrivileges, msgType::shareRes,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::mapChangesToUser
-};
-INSTANTIATE_TEST_CASE_P(sendResThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(sendResForbidden));
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
-TEST_P(MessageActionTest, updateActiveMsgForbiddenActions) {
+
+struct updateActiveMsgForbiddenActions: signUpMsgForbiddenActions {};
+TEST_P(updateActiveMsgForbiddenActions, updateActiveThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new updateActiveMessage(action, msgOutcome::success, u, 0), action, messageException);
 }
-msgType updateActiveForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-         msgType::changePrivileges, msgType::shareRes,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::mapChangesToUser,
-        msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::login
-};
-INSTANTIATE_TEST_CASE_P(updateActiveThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(updateActiveForbidden));
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_CASE_P(AllButCloseResFromFourthGroup, updateActiveMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-1)));
 
-TEST_P(MessageActionTest, privMsgForbiddenActions) {
+
+struct privMsgForbiddenActions: simpleMsgTypeTest {};
+
+TEST_P(privMsgForbiddenActions, privThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new privMessage(action, {"", ""}, msgOutcome::success, 0, "", privilege::modify), action, messageException);
 }
-msgType privMsgForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-         msgType::login, msgType::shareRes,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
-};
-INSTANTIATE_TEST_CASE_P(privThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(privMsgForbidden));
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(secondGroup));
+std::vector<msgType> ThirdWtChangePriv(thirdGroup);
+auto res=ThirdWtChangePriv.erase(ThirdWtChangePriv.begin()+1);
+INSTANTIATE_TEST_CASE_P(AllButChangePrivilgesFromThirdGroup, privMsgForbiddenActions, testing::ValuesIn(ThirdWtChangePriv));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
-TEST_P(MessageActionTest, symbolMsgForbiddenActions) {
+struct symbolMsgForbiddenActions: simpleMsgTypeTest {
+    symbol s;
+    symbolMsgForbiddenActions(): s('a', 0, 0, std::vector<int>(), false){};
+};
+TEST_P(symbolMsgForbiddenActions, symbolThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new symbolMessage(action, {"", ""}, msgOutcome::success, 0, 0, s), action, messageException);
 }
-msgType symbolMsgForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-         msgType::login, msgType::shareRes,
-        msgType::changePrivileges, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
-};
-INSTANTIATE_TEST_CASE_P(symbolThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(symbolMsgForbidden));
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(AllButSymInsRemFromThirdGroup, symbolMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin(), thirdGroup.end()-2)));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
-TEST_P(MessageActionTest, uriMsgForbiddenActions) {
+struct uriMsgForbiddenActions: simpleMsgTypeTest {};
+TEST_P(uriMsgForbiddenActions, uriThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new uriMessage(action, {"", ""}, msgOutcome::success, "path",
                                                          "name", uri(), 0), action, messageException);
 }
-msgType uriMsgForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::changeUserPwd, msgType::createRes, msgType::createNewDir,
-         msgType::changePrivileges, msgType::login,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
-};
-INSTANTIATE_TEST_CASE_P(uriThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(uriMsgForbidden));
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(secondGroup));
+std::vector<msgType> ThirdWtShareRes(thirdGroup);
+auto res2=ThirdWtShareRes.erase(ThirdWtShareRes.begin()+1);
+INSTANTIATE_TEST_CASE_P(AllButShareResFromThirdGroup, uriMsgForbiddenActions, testing::ValuesIn(ThirdWtShareRes));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
-TEST_P(MessageActionTest, userDataMsgForbiddenActions) {
+struct userDataMsgForbiddenActions: signUpMsgForbiddenActions {};
+TEST_P(userDataMsgForbiddenActions, userDataThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new userDataMessage(action, {"", ""}, msgOutcome::success, u), action, messageException);
 }
-msgType userDataMsgForbidden[]={
-        msgType::registration, msgType::closeRes, msgType::createRes, msgType::createNewDir,
-        msgType::changePrivileges, msgType::shareRes, msgType::login,
-        msgType::insertSymbol, msgType::removeSymbol, msgType::addActiveUser, msgType::removeActiveUser,
-        msgType::openNewRes, msgType::changeResName, msgType::removeRes, msgType::mapChangesToUser
-};
-INSTANTIATE_TEST_CASE_P(userDataThrowExceptionInConstruction, MessageActionTest, testing::ValuesIn(userDataMsgForbidden));
+std::vector<msgType> FirstWtChangeUserData(firstGroup);
+auto res3=FirstWtChangeUserData.erase(FirstWtChangeUserData.begin()+2, FirstWtChangeUserData.begin()+4);
+INSTANTIATE_TEST_CASE_P(FirstWtChangeUserData, userDataMsgForbiddenActions, testing::ValuesIn(FirstWtChangeUserData));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
+
+//TODO: review the following tests
 //Basic logic tests for messages sent ONLY by the client (clientMessage)
 
 class SymServerMock: public SymServer{
