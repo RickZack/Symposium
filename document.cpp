@@ -162,10 +162,11 @@ void document::remoteRemove(const symbol &toRemove) {
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
-    symbol sym=symbols[i0][i1];
     if(i0==-1 && i1==-1){
         return;
-    }else {symbols[i0].erase(symbols[i0].begin()+i1);}
+    }else if(symbols[i0][i1]!=toRemove){
+        return;
+    }else {symbol sym=symbols[i0][i1];symbols[i0].erase(symbols[i0].begin()+i1);}
 }
 
 std::wstring document::toText() {
@@ -359,7 +360,7 @@ std::pair<int, int> document::findPosition(const symbol &symbol) {
     auto lastChar=lastLine[lastLine.size()-1];
 
     //char is greater than all existing chars(insert at end)
-    if(symbol>lastChar){
+    if(symbol.getCh()>lastChar.getCh()){
         i0=-1; i1=-1; ind={i0,i1}; return ind;
     }
 
