@@ -72,14 +72,15 @@
  */
      class clientMessage : public virtual message {
          std::pair<std::string, std::string> actionOwner; /**< Defines the user (username, password) that has just performed the action */
-
+     protected:
+         clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
          clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
-         clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
+
 
          const std::pair<std::string, std::string> &getActionOwner() const;
 
@@ -250,6 +251,8 @@
  */
      class serverMessage : public virtual message {
          msgOutcome result;         /**< result of an operation asked to the server */
+     protected:
+         serverMessage(msgOutcome result, int msgId = 0);
      public:
 
          /**
@@ -257,7 +260,7 @@
           */
          serverMessage(msgType action, msgOutcome result, int msgId = 0);
 
-         serverMessage(msgOutcome result, int msgId = 0);
+
 
          void setResult(msgOutcome outcome);
 
