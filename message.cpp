@@ -278,8 +278,8 @@ privMessage::privMessage(msgType action, const std::pair<std::string, std::strin
                          int msgId)
                          : message(msgId), clientMessage(actionOwner, msgId),
                            serverMessage(result, msgId), resourceId(resourceId), targetUser(targetUser), newPrivilege(newPrivilege) {
-    //if(action!=msgType::changePrivileges)
-        //throw messageException("The action is not consistent with the message type");
+    if(action!=msgType::changePrivileges)
+        throw messageException("The action is not consistent with the message type");
     this->action=action;
 }
 
@@ -312,7 +312,9 @@ symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::s
                              int resourceId, const symbol &sym, int msgId)
                              : message(msgId), clientMessage(actionOwner, msgId),
                                serverMessage(result, msgId), siteId(siteId), resourceId(resourceId), sym(sym) {
-    //TODO:implement
+    if(action!=msgType::insertSymbol && action!=msgType::removeSymbol)
+        throw messageException("The action is not consistent with the message type");
+    this->action=action;
 }
 
 int symbolMessage::getSiteId() const {
@@ -349,7 +351,14 @@ uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string>
                        const std::string &path, const std::string &name, const uri &sharingPrefs, int msgId)
                        : message(msgId), clientMessage(actionOwner, msgId),
                          serverMessage(result, msgId), sharingPrefs(sharingPrefs) {
-    //TODO:implement
+    if(action!=msgType::shareRes)
+        throw messageException("The action is not consistent with the message type");
+    if(result==msgOutcome::success)
+        throw messageException("Invalid action"
+                               "");
+    this->action=action;
+    this->path=path;
+    this->name=name;
 }
 
 const uri &uriMessage::getSharingPrefs() const {
@@ -373,8 +382,12 @@ updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, cons
                                          int msgId)
                                          : message(msgId), serverMessage(result, msgId),
                                            newUser(newUser), resourceId(resourceId), userPrivilege(priv) {
-    if(action!=msgType::openRes|| action!=msgType::openNewRes|| action!=msgType::closeRes)
+    this->action=action;
+    if(action!=msgType::openRes && action!=msgType::closeRes)
         throw messageException("The action is not consistent with the message type");
+    if(result== msgOutcome::success){
+        throw messageException("Failure Message");
+    }
 
 }
 
@@ -435,7 +448,8 @@ userDataMessage::userDataMessage(msgType action, const std::pair<std::string, st
                                  const user &newUserData, int msgId)
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    serverMessage(action, result, msgId), newUserData(newUserData) {
-    //TODO: implement
+   if(action!=msgType::changeUserData && action !=msgType::changeUserPwd && action!= msgType::changePrivileges)
+       throw messageException("The action is not consistent with the message type");
 }
 
 void userDataMessage::invokeMethod(SymServer &server) {
