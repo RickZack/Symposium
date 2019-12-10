@@ -122,11 +122,12 @@ askResMessage::askResMessage(msgType action, const std::pair<std::string, std::s
                              const std::string &path,
                              const std::string &name, const std::string &resourceId, privilege accessMode, int msgId)
         : message(msgId), clientMessage( actionOwner, msgId), path(path), name(name),
-          resourceId(resourceId) {
-    if(action!=msgType::createRes|| action!= msgType::openRes || action!=msgType::openNewRes|| action!=msgType::changeResName
-    || action!=msgType::createNewDir|| action!=msgType::removeRes){
+          resourceId(resourceId), accessMode(accessMode) {
+    if(action!=msgType::createRes && action!= msgType::openRes && action!=msgType::openNewRes&& action!=msgType::changeResName
+    && action!=msgType::createNewDir&& action!=msgType::removeRes)
         throw messageException("Action is not consistent with the message type");
-    }
+
+    this->action=action;
 }
 
 void askResMessage::invokeMethod(SymServer &server) {
@@ -134,6 +135,7 @@ void askResMessage::invokeMethod(SymServer &server) {
     {
         case msgType::createRes:{
           server.createNewSource(getActionOwner().first,path,name);
+          break;
         }
         case msgType::openRes:{
             server.openSource(getActionOwner().first,path,name,accessMode);
@@ -153,6 +155,7 @@ void askResMessage::invokeMethod(SymServer &server) {
         }
         case msgType::removeRes:{
             //server.removeResource()
+            break;
         }
         default:
             throw messageException("This is not a valid message");
@@ -179,9 +182,9 @@ signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::s
                              const user &newUser,
                              int msgId)
                              : message(msgId), clientMessage(actionOwner, msgId), newUser(newUser) {
-    if(action!=msgType::addActiveUser){
+    if(action!=msgType::registration)
         throw messageException("Action is not consistent with the message type");
-    }
+    this->action=action;
 }
 
 void signUpMessage::invokeMethod(SymServer &ss) {
@@ -219,8 +222,9 @@ msgOutcome serverMessage::getResult() const {
 
 loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId)
                            : message(msgId), serverMessage(result, msgId), loggedUser(loggedUser) {
-    if(action!=msgType::login|| action!=msgType::registration)
+    if(action!=msgType::login && action!=msgType::registration)
         throw messageException("The action is not consistent with the message type");
+    this->action=action;
 }
 
 const user &loginMessage::getLoggedUser() const {
@@ -235,8 +239,7 @@ mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<int, us
         : message(msgId), serverMessage(result, msgId), siteIdToUser(siteIdToUser) {
     if(action!=msgType::mapChangesToUser)
         throw messageException("The action is not consistent with the message type");
-    else
-        this->action=action;
+    this->action=action;
 }
 
 const std::map<int, user> & mapMessage::getSiteIdToUser() const {
