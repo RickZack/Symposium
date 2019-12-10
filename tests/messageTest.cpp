@@ -75,6 +75,10 @@ const std::vector<msgType> fourthGroup={msgType::addActiveUser, msgType::removeA
         EXPECT_THROW(statement, exceptionType) \
         <<"action: "<<action<<" should not be compatible with message class";
 
+#define EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(statement, action) \
+        EXPECT_NO_THROW(statement) \
+        <<"action: "<<action<<" should be compatible with message class";
+
 struct simpleMsgTypeTest: ::testing::TestWithParam<msgType>{
     message *m;
 
@@ -119,6 +123,17 @@ std::ostream& operator<<(std::ostream& output, msgType m){
         default: return output<<"operator<< not defined for this value";
     }
 }
+//After bug found 10/12/2019: serverMessage is compatible with every msgType, mostly because
+//it's used to signal failure
+struct serverMsgNotForbidden: simpleMsgTypeTest{};
+TEST_P(serverMsgNotForbidden, serverMsgNoThrowInConstruction){
+    msgType action=GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m= new serverMessage(action, msgOutcome::success), action)
+}
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(fourthGroup));
 
 struct askResMsgForbiddenActions: simpleMsgTypeTest{};
 
@@ -202,14 +217,14 @@ TEST_P(updateActiveMsgForbiddenActions, updateActiveThrowExceptionInConstruction
 INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(firstGroup));
 INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(AllButCloseResFromFourthGroup, updateActiveMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-1)));
+INSTANTIATE_TEST_CASE_P(OnlyCloseResFromFourthGroup, updateActiveMsgForbiddenActions, testing::Values(msgType::closeRes));
 
 
 struct privMsgForbiddenActions: simpleMsgTypeTest {};
 
 TEST_P(privMsgForbiddenActions, privThrowExceptionInConstruction) {
     msgType action = GetParam();
-    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new privMessage(action, {"", ""}, msgOutcome::success, 0, "", privilege::modify), action, messageException);
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new privMessage(action, {"", ""}, msgOutcome::success, "", "", privilege::modify), action, messageException);
 }
 INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(firstGroup));
 INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(secondGroup));
@@ -257,8 +272,11 @@ INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, userDataMsgForbiddenActions, testi
 INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 
-//TODO: review the following tests
-//Basic logic tests for messages sent ONLY by the client (clientMessage)
+/*
+ * Basic logic tests for messages sent ONLY by the client (clientMessage)
+ * These tests verify that, once received by the server, the invokeMethod calls
+ * the proper function on the server itself
+ */
 
 class SymServerMock: public SymServer{
 public:
@@ -267,10 +285,11 @@ public:
     MOCK_METHOD2(removeUser, void(const std::string&, const std::string&));
     MOCK_METHOD1(addUser, const user(const user&));
     MOCK_METHOD3(createNewSource, document&(const user&, const std::string&, const std::string&));
-    MOCK_METHOD5(openNewSource, const document&(const user&, const std::string&, const std::string&, privilege, const std::string&));
-    MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const user&, const std::string&, const std::string&, const std::string&));
-    MOCK_METHOD3(createNewDir, std::shared_ptr<directory>(const user&, const std::string&, const std::string&));
-    MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const user&, const std::string&, const std::string&));
+    MOCK_METHOD4(openSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, privilege));
+    MOCK_METHOD5(openNewSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, const std::string&, privilege));
+    MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, const std::string&));
+    MOCK_METHOD3(createNewDir, std::shared_ptr<directory>(const std::string&, const std::string&, const std::string&));
+    MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&));
     MOCK_METHOD2(mapSiteIdToUser, std::map<int, user>(const std::string&, int));
 
     MOCK_METHOD5(editPrivilege, privilege(const user&, const user&, const std::string&, const std::string&, privilege));
@@ -278,85 +297,112 @@ public:
     MOCK_METHOD3(remoteRemove, void(const std::string&, int, const symbol&));
     MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const user& actionUser, const std::string&, const std::string&, uri&));
     MOCK_METHOD3(editUser, const user&(const std::string&, const std::string&, user&));
-    MOCK_METHOD2(closeSource, void(const user&, document&));
+    MOCK_METHOD2(closeSource, void(const std::string&, int));
 };
 
 struct clientMessageTest: public testing::Test{
     clientMessage *m;
     user u;
+    static const std::string path;
+    static const std::string name;
+    static const std::string resId;
+    static const std::string username;
+    static const std::string pwd;
+    static const int resourceId;
     ::testing::NiceMock<SymServerMock> server;
-    clientMessageTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr){
+    clientMessageTest(): u(username, pwd, "noempty", "", 0, nullptr){
         m= nullptr;
     }
     ~clientMessageTest(){
         delete m;
     }
 };
+const std::string clientMessageTest::path="./dir1/dir2";
+const std::string clientMessageTest::name="somefile";
+const std::string clientMessageTest::resId="./someUserDir/hisDir/hisFile";
+const std::string clientMessageTest::username="mario";
+const std::string clientMessageTest::pwd="AP@ssw0rd!";
+const int clientMessageTest::resourceId=10;
 
 TEST_F(clientMessageTest, clientMessageTestCallsLoginOnServer){
-    m=new clientMessage(msgType::login, {"", ""});
+    m=new clientMessage(msgType::login, {username, pwd});
     EXPECT_CALL(server, login(m->getActionOwner().first, m->getActionOwner().second)).WillOnce(::testing::Return(u));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, clientMessageTestCallsLogoutOnServer){
-    m=new clientMessage(msgType::logout, {"", ""});
+    m=new clientMessage(msgType::logout, {username, ""});
     EXPECT_CALL(server, logout(m->getActionOwner().first, m->getActionOwner().second));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, clientMessageTestCallsRemoveUserOnServer){
-    m=new clientMessage(msgType::removeUser, {"", ""});
+    m=new clientMessage(msgType::removeUser, {username, ""});
     EXPECT_CALL(server, removeUser(m->getActionOwner().first, m->getActionOwner().second));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, signUpMsgTestCallsAddUserOnServer){
-    m=new signUpMessage(msgType::registration, {"", ""}, u);
+    m=new signUpMessage(msgType::registration, {username, ""}, u);
     EXPECT_CALL(server, addUser(u)).WillOnce(::testing::Return(u));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewSource){
-    m= new askResMessage(msgType::createRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
-    document returned;
-    EXPECT_CALL(server, createNewSource(u, "", "")).WillOnce(::testing::ReturnRef(returned));
+    m= new askResMessage(msgType::createRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, createNewSource(u, path, name));
+    m->invokeMethod(server);
+}
+
+TEST_F(clientMessageTest, askResMsgTestCallsOpenSource){
+    m= new askResMessage(msgType::openRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, openSource(m->getActionOwner().first, path, name, uri::getDefaultPrivilege()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsOpenNewSource){
-    m= new askResMessage(msgType::openNewRes, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
-    document returned;
-    EXPECT_CALL(server, openNewSource(u, "", "", privilege::modify, "")).WillOnce(::testing::ReturnRef(returned));
+    m= new askResMessage(msgType::openNewRes, {username, ""}, path, name, resId, uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, openNewSource(username, resId, path, name, uri::getDefaultPrivilege()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsRenameResource){
-    m= new askResMessage(msgType::changeResName, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, renameResource(u, "", "", "")).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
+    //If @e action is "changeResName" then @e resourceId is the new file name. See def. of askResMessage in message.h
+    m= new askResMessage(msgType::changeResName, {username, ""}, path, name, resId, uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, renameResource(username, path, name, resId)).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewDir){
-    m= new askResMessage(msgType::createNewDir, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, createNewDir(u, "", "")).WillOnce(::testing::Return(std::shared_ptr<directory>()));
+    m= new askResMessage(msgType::createNewDir, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, createNewDir(username, path, name));
+    m->invokeMethod(server);
+}
+
+TEST_F(clientMessageTest, askResMsgTestCallsRemoveResource){
+    m= new askResMessage(msgType::removeRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, removeResource(username, path, name)).WillOnce(::testing::Return(std::shared_ptr<directory>()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, updateDocMsgTestCallsMapSiteIdToUser){
-    m=new updateDocMessage(msgType::mapChangesToUser, {"",""},0);
-    EXPECT_CALL(server, mapSiteIdToUser("", 0)).WillOnce(::testing::Return(std::map<int, user>()));
+    m=new updateDocMessage(msgType::mapChangesToUser, {username,""},resourceId);
+    EXPECT_CALL(server, mapSiteIdToUser(username, resourceId));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, updateDocMsgTestCallsCloseSource){
-    m=new updateDocMessage(msgType::closeRes, {"",""},0);
-    document dummy=document();
-    EXPECT_CALL(server, closeSource(u, dummy)).WillOnce(::testing::Return());
+    m=new updateDocMessage(msgType::closeRes, {username,""},resourceId);
+    EXPECT_CALL(server, closeSource(username, resourceId));
     m->invokeMethod(server);
 }
 
-//Basic logic tests for messages sent ONLY by the server (serverMessage)
+
+/*
+ * Basic logic tests for messages sent ONLY by the server (serverMessage)
+ * These tests verify that, once received by the client, the invokeMethod calls
+ * the proper function on the client itself
+ */
 
 class SymClientMock: public SymClient{
 public:
@@ -368,7 +414,7 @@ public:
     MOCK_METHOD6(openNewSource, void(const std::string &resId, privilege reqPriv, const std::string &destPath, const std::string &destName, int idToAssign, const std::shared_ptr<file> fileAsked));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, bool));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, bool));
-    MOCK_METHOD2(addActiveUser, void(int, user &));
+    MOCK_METHOD2(addActiveUser, void(int, user&));
     MOCK_METHOD2(removeActiveUser, void(int, user&));
 
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, privilege, bool));
@@ -380,21 +426,25 @@ public:
 };
 
 struct serverMessageTest: public testing::Test{
+    clientMessage *cm;
     serverMessage *m;
     user u;
     ::testing::NiceMock<SymClientMock> client;
 
     serverMessageTest(): u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr){
+        cm=nullptr;
         m= nullptr;
     }
     ~serverMessageTest(){
         delete m;
+        if(cm!=nullptr)
+            delete cm;
     }
 };
 
 TEST_F(serverMessageTest, loginMsgTestCallsSetLoggedUser){
     m=new loginMessage(msgType::login, msgOutcome::success, u);
-    EXPECT_CALL(client, setLoggedUser(u)).WillOnce(::testing::Return());
+    EXPECT_CALL(client, setLoggedUser(u));
     m->invokeMethod(client);
 }
 
@@ -406,62 +456,82 @@ TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
-    std::shared_ptr<file> dummyFile(new file("file", "./somedir", 0));
+    std::shared_ptr<file> dummyFile(new file("file", "./somedir", 5));
+    //data to call createNewSource() with is retrieved by the previously sent askResMessage, so suppose
+    //the client has sent the following message
+    cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
     m=new sendResMessage(msgType::createRes, msgOutcome::success, *dummyFile);
-    EXPECT_CALL(client, createNewSource(::testing::_, ::testing::_, ::testing::_));
+    EXPECT_CALL(client, createNewSource(clientMessageTest::path, clientMessageTest::name, dummyFile->getId()));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
-    m=new sendResMessage(msgType::createNewDir, msgOutcome::success, *directory::nullDir());
-    EXPECT_CALL(client, createNewDir(::testing::_, ::testing::_, ::testing::_));
+    //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
+    //the client has sent the following message
+    cm= new askResMessage(msgType::createNewDir, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
+    auto dirCreated=directory::emptyDir();
+    m=new sendResMessage(msgType::createNewDir, msgOutcome::success, *dirCreated);
+    EXPECT_CALL(client, createNewDir(clientMessageTest::path, clientMessageTest::name, dirCreated->getId()));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
-    std::shared_ptr<file> dummyFile(new file("file", "./somedir", 0));
+    std::shared_ptr<file> dummyFile(new file("file", "./somedir", 1));
     m=new sendResMessage(msgType::openRes, msgOutcome::success, *dummyFile);
     EXPECT_CALL(client, openSource(dummyFile));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
-    std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir", 0));
+    //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
+    //the client has sent the following message
+    cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, clientMessageTest::resId, uri::getDefaultPrivilege(), 0);
+    std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir", 1));
     m=new sendResMessage(msgType::openNewRes, msgOutcome::success, *dummyFile);
-    EXPECT_CALL(client, openNewSource(::testing::_, ::testing::_, ::testing::_, "file", dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
+    EXPECT_CALL(client, openNewSource(clientMessageTest::resId, uri::getDefaultPrivilege(), clientMessageTest::path, clientMessageTest::name, dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
     m->invokeMethod(client);
 }
 
-TEST_F(serverMessageTest, sendResMsgTestCallsRenameResource){
-    file dummyFile("file", "./somedir", 0);
-    m=new sendResMessage(msgType::changeResName, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, renameResource("", "", "", true)).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
+TEST_F(serverMessageTest, serverMsgTestCallsRenameResource){
+    //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
+    //the client has sent the following message
+    cm= new askResMessage(msgType::changeResName, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "newName", uri::getDefaultPrivilege(), 0);
+    m=new serverMessage(msgType::changeResName, msgOutcome::success);
+    EXPECT_CALL(client, renameResource(clientMessageTest::path, clientMessageTest::name, "newName", true));
     m->invokeMethod(client);
 }
 
-TEST_F(serverMessageTest, sendResMsgTestCallsRemoveResource){
-    file dummyFile("file", "./somedir", 0);
-    m=new sendResMessage(msgType::removeRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, removeResource("", "", true)).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
+TEST_F(serverMessageTest, serverResMsgTestCallsRemoveResource){
+    //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
+    //the client has sent the following message
+    cm= new askResMessage(msgType::removeRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
+    m=new serverMessage(msgType::removeRes, msgOutcome::success);
+    EXPECT_CALL(client, removeResource(clientMessageTest::path, clientMessageTest::name, true));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, updateActiveMsgTestCallsAddActiveUsers){
-    m=new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, u, 0);
+    user sentByServer=u.makeCopyNoPwd();
+    m=new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, sentByServer, 0);
+    //m is a serverMessage, we need a cast to extract the resource id
+    //this will not be necessary in code because SymClient::addActiveUser() is called from within the invokeMethod()
     updateActiveMessage* uam=dynamic_cast<updateActiveMessage*>(m);
-    EXPECT_CALL(client, addActiveUser(uam->getResourceId(), const_cast<user&>(uam->getNewUser()))).WillOnce(::testing::Return());
+    EXPECT_CALL(client, addActiveUser(uam->getResourceId(), sentByServer));
     m->invokeMethod(client);
 }
 
 TEST_F(serverMessageTest, updateActiveMsgTestCallsRemoveActiveUsers){
-    m=new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, u, 0);
+    user sentByServer=u.makeCopyNoPwd();
+    m=new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, sentByServer, 0);
+    //m is a serverMessage, we need a cast to extract the resource id
+    //this will not be necessary in code because SymClient::addActiveUser() is called from within the invokeMethod()
     updateActiveMessage* uam=dynamic_cast<updateActiveMessage*>(m);
-    EXPECT_CALL(client, removeActiveUser(uam->getResourceId(), const_cast<user&>(uam->getNewUser()))).WillOnce(::testing::Return());
+    EXPECT_CALL(client, removeActiveUser(uam->getResourceId(), sentByServer));
     m->invokeMethod(client);
 }
 
+//TODO: review the following tests
 //Basic logic tests for messages that may be sent from client or server (message)
-
 struct DoubleEndMessageTest: public testing::Test{
     serverMessage *fromServer;
     clientMessage *fromClient;

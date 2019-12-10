@@ -193,8 +193,9 @@ directory::directory(const std::string &name, const int &idToAssign) : filesyste
     strategy=std::make_unique<TrivialAccess>();
 }
 
-std::shared_ptr<directory> directory::nullDir() {
-    return std::shared_ptr<directory>();
+std::shared_ptr<directory> directory::emptyDir() {
+    //this way I should not interfere with ids generation
+    return std::shared_ptr<directory>(new directory("EmptyDir", -1));
 }
 
 

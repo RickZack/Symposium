@@ -246,7 +246,7 @@
           * Sends back a @ref serveMessage, to indicate whether the action succeeded or not.
           */
          virtual std::shared_ptr<filesystem>
-         renameResource(const user &renamer, const std::string &resPath, const std::string &resName,
+         renameResource(const std::string &renamer, const std::string &resPath, const std::string &resName,
                         const std::string &newName);
 
          /**
@@ -260,7 +260,7 @@
           * The server checks that @e actionUser is in @e registered and in @e active, then calls @ref user::renameResource on @e remover.
           */
          virtual std::shared_ptr<filesystem>
-         removeResource(const user &remover, const std::string &resPath, const std::string &resName);
+         removeResource(const std::string &remover, const std::string &resPath, const std::string &resName);
 
          /**
          * @brief close a @ref document for a user
@@ -314,7 +314,7 @@
           * the map with users in @e registered.
           * Sends to the client a @ref mapMessage
           */
-         virtual std::map<int, user> mapSiteIdToUser(const std::string &actionUser, int resourceId);
+         virtual std::map<int, user> mapSiteIdToUser(const std::string &actionUser, int resourceId) const;
          //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
          virtual ~SymServer() = default;
@@ -324,8 +324,20 @@
           * These methods have been created for test suites to allow the mock class to access elements.
           * They must be used in code to allow tests to verify expectations
           */
+         /**
+          * @brief insert a new user in the table of registered users
+          * @param toInsert the user to be inserted
+          * @return a reference to the inserted user
+          */
          virtual user &registerUser(user *toInsert);
 
+         /**
+          * @brief return the registered user associated with @e username
+          * @param username the username of the registered user
+          * @return a reference to the user
+          * @warning before a call to this method, the user with @e username must exist in server memory, otherwise an exception is thrown
+          * @throw std::out_of_range can be thrown if the method is called without previously verifying that the user is registered
+          */
          virtual user &getRegistered(const std::string &username);
 
          virtual void removeRegistered(const std::string &username);
@@ -334,9 +346,9 @@
           * These methods are for internal use, to simplify the body of public functions.
           * Some of them are also virtual to be overridden in test suites (read ./tests/SymServerTest.cpp)
           */
-         virtual bool userIsRegistered(const std::string &toCheck);
-         virtual user findUserBySiteId(int id);
-         virtual bool userIsActive(const std::string &username);
+         virtual bool userIsRegistered(const std::string &toCheck) const noexcept ;
+         virtual user findUserBySiteId(int id) const;
+         virtual bool userIsActive(const std::string &username) const;
 
          /*
           * These are utility methods for internal use that don't need override
@@ -350,7 +362,7 @@
           * @return a pair that containt {false, nulltpr} if the user is not working on the resource that has the given
           * @e resourceId, or {true, pointer to document} if the user is working on the resource
           */
-         std::pair<bool, document *> userIsWorkingOnDocument(const std::string &username, int resourceId);
+         std::pair<bool, document *> userIsWorkingOnDocument(const std::string &username, int resourceId) const;
 
         /**
          * @brief Handles the access of @e actionUser to the document to change the privileges of a target user
@@ -379,14 +391,14 @@
           * @param siteIdToExclude a siteId to exclude from the result, tipically the one of the user who asked for this
           * @return a list of siteIds
           */
-         virtual std::forward_list<int> siteIdsFor(int resId, int siteIdToExclude=-1);
+         virtual std::forward_list<int> siteIdsFor(int resId, int siteIdToExclude=-1) const;
 
          /**
           * @brief extract the resIds of the documents associated with the user names @e username
           * @param username the name of the user for which the mapping is needed
           * @return a list of resIds
           */
-         virtual std::forward_list<int> resIdOfDocOfUser(const std::string& username);
+         virtual std::forward_list<int> resIdOfDocOfUser(const std::string& username) const;
 
          /**
           * @brief extract the siteIds of the users that are associated with at least one of resIds in @e resIds
@@ -394,14 +406,14 @@
           * @param siteIdToExclude a siteId to exclude from the result, tipically the one of the user who asked for this
           * @return a list of siteIds
           */
-         virtual std::forward_list<int> siteIdOfUserOfDoc(const std::forward_list<int> &resIds, int siteIdToExclude=-1);
+         virtual std::forward_list<int> siteIdOfUserOfDoc(const std::forward_list<int> &resIds, int siteIdToExclude=-1) const;
 
          /**
           * @brief Insert a copy of the message @e toSend in the message queue associated with every siteIds in @e siteIds
           * @param siteIds the list of user (by means of their siteId) the message @e toSend should be forwarded to
           * @param toSend the message to send to every user that has siteId in @e siteIds
           */
-         void insertMessageForSiteIds(std::forward_list<int> siteIds, std::shared_ptr<serverMessage> toSend);
+         void insertMessageForSiteIds(const std::forward_list<int>& siteIds, std::shared_ptr<serverMessage> toSend);
 
         /**
          * @brief Call document::close on all the documents left opened by the user that just logged out and propagate
@@ -409,7 +421,7 @@
          * @param loggedOut the user that just logged out
          * @param listOfDocs the user of docs the user was working on
          */
-         void closeAllDocsAndPropagateMex(const user &loggedOut, std::forward_list<document*> listOfDocs);
+         void closeAllDocsAndPropagateMex(const user &loggedOut, const std::forward_list<document*>& listOfDocs);
 
          /**
           * @brief Removes the siteId of the user that just logged out from the list

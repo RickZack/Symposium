@@ -215,18 +215,18 @@ std::shared_ptr<filesystem> SymServer::shareResource(const user &actionUser, con
 }
 
 std::shared_ptr<filesystem>
-SymServer::renameResource(const user &renamer, const std::string &resPath, const std::string &resName,
+SymServer::renameResource(const std::string &renamer, const std::string &resPath, const std::string &resName,
                           const std::string &newName) {
-    if(!userIsActive(renamer.getUsername()))
+    if(!userIsActive(renamer))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    return renamer.renameResource(resPath, resName, newName);
+    return getRegistered(renamer).renameResource(resPath, resName, newName);
 }
 
 std::shared_ptr<filesystem>
-SymServer::removeResource(const user &remover, const std::string &resPath, const std::string &resName) {
-    if(!userIsActive(remover.getUsername()))
+SymServer::removeResource(const std::string &remover, const std::string &resPath, const std::string &resName) {
+    if(!userIsActive(remover))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    return remover.removeResource(resPath, resName);
+    return getRegistered(remover).removeResource(resPath, resName);
 }
 
 void SymServer::closeSource(const std::string &actionUser, int resIdtoClose) {
@@ -278,7 +278,7 @@ void SymServer::logout(const std::string &username, const std::string &pwd) {
     active.erase(username);
 }
 
-std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, int resourceId) {
+std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, int resourceId) const {
     std::pair<bool, document*> retrieved=userIsWorkingOnDocument(actionUser, resourceId);
     if(!retrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
@@ -291,8 +291,8 @@ std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, in
     return result;
 }
 
-bool SymServer::userIsRegistered(const std::string &toCheck) {
-    return registered.find(toCheck)!=registered.end();
+bool SymServer::userIsRegistered(const std::string &toCheck) const noexcept {
+    return registered.count(toCheck)==1;
 }
 
 bool SymServer::userIsValid(const user &toCheck) {
@@ -307,14 +307,14 @@ SymServer::SymServer() {
 rootDir=directory::getRoot();
 }
 
-bool SymServer::userIsActive(const std::string &username) {
-    return active.find(username)!=active.end();
+bool SymServer::userIsActive(const std::string &username) const{
+    return active.count(username)==1;
 }
 
-std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string &username, int resourceId) {
+std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string &username, int resourceId) const {
     std::pair<bool, document*> result(false, nullptr);
-    if(workingDoc.find(username)==workingDoc.end()) return result;
-    for(auto doc:workingDoc[username])
+    if(workingDoc.count(username)==0) return result;
+    for(auto doc:workingDoc.at(username))
         if (doc->getId()==resourceId){
             result.first=true; result.second=doc;
             break;
@@ -322,7 +322,7 @@ std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string 
     return result;
 }
 
-user SymServer::findUserBySiteId(int id) {
+user SymServer::findUserBySiteId(int id) const{
     for(const auto& elem:registered)
         if(elem.second.getSiteId()==id)
             return elem.second;
@@ -334,38 +334,40 @@ user &SymServer::registerUser(user *toInsert) {
 }
 
 user &SymServer::getRegistered(const std::string &username) {
-    return registered[username];
+    return registered.at(username);
 }
 
 void SymServer::removeRegistered(const std::string &username) {
     registered.erase(username);
 }
 
-std::forward_list<int> SymServer::siteIdsFor(int resId, int siteIdToExclude) {
-    auto list=resIdToSiteId.find(resId);
+std::forward_list<int> SymServer::siteIdsFor(int resId, int siteIdToExclude) const {
+    auto it=resIdToSiteId.find(resId);
+    auto siteIds=it->second;
     //TODO: fix this exception error
-    if(list == resIdToSiteId.end())
+    if(it == resIdToSiteId.end())
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     if(siteIdToExclude>=0)
-        list->second.remove(siteIdToExclude);
-    return list->second;
+        siteIds.remove(siteIdToExclude);
+    return siteIds;
 }
 
-void SymServer::insertMessageForSiteIds(std::forward_list<int> siteIds, std::shared_ptr<serverMessage> toSend) {
+void SymServer::insertMessageForSiteIds(const std::forward_list<int>& siteIds, std::shared_ptr<serverMessage> toSend) {
     for(int id:siteIds){
         siteIdToMex[id].push(toSend);
     }
 }
 
-std::forward_list<int> SymServer::resIdOfDocOfUser(const std::string &username) {
+std::forward_list<int> SymServer::resIdOfDocOfUser(const std::string &username) const {
     std::forward_list<int> resIds;
-    for(document* d:workingDoc[username]){
+    if(workingDoc.count(username)==0) return resIds;
+    for(auto d:workingDoc.at(username)){
         resIds.push_front(d->getId());
     }
     return resIds;
 }
 
-std::forward_list<int> SymServer::siteIdOfUserOfDoc(const std::forward_list<int> &resIds, int siteIdToExclude) {
+std::forward_list<int> SymServer::siteIdOfUserOfDoc(const std::forward_list<int> &resIds, int siteIdToExclude) const {
     std::set<int> siteIds;
     for(int resId:resIds){
         for(int siteId:siteIdsFor(resId, siteIdToExclude)){
@@ -375,7 +377,7 @@ std::forward_list<int> SymServer::siteIdOfUserOfDoc(const std::forward_list<int>
     return std::forward_list<int>(siteIds.begin(), siteIds.end());
 }
 
-void SymServer::closeAllDocsAndPropagateMex(const user &loggedOut, std::forward_list<document*> listOfDocs) {
+void SymServer::closeAllDocsAndPropagateMex(const user &loggedOut, const std::forward_list<document*>& listOfDocs) {
     for(document* doc: listOfDocs) {
         doc->close(loggedOut);
         updateActiveMessage* toSend=new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, loggedOut.makeCopyNoPwd(), doc->getId());

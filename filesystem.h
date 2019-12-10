@@ -325,7 +325,7 @@ namespace Symposium {
     protected:
         directory(const std::string &name, const int &idToAssign=0);
     public:
-        static std::shared_ptr<directory> nullDir(); //necessary to build a new user client side
+        static std::shared_ptr<directory> emptyDir(); //necessary to build a new user client side
         static std::shared_ptr<directory> getRoot();
 
         virtual std::shared_ptr<filesystem> get(const std::string &path, const std::string &name);

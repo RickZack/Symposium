@@ -152,7 +152,7 @@ public:
         std::queue<std::shared_ptr<serverMessage>> messages=entry->second;
         while(!messages.empty()){
             auto m=messages.front();
-            if(m->getMsgId()==msg.getMsgId() && m->getAction()==msg.getAction()
+            if(/*m->getMsgId()==msg.getMsgId() && */m->getAction()==msg.getAction()
                && m->getResult()==msg.getResult() && typeid(*m)== typeid(msg)){
                 result.first=true; result.second=messages.front();
                 //messages.pop();
@@ -195,11 +195,11 @@ protected:
         registered.erase(username);
     }
 
-    bool userIsRegistered(const std::string &toCheck) override {
+    bool userIsRegistered(const std::string &toCheck) const noexcept override {
         return registered.find(toCheck)!=registered.end();
     }
 
-    bool userIsActive(const std::string &username) override {
+    bool userIsActive(const std::string &username) const override {
         return active.find(username)!=active.end();
     }
 
@@ -208,7 +208,7 @@ protected:
      * here it's necessary to make the function SymServer::mapSiteIdToUser
      * take the mocked user from SymServerAccesser in tests
      */
-    user findUserBySiteId(int id) override {
+    user findUserBySiteId(int id) const override {
         for(const auto& elem:registered)
             if(elem.second.getSiteId()==id)
                 return elem.second;
@@ -787,23 +787,23 @@ TEST_F(SymServerTestFilesystemFunctionality, shareResourceOfUnLoggedUser){
 TEST_F(SymServerTestFilesystemFunctionality, renameResourceCallsRenameResourceOnUser){
     setStageForAccessedDoc(loggedUser);
     EXPECT_CALL(loggedUser, renameResource(filePath, fileName, "newName")).WillOnce(::testing::Return(fileToReturn));
-    auto ret=server.renameResource(loggedUser, filePath, fileName, "newName");
+    auto ret=server.renameResource(loggedUserUsername, filePath, fileName, "newName");
     EXPECT_EQ(fileToReturn, ret);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, renameResourceByUnloggedUser){
-    EXPECT_THROW(server.renameResource(anotherUser, filePath, fileName, "newName"), SymServerException);
+    EXPECT_THROW(server.renameResource(anotherUserUsername, filePath, fileName, "newName"), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, removeResourceCallsResourceFileOnUser){
     setStageForAccessedDoc(loggedUser);
     EXPECT_CALL(loggedUser, removeResource(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
-    auto ret=server.removeResource(loggedUser, filePath, fileName);
+    auto ret=server.removeResource(loggedUserUsername, filePath, fileName);
     EXPECT_EQ(fileToReturn, ret);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, removeResourceByUnloggedUser){
-    EXPECT_THROW(server.removeResource(anotherUser, filePath, fileName), SymServerException);
+    EXPECT_THROW(server.removeResource(anotherUserUsername, filePath, fileName), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCallsRetrieveSiteIdsOnDoc){
