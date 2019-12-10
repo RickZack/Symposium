@@ -38,6 +38,8 @@
 #include "symbol.h"
 #include "uri.h"
 #include "messageData.h"
+#include "filesystem.h"
+#include "resourceType.h"
 
 /**
  * @interface message message.h message

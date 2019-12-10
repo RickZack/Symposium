@@ -32,6 +32,7 @@
 #include "message.h"
 #include "SymServer.h"
 #include "SymClient.h"
+#include "resourceType.h"
 
 using namespace Symposium;
 int message::msgCounter=1;
@@ -196,7 +197,9 @@ const user &signUpMessage::getNewUser() const {
 }
 
 serverMessage::serverMessage(msgType action, msgOutcome result, int msgId) : message(msgId), result(result) {
-    //TODO: implement
+    if(action!=msgType::removeRes && action!=msgType::changeResName)
+        throw messageException("The action is not consistent with the message type");
+    this->action=action;
 }
 
 serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), result(result) {
@@ -252,7 +255,14 @@ void mapMessage::invokeMethod(SymClient &client) {
 
 sendResMessage::sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId, int msgId)
         : message(msgId), serverMessage(result, msgId), resource{resource} {
-    //TODO: implement
+    if(action!=msgType::createRes && action!=msgType::createNewDir && action!=msgType::openNewRes
+    && action!=msgType::changeResName && action!=msgType::removeRes)
+        throw messageException("The action is not consistent with the message type");
+    this->action=action;
+    if(resource.resType()==resourceType::symlink)
+        this->symId=resource.getId();
+    else
+        this->symId=symId;
 }
 
 const filesystem &sendResMessage::getResource() const {
@@ -268,7 +278,9 @@ privMessage::privMessage(msgType action, const std::pair<std::string, std::strin
                          int msgId)
                          : message(msgId), clientMessage(actionOwner, msgId),
                            serverMessage(result, msgId), resourceId(resourceId), targetUser(targetUser), newPrivilege(newPrivilege) {
-    //TODO:implement
+    //if(action!=msgType::changePrivileges)
+        //throw messageException("The action is not consistent with the message type");
+    this->action=action;
 }
 
 const std::string &privMessage::getResourceId() const {
