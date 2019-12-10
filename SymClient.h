@@ -84,15 +84,6 @@ namespace Symposium {
          */
         virtual user& getLoggedUser();
 
-        /**
-         * @brief set all the details of the user just logged
-         * @param loggedUser the user object containing all the information of the logged user
-         *
-         * When the client wants to perform login it calls the logIn method. When the server answers, the loginMessage
-         * calls setLoggedUser, passing the user object transmitted by the user
-         */
-        virtual void setLoggedUser(const user &loggedUser);
-
     public:
         //Some methods are virtual in order to use the mocks in tests
         SymClient();
@@ -480,6 +471,15 @@ namespace Symposium {
         virtual clientMessage retrieveRelatedMessage(const serverMessage& smex);
 
         virtual ~SymClient() = default;
+
+        /**
+             * @brief set all the details of the user just logged
+             * @param loggedUser the user object containing all the information of the logged user
+             *
+             * When the client wants to perform login it calls the logIn method. When the server answers, the loginMessage
+             * calls setLoggedUser, passing the user object transmitted by the user
+             */
+        virtual void setLoggedUser(const user &loggedUser);
 
     private:
         document* getActiveDocumentbyID(int id);

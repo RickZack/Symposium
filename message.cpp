@@ -123,11 +123,41 @@ askResMessage::askResMessage(msgType action, const std::pair<std::string, std::s
                              const std::string &name, const std::string &resourceId, privilege accessMode, int msgId)
         : message(msgId), clientMessage( actionOwner, msgId), path(path), name(name),
           resourceId(resourceId) {
-    //TODO: implement
+    if(action!=msgType::createRes|| action!= msgType::openRes || action!=msgType::openNewRes|| action!=msgType::changeResName
+    || action!=msgType::createNewDir|| action!=msgType::removeRes){
+        throw messageException("Action is not consistent with the message type");
+    }
 }
 
 void askResMessage::invokeMethod(SymServer &server) {
-    //TODO: implement
+    switch(action)
+    {
+        case msgType::createRes:{
+          server.createNewSource(getActionOwner().first,path,name);
+        }
+        case msgType::openRes:{
+            server.openSource(getActionOwner().first,path,name,accessMode);
+            break;
+        }
+        case msgType::openNewRes:{
+            server.openNewSource(getActionOwner().first,resourceId,path,name,accessMode);
+            break;
+        }
+        case msgType::changeResName:{
+            //server.renameResource()
+            break;
+        }
+        case msgType::createNewDir:{
+            server.createNewDir(getActionOwner().first,path,name);
+            break;
+        }
+        case msgType::removeRes:{
+            //server.removeResource()
+        }
+        default:
+            throw messageException("This is not a valid message");
+    }
+
 }
 
 void askResMessage::completeAction(SymClient &client) {
@@ -149,11 +179,13 @@ signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::s
                              const user &newUser,
                              int msgId)
                              : message(msgId), clientMessage(actionOwner, msgId), newUser(newUser) {
-    //TODO:implement
+    if(action!=msgType::addActiveUser){
+        throw messageException("Action is not consistent with the message type");
+    }
 }
 
 void signUpMessage::invokeMethod(SymServer &ss) {
-    //TODO: implement
+    ss.addUser(newUser);
 }
 
 const user &signUpMessage::getNewUser() const {
@@ -187,7 +219,8 @@ msgOutcome serverMessage::getResult() const {
 
 loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId)
                            : message(msgId), serverMessage(result, msgId), loggedUser(loggedUser) {
-    //TODO: implement
+    if(action!=msgType::login|| action!=msgType::registration)
+        throw messageException("The action is not consistent with the message type");
 }
 
 const user &loginMessage::getLoggedUser() const {
@@ -195,12 +228,15 @@ const user &loginMessage::getLoggedUser() const {
 }
 
 void loginMessage::invokeMethod(SymClient &client) {
-    //TODO: implement
+    client.setLoggedUser(loggedUser);
 }
 
 mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<int, user> &siteIdToUser, int msgId)
         : message(msgId), serverMessage(result, msgId), siteIdToUser(siteIdToUser) {
-    //TODO: implement
+    if(action!=msgType::mapChangesToUser)
+        throw messageException("The action is not consistent with the message type");
+    else
+        this->action=action;
 }
 
 const std::map<int, user> & mapMessage::getSiteIdToUser() const {
@@ -208,7 +244,7 @@ const std::map<int, user> & mapMessage::getSiteIdToUser() const {
 }
 
 void mapMessage::invokeMethod(SymClient &client) {
-    //TODO: implement
+    client.setUserColors(siteIdToUser);
 }
 
 sendResMessage::sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId, int msgId)
@@ -322,7 +358,9 @@ updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, cons
                                          int msgId)
                                          : message(msgId), serverMessage(result, msgId),
                                            newUser(newUser), resourceId(resourceId), userPrivilege(priv) {
-    //TODO: implement
+    if(action!=msgType::openRes|| action!=msgType::openNewRes|| action!=msgType::closeRes)
+        throw messageException("The action is not consistent with the message type");
+
 }
 
 const user &updateActiveMessage::getNewUser() const {
@@ -338,7 +376,19 @@ privilege updateActiveMessage::getUserPrivilege() const {
 }
 
 void updateActiveMessage::invokeMethod(SymClient &client) {
-    //TODO: implement
+    switch(action)
+    {
+        case msgType::addActiveUser:{
+            client.addActiveUser(resourceId,newUser);
+            break;
+        }
+        case msgType::removeActiveUser:{
+            client.removeActiveUser(resourceId,newUser);
+            break;
+        }
+        default:
+            throw messageException("This is not a valid message");
+    }
     serverMessage::invokeMethod(client);
 }
 
@@ -346,16 +396,22 @@ updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, 
                                    int resourceId, int msgId)
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    resourceId(resourceId) {
-    //TODO: implement
+    if(action!=msgType::closeRes)
+        throw messageException("The action is not consistent with the message type");
+    this->action=action;
 }
 
 int updateDocMessage::getResourceId() const {
-    //TODO: implement
     return resourceId;
 }
 
 void updateDocMessage::invokeMethod(SymServer &server) {
-    //TODO: implement
+    if(action==msgType::closeRes){
+        server.closeSource(getActionOwner().first,resourceId);
+    }
+    if(action==msgType::mapChangesToUser){
+        server.mapSiteIdToUser(getActionOwner().first,resourceId);
+    }
     clientMessage::invokeMethod(server);
 }
 
