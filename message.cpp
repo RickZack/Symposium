@@ -197,13 +197,10 @@ const user &signUpMessage::getNewUser() const {
 }
 
 serverMessage::serverMessage(msgType action, msgOutcome result, int msgId) : message(msgId), result(result) {
-    if(action!=msgType::removeRes && action!=msgType::changeResName)
-        throw messageException("The action is not consistent with the message type");
     this->action=action;
 }
 
 serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), result(result) {
-    //TODO: implement
 }
 
 void serverMessage::setResult(msgOutcome outcome) {
@@ -448,7 +445,7 @@ userDataMessage::userDataMessage(msgType action, const std::pair<std::string, st
                                  const user &newUserData, int msgId)
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    serverMessage(action, result, msgId), newUserData(newUserData) {
-   if(action!=msgType::changeUserData && action !=msgType::changeUserPwd && action!= msgType::changePrivileges)
+   if(action!=msgType::changeUserData && action !=msgType::changeUserPwd)
        throw messageException("The action is not consistent with the message type");
 }
 
