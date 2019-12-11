@@ -245,7 +245,9 @@ user &SymClient::getLoggedUser() {
     return loggedUser;
 }
 
-clientMessage SymClient::retrieveRelatedMessage(const serverMessage& smex) {
+std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMessage& smex) {
+    //To review
+    /*
     serverMessage mess = smex;
     for (std::shared_ptr<clientMessage> it:SymClient::unanswered){
         if(mess.isRelatedTo(*it)){
@@ -255,6 +257,7 @@ clientMessage SymClient::retrieveRelatedMessage(const serverMessage& smex) {
         }
     }
     throw SymClientException(SymClientException::noRelatedMessage, UnpackFileLineFunction());
+     */
 }
 
 void SymClient::verifySymbol(int resourceId, const symbol &sym) {

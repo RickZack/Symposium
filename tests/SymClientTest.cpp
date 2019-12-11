@@ -541,7 +541,7 @@ TEST_F(SymClientTest, retrieveRelatedMessageReturnCorrectMessage){
     ASSERT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
     serverMessage responseFromServer(msgType::login, msgOutcome::success, mex.getMsgId());
     auto retrieved=client.retrieveRelatedMessage(responseFromServer);
-    EXPECT_EQ(mex, retrieved);
+    EXPECT_EQ(mex, *retrieved);
 }
 
 TEST_F(SymClientTest, retrieveRelatedMessageThrowsOnMissingMessage){

@@ -423,6 +423,7 @@ public:
     MOCK_METHOD4(shareResource, uri(const std::string&, const std::string&, uri&, bool msgRcv));
     MOCK_METHOD2(editUser, const user(user&, bool));
     MOCK_METHOD2(verifySymbol, void(int, const symbol&));
+    MOCK_METHOD1(retrieveRelatedMessage, std::shared_ptr<clientMessage>(const serverMessage&));
 };
 
 struct serverMessageTest: public testing::Test{
@@ -437,14 +438,16 @@ struct serverMessageTest: public testing::Test{
     }
     ~serverMessageTest(){
         delete m;
-        if(cm!=nullptr)
-            delete cm;
     }
 };
 
 TEST_F(serverMessageTest, loginMsgTestCallsSetLoggedUser){
     m=new loginMessage(msgType::login, msgOutcome::success, u);
     EXPECT_CALL(client, setLoggedUser(u));
+    //Even if the retrieved message is not useful to call setLoggedUser(), it's necessary to
+    //notify that the server answered and check if the asked action has been completed successfully
+    EXPECT_CALL(client, retrieveRelatedMessage(*m));
+
     m->invokeMethod(client);
 }
 
@@ -452,6 +455,10 @@ TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
     std::map<int, user> siteIdToUser;
     m=new mapMessage(msgType::mapChangesToUser, msgOutcome::success, siteIdToUser);
     EXPECT_CALL(client, setUserColors(siteIdToUser));
+    //Even if the retrieved message is not useful to call setLoggedUser(), it's necessary to
+    //notify that the server answered and check if the asked action has been completed successfully
+    EXPECT_CALL(client, retrieveRelatedMessage(*m));
+
     m->invokeMethod(client);
 }
 
@@ -462,6 +469,8 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
     cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
     m=new sendResMessage(msgType::createRes, msgOutcome::success, *dummyFile);
     EXPECT_CALL(client, createNewSource(clientMessageTest::path, clientMessageTest::name, dummyFile->getId()));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
+
     m->invokeMethod(client);
 }
 
@@ -472,6 +481,8 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
     auto dirCreated=directory::emptyDir();
     m=new sendResMessage(msgType::createNewDir, msgOutcome::success, *dirCreated);
     EXPECT_CALL(client, createNewDir(clientMessageTest::path, clientMessageTest::name, dirCreated->getId()));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
+
     m->invokeMethod(client);
 }
 
@@ -479,6 +490,8 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
     std::shared_ptr<file> dummyFile(new file("file", "./somedir", 1));
     m=new sendResMessage(msgType::openRes, msgOutcome::success, *dummyFile);
     EXPECT_CALL(client, openSource(dummyFile));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
+
     m->invokeMethod(client);
 }
 
@@ -489,6 +502,8 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
     std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir", 1));
     m=new sendResMessage(msgType::openNewRes, msgOutcome::success, *dummyFile);
     EXPECT_CALL(client, openNewSource(clientMessageTest::resId, uri::getDefaultPrivilege(), clientMessageTest::path, clientMessageTest::name, dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
+
     m->invokeMethod(client);
 }
 
@@ -498,6 +513,8 @@ TEST_F(serverMessageTest, serverMsgTestCallsRenameResource){
     cm= new askResMessage(msgType::changeResName, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "newName", uri::getDefaultPrivilege(), 0);
     m=new serverMessage(msgType::changeResName, msgOutcome::success);
     EXPECT_CALL(client, renameResource(clientMessageTest::path, clientMessageTest::name, "newName", true));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
+
     m->invokeMethod(client);
 }
 
@@ -507,6 +524,8 @@ TEST_F(serverMessageTest, serverResMsgTestCallsRemoveResource){
     cm= new askResMessage(msgType::removeRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
     m=new serverMessage(msgType::removeRes, msgOutcome::success);
     EXPECT_CALL(client, removeResource(clientMessageTest::path, clientMessageTest::name, true));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
+
     m->invokeMethod(client);
 }
 
@@ -524,7 +543,7 @@ TEST_F(serverMessageTest, updateActiveMsgTestCallsRemoveActiveUsers){
     user sentByServer=u.makeCopyNoPwd();
     m=new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, sentByServer, 0);
     //m is a serverMessage, we need a cast to extract the resource id
-    //this will not be necessary in code because SymClient::addActiveUser() is called from within the invokeMethod()
+    //this will not be necessary in code because SymClient::removeActiveUser() is called from within the invokeMethod()
     updateActiveMessage* uam=dynamic_cast<updateActiveMessage*>(m);
     EXPECT_CALL(client, removeActiveUser(uam->getResourceId(), sentByServer));
     m->invokeMethod(client);
