@@ -256,7 +256,7 @@ TEST_P(uriMsgForbiddenActions, uriThrowExceptionInConstruction) {
 INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(firstGroup));
 INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(secondGroup));
 std::vector<msgType> ThirdWtShareRes(thirdGroup);
-auto res2=ThirdWtShareRes.erase(ThirdWtShareRes.begin()+1);
+auto res2=ThirdWtShareRes.erase(ThirdWtShareRes.begin()+2);
 INSTANTIATE_TEST_CASE_P(AllButShareResFromThirdGroup, uriMsgForbiddenActions, testing::ValuesIn(ThirdWtShareRes));
 INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 

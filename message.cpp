@@ -350,9 +350,7 @@ uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string>
                          serverMessage(result, msgId), sharingPrefs(sharingPrefs) {
     if(action!=msgType::shareRes)
         throw messageException("The action is not consistent with the message type");
-    if(result==msgOutcome::success)
-        throw messageException("Invalid action"
-                               "");
+
     this->action=action;
     this->path=path;
     this->name=name;
@@ -364,10 +362,11 @@ const uri &uriMessage::getSharingPrefs() const {
 
 void uriMessage::invokeMethod(SymServer &server) {
     //TODO: implement
+
 }
 
 void uriMessage::invokeMethod(SymClient &client) {
-    //TODO: implement
+    client.shareResource(path,name,sharingPrefs);
 }
 
 void uriMessage::completeAction(SymClient &client) {
@@ -380,12 +379,8 @@ updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, cons
                                          : message(msgId), serverMessage(result, msgId),
                                            newUser(newUser), resourceId(resourceId), userPrivilege(priv) {
     this->action=action;
-    if(action!=msgType::openRes && action!=msgType::closeRes)
+    if(action!=msgType::addActiveUser && action!=msgType::removeActiveUser)
         throw messageException("The action is not consistent with the message type");
-    if(result== msgOutcome::success){
-        throw messageException("Failure Message");
-    }
-
 }
 
 const user &updateActiveMessage::getNewUser() const {
@@ -421,7 +416,7 @@ updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, 
                                    int resourceId, int msgId)
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    resourceId(resourceId) {
-    if(action!=msgType::closeRes)
+    if(action!=msgType::mapChangesToUser && action!=msgType::closeRes)
         throw messageException("The action is not consistent with the message type");
     this->action=action;
 }
