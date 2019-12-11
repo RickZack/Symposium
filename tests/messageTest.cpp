@@ -319,7 +319,7 @@ TEST_P(updateActiveMsgLegalActions, updateActiveThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new updateActiveMessage(action, msgOutcome::success, u, 0), action);
 }
-INSTANTIATE_TEST_CASE_P(CloseRes, updateActiveMsgLegalActions, testing::Values(msgType::closeRes));
+INSTANTIATE_TEST_CASE_P(CloseRes, updateActiveMsgLegalActions, testing::Values(msgType::addActiveUser, msgType::removeActiveUser));
 
 struct privMsgLegalActions: simpleMsgTypeTest {};
 

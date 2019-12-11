@@ -253,7 +253,7 @@ void mapMessage::invokeMethod(SymClient &client) {
 sendResMessage::sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId, int msgId)
         : message(msgId), serverMessage(result, msgId), resource{resource} {
     if(action!=msgType::createRes && action!=msgType::createNewDir && action!=msgType::openNewRes
-    && action!=msgType::changeResName && action!=msgType::removeRes)
+    && action!=msgType::changeResName && action!=msgType::removeRes && action!=msgType::openRes)
         throw messageException("The action is not consistent with the message type");
     this->action=action;
     if(resource.resType()==resourceType::symlink)

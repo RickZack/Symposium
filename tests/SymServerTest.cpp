@@ -786,8 +786,8 @@ TEST_F(SymServerTestFilesystemFunctionality, shareResourceOfUnLoggedUser){
 
 TEST_F(SymServerTestFilesystemFunctionality, renameResourceCallsRenameResourceOnUser){
     setStageForAccessedDoc(loggedUser);
-    EXPECT_CALL(loggedUser, renameResource(filePath, fileName, "newName")).WillOnce(::testing::Return(fileToReturn));
-    auto ret=server.renameResource(loggedUserUsername, filePath, fileName, "newName");
+    EXPECT_CALL(*justInserted, renameResource(filePath, fileName, "newName")).WillOnce(::testing::Return(fileToReturn));
+    std::shared_ptr<filesystem> ret=server.renameResource(loggedUserUsername, filePath, fileName, "newName");
     EXPECT_EQ(fileToReturn, ret);
 }
 
@@ -797,7 +797,7 @@ TEST_F(SymServerTestFilesystemFunctionality, renameResourceByUnloggedUser){
 
 TEST_F(SymServerTestFilesystemFunctionality, removeResourceCallsResourceFileOnUser){
     setStageForAccessedDoc(loggedUser);
-    EXPECT_CALL(loggedUser, removeResource(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
+    EXPECT_CALL(*justInserted, removeResource(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
     auto ret=server.removeResource(loggedUserUsername, filePath, fileName);
     EXPECT_EQ(fileToReturn, ret);
 }
