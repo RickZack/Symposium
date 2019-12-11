@@ -211,7 +211,7 @@ void serverMessage::invokeMethod(SymClient &client) {
     //TODO: implement
 }
 
-bool serverMessage::isRelatedTo(const clientMessage &other) {
+bool serverMessage::isRelatedTo(const clientMessage &other) const {
     //TODO: implement
     return false;
 }

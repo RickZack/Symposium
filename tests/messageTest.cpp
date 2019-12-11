@@ -106,6 +106,7 @@ std::ostream& operator<<(std::ostream& output, msgType m){
 
         case msgType::createRes: return output<<"msgType::createRes";
         case msgType::createNewDir: return output<<"msgType::createNewDir";
+        case msgType::openRes: return output<<"msgType::openRes";
         case msgType::openNewRes: return output<<"msgType::openNewRes";
         case msgType::changeResName: return output<<"msgType::changeResName";
         case msgType::removeRes: return output<<"msgType::removeRes";
@@ -270,6 +271,88 @@ INSTANTIATE_TEST_CASE_P(FirstWtChangeUserData, userDataMsgForbiddenActions, test
 INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+
+//After bug found 11/12/2019: not only we need to throw when an action is illegal, but we do need to NOT
+//throw when it's legal! The following test should assure complete coverage for this consistency check
+struct askResMsgLegalActions: simpleMsgTypeTest{};
+
+TEST_P(askResMsgLegalActions, askResNoThrowExceptionInConstruction){
+    msgType action=GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m= new askResMessage(action, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0), action);
+}
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, askResMsgLegalActions, testing::ValuesIn(secondGroup));
+
+struct signUpMsgLegalActions: simpleMsgTypeTest {
+    user u;
+
+    signUpMsgLegalActions() : u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr) {}
+    ~signUpMsgLegalActions()=default;
+};
+
+TEST_P(signUpMsgLegalActions, signUpNoThrowExceptionInConstruction){
+    msgType action=GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m=new signUpMessage(action, {"",""}, u), action);
+}
+INSTANTIATE_TEST_CASE_P(Registration, signUpMsgLegalActions, testing::Values(msgType::registration));
+
+struct updateDocMsgLegalActions: simpleMsgTypeTest {};
+
+TEST_P(updateDocMsgLegalActions, updateDocNoThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new updateDocMessage(action, {"", ""}, 0), action);
+}
+INSTANTIATE_TEST_CASE_P(MapChangesAndCloseRes, updateDocMsgLegalActions, testing::Values(msgType::mapChangesToUser, msgType::closeRes));
+
+struct sendResMsgLegalActions: simpleMsgTypeTest {
+    file f;
+    sendResMsgLegalActions(): f("name", "./somedir", 0){};
+    ~sendResMsgLegalActions()=default;
+};
+TEST_P(sendResMsgLegalActions, sendResNoThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new sendResMessage(action, msgOutcome::success, f), action);
+}
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, sendResMsgLegalActions, testing::ValuesIn(secondGroup));
+
+struct updateActiveMsgLegalActions: signUpMsgForbiddenActions {};
+TEST_P(updateActiveMsgLegalActions, updateActiveThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new updateActiveMessage(action, msgOutcome::success, u, 0), action);
+}
+INSTANTIATE_TEST_CASE_P(CloseRes, updateActiveMsgLegalActions, testing::Values(msgType::closeRes));
+
+struct privMsgLegalActions: simpleMsgTypeTest {};
+
+TEST_P(privMsgLegalActions, privNoThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new privMessage(action, {"", ""}, msgOutcome::success, "", "", privilege::modify), action);
+}
+INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, privMsgLegalActions, testing::Values(msgType::changePrivileges));
+
+struct symbolMsgLegalActions: simpleMsgTypeTest {
+    symbol s;
+    symbolMsgLegalActions(): s('a', 0, 0, std::vector<int>(), false){};
+};
+TEST_P(symbolMsgLegalActions, symbolNoThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new symbolMessage(action, {"", ""}, msgOutcome::success, 0, 0, s), action);
+}
+INSTANTIATE_TEST_CASE_P(InsertSymbol, symbolMsgLegalActions, testing::Values(msgType::insertSymbol));
+
+struct uriMsgLegalActions: simpleMsgTypeTest {};
+TEST_P(uriMsgLegalActions, uriNoThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new uriMessage(action, {"", ""}, msgOutcome::success, "path",
+                                                         "name", uri(), 0), action);
+}
+INSTANTIATE_TEST_CASE_P(ShareRes, uriMsgLegalActions, testing::Values(msgType::shareRes));
+
+struct userDataMsgLegalActions: signUpMsgForbiddenActions {};
+TEST_P(userDataMsgLegalActions, userNoDataThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new userDataMessage(action, {"", ""}, msgOutcome::success, u), action);
+}
+INSTANTIATE_TEST_CASE_P(ChangeUserData, userDataMsgLegalActions, testing::Values(msgType::changeUserData));
 
 
 /*

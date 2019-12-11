@@ -70,9 +70,13 @@ askResMessage SymClient::openSource(const std::string &path, const std::string &
     return *mess;
 }
 //FIXME: TEST FALLISCE
-void SymClient::openSource(const std::shared_ptr<file> fileAsked) {
+// Il motivo è simile a quello dell'openNewSource: se guardi bene il test, lui suppone che tu sostituisca il documento
+// dentro il file conservato dal client con quello che c'è dentro il server.
+// Come per l'altro test, ne dobbiamo discutere. Potremmo sostituire il file stesso e quindi anche il documento
+void SymClient::openSource(const std::shared_ptr<file> fileAsked, privilege reqPriv) {
     activeFile.push_front(fileAsked);
-    document& doc = fileAsked->access(this->getLoggedUser(), privilege::owner);
+    user& logged=getLoggedUser();
+    document& doc = fileAsked->access(logged, reqPriv);
     activeDoc.push_front(&doc);
 }
 
@@ -88,6 +92,15 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
                               int idToAssign, const std::shared_ptr<file> fileAsked) {
     this->getLoggedUser().getHome()->addLink(destPath, destName, resId, (*fileAsked).getName(), idToAssign);
     activeFile.push_front(this->getLoggedUser().getHome()->getFile(destPath, destName));
+    //FIXME: non stai accedendo al documento giusto! Il documento che ha il contenuto corretto è nel file che hai
+    // ricevuto. Poi stai creando una copia di un documento, devi lavorare sul documento stesso. Ne puoi prendere l'indirizzo
+    // perchè esso è memorizzato nel file, che viene eliminato solo quando ti liberi dello shared_ptr
+    // Dobbiamo usare il metodo access() di file, non getDoc().
+    // L'unica cosa poco chiara è se è opportuno sostituire il file che abbiamo nel filesystem
+    // con quello che abbiamo ricevuto o semplicemente per i file aperti facciamo riferimento a quelli in coda.
+    // Io credo che sia da fare così per essere sicuri di essere consistenti con il server
+    // Parliamone con Ksenia
+
     document *doc = new document((this->getLoggedUser().getHome()->getFile(destPath, destName))->getDoc());
     activeDoc.push_front(doc);
 }
@@ -97,7 +110,8 @@ askResMessage SymClient::createNewSource(const std::string &path, const std::str
     unanswered.push_front(mess);
     return *mess;
 }
-//FIXME: TEST FALLISCE
+//FIXME: Attenzione (anche in generale) all'ordine delle operazioni:
+// che succede se access() lancia eccezione?
 void SymClient::createNewSource(const std::string &path, const std::string &name, int idToAssign) {
     std::shared_ptr<file> file = this->getLoggedUser().newFile(name, path, idToAssign);
     activeFile.push_front(file);
@@ -122,7 +136,11 @@ symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const
     d->localInsert(pos, const_cast<symbol &>(newSym));
     return symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, newSym);
 }
+
 //FIXME: non abbiamo il simbolo da eliminare, ma nel messaggio dobbiamo inserire perforza il simbolo, quindi ne ho creato uno a caso ma impostato con la posizione in cui dobbiamo eliminare, corretto?
+// RISPOSTA: no, al server (e agli altri client) per rimuovere un simbolo serve tutto il simbolo stesso (vedi document::remoteRemove()).
+// Qui devi usare l'indice (indexes) per prendere il simbolo dal documento (di cui ti viene dato il resourceId) e metterlo nel messaggio.
+// Se ti dovessero mancare metodi per questo dì a Martina, si è occupata lei di document, e vedete come potete combinare
 symbolMessage SymClient::localRemove(int resourceId, int indexes[2]) {
     std::vector<int> *pos = new std::vector<int>({indexes[0], indexes[1]});
     return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, symbol('a', 0, 0, *pos, false));
@@ -223,6 +241,7 @@ clientMessage SymClient::logout() {
     return clientMessage(msgType::logout, {user, ""});
 }
 
+//FIXME: il messaggio deve essere inserito nella coda
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
     return updateDocMessage(msgType::mapChangesToUser, {SymClient::getLoggedUser().getUsername(), ""}, currentDoc.getId());
 }
@@ -246,18 +265,13 @@ user &SymClient::getLoggedUser() {
 }
 
 std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMessage& smex) {
-    //To review
-    /*
-    serverMessage mess = smex;
     for (std::shared_ptr<clientMessage> it:SymClient::unanswered){
-        if(mess.isRelatedTo(*it)){
-            clientMessage *cmess = new clientMessage(*it); //costruttore di copia
+        if(smex.isRelatedTo(*it)){
             unanswered.remove(it);
-            return *cmess;
+            return it;
         }
     }
     throw SymClientException(SymClientException::noRelatedMessage, UnpackFileLineFunction());
-     */
 }
 
 void SymClient::verifySymbol(int resourceId, const symbol &sym) {

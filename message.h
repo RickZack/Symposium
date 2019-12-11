@@ -279,7 +279,7 @@
           * @param other the message this message could be in response to
           * @return true if the current message is in response to the one passed as argument; false otherwise
           */
-         bool isRelatedTo(const clientMessage &other);
+         bool isRelatedTo(const clientMessage &other) const;
 
          virtual ~serverMessage() = default;
      };
