@@ -75,7 +75,7 @@ struct SymServerDocMock: public document{
     MOCK_METHOD1(remoteInsert, void(const symbol &toInsert));
     MOCK_METHOD1(remoteRemove, void(const symbol &toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
-    MOCK_METHOD0(retrieveSiteIds, std::set<int>());
+    MOCK_CONST_METHOD0(retrieveSiteIds, std::set<int>());
 };
 
 /*

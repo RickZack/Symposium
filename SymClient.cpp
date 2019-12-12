@@ -132,8 +132,7 @@ void SymClient::createNewDir(const std::string &path, const std::string &name, i
 //FIXME: TEST FALLISCE
 symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    int pos[2] = {index.first,index.second};
-    d->localInsert(pos, const_cast<symbol &>(newSym));
+    d->localInsert(index, const_cast<symbol &>(newSym));
     return symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, newSym);
 }
 
@@ -141,9 +140,11 @@ symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const
 // RISPOSTA: no, al server (e agli altri client) per rimuovere un simbolo serve tutto il simbolo stesso (vedi document::remoteRemove()).
 // Qui devi usare l'indice (indexes) per prendere il simbolo dal documento (di cui ti viene dato il resourceId) e metterlo nel messaggio.
 // Se ti dovessero mancare metodi per questo dì a Martina, si è occupata lei di document, e vedete come potete combinare
-symbolMessage SymClient::localRemove(int resourceId, int indexes[2]) {
-    std::vector<int> *pos = new std::vector<int>({indexes[0], indexes[1]});
-    return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, symbol('a', 0, 0, *pos, false));
+symbolMessage SymClient::localRemove(int resourceId, const std::pair<int, int> indexes) {
+    //TODO: ho cambiato l'ultimo parametro da vettore-C a pair
+    //FIXME: il vector usato così non va bene, allochi memoria e non la liberi mai
+    //std::vector<int> *pos = new std::vector<int>({indexes[0], indexes[1]});
+    //return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, symbol('a', 0, 0, *pos, false));
 }
 
 void SymClient::remoteInsert(int resourceId, const symbol &newSym) {

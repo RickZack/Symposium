@@ -126,8 +126,8 @@ struct SymClientDocMock: public document{
     MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_METHOD2(access, document&(const user&, privilege));
-    MOCK_METHOD2(localInsert, symbol(int indexes[2], symbol &toInsert));
-    MOCK_METHOD1(localRemove, symbol(int indexes[2]));
+    MOCK_METHOD2(localInsert, symbol(const std::pair<int, int>& index, symbol &toInsert));
+    MOCK_METHOD1(localRemove, symbol(const std::pair<int, int> index));
 };
 
 struct SymClientTest : ::testing::Test{
@@ -147,7 +147,7 @@ struct SymClientTest : ::testing::Test{
     std::shared_ptr<SymClientFileMock> fileInUserFilesystem;
     std::shared_ptr<SymClientDirMock> dirSentByServer;
     SymClientDocMock docInUserFilesystem, docSentByServer;
-    static int indexes[2];
+    static const std::pair<int, int> indexes;
     SymClientTest(): userReceived(username, pwd, nickname, iconPath, 0, std::shared_ptr<SymClientDirMock>(new SymClientDirMock(username))),
                      fileSentByServer(new SymClientFileMock(filename, "./dir1/dir2")),
                      docInUserFilesystem(120), docSentByServer(120),
@@ -229,7 +229,7 @@ const std::string SymClientTest::filename="file1";
 const std::string SymClientTest::destPath="./dir1/dir2";
 const std::string SymClientTest::anotherUsername="anotherUsername";
 uri SymClientTest::newPreferences(uriPolicy::activeAlways);
-int SymClientTest::indexes[2]={0,0};
+const std::pair<int, int> SymClientTest::indexes={0,0};
 
 TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
     client.setLoggedUser(userReceived);
@@ -380,7 +380,7 @@ TEST_F(SymClientTest, localInsertConstructsGoodMessageAndInsertInUnanswered){
     symbol toInsert('a', userReceived.getSiteId(), 0, {}, false);
     symbol inserted('a', userReceived.getSiteId(), 0, {1}, false);
     EXPECT_CALL(docSentByServer, localInsert(indexes, toInsert)).WillOnce(::testing::Return(inserted));
-    auto mex= client.localInsert(docSentByServer.getId(), toInsert, {0,0});
+    auto mex= client.localInsert(docSentByServer.getId(), toInsert, indexes);
     //std::pair<bool, std::shared_ptr<clientMessage>> res=client.thereIsUnansweredMex(mex.getMsgId());
     //ASSERT_TRUE(res.first);
     //EXPECT_EQ(mex, *res.second);

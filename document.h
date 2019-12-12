@@ -84,13 +84,13 @@ namespace Symposium {
          * @brief insert a symbol in the document as consequence of an user's action on the GUI
          * @param toInsert symbol to insert
          */
-        virtual symbol localInsert(int *indexes, symbol &toInsert);
+        virtual symbol localInsert(const std::pair<int, int> &indexes, symbol &toInsert);
 
         /**
          * @brief remove a symbol in the document as consequence of an user's action on the GUI
          * @param indexes symbol to remove
          */
-        virtual symbol localRemove(int *indexes);
+        virtual symbol localRemove(const std::pair<int, int> &indexes);
 
         /**
          * @brief insert a symbol in the document as consequence of a remote user's action
@@ -108,7 +108,7 @@ namespace Symposium {
          * @brief give a representation of the document ad sequence of wide characters
          * @return a string of wide characters with the document's content
          */
-        std::wstring toText();
+        std::wstring toText() const;
 
         /**
          * @brief removes the user @e noLongerActive from @e activeUsers
@@ -126,20 +126,20 @@ namespace Symposium {
          * @brief retrieves the set of siteId in the current document
          * @return a set of siteIds
          */
-        virtual std::set<int> retrieveSiteIds();
+        virtual std::set<int> retrieveSiteIds() const;
 
     private:
-        void generatePosition(int *indexes);
+        void generatePosition(const std::pair<int, int> indexes) const;
 
-        std::pair<int, int> findInsertIndex(const symbol &symbol);
+        std::pair<int, int> findInsertIndex(const symbol &symbol) const;
 
-        std::pair<int,int> findEndPosition(symbol aChar, std::vector<Symposium::symbol> vector, int lines);
+        std::pair<int,int> findEndPosition(symbol aChar, std::vector<Symposium::symbol> vector, int lines) const;
 
-        int findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector);
+        int findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector) const;
 
-        std::pair<int, int> findPosition(const symbol &symbol);
+        std::pair<int, int> findPosition(const symbol &symbol) const;
 
-        int findIndexInLine(const symbol &symbol, std::vector<Symposium::symbol> vector);
+        int findIndexInLine(const symbol &symbol, std::vector<Symposium::symbol> vector) const;
     };
 }
 

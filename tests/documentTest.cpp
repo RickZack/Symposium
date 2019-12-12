@@ -59,7 +59,7 @@ TEST_F(documentTest, userIsNoLongerInActiveListAfterClosing){
 }
 
 TEST_F(documentTest, localAddingSymbolsInSequence){
-    int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
+    std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2};
     symbol s1('a', 0, 0, std::vector<int>(), false),
           s2('b', 0, 1, std::vector<int>(), false),
     s3('c', 0, 2, std::vector<int>(), false);
@@ -70,7 +70,7 @@ TEST_F(documentTest, localAddingSymbolsInSequence){
  }
 
 TEST_F(documentTest, localAddingSymbolsInTheMiddle){
-    int i1[]={0,0}, i2[]={0,1};
+    std::pair<int, int> i1={0,0}, i2={0,1};
     symbol s1('a', 0, 0, std::vector<int>(), false),
             s2('b', 0, 1, std::vector<int>(), false),
             s3('c', 0, 2, std::vector<int>(), false);
@@ -81,7 +81,7 @@ TEST_F(documentTest, localAddingSymbolsInTheMiddle){
 }
 
 TEST_F(documentTest, localRemovingSymbolsFromBottom){
-    int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
+    std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2};
     symbol s1('a', 0, 0, std::vector<int>(), false),
             s2('b', 0, 1, std::vector<int>(), false),
             s3('c', 0, 2, std::vector<int>(), false);
@@ -93,7 +93,7 @@ TEST_F(documentTest, localRemovingSymbolsFromBottom){
 }
 
 TEST_F(documentTest, localRemovingSymbolsFromMiddle){
-    int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
+    std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2};
     symbol s1('a', 0, 0, std::vector<int>(), false),
             s2('b', 0, 1, std::vector<int>(), false),
             s3('c', 0, 2, std::vector<int>(), false);
@@ -166,7 +166,7 @@ Insertion inserts2[]={
 INSTANTIATE_TEST_CASE_P(RemoveRemoteSymbols, docRemoteRemoveSymbolTest, testing::ValuesIn(inserts2));
 
 TEST_F(documentTest, canRetrieveSiteIds){
-    int i1[]={0,0}, i2[]={0,1}, i3[]={0,2};
+    std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2};
     symbol s1('a', 0, 0, std::vector<int>(), false),
             s2('b', 1, 0, std::vector<int>(), false),
             s3('c', 2, 2, std::vector<int>(), false);

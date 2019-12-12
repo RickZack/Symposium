@@ -70,10 +70,10 @@ document & document::access(const user &newActive, privilege accessPriv) {
 }
 
 
-symbol document::localInsert(int *indexes, symbol &toInsert) {
+symbol document::localInsert(const std::pair<int, int> &indexes, symbol &toInsert) {
 
-    int i0=indexes[0];
-    int i1=indexes[1];
+    int i0=indexes.first;
+    int i1=indexes.second;
     float mul_fct=1.5; //just to avoid too many reallocations
 
     if(i0>=symbols.capacity())
@@ -92,9 +92,9 @@ symbol document::localInsert(int *indexes, symbol &toInsert) {
 
 }
 
-void document::generatePosition(int *indexes) {
-    int i0=indexes[0];
-    int i1=indexes[1];
+void document::generatePosition(const std::pair<int, int> indexes) const {
+    int i0=indexes.first;
+    int i1=indexes.second;
     int c=symbols[i0].size();
 
     // vectors that maintain the position for all the rows of symbols.
@@ -124,9 +124,9 @@ void document::generatePosition(int *indexes) {
 
 }
 
-symbol document::localRemove(int *indexes) {
-    int i0=indexes[0];
-    int i1=indexes[1];
+symbol document::localRemove(const std::pair<int, int> &indexes) {
+    int i0=indexes.first;
+    int i1=indexes.second;
 
     symbol sym=symbols[i0][i1];
     symbols[i0].erase(symbols[i0].begin()+i1);
@@ -169,7 +169,7 @@ void document::remoteRemove(const symbol &toRemove) {
     }else {symbol sym=symbols[i0][i1];symbols[i0].erase(symbols[i0].begin()+i1);}
 }
 
-std::wstring document::toText() {
+std::wstring document::toText() const {
     std::wstring str;
     std::wostringstream str1;
     int size= symbols.size();
@@ -209,7 +209,7 @@ void document::load(const std::string &loadPath) {
     //TODO:implement
 }
 
-std::set<int> document::retrieveSiteIds() {
+std::set<int> document::retrieveSiteIds() const{
     std::set<int> siteIds;
     std::set<int>::iterator it=siteIds.begin();
     for(int i=0;i<symbols.size();i++){
@@ -232,7 +232,7 @@ bool document::operator!=(const document &rhs) const {
 
 
 
-std::pair<int, int> document::findInsertIndex(const symbol &symbol) {
+std::pair<int, int> document::findInsertIndex(const symbol &symbol) const {
     std::pair<int,int> ind;
     int i0=0; int i1=0;
     int minLine=0;
@@ -294,7 +294,7 @@ std::pair<int, int> document::findInsertIndex(const symbol &symbol) {
 
 }
 
-std::pair<int, int> document::findEndPosition(symbol aChar, std::vector<Symposium::symbol> vector, int lines) {
+std::pair<int, int> document::findEndPosition(symbol aChar, std::vector<Symposium::symbol> vector, int lines) const {
     std::pair<int,int> ind;
     if(aChar== emptySymbol){
         ind={lines,0}; return ind;
@@ -305,7 +305,7 @@ std::pair<int, int> document::findEndPosition(symbol aChar, std::vector<Symposiu
 
 }
 
-int document::findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector) {
+int document::findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector) const {
     int ind=0;
     int left=0;
     int right= vector.size()-1;
@@ -323,7 +323,7 @@ int document::findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector)
         mid=left-(right-left)/2;
 
         if(ch==vector[mid]){
-            id=mid; return id;
+            ind=mid; return ind;
         } else if(ch>vector[mid]){
             left=mid;
         } else{
@@ -332,14 +332,14 @@ int document::findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector)
     }
 
     if(ch==vector[left]){
-        id=left; return id;
+        ind=left; return ind;
     } else{
-        id=right; return right;
+        ind=right; return right;
     }
 
 }
 
-std::pair<int, int> document::findPosition(const symbol &symbol) {
+std::pair<int, int> document::findPosition(const symbol &symbol) const {
     std::pair<int,int> ind;
     int i0=0; int i1=0;
     int minLine=0;
@@ -397,7 +397,7 @@ std::pair<int, int> document::findPosition(const symbol &symbol) {
 
 }
 
-int document::findIndexInLine(const symbol &symbol, std::vector<Symposium::symbol> vector) {
+int document::findIndexInLine(const symbol &symbol, std::vector<Symposium::symbol> vector) const {
     int left=0;
     int right=vector.size()-1;
     int mid;

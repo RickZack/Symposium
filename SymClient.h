@@ -211,7 +211,7 @@ namespace Symposium {
          * @param indexes the position of the symbol to remove
          * @return a properly constructed @ref symbolMessage to send to the server
          */
-        virtual symbolMessage localRemove(int resourceId, int indexes[2]);
+        virtual symbolMessage localRemove(int resourceId, const std::pair<int, int> indexes);
 
         /**
          * @brief propagate a symbol insertion on document content made by another user
