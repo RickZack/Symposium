@@ -74,9 +74,8 @@ askResMessage SymClient::openSource(const std::string &path, const std::string &
 // dentro il file conservato dal client con quello che c'è dentro il server.
 // Come per l'altro test, ne dobbiamo discutere. Potremmo sostituire il file stesso e quindi anche il documento
 void SymClient::openSource(const std::shared_ptr<file> fileAsked, privilege reqPriv) {
+    document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
     activeFile.push_front(fileAsked);
-    user& logged=getLoggedUser();
-    document& doc = fileAsked->access(logged, reqPriv);
     activeDoc.push_front(&doc);
 }
 
@@ -91,7 +90,7 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
                               const std::string &destName,
                               int idToAssign, const std::shared_ptr<file> fileAsked) {
     this->getLoggedUser().getHome()->addLink(destPath, destName, resId, (*fileAsked).getName(), idToAssign);
-    activeFile.push_front(this->getLoggedUser().getHome()->getFile(destPath, destName));
+
     //FIXME: non stai accedendo al documento giusto! Il documento che ha il contenuto corretto è nel file che hai
     // ricevuto. Poi stai creando una copia di un documento, devi lavorare sul documento stesso. Ne puoi prendere l'indirizzo
     // perchè esso è memorizzato nel file, che viene eliminato solo quando ti liberi dello shared_ptr
@@ -101,8 +100,9 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
     // Io credo che sia da fare così per essere sicuri di essere consistenti con il server
     // Parliamone con Ksenia
 
-    document *doc = new document((this->getLoggedUser().getHome()->getFile(destPath, destName))->getDoc());
-    activeDoc.push_front(doc);
+    document &doc = (fileAsked->access(this->getLoggedUser(), reqPriv));
+    activeFile.push_front(this->getLoggedUser().getHome()->getFile(destPath, destName));
+    activeDoc.push_front(&doc);
 }
 
 askResMessage SymClient::createNewSource(const std::string &path, const std::string &name) {
@@ -153,8 +153,8 @@ void SymClient::remoteRemove(int resourceId, const symbol &rmSym) {
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                      privilege newPrivilege) {
     std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
-    privMessage *mess = new privMessage(msgType::changePrivileges, {SymClient::getLoggedUser().getUsername(),""}, msgOutcome::success, idres, targetUser, newPrivilege);
-    unanswered.push_front(std::shared_ptr<privMessage>(mess));
+    std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {SymClient::getLoggedUser().getUsername(),""}, msgOutcome::success, idres, targetUser, newPrivilege));
+    unanswered.push_front(mess);
     return *mess;
 }
 
@@ -164,8 +164,8 @@ privilege SymClient::editPrivilege(const std::string &targetUser, const std::str
 }
 
 uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
-    uriMessage *mess = new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0);
-    unanswered.push_front(std::shared_ptr<uriMessage>(mess));
+    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0));
+    unanswered.push_front(mess);
     return *mess;
 }
 //FIXME: Metodo non funzionante
@@ -178,9 +178,8 @@ uri SymClient::shareResource(const std::string &resPath, const std::string &resN
 
 askResMessage
 SymClient::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) {
-    //FIXME: mess is not in dynamic memory, assign its pointer to a shared_ptr is wrong
-    askResMessage *mess = new askResMessage(msgType::changeResName, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, newName, uri::getDefaultPrivilege(), 0);
-    unanswered.push_front(std::shared_ptr<askResMessage>(mess));
+    std::shared_ptr<askResMessage> mess(new askResMessage(msgType::changeResName, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, newName, uri::getDefaultPrivilege(), 0));
+    unanswered.push_front(mess);
     return *mess;
 }
 
@@ -192,14 +191,14 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
 
 askResMessage SymClient::removeResource(const std::string &resPath, const std::string &resName) {
     std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
-    askResMessage *mess = new askResMessage(msgType::removeRes, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, idres, uri::getDefaultPrivilege(), 0);
-    unanswered.push_front(std::shared_ptr<askResMessage>(mess));
+    std::shared_ptr<askResMessage> mess(new askResMessage(msgType::removeRes, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, idres, uri::getDefaultPrivilege(), 0));
+    unanswered.push_front(mess);
     return *mess;
 }
 
 std::shared_ptr<filesystem>
 SymClient::removeResource(const std::string &resPath, const std::string &resName, bool msgRcv) {
-    return getLoggedUser().getHome()->remove(getLoggedUser(),resPath,resName);
+    return this->getLoggedUser().removeResource(resPath,resName);
 }
 //RIVEDERE: Cosa deve fare questo metodo?
 //la funzione stampa l'albero filesyste dell'utente
@@ -215,8 +214,8 @@ updateDocMessage SymClient::closeSource(int resourceId) {
 }
 //FIXME: add and review tests for editUser
 userDataMessage SymClient::editUser(user &newUserData) {
-    userDataMessage *mess = new userDataMessage(msgType::changeUserData, std::pair(SymClient::getLoggedUser().getUsername(), ""), msgOutcome::success, newUserData);
-    unanswered.push_front(std::shared_ptr<userDataMessage>(mess));
+    std::shared_ptr<userDataMessage> mess (new userDataMessage(msgType::changeUserData, std::pair(SymClient::getLoggedUser().getUsername(), ""), msgOutcome::success, newUserData));
+    unanswered.push_front(mess);
     return *mess;
 }
 
@@ -231,13 +230,12 @@ clientMessage SymClient::removeUser() {
 }
 
 clientMessage SymClient::logout() {
-    std::string user = SymClient::getLoggedUser().getUsername();
-    return clientMessage(msgType::logout, {user, ""});
+    return clientMessage(msgType::logout, {this->getLoggedUser().getUsername(), ""});
 }
 
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
-    updateDocMessage *mess = new updateDocMessage(msgType::mapChangesToUser, {SymClient::getLoggedUser().getUsername(), ""}, currentDoc.getId());
-    unanswered.push_front(std::shared_ptr<updateDocMessage>(mess));
+    std::shared_ptr<updateDocMessage> mess (new updateDocMessage(msgType::mapChangesToUser, {SymClient::getLoggedUser().getUsername(), ""}, currentDoc.getId()));
+    unanswered.push_front(mess);
     return *mess;
 }
 //con questo metodo associamo agli utenti i colori (che sono diversi per ogni client), da fare con qcolor
@@ -260,7 +258,7 @@ user &SymClient::getLoggedUser() {
 }
 
 std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMessage& smex) {
-    for (std::shared_ptr<clientMessage> it:SymClient::unanswered){
+    for (std::shared_ptr<clientMessage> it:unanswered){
         if(smex.isRelatedTo(*it)){
             unanswered.remove(it);
             return it;
