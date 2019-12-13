@@ -110,12 +110,11 @@ askResMessage SymClient::createNewSource(const std::string &path, const std::str
     unanswered.push_front(mess);
     return *mess;
 }
-//FIXME: Attenzione (anche in generale) all'ordine delle operazioni:
-// che succede se access() lancia eccezione?
+
 void SymClient::createNewSource(const std::string &path, const std::string &name, int idToAssign) {
     std::shared_ptr<file> file = this->getLoggedUser().newFile(name, path, idToAssign);
-    activeFile.push_front(file);
     document& docReq = file->access(this->getLoggedUser(), privilege::owner);
+    activeFile.push_front(file);
     activeDoc.push_front(&docReq);
 }
 
@@ -136,15 +135,9 @@ symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const
     return symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, newSym);
 }
 
-//FIXME: non abbiamo il simbolo da eliminare, ma nel messaggio dobbiamo inserire perforza il simbolo, quindi ne ho creato uno a caso ma impostato con la posizione in cui dobbiamo eliminare, corretto?
-// RISPOSTA: no, al server (e agli altri client) per rimuovere un simbolo serve tutto il simbolo stesso (vedi document::remoteRemove()).
-// Qui devi usare l'indice (indexes) per prendere il simbolo dal documento (di cui ti viene dato il resourceId) e metterlo nel messaggio.
-// Se ti dovessero mancare metodi per questo dì a Martina, si è occupata lei di document, e vedete come potete combinare
 symbolMessage SymClient::localRemove(int resourceId, const std::pair<int, int> indexes) {
-    //TODO: ho cambiato l'ultimo parametro da vettore-C a pair
-    //FIXME: il vector usato così non va bene, allochi memoria e non la liberi mai
-    //std::vector<int> *pos = new std::vector<int>({indexes[0], indexes[1]});
-    //return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, symbol('a', 0, 0, *pos, false));
+    document* d = this->getActiveDocumentbyID(resourceId);
+    return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, d->localRemove(indexes));
 }
 
 void SymClient::remoteInsert(int resourceId, const symbol &newSym) {
