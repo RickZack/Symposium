@@ -242,9 +242,10 @@ clientMessage SymClient::logout() {
     return clientMessage(msgType::logout, {user, ""});
 }
 
-//FIXME: il messaggio deve essere inserito nella coda
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
-    return updateDocMessage(msgType::mapChangesToUser, {SymClient::getLoggedUser().getUsername(), ""}, currentDoc.getId());
+    updateDocMessage *mess = new updateDocMessage(msgType::mapChangesToUser, {SymClient::getLoggedUser().getUsername(), ""}, currentDoc.getId());
+    unanswered.push_front(std::shared_ptr<updateDocMessage>(mess));
+    return *mess;
 }
 //con questo metodo associamo agli utenti i colori (che sono diversi per ogni client), da fare con qcolor
 void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
