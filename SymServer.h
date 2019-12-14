@@ -229,7 +229,7 @@
           * At the end send a @ref serverMessage with the action outcome
           */
          virtual std::shared_ptr<filesystem>
-         shareResource(const user &actionUser, const std::string &resPath, const std::string &resName, uri &newPrefs);
+         shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName, uri &newPrefs);
 
          /**
           * @brief renames a resource from @e remover 's @e home directory
@@ -275,7 +275,6 @@
          /**
           * @brief changes user's data
           * @param username the username of the user whose data are to be changed
-          * @param pwd the user's password
           * @param newUserData a user object filled with new data
           * @return the new user data
           *
@@ -284,7 +283,7 @@
           * The server must send a @ref userDataMessage to the users in @e active that share some files with the user
           * identified by @e username if the user changed the nickname or the icon
           */
-         virtual const user &editUser(const std::string &username, const std::string &pwd, user &newUserData);
+         virtual const user &editUser(const std::string &username, user &newUserData);
 
          /**
          * @brief removes an user to the set of users registered to the system
@@ -297,10 +296,9 @@
          /**
           * @brief performs a log out, removing the user from @e active
           * @param username the username of the user who is performing the log out
-          * @param pwd the user's password
           * @return the logged out user
           */
-         virtual void logout(const std::string &username, const std::string &pwd);
+         virtual void logout(const std::string &username);
 
          /**
           * @brief maps siteIds to users to allow a client to identify the owner of each change in a document

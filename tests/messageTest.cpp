@@ -364,7 +364,7 @@ INSTANTIATE_TEST_CASE_P(ChangeUserData, userDataMsgLegalActions, testing::Values
 class SymServerMock: public SymServer{
 public:
     MOCK_METHOD2(login, const user(const std::string&, const std::string&));
-    MOCK_METHOD2(logout, void(const std::string&, const std::string&));
+    MOCK_METHOD1(logout, void(const std::string&));
     MOCK_METHOD2(removeUser, void(const std::string&, const std::string&));
     MOCK_METHOD1(addUser, const user(const user&));
     MOCK_METHOD3(createNewSource, document&(const user&, const std::string&, const std::string&));
@@ -375,11 +375,11 @@ public:
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&));
     MOCK_METHOD2(mapSiteIdToUser, std::map<int, user>(const std::string&, int));
 
-    MOCK_METHOD5(editPrivilege, privilege(const user&, const user&, const std::string&, const std::string&, privilege));
-    MOCK_METHOD3(remoteInsert, void(const std::string&, int, symbolMessage&));
+    MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, const std::string&, privilege));
+    MOCK_METHOD3(remoteInsert, void(const std::string&, int resourceId, symbolMessage&));
     MOCK_METHOD3(remoteRemove, void(const std::string&, int, const symbol&));
-    MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const user& actionUser, const std::string&, const std::string&, uri&));
-    MOCK_METHOD3(editUser, const user&(const std::string&, const std::string&, user&));
+    MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string& actionUser, const std::string&, const std::string&, const uri&));
+    MOCK_METHOD2(editUser, const user&(const std::string&, user&));
     MOCK_METHOD2(closeSource, void(const std::string&, int));
 };
 
@@ -415,12 +415,12 @@ TEST_F(clientMessageTest, clientMessageTestCallsLoginOnServer){
 
 TEST_F(clientMessageTest, clientMessageTestCallsLogoutOnServer){
     m=new clientMessage(msgType::logout, {username, ""});
-    EXPECT_CALL(server, logout(m->getActionOwner().first, m->getActionOwner().second));
+    EXPECT_CALL(server, logout(m->getActionOwner().first));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, clientMessageTestCallsRemoveUserOnServer){
-    m=new clientMessage(msgType::removeUser, {username, ""});
+    m=new clientMessage(msgType::removeUser, {username, pwd});
     EXPECT_CALL(server, removeUser(m->getActionOwner().first, m->getActionOwner().second));
     m->invokeMethod(server);
 }
@@ -503,7 +503,7 @@ public:
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, privilege, bool));
     MOCK_METHOD2(remoteInsert, void(int, const symbol&));
     MOCK_METHOD2(remoteRemove, void(int, const symbol&));
-    MOCK_METHOD4(shareResource, uri(const std::string&, const std::string&, uri&, bool msgRcv));
+    MOCK_METHOD4(shareResource, uri(const std::string&, const std::string&, const uri&, bool msgRcv));
     MOCK_METHOD2(editUser, const user(user&, bool));
     MOCK_METHOD2(verifySymbol, void(int, const symbol&));
     MOCK_METHOD1(retrieveRelatedMessage, std::shared_ptr<clientMessage>(const serverMessage&));
@@ -617,7 +617,7 @@ TEST_F(serverMessageTest, updateActiveMsgTestCallsAddActiveUsers){
     m=new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, sentByServer, 0);
     //m is a serverMessage, we need a cast to extract the resource id
     //this will not be necessary in code because SymClient::addActiveUser() is called from within the invokeMethod()
-    updateActiveMessage* uam=dynamic_cast<updateActiveMessage*>(m);
+    updateActiveMessage* uam=static_cast<updateActiveMessage*>(m);
     EXPECT_CALL(client, addActiveUser(uam->getResourceId(), sentByServer));
     m->invokeMethod(client);
 }
@@ -627,13 +627,14 @@ TEST_F(serverMessageTest, updateActiveMsgTestCallsRemoveActiveUsers){
     m=new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, sentByServer, 0);
     //m is a serverMessage, we need a cast to extract the resource id
     //this will not be necessary in code because SymClient::removeActiveUser() is called from within the invokeMethod()
-    updateActiveMessage* uam=dynamic_cast<updateActiveMessage*>(m);
+    updateActiveMessage* uam=static_cast<updateActiveMessage*>(m);
     EXPECT_CALL(client, removeActiveUser(uam->getResourceId(), sentByServer));
     m->invokeMethod(client);
 }
 
-//TODO: review the following tests
-//Basic logic tests for messages that may be sent from client or server (message)
+/*
+ * Basic logic tests for messages that may be sent from client or server
+ */
 struct DoubleEndMessageTest: public testing::Test{
     serverMessage *fromServer;
     clientMessage *fromClient;
@@ -644,9 +645,20 @@ struct DoubleEndMessageTest: public testing::Test{
     uri dummyUri;
     privilege priv;
 
+    /*
+     * Example data for messages and invocations
+     */
+    static const std::string path;
+    static const std::string name;
+    static const std::string resId;
+    static const std::string username;
+    static const std::string pwd;
+    static const std::string anotherUsername;
+    static const int resourceId;
+
     DoubleEndMessageTest(): dummySymbol('a', 0, 1, std::vector<int>(), false),
-                            u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr),
-                            priv(privilege::modify){
+                            u(username, pwd, "noempty", "", 0, nullptr),
+                            priv(uri::getDefaultPrivilege()){
         fromServer=nullptr;
         fromClient= nullptr;
     }
@@ -655,187 +667,198 @@ struct DoubleEndMessageTest: public testing::Test{
         delete fromClient;
     }
 };
+const std::string DoubleEndMessageTest::path="./dir1/dir2";
+const std::string DoubleEndMessageTest::name="somefile";
+const std::string DoubleEndMessageTest::resId=".mario/dir1/dir2/somefile";
+const std::string DoubleEndMessageTest::username="mario";
+const std::string DoubleEndMessageTest::pwd="AP@ssw0rd!";
+const std::string DoubleEndMessageTest::anotherUsername="lucio";
+const int DoubleEndMessageTest::resourceId=10;
 
 TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilege){
-    fromClient=new privMessage(msgType::changePrivileges,{"", ""}, msgOutcome::success, "", "", privilege::modify);
-    privMessage* fc= dynamic_cast<privMessage*>(fromClient);
-    //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
-    //(here we suppose it is the dummy user u)
-    //Same thing with targetUser
-    EXPECT_CALL(server, editPrivilege(u, u, "", "", fc->getNewPrivilege())).WillOnce(::testing::Return(privilege::modify));
+    fromClient=new privMessage(msgType::changePrivileges,{username, {}}, msgOutcome::success, resId, anotherUsername, uri::getDefaultPrivilege());
+    EXPECT_CALL(server, editPrivilege(username, anotherUsername, path, name, uri::getDefaultPrivilege())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::changePrivileges, msgOutcome::success, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, editPrivilege(u.getUsername(), "", "", fc->getNewPrivilege(), true)).WillOnce(::testing::Return(fc->getNewPrivilege()));
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
+    EXPECT_CALL(client, editPrivilege(anotherUsername, path, name, uri::getDefaultPrivilege(), true));
     //when a serverMessage is received, a related message from the client is searched and completeAction() called
-    fromClient->completeAction(client);
+    //the retrived clientMessage has all the data needed to perform the action required
+    fromServer->invokeMethod(client);
+
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
 }
 
 TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilegeOnOtherClient){
-    fromClient=new privMessage(msgType::changePrivileges,{"user", "pwd"}, msgOutcome::success, "", "", privilege::modify);
-    privMessage* fc= dynamic_cast<privMessage*>(fromClient);
+    fromClient=new privMessage(msgType::changePrivileges,{username, {}}, msgOutcome::success, resId, anotherUsername, uri::getDefaultPrivilege());
 
     //the message from client is forwarded to the other client, but the password is cleaned
-    fromServer=new privMessage(msgType::changePrivileges,{"user", ""}, msgOutcome::success, "", "", privilege::modify);
-    EXPECT_CALL(client, editPrivilege(u.getUsername(), "", "", fc->getNewPrivilege(), true)).WillOnce(::testing::Return(fc->getNewPrivilege()));
+    fromServer=new privMessage(msgType::changePrivileges,{username, {}}, msgOutcome::success, resId, anotherUsername, uri::getDefaultPrivilege());
+    EXPECT_CALL(client, editPrivilege(username, path, name, uri::getDefaultPrivilege(), false));
     fromServer->invokeMethod(client);
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnSuccess){
-    fromClient=new symbolMessage(msgType::insertSymbol,{"", ""}, msgOutcome::success, 0,0, dummySymbol);
-    symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
-    //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
-    //(here we suppose it is the dummy user u)
-    //Same thing with targetUser
-    EXPECT_CALL(server, remoteInsert("", 0, *fc)).WillOnce(::testing::Return());
+    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
+    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::insertSymbol, msgOutcome::success, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
-
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
     //We expect verifySymbol to be called by fromClient when the outcome is positive
-    EXPECT_CALL(client, verifySymbol(0, fc->getSym()));
-    fromClient->completeAction(client);
+    EXPECT_CALL(client, verifySymbol(resourceId, fc->getSym()));
+    //when a serverMessage is received, a related message from the client is searched and completeAction() called
+    //the retrived clientMessage has all the data needed to perform the action required
+    fromServer->invokeMethod(client);
+    //the state of the action outcome must be propagated to the previously sent message, because completeAction will use that
+    EXPECT_EQ(fromServer->getResult(), fc->getResult());
+
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
+
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnFailure){
-    fromClient=new symbolMessage(msgType::insertSymbol,{"", ""}, msgOutcome::success, 0,0, dummySymbol);
-    symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
-    //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
-    //(here we suppose it is the dummy user u)
-    //Same thing with targetUser
-    EXPECT_CALL(server, remoteInsert("", 0, *fc)).WillOnce(::testing::Return());
+    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
+    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
     fromClient->invokeMethod(server);
 
-    //Suppose now that the server returns a failure
+    //Suppose now that the user return a failure
     fromServer= new serverMessage(msgType::insertSymbol, msgOutcome::failure, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
+    //We expect remoteRemove to be called by fromClient when the outcome is negative
+    EXPECT_CALL(client, remoteRemove(resourceId, fc->getSym()));
+    //when a serverMessage is received, a related message from the client is searched and completeAction() called
+    //the retrived clientMessage has all the data needed to perform the action required
+    fromServer->invokeMethod(client);
+    //the state of the action outcome must be propagated to the previously sent message, because completeAction will use that
+    EXPECT_EQ(fromServer->getResult(), fc->getResult());
 
-    //We expect remoteRemove to be called by fromClient when the outcome is negative!
-    EXPECT_CALL(client, remoteRemove(0, fc->getSym()));
-    fromClient->completeAction(client);
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
+
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnOtherClient){
-    fromClient=new symbolMessage(msgType::insertSymbol,{"user", "pwd"}, msgOutcome::success, 0,0, dummySymbol);
-    symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
+    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
 
-    //the message from client is forwarded to the other client, but the password is cleaned and it's now verified
-    symbol s=fc->getSym();
-    fromServer= new symbolMessage(msgType::insertSymbol,{"user", ""}, msgOutcome::success, 0,0, s.setVerified());
-    //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, remoteInsert(0, dummySymbol)).WillOnce(::testing::Return());
+    //the message from client is forwarded to and the symbol contained it's now verified
+    symbol s=fc->getSym(); s.setVerified();
+    fromServer=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 0,resourceId, s);
+    EXPECT_CALL(client, remoteInsert(resourceId, s));
     fromServer->invokeMethod(client);
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnSuccess){
-    fromClient=new symbolMessage(msgType::removeSymbol,{"", ""}, msgOutcome::success, 0,0, dummySymbol);
-    symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
+    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
+    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
+    fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::removeSymbol, msgOutcome::success, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
+    //We expect no other function to be called when the outcome is positive, the symbol has already been removed
 
-    //We expect no function called by fromClient when the outcome is positive
-    fromClient->completeAction(client);
+    fromServer->invokeMethod(client);
+    //the state of the action outcome must be propagated to the previously sent message, because completeAction will use that
+    EXPECT_EQ(fromServer->getResult(), fc->getResult());
+
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
+
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
-    fromClient=new symbolMessage(msgType::removeSymbol,{"", ""}, msgOutcome::success, 0,0, dummySymbol);
-    symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
+    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
+    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
+    fromClient->invokeMethod(server);
 
+    //Suppose now that the user return a failure
     fromServer= new serverMessage(msgType::removeSymbol, msgOutcome::failure, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
+    //We expect remoteInsert to be called by fromClient when the outcome is negative, so that the removal done in advance is annulled
+    EXPECT_CALL(client, remoteInsert(resourceId, fc->getSym()));
+    //when a serverMessage is received, a related message from the client is searched and completeAction() called
+    //the retrived clientMessage has all the data needed to perform the action required
+    fromServer->invokeMethod(client);
+    //the state of the action outcome must be propagated to the previously sent message, because completeAction will use that
+    EXPECT_EQ(fromServer->getResult(), fc->getResult());
 
-    //We expect remoteInsert to be called by fromClient when the outcome is negative, so that the removal is annulled
-    EXPECT_CALL(client, remoteInsert(0, fc->getSym()));
-    fromClient->completeAction(client);
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
+
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnOtherClient){
-    fromClient=new symbolMessage(msgType::removeSymbol,{"user", "pwd"}, msgOutcome::success, 0,0, dummySymbol);
-    symbolMessage* fc= dynamic_cast<symbolMessage*>(fromClient);
+    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
 
-    //the message from client is forwarded to the other client, but the password is cleaned
-    fromServer= new symbolMessage(msgType::removeSymbol,{"user", ""}, msgOutcome::success, 0,0, fc->getSym());
-    //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, remoteRemove(0, dummySymbol)).WillOnce(::testing::Return());
+    //the message from client is forwarded to the other client, but the password is cleaned and it's now verified
+    symbol s=fc->getSym(); s.setVerified();
+    fromServer=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, s);
+    EXPECT_CALL(client, remoteRemove(resourceId, s));
     fromServer->invokeMethod(client);
 }
 
 TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemove){
-    fromClient= new uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, "path", "name",
-                               dummyUri, 0);
-    uriMessage* fc= dynamic_cast<uriMessage*>(fromClient);
-    //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
-    //(here we suppose it is the dummy user u)
-    //Same thing with targetUser
-    EXPECT_CALL(server, shareResource(u, "path", "name", const_cast<uri&>(fc->getSharingPrefs())));
+    fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path, name,
+                               dummyUri);
+    uriMessage* fc= static_cast<uriMessage*>(fromClient);
+    EXPECT_CALL(server, shareResource(username, path, name, dummyUri));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::shareRes, msgOutcome::success, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, shareResource("path", "name", const_cast<uri&>(fc->getSharingPrefs()), true)).WillOnce(::testing::Return(fc->getSharingPrefs()));
-    fromClient->completeAction(client);
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
+    EXPECT_CALL(client, shareResource(path, name, fc->getSharingPrefs(), true));
+    fromServer->invokeMethod(client);
+
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
 }
 
 TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemoveOnOtherClient){
-    fromClient= new uriMessage(msgType::shareRes, {"user", "pwd"}, msgOutcome::success, "path",
-                               "name",
-                               dummyUri, 0);
-    uriMessage* fc= dynamic_cast<uriMessage*>(fromClient);
+    fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path,
+                               name,
+                               dummyUri);
+    uriMessage* fc= static_cast<uriMessage*>(fromClient);
 
     //the message from client is forwarded to the other client, but the password is cleaned
-    fromServer= new uriMessage(msgType::shareRes, {"", ""}, msgOutcome::success, "path", "name",
+    fromServer= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path, name,
                                dummyUri, fc->getMsgId());
-    //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, shareResource("path", "name", const_cast<uri&>(fc->getSharingPrefs()), false)).WillOnce(::testing::Return(fc->getSharingPrefs()));
+    EXPECT_CALL(client, shareResource(path, name, fc->getSharingPrefs(), false));
     fromServer->invokeMethod(client);
 }
 
 TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUser){
-    fromClient=new userDataMessage(msgType::changeUserPwd, {"", ""}, msgOutcome::success, u);
-    //uriMessage* fc= dynamic_cast<uriMessage*>(fromClient);
-    //message handler has to retrieve the correct actionOwner user knowing the pair (username, pwd) in message's actionOwner
-    //(here we suppose it is the dummy user u)
-    //Same thing with targetUser
-    EXPECT_CALL(server, editUser("", "", u)).WillOnce(::testing::ReturnRef(u));
+    fromClient=new userDataMessage(msgType::changeUserData, {username, {}}, msgOutcome::success, u);
+
+    EXPECT_CALL(server, editUser(username, u)).WillOnce(::testing::ReturnRef(u));
     fromClient->invokeMethod(server);
 
-    fromServer= new serverMessage(msgType::shareRes, msgOutcome::success, fromClient->getMsgId());
+    fromServer= new serverMessage(msgType::changeUserData, msgOutcome::success, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
     EXPECT_CALL(client, editUser(u, true)).WillOnce(::testing::Return(u));
-    fromClient->completeAction(client);
+    fromServer->invokeMethod(client);
+
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
 }
 
 TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUserOnOtherClient){
-    fromClient=new userDataMessage(msgType::changeUserPwd, {"user", "pwd"}, msgOutcome::success, u);
+    fromClient=new userDataMessage(msgType::changeUserPwd, {username, {}}, msgOutcome::success, u);
     //uriMessage* fc= dynamic_cast<uriMessage*>(fromClient);
 
-    fromServer= new userDataMessage(msgType::changeUserPwd, {"user", ""}, msgOutcome::success, u, fromClient->getMsgId());
-    //client uses the message previously sent to the server to retrieve the parameters for the required action:
-    //targetUser from fc->getTargetUser() (from std::string to user)
-    //resPath and resName from fc->getResourceId
-    EXPECT_CALL(client, editUser(u, true)).WillOnce(::testing::Return(u));
+    fromServer= new userDataMessage(msgType::changeUserPwd, {username, {}}, msgOutcome::success, u, fromClient->getMsgId());
+    EXPECT_CALL(client, editUser(u, false)).WillOnce(::testing::Return(u));
     fromServer->invokeMethod(client);
 }

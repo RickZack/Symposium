@@ -77,7 +77,7 @@ struct fileMock: public file{
 
     fileMock(): file("dummy", "./somedir", 0), policyMocked(uri::getDefaultPrivilege()) {};
     MOCK_METHOD2(setUserPrivilege, privilege(const std::string&, privilege));
-    MOCK_METHOD2(setSharingPolicy, uri(const std::string&, uri& newSharingPrefs));
+    MOCK_METHOD2(setSharingPolicy, uri(const std::string&, const uri& newSharingPrefs));
     MOCK_CONST_METHOD1(getUserPrivilege, privilege(const std::string&));
     MOCK_METHOD0(getSharingPolicy, uri&());
     void setMockPolicy(privilege privilege) {

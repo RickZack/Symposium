@@ -163,14 +163,12 @@ privilege SymClient::editPrivilege(const std::string &targetUser, const std::str
     return this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege);
 }
 
-uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) {
-    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0));
+uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) {    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0));
     unanswered.push_front(mess);
     return *mess;
 }
 //FIXME: Metodo non funzionante
-uri SymClient::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs, bool msgRcv) {
-    //TODO: modified this method, return the file
+uri SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv) {    //TODO: modified this method, return the file
     std::shared_ptr<filesystem> fil = this->getLoggedUser().shareResource(resPath, resName, newPrefs);
    // return fil->getSharingPolicy();
     return newPrefs;

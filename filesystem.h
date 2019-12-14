@@ -141,7 +141,7 @@ namespace Symposium {
          * Calling @e setSharingPolicy on a filesystem object is considered an error, so an exception is raised, since
          * each subclass must specify whether it is allowed to share objects of its type among users, overriding this method.
          */
-        virtual uri setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs);
+        virtual uri setSharingPolicy(const std::string &actionUser, const uri &newSharingPrefs);
 
         virtual void store(const std::string &storePath) const = 0;
 
@@ -206,7 +206,7 @@ namespace Symposium {
          *
          * Verifies that @e actionUser is enabled to make such an action and replace the old @e sharingPolicy
          */
-        virtual uri setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) override;
+        virtual uri setSharingPolicy(const std::string &actionUser, const uri &newSharingPrefs) override;
 
         resourceType resType() const override;
 

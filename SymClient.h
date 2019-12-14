@@ -289,7 +289,7 @@ namespace Symposium {
          * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
          * uri SymClient::shareResource that will actually perform the sharing preference change.
          */
-        virtual uriMessage shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs);
+        virtual uriMessage shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
 
         /**
          * @brief set new sharing preferences for a resource
@@ -305,7 +305,7 @@ namespace Symposium {
          * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
          * of this method and the one that returns a uriMessage.
          */
-        virtual uri shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs, bool msgRcv);
+        virtual uri shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv);
 
         /**
          * @brief constructs a @ref uriMessage to send to the server to ask to change the name of a resource

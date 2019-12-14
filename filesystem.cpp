@@ -69,7 +69,7 @@ std::string filesystem::setName(const std::string &newName) {
     return name;
 }
 
-uri filesystem::setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) {
+uri filesystem::setSharingPolicy(const std::string &actionUser, const uri &newSharingPrefs) {
     throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
@@ -130,7 +130,7 @@ privilege file::setUserPrivilege(const std::string &targetUser, privilege newPri
     return newPrivilege;
 }
 
-uri file::setSharingPolicy(const std::string &actionUser, uri &newSharingPrefs) {
+uri file::setSharingPolicy(const std::string &actionUser, const uri &newSharingPrefs) {
     privilege userPriv=strategy->getPrivilege(actionUser);
     if(userPriv==privilege::owner) {
         this->sharingPolicy=newSharingPrefs;
@@ -304,7 +304,7 @@ std::string directory::setName(const std::string &path, const std::string &fileN
 std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
     if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> &i){return i->getName()==name;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
-    std::shared_ptr<directory> newDir(new directory(name, idToAssign));//directory deve essere protetto
+    std::shared_ptr<directory> newDir(new directory(name, idToAssign));
     newDir->parent=this->self;
     newDir->self=newDir;
     contained.push_back(newDir);

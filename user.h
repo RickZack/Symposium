@@ -174,7 +174,7 @@ namespace Symposium {
          * This method calls @ref directory::getFile method on the @e home, retrieving the file, and calls
          * @ref file::setUserPrivilege passing the current user as the one on which take action
          */
-        privilege changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege);
+        privilege changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) const;
 
         /**
          * @brief set new sharing preferences for a resource
@@ -185,7 +185,7 @@ namespace Symposium {
          *
          * Calls @ref directory::getFile on @e home and then file::setSharingPolicy on the retrieved file
          */
-        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const;
+        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) const;
 
         /**
          * @brief renames a resource

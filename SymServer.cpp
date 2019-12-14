@@ -200,15 +200,16 @@ void SymServer::handleUserState(const std::string &targetUser, int docId, bool w
 
 }
 
-std::shared_ptr<filesystem> SymServer::shareResource(const user &actionUser, const std::string &resPath, const std::string &resName,
+std::shared_ptr<filesystem> SymServer::shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName,
                                                      uri &newPrefs) {
-    if(!userIsActive(actionUser.getUsername()))
+    if(!userIsActive(actionUser))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    auto res= actionUser.shareResource(resPath, resName, newPrefs);
-    uriMessage *toSend=new uriMessage(msgType::shareRes, {actionUser.getUsername(), {}}, msgOutcome ::success, resPath, resName, newPrefs);
+    const user& actionU=getRegistered(actionUser);
+    auto res= actionU.shareResource(resPath, resName, newPrefs);
+    uriMessage *toSend=new uriMessage(msgType::shareRes, {actionUser, {}}, msgOutcome ::success, resPath, resName, newPrefs);
     int docId= std::dynamic_pointer_cast<file>(res)->getDoc().getId();
 
-    std::forward_list<int> setSiteIds= siteIdsFor(docId, actionUser.getSiteId());
+    std::forward_list<int> setSiteIds= siteIdsFor(docId, actionU.getSiteId());
     insertMessageForSiteIds(setSiteIds, std::shared_ptr<serverMessage>(toSend));
 
     return res;
@@ -241,7 +242,7 @@ void SymServer::closeSource(const std::string &actionUser, int resIdtoClose) {
     insertMessageForSiteIds(siteIdsFor(resIdtoClose, actionU.getSiteId()), std::shared_ptr<serverMessage>(toSend));
 }
 
-const user & SymServer::editUser(const std::string &username, const std::string &pwd, user &newUserData) {
+const user & SymServer::editUser(const std::string &username, user &newUserData) {
     if(!userIsActive(username))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& target=getRegistered(username);
@@ -261,6 +262,8 @@ void SymServer::removeUser(const std::string &username, const std::string &pwd) 
     if (!userIsRegistered(username))
         throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
     user& toBeRemoved=getRegistered(username);
+    if(!toBeRemoved.hasPwd(pwd))
+        throw SymServerException(SymServerException::userWrongPwd, UnpackFileLineFunction());
     closeAllDocsAndPropagateMex(toBeRemoved, workingDoc[username]);
     serverMessage* response=new serverMessage(msgType::removeUser, msgOutcome::success);
     insertMessageForSiteIds({toBeRemoved.getSiteId()}, std::shared_ptr<serverMessage>(response));
@@ -268,7 +271,7 @@ void SymServer::removeUser(const std::string &username, const std::string &pwd) 
     removeRegistered(username);
 }
 
-void SymServer::logout(const std::string &username, const std::string &pwd) {
+void SymServer::logout(const std::string &username) {
     if(!userIsActive(username))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& loggedOut=getRegistered(username);

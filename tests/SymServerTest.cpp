@@ -57,7 +57,7 @@ struct SymServerUserMock: public user{
     MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome, int id));
     MOCK_CONST_METHOD4(editPrivilege, privilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
-    MOCK_CONST_METHOD3(shareResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, uri& newPrefs));
+    MOCK_CONST_METHOD3(shareResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, const uri& newPrefs));
     MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string& resPath, const std::string& resName, const std::string& newName));
     MOCK_CONST_METHOD2(removeResource, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
     MOCK_CONST_METHOD1(hasPwd, bool(const std::string& pwd));
@@ -320,7 +320,7 @@ TEST_F(SymServerTestUserFunctionality, logoutRemovesUserFromActiveAndGenerateCor
     EXPECT_CALL(inserted, hasPwd(newUserPwd)).WillOnce(::testing::Return(true));
     server.login(newUserUsername, newUserPwd);
     ASSERT_TRUE(server.userIsActive(newUserUsername, newUser));
-    server.logout(newUserUsername, newUserPwd);
+    server.logout(newUserUsername);
     EXPECT_FALSE(server.userIsActive(newUserUsername, newUser));
 
     serverMessage response(msgType::logout, msgOutcome::success);
@@ -330,6 +330,7 @@ TEST_F(SymServerTestUserFunctionality, logoutRemovesUserFromActiveAndGenerateCor
 TEST_F(SymServerTestUserFunctionality, removeUserRemovesUserFromRegistered){
     const SymServerUserMock& inserted= dynamic_cast<const SymServerUserMock&>(server.addUser(newUser));
     ASSERT_TRUE(server.userAlreadyRegistered(newUser));
+    EXPECT_CALL(inserted, hasPwd(newUserPwd)).WillOnce(::testing::Return(true));
     server.removeUser(newUserUsername, newUserPwd);
     EXPECT_FALSE(server.userAlreadyRegistered(newUser));
 
@@ -344,7 +345,7 @@ TEST_F(SymServerTestUserFunctionality, editUserCallSetUserDataAndGenerateCorrect
 
     user newData("giuseppe", "123@pwd@!", "peppuccio63", validIconPath, 0, nullptr);
     EXPECT_CALL(oldUser, setNewData(newData));
-    server.editUser(newUserUsername, newUserPwd, newData);
+    server.editUser(newUserUsername, newData);
 
     serverMessage response(msgType::changeUserData, msgOutcome::success);
     EXPECT_TRUE(server.thereIsMessageForUser(oldUser.getSiteId(), response).first);
@@ -358,7 +359,7 @@ TEST_F(SymServerTestUserFunctionality, editUserChangesUserDataAndPropagateChange
     user newData("giuseppe", "123@pwd@!", "peppuccio63", validIconPath, 0, nullptr);
     EXPECT_CALL(oldUser, setNewData(newData));
 
-    const user& inserted=server.editUser(newUserUsername, newUserPwd, newData);
+    const user& inserted= server.editUser(newUserUsername, newData);
 
     /*
      * Change in a user's data must be propagated to clients that can be interested
@@ -528,7 +529,7 @@ TEST_F(SymServerTestFilesystemFunctionality, logoutClosesOpenedDocumentsAndPropa
     updateActiveMessage toSend(msgType::removeActiveUser, msgOutcome::success, loggedUser.makeCopyNoPwd(), doc.getId());
 
 
-    server.logout(loggedUserUsername, loggedUserPwd);
+    server.logout(loggedUserUsername);
     EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
     ASSERT_NO_FATAL_FAILURE(messageAssociatedWithRightUsers({anotherUser.getSiteId()}, toSend, {loggedUser.getSiteId()}));
 }
@@ -542,7 +543,7 @@ TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
     ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 
     updateActiveMessage toSend(msgType::removeActiveUser, msgOutcome::success, loggedUser.makeCopyNoPwd(), doc.getId());
-
+    EXPECT_CALL(target, hasPwd(loggedUserPwd)).WillOnce(::testing::Return(true));
     server.removeUser(loggedUserUsername, loggedUserPwd);
     EXPECT_FALSE(server.userAlreadyRegistered(loggedUser));
     EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
@@ -760,6 +761,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeOnUserWorkingOnDocumen
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, shareResourceCallsShareResourceOnUserAndInsertInQueue){
+    setStageForAccessedDoc(loggedUser);
     uri newPref(uriPolicy::activeAlways);
     /*
      * Let's suppose that a message like that has been received by the server
@@ -768,8 +770,8 @@ TEST_F(SymServerTestFilesystemFunctionality, shareResourceCallsShareResourceOnUs
     uriMessage toSend(received);
     toSend.clearAuthParam();
     server.forceSiteIdForResId(&(fileToReturn->getDoc()), anotherUser);
-    EXPECT_CALL(loggedUser, shareResource(filePath, fileName, newPref)).WillOnce(::testing::Return(fileToReturn));
-    auto file=server.shareResource(loggedUser, filePath, fileName, newPref);
+    EXPECT_CALL(*justInserted, shareResource(filePath, fileName, newPref)).WillOnce(::testing::Return(fileToReturn));
+    auto file=server.shareResource(loggedUserUsername, filePath, fileName, newPref);
     /*
      * A message is supposed to be inserted in the queue corresponding to the file's document
      * This means that only the client that have the document opened will receive that message
@@ -781,7 +783,7 @@ TEST_F(SymServerTestFilesystemFunctionality, shareResourceCallsShareResourceOnUs
 
 TEST_F(SymServerTestFilesystemFunctionality, shareResourceOfUnLoggedUser){
     uri newPref(uriPolicy::activeAlways);
-    EXPECT_THROW(server.shareResource(anotherUser, filePath, fileName, newPref), SymServerException);
+    EXPECT_THROW(server.shareResource(anotherUserUsername, filePath, fileName, newPref), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, renameResourceCallsRenameResourceOnUser){

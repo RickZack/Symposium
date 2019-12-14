@@ -91,7 +91,7 @@ void clientMessage::invokeMethod(SymServer &server) {
             break;
         }
         case msgType::logout:{
-            server.logout(actionOwner.first, actionOwner.second);
+            server.logout(actionOwner.first);
             break;
         }
         default:

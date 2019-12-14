@@ -113,7 +113,16 @@ std::shared_ptr<file> user::newFile(const std::string &fileName, const std::stri
     return newF;
 }
 
-
+//FIXME: mi sembra ci sia qualcosa che non va.
+// Penso che tu abbia seguito questa linea:
+// - mi faccio tornare la directory dove voglio creare la nuova directory;
+// - chiamo addDirectory su quella;
+// Il problema è che, dopo aver chiamato la getDir, la addDirectory la fai sempre sulla home.
+// Hai due opzioni:
+// - correggi e chiami addDirectory sulla cartella giusta
+// - similmente a come facciamo in altri punti (per esempio addFile), l'inserzione di una cartella dentro un'altra diventa
+//   responsabilità del filesystem, dunque modifichi la addDirectory per fare in modo che possa inserire nelle sue sottocartelle
+//   (questa è a mio avviso la scelta più pulita, ma richiede di rivedere i test relativi ad addDirectory())
 std::shared_ptr<directory>
 user::newDirectory(const std::string &dirName, const std::string &pathFromHome, int idToAssign) const{
     std::shared_ptr<directory> newD;
@@ -166,14 +175,14 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
     return newP;
 }
 
-privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) {
+privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     privilege newP;
     newP=newF->setUserPrivilege(username, newPrivilege);
     return newP;
 }
 
-std::shared_ptr<filesystem> user::shareResource(const std::string &resPath, const std::string &resName, uri &newPrefs) const {
+std::shared_ptr<filesystem> user::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     uri u;
     u=newF->setSharingPolicy(username, newPrefs);
