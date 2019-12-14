@@ -432,6 +432,13 @@
           * @param loggedOut the user that just logged out
           */
          void settleResIdToSiteId(const user &loggedOut);
+
+         /**
+          * @brief generate a simple response with msgOutcome::success for a client request
+          * @param recvSiteId the siteId of the client to send the confirm to
+          * @param action the msgType of the received clientMessage
+          */
+         void generateSimpleResponse(int recvSiteId, msgType action);
      };
  }
 

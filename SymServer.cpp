@@ -145,10 +145,7 @@ void SymServer::remoteInsert(const std::string &inserter, int resourceId, symbol
     symMsg.clearAuthParam();
     docRetrieved.second->remoteInsert(symMsg.verifySym().getSym());
     insertMessageForSiteIds(siteIdsFor(resourceId, getRegistered(inserter).getSiteId()), std::shared_ptr<serverMessage>(new symbolMessage(symMsg)));
-
-    //response to client
-    serverMessage* response=new serverMessage(msgType::insertSymbol, msgOutcome::success);
-    insertMessageForSiteIds({getRegistered(inserter).getSiteId()}, std::shared_ptr<serverMessage>(response));
+    generateSimpleResponse(getRegistered(inserter).getSiteId(), msgType::insertSymbol);
 }
 
 void SymServer::remoteRemove(const std::string &remover, int resourceId, symbolMessage &rmMsg) {
@@ -162,9 +159,7 @@ void SymServer::remoteRemove(const std::string &remover, int resourceId, symbolM
     docRetrieved.second->remoteRemove(rmMsg.verifySym().getSym());
     insertMessageForSiteIds(siteIdsFor(resourceId, actionU.getSiteId()), std::shared_ptr<serverMessage>(new symbolMessage(rmMsg)));
 
-    //response to client
-    serverMessage* response=new serverMessage(msgType::removeSymbol, msgOutcome::success);
-    insertMessageForSiteIds({actionU.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    generateSimpleResponse(actionU.getSiteId(), msgType::removeSymbol);
 }
 
 privilege SymServer::editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
@@ -181,9 +176,7 @@ privilege SymServer::editPrivilege(const std::string &actionUser, const std::str
     privMessage* toSend=new privMessage(msgType::changePrivileges, {actionUser,{}}, msgOutcome::success, std::to_string(docId), targetUser, privilege::readOnly);
     insertMessageForSiteIds(setSiteIds, std::shared_ptr<serverMessage>(toSend));
 
-    //response to client
-    serverMessage* response=new serverMessage(msgType::changePrivileges, msgOutcome::success);
-    insertMessageForSiteIds({actionU.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    generateSimpleResponse(actionU.getSiteId(), msgType::changePrivileges);
     return oldPriv;
 }
 
@@ -222,10 +215,7 @@ std::shared_ptr<filesystem> SymServer::shareResource(const std::string &actionUs
     std::forward_list<int> setSiteIds= siteIdsFor(docId, actionU.getSiteId());
     insertMessageForSiteIds(setSiteIds, std::shared_ptr<serverMessage>(toSend));
 
-    //response to client
-    serverMessage* response=new serverMessage(msgType::shareRes, msgOutcome::success);
-    insertMessageForSiteIds({actionU.getSiteId()}, std::shared_ptr<serverMessage>(response));
-
+    generateSimpleResponse(actionU.getSiteId(), msgType::shareRes);
     return res;
 }
 
@@ -237,9 +227,7 @@ SymServer::renameResource(const std::string &renamer, const std::string &resPath
     user& actionU=getRegistered(renamer);
     auto res=actionU.renameResource(resPath, resName, newName);
 
-    //response to client
-    serverMessage* response=new serverMessage(msgType::changeResName, msgOutcome::success);
-    insertMessageForSiteIds({actionU.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    generateSimpleResponse(actionU.getSiteId(), msgType::changeResName);
     return res;
 }
 
@@ -250,9 +238,7 @@ SymServer::removeResource(const std::string &remover, const std::string &resPath
     user& actionU=getRegistered(remover);
     auto res=actionU.removeResource(resPath, resName);
 
-    //response to client
-    serverMessage* response=new serverMessage(msgType::removeRes, msgOutcome::success);
-    insertMessageForSiteIds({actionU.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    generateSimpleResponse(actionU.getSiteId(), msgType::removeRes);
     return res;
 }
 
@@ -267,48 +253,45 @@ void SymServer::closeSource(const std::string &actionUser, int resIdtoClose) {
     updateActiveMessage* toSend= new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, getRegistered(actionUser).makeCopyNoPwd(), resIdtoClose);
     insertMessageForSiteIds(siteIdsFor(resIdtoClose, actionU.getSiteId()), std::shared_ptr<serverMessage>(toSend));
 
-    //response to client
-    serverMessage* response=new serverMessage(msgType::closeRes, msgOutcome::success);
-    insertMessageForSiteIds({actionU.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    generateSimpleResponse(actionU.getSiteId(), msgType::closeRes);
 }
 
 const user & SymServer::editUser(const std::string &username, user &newUserData) {
     if(!userIsActive(username))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    user& target=getRegistered(username);
-    target.setNewData(newUserData);
-    userDataMessage* toSend= new userDataMessage(msgType::changeUserData, {username, {}}, msgOutcome::success, target.makeCopyNoPwd());
+    user& toEdit=getRegistered(username);
+    toEdit.setNewData(newUserData);
+    userDataMessage* toSend= new userDataMessage(msgType::changeUserData, {username, {}}, msgOutcome::success, toEdit.makeCopyNoPwd());
 
     //notification to other clients interested in changes on this user
-    std::forward_list<int> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(username), target.getSiteId());
+    std::forward_list<int> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(username), toEdit.getSiteId());
     insertMessageForSiteIds(setSiteIds, std::shared_ptr<serverMessage>(toSend));
 
-    serverMessage* response=new serverMessage(msgType::changeUserData, msgOutcome::success);
-    insertMessageForSiteIds({target.getSiteId()}, std::shared_ptr<serverMessage>(response));
-    return target;
+    generateSimpleResponse(toEdit.getSiteId(), msgType::changeUserData);
+    return toEdit;
 }
 
 void SymServer::removeUser(const std::string &username, const std::string &pwd) {
     if (!userIsRegistered(username))
         throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
-    user& toBeRemoved=getRegistered(username);
-    if(!toBeRemoved.hasPwd(pwd))
+    user& toRemove=getRegistered(username);
+    if(!toRemove.hasPwd(pwd))
         throw SymServerException(SymServerException::userWrongPwd, UnpackFileLineFunction());
-    closeAllDocsAndPropagateMex(toBeRemoved, workingDoc[username]);
-    serverMessage* response=new serverMessage(msgType::removeUser, msgOutcome::success);
-    insertMessageForSiteIds({toBeRemoved.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    closeAllDocsAndPropagateMex(toRemove, workingDoc[username]);
     active.erase(username);
     removeRegistered(username);
+
+    generateSimpleResponse(toRemove.getSiteId(), msgType::removeUser);
 }
 
 void SymServer::logout(const std::string &username) {
     if(!userIsActive(username))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
-    user& loggedOut=getRegistered(username);
-    closeAllDocsAndPropagateMex(loggedOut, workingDoc[username]);
-    serverMessage* response=new serverMessage(msgType::logout, msgOutcome::success);
-    insertMessageForSiteIds({loggedOut.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    user& toLogOut=getRegistered(username);
+    closeAllDocsAndPropagateMex(toLogOut, workingDoc[username]);
     active.erase(username);
+
+    generateSimpleResponse(toLogOut.getSiteId(), msgType::logout);
 }
 
 std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, int resourceId) {
@@ -445,5 +428,11 @@ std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessa
         }
     return result;
 }
+
+void SymServer::generateSimpleResponse(int recvSiteId, msgType action) {
+    serverMessage* response=new serverMessage(action, msgOutcome::success);
+    insertMessageForSiteIds({recvSiteId}, std::shared_ptr<serverMessage>(response));
+}
+
 
 
