@@ -312,9 +312,14 @@
           * the map with users in @e registered.
           * Sends to the client a @ref mapMessage
           */
-         virtual std::map<int, user> mapSiteIdToUser(const std::string &actionUser, int resourceId) const;
+         virtual std::map<int, user> mapSiteIdToUser(const std::string &actionUser, int resourceId);
          //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
+         /**
+          * @brief extract a message from the message queue associated with an user
+          * @return a pair containing the siteId of the user the message is to send to and the message itself
+          */
+         std::pair<const int, std::shared_ptr<serverMessage>> extractNextMessage();
          virtual ~SymServer() = default;
 
      protected:
@@ -352,7 +357,7 @@
           * These are utility methods for internal use that don't need override
           */
      private:
-         static bool userIsValid(const user &toCheck);
+         static bool userIsValid(const user &toCheck)  noexcept ;
          /**
           * @brief searches in the @e workingDoc map for the document that has the given @e resourceId
           * @param username the username of the user whose working state on a document is to be checked
