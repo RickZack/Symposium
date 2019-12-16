@@ -212,8 +212,7 @@ void serverMessage::invokeMethod(SymClient &client) {
 }
 
 bool serverMessage::isRelatedTo(const clientMessage &other) const {
-    //TODO: implement
-    return false;
+    return other.getMsgId() == this->msgId && other.getAction() == this->action;
 }
 
 msgOutcome serverMessage::getResult() const {
