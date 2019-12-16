@@ -366,8 +366,10 @@ public:
     MOCK_METHOD2(login, const user(const std::string&, const std::string&));
     MOCK_METHOD1(logout, void(const std::string&));
     MOCK_METHOD2(removeUser, void(const std::string&, const std::string&));
+
+    //come togliere const da dentro le parentesi??
     MOCK_METHOD1(addUser, const user(const user&));
-    MOCK_METHOD3(createNewSource, document&(const user&, const std::string&, const std::string&));
+    MOCK_METHOD3(createNewSource, document&(const std::string&, const std::string&, const std::string&));
     MOCK_METHOD4(openSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, privilege));
     MOCK_METHOD5(openNewSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, const std::string&, privilege));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, const std::string&));
@@ -433,7 +435,7 @@ TEST_F(clientMessageTest, signUpMsgTestCallsAddUserOnServer){
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewSource){
     m= new askResMessage(msgType::createRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, createNewSource(u, path, name));
+    EXPECT_CALL(server, createNewSource(m->getActionOwner().first, path, name));
     m->invokeMethod(server);
 }
 
@@ -453,6 +455,8 @@ TEST_F(clientMessageTest, askResMsgTestCallsRenameResource){
     //If @e action is "changeResName" then @e resourceId is the new file name. See def. of askResMessage in message.h
     m= new askResMessage(msgType::changeResName, {username, ""}, path, name, resId, uri::getDefaultPrivilege(), 0);
     EXPECT_CALL(server, renameResource(username, path, name, resId)).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
+
+    //resID non è un nuovo nome della risorsa, sistemare!
     m->invokeMethod(server);
 }
 

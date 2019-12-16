@@ -147,7 +147,7 @@ void askResMessage::invokeMethod(SymServer &server) {
             break;
         }
         case msgType::changeResName:{
-            //server.renameResource()
+            server.renameResource(getActionOwner().first,path, name, resourceId);
             break;
         }
         case msgType::createNewDir:{
@@ -155,7 +155,7 @@ void askResMessage::invokeMethod(SymServer &server) {
             break;
         }
         case msgType::removeRes:{
-            //server.removeResource()
+            server.removeResource(getActionOwner().first,path,name);
             break;
         }
         default:
@@ -180,7 +180,7 @@ bool askResMessage::operator!=(const askResMessage &rhs) const {
 }
 
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
-                             const user &newUser,
+                            const user &newUser,
                              int msgId)
                              : message(msgId), clientMessage(actionOwner, msgId), newUser(newUser) {
     if(action!=msgType::registration)
@@ -429,10 +429,11 @@ void updateDocMessage::invokeMethod(SymServer &server) {
     if(action==msgType::closeRes){
         server.closeSource(getActionOwner().first,resourceId);
     }
-    if(action==msgType::mapChangesToUser){
+    else if(action==msgType::mapChangesToUser){
         server.mapSiteIdToUser(getActionOwner().first,resourceId);
     }
-    clientMessage::invokeMethod(server);
+    else
+        throw messageException("This is not a valid message");
 }
 
 userDataMessage::userDataMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,

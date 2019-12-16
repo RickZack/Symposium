@@ -113,28 +113,19 @@ std::shared_ptr<file> user::newFile(const std::string &fileName, const std::stri
     return newF;
 }
 
-//FIXME: mi sembra ci sia qualcosa che non va.
-// Penso che tu abbia seguito questa linea:
-// - mi faccio tornare la directory dove voglio creare la nuova directory;
-// - chiamo addDirectory su quella;
-// Il problema è che, dopo aver chiamato la getDir, la addDirectory la fai sempre sulla home.
-// Hai due opzioni:
-// - correggi e chiami addDirectory sulla cartella giusta
-// - similmente a come facciamo in altri punti (per esempio addFile), l'inserzione di una cartella dentro un'altra diventa
-//   responsabilità del filesystem, dunque modifichi la addDirectory per fare in modo che possa inserire nelle sue sottocartelle
-//   (questa è a mio avviso la scelta più pulita, ma richiede di rivedere i test relativi ad addDirectory())
+
 std::shared_ptr<directory>
 user::newDirectory(const std::string &dirName, const std::string &pathFromHome, int idToAssign) const{
-    std::shared_ptr<directory> newD;
+    std::shared_ptr<directory> newDir;
     std::string pathToDir;
     std::string idDir;
     tie(pathToDir, idDir)= separate(pathFromHome);
-    newD=home->getDir(pathToDir, idDir);
+    std::shared_ptr<directory> dir=home->getDir(pathToDir, idDir);
     if(idToAssign==-1)
-        newD=home->addDirectory(dirName);
+        newDir=dir->addDirectory(dirName);
     else
-        newD=home->addDirectory(dirName, idToAssign);
-    return newD;
+        newDir=dir->addDirectory(dirName, idToAssign);
+    return newDir;
 }
 
 
