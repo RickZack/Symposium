@@ -119,8 +119,12 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
     std::shared_ptr<directory> newDir;
     std::string pathToDir;
     std::string idDir;
-    tie(pathToDir, idDir)= separate(pathFromHome);
-    std::shared_ptr<directory> dir=home->getDir(pathToDir, idDir);
+    std::shared_ptr<directory> dir=home;
+    if(!(pathFromHome.empty()) && pathFromHome!="./" && pathFromHome!=".")
+    {
+        tie(pathToDir, idDir)= separate(pathFromHome);
+        dir=home->getDir(pathToDir, idDir);
+    }
     if(idToAssign==-1)
         newDir=dir->addDirectory(dirName);
     else
@@ -263,8 +267,8 @@ bool user::noSpecialCharPwd(const std::string &pass)
 
 std::tuple<std::string, std::string>  user::separate(const std::string &path)
 {
-    std::string path2;
     std::string id;
+    std::string path2;
     std::size_t found = path.find_last_of("/\\");
     if(found==0)
         path2="";

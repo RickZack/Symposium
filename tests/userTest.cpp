@@ -156,7 +156,7 @@ TEST(userTest, makeNewDirMock){
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     directory *created=new dirMock("ciao");
     EXPECT_CALL(*dir, addDirectory("ciao", dirMock::getIdCounter())).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
-    u1.newDirectory("ciao");
+    u1.newDirectory("ciao", "./");
 }
 
 TEST_F(UserTest, callEditPrivilege){
