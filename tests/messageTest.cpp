@@ -366,10 +366,8 @@ public:
     MOCK_METHOD2(login, const user(const std::string&, const std::string&));
     MOCK_METHOD1(logout, void(const std::string&));
     MOCK_METHOD2(removeUser, void(const std::string&, const std::string&));
-
-    //come togliere const da dentro le parentesi??
-    MOCK_METHOD1(addUser, const user(const user&));
-    MOCK_METHOD3(createNewSource, document&(const std::string&, const std::string&, const std::string&));
+    MOCK_METHOD1(addUser, const user&(user&));
+    MOCK_METHOD3(createNewSource, const document&(const std::string&, const std::string&, const std::string&));
     MOCK_METHOD4(openSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, privilege));
     MOCK_METHOD5(openNewSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, const std::string&, privilege));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, const std::string&));
@@ -429,13 +427,14 @@ TEST_F(clientMessageTest, clientMessageTestCallsRemoveUserOnServer){
 
 TEST_F(clientMessageTest, signUpMsgTestCallsAddUserOnServer){
     m=new signUpMessage(msgType::registration, {username, ""}, u);
-    EXPECT_CALL(server, addUser(u)).WillOnce(::testing::Return(u));
+    EXPECT_CALL(server, addUser(u)).WillOnce(::testing::ReturnRef(u));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewSource){
+    document d;
     m= new askResMessage(msgType::createRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, createNewSource(m->getActionOwner().first, path, name));
+    EXPECT_CALL(server, createNewSource(m->getActionOwner().first, path, name)).WillOnce(::testing::ReturnRef(d));
     m->invokeMethod(server);
 }
 
