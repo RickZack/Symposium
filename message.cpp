@@ -232,6 +232,7 @@ const user &loginMessage::getLoggedUser() const {
 
 void loginMessage::invokeMethod(SymClient &client) {
     client.setLoggedUser(loggedUser);
+    auto msg= client.retrieveRelatedMessage(*this);
 }
 
 mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<int, user> &siteIdToUser, int msgId)
@@ -247,6 +248,7 @@ const std::map<int, user> & mapMessage::getSiteIdToUser() const {
 
 void mapMessage::invokeMethod(SymClient &client) {
     client.setUserColors(siteIdToUser);
+    auto msg= client.retrieveRelatedMessage(*this);
 }
 
 sendResMessage::sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId, int msgId)
