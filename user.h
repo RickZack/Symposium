@@ -134,7 +134,7 @@ namespace Symposium {
          * @param fileName the name of the new link
          * @return the file just added
          */
-        virtual std::shared_ptr<file>
+        virtual std::pair<int, std::shared_ptr<file>>
         accessFile(const std::string &resId, const std::string &path, const std::string &fileName = "") const;
 
         /**

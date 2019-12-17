@@ -134,8 +134,7 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
 
 
 
-std::shared_ptr<file> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {
-    std::string pathAdd;
+std::pair<int, std::shared_ptr<file>> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {    std::string pathAdd;
     std::string idAdd;
 
     std::shared_ptr<directory> root1=this->home->getRoot();
@@ -153,7 +152,7 @@ std::shared_ptr<file> user::accessFile(const std::string &resId, const std::stri
         throw userException(userException::noPriv, UnpackFileLineFunction());
 
     std::shared_ptr<symlink> sym= home->addLink(path, fileName, pathAdd, idAdd,0);
-    return fi;
+    return std::make_pair(sym->getId(), fi);
 }
 
 std::shared_ptr<file> user::openFile(const std::string &path, const std::string &fileName, privilege accessMode) const {

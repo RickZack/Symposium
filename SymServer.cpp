@@ -102,8 +102,8 @@ SymServer::openNewSource(const std::string &opener, const std::string &resourceI
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
-    std::shared_ptr<file> fileReq=target.accessFile(resourceId, destPath, destName);
-    document& docReq=fileReq->access(target, reqPriv);
+    std::pair<int, std::shared_ptr<file>> fileReq=target.accessFile(resourceId, destPath, destName);
+    document& docReq=fileReq.second->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
 
@@ -113,9 +113,9 @@ SymServer::openNewSource(const std::string &opener, const std::string &resourceI
     insertMessageForSiteIds(siteIdToSend, std::shared_ptr<serverMessage>(toSend));
 
     //response to client
-    sendResMessage* response=new sendResMessage(msgType::openNewRes, msgOutcome::success, *fileReq);
+    sendResMessage* response=new sendResMessage(msgType::openNewRes, msgOutcome::success, *fileReq.second, fileReq.first);
     insertMessageForSiteIds({target.getSiteId()}, std::shared_ptr<serverMessage>(response));
-    return fileReq;
+    return fileReq.second;
 }
 
 const document & SymServer::createNewSource(const std::string &opener, const std::string &path, const std::string &name) {
