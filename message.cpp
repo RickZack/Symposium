@@ -208,7 +208,8 @@ void serverMessage::setResult(msgOutcome outcome) {
 }
 
 void serverMessage::invokeMethod(SymClient &client) {
-    //TODO: implement
+    auto mex=client.retrieveRelatedMessage(*this);
+    mex->completeAction(client);
 }
 
 bool serverMessage::isRelatedTo(const clientMessage &other) const {
@@ -447,9 +448,22 @@ userDataMessage::userDataMessage(msgType action, const std::pair<std::string, st
 }
 
 void userDataMessage::invokeMethod(SymServer &server) {
-    clientMessage::invokeMethod(server);
+    if(action==msgType::changeUserData){
+        server.editUser(getActionOwner().first,newUserData);
+    }
+    else
+        throw messageException("This is not a valid message");
 }
 
 void userDataMessage::invokeMethod(SymClient &client) {
-    serverMessage::invokeMethod(client);
+    if(action==msgType::changeUserData){
+        client.editUser(newUserData, false);
+    }
+    else
+        throw messageException("This is not a valid message");
+}
+
+void userDataMessage::completeAction(SymClient &client) {
+    if(action==msgType::changeUserData)
+        client.editUser(newUserData, true);
 }

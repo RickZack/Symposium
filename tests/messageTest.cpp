@@ -858,10 +858,10 @@ TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUser){
 }
 
 TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUserOnOtherClient){
-    fromClient=new userDataMessage(msgType::changeUserPwd, {username, {}}, msgOutcome::success, u);
+    fromClient=new userDataMessage(msgType::changeUserData, {username, {}}, msgOutcome::success, u);
     //uriMessage* fc= dynamic_cast<uriMessage*>(fromClient);
 
-    fromServer= new userDataMessage(msgType::changeUserPwd, {username, {}}, msgOutcome::success, u, fromClient->getMsgId());
+    fromServer= new userDataMessage(msgType::changeUserData, {username, {}}, msgOutcome::success, u, fromClient->getMsgId());
     EXPECT_CALL(client, editUser(u, false)).WillOnce(::testing::Return(u));
     fromServer->invokeMethod(client);
 }

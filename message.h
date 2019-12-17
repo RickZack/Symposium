@@ -621,6 +621,8 @@
           */
          void invokeMethod(SymClient &client) override;
 
+         void completeAction(SymClient &client) override;
+
          ~userDataMessage() override = default;
 
      };
