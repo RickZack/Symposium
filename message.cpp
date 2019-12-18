@@ -179,6 +179,18 @@ bool askResMessage::operator!=(const askResMessage &rhs) const {
     return !(rhs == *this);
 }
 
+const std::string &askResMessage::getPath() const {
+    return path;
+}
+
+const std::string &askResMessage::getName() const {
+    return name;
+}
+
+const std::string &askResMessage::getResourceId() const {
+    return resourceId;
+}
+
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                             const user &newUser,
                              int msgId)
@@ -273,7 +285,44 @@ const filesystem &sendResMessage::getResource() const {
 }
 
 void sendResMessage::invokeMethod(SymClient &client) {
-    //TODO: implement
+    auto mex=client.retrieveRelatedMessage(*this); //Questa parte non dovrebbe stare in server invoke??
+    switch(mex->getAction())
+    {
+        case msgType::createRes:{
+            std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
+            client.createNewSource(mex2->getPath(), mex2->getName(), resource.getId());
+            break;
+        }
+        //case msgType::openRes:{
+            //std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
+            //resourceType type=resource.resType();
+            //if(type==resourceType::file)
+            //{
+                //std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
+                //client.openSource(f, resource.getUserPrivilege(mex2->getActionOwner().first));
+            //}
+           // break;
+       // }
+        //case msgType::openNewRes:{
+            //server.openNewSource(getActionOwner().first,resourceId,path,name,accessMode);
+           //break;
+       // }
+        //case msgType::changeResName:{
+            //server.renameResource(getActionOwner().first,path, name, resourceId);
+            //break;
+       // }
+        case msgType::createNewDir:{
+            std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
+            client.createNewDir(mex2->getPath(), mex2->getName(), resource.getId());
+            break;
+        }
+       // case msgType::removeRes:{
+            //server.removeResource(getActionOwner().first,path,name);
+           // break;
+       // }
+        default:
+            throw messageException("This is not a valid message");
+    }
 }
 
 privMessage::privMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,

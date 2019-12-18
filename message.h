@@ -190,6 +190,12 @@
          bool operator==(const askResMessage &rhs) const;
          bool operator!=(const askResMessage &rhs) const;
 
+         const std::string &getPath() const;
+
+         const std::string &getName() const;
+
+         const std::string &getResourceId() const;
+
          ~askResMessage() override = default;
      };
 
