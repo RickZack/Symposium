@@ -16,10 +16,10 @@
  * along with Symposium.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   message.cpp
  * Project: Symposium
- * Authors: 
+ * Authors:
  *          Riccardo Zaccone <riccardo.zaccone at studenti.polito.it>
  *          Ksenia Del Conte Akimova <s256669 at studenti.polito.it>
  *          Alice Morano <s259158 at studenti.polito.it>
@@ -210,6 +210,10 @@ void serverMessage::setResult(msgOutcome outcome) {
 void serverMessage::invokeMethod(SymClient &client) {
     auto mex=client.retrieveRelatedMessage(*this);
     mex->completeAction(client);
+    // in base al tipo del messaggio faccio un cast
+    if(action==msgType::changePrivileges){
+        // cast di mex a privMessage
+    }
 }
 
 bool serverMessage::isRelatedTo(const clientMessage &other) const {
@@ -296,14 +300,61 @@ privilege privMessage::getNewPrivilege() const {
 
 void privMessage::invokeMethod(SymServer &server) {
     //TODO: implement
-}
+    //
+    std::string path1;
+    std::string name1;
+    tie(path1, name1) = directory::separateFirst(resourceId);
 
+    std::string path2;
+    std::string nameRes;
+    tie(path2, nameRes) = filesystem::separate(path1);
+
+    std::string pathRes="./";
+    pathRes.append(path2);
+
+    server.editPrivilege(getActionOwner().first,targetUser,pathRes,nameRes,newPrivilege);
+
+
+}
 void privMessage::invokeMethod(SymClient &client) {
     //TODO: implement
+    std::string path1;
+    std::string name1;
+    tie(path1, name1) = directory::separateFirst(resourceId);
+
+    std::string path2;
+    std::string nameRes;
+    tie(path2, nameRes) = filesystem::separate(path1);
+
+    std::string pathRes="./";
+    pathRes.append(path2);
+
+    auto msg= client.retrieveRelatedMessage(*this);
+    client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege,false);
+
+    msg->completeAction(client);
+
 }
 
 void privMessage::completeAction(SymClient &client) {
     //TODO: implement
+    std::string path1;
+    std::string name1;
+    tie(path1, name1) = directory::separateFirst(resourceId);
+
+    std::string path2;
+    std::string nameRes;
+    tie(path2, nameRes) = filesystem::separate(path1);
+
+    std::string pathRes="./";
+    pathRes.append(path2);
+
+    if(getResult()==msgOutcome::success){
+        client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege);
+    }
+    else
+        throw messageException("This is not a valid message");
+
 }
 
 symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
@@ -364,11 +415,13 @@ const uri &uriMessage::getSharingPrefs() const {
 
 void uriMessage::invokeMethod(SymServer &server) {
     //TODO: implement
+    server.shareResource(getActionOwner().first,path,name,sharingPrefs);
 
 }
 
 void uriMessage::invokeMethod(SymClient &client) {
     client.shareResource(path,name,sharingPrefs);
+    auto msg= client.retrieveRelatedMessage(*this);
 }
 
 void uriMessage::completeAction(SymClient &client) {
@@ -411,7 +464,7 @@ void updateActiveMessage::invokeMethod(SymClient &client) {
         default:
             throw messageException("This is not a valid message");
     }
-    serverMessage::invokeMethod(client);
+
 }
 
 updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
@@ -467,3 +520,4 @@ void userDataMessage::completeAction(SymClient &client) {
     if(action==msgType::changeUserData)
         client.editUser(newUserData, true);
 }
+

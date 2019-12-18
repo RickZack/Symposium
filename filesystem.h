@@ -155,7 +155,7 @@ namespace Symposium {
          * @param path the path to divide
          * @return path to resource and id of the resource
          */
-        std::tuple<std::string, std::string> separate(const std::string &path);
+        static std::tuple<std::string, std::string> separate(const std::string &path);
 
         /**
          * @brief check if the path has a valid format
@@ -389,13 +389,14 @@ namespace Symposium {
         virtual std::string print(const std::string &targetUser, bool recursive = true, int indent = 0) const override;
         virtual ~directory() override= default;
 
-    private:
         /**
-         * @brief separate the first part of the path which indicate the id of the directory, example: path=./1/2/3 result 1 and 2/3
-         * @param path the path to divide
-         * @return path that has remained and the id of the directory
-         */
-        std::tuple<std::string, std::string> separateFirst(std::string path);
+             * @brief separate the first part of the path which indicate the id of the directory, example: path=./1/2/3 result 1 and 2/3
+             * @param path the path to divide
+             * @return path that has remained and the id of the directory
+             */
+        static std::tuple<std::string, std::string> separateFirst(std::string path);
+
+    private:
 
         /**
          * @brief print the single element, this method is used in the @ref directory::print

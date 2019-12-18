@@ -64,6 +64,8 @@
          bool operator!=(const message &rhs) const;
 
          virtual ~message() = default;
+
+         std::tuple<std::string, std::string> separate(const std::string &path);
      };
 
 /**
