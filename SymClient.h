@@ -428,10 +428,15 @@ namespace Symposium {
         clientMessage removeUser();
 
         /**
-         * @brief disconnect a user from the system
+         * @brief ask to disconnect a user from the system
          * @return a properly constructed @ref clientMessage to send to the server
          */
         clientMessage logout();
+
+        /**
+         * @brief disconnect a user from the system
+         */
+        void logout(bool msgRcv);
 
         /**
          * @brief create a @ref updateDocMessage to get from the server the mapping between username ad siteID of @e currentDoc 's activeUsers

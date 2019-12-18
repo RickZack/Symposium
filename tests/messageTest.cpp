@@ -197,8 +197,8 @@ INSTANTIATE_TEST_CASE_P(AllButMapChangesFromThirdGroup, mapMsgForbiddenActions, 
 INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 struct sendResMsgForbiddenActions: simpleMsgTypeTest {
-    file f;
-    sendResMsgForbiddenActions(): f("name", "./somedir", 0){};
+    std::shared_ptr<filesystem> f;
+    sendResMsgForbiddenActions(): f(new file("name", "./somedir", 0)){};
     ~sendResMsgForbiddenActions()=default;
 };
 TEST_P(sendResMsgForbiddenActions, sendResThrowExceptionInConstruction) {
@@ -208,6 +208,7 @@ TEST_P(sendResMsgForbiddenActions, sendResThrowExceptionInConstruction) {
 INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(firstGroup));
 INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_CASE_P(changeResNameAndRemove, sendResMsgForbiddenActions, testing::Values(msgType::changeResName, msgType::removeRes));
 
 
 struct updateActiveMsgForbiddenActions: signUpMsgForbiddenActions {};
@@ -304,15 +305,15 @@ TEST_P(updateDocMsgLegalActions, updateDocNoThrowExceptionInConstruction) {
 INSTANTIATE_TEST_CASE_P(MapChangesAndCloseRes, updateDocMsgLegalActions, testing::Values(msgType::mapChangesToUser, msgType::closeRes));
 
 struct sendResMsgLegalActions: simpleMsgTypeTest {
-    file f;
-    sendResMsgLegalActions(): f("name", "./somedir", 0){};
+    std::shared_ptr<filesystem> f;
+    sendResMsgLegalActions(): f(new file("name", "./somedir", 0)){};
     ~sendResMsgLegalActions()=default;
 };
 TEST_P(sendResMsgLegalActions, sendResNoThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new sendResMessage(action, msgOutcome::success, f), action);
 }
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, sendResMsgLegalActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, sendResMsgLegalActions, testing::ValuesIn(std::vector<msgType>(secondGroup.begin(), secondGroup.begin()+4)));
 
 struct updateActiveMsgLegalActions: signUpMsgForbiddenActions {};
 TEST_P(updateActiveMsgLegalActions, updateActiveThrowExceptionInConstruction) {
@@ -496,7 +497,7 @@ public:
     MOCK_METHOD1(setUserColors, void(const std::map<int, user>&));
     MOCK_METHOD3(createNewSource, void(const std::string&, const std::string&, int));
     MOCK_METHOD3(createNewDir, void(const std::string&, const std::string&, int));
-    MOCK_METHOD1(openSource, void(const std::shared_ptr<file>));
+    MOCK_METHOD2(openSource, void(const std::shared_ptr<file>, privilege priv));
     MOCK_METHOD6(openNewSource, void(const std::string &resId, privilege reqPriv, const std::string &destPath, const std::string &destName, int idToAssign, const std::shared_ptr<file> fileAsked));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, bool));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, bool));
@@ -510,6 +511,7 @@ public:
     MOCK_METHOD2(editUser, const user(user&, bool));
     MOCK_METHOD2(verifySymbol, void(int, const symbol&));
     MOCK_METHOD1(retrieveRelatedMessage, std::shared_ptr<clientMessage>(const serverMessage&));
+    MOCK_METHOD1(logout, void(bool msgRcv));
 };
 
 struct serverMessageTest: public testing::Test{
@@ -553,7 +555,7 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
     //data to call createNewSource() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
     cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
-    m=new sendResMessage(msgType::createRes, msgOutcome::success, *dummyFile);
+    m=new sendResMessage(msgType::createRes, msgOutcome::success, dummyFile);
     EXPECT_CALL(client, createNewSource(clientMessageTest::path, clientMessageTest::name, dummyFile->getId()));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
@@ -565,7 +567,7 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
     //the client has sent the following message
     cm= new askResMessage(msgType::createNewDir, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
     auto dirCreated=directory::emptyDir();
-    m=new sendResMessage(msgType::createNewDir, msgOutcome::success, *dirCreated);
+    m=new sendResMessage(msgType::createNewDir, msgOutcome::success, dirCreated);
     EXPECT_CALL(client, createNewDir(clientMessageTest::path, clientMessageTest::name, dirCreated->getId()));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
@@ -574,8 +576,10 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
 
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
     std::shared_ptr<file> dummyFile(new file("file", "./somedir", 1));
-    m=new sendResMessage(msgType::openRes, msgOutcome::success, *dummyFile);
-    EXPECT_CALL(client, openSource(dummyFile));
+    dummyFile->setUserPrivilege(clientMessageTest::username, uri::getDefaultPrivilege());
+    cm= new askResMessage(msgType::openRes, {clientMessageTest::username, {}}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
+    m=new sendResMessage(msgType::openRes, msgOutcome::success, dummyFile);
+    EXPECT_CALL(client, openSource(dummyFile, dummyFile->getUserPrivilege(clientMessageTest::username)));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);
@@ -586,7 +590,7 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
     //the client has sent the following message
     cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, clientMessageTest::resId, uri::getDefaultPrivilege(), 0);
     std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir", 1));
-    m=new sendResMessage(msgType::openNewRes, msgOutcome::success, *dummyFile);
+    m=new sendResMessage(msgType::openNewRes, msgOutcome::success, dummyFile);
     EXPECT_CALL(client, openNewSource(clientMessageTest::resId, uri::getDefaultPrivilege(), clientMessageTest::path, clientMessageTest::name, dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
@@ -610,6 +614,17 @@ TEST_F(serverMessageTest, serverResMsgTestCallsRemoveResource){
     cm= new askResMessage(msgType::removeRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
     m=new serverMessage(msgType::removeRes, msgOutcome::success);
     EXPECT_CALL(client, removeResource(clientMessageTest::path, clientMessageTest::name, true));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
+
+    m->invokeMethod(client);
+}
+
+TEST_F(serverMessageTest, serverMsgTestCallsLogoutOnClient){
+    //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
+    //the client has sent the following message
+    cm= new clientMessage(msgType::logout, {clientMessageTest::username, {}});
+    m=new serverMessage(msgType::logout, msgOutcome::success);
+    EXPECT_CALL(client, logout(true));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);

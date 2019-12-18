@@ -44,10 +44,9 @@
       <bpmn:lane id="Lane_03o2ima" name="serverMessage">
         <bpmn:flowNodeRef>Task_0ghjfom</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>ExclusiveGateway_0if0x9s</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>SubProcess_06yrzbp</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_0y7k5y3</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>ExclusiveGateway_09omvcm</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>ExclusiveGateway_05h9lxi</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SubProcess_06yrzbp</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_0791zzz" name="document">
         <bpmn:flowNodeRef>Task_1vurrul</bpmn:flowNodeRef>
@@ -181,7 +180,6 @@
       <bpmn:incoming>SequenceFlow_0d6pnmo</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_04h790f</bpmn:outgoing>
     </bpmn:subProcess>
-    <bpmn:sequenceFlow id="SequenceFlow_1ln17a9" sourceRef="Task_0y7k5y3" targetRef="SubProcess_06yrzbp" />
     <bpmn:sequenceFlow id="SequenceFlow_0t32c59" sourceRef="SubProcess_06yrzbp" targetRef="ExclusiveGateway_0if0x9s" />
     <bpmn:dataObjectReference id="DataObjectReference_0tcyo49" name="symbol(ch, siteId, counter, pos, false)" dataObjectRef="DataObject_06mhjww" />
     <bpmn:dataObject id="DataObject_06mhjww" />
@@ -234,14 +232,6 @@
     <bpmn:dataObjectReference id="DataObjectReference_0ie54u1" name="symbolMessage(messageType::insertSymbo {username, pwd}, resourceId, newSym)" dataObjectRef="DataObject_199y4ic" />
     <bpmn:dataObject id="DataObject_199y4ic" />
     <bpmn:dataStoreReference id="DataStoreReference_06ubytp" name="unanswered" />
-    <bpmn:subProcess id="SubProcess_06yrzbp" name="Call completeAction(client) on the retrieved message">
-      <bpmn:incoming>SequenceFlow_1ln17a9</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0t32c59</bpmn:outgoing>
-    </bpmn:subProcess>
-    <bpmn:task id="Task_0y7k5y3" name="Set that message&#39;s outcome to the server message&#39;s outcome">
-      <bpmn:incoming>SequenceFlow_0yvj3po</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_1ln17a9</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:sequenceFlow id="SequenceFlow_0u4sbkl" sourceRef="Task_0ghjfom" targetRef="ExclusiveGateway_05h9lxi" />
     <bpmn:sequenceFlow id="SequenceFlow_1sw71c7" sourceRef="ExclusiveGateway_05h9lxi" targetRef="ExclusiveGateway_09omvcm" />
     <bpmn:parallelGateway id="ExclusiveGateway_09omvcm">
@@ -249,7 +239,7 @@
       <bpmn:incoming>SequenceFlow_0jdysvj</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0yvj3po</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_0yvj3po" sourceRef="ExclusiveGateway_09omvcm" targetRef="Task_0y7k5y3" />
+    <bpmn:sequenceFlow id="SequenceFlow_0yvj3po" sourceRef="ExclusiveGateway_09omvcm" targetRef="SubProcess_06yrzbp" />
     <bpmn:parallelGateway id="ExclusiveGateway_05h9lxi">
       <bpmn:incoming>SequenceFlow_0u4sbkl</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1sw71c7</bpmn:outgoing>
@@ -278,6 +268,10 @@
     <bpmn:sequenceFlow id="SequenceFlow_00qob01" sourceRef="ExclusiveGateway_094mbxp" targetRef="Task_1prs8y0" />
     <bpmn:sequenceFlow id="SequenceFlow_04h790f" sourceRef="Task_0yb3uuv" targetRef="ExclusiveGateway_094mbxp" />
     <bpmn:sequenceFlow id="SequenceFlow_0dt9kez" sourceRef="BoundaryEvent_0zo4igy" targetRef="ExclusiveGateway_094mbxp" />
+    <bpmn:subProcess id="SubProcess_06yrzbp" name="Call completeAction(client, outcome) on the retrieved message">
+      <bpmn:incoming>SequenceFlow_0yvj3po</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0t32c59</bpmn:outgoing>
+    </bpmn:subProcess>
   </bpmn:process>
   <bpmn:process id="Process_1bec4gv" isExecutable="false">
     <bpmn:laneSet id="LaneSet_03l6y5m">
@@ -718,7 +712,7 @@
         <dc:Bounds x="1033" y="-133" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="SubProcess_06yrzbp_di" bpmnElement="SubProcess_06yrzbp">
-        <dc:Bounds x="461" y="-743" width="100" height="80" />
+        <dc:Bounds x="370" y="-743" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="SubProcess_19k1ye9_di" bpmnElement="SubProcess_19k1ye9">
         <dc:Bounds x="700" y="-360" width="100" height="80" />
@@ -1180,15 +1174,8 @@
       <bpmndi:BPMNShape id="SubProcess_073xlmj_di" bpmnElement="Task_0yb3uuv">
         <dc:Bounds x="572" y="-360" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_0y7k5y3_di" bpmnElement="Task_0y7k5y3">
-        <dc:Bounds x="312" y="-743" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_1ln17a9_di" bpmnElement="SequenceFlow_1ln17a9">
-        <di:waypoint x="412" y="-703" />
-        <di:waypoint x="461" y="-703" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0t32c59_di" bpmnElement="SequenceFlow_0t32c59">
-        <di:waypoint x="561" y="-703" />
+        <di:waypoint x="470" y="-703" />
         <di:waypoint x="597" y="-703" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOutputAssociation_06roivv_di" bpmnElement="DataOutputAssociation_06roivv">
@@ -1267,7 +1254,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0yvj3po_di" bpmnElement="SequenceFlow_0yvj3po">
         <di:waypoint x="274" y="-703" />
-        <di:waypoint x="312" y="-703" />
+        <di:waypoint x="370" y="-703" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ParallelGateway_1bxrf8l_di" bpmnElement="ExclusiveGateway_05h9lxi">
         <dc:Bounds x="131" y="-728" width="50" height="50" />

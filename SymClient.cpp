@@ -231,6 +231,10 @@ clientMessage SymClient::logout() {
     return clientMessage(msgType::logout, {this->getLoggedUser().getUsername(), ""});
 }
 
+void SymClient::logout(bool msgRcv){
+    //TODO: Boh, conferma azione. Fatto solo per uniformità. Magari ci sarà da dire qualcosa alla GUI.
+}
+
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
     std::shared_ptr<updateDocMessage> mess (new updateDocMessage(msgType::mapChangesToUser, {SymClient::getLoggedUser().getUsername(), ""}, currentDoc.getId()));
     unanswered.push_front(mess);

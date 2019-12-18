@@ -100,8 +100,9 @@ void clientMessage::invokeMethod(SymServer &server) {
 
 }
 
-void clientMessage::completeAction(SymClient &client) {
+void clientMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     //TODO: implement
+    //TODO: see logout diagram
 }
 
 bool clientMessage::operator==(const clientMessage &rhs) const {
@@ -164,10 +165,6 @@ void askResMessage::invokeMethod(SymServer &server) {
 
 }
 
-void askResMessage::completeAction(SymClient &client) {
-    clientMessage::completeAction(client);
-}
-
 bool askResMessage::operator==(const askResMessage &rhs) const {
     return static_cast<const clientMessage &>(*this) == static_cast<const clientMessage &>(rhs) &&
            path == rhs.path &&
@@ -215,17 +212,10 @@ serverMessage::serverMessage(msgType action, msgOutcome result, int msgId) : mes
 serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), result(result) {
 }
 
-void serverMessage::setResult(msgOutcome outcome) {
-    result=outcome;
-}
-
 void serverMessage::invokeMethod(SymClient &client) {
     auto mex=client.retrieveRelatedMessage(*this);
-    mex->completeAction(client);
-    // in base al tipo del messaggio faccio un cast
-    if(action==msgType::changePrivileges){
-        // cast di mex a privMessage
-    }
+    mex->completeAction(client, result);
+    //FIXME: aggiungere controllo su result
 }
 
 bool serverMessage::isRelatedTo(const clientMessage &other) const {
@@ -248,8 +238,8 @@ const user &loginMessage::getLoggedUser() const {
 }
 
 void loginMessage::invokeMethod(SymClient &client) {
-    client.setLoggedUser(loggedUser);
     auto msg= client.retrieveRelatedMessage(*this);
+    client.setLoggedUser(loggedUser);
 }
 
 mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<int, user> &siteIdToUser, int msgId)
@@ -264,62 +254,54 @@ const std::map<int, user> & mapMessage::getSiteIdToUser() const {
 }
 
 void mapMessage::invokeMethod(SymClient &client) {
-    client.setUserColors(siteIdToUser);
     auto msg= client.retrieveRelatedMessage(*this);
+    client.setUserColors(siteIdToUser);
 }
 
-sendResMessage::sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId, int msgId)
+sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, int symId, int msgId)
         : message(msgId), serverMessage(result, msgId), resource{resource} {
     if(action!=msgType::createRes && action!=msgType::createNewDir && action!=msgType::openNewRes
-    && action!=msgType::changeResName && action!=msgType::removeRes && action!=msgType::openRes)
+    && action!=msgType::openRes)
         throw messageException("The action is not consistent with the message type");
     this->action=action;
-    if(resource.resType()==resourceType::symlink)
-        this->symId=resource.getId();
+    if(resource->resType()==resourceType::symlink)
+        this->symId=resource->getId();
     else
         this->symId=symId;
 }
 
-const filesystem &sendResMessage::getResource() const {
+std::shared_ptr<filesystem> sendResMessage::getResource() const {
     return resource;
 }
 
 void sendResMessage::invokeMethod(SymClient &client) {
-    auto mex=client.retrieveRelatedMessage(*this); //Questa parte non dovrebbe stare in server invoke??
+    auto mex=client.retrieveRelatedMessage(*this);
     switch(mex->getAction())
     {
         case msgType::createRes:{
             std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
-            client.createNewSource(mex2->getPath(), mex2->getName(), resource.getId());
+            client.createNewSource(mex2->getPath(), mex2->getName(), resource->getId());
             break;
         }
-        //case msgType::openRes:{
-            //std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
-            //resourceType type=resource.resType();
-            //if(type==resourceType::file)
-            //{
-                //std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
-                //client.openSource(f, resource.getUserPrivilege(mex2->getActionOwner().first));
-            //}
-           // break;
-       // }
+        case msgType::openRes:{
+            std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
+            resourceType type=resource->resType();
+            if(type==resourceType::file)
+            {
+                std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
+                client.openSource(f, resource->getUserPrivilege(mex2->getActionOwner().first));
+            }
+            break;
+        }
         //case msgType::openNewRes:{
             //server.openNewSource(getActionOwner().first,resourceId,path,name,accessMode);
            //break;
        // }
-        //case msgType::changeResName:{
-            //server.renameResource(getActionOwner().first,path, name, resourceId);
-            //break;
-       // }
         case msgType::createNewDir:{
             std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
-            client.createNewDir(mex2->getPath(), mex2->getName(), resource.getId());
+            client.createNewDir(mex2->getPath(), mex2->getName(), resource->getId());
             break;
         }
-       // case msgType::removeRes:{
-            //server.removeResource(getActionOwner().first,path,name);
-           // break;
-       // }
         default:
             throw messageException("This is not a valid message");
     }
@@ -378,14 +360,15 @@ void privMessage::invokeMethod(SymClient &client) {
     std::string pathRes="./";
     pathRes.append(path2);
 
-    auto msg= client.retrieveRelatedMessage(*this);
+    //FIXME: ATTENZIONE, GUARDA GLI SCHEMI, LE DUE LINEE COMMENTATE NON CI DEVONO ESSERE
+    //auto msg= client.retrieveRelatedMessage(*this);
     client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege,false);
 
-    msg->completeAction(client);
+    //msg->completeAction(client, msgOutcome::success);
 
 }
 
-void privMessage::completeAction(SymClient &client) {
+void privMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     //TODO: implement
     std::string path1;
     std::string name1;
@@ -398,11 +381,13 @@ void privMessage::completeAction(SymClient &client) {
     std::string pathRes="./";
     pathRes.append(path2);
 
-    if(getResult()==msgOutcome::success){
-        client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege);
+    if(serverResult==msgOutcome::success){
+        client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege, true);
     }
     else
         throw messageException("This is not a valid message");
+        //FIXME: metti un messaggio di fallimento più adeguato, è fallita l'azione
+        // ma il messaggio è valido
 
 }
 
@@ -441,9 +426,9 @@ symbolMessage & symbolMessage::verifySym() {
     return *this;
 }
 
-void symbolMessage::completeAction(SymClient &client) {
+void symbolMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     //TODO: implement
-    clientMessage::completeAction(client);
+    clientMessage::completeAction(client, msgOutcome::success);
 }
 
 uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
@@ -473,7 +458,7 @@ void uriMessage::invokeMethod(SymClient &client) {
     auto msg= client.retrieveRelatedMessage(*this);
 }
 
-void uriMessage::completeAction(SymClient &client) {
+void uriMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     //TODO: implement
 }
 
@@ -565,8 +550,9 @@ void userDataMessage::invokeMethod(SymClient &client) {
         throw messageException("This is not a valid message");
 }
 
-void userDataMessage::completeAction(SymClient &client) {
+void userDataMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(action==msgType::changeUserData)
         client.editUser(newUserData, true);
+    //FIXME: caso failure?
 }
 

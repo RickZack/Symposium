@@ -121,7 +121,7 @@
           * and to propagate the change on the server. For such actions, only if the outcome from the
           * server is positive the action can be actually done.
           */
-         virtual void completeAction(SymClient &client);
+         virtual void completeAction(SymClient &client, msgOutcome serverResult);
 
          bool operator==(const clientMessage &rhs) const;
 
@@ -177,15 +177,6 @@
           * @ref serveMessage is sent back to the client, to indicate whether the action succeeded or not.
           */
          void invokeMethod(SymServer &server) override;
-
-         /**
-          * @brief completes an action for which the client asked to the server
-          * @param client the same client that had originated the clientMessage
-          *
-          * When an a client sends an askResMessage with <em> action=msgType::changeResName </em>, the server answers
-          * with a serverMessage containing the outcome: in case it is positive, completeAction() performs the actual name change.
-          */
-         void completeAction(SymClient &client) override;
 
          bool operator==(const askResMessage &rhs) const;
          bool operator!=(const askResMessage &rhs) const;
@@ -271,9 +262,6 @@
          serverMessage(msgType action, msgOutcome result, int msgId = 0);
 
 
-
-         void setResult(msgOutcome outcome);
-
          msgOutcome getResult() const;
 
          /**
@@ -357,15 +345,15 @@
  */
      class sendResMessage : public serverMessage {
          int symId;             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
-         filesystem &resource;
+         std::shared_ptr<filesystem> resource;
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         sendResMessage(msgType action, msgOutcome result, filesystem &resource, int symId=0, int msgId = 0);
+         sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, int symId=0, int msgId = 0);
 
-         const filesystem &getResource() const;
+         std::shared_ptr<filesystem> getResource() const;
 
          /**
           * @brief make a client receive a new resource after a request
@@ -468,7 +456,7 @@
           */
          void invokeMethod(SymClient &client) override;
 
-         void completeAction(SymClient &client) override;
+         void completeAction(SymClient &client, msgOutcome serverResult) override;
 
          virtual ~privMessage() = default;
      };
@@ -547,7 +535,7 @@
           * </ul>
           */
           //TODO: complete description
-         void completeAction(SymClient &client) override;
+          void completeAction(SymClient &client, msgOutcome serverResult) override;
 
          virtual ~symbolMessage() = default;
      };
@@ -590,7 +578,7 @@
           */
          void invokeMethod(SymClient &client) override;
 
-         void completeAction(SymClient &client) override;
+         void completeAction(SymClient &client, msgOutcome serverResult) override;
 
          virtual ~uriMessage() = default;
      };
@@ -629,7 +617,7 @@
           */
          void invokeMethod(SymClient &client) override;
 
-         void completeAction(SymClient &client) override;
+         void completeAction(SymClient &client, msgOutcome serverResult) override;
 
          ~userDataMessage() override = default;
 

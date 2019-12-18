@@ -503,7 +503,7 @@ TEST_F(SymServerTestFilesystemFunctionality, openSourceMakesTheUserWorkOnDocumen
     ASSERT_NO_FATAL_FAILURE(messageAssociatedWithRightUsers({anotherUser.getSiteId()}, toSend, {loggedUser.getSiteId()}));
 
     //Response to the client
-    sendResMessage response(msgType::openRes, msgOutcome::success, *f);
+    sendResMessage response(msgType::openRes, msgOutcome::success, f);
     EXPECT_TRUE(server.thereIsMessageForUser(target.getSiteId(), response).first);
 }
 
@@ -562,7 +562,7 @@ TEST_F(SymServerTestFilesystemFunctionality, openNewSourceAccessesTheFileAndGene
     ASSERT_NO_FATAL_FAILURE(messageAssociatedWithRightUsers({anotherUser.getSiteId()}, toSend, {loggedUser.getSiteId()}));
 
     //response
-    sendResMessage response(msgType::openNewRes, msgOutcome::success, *f, 0);
+    sendResMessage response(msgType::openNewRes, msgOutcome::success, f, 0);
     EXPECT_TRUE(server.thereIsMessageForUser(target.getSiteId(), response).first);
 }
 

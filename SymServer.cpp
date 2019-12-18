@@ -91,7 +91,7 @@ SymServer::openSource(const std::string &opener, const std::string &path, const 
     insertMessageForSiteIds(siteIdToSend, std::shared_ptr<serverMessage>(toSend));
 
     //response to client
-    sendResMessage* response=new sendResMessage(msgType::openRes, msgOutcome::success, *fileReq);
+    sendResMessage* response=new sendResMessage(msgType::openRes, msgOutcome::success, fileReq);
     insertMessageForSiteIds({target.getSiteId()}, std::shared_ptr<serverMessage>(response));
     return fileReq;
 }
@@ -113,7 +113,7 @@ SymServer::openNewSource(const std::string &opener, const std::string &resourceI
     insertMessageForSiteIds(siteIdToSend, std::shared_ptr<serverMessage>(toSend));
 
     //response to client
-    sendResMessage* response=new sendResMessage(msgType::openNewRes, msgOutcome::success, *fileReq.second, fileReq.first);
+    sendResMessage* response=new sendResMessage(msgType::openNewRes, msgOutcome::success, fileReq.second, fileReq.first);
     insertMessageForSiteIds({target.getSiteId()}, std::shared_ptr<serverMessage>(response));
     return fileReq.second;
 }

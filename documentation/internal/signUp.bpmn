@@ -144,7 +144,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_1k0y6p7" sourceRef="StartEvent_1cpaad6" targetRef="Task_118kza5" />
     <bpmn:sequenceFlow id="SequenceFlow_0wgemu8" sourceRef="Task_118kza5" targetRef="Task_0frp8l0" />
     <bpmn:sequenceFlow id="SequenceFlow_1i2vg8m" sourceRef="Task_0frp8l0" targetRef="EndEvent_1wiam41" />
-    <bpmn:task id="Task_0lm7r42" name="Call invokeMethod(client) on the serverMessage">
+    <bpmn:task id="Task_0lm7r42" name="Call invokeMethod(client) on the loginMessage">
       <bpmn:incoming>SequenceFlow_0i5pkgz</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0jls54y</bpmn:outgoing>
       <bpmn:property id="Property_0tcqtal" name="__targetRef_placeholder" />
