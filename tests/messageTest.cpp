@@ -378,7 +378,7 @@ public:
 
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, const std::string&, privilege));
     MOCK_METHOD3(remoteInsert, void(const std::string&, int resourceId, symbolMessage&));
-    MOCK_METHOD3(remoteRemove, void(const std::string&, int, const symbol&));
+    MOCK_METHOD3(remoteRemove, void(const std::string&, int, symbolMessage& rmMsg));
     MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string& actionUser, const std::string&, const std::string&, const uri&));
     MOCK_METHOD2(editUser, const user&(const std::string&, user&));
     MOCK_METHOD2(closeSource, void(const std::string&, int));
@@ -734,8 +734,6 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnSuccess){
     //when a serverMessage is received, a related message from the client is searched and completeAction() called
     //the retrived clientMessage has all the data needed to perform the action required
     fromServer->invokeMethod(client);
-    //the state of the action outcome must be propagated to the previously sent message, because completeAction will use that
-    EXPECT_EQ(fromServer->getResult(), fc->getResult());
 
     fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
 
@@ -757,8 +755,6 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnFailure){
     //when a serverMessage is received, a related message from the client is searched and completeAction() called
     //the retrived clientMessage has all the data needed to perform the action required
     fromServer->invokeMethod(client);
-    //the state of the action outcome must be propagated to the previously sent message, because completeAction will use that
-    EXPECT_EQ(fromServer->getResult(), fc->getResult());
 
     fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
 
@@ -779,7 +775,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnSuccess){
     fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
     symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
-    EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
+    EXPECT_CALL(server, remoteRemove(username, resourceId, *fc));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::removeSymbol, msgOutcome::success, fromClient->getMsgId());
@@ -788,8 +784,6 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnSuccess){
     //We expect no other function to be called when the outcome is positive, the symbol has already been removed
 
     fromServer->invokeMethod(client);
-    //the state of the action outcome must be propagated to the previously sent message, because completeAction will use that
-    EXPECT_EQ(fromServer->getResult(), fc->getResult());
 
     fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
 
@@ -811,8 +805,6 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
     //when a serverMessage is received, a related message from the client is searched and completeAction() called
     //the retrived clientMessage has all the data needed to perform the action required
     fromServer->invokeMethod(client);
-    //the state of the action outcome must be propagated to the previously sent message, because completeAction will use that
-    EXPECT_EQ(fromServer->getResult(), fc->getResult());
 
     fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
 
