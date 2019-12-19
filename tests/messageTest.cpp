@@ -588,8 +588,9 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
     //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
-    cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, clientMessageTest::resId, uri::getDefaultPrivilege(), 0);
+    cm= new askResMessage(msgType::openNewRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, clientMessageTest::resId, uri::getDefaultPrivilege(), 0);
     std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir", 1));
+    dummyFile->setUserPrivilege(clientMessageTest::username, uri::getDefaultPrivilege());
     m=new sendResMessage(msgType::openNewRes, msgOutcome::success, dummyFile);
     EXPECT_CALL(client, openNewSource(clientMessageTest::resId, uri::getDefaultPrivilege(), clientMessageTest::path, clientMessageTest::name, dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));

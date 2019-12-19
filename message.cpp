@@ -101,8 +101,10 @@ void clientMessage::invokeMethod(SymServer &server) {
 }
 
 void clientMessage::completeAction(SymClient &client, msgOutcome serverResult) {
-    //TODO: implement
-    //TODO: see logout diagram
+    if(action==msgType::logout)
+    {
+        client.logout(true);
+    }
 }
 
 bool clientMessage::operator==(const clientMessage &rhs) const {
@@ -188,6 +190,19 @@ const std::string &askResMessage::getResourceId() const {
     return resourceId;
 }
 
+void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
+    if(action==msgType::changeResName)
+    {
+        client.renameResource(path, name, resourceId, true);
+    }
+    else if(action==msgType::removeRes)
+    {
+        client.removeResource(path, name, true);
+    }
+    else
+        throw messageException("Action is not consistent with the message type");
+}
+
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                             const user &newUser,
                              int msgId)
@@ -214,8 +229,9 @@ serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), res
 
 void serverMessage::invokeMethod(SymClient &client) {
     auto mex=client.retrieveRelatedMessage(*this);
+    if(result==msgOutcome::failure)
+        throw messageException("The action had not succeded");
     mex->completeAction(client, result);
-    //FIXME: aggiungere controllo su result
 }
 
 bool serverMessage::isRelatedTo(const clientMessage &other) const {
@@ -291,12 +307,33 @@ void sendResMessage::invokeMethod(SymClient &client) {
                 std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
                 client.openSource(f, resource->getUserPrivilege(mex2->getActionOwner().first));
             }
+            if(type==resourceType::symlink)
+            {
+                std::shared_ptr <symlink> s= std::dynamic_pointer_cast<symlink>(resource);
+                std::shared_ptr<file> f=directory::getRoot()->getFile(s->getPath(), s->getFileName());
+                client.openSource(f, resource->getUserPrivilege(mex2->getActionOwner().first));
+            }
             break;
         }
-        //case msgType::openNewRes:{
-            //server.openNewSource(getActionOwner().first,resourceId,path,name,accessMode);
-           //break;
-       // }
+        case msgType::openNewRes:{
+            std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
+            resourceType type=resource->resType();
+            if(type==resourceType::file)
+            {
+                std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
+                client.openNewSource(mex2->getResourceId(), resource->getUserPrivilege(mex2->getActionOwner().first),
+                        mex2->getPath(), mex2->getName(), resource->getId(), f);
+            }
+
+            if(type==resourceType::symlink)
+            {
+                std::shared_ptr <symlink> s= std::dynamic_pointer_cast<symlink>(resource);
+                std::shared_ptr<file> f=directory::getRoot()->getFile(s->getPath(), s->getFileName());
+                client.openNewSource(mex2->getResourceId(), resource->getUserPrivilege(mex2->getActionOwner().first),
+                                     mex2->getPath(), mex2->getName(), resource->getId(), f);
+            }
+           break;
+        }
         case msgType::createNewDir:{
             std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
             client.createNewDir(mex2->getPath(), mex2->getName(), resource->getId());

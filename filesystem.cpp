@@ -507,4 +507,8 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool recurs
     return ritorno+typeres.str()+" " +name + " " + priv.str();
 }
 
+const std::string &Symposium::symlink::getFileName() const {
+    return fileName;
+}
+
 

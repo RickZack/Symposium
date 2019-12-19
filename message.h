@@ -178,6 +178,8 @@
           */
          void invokeMethod(SymServer &server) override;
 
+         void completeAction(SymClient &client, msgOutcome serverResult) override;
+
          bool operator==(const askResMessage &rhs) const;
          bool operator!=(const askResMessage &rhs) const;
 

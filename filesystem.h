@@ -277,6 +277,8 @@ namespace Symposium {
         symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
                 int idToAssign=0);
 
+        const std::string &getFileName() const;
+
         std::string getPath();
 
         resourceType resType() const override;
