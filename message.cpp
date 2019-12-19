@@ -229,8 +229,8 @@ serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), res
 
 void serverMessage::invokeMethod(SymClient &client) {
     auto mex=client.retrieveRelatedMessage(*this);
-    if(result==msgOutcome::failure)
-        throw messageException("The action had not succeded");
+    //if(result==msgOutcome::failure)
+        //throw messageException("The action had not succeded");
     mex->completeAction(client, result);
 }
 
