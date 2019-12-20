@@ -116,10 +116,22 @@ namespace Symposium{
         /**
          * @brief Specific error codes for @ref SymClientException. They are used as indexes to the error table string
          */
-        enum SymClientExceptionCodes{noActiveDocument, noRelatedMessage};
+        enum SymClientExceptionCodes{noActiveDocument=0, noRelatedMessage};
 
         explicit SymClientException(SymClientExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~SymClientException()=default;
+    };
+
+    class messageException : public SymposiumException {
+        static const char* messageErrors[];
+    public:
+        /**
+         * @brief Specific error codes for @ref SymClientException. They are used as indexes to the error table string
+         */
+        enum messageExceptionCodes{action=0, notClient, notSucc, askResMes, sendResMes, symb, upAct, upDoc, userData};
+
+        explicit messageException(messageExceptionCodes exceptionCode, const char *file, int line, const char *func);
+        virtual ~messageException()=default;
     };
 
 

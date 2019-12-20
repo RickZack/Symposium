@@ -67,7 +67,7 @@ bool message::operator!=(const message &rhs) const {
 clientMessage::clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, int msgId)
         : message(msgId), actionOwner(actionOwner) {
     if(action!=msgType::login && action!=msgType::removeUser && action!=msgType::logout)
-        throw messageException("Action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
 }
 
@@ -95,12 +95,14 @@ void clientMessage::invokeMethod(SymServer &server) {
             break;
         }
         default:
-            throw messageException("This is not a client message");
+            throw messageException(messageException::notClient, UnpackFileLineFunction());
     }
 
 }
 
 void clientMessage::completeAction(SymClient &client, msgOutcome serverResult) {
+    if(serverResult==msgOutcome::failure)
+        throw messageException(messageException::notSucc, UnpackFileLineFunction());
     if(action==msgType::logout)
     {
         client.logout(true);
@@ -129,7 +131,7 @@ askResMessage::askResMessage(msgType action, const std::pair<std::string, std::s
           resourceId(resourceId), accessMode(accessMode) {
     if(action!=msgType::createRes && action!= msgType::openRes && action!=msgType::openNewRes&& action!=msgType::changeResName
     && action!=msgType::createNewDir&& action!=msgType::removeRes)
-        throw messageException("Action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
 
     this->action=action;
 }
@@ -162,7 +164,7 @@ void askResMessage::invokeMethod(SymServer &server) {
             break;
         }
         default:
-            throw messageException("This is not a valid message");
+            throw messageException(messageException::askResMes, UnpackFileLineFunction());
     }
 
 }
@@ -191,6 +193,8 @@ const std::string &askResMessage::getResourceId() const {
 }
 
 void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
+    if(serverResult==msgOutcome::failure)
+        throw messageException(messageException::notSucc, UnpackFileLineFunction());
     if(action==msgType::changeResName)
     {
         client.renameResource(path, name, resourceId, true);
@@ -200,7 +204,7 @@ void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
         client.removeResource(path, name, true);
     }
     else
-        throw messageException("Action is not consistent with the message type");
+        throw messageException(messageException::askResMes, UnpackFileLineFunction());
 }
 
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
@@ -208,7 +212,7 @@ signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::s
                              int msgId)
                              : message(msgId), clientMessage(actionOwner, msgId), newUser(newUser) {
     if(action!=msgType::registration)
-        throw messageException("Action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
 }
 
@@ -229,8 +233,6 @@ serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), res
 
 void serverMessage::invokeMethod(SymClient &client) {
     auto mex=client.retrieveRelatedMessage(*this);
-    //if(result==msgOutcome::failure)
-        //throw messageException("The action had not succeded");
     mex->completeAction(client, result);
 }
 
@@ -245,7 +247,7 @@ msgOutcome serverMessage::getResult() const {
 loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId)
                            : message(msgId), serverMessage(result, msgId), loggedUser(loggedUser) {
     if(action!=msgType::login && action!=msgType::registration)
-        throw messageException("The action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
 }
 
@@ -261,7 +263,7 @@ void loginMessage::invokeMethod(SymClient &client) {
 mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<int, user> &siteIdToUser, int msgId)
         : message(msgId), serverMessage(result, msgId), siteIdToUser(siteIdToUser) {
     if(action!=msgType::mapChangesToUser)
-        throw messageException("The action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
 }
 
@@ -278,7 +280,7 @@ sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_pt
         : message(msgId), serverMessage(result, msgId), resource{resource} {
     if(action!=msgType::createRes && action!=msgType::createNewDir && action!=msgType::openNewRes
     && action!=msgType::openRes)
-        throw messageException("The action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
     if(resource->resType()==resourceType::symlink)
         this->symId=resource->getId();
@@ -340,7 +342,7 @@ void sendResMessage::invokeMethod(SymClient &client) {
             break;
         }
         default:
-            throw messageException("This is not a valid message");
+            throw messageException(messageException::sendResMes, UnpackFileLineFunction());
     }
 }
 
@@ -350,7 +352,7 @@ privMessage::privMessage(msgType action, const std::pair<std::string, std::strin
                          : message(msgId), clientMessage(actionOwner, msgId),
                            serverMessage(result, msgId), resourceId(resourceId), targetUser(targetUser), newPrivilege(newPrivilege) {
     if(action!=msgType::changePrivileges)
-        throw messageException("The action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
 }
 
@@ -367,8 +369,6 @@ privilege privMessage::getNewPrivilege() const {
 }
 
 void privMessage::invokeMethod(SymServer &server) {
-    //TODO: implement
-    //
     std::string path1;
     std::string name1;
     tie(path1, name1) = directory::separateFirst(resourceId);
@@ -418,7 +418,7 @@ void privMessage::completeAction(SymClient &client, msgOutcome serverResult) {
         client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege, true);
     }
     else
-        throw messageException("This is not a valid action");
+        throw messageException(messageException::notSucc, UnpackFileLineFunction());
 
 }
 
@@ -428,7 +428,7 @@ symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::s
                              : message(msgId), clientMessage(actionOwner, msgId),
                                serverMessage(result, msgId), siteId(siteId), resourceId(resourceId), sym(sym) {
     if(action!=msgType::insertSymbol && action!=msgType::removeSymbol)
-        throw messageException("The action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
 }
 
@@ -456,7 +456,7 @@ void symbolMessage::invokeMethod(SymServer &server) {
             break;
         }
         default:
-            throw messageException("This is not a valid message");
+            throw messageException(messageException::symb, UnpackFileLineFunction());
     }
 
 }
@@ -473,7 +473,7 @@ void symbolMessage::invokeMethod(SymClient &client) {
             break;
         }
         default:
-            throw messageException("This is not a valid message");
+            throw messageException(messageException::symb, UnpackFileLineFunction());
     }
 
 }
@@ -494,7 +494,7 @@ void symbolMessage::completeAction(SymClient &client, msgOutcome serverResult) {
         else if(action==msgType::removeSymbol)
             client.remoteInsert(resourceId,sym);
         else
-            throw messageException("This is not a valid action");
+            throw messageException(messageException::notSucc, UnpackFileLineFunction());
     }
 
 }
@@ -504,7 +504,7 @@ uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string>
                        : message(msgId), clientMessage(actionOwner, msgId),
                          serverMessage(result, msgId), sharingPrefs(sharingPrefs) {
     if(action!=msgType::shareRes)
-        throw messageException("The action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
 
     this->action=action;
     this->path=path;
@@ -529,7 +529,7 @@ void uriMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(serverResult==msgOutcome::success)
         client.shareResource(path,name,sharingPrefs,true);
     else
-        throw messageException("This is not a valid action");
+        throw messageException(messageException::notSucc, UnpackFileLineFunction());
 }
 
 updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, const user &newUser, int resourceId,
@@ -539,7 +539,7 @@ updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, cons
                                            newUser(newUser), resourceId(resourceId), userPrivilege(priv) {
     this->action=action;
     if(action!=msgType::addActiveUser && action!=msgType::removeActiveUser)
-        throw messageException("The action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
 }
 
 const user &updateActiveMessage::getNewUser() const {
@@ -566,7 +566,7 @@ void updateActiveMessage::invokeMethod(SymClient &client) {
             break;
         }
         default:
-            throw messageException("This is not a valid message");
+            throw messageException(messageException::upAct, UnpackFileLineFunction());
     }
 
 }
@@ -576,7 +576,7 @@ updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, 
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    resourceId(resourceId) {
     if(action!=msgType::mapChangesToUser && action!=msgType::closeRes)
-        throw messageException("The action is not consistent with the message type");
+        throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
 }
 
@@ -592,7 +592,7 @@ void updateDocMessage::invokeMethod(SymServer &server) {
         server.mapSiteIdToUser(getActionOwner().first,resourceId);
     }
     else
-        throw messageException("This is not a valid message");
+        throw messageException(messageException::upDoc, UnpackFileLineFunction());
 }
 
 userDataMessage::userDataMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
@@ -601,7 +601,7 @@ userDataMessage::userDataMessage(msgType action, const std::pair<std::string, st
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    serverMessage(action, result, msgId), newUserData(newUserData) {
    if(action!=msgType::changeUserData && action !=msgType::changeUserPwd)
-       throw messageException("The action is not consistent with the message type");
+       throw messageException(messageException::action, UnpackFileLineFunction());
 }
 
 void userDataMessage::invokeMethod(SymServer &server) {
@@ -609,7 +609,7 @@ void userDataMessage::invokeMethod(SymServer &server) {
         server.editUser(getActionOwner().first,newUserData);
     }
     else
-        throw messageException("This is not a valid message");
+        throw messageException(messageException::userData, UnpackFileLineFunction());
 }
 
 void userDataMessage::invokeMethod(SymClient &client) {
@@ -617,13 +617,15 @@ void userDataMessage::invokeMethod(SymClient &client) {
         client.editUser(newUserData, false);
     }
     else
-        throw messageException("This is not a valid message");
+        throw messageException(messageException::userData, UnpackFileLineFunction());
 }
 
 void userDataMessage::completeAction(SymClient &client, msgOutcome serverResult) {
+    if(serverResult==msgOutcome::failure)
+        throw messageException(messageException::notSucc, UnpackFileLineFunction());
     if(action==msgType::changeUserData)
         client.editUser(newUserData, true);
     else
-        throw messageException("This is not a valid action");
+        throw messageException(messageException::userData, UnpackFileLineFunction());
 }
 

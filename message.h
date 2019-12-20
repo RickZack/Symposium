@@ -40,6 +40,7 @@
 #include "messageData.h"
 #include "filesystem.h"
 #include "resourceType.h"
+#include "SymposiumException.h"
 
 /**
  * @interface message message.h message
@@ -627,20 +628,6 @@
 
      };
 
-/**
- * @brief models an exception thrown for error in messages
- */
-     class messageException : public std::exception {
-         std::string msg;
-     public:
-         messageException(const std::string &message) : msg(message) {};
-
-         const char *what() const noexcept override {
-             return msg.c_str();
-         }
-
-         ~messageException() = default;
-     };
  }
 
 #endif //SYMPOSIUM_MESSAGE_H

@@ -80,3 +80,13 @@ const char* SymClientException::SymClientErrors[]={"No active document with that
 SymClientException::SymClientException(SymClientExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
         SymposiumException(file, line, func, SymClientErrors[static_cast<int>(exceptionCode)]){};
+
+const char* messageException::messageErrors[]={"Action is not consistent with the message type", "This is not a client message",
+                                               "The action had not succeded", "This is not an askRes message",
+                                               "This is not a sendRes  message", "This is not a symbol message",
+                                               "This is not an updateActive message", "This is not an updateDoc message",
+                                               "This is not an userData message"};
+
+messageException::messageException(messageExceptionCodes exceptionCode, const char *file, int line,
+                                       const char *func) :
+        SymposiumException(file, line, func, messageErrors[static_cast<int>(exceptionCode)]){};
