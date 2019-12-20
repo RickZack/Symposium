@@ -229,7 +229,7 @@
           * At the end send a @ref serverMessage with the action outcome
           */
          virtual std::shared_ptr<filesystem>
-         shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName, uri &newPrefs);
+         shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName, const uri &newPrefs);
 
          /**
           * @brief renames a resource from @e remover 's @e home directory

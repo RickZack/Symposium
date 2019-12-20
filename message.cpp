@@ -385,7 +385,7 @@ void privMessage::invokeMethod(SymServer &server) {
 
 }
 void privMessage::invokeMethod(SymClient &client) {
-    //TODO: implement
+
     std::string path1;
     std::string name1;
     tie(path1, name1) = directory::separateFirst(resourceId);
@@ -397,16 +397,12 @@ void privMessage::invokeMethod(SymClient &client) {
     std::string pathRes="./";
     pathRes.append(path2);
 
-    //FIXME: ATTENZIONE, GUARDA GLI SCHEMI, LE DUE LINEE COMMENTATE NON CI DEVONO ESSERE
-    //auto msg= client.retrieveRelatedMessage(*this);
     client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege,false);
 
-    //msg->completeAction(client, msgOutcome::success);
 
 }
 
 void privMessage::completeAction(SymClient &client, msgOutcome serverResult) {
-    //TODO: implement
     std::string path1;
     std::string name1;
     tie(path1, name1) = directory::separateFirst(resourceId);
@@ -422,9 +418,7 @@ void privMessage::completeAction(SymClient &client, msgOutcome serverResult) {
         client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege, true);
     }
     else
-        throw messageException("This is not a valid message");
-        //FIXME: metti un messaggio di fallimento più adeguato, è fallita l'azione
-        // ma il messaggio è valido
+        throw messageException("This is not a valid action");
 
 }
 
@@ -451,11 +445,37 @@ const symbol &symbolMessage::getSym() const {
 }
 
 void symbolMessage::invokeMethod(SymServer &server) {
-    //TODO: implement
+    switch(action)
+    {
+        case msgType::insertSymbol:{
+           server.remoteInsert(getActionOwner().first,resourceId,*this);
+            break;
+        }
+        case msgType::removeSymbol:{
+            server.remoteRemove(getActionOwner().first,resourceId,*this);
+            break;
+        }
+        default:
+            throw messageException("This is not a valid message");
+    }
+
 }
 
 void symbolMessage::invokeMethod(SymClient &client) {
-    //TODO: implement
+    switch(action)
+    {
+        case msgType::insertSymbol:{
+            client.remoteInsert(resourceId,sym);
+            break;
+        }
+        case msgType::removeSymbol:{
+            client.remoteRemove(resourceId,sym);
+            break;
+        }
+        default:
+            throw messageException("This is not a valid message");
+    }
+
 }
 
 symbolMessage & symbolMessage::verifySym() {
@@ -464,8 +484,21 @@ symbolMessage & symbolMessage::verifySym() {
 }
 
 void symbolMessage::completeAction(SymClient &client, msgOutcome serverResult) {
-    //TODO: implement
-    clientMessage::completeAction(client, msgOutcome::success);
+    if(serverResult==msgOutcome::success){
+        if(action==msgType::insertSymbol)
+        client.verifySymbol(resourceId,sym);
+        else
+            throw messageException("This is not a valid action");
+    }
+    if(serverResult==msgOutcome::failure){
+        if(action==msgType::insertSymbol)
+            client.remoteRemove(resourceId,sym);
+        if(action==msgType::removeSymbol)
+            client.remoteInsert(resourceId,sym);
+        else
+            throw messageException("This is not a valid action");
+    }
+
 }
 
 uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
@@ -485,18 +518,20 @@ const uri &uriMessage::getSharingPrefs() const {
 }
 
 void uriMessage::invokeMethod(SymServer &server) {
-    //TODO: implement
     server.shareResource(getActionOwner().first,path,name,sharingPrefs);
 
 }
 
 void uriMessage::invokeMethod(SymClient &client) {
-    client.shareResource(path,name,sharingPrefs);
-    auto msg= client.retrieveRelatedMessage(*this);
+    client.shareResource(path,name,sharingPrefs,false);
 }
 
+
 void uriMessage::completeAction(SymClient &client, msgOutcome serverResult) {
-    //TODO: implement
+    if(serverResult==msgOutcome::success)
+        client.shareResource(path,name,sharingPrefs,true);
+    else
+        throw messageException("This is not a valid action");
 }
 
 updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, const user &newUser, int resourceId,
@@ -590,6 +625,7 @@ void userDataMessage::invokeMethod(SymClient &client) {
 void userDataMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(action==msgType::changeUserData)
         client.editUser(newUserData, true);
-    //FIXME: caso failure?
+    else
+        throw messageException("This is not a valid action");
 }
 

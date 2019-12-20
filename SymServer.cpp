@@ -204,7 +204,7 @@ void SymServer::handleUserState(const std::string &targetUser, int docId, bool w
 }
 
 std::shared_ptr<filesystem> SymServer::shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName,
-                                                     uri &newPrefs) {
+                                                     const uri &newPrefs) {
     if(!userIsActive(actionUser))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& actionU=getRegistered(actionUser);

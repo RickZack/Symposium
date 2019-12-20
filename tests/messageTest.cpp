@@ -715,7 +715,7 @@ TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilegeOnOtherClient){
 
     //the message from client is forwarded to the other client, but the password is cleaned
     fromServer=new privMessage(msgType::changePrivileges,{username, {}}, msgOutcome::success, resId, anotherUsername, uri::getDefaultPrivilege());
-    EXPECT_CALL(client, editPrivilege(username, path, name, uri::getDefaultPrivilege(), false));
+    EXPECT_CALL(client, editPrivilege(anotherUsername, path, name, uri::getDefaultPrivilege(), false));
     fromServer->invokeMethod(client);
 }
 
@@ -793,7 +793,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
     fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
     symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
-    EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
+    EXPECT_CALL(server, remoteRemove(username, resourceId, *fc));
     fromClient->invokeMethod(server);
 
     //Suppose now that the user return a failure

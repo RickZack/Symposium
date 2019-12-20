@@ -436,7 +436,7 @@ namespace Symposium {
         /**
          * @brief disconnect a user from the system
          */
-        void logout(bool msgRcv);
+        virtual void logout(bool msgRcv);
 
         /**
          * @brief create a @ref updateDocMessage to get from the server the mapping between username ad siteID of @e currentDoc 's activeUsers

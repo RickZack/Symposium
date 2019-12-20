@@ -253,9 +253,11 @@
  * @brief class used to model a message sent by the server
  */
      class serverMessage : public virtual message {
-         msgOutcome result;         /**< result of an operation asked to the server */
+         /**< result of an operation asked to the server */
      protected:
          serverMessage(msgOutcome result, int msgId = 0);
+
+         msgOutcome result;
      public:
 
          /**
