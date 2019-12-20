@@ -487,13 +487,11 @@ void symbolMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(serverResult==msgOutcome::success){
         if(action==msgType::insertSymbol)
         client.verifySymbol(resourceId,sym);
-        else
-            throw messageException("This is not a valid action");
     }
     if(serverResult==msgOutcome::failure){
         if(action==msgType::insertSymbol)
             client.remoteRemove(resourceId,sym);
-        if(action==msgType::removeSymbol)
+        else if(action==msgType::removeSymbol)
             client.remoteInsert(resourceId,sym);
         else
             throw messageException("This is not a valid action");
