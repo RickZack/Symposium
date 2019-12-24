@@ -41,10 +41,16 @@ bool RMOAccess::validateAction(const std::string &targetUser, privilege requeste
         return attuale==requested;
     }
     attuale=got->second;
+    //FIXME: setPrivilege() crea problemi anche a questa funzione, perchè se arrivi ad avere una entry con
+    // <user, privilege::none> questa istruzione ritorna true, file::access() autorizza l'accesso,
+    // document::access() aggiunge una entry con <user, privilege::none> e quindi ti trovi un utente
+    // che ha fatto accesso anche se non aveva neanche il privilege::readOnly
     return attuale >= requested;
 }
 
-
+//FIXME: c'è un po' di ridondanza: ogni volta che utente ha già un privilegio e vuoi solo cambiarlo
+// elimini la sua entry in permission e ne crei una nuova. Puoi semplicemente modificare il privilegio
+// che è associato alla entry già presente.
 privilege RMOAccess::setPrivilege(const std::string &targetUser, privilege toGrant) {
     if(permission.empty() && toGrant==privilege::owner)
         permission.insert (std::make_pair(targetUser, toGrant));
@@ -56,6 +62,9 @@ privilege RMOAccess::setPrivilege(const std::string &targetUser, privilege toGra
     }
     privilege vecchio=got->second;
     permission.erase (targetUser);
+    //FIXME: nel caso ti passi toGrant==privilege::none, stai aggiungendo una entry che non dice nulla
+    // Nel caso privilege::none conviene non avere la entry. Il modo in cui hai scritto validateAction()
+    // e getPrivilege() rispecchia questa assunzione
     permission.insert(std::make_pair(targetUser, toGrant));
     return vecchio;
 }
@@ -87,6 +96,11 @@ bool RMOAccess::moreOwner(std::string username)
 
 bool RMOAccess::deleteUser(const std::string &targetUser)
 {
+    //FIXME: vedere prima commento a directory::remove()
+    // Non serve tornare il bool e std::unordered_map::erase() non
+    // ha bisogno di un controllo sulla chiave.
+    // A questo punto toglierei questa funzione e userei
+    // setPrivilege(username, privilege::none) per ottenere lo stesso effetto
     auto it=permission.find(targetUser);
     if(it==permission.end())
         return false;

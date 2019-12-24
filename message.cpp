@@ -35,6 +35,8 @@
 #include "resourceType.h"
 
 using namespace Symposium;
+
+//FIXME: put unsigned, siteIds must be positive, because a negative id is assumed as "no user present"
 int message::msgCounter=1;
 
 message::message(int msgId){
@@ -195,6 +197,7 @@ const std::string &askResMessage::getResourceId() const {
 void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(serverResult==msgOutcome::failure)
         throw messageException(messageException::notSucc, UnpackFileLineFunction());
+    //FIXME: altrove avete usato lo switch, che è la scelta migliore, quindi per uniformità usatelo anche qui
     if(action==msgType::changeResName)
     {
         client.renameResource(path, name, resourceId, true);
@@ -282,6 +285,9 @@ sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_pt
     && action!=msgType::openRes)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
+    //FIXME: non passiamo mai un symlink, la condizione è sempre falsa. Inoltre il parametro symId è già corretto
+    // nei casi in cui poi servirà quando verrà chiamato invokeMethod. Nei casi in cui non serve va bene inizializzarlo
+    // con un dato qualsiasi, l'argomento di default.
     if(resource->resType()==resourceType::symlink)
         this->symId=resource->getId();
     else
@@ -294,6 +300,8 @@ std::shared_ptr<filesystem> sendResMessage::getResource() const {
 
 void sendResMessage::invokeMethod(SymClient &client) {
     auto mex=client.retrieveRelatedMessage(*this);
+    //FIXME: tutte le azioni comuni a tutti i rami dello switch è meglio metterle prima, cosi non le ripeti.
+    // Poi mex->getAction()==action, non hai bisogno di prenderla dal mex.
     switch(mex->getAction())
     {
         case msgType::createRes:{
@@ -309,6 +317,8 @@ void sendResMessage::invokeMethod(SymClient &client) {
                 std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
                 client.openSource(f, resource->getUserPrivilege(mex2->getActionOwner().first));
             }
+            //FIXME: questo if non dovrebbe essere necessario. Non mandiamo mai dei symlink,
+            // soprattutto con openRes, vedi il diagramma di OpenSource e il codice lato server
             if(type==resourceType::symlink)
             {
                 std::shared_ptr <symlink> s= std::dynamic_pointer_cast<symlink>(resource);
@@ -326,7 +336,7 @@ void sendResMessage::invokeMethod(SymClient &client) {
                 client.openNewSource(mex2->getResourceId(), resource->getUserPrivilege(mex2->getActionOwner().first),
                         mex2->getPath(), mex2->getName(), resource->getId(), f);
             }
-
+            //FIXME: anche qui non mandiamo mai symlink, vedi il diagramma di OpenNewSource.
             if(type==resourceType::symlink)
             {
                 std::shared_ptr <symlink> s= std::dynamic_pointer_cast<symlink>(resource);
@@ -488,6 +498,7 @@ void symbolMessage::completeAction(SymClient &client, msgOutcome serverResult) {
         if(action==msgType::insertSymbol)
         client.verifySymbol(resourceId,sym);
     }
+    //FIXME: else al posto di if, serverResult può assumere solo due valori
     if(serverResult==msgOutcome::failure){
         if(action==msgType::insertSymbol)
             client.remoteRemove(resourceId,sym);
@@ -585,6 +596,7 @@ int updateDocMessage::getResourceId() const {
 }
 
 void updateDocMessage::invokeMethod(SymServer &server) {
+    //FIXME: altrove avete usato lo switch, che è la scelta migliore, quindi per uniformità usatelo anche qui
     if(action==msgType::closeRes){
         server.closeSource(getActionOwner().first,resourceId);
     }

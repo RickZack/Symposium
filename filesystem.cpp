@@ -122,7 +122,13 @@ privilege file::getUserPrivilege(const std::string &targetUser) const {
     return userPriv;
 }
 
+//FIXME: questa funzione viene chiamata anche quando un utente vuole cambiare il proprio privilegio,
+// ma in tal caso lancerebbe sempre eccezione.
+// Ad esempio: Riccardo ha privilegio privilege::modify e vuole avere privilege::readOnly
+// il metodo controlla che Riccardo abbia privilege::owner, trova che non è così e lancia
+// Anche il test è da rivedere.
 privilege file::setUserPrivilege(const std::string &targetUser, privilege newPrivilege) {
+    //FIXME: use stategy->validateAction() as guard to action
     privilege oldPrivilege=getUserPrivilege(targetUser);
     if(oldPrivilege==privilege::owner)
         throw filesystemException(filesystemException::changePriv, UnpackFileLineFunction());
@@ -131,6 +137,7 @@ privilege file::setUserPrivilege(const std::string &targetUser, privilege newPri
 }
 
 uri file::setSharingPolicy(const std::string &actionUser, const uri &newSharingPrefs) {
+    //FIXME: use stategy->validateAction() as guard to action
     privilege userPriv=strategy->getPrivilege(actionUser);
     if(userPriv==privilege::owner) {
         this->sharingPolicy=newSharingPrefs;
@@ -159,6 +166,10 @@ void file::send() const {
     //TODO: implement
 }
 
+//FIXME: è più corretto implementare questa operazione per oggetti di tipo
+// filesystem in generale. Non cambierebbe nulla, ma si potrebbe chiamare anche sulle directory.
+// Anche TrivialAccess avrà il metodo moreOwner implementato, quindi è ok. Questa scelta sarebbe in
+// linea con quella di avere setUserPrivilege, setSharingPolicy, ... implementati anche per filesystem
 bool file::moreOwner(const std::string &username)
 {
    return strategy->moreOwner(username);
@@ -166,6 +177,10 @@ bool file::moreOwner(const std::string &username)
 
 bool file::deleteFromStrategy(const std::string &userName)
 {
+    //FIXME: leggere prima commento a directory::remove
+    // Se non serve più il bool si può rendere questa funzione void
+    // e chiamare setUserPrivilege(username, privilege::none) per ottenere
+    // lo stesso risultato
    return strategy->deleteUser(userName);
 }
 
@@ -222,7 +237,7 @@ std::tuple<std::string, std::string> directory::separateFirst(std::string path)
     std::string id;
     if(path.at(0) == '.' || path.at(0) == '/')
     {
-        path.erase(path.begin()+0);
+        path.erase(path.begin()+0); // TODO: +0 superfluo
         return separateFirst(path);
     }
     std::size_t found = path.find_first_of("/\\"); //find first character "/" in order to separate the first directory of the path
@@ -373,7 +388,7 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
         contained.erase(it);//cancel from the container the object
         return obj;
     }
-
+    //FIXME: ci vuole un else if: se è un file non è un symlink
     if(obj->resType()==resourceType::symlink)//if the object is symlink
     {
         std::shared_ptr<symlink> s=std::dynamic_pointer_cast<symlink>(obj);
@@ -382,6 +397,17 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
         std::string idFile;
         tie(pathFile, idFile)= separate(s->getPath());//need to have a pointer for the file and not a symlink in order to operate on file strategy
         std::shared_ptr<file> f=getRoot()->getFile(pathFile, idFile);
+        //FIXME: mi viene in mente almeno un caso in cui lanciare è sbagliato e crea problemi.
+        // Supponiamo che Riccardo abbia condiviso un file con un privilegio priv!=owner, e che Martina abbia
+        // usato l'uri (es. /Riccardo/dir/somefile) per crearsi un symlink. Adesso supponiamo che Riccardo
+        // (che è owner) voglia togliere il privilegio a Martina. Adesso Martina ha ancora il symlink, ma al
+        // prossimo accesso incontrerà problemi perchè non ha più privilegi (e questo è giusto che lanci eccezione).
+        // Quello che non va bene è che Martina (ammesso che non abbia ancora cercato di aprire il file puntato
+        // dal symlink) non può eliminare il symlink, perchè si andrà sempre nel ramo del throw.
+        // Possiamo prevedere che l'utente sia avvisato di questo problema quando cerca di aprire un file per cui
+        // non ha più privilegi, e che gli venga chiesto se vuole eliminare il symlink. Quindi questa operazione non
+        // dovrebbe lanciare.
+        // A questo punto deleteUser (chiamata da deleteFromStrategy) può avere ritorno void ed essere semplificata
         if(!(f->deleteFromStrategy(targetUser.getUsername())))//delete from strategy target user
             throw filesystemException(filesystemException::someError, UnpackFileLineFunction());
         auto it=std::find_if(contained.begin(), contained.end(),
@@ -419,6 +445,8 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
         result.append(targetUser);
     if(!recursive) //if recursive is false, need only the elements of the directory, not a subdirectory elements
     {
+        //FIXME: a cosa serve printElement? print è una funzione di cui si fa l'override nelle sottoclassi
+        // quindi automaticamente viene chiamata quella del tipo dell'elemento, senza ulteriori if o cast
         for(const auto & it : contained)
             result+=" "+printElement(it, targetUser, 0);
 
@@ -432,6 +460,8 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
                 result+=" "+printElement(it, targetUser, indent);
                 indent=indent+1;//need to add the indent if it is a subdirectory
                 std::shared_ptr<directory> dir=std::dynamic_pointer_cast<directory>(it);
+                //FIXME: qui giustamente passi indent+1 (rispetto al valore di indent nella prima nota)
+                // Se passi indent+1 direttamente qui ti eviti le due istruzioni in cui incrementi e decrementi
                 result+=dir->print(targetUser, true, indent);
                 indent=indent-1;//when finished the recursion need to restore the original indent
             }
@@ -442,6 +472,7 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
     return result;
 }
 
+//FIXME: a cosa server? perchè abbiamo print e printElement? Vedi nota in directory::print
 std::string directory::printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, int indent)
 {
     resourceType type=it->resType();
@@ -491,6 +522,8 @@ std::string Symposium::symlink::getPath() {
     return pathToFile+"/"+fileName;
 }
 
+//TODO: indent dovrebbe essere sempre positivo, quindi porlo come unsigned int. Come garantisco che sia
+// sempre positivo?
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
     std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
     std::ostringstream priv;

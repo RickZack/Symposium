@@ -51,6 +51,9 @@ const std::vector<int> &symbol::getPos() const {
 bool symbol::operator<(const symbol &rhs) const {
     int size=std::min(this->pos.size(), rhs.pos.size());
     for(int i=0; i<size; i++) {
+        //FIXME: il valore di size è già una garanzia sul fatto che l'accesso
+        // al vettore sia legale, non occorre usare at(), che controlla nuovamente l'indice.
+        // Se non usi at() ma [] possiamo lasciare più spazio al compilatore per ottimizzare
         if (this->pos.at(i) < rhs.pos.at(i))
             return true;
         if (this->pos.at(i) > rhs.pos.at(i))

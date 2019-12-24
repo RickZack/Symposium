@@ -54,9 +54,9 @@
      class SymServer {
      protected:
          std::unordered_map<std::string, user> registered;                                                 /**< registered users, indexed by username */
-         std::unordered_map<std::string, const user *> active;                                                   /**< active users, indexed by username */
+         std::unordered_map<std::string, const user *> active;                                             /**< active users, indexed by username */
          std::unordered_map<std::string, std::forward_list<document *>> workingDoc;                        /**< list of document each user is working on */
-         std::unordered_map<int, std::queue<std::shared_ptr<serverMessage>>> siteIdToMex;                        /**< messages queues associated with every user by means of @e siteId */
+         std::unordered_map<int, std::queue<std::shared_ptr<serverMessage>>> siteIdToMex;                  /**< messages queues associated with every user by means of @e siteId */
          std::unordered_map<int, std::forward_list<int>> resIdToSiteId;                                    /**< list of users involved in a document, by means of @e siteIds and @e resIds */
          static int idCounter;                                                                             /**< siteId to be assigned to the next registered user */
          std::shared_ptr<directory> rootDir;                                                               /**< virtual filesystem of the Symposium server */

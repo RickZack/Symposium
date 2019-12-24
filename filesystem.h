@@ -69,7 +69,9 @@ namespace Symposium {
      */
     class filesystem {
     protected:
+        //FIXME: put unsigned, id must be positive
         static int idCounter;      /**< id to be assigned to the next created filesystem object */
+        //FIXME: put unsigned, id must be positive
         int id;                    /**< unique identifier for the filesystem object, used also for identifying objects along a path */
         std::string name;          /**< resource name */
         uri sharingPolicy;         /**< sharing policy applied to the resource */
@@ -241,6 +243,8 @@ namespace Symposium {
          */
         std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
 
+        //FIXME: se sono usate solo dentro filesystem (e se non è così c'è quache errore), allora è meglio
+        // averle protette
         /**
          * @brief check if the file has other owners besides the name of the username pass as parameter
          * @param username
@@ -314,9 +318,9 @@ namespace Symposium {
     };
 
 
-/**
- * @brief class used to model a directory, uses @e Singleton pattern
- */
+    /**
+     * @brief class used to model a directory, uses @e Singleton pattern
+     */
     class directory : public filesystem {
     protected:
         static std::shared_ptr<directory> root;                 /**< root directory of the system */

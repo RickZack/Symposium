@@ -89,11 +89,14 @@ void uri::deactivate() {
 }
 
 privilege uri::getShare(privilege requested) {
+    //FIXME: valutate la possibilità di usare uno switch, diventa tutto più semplice e veloce
     if(activePolicy==uriPolicy::activeTimer)
     {
         std::chrono::system_clock::time_point ora = std::chrono::system_clock::now();
         if(ora<stopTime)
         {
+            //FIXME: questo if è ripetuto uguale per tre volte
+            // è possibile semplificare il metodo estraendo in una funzione
             if(requested<=granted)
                 return requested;
             return granted;

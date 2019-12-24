@@ -35,7 +35,7 @@
 
 using namespace Symposium;
 
-
+//FIXME: put unsigned, siteIds must be positive, because a negative id is assumed as "no user present"
 int SymServer::idCounter=0;
 const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", "./icons/1.png", -1, nullptr);
 
@@ -48,14 +48,13 @@ const user & SymServer::addUser(user &newUser) {
     auto userDir=rootDir->addDirectory(newUser.getUsername());
     newUser.setHome(userDir);
     newUser.setSiteId(idCounter++);
+    //FIXME: return registerUser(...);
     user& inserted=registerUser(&newUser);
     return inserted;
 }
 
 const user SymServer::login(const std::string &username, const std::string &pwd) {
     SymServerException::SymServerExceptionCodes exCode=SymServerException::userNotLogged;
-    loginMessage* response{nullptr};
-
     if(!userIsRegistered(username))
         throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
 
@@ -68,8 +67,8 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
     if(exCode!=SymServerException::userNotLogged)
         throw SymServerException(exCode, UnpackFileLineFunction());
 
-    response=new loginMessage(msgType::login, msgOutcome::success, target);
-    insertMessageForSiteIds({target.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    auto response=std::make_shared<loginMessage>(msgType::login, msgOutcome::success, target);
+    insertMessageForSiteIds({target.getSiteId()}, response);
 
     active[username]=&target;
     return target;
@@ -81,18 +80,22 @@ SymServer::openSource(const std::string &opener, const std::string &path, const 
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
     std::shared_ptr<file> fileReq= target.openFile(path, name, reqPriv);
+    //FIXME: Need to check if the user is working on the document, call handleUserState(). Two reasons:
+    // - list of active users if document must contain unique users
+    // - list of opened documents for opener must contain unique documents (otherwise double close() will cause problems)
+    // Non dovrei usare funzioni di filesystem, bisogna accede a filesystem attraverso user
     document& docReq= fileReq->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
 
     //Propagation to other clients
-    updateActiveMessage* toSend=new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner);
+    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner);
     auto siteIdToSend= siteIdsFor(docReq.getId(), target.getSiteId());
-    insertMessageForSiteIds(siteIdToSend, std::shared_ptr<serverMessage>(toSend));
+    insertMessageForSiteIds(siteIdToSend, toSend);
 
     //response to client
-    sendResMessage* response=new sendResMessage(msgType::openRes, msgOutcome::success, fileReq);
-    insertMessageForSiteIds({target.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    auto response=std::make_shared<sendResMessage>(msgType::openRes, msgOutcome::success, fileReq);
+    insertMessageForSiteIds({target.getSiteId()}, response);
     return fileReq;
 }
 
@@ -102,19 +105,21 @@ SymServer::openNewSource(const std::string &opener, const std::string &resourceI
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
+    //FIXME: Need to check if the user is working on the document, call handleUserState().
+    // Ideas: call getFile()->getDoc()->getId();
     std::pair<int, std::shared_ptr<file>> fileReq=target.accessFile(resourceId, destPath, destName);
     document& docReq=fileReq.second->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
 
     //Propagation to other clients
-    updateActiveMessage* toSend=new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner);
+    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner);
     auto siteIdToSend= siteIdsFor(docReq.getId(), target.getSiteId());
-    insertMessageForSiteIds(siteIdToSend, std::shared_ptr<serverMessage>(toSend));
+    insertMessageForSiteIds(siteIdToSend, toSend);
 
     //response to client
-    sendResMessage* response=new sendResMessage(msgType::openNewRes, msgOutcome::success, fileReq.second, fileReq.first);
-    insertMessageForSiteIds({target.getSiteId()}, std::shared_ptr<serverMessage>(response));
+    auto response=std::make_shared<sendResMessage>(msgType::openNewRes, msgOutcome::success, fileReq.second, fileReq.first);
+    insertMessageForSiteIds({target.getSiteId()}, response);
     return fileReq.second;
 }
 
@@ -173,8 +178,9 @@ privilege SymServer::editPrivilege(const std::string &actionUser, const std::str
     privilege oldPriv=actionU.editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
 
     std::forward_list<int> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(actionUser), actionU.getSiteId());
-    privMessage* toSend=new privMessage(msgType::changePrivileges, {actionUser,{}}, msgOutcome::success, std::to_string(docId), targetUser, privilege::readOnly);
-    insertMessageForSiteIds(setSiteIds, std::shared_ptr<serverMessage>(toSend));
+
+    auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, std::to_string(docId), targetUser, privilege::readOnly);
+    insertMessageForSiteIds(setSiteIds, toSend);
 
     generateSimpleResponse(actionU.getSiteId(), msgType::changePrivileges);
     return oldPriv;
@@ -184,6 +190,10 @@ int
 SymServer::handleAccessToDoc(const std::string &actionUser, const std::string &resName,
                              const std::string &pathFromUserHome, const user &actionU) {
     std::shared_ptr<file> fileReq= actionU.openFile(pathFromUserHome, resName, privilege::owner);
+    //FIXME: se l'utente stava già lavorando sul documento, esso contiene già una entry per lo user attivo
+    // per l'utente corrente, quindi access crea un duplicato nella lista.
+    // Idea: usare sempre getDoc(), tanto il metodo chiamante chiama user::setUserPrivilege che controlla
+    // i privilegi.
     document& docReq=fileReq->access(actionU, privilege::owner);
     int docId=docReq.getId();
     if(!userIsWorkingOnDocument(actionUser, docId).first)
@@ -209,11 +219,12 @@ std::shared_ptr<filesystem> SymServer::shareResource(const std::string &actionUs
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& actionU=getRegistered(actionUser);
     auto res= actionU.shareResource(resPath, resName, newPrefs);
-    uriMessage *toSend=new uriMessage(msgType::shareRes, {actionUser, {}}, msgOutcome ::success, resPath, resName, newPrefs);
+
+    auto toSend=std::make_shared<uriMessage>(msgType::shareRes, make_pair(actionUser, ""), msgOutcome ::success, resPath, resName, newPrefs);
     int docId= std::dynamic_pointer_cast<file>(res)->getDoc().getId();
 
     std::forward_list<int> setSiteIds= siteIdsFor(docId, actionU.getSiteId());
-    insertMessageForSiteIds(setSiteIds, std::shared_ptr<serverMessage>(toSend));
+    insertMessageForSiteIds(setSiteIds, toSend);
 
     generateSimpleResponse(actionU.getSiteId(), msgType::shareRes);
     return res;
@@ -243,6 +254,7 @@ SymServer::removeResource(const std::string &remover, const std::string &resPath
 }
 
 void SymServer::closeSource(const std::string &actionUser, int resIdtoClose) {
+    //FIXME: the following tree lines can be replaced by a call to handleUserState()
     std::pair<bool, document*> toClose=userIsWorkingOnDocument(actionUser, resIdtoClose);
     if(!toClose.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
@@ -250,8 +262,9 @@ void SymServer::closeSource(const std::string &actionUser, int resIdtoClose) {
     toClose.second->close(actionU);
     workingDoc[actionUser].remove_if([resIdtoClose](document* doc){return resIdtoClose== doc->getId();});
     resIdToSiteId[resIdtoClose].remove(actionU.getSiteId());
-    updateActiveMessage* toSend= new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, getRegistered(actionUser).makeCopyNoPwd(), resIdtoClose);
-    insertMessageForSiteIds(siteIdsFor(resIdtoClose, actionU.getSiteId()), std::shared_ptr<serverMessage>(toSend));
+
+    auto toSend= std::make_shared<updateActiveMessage>(msgType::removeActiveUser, msgOutcome::success, getRegistered(actionUser).makeCopyNoPwd(), resIdtoClose);
+    insertMessageForSiteIds(siteIdsFor(resIdtoClose, actionU.getSiteId()), toSend);
 
     generateSimpleResponse(actionU.getSiteId(), msgType::closeRes);
 }
@@ -261,11 +274,12 @@ const user & SymServer::editUser(const std::string &username, user &newUserData)
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& toEdit=getRegistered(username);
     toEdit.setNewData(newUserData);
-    userDataMessage* toSend= new userDataMessage(msgType::changeUserData, {username, {}}, msgOutcome::success, toEdit.makeCopyNoPwd());
+
+    auto toSend= std::make_shared<userDataMessage>(msgType::changeUserData, std::make_pair(username, ""), msgOutcome::success, toEdit.makeCopyNoPwd());
 
     //notification to other clients interested in changes on this user
     std::forward_list<int> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(username), toEdit.getSiteId());
-    insertMessageForSiteIds(setSiteIds, std::shared_ptr<serverMessage>(toSend));
+    insertMessageForSiteIds(setSiteIds, toSend);
 
     generateSimpleResponse(toEdit.getSiteId(), msgType::changeUserData);
     return toEdit;
@@ -300,14 +314,18 @@ std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, in
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     std::set<int> siteIds=retrieved.second->retrieveSiteIds();
     std::map<int, user> result;
+    //FIXME: così potrebbe essere lenta, complessità theta(N*size(siteIds))
+    // con N pari alla dimensione di registered.
+    // Idea: findUserBySiteId potrebbe ricevere un elenco di siteId e tornare
+    // un elenco di user. In questo modo la complessità diventa O(N)
     for(int siteId:siteIds){
         user founded= findUserBySiteId(siteId);
         result.emplace(siteId, founded);
     }
 
     //response to client
-    mapMessage* response=new mapMessage(msgType::mapChangesToUser, msgOutcome::success, result);
-    insertMessageForSiteIds({getRegistered(actionUser).getSiteId()}, std::shared_ptr<serverMessage>(response));
+    auto response=std::make_shared<mapMessage>(msgType::mapChangesToUser, msgOutcome::success, result);
+    insertMessageForSiteIds({getRegistered(actionUser).getSiteId()}, response);
 
     return result;
 }
@@ -350,6 +368,7 @@ user SymServer::findUserBySiteId(int id) const {
     return unknownUser;
 }
 
+//FIXME: use reference instead of pointer
 user &SymServer::registerUser(user *toInsert) {
     return registered[toInsert->getUsername()]=*toInsert;
 }
@@ -382,7 +401,8 @@ void SymServer::insertMessageForSiteIds(const std::forward_list<int>& siteIds, s
 std::forward_list<int> SymServer::resIdOfDocOfUser(const std::string &username) const {
     std::forward_list<int> resIds;
     if(workingDoc.count(username)==0) return resIds;
-    for(auto d:workingDoc.at(username)){
+    //FIXME: at() used to make the method const, boundary check is not necessary. Way to do so?
+    for(const auto* d:workingDoc.at(username)){
         resIds.push_front(d->getId());
     }
     return resIds;
@@ -401,18 +421,20 @@ std::forward_list<int> SymServer::siteIdOfUserOfDoc(const std::forward_list<int>
 void SymServer::closeAllDocsAndPropagateMex(const user &loggedOut, const std::forward_list<document*>& listOfDocs) {
     for(document* doc: listOfDocs) {
         doc->close(loggedOut);
-        updateActiveMessage* toSend=new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, loggedOut.makeCopyNoPwd(), doc->getId());
-        insertMessageForSiteIds(siteIdsFor(doc->getId(), loggedOut.getSiteId()), std::shared_ptr<serverMessage>(toSend));
+        auto toSend=std::make_shared<updateActiveMessage>(msgType::removeActiveUser, msgOutcome::success, loggedOut.makeCopyNoPwd(), doc->getId());
+        insertMessageForSiteIds(siteIdsFor(doc->getId(), loggedOut.getSiteId()), toSend);
     }
     settleResIdToSiteId(loggedOut);
     workingDoc.erase(loggedOut.getUsername());
 }
 
+//FIXME: better name, inspect usages
 void SymServer::settleResIdToSiteId(const user &loggedOut) {
     auto l=resIdOfDocOfUser(loggedOut.getUsername());
     for (int resId:l){
         resIdToSiteId[resId].remove(loggedOut.getSiteId());
     }
+    //FIXME: need to remove also the entry in siteIds associated with loggedOut.getSiteId() siteIdToMex
 }
 
 std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessage() {
@@ -430,8 +452,8 @@ std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessa
 }
 
 void SymServer::generateSimpleResponse(int recvSiteId, msgType action) {
-    serverMessage* response=new serverMessage(action, msgOutcome::success);
-    insertMessageForSiteIds({recvSiteId}, std::shared_ptr<serverMessage>(response));
+    auto response=std::make_shared<serverMessage>(action, msgOutcome::success);
+    insertMessageForSiteIds({recvSiteId}, response);
 }
 
 

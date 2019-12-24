@@ -107,6 +107,8 @@ namespace Symposium {
 
         bool moreOwner(std::string username) override;
 
+        //FIXME: non serve realmente, fa quello che dovrebbe fare già setPrivilege() con
+        // parametro privilege::none
         bool deleteUser(const std::string &targetUser) override;
 
         bool operator==(const RMOAccess &rhs) const;

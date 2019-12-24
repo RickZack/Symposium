@@ -31,27 +31,27 @@
 #include "privilege.h"
 using namespace Symposium;
 
-bool operator<(const privilege a, const privilege b){
+bool Symposium::operator<(const privilege a, const privilege b){
     return (static_cast<char>(a)- static_cast<char>(b))<0;
 }
 
 
-bool operator>(const privilege a, const privilege b){
+bool Symposium::operator>(const privilege a, const privilege b){
     return (static_cast<char>(a)- static_cast<char>(b))>0;
 }
 
 
-bool operator==(const privilege a, const privilege b){
+bool Symposium::operator==(const privilege a, const privilege b){
     return (static_cast<char>(a)- static_cast<char>(b))==0;
 }
 
-bool operator<=(const privilege a, const privilege b)
+bool Symposium::operator<=(const privilege a, const privilege b)
 {
     return a == b || a < b;
 }
 
 
-privilege operator++(privilege& oldPriv, int){
+privilege Symposium::operator++(privilege& oldPriv, int){
     privilege ret{oldPriv};
     switch(oldPriv){
         case privilege::readOnly: oldPriv=privilege::modify; break;
@@ -62,7 +62,7 @@ privilege operator++(privilege& oldPriv, int){
 }
 
 
-privilege operator--(privilege& oldPriv, int){
+privilege Symposium::operator--(privilege& oldPriv, int){
     privilege ret{oldPriv};
     switch(oldPriv){
         case privilege::modify:   oldPriv=privilege::readOnly; break;
@@ -73,7 +73,7 @@ privilege operator--(privilege& oldPriv, int){
 }
 
 
-privilege& operator++(privilege& oldPriv){
+privilege& Symposium::operator++(privilege& oldPriv){
     switch(oldPriv){
         case privilege::readOnly: return oldPriv=privilege::modify;
         case privilege::modify:   return oldPriv=privilege::owner;
@@ -82,7 +82,7 @@ privilege& operator++(privilege& oldPriv){
 }
 
 
-privilege& operator--(privilege& oldPriv){
+privilege& Symposium::operator--(privilege& oldPriv){
     switch(oldPriv){
         case privilege::modify:   return oldPriv=privilege::readOnly;
         case privilege::owner:    return oldPriv=privilege::modify;
@@ -91,7 +91,7 @@ privilege& operator--(privilege& oldPriv){
 }
 
 
-std::ostream& operator<<(std::ostream& output, privilege priv){
+std::ostream& Symposium::operator<<(std::ostream& output, privilege priv){
     switch(priv){
         case privilege::readOnly: return output<<"reader";
         case privilege::modify: return output<<"writer";

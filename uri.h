@@ -54,6 +54,7 @@ namespace Symposium {
  * the uri object refers to
  */
     class uri {
+        //FIXME: mai usato, si può togliere
         int uriId;                 /**< unique identifier for the uri */
         uriPolicy activePolicy;    /**< the policy currently active */
         int sharesLeft;            /**< number of shares that can still be accepted */

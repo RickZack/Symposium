@@ -129,6 +129,7 @@ namespace Symposium {
         virtual std::set<int> retrieveSiteIds() const;
 
     private:
+        //FIXME: manca tutta la documentazione per queste funzioni!
         void generatePosition(const std::pair<int, int> indexes) const;
 
         std::pair<int, int> findInsertIndex(const symbol &symbol) const;

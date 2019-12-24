@@ -41,14 +41,16 @@ namespace Symposium {
     enum class resourceType : char {
         directory, file, symlink
     };
+
+
+    /**
+     * @brief output operator for @e resType
+     *
+     * @relatesalso resType
+     */
+    std::ostream& operator<<(std::ostream& output, resourceType type);
 }
-using namespace Symposium;
-/**
- * @brief output operator for @e resType
- *
- * @relatesalso resType
- */
-std::ostream& operator<<(std::ostream& output, resourceType type);
+
 
 
 #endif //SYMPOSIUM_RESOURCETYPE_H
