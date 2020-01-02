@@ -54,8 +54,6 @@ namespace Symposium {
  * the uri object refers to
  */
     class uri {
-        //FIXME: mai usato, si può togliere
-        int uriId;                 /**< unique identifier for the uri */
         uriPolicy activePolicy;    /**< the policy currently active */
         int sharesLeft;            /**< number of shares that can still be accepted */
         std::chrono::system_clock::time_point stopTime; /**< end time of sharing */
@@ -66,7 +64,7 @@ namespace Symposium {
         friend class boost::serialization::access;
         template<class Archive>
         void serialize(Archive & ar, const unsigned int /* file_version */){
-            ar & uriId & activePolicy & sharesLeft
+            ar & activePolicy & sharesLeft
             & boost::serialization::make_binary_object(&stopTime, sizeof(stopTime))
             & granted;
         }

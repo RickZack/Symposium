@@ -38,7 +38,7 @@ using namespace Symposium;
 
 struct SymServerdirMock : public directory{
     SymServerdirMock(const std::string &name) : directory(name) {};
-    MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, int idToAssign));
+    MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, uint_positive_cnt::type idToAssign));
     MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
 };
@@ -53,8 +53,8 @@ struct SymServerUserMock: public user{
     SymServerUserMock(const SymServerUserMock& other): user(other){};
     MOCK_CONST_METHOD3(accessFile,  std::pair<int, std::shared_ptr<file>>(const std::string &resId, const std::string &path,  const std::string &fileName));
     MOCK_CONST_METHOD3(openFile, std::shared_ptr<file>(const std::string &path,  const std::string &fileName, privilege accessMode));
-    MOCK_CONST_METHOD3(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome, int));
-    MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome, int id));
+    MOCK_CONST_METHOD3(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome, uint_positive_cnt::type));
+    MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome, uint_positive_cnt::type id));
     MOCK_CONST_METHOD4(editPrivilege, privilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
     MOCK_CONST_METHOD3(shareResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, const uri& newPrefs));
@@ -180,9 +180,9 @@ public:
      * this permits to return objects of type SymServerUserMock, so to break the dependency
      * from user mocking the called methods
      */
-    user &registerUser(user *toInsert) override {
-        std::string username=toInsert->getUsername();
-        SymServerUserMock* mocked= dynamic_cast<SymServerUserMock*>(toInsert);
+    user &registerUser(const user &toInsert) override {
+        std::string username=toInsert.getUsername();
+        const SymServerUserMock* mocked= dynamic_cast<const SymServerUserMock*>(&toInsert);
         SymServerUserMock& toReturn=registered.insert({username, *mocked}).first->second;
         return toReturn;
     }
@@ -589,7 +589,7 @@ TEST_F(SymServerTestFilesystemFunctionality, createNewSourceOfUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, createNewDirCallsNewDirectory){
-    EXPECT_CALL(*inserted, newDirectory(fileName, filePath,-1));
+    EXPECT_CALL(*inserted, newDirectory(fileName, filePath, 0));
     server.createNewDir(loggedUserUsername, filePath, fileName);
 }
 

@@ -61,8 +61,7 @@ namespace Symposium {
         std::string username;              /**< unique identifier for the user, used also for login */
         std::string pwdHash;               /**< user password's hash value */
         std::string hashSalt;              /**< random generated string, used as a salt to @e pwdHash */
-        //FIXME: put unsigned, siteIds must be positive, because a negative id is assumed as "no user present"
-        int siteId;                        /**< unique identifier for the user, used in CRDT logic */
+        uint_positive_cnt::type siteId;    /**< unique identifier for the user, used in CRDT logic */
         std::string nickname;              /**< name chosen by the user to be showed to other users */
         std::string iconPath;              /**< path to the user's icon in program installation folder */
         std::shared_ptr<directory> home;   /**< user's virtual filesystem */
@@ -89,7 +88,7 @@ namespace Symposium {
 
         void setNickname(const std::string &nickname);
 
-        void setSiteId(int siteId);
+        void setSiteId(uint_positive_cnt::type siteId);
 
         void setIconPath(const std::string &iconPath);
 
@@ -117,7 +116,7 @@ namespace Symposium {
          * @return the pointer to the file just created
          */
         virtual std::shared_ptr<file>
-        newFile(const std::string &fileName, const std::string &pathFromHome=".", int idToAssign=0) const;
+        newFile(const std::string &fileName, const std::string &pathFromHome= ".", uint_positive_cnt::type idToAssign= 0) const;
 
         /**
          * @brief creates a new directory named @e dirName in @e pathFromHome
@@ -125,10 +124,9 @@ namespace Symposium {
          * @param pathFromHome path inside the home to put the directory. By default is the home itself
          * @return the pointer to the directory just created
          */
-        //FIXME: dovremmo poter eliminare questo if, bisogna decidere in un solo punto quale deve un id invalido
-        // Potrebbe essere lo 0, cioè dire che è riservato. Filesystem usa questa convenzione
+
         virtual std::shared_ptr<directory>
-        newDirectory(const std::string &dirName, const std::string &pathFromHome = ".", int idToAssign=-1) const;
+        newDirectory(const std::string &dirName, const std::string &pathFromHome = ".", uint_positive_cnt::type idToAssign=0) const;
 
         /**
          * @brief adds a link to the resource for which the user has been granted a privilege

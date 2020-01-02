@@ -56,6 +56,11 @@ namespace Symposium{
     enum class msgOutcome:char;
     enum class msgType;
     enum class privilege:char;
+
+    namespace detail{
+        #include "counter.h"
+    }
+    using detail::uint_positive_cnt;
 }
 
 

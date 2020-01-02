@@ -58,7 +58,7 @@
          std::unordered_map<std::string, std::forward_list<document *>> workingDoc;                        /**< list of document each user is working on */
          std::unordered_map<int, std::queue<std::shared_ptr<serverMessage>>> siteIdToMex;                  /**< messages queues associated with every user by means of @e siteId */
          std::unordered_map<int, std::forward_list<int>> resIdToSiteId;                                    /**< list of users involved in a document, by means of @e siteIds and @e resIds */
-         static int idCounter;                                                                             /**< siteId to be assigned to the next registered user */
+         static uint_positive_cnt idCounter;                                                               /**< siteId to be assigned to the next registered user */
          std::shared_ptr<directory> rootDir;                                                               /**< virtual filesystem of the Symposium server */
 
      public:
@@ -332,7 +332,7 @@
           * @param toInsert the user to be inserted
           * @return a reference to the inserted user
           */
-         virtual user &registerUser(user *toInsert);
+         virtual user &registerUser(const user &toInsert);
 
          /**
           * @brief return the registered user associated with @e username

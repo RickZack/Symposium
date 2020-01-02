@@ -32,10 +32,10 @@
 #include "user.h"
 using namespace Symposium;
 
-int filesystem::idCounter=0;
+uint_positive_cnt filesystem::idCounter;
 std::shared_ptr<directory> directory::root;
 
-filesystem::filesystem(const std::string &name, const int idToAssign) : name(name){
+filesystem::filesystem(const std::string &name, const uint_positive_cnt::type idToAssign) : name(name){
     if(idToAssign==0){
         id=idCounter;
         idCounter++;
@@ -44,7 +44,7 @@ filesystem::filesystem(const std::string &name, const int idToAssign) : name(nam
         id=idToAssign;
 }
 
-int filesystem::getId() const {
+uint_positive_cnt::type filesystem::getId() const {
     return id;
 }
 
@@ -106,7 +106,7 @@ bool filesystem::pathIsValid2(const std::string &toCheck) {
     return !toCheck.empty() && std::regex_match(toCheck, pathPattern);
 }
 
-file::file(const std::string &name, const std::string &realPath, int idToAssign) : filesystem(name, idToAssign), realPath(realPath), doc(0){
+file::file(const std::string &name, const std::string &realPath, uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), realPath(realPath), doc(0){
     if(!(pathIsValid2(realPath)))
         throw filesystemException(filesystemException::pathNvalid, UnpackFileLineFunction());
     strategy=std::make_unique<RMOAccess>();
@@ -184,7 +184,7 @@ bool file::deleteFromStrategy(const std::string &userName)
    return strategy->deleteUser(userName);
 }
 
-std::string file::print(const std::string &targetUser, bool recursive, int indent) const {
+std::string file::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
     std::string ritorno;
     if (indent>0)
         ritorno.insert(0, indent, ' '); //first need to insert indent
@@ -316,7 +316,7 @@ std::string directory::setName(const std::string &path, const std::string &fileN
 
 
 
-std::shared_ptr<directory> directory::addDirectory(const std::string &name, int idToAssign) {
+std::shared_ptr<directory> directory::addDirectory(const std::string &name, uint_positive_cnt::type idToAssign) {
     if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> &i){return i->getName()==name;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
     std::shared_ptr<directory> newDir(new directory(name, idToAssign));
@@ -327,7 +327,7 @@ std::shared_ptr<directory> directory::addDirectory(const std::string &name, int 
 }
 
 
-std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name, int idToAssign) {
+std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
     std::string pathAdd;
     std::string idAdd;
     tie(pathAdd, idAdd)= separate(path);
@@ -341,7 +341,7 @@ std::shared_ptr<file> directory::addFile(const std::string &path, const std::str
 
 std::shared_ptr<class symlink>
 directory::addLink(const std::string &path, const std::string &name, const std::string &filePath,
-                   const std::string &fileName, int idToAssign)
+                   const std::string &fileName, uint_positive_cnt::type idToAssign)
 {
     std::string pathAdd;
     std::string idAdd;
@@ -439,7 +439,7 @@ void directory::load(const std::string &loadPath) {
 void directory::send() const {
     //TODO: implement
 }
-std::string directory::print(const std::string &targetUser, bool recursive, int indent) const {
+std::string directory::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
     std::string result;
     if(indent==0)
         result.append(targetUser);
@@ -473,7 +473,7 @@ std::string directory::print(const std::string &targetUser, bool recursive, int 
 }
 
 //FIXME: a cosa server? perchè abbiamo print e printElement? Vedi nota in directory::print
-std::string directory::printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, int indent)
+std::string directory::printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, unsigned int indent)
 {
     resourceType type=it->resType();
     std::string result;
@@ -489,7 +489,7 @@ std::string directory::printElement(const std::shared_ptr<filesystem> &it, const
 }
 
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
-                            int idToAssign) : filesystem(name, idToAssign), pathToFile(pathToFile), fileName(fileName) {
+                            uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), pathToFile(pathToFile), fileName(fileName) {
 
     if(!pathIsValid2(pathToFile))
         throw filesystemException(filesystemException::pathNvalid, UnpackFileLineFunction());
@@ -524,7 +524,7 @@ std::string Symposium::symlink::getPath() {
 
 //TODO: indent dovrebbe essere sempre positivo, quindi porlo come unsigned int. Come garantisco che sia
 // sempre positivo?
-std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, int indent) const {
+std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
     std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
     std::ostringstream priv;
     std::ostringstream typeres;

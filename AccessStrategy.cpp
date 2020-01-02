@@ -32,7 +32,7 @@
 
 using namespace Symposium;
 
-bool RMOAccess::validateAction(const std::string &targetUser, privilege requested) {
+bool RMOAccess::validateAction(const std::string &targetUser, privilege requested) const {
     std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
     privilege attuale;
     if ( got == permission.end() )
@@ -60,6 +60,10 @@ privilege RMOAccess::setPrivilege(const std::string &targetUser, privilege toGra
         permission.insert (std::make_pair(targetUser, toGrant));
         return privilege::none;
     }
+    //FIXME: se permission.empty() && toGrant==privilege::owner allora got!=permission.end(), saltiamo
+    // l'if e arriviamo qui, quindi togliamo la entry di targetUser e poi la reinseriamo. Credo tu abbia
+    // dimenticato un return dentro il primo if.
+
     privilege vecchio=got->second;
     permission.erase (targetUser);
     //FIXME: nel caso ti passi toGrant==privilege::none, stai aggiungendo una entry che non dice nulla
@@ -69,7 +73,7 @@ privilege RMOAccess::setPrivilege(const std::string &targetUser, privilege toGra
     return vecchio;
 }
 
-privilege RMOAccess::getPrivilege(const std::string &targetUser)
+privilege RMOAccess::getPrivilege(const std::string &targetUser) const
 {
     std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
     if ( got == permission.end() )
@@ -77,7 +81,7 @@ privilege RMOAccess::getPrivilege(const std::string &targetUser)
     return got->second;
 }
 
-bool RMOAccess::moreOwner(std::string username)
+bool RMOAccess::moreOwner(std::string username) const
 {
     int i=0;
     bool own=false;
@@ -116,7 +120,7 @@ bool RMOAccess::operator!=(const RMOAccess &rhs) const {
     return !(rhs == *this);
 }
 
-bool TrivialAccess::validateAction(const std::string &targetUser, privilege requested) {
+bool TrivialAccess::validateAction(const std::string &targetUser, privilege requested) const {
     return true;
 }
 
@@ -124,11 +128,11 @@ privilege TrivialAccess::setPrivilege(const std::string &targetUser, privilege t
     return privilege::none;
 }
 
-privilege TrivialAccess::getPrivilege(const std::string &targetUser) {
+privilege TrivialAccess::getPrivilege(const std::string &targetUser) const {
     return privilege::none;
 }
 
-bool TrivialAccess::moreOwner(std::string username){
+bool TrivialAccess::moreOwner(std::string username) const{
     return false;
 }
 

@@ -37,7 +37,7 @@ using namespace Symposium;
 int document::idCounter=0;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 
-
+//FIXME: valore di default di id ignorato, potenziale errore
 document::document(int id) : id(id), symbols(1,std::vector<symbol>(1,emptySymbol)) {
     id=idCounter;
     idCounter++;

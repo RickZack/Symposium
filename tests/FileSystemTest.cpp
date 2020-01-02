@@ -50,9 +50,9 @@ struct documentMock: public document {
 
 struct RMOAccessMock: public RMOAccess{
     RMOAccessMock(): RMOAccess(){};
-    MOCK_METHOD2(validateAction, bool(const std::string &targetUser, privilege requested));
+    MOCK_CONST_METHOD2(validateAction, bool(const std::string &targetUser, privilege requested));
     MOCK_METHOD2(setPrivilege, privilege(const std::string &targetUser, privilege toGrant));
-    MOCK_METHOD1(getPrivilege, privilege(const std::string &targetUser));
+    MOCK_CONST_METHOD1(getPrivilege, privilege(const std::string &targetUser));
 
 };
 
@@ -68,7 +68,7 @@ struct directoryAccesser: public directory{ //only to access the protected membe
     void resetFreshFilesystem(){
         auto r= static_cast<directoryAccesser*>(this->root.get());
         if(r){
-            r->idCounter=0;
+            //r->idCounter=0;
             r->contained.clear();
             this->root.reset(); //the static object is now free (root removed)
             //Note:: r is not valid at this point
@@ -78,7 +78,7 @@ struct directoryAccesser: public directory{ //only to access the protected membe
 };
 
 struct fileAccesser: public file{ //only to access the protected members of directory from tests
-    fileAccesser(const std::string &name) : file(name, "./somedir", 0) {};
+    fileAccesser(const std::string &name) : file(name, "./somedir") {};
     /*
      * Used in tests when we want to set expectations on the strategy object, that normally
      * is an internal detail of file
@@ -112,7 +112,7 @@ struct fileAccesser: public file{ //only to access the protected members of dire
 };
 
 struct symlinkAccesser: public symlink{ //only to access the protected members of directory from tests
-    symlinkAccesser(const std::string &name) : symlink(name, "./dir/dir2", "fakesym", 0) {};
+    symlinkAccesser(const std::string &name) : symlink(name, "./dir/dir2", "fakesym") {};
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
@@ -158,12 +158,12 @@ TEST_F(FileSystemTestRobust, FileThrowsOnMalformedRealPath){
     file *f;
     std::string someWrongFormats[]={"../", "..", ".", "./", "path", "./dir/file.jpg"};
     for (auto& path:someWrongFormats)
-        EXPECT_THROW(f= new file("fileName", path, 0), filesystemException);
+        EXPECT_THROW(f= new file("fileName", path), filesystemException);
 }
 
 TEST_F(FileSystemTestRobust, FileAcceptsWellFormedRealPath) {
     std::string aGoodPath{"./dir1/dir2/dir3"};
-    file f("fileName", "./dir1/dir2/dir3", 0);
+    file f("fileName", "./dir1/dir2/dir3");
 }
 
 struct FileSystemTestSharing: ::testing::Test{
@@ -244,7 +244,7 @@ struct FileSystemTestSharing: ::testing::Test{
      */
     void constructTree1(){
         ASSERT_NO_FATAL_FAILURE(constructTree0());
-        file1= directory::getRoot()->addFile("./1/7", "file1", 0);
+        file1= directory::getRoot()->addFile("./1/7", "file1");
         /*
          * Simulate the fact that the user created the file, so he has [privilege::owner] on [file1]
          */
@@ -263,7 +263,7 @@ struct FileSystemTestSharing: ::testing::Test{
     void constructTree2(){
         ASSERT_NO_FATAL_FAILURE(constructTree1());
         anotherUser_d=directory::getRoot()->addDirectory("anotherUsername", 2);
-        sym1= directory::getRoot()->addLink("./2", "sym1", "./1/7", std::to_string(file1->getId()), 0);
+        sym1= directory::getRoot()->addLink("./2", "sym1", "./1/7", std::to_string(file1->getId()));
         /*
          * Simulate the fact that the privilege acquired adding a symlink
          */
@@ -283,8 +283,8 @@ struct FileSystemTestSharing: ::testing::Test{
      */
     void constructTree3(){
         ASSERT_NO_FATAL_FAILURE(constructTree2());
-        file2= directory::getRoot()->addFile("./2", "file2", 0);
-        sym2= directory::getRoot()->addLink("./1/7", "sym2", "./2", std::to_string(file2->getId()), 0);
+        file2= directory::getRoot()->addFile("./2", "file2");
+        sym2= directory::getRoot()->addLink("./1/7", "sym2", "./2", std::to_string(file2->getId()));
         /*
          * Simulate the fact that the user created the file, so he has [privilege::owner] on [file2]
          * Simulate the fact that the privilege acquired adding a symlink
@@ -615,7 +615,7 @@ struct FileSystemTestT: ::testing::Test{
     FileSystemTestT(){
         document=new ::testing::NiceMock<documentMock>();
         rmo=new ::testing::NiceMock<RMOAccessMock>();
-        f= new file("f", "./somedir", 0);
+        f= new file("f", "./somedir");
     }
     ~FileSystemTestT() override{
         delete f;
@@ -654,7 +654,7 @@ TEST_F(FileSystemTestT, DISABLED_accessTest)
 TEST(FileSystemTest, DISABLED_getSetDirSymTest)
 {
     directoryAccesser d("d");
-    class symlink sym("sym", ".", "f", 0);
+    class symlink sym("sym", ".", "f");
     std::string u="username";
     user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
     uri u1(uriPolicy::activeAlways);
@@ -681,7 +681,7 @@ TEST(FileSystemTest, DISABLED_printFileTest)
 {
     std::string u="username";
     user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    file f("file", "./somedir", 0);
+    file f("file", "./somedir");
     f.setUserPrivilege(u, privilege::owner);
     EXPECT_EQ("file owner", f.print(u));
     f.setUserPrivilege(u, privilege::none);
@@ -736,6 +736,6 @@ TEST(FileSystemTest, DISABLED_printSymTest)
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
     std::shared_ptr<file> f1;
     f1= d->addFile("file1", "/root", 0);
-    class symlink sym("sym", "/root", "file1", 0);
+    class symlink sym("sym", "/root", "file1");
     EXPECT_EQ("sym", sym.print(u1.getUsername()));
 }

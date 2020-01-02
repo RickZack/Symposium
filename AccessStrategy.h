@@ -63,7 +63,7 @@ namespace Symposium {
          * @param requested the permission requested by the action
          * @return true if the user is granted the privilege @ref requested
          */
-        virtual bool validateAction(const std::string &targetUser, privilege requested)=0 ;
+        virtual bool validateAction(const std::string &targetUser, privilege requested)const =0 ;
 
         /**
          * @brief set the privilege of an user
@@ -73,9 +73,9 @@ namespace Symposium {
          */
         virtual privilege setPrivilege(const std::string &targetUser, privilege toGrant) =0;
 
-        virtual privilege getPrivilege(const std::string &targetUser) =0;
+        virtual privilege getPrivilege(const std::string &targetUser) const =0;
 
-        virtual bool moreOwner(std::string username) =0;
+        virtual bool moreOwner(std::string username) const =0;
 
         virtual bool deleteUser(const std::string &targetUser) =0;
 
@@ -99,13 +99,13 @@ namespace Symposium {
         }
 
     public:
-        bool validateAction(const std::string &targetUser, privilege requested) override;
+        bool validateAction(const std::string &targetUser, privilege requested) const override;
 
         privilege setPrivilege(const std::string &targetUser, privilege toGrant) override;
 
-        privilege getPrivilege(const std::string &targetUser) override;
+        privilege getPrivilege(const std::string &targetUser) const override;
 
-        bool moreOwner(std::string username) override;
+        bool moreOwner(std::string username) const override;
 
         //FIXME: non serve realmente, fa quello che dovrebbe fare già setPrivilege() con
         // parametro privilege::none
@@ -131,15 +131,15 @@ namespace Symposium {
         }
 
     public:
-        bool validateAction(const std::string &targetUser, privilege requested) override;
+        bool validateAction(const std::string &targetUser, privilege requested) const override;
 
         privilege setPrivilege(const std::string &targetUser, privilege toGrant) override;
 
-        privilege getPrivilege(const std::string &targetUser) override;
+        privilege getPrivilege(const std::string &targetUser) const override;
 
         bool deleteUser(const std::string &targetUser) override;
 
-        bool moreOwner(std::string username) override;
+        bool moreOwner(std::string username) const override;
 
         ~TrivialAccess() override = default;
     };

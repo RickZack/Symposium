@@ -39,23 +39,18 @@ struct dirMock: public directory{
     dirMock(const std::string& name="dummy"): directory(name){};
 
     MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
-    MOCK_METHOD3(addFile, std::shared_ptr<file>(const std::string&, const std::string&, int));
+    MOCK_METHOD3(addFile, std::shared_ptr<file>(const std::string&, const std::string&, uint_positive_cnt::type));
     MOCK_METHOD2(get, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
     MOCK_METHOD0(getRoot, std::shared_ptr<directory>());
     MOCK_METHOD5(addLink, std::shared_ptr<Symposium::symlink>(const std::string &path, const std::string &name, const std::string &filePath,
-            const std::string &fileName, int));
-    MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, int idToAssign));
+            const std::string &fileName, uint_positive_cnt::type));
+    MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, uint_positive_cnt::type idToAssign));
 
     MOCK_METHOD4(access, document&(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode));
     MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &, const std::string &, const std::string &));
 
-    MOCK_CONST_METHOD3(print, std::string(const std::string &targetUser, bool recursive, int indent));
-
-
-    static int getIdCounter(){
-        return idCounter;
-    }
+    MOCK_CONST_METHOD3(print, std::string(const std::string &targetUser, bool recursive, unsigned int indent));
 
     void setRootOfHome(std::shared_ptr<dirMock> root){
         this->root=root;
@@ -155,7 +150,7 @@ TEST(userTest, makeNewDirMock){
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     directory *created=new dirMock("ciao");
-    EXPECT_CALL(*dir, addDirectory("ciao", dirMock::getIdCounter())).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
+    EXPECT_CALL(*dir, addDirectory("ciao",0)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
     u1.newDirectory("ciao", "./");
 }
 

@@ -90,7 +90,7 @@ void user::setNickname(const std::string &nickname) {
     user::nickname = nickname;
 }
 
-void user::setSiteId(int siteId) {
+void user::setSiteId(uint_positive_cnt::type siteId) {
     user::siteId = siteId;
 }
 
@@ -108,7 +108,7 @@ std::string user::showDir(bool recursive) const {
 
 }
 
-std::shared_ptr<file> user::newFile(const std::string &fileName, const std::string &pathFromHome, int idToAssign) const {
+std::shared_ptr<file> user::newFile(const std::string &fileName, const std::string &pathFromHome, uint_positive_cnt::type idToAssign) const {
 
     std::shared_ptr<file> newF= home->addFile(pathFromHome, fileName);
     newF->setUserPrivilege(this->getUsername(), privilege::owner);
@@ -117,7 +117,7 @@ std::shared_ptr<file> user::newFile(const std::string &fileName, const std::stri
 
 
 std::shared_ptr<directory>
-user::newDirectory(const std::string &dirName, const std::string &pathFromHome, int idToAssign) const{
+user::newDirectory(const std::string &dirName, const std::string &pathFromHome, uint_positive_cnt::type idToAssign) const{
     std::shared_ptr<directory> newDir;
     std::string pathToDir;
     std::string idDir;
@@ -129,12 +129,7 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
         tie(pathToDir, idDir)= separate(pathFromHome);
         dir=home->getDir(pathToDir, idDir);
     }
-    //FIXME: dovremmo poter eliminare questo if, bisogna decidere in un solo punto quale deve un id invalido
-    // Potrebbe essere lo 0, cioè dire che è riservato. Filesystem usa questa convenzione
-    if(idToAssign==-1)
-        newDir=dir->addDirectory(dirName);
-    else
-        newDir=dir->addDirectory(dirName, idToAssign);
+    newDir=dir->addDirectory(dirName, idToAssign);
     return newDir;
 }
 

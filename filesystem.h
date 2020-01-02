@@ -68,18 +68,16 @@ namespace Symposium {
      * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
      */
     class filesystem {
+        static uint_positive_cnt idCounter;  /**< id to be assigned to the next created filesystem object */
+        uint_positive_cnt::type id;          /**< unique identifier for the filesystem object, used also for identifying objects along a path */
     protected:
-        //FIXME: put unsigned, id must be positive
-        static int idCounter;      /**< id to be assigned to the next created filesystem object */
-        //FIXME: put unsigned, id must be positive
-        int id;                    /**< unique identifier for the filesystem object, used also for identifying objects along a path */
-        std::string name;          /**< resource name */
-        uri sharingPolicy;         /**< sharing policy applied to the resource */
+        std::string name;                    /**< resource name */
+        uri sharingPolicy;                   /**< sharing policy applied to the resource */
         std::unique_ptr<AccessStrategy> strategy;
     public:
-        filesystem(const std::string &name, const int idToAssign=0);
+        filesystem(const std::string &name, const uint_positive_cnt::type idToAssign=0);
 
-        int getId() const;
+        uint_positive_cnt::type getId() const;
 
         const std::string &getName() const;
 
@@ -151,7 +149,7 @@ namespace Symposium {
 
         virtual void send() const = 0; //not clear how to set this
 
-        virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const = 0;
+        virtual std::string print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const = 0;
         /**
          * @brief separate the last part of path which indicate the id of the resource, example: path=./1/2/3 result 1/2 and 3
          * @param path the path to divide
@@ -176,7 +174,7 @@ namespace Symposium {
         std::string realPath;      /**< file's path internal to the actual working directory of the system */
         document doc;              /**< document to handle */
     public:
-        file(const std::string &name, const std::string &realPath, int idToAssign=0);
+        file(const std::string &name, const std::string &realPath, uint_positive_cnt::type idToAssign=0);
 
 
         const document &getDoc() const;
@@ -241,7 +239,7 @@ namespace Symposium {
          * For a file, @e print(targetUser) shows the name of the file and the privilege
          * that @e targetUser has on it
          */
-        std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
+        std::string print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const override;
 
         //FIXME: se sono usate solo dentro filesystem (e se non è così c'è quache errore), allora è meglio
         // averle protette
@@ -279,7 +277,7 @@ namespace Symposium {
         
     public:
         symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
-                int idToAssign=0);
+                uint_positive_cnt::type idToAssign=0);
 
         const std::string &getFileName() const;
 
@@ -312,7 +310,7 @@ namespace Symposium {
          * For a symlink, @e print(targetUser) shows the name of the symlink and the
          * privileges granted to @e targetUser for the file pointed by the symlink
          */
-        virtual std::string print(const std::string &targetUser, bool recursive = false, int indent = 0) const override;
+        virtual std::string print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const override;
 
         ~symlink() override = default;
     };
@@ -344,13 +342,13 @@ namespace Symposium {
         setName(const std::string &path, const std::string &fileName, const std::string &newName);
 
 
-        virtual std::shared_ptr<directory> addDirectory(const std::string &name, int idToAssign=filesystem::idCounter);
+        virtual std::shared_ptr<directory> addDirectory(const std::string &name, uint_positive_cnt::type idToAssign=0);
 
-        virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name, int idToAssign=0);
+        virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign=0);
 
         virtual std::shared_ptr<Symposium::symlink>
         addLink(const std::string &path, const std::string &name, const std::string &filePath,
-                const std::string &fileName, int idToAssign=0);
+                const std::string &fileName, uint_positive_cnt::type idToAssign=0);
 
         virtual resourceType resType() const override;
 
@@ -392,7 +390,7 @@ namespace Symposium {
          * @param indent an optional identation level to distinguish nested objects
          * @return a string containing the representation
          */
-        virtual std::string print(const std::string &targetUser, bool recursive = true, int indent = 0) const override;
+        virtual std::string print(const std::string &targetUser, bool recursive = true, unsigned int indent = 0) const override;
         virtual ~directory() override= default;
 
         /**
@@ -411,7 +409,7 @@ namespace Symposium {
          * @param indent indent if present
          * @return the string which represent the name of the resource
          */
-        static std::string printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, int indent);
+        static std::string printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, unsigned int indent);
     };
 
 

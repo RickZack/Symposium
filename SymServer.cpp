@@ -35,8 +35,7 @@
 
 using namespace Symposium;
 
-//FIXME: put unsigned, siteIds must be positive, because a negative id is assumed as "no user present"
-int SymServer::idCounter=0;
+uint_positive_cnt SymServer::idCounter;
 const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", "./icons/1.png", -1, nullptr);
 
 const user & SymServer::addUser(user &newUser) {
@@ -49,7 +48,7 @@ const user & SymServer::addUser(user &newUser) {
     newUser.setHome(userDir);
     newUser.setSiteId(idCounter++);
     //FIXME: return registerUser(...);
-    user& inserted=registerUser(&newUser);
+    user& inserted=registerUser(newUser);
     return inserted;
 }
 
@@ -368,9 +367,8 @@ user SymServer::findUserBySiteId(int id) const {
     return unknownUser;
 }
 
-//FIXME: use reference instead of pointer
-user &SymServer::registerUser(user *toInsert) {
-    return registered[toInsert->getUsername()]=*toInsert;
+user &SymServer::registerUser(const user &toInsert) {
+    return registered[toInsert.getUsername()]=toInsert;
 }
 
 user &SymServer::getRegistered(const std::string &username) {

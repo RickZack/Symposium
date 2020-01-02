@@ -45,8 +45,7 @@ privilege uri::getGranted() const {
 }
 
 bool uri::operator==(const uri &rhs) const {
-    return uriId == rhs.uriId &&
-           activePolicy == rhs.activePolicy &&
+    return activePolicy == rhs.activePolicy &&
            sharesLeft == rhs.sharesLeft &&
            stopTime == rhs.stopTime &&
            granted == rhs.granted;

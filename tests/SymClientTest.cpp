@@ -43,8 +43,8 @@ struct SymClientUserMock: public user{
             user(username, pwd, nickname, iconPath, siteId, home) {}
     MOCK_CONST_METHOD3(openFile, std::shared_ptr<file>(const std::string& path, const std::string& filename, privilege accessMode));
     MOCK_CONST_METHOD3(accessFile, std::pair<int, std::shared_ptr<file>>(const std::string &resId, const std::string &path, const std::string &fileName));
-    MOCK_CONST_METHOD3(newFile, std::shared_ptr<file>(const std::string &filename, const std::string &path, int id));
-    MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string &filename, const std::string &path, int id));
+    MOCK_CONST_METHOD3(newFile, std::shared_ptr<file>(const std::string &filename, const std::string &path, uint_positive_cnt::type id));
+    MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string &filename, const std::string &path, uint_positive_cnt::type id));
     MOCK_METHOD4(editPrivilege, privilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
     MOCK_CONST_METHOD3(shareResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, uri &newPrefs));
