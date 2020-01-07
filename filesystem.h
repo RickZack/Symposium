@@ -377,6 +377,8 @@ namespace Symposium {
         virtual std::shared_ptr<filesystem>
         remove(const user &targetUser, const std::string &path, const std::string &resName);
 
+        void replacement(const std::shared_ptr<file>);
+
         void store(const std::string &storePath) const override;
 
         void load(const std::string &loadPath) override;
