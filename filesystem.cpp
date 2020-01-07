@@ -428,7 +428,7 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
     return obj;
 }
 
-void replacement(const std::shared_ptr<file>){
+void directory::replacement(const std::shared_ptr<file>){
     //TODO: implement
 }
 
