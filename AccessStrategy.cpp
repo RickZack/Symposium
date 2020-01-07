@@ -33,6 +33,8 @@
 using namespace Symposium;
 
 bool RMOAccess::validateAction(const std::string &targetUser, privilege requested) const {
+    if(requested==privilege::none)
+        return false;
     std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
     privilege attuale;
     if ( got == permission.end() )
@@ -41,35 +43,29 @@ bool RMOAccess::validateAction(const std::string &targetUser, privilege requeste
         return attuale==requested;
     }
     attuale=got->second;
-    //FIXME: setPrivilege() crea problemi anche a questa funzione, perchè se arrivi ad avere una entry con
-    // <user, privilege::none> questa istruzione ritorna true, file::access() autorizza l'accesso,
-    // document::access() aggiunge una entry con <user, privilege::none> e quindi ti trovi un utente
-    // che ha fatto accesso anche se non aveva neanche il privilege::readOnly
     return attuale >= requested;
 }
 
-//FIXME: c'è un po' di ridondanza: ogni volta che utente ha già un privilegio e vuoi solo cambiarlo
-// elimini la sua entry in permission e ne crei una nuova. Puoi semplicemente modificare il privilegio
-// che è associato alla entry già presente.
+
 privilege RMOAccess::setPrivilege(const std::string &targetUser, privilege toGrant) {
     if(permission.empty() && toGrant==privilege::owner)
-        permission.insert (std::make_pair(targetUser, toGrant));
-    std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
-    if ( got == permission.end() )
     {
         permission.insert (std::make_pair(targetUser, toGrant));
         return privilege::none;
     }
-    //FIXME: se permission.empty() && toGrant==privilege::owner allora got!=permission.end(), saltiamo
-    // l'if e arriviamo qui, quindi togliamo la entry di targetUser e poi la reinseriamo. Credo tu abbia
-    // dimenticato un return dentro il primo if.
-
+    auto got = permission.find(targetUser);
+    if ( got == permission.end())
+    {
+        if(toGrant==privilege::none)
+            return privilege::none;
+        permission.insert (std::make_pair(targetUser, toGrant));
+        return privilege::none;
+    }
     privilege vecchio=got->second;
-    permission.erase (targetUser);
-    //FIXME: nel caso ti passi toGrant==privilege::none, stai aggiungendo una entry che non dice nulla
-    // Nel caso privilege::none conviene non avere la entry. Il modo in cui hai scritto validateAction()
-    // e getPrivilege() rispecchia questa assunzione
-    permission.insert(std::make_pair(targetUser, toGrant));
+    if(toGrant==privilege::none)
+        permission.erase (targetUser);
+    else
+        got->second=toGrant;
     return vecchio;
 }
 
