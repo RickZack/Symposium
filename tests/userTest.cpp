@@ -128,10 +128,10 @@ TEST_F(UserTest, callAccessFile){
      *     -sym1 (has id=decided internally)
      */
     std::shared_ptr<class symlink> returned(new Symposium::symlink("sym1", "./1", "4"));
-    EXPECT_CALL(*Root, getFile("./1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
+    EXPECT_CALL(*Root, getFile("1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
     EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
     EXPECT_CALL(*dummyFile, getSharingPolicy()).WillOnce(::testing::ReturnRef(um));
-    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "./1", "4",0)).WillOnce(::testing::Return(returned));
+    EXPECT_CALL(*homeDir, addLink("/2", "sym1", "1", "4",0)).WillOnce(::testing::Return(returned));
 
     u->accessFile("./1/4", "/2", "sym1");
 }
@@ -165,7 +165,7 @@ TEST_F(UserTest, callEditPrivilege){
     u->editPrivilege(otherUser.getUsername(), ".", "dummyFile", privilege::owner);
 }
 
-TEST_F(UserTest, callChangePrivilege){
+/*TEST_F(UserTest, callChangePrivilege){
     testing::InSequence forceOrder; //force function call order in EXPECT_CALL
     //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
@@ -173,7 +173,7 @@ TEST_F(UserTest, callChangePrivilege){
     EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
     EXPECT_CALL(*dummyFile, setUserPrivilege(u->getUsername(), privilege::owner));
     u->changePrivilege(".", "dummyFile", privilege::owner);
-}
+}*/
 
 TEST_F(UserTest, callRemoveResource)
 {

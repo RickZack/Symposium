@@ -65,6 +65,11 @@ namespace Symposium {
         std::string nickname;              /**< name chosen by the user to be showed to other users */
         std::string iconPath;              /**< path to the user's icon in program installation folder */
         std::shared_ptr<directory> home;   /**< user's virtual filesystem */
+
+        static constexpr char noChar[] ="1234567890?!$+-/.,@ˆ_ ";
+        static constexpr char noNum[] ="abcdefghijklmnopqrstuvwxyz?!$+-/.,@ˆ_ ";
+        static constexpr char noSpecialChar[] ="abcdefghijklmnopqrstuvwxyz1234567890 ";
+
     public:
         user() = default;
 
@@ -164,18 +169,7 @@ namespace Symposium {
         virtual privilege editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
                                         privilege newPrivilege) const;
 
-        /**
-         * @brief edit the privilege of the current user for the resource @e resName in @e resPath
-         * @param resPath the path to the target resource
-         * @param resName the id of the target resource
-         * @param newPrivilege newPrivilege the new privilege to be granted
-         * @return @e newPrivilege
-         * @warning the current user must be a owner of the target resource
-         *
-         * This method calls @ref directory::getFile method on the @e home, retrieving the file, and calls
-         * @ref file::setUserPrivilege passing the current user as the one on which take action
-         */
-        privilege changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) const;
+
 
         /**
          * @brief set new sharing preferences for a resource
@@ -239,12 +233,6 @@ namespace Symposium {
          * @return true if the @pass don't have any special character and false if it does
          */
         static bool noSpecialCharPwd(const std::string &pass);
-
-        /**
-         * @param path the path which have to be divided into path and id
-         * @return the tuple path for resource and id of the resource
-         */
-        static std::tuple<std::string, std::string>  separate(const std::string &path);
 
     };
 }

@@ -40,24 +40,22 @@ user::user(const std::string &username, const std::string &pwd, const std::strin
            int siteId, std::shared_ptr<directory> home) : username(username), siteId(siteId),
                                                           nickname(nickname), iconPath(iconPath), home(home)
 {
-    //FIXME: dovrebbero essere tutti degli else if, evitiamo le costanti scritte nel codice, preferisci
-    // delle espressioni costanti definite nel .h, vedi ad esempio document.h linea 51
     if(pwd.length()<=5)
         throw userException(userException::shortPwd, UnpackFileLineFunction());
 
-    if(pwd.length()>=22)
+    else if(pwd.length()>=22)
         throw userException(userException::longPwd, UnpackFileLineFunction());
 
-    if(noCharPwd(pwd))
+    else if(noCharPwd(pwd))
         throw userException(userException::noCharPwd, UnpackFileLineFunction());
 
-    if(noNumPwd(pwd))
+    else if(noNumPwd(pwd))
         throw userException(userException::noNumPwd, UnpackFileLineFunction());
 
-    if(noSpecialCharPwd(pwd))
+    else if(noSpecialCharPwd(pwd))
         throw userException(userException::noSpecialCharPwd, UnpackFileLineFunction());
 
-    if(nickname=="")
+    else if(nickname.empty())
         throw userException(userException::nickname, UnpackFileLineFunction());
 
     //generating random salt for user
@@ -124,9 +122,7 @@ user::newDirectory(const std::string &dirName, const std::string &pathFromHome, 
     std::shared_ptr<directory> dir=home;
     if(!(pathFromHome.empty()) && pathFromHome!="./" && pathFromHome!=".")
     {
-        //FIXME: esiste una funzione con lo stesso nome in filesystem e sembra faccia la stessa cosa.
-        // Rendila pubblica e statica se non lo è ed usa quella
-        tie(pathToDir, idDir)= separate(pathFromHome);
+        tie(pathToDir, idDir)= filesystem::separate(pathFromHome);
         dir=home->getDir(pathToDir, idDir);
     }
     newDir=dir->addDirectory(dirName, idToAssign);
@@ -140,7 +136,7 @@ std::pair<int, std::shared_ptr<file>> user::accessFile(const std::string &resId,
 
     std::shared_ptr<directory> root1=this->home->getRoot();
 
-    tie(pathAdd, idAdd)= separate(resId); //separate the path and the id of file which the user want
+    tie(pathAdd, idAdd)= filesystem::separate(resId); //separate the path and the id of file which the user want
 
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
 
@@ -169,19 +165,20 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
                               privilege newPrivilege) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     privilege newP;
-    newP=newF->setUserPrivilege(otherUser, newPrivilege);
+    privilege oldP=newF->getUserPrivilege(otherUser);
+    if(this->username!=otherUser || (this->username==otherUser && oldP>newPrivilege))
+        newP=newF->setUserPrivilege(otherUser, newPrivilege);
+    else
+        throw userException(userException::noPermissionToChange, UnpackFileLineFunction());
     return newP;
 }
 
-//FIXME: queste due metodi sono uguali ma non dovrebbero esserlo. Sospetto che abbiamo inserito la distinzione
-// al livello sbagliato. Idea per risolvere: eliminiamo questa funzione, usiamo sempre editPrivilege e cambiamo
-// setUserPrivilege in modo che se actionUser==targetUser cambia sempre se newPrivige<oldPrivilege
-privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) const {
+/*privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     privilege newP;
     newP=newF->setUserPrivilege(username, newPrivilege);
     return newP;
-}
+}*/
 
 std::shared_ptr<filesystem> user::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
@@ -255,40 +252,20 @@ std::string user::saltGenerate()
 
 bool user::noCharPwd(const std::string &pass)
 {
-    std::size_t found = pass.find_first_not_of("1234567890?!$+-/.,@ˆ_ ");
+    std::size_t found = pass.find_first_not_of(noChar);
     return found == std::string::npos;
 }
 
 bool user::noNumPwd(const std::string &pass)
 {
-    std::size_t found = pass.find_first_not_of("abcdefghijklmnopqrstuvwxyz?!$+-/.,@ˆ_ ");
+    std::size_t found = pass.find_first_not_of(noNum);
     return found == std::string::npos;
 }
 
 bool user::noSpecialCharPwd(const std::string &pass)
 {
-    std::size_t found = pass.find_first_not_of("abcdefghijklmnopqrstuvwxyz1234567890 ");
+    std::size_t found = pass.find_first_not_of(noSpecialChar);
     return found == std::string::npos;
-}
-
-//FIXME: esiste una funzione analoga in filesystem, dalla documentazione sembra faccia la stessa cosa
-// Le duplicazioni di codice sono da evitare: se puoi usare quella rendila pubblica se non lo è e richiamala dove serve
-// Se sono leggermente diverse cerca di generalizzare e avere una sola funzione che si occupa della separazione.
-// Se ti accorgi che ci sono più moduli diversi del programma dove serve, valuta la possibilità di scrivere una classe
-// a parte con soli metodi statici che raccoglie le funzioni per manipolare le stringhe che contengono percorsi.
-// Poi fammi sapere cosa scegli perchè è opportuno testare ognuna di queste funzioni (in ogni caso, sia che scelga di
-// farla in una classe o meno)
-std::tuple<std::string, std::string>  user::separate(const std::string &path)
-{
-    std::string id;
-    std::string path2;
-    std::size_t found = path.find_last_of("/\\");
-    if(found==0)
-        path2="";
-    else
-        path2.append(path,0, found); //path to the directory of the current user
-    id.append(path.begin()+found+1,path.end()); //the id of directory where the current user want to insert the file
-    return  std::make_tuple(path2, id);
 }
 
 user user::makeCopyNoPwd() const {

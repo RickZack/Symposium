@@ -91,7 +91,7 @@ namespace Symposium{
         /**
          * @brief Specific error codes for @ref userException. They are used as indexes to the error table string
          */
-        enum userExceptionCodes{shortPwd=0, longPwd, noCharPwd, noNumPwd, noSpecialCharPwd, nickname, noPriv};
+        enum userExceptionCodes{shortPwd=0, longPwd, noCharPwd, noNumPwd, noSpecialCharPwd, nickname, noPriv, noPermissionToChange};
 
         explicit userException(userExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~userException()=default;
