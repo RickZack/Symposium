@@ -88,27 +88,35 @@ void uri::deactivate() {
 }
 
 privilege uri::getShare(privilege requested) {
-    //FIXME: valutate la possibilità di usare uno switch, diventa tutto più semplice e veloce
-    if(activePolicy==uriPolicy::activeTimer)
+    bool permission=false;
+    switch (activePolicy)
     {
-        std::chrono::system_clock::time_point ora = std::chrono::system_clock::now();
-        if(ora<stopTime)
+        case uriPolicy::activeTimer:
         {
-            //FIXME: questo if è ripetuto uguale per tre volte
-            // è possibile semplificare il metodo estraendo in una funzione
-            if(requested<=granted)
-                return requested;
-            return granted;
+            std::chrono::system_clock::time_point ora = std::chrono::system_clock::now();
+            if(ora<stopTime)
+                permission=true;
+            break;
         }
+        case uriPolicy::activeCount:
+        {
+            if(sharesLeft>0)
+            {
+                sharesLeft--;
+                permission=true;
+            }
+            break;
+        }
+        case uriPolicy::activeAlways:
+        {
+            permission=true;
+            break;
+        }
+        default:
+            return privilege::none;
+
     }
-    else if(activePolicy==uriPolicy::activeCount && sharesLeft>0)
-        {
-            sharesLeft--;
-            if(requested<=granted)
-                return requested;
-            return granted;
-        }
-    else if(activePolicy==uriPolicy::activeAlways)
+    if(permission)
     {
         if(requested<=granted)
             return requested;
