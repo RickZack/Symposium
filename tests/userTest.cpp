@@ -67,6 +67,7 @@ struct uriMock: public uri{
     virtual ~uriMock() override = default;
 };
 
+
 struct fileMock: public file{
     uriMock policyMocked;
 
@@ -75,6 +76,7 @@ struct fileMock: public file{
     MOCK_METHOD2(setSharingPolicy, uri(const std::string&, const uri& newSharingPrefs));
     MOCK_CONST_METHOD1(getUserPrivilege, privilege(const std::string&));
     MOCK_METHOD0(getSharingPolicy, uri&());
+    MOCK_METHOD2(validateAction, bool(const std::string&, privilege));
     void setMockPolicy(privilege privilege) {
         policyMocked.activateAlways(privilege);
     }
@@ -114,6 +116,7 @@ struct UserTest: ::testing::Test{
         ::testing::Mock::AllowLeak(Root);
         ::testing::Mock::AllowLeak(Dir);
         ::testing::Mock::AllowLeak(dummyFile);
+
     }
 };
 
@@ -161,6 +164,7 @@ TEST_F(UserTest, callEditPrivilege){
     //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
     EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
+    EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(privilege::owner));
     EXPECT_CALL(*dummyFile, setUserPrivilege(otherUser.getUsername(), privilege::owner));
     u->editPrivilege(otherUser.getUsername(), ".", "dummyFile", privilege::owner);
 }

@@ -165,8 +165,8 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
                               privilege newPrivilege) const {
     std::shared_ptr<file> newF=home->getFile(resPath, resName);
     privilege newP;
-    privilege oldP=newF->getUserPrivilege(otherUser);
-    if(this->username!=otherUser || (this->username==otherUser && oldP>newPrivilege))
+    if((this->username!=otherUser && newF->getUserPrivilege(this->username)==privilege::owner) ||
+        (this->username==otherUser && newF->validateAction(this->username, newPrivilege)))
         newP=newF->setUserPrivilege(otherUser, newPrivilege);
     else
         throw userException(userException::noPermissionToChange, UnpackFileLineFunction());

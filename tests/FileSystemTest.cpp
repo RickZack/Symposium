@@ -325,7 +325,7 @@ TEST_F(FileSystemTestSharing, setSharingPolicyOnFile) {
     //Just to verify that doesn't return a default constructed uri
     expected.activateCount(2);
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile());
-    EXPECT_CALL(*f.getStrategyMocked(), getPrivilege(username)).WillOnce(::testing::Return(privilege::owner));
+    EXPECT_CALL(*f.getStrategyMocked(), validateAction(username, privilege::owner)).WillOnce(::testing::Return(true));
     uri returned=f.setSharingPolicy(username, expected);
     EXPECT_EQ(expected, returned);
 }
@@ -339,7 +339,6 @@ TEST_F(FileSystemTestSharing, setSharingPolicyOnFileThrowsOnInsufficientPrivileg
     //Just to verify that doesn't return a default constructed uri
     expected.activateCount(2);
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::modify));
-    EXPECT_CALL(*f.getStrategyMocked(), getPrivilege(username));
     EXPECT_THROW(f.setSharingPolicy(username, expected), filesystemException);
 }
 

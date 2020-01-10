@@ -106,6 +106,12 @@ bool filesystem::pathIsValid2(const std::string &toCheck) {
     return !toCheck.empty() && std::regex_match(toCheck, pathPattern);
 }
 
+bool filesystem::moreOwner(const std::string &username)
+{
+    return strategy->moreOwner(username);
+}
+
+
 file::file(const std::string &name, const std::string &realPath, uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), realPath(realPath), doc(0){
     if(!(pathIsValid2(realPath)))
         throw filesystemException(filesystemException::pathNvalid, UnpackFileLineFunction());
@@ -122,13 +128,8 @@ privilege file::getUserPrivilege(const std::string &targetUser) const {
     return userPriv;
 }
 
-//FIXME: questa funzione viene chiamata anche quando un utente vuole cambiare il proprio privilegio,
-// ma in tal caso lancerebbe sempre eccezione.
-// Ad esempio: Riccardo ha privilegio privilege::modify e vuole avere privilege::readOnly
-// il metodo controlla che Riccardo abbia privilege::owner, trova che non è così e lancia
-// Anche il test è da rivedere.
+
 privilege file::setUserPrivilege(const std::string &targetUser, privilege newPrivilege) {
-    //FIXME: use stategy->validateAction() as guard to action
     privilege oldPrivilege=getUserPrivilege(targetUser);
     if(oldPrivilege==privilege::owner)
         throw filesystemException(filesystemException::changePriv, UnpackFileLineFunction());
@@ -137,9 +138,8 @@ privilege file::setUserPrivilege(const std::string &targetUser, privilege newPri
 }
 
 uri file::setSharingPolicy(const std::string &actionUser, const uri &newSharingPrefs) {
-    //FIXME: use stategy->validateAction() as guard to action
-    privilege userPriv=strategy->getPrivilege(actionUser);
-    if(userPriv==privilege::owner) {
+
+    if(strategy->validateAction(actionUser, privilege::owner)) {
         this->sharingPolicy=newSharingPrefs;
     }
     else
@@ -166,14 +166,6 @@ void file::send() const {
     //TODO: implement
 }
 
-//FIXME: è più corretto implementare questa operazione per oggetti di tipo
-// filesystem in generale. Non cambierebbe nulla, ma si potrebbe chiamare anche sulle directory.
-// Anche TrivialAccess avrà il metodo moreOwner implementato, quindi è ok. Questa scelta sarebbe in
-// linea con quella di avere setUserPrivilege, setSharingPolicy, ... implementati anche per filesystem
-bool file::moreOwner(const std::string &username)
-{
-   return strategy->moreOwner(username);
-}
 
 bool file::deleteFromStrategy(const std::string &userName)
 {
@@ -201,6 +193,10 @@ std::string file::print(const std::string &targetUser, bool recursive, unsigned 
 
 const document &file::getDoc() const {
     return doc;
+}
+
+bool file::validateAction(const std::string &userName, privilege priv) {
+    return strategy->validateAction(userName, priv);
 }
 
 directory::directory(const std::string &name, const int &idToAssign) : filesystem(name, idToAssign) {
@@ -237,7 +233,7 @@ std::tuple<std::string, std::string> directory::separateFirst(std::string path)
     std::string id;
     if(path.at(0) == '.' || path.at(0) == '/')
     {
-        path.erase(path.begin()+0); // TODO: +0 superfluo
+        path.erase(path.begin());
         return separateFirst(path);
     }
     std::size_t found = path.find_first_of("/\\"); //find first character "/" in order to separate the first directory of the path
@@ -447,50 +443,28 @@ std::string directory::print(const std::string &targetUser, bool recursive, unsi
     std::string result;
     if(indent==0)
         result.append(targetUser);
-    if(!recursive) //if recursive is false, need only the elements of the directory, not a subdirectory elements
-    {
-        //FIXME: a cosa serve printElement? print è una funzione di cui si fa l'override nelle sottoclassi
-        // quindi automaticamente viene chiamata quella del tipo dell'elemento, senza ulteriori if o cast
-        for(const auto & it : contained)
-            result+=" "+printElement(it, targetUser, 0);
-
-    }
-    else { //otherwise need to invoke recursively the method prints for all subdirectory
+    //otherwise need to invoke recursively the method prints for all subdirectory
         for(const auto & it : contained)
         {
             resourceType type=it->resType();
             if(type==resourceType::directory)
             {
-                result+=" "+printElement(it, targetUser, indent);
-                indent=indent+1;//need to add the indent if it is a subdirectory
+                result.insert(result.end(), indent, ' ');
                 std::shared_ptr<directory> dir=std::dynamic_pointer_cast<directory>(it);
-                //FIXME: qui giustamente passi indent+1 (rispetto al valore di indent nella prima nota)
-                // Se passi indent+1 direttamente qui ti eviti le due istruzioni in cui incrementi e decrementi
-                result+=dir->print(targetUser, true, indent);
-                indent=indent-1;//when finished the recursion need to restore the original indent
+                std::ostringstream typeres;
+                typeres<<dir->resType();
+                result.insert(result.end(), indent, ' ');
+                result=result+" "+typeres.str()+" "+dir->name+"\r\n";
+                if(recursive)
+                    result+=dir->print(targetUser, recursive, indent+1);
             }
             else
-                result+=" "+printElement(it, targetUser, indent);
+                result+=" "+it->print(targetUser, recursive, indent)+"\r\n";
         }
-    }
+
     return result;
 }
 
-//FIXME: a cosa server? perchè abbiamo print e printElement? Vedi nota in directory::print
-std::string directory::printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, unsigned int indent)
-{
-    resourceType type=it->resType();
-    std::string result;
-    result.insert(0, indent, ' ');
-    if(type==resourceType::file)
-        return result+std::dynamic_pointer_cast<file>(it)->print(targetUser)+"\r\n";
-    if(type==resourceType::symlink)
-        return result+std::dynamic_pointer_cast<symlink>(it)->print(targetUser)+"\r\n";
-    std::shared_ptr<directory> dir=std::dynamic_pointer_cast<directory>(it);
-    std::ostringstream typeres;
-    typeres<<dir->resType();
-    return result+typeres.str()+" "+dir->name+"\r\n";
-}
 
 Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
                             uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), pathToFile(pathToFile), fileName(fileName) {
@@ -526,8 +500,6 @@ std::string Symposium::symlink::getPath() {
     return pathToFile+"/"+fileName;
 }
 
-//TODO: indent dovrebbe essere sempre positivo, quindi porlo come unsigned int. Come garantisco che sia
-// sempre positivo?
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
     std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
     std::ostringstream priv;

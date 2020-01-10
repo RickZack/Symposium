@@ -164,6 +164,14 @@ namespace Symposium {
          */
         static bool pathIsValid2(const std::string &toCheck);
 
+        /**
+         * @brief check if the object has other owners besides the name of the username pass as parameter
+         * @param username
+         * @return true if there is only one user and this user is @e username, false instead
+         */
+
+        bool moreOwner(const std::string &username);
+
         virtual ~filesystem()= default;
     };
 
@@ -241,15 +249,7 @@ namespace Symposium {
          */
         std::string print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const override;
 
-        //FIXME: se sono usate solo dentro filesystem (e se non è così c'è quache errore), allora è meglio
-        // averle protette
-        /**
-         * @brief check if the file has other owners besides the name of the username pass as parameter
-         * @param username
-         * @return true if there is only one user and this user is @e username, false instead
-         */
 
-        bool moreOwner(const std::string &username);
 
         /**
          * @brief invoke @ref AccessStrategy::deleteUser
@@ -258,6 +258,8 @@ namespace Symposium {
          */
 
         bool deleteFromStrategy(const std::string &userName);
+
+        virtual bool validateAction(const std::string &userName, privilege priv);
 
         virtual ~file() override=default;
 
@@ -401,17 +403,6 @@ namespace Symposium {
              * @return path that has remained and the id of the directory
              */
         static std::tuple<std::string, std::string> separateFirst(std::string path);
-
-    private:
-
-        /**
-         * @brief print the single element, this method is used in the @ref directory::print
-         * @param it the resource
-         * @param targetUser the owner of the resource
-         * @param indent indent if present
-         * @return the string which represent the name of the resource
-         */
-        static std::string printElement(const std::shared_ptr<filesystem> &it, const std::string &targetUser, unsigned int indent);
     };
 
 

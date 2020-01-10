@@ -33,6 +33,8 @@
 using namespace Symposium;
 
 bool RMOAccess::validateAction(const std::string &targetUser, privilege requested) const {
+    if(permission.empty() && requested==privilege::owner)
+        return true;
     if(requested==privilege::none)
         return false;
     std::unordered_map<std::string,privilege >::const_iterator got = permission.find(targetUser);
