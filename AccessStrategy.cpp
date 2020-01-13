@@ -96,19 +96,7 @@ bool RMOAccess::moreOwner(std::string username) const
     return ((i > 1)&&own);
 }
 
-bool RMOAccess::deleteUser(const std::string &targetUser)
-{
-    //FIXME: vedere prima commento a directory::remove()
-    // Non serve tornare il bool e std::unordered_map::erase() non
-    // ha bisogno di un controllo sulla chiave.
-    // A questo punto toglierei questa funzione e userei
-    // setPrivilege(username, privilege::none) per ottenere lo stesso effetto
-    auto it=permission.find(targetUser);
-    if(it==permission.end())
-        return false;
-    permission.erase(targetUser);
-    return true;
-}
+
 
 bool RMOAccess::operator==(const RMOAccess &rhs) const {
     return permission == rhs.permission;
@@ -134,8 +122,5 @@ bool TrivialAccess::moreOwner(std::string username) const{
     return false;
 }
 
-bool TrivialAccess::deleteUser(const std::string &targetUser)
-{
-    return true;
-}
+
 BOOST_CLASS_EXPORT(Symposium::RMOAccess)

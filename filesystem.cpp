@@ -167,13 +167,9 @@ void file::send() const {
 }
 
 
-bool file::deleteFromStrategy(const std::string &userName)
+void file::deleteFromStrategy(const std::string &userName)
 {
-    //FIXME: leggere prima commento a directory::remove
-    // Se non serve più il bool si può rendere questa funzione void
-    // e chiamare setUserPrivilege(username, privilege::none) per ottenere
-    // lo stesso risultato
-   return strategy->deleteUser(userName);
+   strategy->setPrivilege(userName, privilege::none);
 }
 
 std::string file::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
@@ -384,8 +380,8 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
         contained.erase(it);//cancel from the container the object
         return obj;
     }
-    //FIXME: ci vuole un else if: se è un file non è un symlink
-    if(obj->resType()==resourceType::symlink)//if the object is symlink
+
+    else if(obj->resType()==resourceType::symlink)//if the object is symlink
     {
         std::shared_ptr<symlink> s=std::dynamic_pointer_cast<symlink>(obj);
 
@@ -393,19 +389,7 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
         std::string idFile;
         tie(pathFile, idFile)= separate(s->getPath());//need to have a pointer for the file and not a symlink in order to operate on file strategy
         std::shared_ptr<file> f=getRoot()->getFile(pathFile, idFile);
-        //FIXME: mi viene in mente almeno un caso in cui lanciare è sbagliato e crea problemi.
-        // Supponiamo che Riccardo abbia condiviso un file con un privilegio priv!=owner, e che Martina abbia
-        // usato l'uri (es. /Riccardo/dir/somefile) per crearsi un symlink. Adesso supponiamo che Riccardo
-        // (che è owner) voglia togliere il privilegio a Martina. Adesso Martina ha ancora il symlink, ma al
-        // prossimo accesso incontrerà problemi perchè non ha più privilegi (e questo è giusto che lanci eccezione).
-        // Quello che non va bene è che Martina (ammesso che non abbia ancora cercato di aprire il file puntato
-        // dal symlink) non può eliminare il symlink, perchè si andrà sempre nel ramo del throw.
-        // Possiamo prevedere che l'utente sia avvisato di questo problema quando cerca di aprire un file per cui
-        // non ha più privilegi, e che gli venga chiesto se vuole eliminare il symlink. Quindi questa operazione non
-        // dovrebbe lanciare.
-        // A questo punto deleteUser (chiamata da deleteFromStrategy) può avere ritorno void ed essere semplificata
-        if(!(f->deleteFromStrategy(targetUser.getUsername())))//delete from strategy target user
-            throw filesystemException(filesystemException::someError, UnpackFileLineFunction());
+        f->deleteFromStrategy(targetUser.getUsername());
         auto it=std::find_if(contained.begin(), contained.end(),
                              [idRem, s](std::shared_ptr<filesystem> i){return i->getId()==s->getId();});
 

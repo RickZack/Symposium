@@ -257,7 +257,7 @@ namespace Symposium {
          * @return true if the operation was successful, false instead
          */
 
-        bool deleteFromStrategy(const std::string &userName);
+        void deleteFromStrategy(const std::string &userName);
 
         virtual bool validateAction(const std::string &userName, privilege priv);
 
