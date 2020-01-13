@@ -59,7 +59,7 @@ struct SymClientAccesser: public SymClient{
 
     SymClientAccesser(){}
 
-    user& getLoggedUser() override {
+    user& getLoggedUser() const override {
         if(userMock== nullptr)
             throw std::exception();
         return *userMock;
@@ -545,13 +545,13 @@ TEST_F(SymClientTest, addActiveUserCallsAccessOnDoc){
     setStageForOpenedDoc();
     SymClientUserMock anotherUser(anotherUsername, pwd, "noempty", "", 0, nullptr);
     EXPECT_CALL(docSentByServer, access(anotherUser, privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.addActiveUser(docSentByServer.getId(), anotherUser);
+    client.addActiveUser(docSentByServer.getId(), anotherUser, privilege::readOnly);
 }
 
 TEST_F(SymClientTest, removeActiveUserCallsCloseOnDoc){
     setStageForOpenedDoc();
     EXPECT_CALL(docSentByServer, close(userReceived));
-    client.addActiveUser(docSentByServer.getId(), userReceived);
+    client.addActiveUser(docSentByServer.getId(), userReceived, aPrivilege);
 }
 
 TEST_F(SymClientTest, editUserConstructsGoodMessageAndInsertInUnanswered){

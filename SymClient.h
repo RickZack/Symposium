@@ -82,7 +82,7 @@ namespace Symposium {
          * Use this function to access to loggedUser, because it allows the tests to work with a mock class
          * of user and verify expectations about calls on loggedUser
          */
-        virtual user& getLoggedUser();
+        const virtual user& getLoggedUser() const;
 
     public:
         //Some methods are virtual in order to use the mocks in tests
@@ -305,7 +305,7 @@ namespace Symposium {
          * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
          * of this method and the one that returns a uriMessage.
          */
-        virtual uri shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv);
+        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv);
 
         /**
          * @brief constructs a @ref uriMessage to send to the server to ask to change the name of a resource
@@ -458,8 +458,9 @@ namespace Symposium {
          * @brief add @e targetUser to the list of active users of the document
          * @param resourceId the id of the document the update refers to
          * @param targetUser the user to add
+         * @param Priv the privilege of the user to add
          */
-        virtual void addActiveUser(int resourceId, user &targetUser);
+        virtual void addActiveUser(int resourceId, user &targetUser, privilege Priv);
 
         /**
          * @brief remove @e targetUser to the list of active users of the document

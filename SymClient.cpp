@@ -35,8 +35,7 @@
 
 using namespace Symposium;
 
-SymClient::SymClient() :loggedUser("username", "P@assW0rd!!", "noempty", "", 0, nullptr){
-    //TODO: implement
+SymClient::SymClient(): loggedUser("username", "P@assW0rd!!", "noempty", "", 0, nullptr), activeFile(), activeDoc(), userColors(), unanswered(){
 }
 
 void SymClient::setLoggedUser(const user &loggedUser) {
@@ -69,12 +68,10 @@ askResMessage SymClient::openSource(const std::string &path, const std::string &
     unanswered.push_front(mess);
     return *mess;
 }
-//FIXME: TEST FALLISCE
-// Il motivo è simile a quello dell'openNewSource: se guardi bene il test, lui suppone che tu sostituisca il documento
-// dentro il file conservato dal client con quello che c'è dentro il server.
-// Come per l'altro test, ne dobbiamo discutere. Potremmo sostituire il file stesso e quindi anche il documento
+
 void SymClient::openSource(const std::shared_ptr<file> fileAsked, privilege reqPriv) {
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
+    this->getLoggedUser().getHome()->getFile(fileAsked->getRealPath(),fileAsked->getName())->replacement(fileAsked);
     activeFile.push_front(fileAsked);
     activeDoc.push_front(&doc);
 }
@@ -85,23 +82,13 @@ SymClient::openNewSource(const std::string &resourceId, privilege reqPriv, const
     unanswered.push_front(mess);
     return *mess;
 }
-//FIXME: TEST FALLISCE
+
 void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
                               const std::string &destName,
                               int idToAssign, const std::shared_ptr<file> fileAsked) {
     this->getLoggedUser().getHome()->addLink(destPath, destName, resId, (*fileAsked).getName(), idToAssign);
-
-    //FIXME: non stai accedendo al documento giusto! Il documento che ha il contenuto corretto è nel file che hai
-    // ricevuto. Poi stai creando una copia di un documento, devi lavorare sul documento stesso. Ne puoi prendere l'indirizzo
-    // perchè esso è memorizzato nel file, che viene eliminato solo quando ti liberi dello shared_ptr
-    // Dobbiamo usare il metodo access() di file, non getDoc().
-    // L'unica cosa poco chiara è se è opportuno sostituire il file che abbiamo nel filesystem
-    // con quello che abbiamo ricevuto o semplicemente per i file aperti facciamo riferimento a quelli in coda.
-    // Io credo che sia da fare così per essere sicuri di essere consistenti con il server
-    // Parliamone con Ksenia
-
-    document &doc = (fileAsked->access(this->getLoggedUser(), reqPriv));
-    activeFile.push_front(this->getLoggedUser().getHome()->getFile(destPath, destName));
+    activeFile.push_front(fileAsked);
+    document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
     activeDoc.push_front(&doc);
 }
 
@@ -128,7 +115,7 @@ void SymClient::createNewDir(const std::string &path, const std::string &name, i
     this->getLoggedUser().newDirectory(name,path,idToAssign);
 }
 
-//FIXME: TEST FALLISCE
+
 symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index) {
     document* d = this->getActiveDocumentbyID(resourceId);
     d->localInsert(index, const_cast<symbol &>(newSym));
@@ -167,11 +154,10 @@ uriMessage SymClient::shareResource(const std::string &resPath, const std::strin
     unanswered.push_front(mess);
     return *mess;
 }
-//FIXME: Metodo non funzionante
-uri SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv) {    //TODO: modified this method, return the file
+
+std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv) {    //TODO: modified this method, return the file: FATTO
     std::shared_ptr<filesystem> fil = this->getLoggedUser().shareResource(resPath, resName, newPrefs);
-   // return fil->getSharingPolicy();
-    return newPrefs;
+    return fil;
 }
 
 askResMessage
@@ -198,10 +184,9 @@ std::shared_ptr<filesystem>
 SymClient::removeResource(const std::string &resPath, const std::string &resName, bool msgRcv) {
     return this->getLoggedUser().removeResource(resPath,resName);
 }
-//RIVEDERE: Cosa deve fare questo metodo?
-//la funzione stampa l'albero filesyste dell'utente
+
 std::string SymClient::showDir(bool recursive) const {
-    return "";
+    return getLoggedUser().showDir(recursive);
 }
 
 updateDocMessage SymClient::closeSource(int resourceId) {
@@ -244,18 +229,16 @@ updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
 void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
     //TODO:implement
 }
-//RIVEDERE: per aggiungere il nuovo utente alla lista di utenti attivi sul documento uso la funzione access di document?
-//Se si, non dovrei avere il livello di privilegio dell'utente da aggiungere? SI, il parametro è da aggiungere
-void SymClient::addActiveUser(int resourceId, user &targetUser) {
-    document* d = getActiveDocumentbyID(resourceId);
+
+void SymClient::addActiveUser(int resourceId, user &targetUser, privilege Priv) {
+    getActiveDocumentbyID(resourceId)->access(targetUser, Priv);
 }
 
 void SymClient::removeActiveUser(int resourceId, user &targetUser) {
-    document* d = getActiveDocumentbyID(resourceId);
-    d->close(targetUser);
+    getActiveDocumentbyID(resourceId)->close(targetUser);
 }
 
-user &SymClient::getLoggedUser() {
+const user& SymClient::getLoggedUser() const{
     return loggedUser;
 }
 

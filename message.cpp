@@ -544,7 +544,7 @@ void updateActiveMessage::invokeMethod(SymClient &client) {
     switch(action)
     {
         case msgType::addActiveUser:{
-            client.addActiveUser(resourceId,newUser);
+            client.addActiveUser(resourceId,newUser,userPrivilege);
             break;
         }
         case msgType::removeActiveUser:{

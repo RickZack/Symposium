@@ -507,7 +507,7 @@ public:
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, privilege, bool));
     MOCK_METHOD2(remoteInsert, void(int, const symbol&));
     MOCK_METHOD2(remoteRemove, void(int, const symbol&));
-    MOCK_METHOD4(shareResource, uri(const std::string&, const std::string&, const uri&, bool msgRcv));
+    MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const uri&, bool msgRcv));
     MOCK_METHOD2(editUser, const user(user&, bool));
     MOCK_METHOD2(verifySymbol, void(int, const symbol&));
     MOCK_METHOD1(retrieveRelatedMessage, std::shared_ptr<clientMessage>(const serverMessage&));
