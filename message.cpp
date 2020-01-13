@@ -197,17 +197,19 @@ const std::string &askResMessage::getResourceId() const {
 void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(serverResult==msgOutcome::failure)
         throw messageException(messageException::notSucc, UnpackFileLineFunction());
-    //FIXME: altrove avete usato lo switch, che è la scelta migliore, quindi per uniformità usatelo anche qui
-    if(action==msgType::changeResName)
+    switch(action)
     {
-        client.renameResource(path, name, resourceId, true);
+        case msgType::changeResName:{
+            client.renameResource(path, name, resourceId, true);
+            break;
+        }
+        case msgType::removeRes:{
+            client.removeResource(path, name, true);
+            break;
+        }
+        default:
+            throw messageException(messageException::askResMes, UnpackFileLineFunction());
     }
-    else if(action==msgType::removeRes)
-    {
-        client.removeResource(path, name, true);
-    }
-    else
-        throw messageException(messageException::askResMes, UnpackFileLineFunction());
 }
 
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
@@ -285,12 +287,7 @@ sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_pt
     && action!=msgType::openRes)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
-    //FIXME: non passiamo mai un symlink, la condizione è sempre falsa. Inoltre il parametro symId è già corretto
-    // nei casi in cui poi servirà quando verrà chiamato invokeMethod. Nei casi in cui non serve va bene inizializzarlo
-    // con un dato qualsiasi, l'argomento di default.
-    if(resource->resType()==resourceType::symlink)
-        this->symId=resource->getId();
-    else
+    if(symId!=0)
         this->symId=symId;
 }
 
@@ -300,35 +297,23 @@ std::shared_ptr<filesystem> sendResMessage::getResource() const {
 
 void sendResMessage::invokeMethod(SymClient &client) {
     auto mex=client.retrieveRelatedMessage(*this);
-    //FIXME: tutte le azioni comuni a tutti i rami dello switch è meglio metterle prima, cosi non le ripeti.
-    // Poi mex->getAction()==action, non hai bisogno di prenderla dal mex.
+    std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
     switch(mex->getAction())
     {
         case msgType::createRes:{
-            std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
             client.createNewSource(mex2->getPath(), mex2->getName(), resource->getId());
             break;
         }
         case msgType::openRes:{
-            std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
             resourceType type=resource->resType();
             if(type==resourceType::file)
             {
                 std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
                 client.openSource(f, resource->getUserPrivilege(mex2->getActionOwner().first));
             }
-            //FIXME: questo if non dovrebbe essere necessario. Non mandiamo mai dei symlink,
-            // soprattutto con openRes, vedi il diagramma di OpenSource e il codice lato server
-            if(type==resourceType::symlink)
-            {
-                std::shared_ptr <symlink> s= std::dynamic_pointer_cast<symlink>(resource);
-                std::shared_ptr<file> f=directory::getRoot()->getFile(s->getPath(), s->getFileName());
-                client.openSource(f, resource->getUserPrivilege(mex2->getActionOwner().first));
-            }
             break;
         }
         case msgType::openNewRes:{
-            std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
             resourceType type=resource->resType();
             if(type==resourceType::file)
             {
@@ -336,18 +321,9 @@ void sendResMessage::invokeMethod(SymClient &client) {
                 client.openNewSource(mex2->getResourceId(), resource->getUserPrivilege(mex2->getActionOwner().first),
                         mex2->getPath(), mex2->getName(), resource->getId(), f);
             }
-            //FIXME: anche qui non mandiamo mai symlink, vedi il diagramma di OpenNewSource.
-            if(type==resourceType::symlink)
-            {
-                std::shared_ptr <symlink> s= std::dynamic_pointer_cast<symlink>(resource);
-                std::shared_ptr<file> f=directory::getRoot()->getFile(s->getPath(), s->getFileName());
-                client.openNewSource(mex2->getResourceId(), resource->getUserPrivilege(mex2->getActionOwner().first),
-                                     mex2->getPath(), mex2->getName(), resource->getId(), f);
-            }
            break;
         }
         case msgType::createNewDir:{
-            std::shared_ptr <askResMessage> mex2=std::dynamic_pointer_cast<askResMessage>(mex);
             client.createNewDir(mex2->getPath(), mex2->getName(), resource->getId());
             break;
         }
@@ -498,8 +474,7 @@ void symbolMessage::completeAction(SymClient &client, msgOutcome serverResult) {
         if(action==msgType::insertSymbol)
         client.verifySymbol(resourceId,sym);
     }
-    //FIXME: else al posto di if, serverResult può assumere solo due valori
-    if(serverResult==msgOutcome::failure){
+   else{
         if(action==msgType::insertSymbol)
             client.remoteRemove(resourceId,sym);
         else if(action==msgType::removeSymbol)
@@ -596,15 +571,20 @@ int updateDocMessage::getResourceId() const {
 }
 
 void updateDocMessage::invokeMethod(SymServer &server) {
-    //FIXME: altrove avete usato lo switch, che è la scelta migliore, quindi per uniformità usatelo anche qui
-    if(action==msgType::closeRes){
-        server.closeSource(getActionOwner().first,resourceId);
+
+    switch(action)
+    {
+        case msgType::closeRes:{
+            server.closeSource(getActionOwner().first,resourceId);
+            break;
+        }
+        case msgType::mapChangesToUser:{
+            server.mapSiteIdToUser(getActionOwner().first,resourceId);
+            break;
+        }
+        default:
+            throw messageException(messageException::upDoc, UnpackFileLineFunction());
     }
-    else if(action==msgType::mapChangesToUser){
-        server.mapSiteIdToUser(getActionOwner().first,resourceId);
-    }
-    else
-        throw messageException(messageException::upDoc, UnpackFileLineFunction());
 }
 
 userDataMessage::userDataMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
