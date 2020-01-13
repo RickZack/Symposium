@@ -259,6 +259,8 @@ namespace Symposium {
 
         void deleteFromStrategy(const std::string &userName);
 
+        void replacement(const std::shared_ptr<file> replace);
+
         virtual bool validateAction(const std::string &userName, privilege priv);
 
         virtual ~file() override=default;

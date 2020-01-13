@@ -195,6 +195,13 @@ bool file::validateAction(const std::string &userName, privilege priv) {
     return strategy->validateAction(userName, priv);
 }
 
+
+void file::replacement(const std::shared_ptr<file> replace){
+    this->doc=replace->doc;
+    this->sharingPolicy=replace->sharingPolicy;
+    this->strategy=std::move(replace->strategy);
+}
+
 directory::directory(const std::string &name, const int &idToAssign) : filesystem(name, idToAssign) {
 
     strategy=std::make_unique<TrivialAccess>();
@@ -408,9 +415,6 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
     return obj;
 }
 
-void directory::replacement(const std::shared_ptr<file> replace){
-    //TODO: implement
-}
 
 void directory::store(const std::string &storePath) const {
     //TODO: implement
