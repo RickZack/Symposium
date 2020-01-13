@@ -202,6 +202,10 @@ void file::replacement(const std::shared_ptr<file> replace){
     this->strategy=std::move(replace->strategy);
 }
 
+const std::string &file::getRealPath() const {
+    return realPath;
+}
+
 directory::directory(const std::string &name, const int &idToAssign) : filesystem(name, idToAssign) {
 
     strategy=std::make_unique<TrivialAccess>();

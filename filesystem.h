@@ -184,6 +184,7 @@ namespace Symposium {
     public:
         file(const std::string &name, const std::string &realPath, uint_positive_cnt::type idToAssign=0);
 
+        const std::string &getRealPath() const;
 
         const document &getDoc() const;
 
