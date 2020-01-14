@@ -41,7 +41,9 @@ SOURCES += \
         ../../SymClient.cpp \
         ../../SymServer.cpp \
         ../../user.cpp \
-        ../../lib/hash/sha256.cpp
+        ../../lib/hash/sha256.cpp \
+        sigin.cpp \
+        signup.cpp
 
 HEADERS += \
         about.h \
@@ -62,12 +64,16 @@ HEADERS += \
         ../../SymClient.h \
         ../../SymServer.h \
         ../../user.h \
-        ../../lib/hash/sha256.h
+        ../../lib/hash/sha256.h \
+        sigin.h \
+        signup.h
 
 FORMS += \
         about.ui \
         exit.ui \
-        mainwindow.ui
+        mainwindow.ui \
+        sigin.ui \
+        signup.ui
 
 
 DEFINES = BOOST_ALL_NO_LIB

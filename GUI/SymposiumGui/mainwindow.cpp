@@ -26,3 +26,17 @@ void MainWindow::on_exit_clicked()
     exitWindow =new class exit(this);
     exitWindow->show();
 }
+
+void MainWindow::on_SignIn_clicked()
+{
+    hide();
+    signinWindow= new sigin(this);
+    signinWindow->show();
+}
+
+void MainWindow::on_SignUp_clicked()
+{
+    hide();
+    signupWindow= new signup(this);
+    signupWindow->show();
+}

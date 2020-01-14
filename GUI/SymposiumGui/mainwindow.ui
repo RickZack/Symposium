@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="SignIn">
     <property name="geometry">
      <rect>
       <x>190</x>
@@ -24,10 +24,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>SigIn</string>
+     <string>SignIn</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="SignUp">
     <property name="geometry">
      <rect>
       <x>190</x>

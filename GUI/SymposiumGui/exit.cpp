@@ -6,7 +6,7 @@ exit::exit(QWidget *parent) :
     ui(new Ui::exit)
 {
     ui->setupUi(this);
-    //connect(ui->buttonBox, SIGNAL(accept()), parent, SLOT(qApp->quit()));
+    connect(ui->buttonBox, SIGNAL(accepted()), qApp, SLOT(quit()));
 }
 
 exit::~exit()
@@ -15,9 +15,3 @@ exit::~exit()
 }
 
 
-
-void exit::on_buttonBox_accepted()
-{
-    qApp->quit();
-    return;
-}
