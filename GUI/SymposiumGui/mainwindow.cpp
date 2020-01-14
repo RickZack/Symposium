@@ -12,3 +12,17 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+
+
+void MainWindow::on_about_clicked()
+{
+    aboutWindow =new about(this);
+    aboutWindow->show();
+}
+
+void MainWindow::on_exit_clicked()
+{
+    exitWindow =new class exit(this);
+    exitWindow->show();
+}

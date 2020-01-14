@@ -25,6 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++17
 
 SOURCES += \
+        about.cpp \
+        exit.cpp \
         main.cpp \
         mainwindow.cpp\
         ../../uri.cpp\
@@ -42,6 +44,8 @@ SOURCES += \
         ../../lib/hash/sha256.cpp
 
 HEADERS += \
+        about.h \
+        exit.h \
         mainwindow.h\
         ../../uri.h \
         ../../privilege.h\
@@ -61,6 +65,8 @@ HEADERS += \
         ../../lib/hash/sha256.h
 
 FORMS += \
+        about.ui \
+        exit.ui \
         mainwindow.ui
 
 
