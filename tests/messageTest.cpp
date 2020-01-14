@@ -501,7 +501,7 @@ public:
     MOCK_METHOD6(openNewSource, void(const std::string &resId, privilege reqPriv, const std::string &destPath, const std::string &destName, int idToAssign, const std::shared_ptr<file> fileAsked));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, bool));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, bool));
-    MOCK_METHOD2(addActiveUser, void(int, user&));
+    MOCK_METHOD3(addActiveUser, void(int, user&, privilege));
     MOCK_METHOD2(removeActiveUser, void(int, user&));
 
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, privilege, bool));
@@ -637,7 +637,7 @@ TEST_F(serverMessageTest, updateActiveMsgTestCallsAddActiveUsers){
     //m is a serverMessage, we need a cast to extract the resource id
     //this will not be necessary in code because SymClient::addActiveUser() is called from within the invokeMethod()
     updateActiveMessage* uam=static_cast<updateActiveMessage*>(m);
-    EXPECT_CALL(client, addActiveUser(uam->getResourceId(), sentByServer));
+    EXPECT_CALL(client, addActiveUser(uam->getResourceId(), sentByServer, uam->getUserPrivilege()));
     m->invokeMethod(client);
 }
 
