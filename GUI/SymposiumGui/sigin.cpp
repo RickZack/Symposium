@@ -7,7 +7,7 @@ sigin::sigin(QWidget *parent) :
     ui(new Ui::sigin)
 {
     ui->setupUi(this);
-    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
+    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(show()));
 
 }
@@ -15,4 +15,11 @@ sigin::sigin(QWidget *parent) :
 sigin::~sigin()
 {
     delete ui;
+}
+
+void sigin::on_signin_clicked()
+{
+    close();
+    homeWindow= new home(parentWidget());
+    homeWindow->show();
 }

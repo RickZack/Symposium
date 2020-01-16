@@ -26,7 +26,12 @@ CONFIG += c++17
 
 SOURCES += \
         about.cpp \
+        changeuserinfo.cpp \
+        deleteaccount.cpp \
         exit.cpp \
+        home.cpp \
+        icon.cpp \
+        inserturi.cpp \
         main.cpp \
         mainwindow.cpp\
         ../../uri.cpp\
@@ -47,7 +52,12 @@ SOURCES += \
 
 HEADERS += \
         about.h \
+        changeuserinfo.h \
+        deleteaccount.h \
         exit.h \
+        home.h \
+        icon.h \
+        inserturi.h \
         mainwindow.h\
         ../../uri.h \
         ../../privilege.h\
@@ -70,7 +80,12 @@ HEADERS += \
 
 FORMS += \
         about.ui \
+        changeuserinfo.ui \
+        deleteaccount.ui \
         exit.ui \
+        home.ui \
+        icon.ui \
+        inserturi.ui \
         mainwindow.ui \
         sigin.ui \
         signup.ui
@@ -93,3 +108,6 @@ win32 {
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc

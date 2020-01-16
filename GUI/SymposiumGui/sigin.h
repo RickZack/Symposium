@@ -2,6 +2,7 @@
 #define SIGIN_H
 
 #include <QDialog>
+#include "home.h"
 
 
 namespace Ui {
@@ -17,8 +18,12 @@ public:
     ~sigin();
 
 
+private slots:
+    void on_signin_clicked();
+
 private:
     Ui::sigin *ui;
+    home *homeWindow;
 };
 
 #endif // SIGIN_H

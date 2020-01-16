@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>avatar/beaver.png</file>
+        <file>avatar/boar.png</file>
+        <file>avatar/bull.png</file>
+        <file>avatar/deer.png</file>
+        <file>avatar/duck.png</file>
+        <file>avatar/hedgehog.png</file>
+        <file>avatar/hippo.png</file>
+        <file>avatar/ostrich.png</file>
+        <file>avatar/owl.png</file>
+        <file>avatar/zoo.png</file>
+    </qresource>
+</RCC>
