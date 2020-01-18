@@ -27,13 +27,18 @@
      <widget class="QLineEdit" name="lineEdit"/>
     </item>
     <item>
-     <widget class="QLabel" name="directory">
+     <widget class="QPushButton" name="dir">
       <property name="styleSheet">
-       <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;
-text-decoration: underline;</string>
+       <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;
+text-decoration: underline;
+text-align: left;
+</string>
       </property>
       <property name="text">
        <string>choose the directory...</string>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -78,7 +83,7 @@ text-decoration: underline;</string>
     <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;</string>
    </property>
    <property name="text">
-    <string>ADD FILE WITH URI</string>
+    <string>ADD FILE WITH LINK</string>
    </property>
   </widget>
  </widget>

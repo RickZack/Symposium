@@ -27,6 +27,7 @@ CONFIG += c++17
 SOURCES += \
         about.cpp \
         changeuserinfo.cpp \
+        choosedir.cpp \
         deleteaccount.cpp \
         exit.cpp \
         home.cpp \
@@ -53,6 +54,7 @@ SOURCES += \
 HEADERS += \
         about.h \
         changeuserinfo.h \
+        choosedir.h \
         deleteaccount.h \
         exit.h \
         home.h \
@@ -81,6 +83,7 @@ HEADERS += \
 FORMS += \
         about.ui \
         changeuserinfo.ui \
+        choosedir.ui \
         deleteaccount.ui \
         exit.ui \
         home.ui \
