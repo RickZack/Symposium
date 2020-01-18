@@ -2,9 +2,7 @@
 #define CHOOSEDIR_H
 
 #include <QDialog>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <vector>
+#include <QListWidgetItem>
 
 namespace Ui {
 class choosedir;
@@ -17,16 +15,14 @@ class choosedir : public QDialog
 public:
     explicit choosedir(QWidget *parent = nullptr);
     ~choosedir();
-    void buttonGenerate(QString str);
+    void listGenerate(QString str);
 
 private:
     Ui::choosedir *ui;
-    QPushButton *prova;
-    QPushButton* buttons[100];
-    std::vector<QPushButton *>::iterator it;
-private slots:
-    void choose();
 
+private slots:
+
+    void on_list_itemClicked(QListWidgetItem *item);
 };
 
 #endif // CHOOSEDIR_H
