@@ -10,5 +10,6 @@
         <file>avatar/ostrich.png</file>
         <file>avatar/owl.png</file>
         <file>avatar/zoo.png</file>
+        <file>cartelle/cartella_wind.png</file>
     </qresource>
 </RCC>

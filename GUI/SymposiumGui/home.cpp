@@ -32,3 +32,9 @@ void home::on_modify_clicked()
     changeWindow = new changeUserInfo(this);
     changeWindow->show();
 }
+
+void home::on_directory_clicked()
+{
+    directoryWindow=new directory(this);
+    directoryWindow->show();
+}

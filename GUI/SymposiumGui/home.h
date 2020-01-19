@@ -5,6 +5,7 @@
 #include "deleteaccount.h"
 #include "inserturi.h"
 #include "changeuserinfo.h"
+#include "directory.h"
 
 namespace Ui {
 class home;
@@ -25,11 +26,14 @@ private slots:
 
     void on_modify_clicked();
 
+    void on_directory_clicked();
+
 private:
     Ui::home *ui;
     deleteAccount *deleteAccountWindow;
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
+    directory *directoryWindow;
 };
 
 #endif // HOME_H

@@ -28,6 +28,7 @@ SOURCES += \
         about.cpp \
         changeuserinfo.cpp \
         deleteaccount.cpp \
+        directory.cpp \
         exit.cpp \
         home.cpp \
         icon.cpp \
@@ -54,6 +55,7 @@ HEADERS += \
         about.h \
         changeuserinfo.h \
         deleteaccount.h \
+        directory.h \
         exit.h \
         home.h \
         icon.h \
@@ -82,6 +84,7 @@ FORMS += \
         about.ui \
         changeuserinfo.ui \
         deleteaccount.ui \
+        directory.ui \
         exit.ui \
         home.ui \
         icon.ui \
