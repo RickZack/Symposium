@@ -12,4 +12,9 @@
         <file>avatar/zoo.png</file>
         <file>cartelle/cartella_wind.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>icon/file.png</file>
+        <file>icon/folder.png</file>
+        <file>icon/link.png</file>
+    </qresource>
 </RCC>

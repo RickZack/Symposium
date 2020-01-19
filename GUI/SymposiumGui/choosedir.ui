@@ -6,21 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>774</width>
-    <height>686</height>
+    <width>617</width>
+    <height>447</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: white;</string>
+   <string notr="true"/>
   </property>
   <widget class="QTextBrowser" name="nameDir">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>420</y>
+     <x>100</x>
+     <y>290</y>
      <width>411</width>
      <height>31</height>
     </rect>
@@ -32,8 +32,34 @@
      <x>100</x>
      <y>20</y>
      <width>411</width>
-     <height>192</height>
+     <height>251</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="choose">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>350</y>
+     <width>161</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CHOOSE</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancel">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>350</y>
+     <width>161</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CANCEL</string>
    </property>
   </widget>
  </widget>
