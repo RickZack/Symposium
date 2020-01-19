@@ -13,3 +13,9 @@ inserturi::~inserturi()
 {
     delete ui;
 }
+
+void inserturi::on_dir_clicked()
+{
+    dirWindow=new choosedir(this);
+    dirWindow->show();
+}

@@ -2,7 +2,7 @@
 #define INSERTURI_H
 
 #include <QDialog>
-
+#include "choosedir.h"
 namespace Ui {
 class inserturi;
 }
@@ -15,8 +15,12 @@ public:
     explicit inserturi(QWidget *parent = nullptr);
     ~inserturi();
 
+private slots:
+    void on_dir_clicked();
+
 private:
     Ui::inserturi *ui;
+    choosedir *dirWindow;
 };
 
 #endif // INSERTURI_H
