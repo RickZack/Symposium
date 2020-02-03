@@ -51,7 +51,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QRadioButton" name="radioButton_3">
+     <widget class="QRadioButton" name="owner">
       <property name="text">
        <string>owner</string>
       </property>

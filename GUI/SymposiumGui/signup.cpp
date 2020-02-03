@@ -21,9 +21,19 @@ signup::~signup()
 
 void signup::on_signin_clicked()
 {
-    hide();
-    homeWindow= new home(parentWidget());
-    homeWindow->show();
+    QString username= ui->username->text();
+    QString password = ui->password->text();
+    QString nickname =ui->nickname->text();
+    if(username!="" && password!="" && nickname!="")
+    {
+        hide();
+        homeWindow= new home(parentWidget());
+        homeWindow->show();
+    }
+    else {
+
+        ui->msg->setText("This credentials are not valid");
+    }
 }
 
 void signup::on_iconButt_clicked()

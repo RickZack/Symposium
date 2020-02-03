@@ -192,6 +192,22 @@ text-align: left;</string>
     <string>TextLabel</string>
    </property>
   </widget>
+  <widget class="QLabel" name="msg">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>380</y>
+     <width>321</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: red;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

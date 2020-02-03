@@ -19,9 +19,18 @@ sigin::~sigin()
 
 void sigin::on_signin_clicked()
 {
-    hide();
-    homeWindow= new home(parentWidget());
-    homeWindow->show();
+    QString username= ui->username->text();
+    QString password = ui->password->text();
+    if(username=="test" && password=="test")
+    {
+        hide();
+        homeWindow= new home(parentWidget());
+        homeWindow->show();
+    }
+    else {
+
+        ui->msg->setText("This credentials are not valid");
+    }
 }
 
 void sigin::closeEvent(QCloseEvent *event)
