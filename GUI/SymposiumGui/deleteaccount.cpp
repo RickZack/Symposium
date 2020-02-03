@@ -8,7 +8,7 @@ deleteAccount::deleteAccount(QWidget *parent) :
     ui->setupUi(this);
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->delete_2, SIGNAL(clicked()), parent, SLOT(close()));
+    connect(ui->delete_2, SIGNAL(clicked()), parent, SLOT(hide()));
     connect(ui->delete_2, SIGNAL(clicked()), parent->parentWidget(), SLOT(show()));
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(delete_click()));
 }

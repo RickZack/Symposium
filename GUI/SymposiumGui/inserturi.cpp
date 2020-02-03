@@ -6,6 +6,7 @@ inserturi::inserturi(QWidget *parent) :
     ui(new Ui::inserturi)
 {
     ui->setupUi(this);
+    ui->writer->click();
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
 }
 
@@ -22,7 +23,7 @@ void inserturi::on_dir_clicked()
 
 void inserturi::change_text()
 {
-    idDir=dirWindow->idDir;
+    path=dirWindow->path;
     nameDir=dirWindow->nameOfDir;
     if(!nameDir.empty())
         ui->dir->setText(QString::fromStdString(dirWindow->nameOfDir));
@@ -30,7 +31,22 @@ void inserturi::change_text()
 
 void inserturi::reset_text()
 {
-    idDir=-1;
+    path="";
     nameDir="";
     ui->dir->setText("choose the directory...");
+}
+
+void inserturi::on_reader_clicked()
+{
+    privilege="reader";
+}
+
+void inserturi::on_writer_clicked()
+{
+    privilege="writer";
+}
+
+void inserturi::on_owner_clicked()
+{
+    privilege="owner";
 }

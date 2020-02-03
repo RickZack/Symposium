@@ -6,7 +6,7 @@ home::home(QWidget *parent) :
     ui(new Ui::home)
 {
     ui->setupUi(this);
-    connect(ui->logout, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->logout, SIGNAL(clicked()), this, SLOT(hide()));
     connect(ui->logout, SIGNAL(clicked()), parent, SLOT(show()));
 }
 
@@ -37,4 +37,18 @@ void home::on_directory_clicked()
 {
     directoryWindow=new directory(this);
     directoryWindow->show();
+}
+
+void home::closeEvent(QCloseEvent *event)
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
+                                                                    tr("Are you sure to quit?\n"),
+                                                                     QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::Yes);
+        if (resBtn != QMessageBox::Yes) {
+            event->ignore();
+        } else {
+            event->accept();
+        }
+
 }

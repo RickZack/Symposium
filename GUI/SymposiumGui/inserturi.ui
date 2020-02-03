@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>756</width>
-    <height>306</height>
+    <width>681</width>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,12 +19,43 @@
      <x>60</x>
      <y>80</y>
      <width>551</width>
-     <height>80</height>
+     <height>175</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QLineEdit" name="lineEdit"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="styleSheet">
+       <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Choose privilege:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QRadioButton" name="reader">
+      <property name="text">
+       <string> reader</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QRadioButton" name="writer">
+      <property name="text">
+       <string>writer (default)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QRadioButton" name="radioButton_3">
+      <property name="text">
+       <string>owner</string>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QPushButton" name="dir">
@@ -47,8 +78,8 @@ text-align: left;
   <widget class="QPushButton" name="add">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>190</y>
+     <x>50</x>
+     <y>310</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -60,8 +91,8 @@ text-align: left;
   <widget class="QPushButton" name="cancel">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>190</y>
+     <x>170</x>
+     <y>310</y>
      <width>93</width>
      <height>28</height>
     </rect>

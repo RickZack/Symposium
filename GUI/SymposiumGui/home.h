@@ -2,6 +2,7 @@
 #define HOME_H
 
 #include <QMainWindow>
+#include <QCloseEvent>
 #include "deleteaccount.h"
 #include "inserturi.h"
 #include "changeuserinfo.h"
@@ -34,6 +35,8 @@ private:
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
     directory *directoryWindow;
+
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // HOME_H

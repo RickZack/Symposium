@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QApplication>
+#include <QCloseEvent>
 #include "about.h"
 #include "exit.h"
 #include "sigin.h"
@@ -30,12 +31,15 @@ private slots:
 
     void on_SignUp_clicked();
 
+
 private:
     Ui::MainWindow *ui;
     about *aboutWindow;
     class exit *exitWindow;
     sigin *signinWindow;
     signup *signupWindow;
+
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H

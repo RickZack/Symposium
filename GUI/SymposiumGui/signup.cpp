@@ -6,7 +6,7 @@ signup::signup(QWidget *parent) :
     ui(new Ui::signup)
 {
     ui->setupUi(this);
-    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(show()));
     QPixmap pix(":/resources/avatar/beaver.png");
     int w=ui->img->width();
@@ -21,7 +21,7 @@ signup::~signup()
 
 void signup::on_signin_clicked()
 {
-    close();
+    hide();
     homeWindow= new home(parentWidget());
     homeWindow->show();
 }
@@ -40,4 +40,14 @@ void signup::chooseIcon()
     int w=ui->img->width();
     int h=ui->img->height();
     ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+void signup::reject()
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
+                                                                    tr("Are you sure to quit?\n"),
+                                                                     QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::Yes);
+        if (resBtn == QMessageBox::Yes)
+            QDialog::reject();
 }
