@@ -18,6 +18,12 @@ public:
 private slots:
     void on_dir_clicked();
 
+    void on_reader_clicked();
+
+    void on_writer_clicked();
+
+    void on_owner_clicked();
+
 public slots:
     void change_text();
     void reset_text();
@@ -25,8 +31,9 @@ public slots:
 private:
     Ui::inserturi *ui;
     choosedir *dirWindow;
-    int idDir;
+    std::string path;
     std::string nameDir;
+    std::string privilege;
 };
 
 #endif // INSERTURI_H

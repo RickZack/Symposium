@@ -6,7 +6,7 @@ signup::signup(QWidget *parent) :
     ui(new Ui::signup)
 {
     ui->setupUi(this);
-    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(show()));
     QPixmap pix(":/resources/avatar/beaver.png");
     int w=ui->img->width();
@@ -21,9 +21,19 @@ signup::~signup()
 
 void signup::on_signin_clicked()
 {
-    close();
-    homeWindow= new home(parentWidget());
-    homeWindow->show();
+    QString username= ui->username->text();
+    QString password = ui->password->text();
+    QString nickname =ui->nickname->text();
+    if(username!="" && password!="" && nickname!="")
+    {
+        hide();
+        homeWindow= new home(parentWidget());
+        homeWindow->show();
+    }
+    else {
+
+        ui->msg->setText("This credentials are not valid");
+    }
 }
 
 void signup::on_iconButt_clicked()
@@ -40,4 +50,14 @@ void signup::chooseIcon()
     int w=ui->img->width();
     int h=ui->img->height();
     ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+void signup::reject()
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
+                                                                    tr("Are you sure to quit?\n"),
+                                                                     QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::Yes);
+        if (resBtn == QMessageBox::Yes)
+            QDialog::reject();
 }

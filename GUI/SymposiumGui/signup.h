@@ -2,6 +2,7 @@
 #define SIGNUP_H
 
 #include <QDialog>
+#include <QCloseEvent>
 #include "home.h"
 #include "icon.h"
 
@@ -27,6 +28,7 @@ private:
     Ui::signup *ui;
     home *homeWindow;
     icon *iconWindow;
+    void reject();
 };
 
 #endif // SIGNUP_H

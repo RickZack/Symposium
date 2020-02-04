@@ -2,6 +2,7 @@
 #define SIGIN_H
 
 #include <QDialog>
+#include <QCloseEvent>
 #include "home.h"
 
 
@@ -24,6 +25,7 @@ private slots:
 private:
     Ui::sigin *ui;
     home *homeWindow;
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // SIGIN_H

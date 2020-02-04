@@ -23,8 +23,13 @@ void MainWindow::on_about_clicked()
 
 void MainWindow::on_exit_clicked()
 {
-    exitWindow =new class exit(this);
-    exitWindow->show();
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
+                                                                    tr("Are you sure to quit?\n"),
+                                                                     QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::Yes);
+        if (resBtn == QMessageBox::Yes)
+                qApp->quit();
+
 }
 
 void MainWindow::on_SignIn_clicked()
@@ -39,4 +44,18 @@ void MainWindow::on_SignUp_clicked()
     hide();
     signupWindow= new signup(this);
     signupWindow->show();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
+                                                                    tr("Are you sure to quit?\n"),
+                                                                     QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::Yes);
+        if (resBtn != QMessageBox::Yes) {
+            event->ignore();
+        } else {
+            event->accept();
+        }
+
 }
