@@ -7,6 +7,9 @@
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+requires(qtConfig(filedialog))
+qtHaveModule(printsupport): QT += printsupport
+
 
 TARGET = SymposiumGui
 TEMPLATE = app
@@ -50,7 +53,8 @@ SOURCES += \
         ../../user.cpp \
         ../../lib/hash/sha256.cpp \
         sigin.cpp \
-        signup.cpp
+        signup.cpp \
+        textedit.cpp
 
 HEADERS += \
         about.h \
@@ -80,7 +84,8 @@ HEADERS += \
         ../../user.h \
         ../../lib/hash/sha256.h \
         sigin.h \
-        signup.h
+        signup.h \
+        textedit.h
 
 FORMS += \
         about.ui \

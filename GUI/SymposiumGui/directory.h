@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include "inserturi.h"
-#include <QTextEdit>
+#include "textedit.h"
 #include <QLabel>
 #include <QPixmap>
 
@@ -32,7 +32,7 @@ private slots:
 private:
     Ui::directory *ui;
     inserturi *uriWindow;
-    QTextEdit *editor;
+    TextEdit *textEditWindow;
 
 
 };

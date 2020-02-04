@@ -6,13 +6,6 @@ directory::directory(QWidget *parent) :
     ui(new Ui::directory)
 {
     ui->setupUi(this);
-    QPixmap pix(":/resources/cartelle/cartella_wind.png");
-
-    ui->dir_1->setPixmap(pix.scaled(90,90));
-    ui->dir_2->setPixmap(pix.scaled(90,90));
-    ui->dir_3->setPixmap(pix.scaled(90,90));
-    ui->dir_4->setPixmap(pix.scaled(90,90));
-    ui->dir_6->setPixmap(pix.scaled(90,90));
 
 }
 
@@ -23,8 +16,8 @@ directory::~directory()
 
 void directory::on_actionNew_Document_triggered()
 {
-    editor= new QTextEdit;
-    editor->showMaximized();
+    textEditWindow= new TextEdit;
+    textEditWindow->show();
 }
 
 
@@ -43,7 +36,6 @@ void directory::on_actionUri_triggered()
 void directory::on_actionNew_Folder_triggered()
 {
 
-    QPixmap pix(":/resources/cartelle/cartella_wind.png");
-    ui->dir_5->setPixmap(pix.scaled(90,90));
+
 
 }
