@@ -182,7 +182,7 @@ std::string file::print(const std::string &targetUser, bool recursive, unsigned 
     if(getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";
     priv<<getUserPrivilege(targetUser); //the privilege
-    return ritorno+typeres.str()+" "+name + " " + priv.str();
+    return typeres.str()+" "+std::to_string(getId())+" "+ritorno+name + " " + priv.str();
 }
 
 
@@ -434,24 +434,24 @@ void directory::send() const {
 std::string directory::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
     std::string result;
     if(indent==0)
-        result.append(targetUser);
+        {result.append(targetUser); result+=" ";}
     //otherwise need to invoke recursively the method prints for all subdirectory
         for(const auto & it : contained)
         {
             resourceType type=it->resType();
             if(type==resourceType::directory)
             {
-                result.insert(result.end(), indent, ' ');
                 std::shared_ptr<directory> dir=std::dynamic_pointer_cast<directory>(it);
                 std::ostringstream typeres;
                 typeres<<dir->resType();
-                result.insert(result.end(), indent, ' ');
-                result=result+" "+typeres.str()+" "+dir->name+"\r\n";
+                std::string spaces;
+                spaces.insert(result.end(), indent, ' ');
+                result=result+typeres.str()+" "+std::to_string(it->getId())+" "+spaces+dir->name+"\n";
                 if(recursive)
                     result+=dir->print(targetUser, recursive, indent+1);
             }
             else
-                result+=" "+it->print(targetUser, recursive, indent)+"\r\n";
+                result+=" "+it->print(targetUser, recursive, indent)+"\n";
         }
 
     return result;
@@ -505,7 +505,7 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool recurs
     {
         ritorno.insert(0, indent, ' ');
     }
-    return ritorno+typeres.str()+" " +name + " " + priv.str();
+    return typeres.str()+" "+std::to_string(getId())+" "+ritorno+name + " " + priv.str();
 }
 
 const std::string &Symposium::symlink::getFileName() const {
