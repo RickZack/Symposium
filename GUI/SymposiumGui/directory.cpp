@@ -16,7 +16,7 @@ directory::~directory()
 
 void directory::on_actionNew_Document_triggered()
 {
-    textEditWindow= new TextEdit;
+    textEditWindow= new TextEdit(this);
     textEditWindow->show();
 }
 

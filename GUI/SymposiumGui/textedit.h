@@ -55,6 +55,8 @@
 #include <QMap>
 #include <QPointer>
 
+#include "currentusers.h"
+
 QT_BEGIN_NAMESPACE
 class QAction;
 class QComboBox;
@@ -70,7 +72,7 @@ class TextEdit : public QMainWindow
     Q_OBJECT
 
 public:
-    TextEdit(QWidget *parent = 0);
+    TextEdit(QWidget *parent = nullptr);
 
     bool load(const QString &f);
 
@@ -104,7 +106,12 @@ private slots:
     void about();
     void printPreview(QPrinter *);
 
+    void visualizeUsers();
+
 private:
+
+    currentUsers *currentuserswindow;
+
     void setupFileActions();
     void setupEditActions();
     void setupTextActions();
@@ -115,6 +122,7 @@ private:
     void fontChanged(const QFont &f);
     void colorChanged(const QColor &c);
     void alignmentChanged(Qt::Alignment a);
+
 
     QAction *actionSave;
     QAction *actionTextBold;
