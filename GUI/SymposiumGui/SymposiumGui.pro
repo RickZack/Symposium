@@ -52,6 +52,7 @@ SOURCES += \
         ../../SymServer.cpp \
         ../../user.cpp \
         ../../lib/hash/sha256.cpp \
+        newfolderwindow.cpp \
         sigin.cpp \
         signup.cpp \
         textedit.cpp
@@ -83,6 +84,7 @@ HEADERS += \
         ../../SymServer.h \
         ../../user.h \
         ../../lib/hash/sha256.h \
+        newfolderwindow.h \
         sigin.h \
         signup.h \
         textedit.h
@@ -98,6 +100,7 @@ FORMS += \
         icon.ui \
         inserturi.ui \
         mainwindow.ui \
+        newfolderwindow.ui \
         sigin.ui \
         signup.ui
 

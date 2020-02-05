@@ -4,8 +4,6 @@
 #include <QMainWindow>
 #include "inserturi.h"
 #include "textedit.h"
-#include <QLabel>
-#include <QPixmap>
 
 namespace Ui {
 class directory;
@@ -29,10 +27,16 @@ private slots:
 
     void on_actionNew_Folder_triggered();
 
+    void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
+
 private:
     Ui::directory *ui;
     inserturi *uriWindow;
     TextEdit *textEditWindow;
+    int count=0;
+
 
 
 };

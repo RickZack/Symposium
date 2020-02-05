@@ -50,6 +50,7 @@
         <file>images/win/zoomin.png</file>
         <file>images/win/zoomout.png</file>
         <file>images/logo32.png</file>
+        <file>cartelle/folder_icon.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/file.png</file>
