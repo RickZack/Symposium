@@ -366,10 +366,13 @@ TEST_F(FileSystemTestSharing, printFileWithIndent){
     ASSERT_NO_FATAL_FAILURE(verifySetPrivilegeOnFile(privilege::readOnly));
     EXPECT_CALL(*f.getStrategyMocked(), getPrivilege(username)).WillRepeatedly(::testing::Return(privilege::readOnly));
     std::ostringstream expected;
-    expected<<resourceType::file<<" "<<f.getName()<<" "<<privilege::readOnly;
+    expected<<resourceType::file<<" "<<f.getId();
     unsigned  spaces=rand()%10+1; //expect n spaces
+    for(int i=0; i<spaces; i++)
+        expected<<" ";
+    expected<<" "<<f.getName()<<" "<<privilege::readOnly;
     std::string ret=f.print(username, false, spaces);
-    EXPECT_EQ(expected.str().insert(0, spaces, ' '), ret);
+    EXPECT_EQ(expected.str(), ret);
 }
 
 TEST_F(FileSystemTestSharing, getSearchesRecursive){
@@ -443,9 +446,11 @@ TEST_F(FileSystemTestSharing, printSymLink){
      *       -file1
      */
 
-    std::ostringstream out; int n_space=rand()%100+1;
-    std::string spaces; spaces.insert(0, n_space, ' ');
-    out<<spaces<<resourceType::symlink<<" "<<sym1->getName()<<" "<<uri::getDefaultPrivilege();
+    std::ostringstream out;
+    int n_space=rand()%100+1;
+    std::string spaces;
+    spaces.insert(0, n_space, ' ');
+    out<<resourceType::symlink<<" "<<sym1->getId()<<" "<<spaces<<sym1->getName()<<" "<<uri::getDefaultPrivilege();
     EXPECT_EQ( out.str(), sym1->print(anotherUsername, false, n_space));
 }
 
@@ -490,7 +495,7 @@ TEST_F(FileSystemTestSharing, printDirectoryRecursive){
      * way, we expect sym1 (that should point to file1) to return its name and the privilege that the user holds
      * on [file1] (not on the symlink itself, that doesn't make much sense).
      */
-    res<<username<<" "<<"directory "<<"dir1\r\n"<<"  "<<"file "<<"file1 "<<privilege::owner<<"\r\n"<<"  "<<"symlink "<<"sym2 "<<uri::getDefaultPrivilege()<<"\r\n";
+    res<<username<<" "<<"directory "<<dir1->getId()<<" "<<"dir1\n "<<"file "<<file1->getId()<<"  file1 "<<privilege::owner<<"\n "<<"symlink "<<sym2->getId()<<"  sym2 "<<uri::getDefaultPrivilege()<<"\n";
     EXPECT_EQ(res.str(), directory::getRoot()->getDir("./", "1")->print(username, true, 0));
 }
 //FIXME: review the following tests

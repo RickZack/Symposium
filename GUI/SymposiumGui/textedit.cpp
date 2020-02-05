@@ -118,6 +118,9 @@ TextEdit::TextEdit(QWidget *parent)
         helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
     }
 
+    QMenu *userMenu=menuBar()->addMenu(tr("Users"));
+    userMenu->addAction(tr("Current Users"), this, &TextEdit::visualizeUsers);
+
     QFont textFont("Helvetica");
     textFont.setStyleHint(QFont::SansSerif);
     textEdit->setFont(textFont);
@@ -737,6 +740,13 @@ void TextEdit::about()
     QMessageBox::about(this, tr("About"), tr("This example demonstrates Qt's "
         "rich text editing facilities in action, providing an example "
         "document for you to experiment with."));
+}
+
+
+void TextEdit::visualizeUsers()
+{
+    currentuserswindow = new currentUsers(this);
+    currentuserswindow->show();
 }
 
 void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat &format)

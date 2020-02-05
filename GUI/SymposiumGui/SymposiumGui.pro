@@ -31,6 +31,7 @@ SOURCES += \
         about.cpp \
         changeuserinfo.cpp \
         choosedir.cpp \
+        currentusers.cpp \
         deleteaccount.cpp \
         directory.cpp \
         exit.cpp \
@@ -61,6 +62,7 @@ HEADERS += \
         about.h \
         changeuserinfo.h \
         choosedir.h \
+        currentusers.h \
         deleteaccount.h \
         directory.h \
         exit.h \
@@ -93,6 +95,7 @@ FORMS += \
         about.ui \
         changeuserinfo.ui \
         choosedir.ui \
+        currentusers.ui \
         deleteaccount.ui \
         directory.ui \
         exit.ui \
