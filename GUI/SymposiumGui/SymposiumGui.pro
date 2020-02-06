@@ -29,6 +29,9 @@ CONFIG += c++17
 
 SOURCES += \
         about.cpp \
+        activealwayslink.cpp \
+        activecounterlink.cpp \
+        activetimerlink.cpp \
         changeuserinfo.cpp \
         choosedir.cpp \
         currentusers.cpp \
@@ -60,6 +63,9 @@ SOURCES += \
 
 HEADERS += \
         about.h \
+        activealwayslink.h \
+        activecounterlink.h \
+        activetimerlink.h \
         changeuserinfo.h \
         choosedir.h \
         currentusers.h \
@@ -93,6 +99,9 @@ HEADERS += \
 
 FORMS += \
         about.ui \
+        activealwayslink.ui \
+        activecounterlink.ui \
+        activetimerlink.ui \
         changeuserinfo.ui \
         choosedir.ui \
         currentusers.ui \

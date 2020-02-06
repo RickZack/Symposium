@@ -112,14 +112,28 @@ TextEdit::TextEdit(QWidget *parent)
     setupEditActions();
     setupTextActions();
 
+    priv=Symposium::privilege::owner;
+    pathToFile="/1/2/3/4/5/6/7";
+
+    QMenu *userMenu=menuBar()->addMenu(tr("Users"));
+    userMenu->addAction(tr("Current Users"), this, &TextEdit::visualizeUsers);
+    if(priv==Symposium::privilege::owner)
+        userMenu->addAction(tr("Show all users and allow to modify privilege of users"), this, &TextEdit::visualizeAllUsers);
+    if(priv==Symposium::privilege::owner)
+    {
+        QMenu *shareMenu=menuBar()->addMenu(tr("Share File"));
+        shareMenu->addAction(tr("Make all links inactive"), this, &TextEdit::inactiveLink);
+        shareMenu->addAction(tr("Make all links active"), this, &TextEdit::activeAlwaysLink);
+        shareMenu->addAction(tr("Make all links active for a certain period"), this, &TextEdit::timerLink);
+        shareMenu->addAction(tr("Make all links active for a limit number of shares"), this, &TextEdit::counterLink);
+    }
+
     {
         QMenu *helpMenu = menuBar()->addMenu(tr("Help"));
         helpMenu->addAction(tr("About"), this, &TextEdit::about);
         helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
     }
 
-    QMenu *userMenu=menuBar()->addMenu(tr("Users"));
-    userMenu->addAction(tr("Current Users"), this, &TextEdit::visualizeUsers);
 
     QFont textFont("Helvetica");
     textFont.setStyleHint(QFont::SansSerif);
@@ -748,6 +762,47 @@ void TextEdit::visualizeUsers()
     currentuserswindow = new currentUsers(this);
     currentuserswindow->show();
 }
+
+void TextEdit::visualizeAllUsers()
+{
+    currentuserswindow = new currentUsers(this, true);
+    currentuserswindow->show();
+}
+
+void TextEdit::inactiveLink()
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Inactive link",
+                                                                    "Are you sure, you want to deactivate all links?",
+                                                                     QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::Yes);
+        if (resBtn == QMessageBox::Yes)
+        {
+
+        }
+     QMessageBox::information(parentWidget(),
+                                 tr("Links"), tr("All links are inactive now"), QMessageBox::Ok);
+
+}
+
+void TextEdit::activeAlwaysLink()
+{
+    alwayslinkwindow = new activealwayslink(this, pathToFile);
+    alwayslinkwindow->show();
+
+}
+
+void TextEdit::timerLink()
+{
+    timerlinkwindow = new activetimerlink(this, pathToFile);
+    timerlinkwindow->show();
+}
+
+void TextEdit::counterLink()
+{
+    counterlinkwindow = new activecounterlink(this, pathToFile);
+    counterlinkwindow->show();
+}
+
 
 void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
 {

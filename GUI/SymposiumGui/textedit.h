@@ -56,6 +56,10 @@
 #include <QPointer>
 
 #include "currentusers.h"
+#include "../../privilege.h"
+#include "activetimerlink.h"
+#include "activecounterlink.h"
+#include "activealwayslink.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -107,10 +111,20 @@ private slots:
     void printPreview(QPrinter *);
 
     void visualizeUsers();
+    void visualizeAllUsers();
+    void inactiveLink();
+    void activeAlwaysLink();
+    void timerLink();
+    void counterLink();
 
 private:
 
     currentUsers *currentuserswindow;
+    Symposium::privilege priv;
+    std::string pathToFile;
+    activetimerlink *timerlinkwindow;
+    activecounterlink *counterlinkwindow;
+    activealwayslink *alwayslinkwindow;
 
     void setupFileActions();
     void setupEditActions();
