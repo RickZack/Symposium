@@ -35,7 +35,7 @@ void directory::on_actionUri_triggered()
 }
 
 void directory::on_actionNew_Folder_triggered()
-{
+{   
     QListWidgetItem *item= new QListWidgetItem(QIcon(":/resources/cartelle/folder_icon"),"Folder");
     ui->myListWidget->addItem(item);
 
@@ -51,4 +51,13 @@ void directory::on_pushButton_clicked()
 
 void directory::on_pushButton_2_clicked()
 {
+
+   QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
+    foreach(QListWidgetItem *items, item){
+        ui->myListWidget->removeItemWidget(items);
+        delete items;
+        ui->myListWidget->currentItem()->setSelected(false);
+    }
+
+
 }
