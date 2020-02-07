@@ -34,15 +34,6 @@ void directory::on_actionUri_triggered()
     uriWindow->show();
 }
 
-void directory::on_actionNew_Folder_triggered()
-{   
-    QListWidgetItem *item= new QListWidgetItem(QIcon(":/resources/cartelle/folder_icon"),"Folder");
-    ui->myListWidget->addItem(item);
-
-
-
-
-}
 
 void directory::on_pushButton_clicked()
 {
@@ -60,4 +51,12 @@ void directory::on_pushButton_2_clicked()
     }
 
 
+}
+
+void directory::on_pushButton_3_clicked()
+{
+    QString name= ui->name->text();
+    ui->name->setText(" ");
+    QListWidgetItem *item= new QListWidgetItem(QIcon(":/resources/cartelle/folder_icon"),name);
+    ui->myListWidget->addItem(item);
 }
