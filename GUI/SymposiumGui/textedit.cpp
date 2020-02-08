@@ -85,6 +85,7 @@
 #endif
 
 #include "textedit.h"
+#include "newfolderwindow.h"
 
 #ifdef Q_OS_MAC
 const QString rsrcPath = ":/resources/images/mac";
@@ -839,6 +840,11 @@ void TextEdit::alignmentChanged(Qt::Alignment a)
         actionAlignRight->setChecked(true);
     else if (a & Qt::AlignJustify)
         actionAlignJustify->setChecked(true);
+}
+
+QString TextEdit::getName(){
+    QString name=QFileInfo(fileName).fileName();
+    return name;
 }
 
 

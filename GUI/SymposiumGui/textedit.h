@@ -61,6 +61,7 @@
 #include "activecounterlink.h"
 #include "activealwayslink.h"
 
+
 QT_BEGIN_NAMESPACE
 class QAction;
 class QComboBox;
@@ -82,13 +83,18 @@ public:
 
 public slots:
     void fileNew();
+    void setCurrentFileName(const QString &fileName);
+    bool maybeSave();
+    bool fileSave();
+
+    QString getName();
 
 protected:
     void closeEvent(QCloseEvent *e) override;
 
 private slots:
     void fileOpen();
-    bool fileSave();
+    //bool fileSave();
     bool fileSaveAs();
     void filePrint();
     void filePrintPreview();
@@ -129,8 +135,8 @@ private:
     void setupFileActions();
     void setupEditActions();
     void setupTextActions();
-    bool maybeSave();
-    void setCurrentFileName(const QString &fileName);
+    //bool maybeSave();
+    //void setCurrentFileName(const QString &fileName);
 
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void fontChanged(const QFont &f);

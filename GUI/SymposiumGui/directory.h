@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "inserturi.h"
 #include "textedit.h"
+#include "newfolderwindow.h"
 
 namespace Ui {
 class directory;
@@ -39,7 +40,7 @@ private:
     Ui::directory *ui;
     inserturi *uriWindow;
     TextEdit *textEditWindow;
-    int count=0;
+    newFolderWindow *folderWindow;
 
 
 

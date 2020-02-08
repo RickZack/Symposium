@@ -6,6 +6,8 @@ directory::directory(QWidget *parent) :
     ui(new Ui::directory)
 {
     ui->setupUi(this);
+    QPixmap pix(":/resources/cartelle/new_folder");
+    ui->label_3->setPixmap(pix);
 
 
 }
@@ -37,6 +39,9 @@ void directory::on_actionUri_triggered()
 
 void directory::on_pushButton_clicked()
 {
+    folderWindow=new newFolderWindow;
+    folderWindow->show();
+
 
 }
 

@@ -51,6 +51,9 @@
         <file>images/win/zoomout.png</file>
         <file>images/logo32.png</file>
         <file>cartelle/folder_icon.svg</file>
+        <file>cartelle/document_image.png</file>
+        <file>cartelle/Document-Add-icon.png</file>
+        <file>cartelle/new_folder.png</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/file.png</file>
