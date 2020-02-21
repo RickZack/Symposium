@@ -21,9 +21,7 @@ public:
     explicit directory(QWidget *parent = nullptr);
     ~directory();
     void listGenerate(std::string str, int count);
-    void remouveFromString(std::string value,std::string str,std::string type);
-
-
+    void openWindow(std::string str1);
 
 
 private slots:
@@ -32,11 +30,9 @@ private slots:
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
     void on_pushButton_3_clicked();
-
-
-
-
     void on_pushButton_4_clicked();
+
+    void on_pushButton_5_clicked();
 
 private:
     Ui::directory *ui;

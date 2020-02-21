@@ -23,18 +23,23 @@ class folder1 : public QMainWindow
 public:
     explicit folder1(QWidget *parent = nullptr);
     ~folder1();
+    void listGenerate(std::string str, int count);
+    void openWindow(std::string str);
 
 protected:
     void closeEvent(QCloseEvent *e);
 
+
 private slots:
-    void on_pushButton_4_clicked();
 
     void on_pushButton_3_clicked();
 
     void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();
+
+    void on_pushButton_9_clicked();
+
 
 private:
     Ui::folder1 *ui;
@@ -44,6 +49,10 @@ private:
     // count is a variable used to count the number of elements that are present in the folder1
     // At the beginning they are 4
     int count=4;
+    int countDir;
+    std::string id;
+    std::string separate_word(std::string& string);
+    int number_elements(std::string& string);
 };
 
 #endif // FOLDER1_H

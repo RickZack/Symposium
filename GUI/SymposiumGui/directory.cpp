@@ -120,16 +120,18 @@ void directory::on_pushButton_clicked()
     bool msg=true;
     if(msg){
         // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
-        folder1Window=new folder1(this);
-        folderWindow=new newFolderWindow(this);
         QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
         foreach(QListWidgetItem *items, selectedItem){
              QString value= items->whatsThis();
              if(value=="directory")
              {
                  // open the folder Window
-                 folder1Window=new folder1(this);
-                 folder1Window->show();
+                 //folder1Window=new folder1(this);
+                 //folder1Window->show();
+                 std::string str1="directory 1 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
+                 //folder1Window->openWindow(str1);
+                 this->openWindow(str1);
+
 
              }
              else if(value=="file")
@@ -155,7 +157,12 @@ void directory::on_pushButton_clicked()
     }
 }
 
-// SISTEMARE
+void directory::openWindow(std::string str1){
+    ui->myListWidget->clear();
+    int counter=number_elements(str1);
+    listGenerate(str1,counter);
+    this->show();
+}
 // this method deletes a selected folder or a selected document or a selected symlink
 void directory::on_pushButton_2_clicked()
 {
@@ -168,9 +175,8 @@ void directory::on_pushButton_2_clicked()
           QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
             foreach(QListWidgetItem *items, item){
                 QString name=items->text();
+                // nome da passare al server
                 std::string name_std=name.toStdString();
-                std::string type= items->whatsThis().toStdString();
-                remouveFromString(name_std,str,type);
                 ui->myListWidget->removeItemWidget(items);
                 delete items;
                 ui->myListWidget->currentItem()->setSelected(false);
@@ -237,4 +243,14 @@ void directory::closeEvent(QCloseEvent *event)
 //this method creates a new document
 void directory::on_pushButton_4_clicked()
 {
+}
+
+void directory::on_pushButton_5_clicked()
+{
+    ui->myListWidget->clear();
+    str="directory 1 Folder1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
+    int count=number_elements(str);
+    listGenerate(str,count);
+    // al posto di this dovrei passare il parent precedente.
+    this->show();
 }

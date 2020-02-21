@@ -1,5 +1,6 @@
 #include "folder1.h"
 #include "ui_folder1.h"
+#include "directory.h"
 
 folder1::folder1(QWidget *parent) :
     QMainWindow(parent),
@@ -7,9 +8,10 @@ folder1::folder1(QWidget *parent) :
 {
     ui->setupUi(this);
     QPixmap pix(":/resources/cartelle/Document-Add-icon");
-    ui->label_3->setPixmap(pix);
+    ui->label_7->setPixmap(pix);
     QPixmap pix_folder(":/resources/cartelle/new_folder");
-    ui->label_5->setPixmap(pix_folder);
+    ui->label_10->setPixmap(pix_folder);
+
 
 }
 
@@ -24,20 +26,13 @@ void folder1::closeEvent(QCloseEvent *e)
 {
     QWidget::closeEvent(e);
 
-
-}
-
-// When the button "DELETE" is pushed, the name of the folder will be deleted
-void folder1::on_pushButton_4_clicked()
-{
-    QString name= ui->name->text();
-    ui->name->setText(" ");
 }
 
 
 // When the button "CREATE" is pushed, a new folder is created
 void folder1::on_pushButton_3_clicked()
 {
+    /*
     // msg is used to have a connection with the server
     bool msg=true;
     if(msg)
@@ -53,12 +48,14 @@ void folder1::on_pushButton_3_clicked()
     {
         QMessageBox::warning(this,"Error Message","It is not possible to create a new folder");
     }
+    */
 
 }
 
 
 
-// DA RIFARE
+//DA RIFARE
+// SVUOTO LA WIDGET LIST E POI LA RIEMPIO CON UNA NUOVA STRINGA..
 // this method is used to open a document (or a folder)
 void folder1::on_pushButton_clicked()
 {
@@ -123,9 +120,11 @@ void folder1::on_pushButton_clicked()
 }//method
 
 
+// DA RIFARE
 // the method deletes a selected document or a selected folder
 void folder1::on_pushButton_2_clicked()
 {
+    /*
     bool msg=true;
     if(msg)
     {
@@ -155,4 +154,87 @@ void folder1::on_pushButton_2_clicked()
     {
         QMessageBox::warning(this, "Error Message","It is no possible to delete the selected item");
     }
+    */
+}
+
+void folder1::on_pushButton_9_clicked()
+{
+    this->hide();
+}
+
+void folder1::listGenerate(std::string str, int count)
+{
+    std::string word;
+    countDir=-1;
+    for(int i=0; i<count; i++)
+    {
+        word=separate_word(str);
+        QVariant v;
+        id=separate_word(str);
+
+        if(word=="directory")
+        {
+            word=separate_word(str);
+            QListWidgetItem *item=new QListWidgetItem(QIcon(":/resources/cartelle/folder_icon"), QString::fromStdString(word));
+            countDir++;
+            v.setValue(countDir);
+            item->setData(Qt::UserRole,v);
+            item->setWhatsThis("directory");
+            ui->myListWidget_2->addItem(item);
+            //NB riccordarsi di cambiare il codice di Symposium nella print!
+        }
+
+        else if(word=="file")
+        {
+            word=separate_word(str);
+            QListWidgetItem *item=new QListWidgetItem(QIcon(":/resources/cartelle/document_image"), QString::fromStdString(word));
+            v.setValue(-1);
+            item->setData(Qt::UserRole,v);
+            item->setWhatsThis("file");
+            ui->myListWidget_2->addItem(item);
+            word=separate_word(str);
+        }
+        else
+        {
+            word=separate_word(str);
+            QListWidgetItem *item=new QListWidgetItem(QIcon("://icon/link.png"), QString::fromStdString(word));
+            v.setValue(-1);
+            item->setData(Qt::UserRole,v);
+            item->setWhatsThis("symlink");
+            ui->myListWidget_2->addItem(item);
+            word=separate_word(str);
+        }
+    }
+}
+
+std::string folder1::separate_word(std::string& string)
+{
+    std::string separato;
+    std::size_t found = string.find_first_of(' ');
+    if(found==std::string::npos)
+        return string;
+    separato.append(string, 0, found);
+    string.erase(0, found+1);
+    if(separato=="")
+    {
+        return " "+separate_word(string);
+    }
+    return separato;
+}
+
+int folder1::number_elements(std::string& string)
+{
+    int count=0;
+    for(size_t i = 0; i < string.size(); i++)
+      if(string[i] == '\n')
+          count++;
+    string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
+    return count;
+}
+
+void folder1::openWindow(std::string str)
+{
+    int counter=number_elements(str);
+    listGenerate(str,counter);
+    this->show();
 }
