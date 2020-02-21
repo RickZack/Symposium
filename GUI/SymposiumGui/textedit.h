@@ -92,6 +92,7 @@ public slots:
 protected:
     void closeEvent(QCloseEvent *e) override;
 
+
 private slots:
     void fileOpen();
     //bool fileSave();

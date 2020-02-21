@@ -7,8 +7,10 @@ newFolderWindow::newFolderWindow(QWidget *parent) :
     ui(new Ui::newFolderWindow)
 {
     ui->setupUi(this);
-    QPixmap pix(":/resources/cartelle/document_image");
+    QPixmap pix(":/resources/cartelle/Document-Add-icon");
     ui->label_3->setPixmap(pix);
+    QPixmap pix_folder(":/resources/cartelle/new_folder");
+    ui->label_5->setPixmap(pix_folder);
 
 }
 
@@ -47,8 +49,6 @@ void newFolderWindow::on_pushButton_2_clicked()
          ui->listWidget->currentItem()->setSelected(false);
      }
 
-
-
 }
 
 
@@ -60,5 +60,28 @@ void newFolderWindow::on_pushButton_clicked()
     //textEditWindow->show();
 
 
+
+}
+
+// to ensure the correct closing of the window
+void newFolderWindow::closeEvent(QCloseEvent *e)
+{
+    QWidget::closeEvent(e);
+}
+
+// When the button "DELETE" is pushed, the name of the folder will be deleted and the folder will not be created.
+void newFolderWindow::on_pushButton_4_clicked()
+{
+    QString name= ui->name->text();
+    ui->name->setText(" ");
+}
+
+// When the button "CREATE" is pushed, a new folder is created
+void newFolderWindow::on_pushButton_3_clicked()
+{
+    QString name= ui->name->text();
+    ui->name->setText(" ");
+    QListWidgetItem *item= new QListWidgetItem(QIcon(":/resources/cartelle/folder_icon"),name);
+    ui->listWidget->addItem(item);
 
 }

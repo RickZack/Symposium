@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>646</width>
-    <height>552</height>
+    <width>890</width>
+    <height>618</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,43 +24,43 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>100</y>
-      <width>621</width>
-      <height>331</height>
+      <y>90</y>
+      <width>871</width>
+      <height>421</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>440</y>
+      <x>340</x>
+      <y>520</y>
       <width>101</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Open Folder</string>
+     <string>Open </string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>480</y>
+      <x>460</x>
+      <y>520</y>
       <width>101</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Delete Folder</string>
+     <string>Delete </string>
     </property>
    </widget>
    <widget class="QLineEdit" name="name">
     <property name="geometry">
      <rect>
-      <x>450</x>
-      <y>20</y>
+      <x>250</x>
+      <y>40</y>
       <width>151</width>
       <height>21</height>
      </rect>
@@ -69,7 +69,7 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>60</x>
       <y>20</y>
       <width>91</width>
       <height>21</height>
@@ -82,8 +82,8 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>20</y>
+      <x>60</x>
+      <y>40</y>
       <width>181</width>
       <height>21</height>
      </rect>
@@ -95,10 +95,10 @@
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>50</y>
-      <width>81</width>
-      <height>31</height>
+      <x>410</x>
+      <y>40</y>
+      <width>61</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -108,8 +108,8 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>10</y>
+      <x>10</x>
+      <y>20</y>
       <width>41</width>
       <height>41</height>
      </rect>
@@ -124,28 +124,67 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>40</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CREATE</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>20</y>
+      <width>51</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>cartelle/Document-Add-icon.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>20</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>NEW DOCUMENT</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>646</width>
+     <width>890</width>
      <height>26</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuOperations">
-    <property name="title">
-     <string>Operations</string>
-    </property>
-    <widget class="QMenu" name="menuCreate">
-     <property name="title">
-      <string>Create</string>
-     </property>
-     <addaction name="actionNew_Document"/>
-    </widget>
-    <addaction name="menuCreate"/>
-   </widget>
    <widget class="QMenu" name="menuGo_To">
     <property name="title">
      <string>Go To</string>
@@ -153,24 +192,8 @@
     <addaction name="actionHome"/>
     <addaction name="actionUri"/>
    </widget>
-   <addaction name="menuOperations"/>
    <addaction name="menuGo_To"/>
   </widget>
-  <action name="actionDelete">
-   <property name="text">
-    <string>Delete</string>
-   </property>
-  </action>
-  <action name="actionNew_Document">
-   <property name="text">
-    <string>New Document</string>
-   </property>
-  </action>
-  <action name="actionNew_Folder">
-   <property name="text">
-    <string>New Folder</string>
-   </property>
-  </action>
   <action name="actionHome">
    <property name="text">
     <string>Home</string>

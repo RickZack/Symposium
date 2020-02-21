@@ -50,3 +50,4 @@ void inserturi::on_owner_clicked()
 {
     privilege="owner";
 }
+

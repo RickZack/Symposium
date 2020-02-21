@@ -38,6 +38,7 @@ SOURCES += \
         deleteaccount.cpp \
         directory.cpp \
         exit.cpp \
+        folder1.cpp \
         home.cpp \
         icon.cpp \
         inserturi.cpp \
@@ -72,6 +73,7 @@ HEADERS += \
         deleteaccount.h \
         directory.h \
         exit.h \
+        folder1.h \
         home.h \
         icon.h \
         inserturi.h \
@@ -108,6 +110,7 @@ FORMS += \
         deleteaccount.ui \
         directory.ui \
         exit.ui \
+        folder1.ui \
         home.ui \
         icon.ui \
         inserturi.ui \
@@ -137,3 +140,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES += \
+    ../../../../Desktop/Nuovo Documento di Microsoft Word.htm

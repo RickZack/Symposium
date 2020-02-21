@@ -181,9 +181,9 @@ TextEdit::TextEdit(QWidget *parent)
 void TextEdit::closeEvent(QCloseEvent *e)
 {
     if (maybeSave())
-        e->accept();
+       e->accept();
     else
-        e->ignore();
+       e->ignore();
 }
 
 void TextEdit::setupFileActions()

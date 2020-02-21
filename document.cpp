@@ -32,6 +32,8 @@
 #include "document.h"
 #include "symbol.h"
 #include "user.h"
+#include <cmath>
+
 
 using namespace Symposium;
 int document::idCounter=0;
@@ -68,20 +70,22 @@ document & document::access(const user &newActive, privilege accessPriv) {
     return *this;
 }
 
+void document::checkIndex(int i0, int i1) {
+    float mul_fct=1.5; //just to avoid too many reallocations
+    if(i0>=symbols.capacity())
+        symbols.resize((i0+1)*mul_fct);
+    if(i1>=symbols[i0].capacity())
+        symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
+}
+
 
 symbol document::localInsert(const std::pair<int, int> &indexes, symbol &toInsert) {
 
     int i0=indexes.first;
     int i1=indexes.second;
-    float mul_fct=1.5; //just to avoid too many reallocations
+    checkIndex(i0,i1);
 
-    //FIXME: usi questo codice spesso, racchiudilo in una funzione e usa quella
-    if(i0>=symbols.capacity())
-        symbols.resize((i0+1)*mul_fct);
-    if(i1>=symbols[i0].capacity())
-        symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
-
-    generatePosition(indexes);
+    generatePosition(indexes,toInsert);
     char sym=symbols[i0][i1].getCh();
 
     if(sym==emptyChar){
@@ -90,62 +94,127 @@ symbol document::localInsert(const std::pair<int, int> &indexes, symbol &toInser
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
         }
+
     return toInsert;
 }
 
-//FIXME: questo metodo deve essere ripensato, ci sono problemi nelle intenzioni
-// e nell'implementazione, rivedere Conclave e il CRDT. Ad esempio, dove calcoli l'indice quando metti
-// due simboli che hanno già i vettori delle posizioni?
-// Ad esempio (https://conclave-team.github.io/conclave-site/#globally-ordered-characters):
-// il doc contiene già: 'c' (pos [0]), 'a' (pos [1]), 't' (pos[2])
-// vogliamo inserire 'h' tra 'a' e 'b'
-// il risultato dovrebbe essere qualcosa del tipo
-// 'c' (pos [0]), 'h' (pos[0, x]) 'a' (pos [1]), 'b' (pos [2])
-// il valore di x dipende da come scrivi l'algoritmo (nell'esempio di conclave è 5),
-// ma qui non vedo nessun punto in cui viene calcolato.
-// NOTA: Conclave, dopo aver capito quali sono i vettori delle posizioni precedenti e successiva,
-// calcola la posizione da assegnare al carattere, https://github.com/conclave-team/conclave/blob/master/lib/crdt.js
-// linea 352 chiama genPosBetween() definita alla linea 376.
-void document::generatePosition(const std::pair<int, int> indexes) const {
+void document::generatePosition(const std::pair<int, int> indexes,const symbol &toInsert){
+    std::vector<int> posBefore= findPosBefore(indexes);
+    std::vector <int> posAfter= findPosAfter(indexes);
+    int level=0;
+    std::vector<int> newPos= generatePosBetween(posBefore, posAfter, newPos, indexes,level);
+}
+
+
+std::vector<int> document::findPosBefore(const std::pair<int, int> indexes) const {
+
     int i0=indexes.first;
     int i1=indexes.second;
-    int c=symbols[i0].size(); //FIXME: anche qui, variabile mai usata...
-
-    // vectors that maintain the position for all the rows of symbols.
-    //FIXME: mi sembra che ci sia un problema fondamentale in questo metodo: cosa fa?
-    // Praticamente nulla, perchè posA e posB vengono assegnati giù ma all'uscita della funzione
-    // vengono persi. Manca la documentazione quindi mi viene scomodo pensare a cosa avresti voluto fare.
-    std::vector<int> posA;
-    std::vector<int> posB;
-
-    //FIXME: queste variabili non sono mai usate, a che servono?
-    int siteIdB; int siteIdA;
-
-    //FIXME: questa condizione è sempre vera (perchè all'inizio i vettori contengono il '~'),
-    // puoi vedere con il debugger se vuoi. Inoltre i vettori delle posizioni sono sempre vuoti,
-    // e questo non dovrebbe mai succedere.
-    if(!symbols.empty()) {
-        posA = symbols[i0][i1].getPos();
+    wchar_t ch=symbols[i0][i1].getCh();
+    int line= symbols[i0].size();
+    if(ch==0 && line!=0){
+        line=line-1;
+        ch=symbols[line].size();
     }
-    else if (i1 >= symbols[i0].size()) {
-        int ind_new = symbols[i0].size() - 1;
-        posB = symbols[i0][ind_new].getPos();
-    }
-    else {
-        // I have to generate the pos after and the pos before
-        int i1_new = i1 - 1;
-        posB = symbols[i0][i1_new].getPos();
-        siteIdB = symbols[i0][i1_new].getSiteId();
+    return symbols[line][ch-1].getPos();
+}
 
-        posA = symbols[i0][i1].getPos();
-        siteIdA = symbols[i0][i1].getSiteId();
+std::vector<int> document::findPosAfter(const std::pair<int, int> indexes) const {
+    int i0=indexes.first;
+    int i1=indexes.second;
+    wchar_t ch=symbols[i0][i1].getCh();
+    int line= symbols[i0].size();
+    int numLines=symbols.size();
+    int numChars=symbols[line].capacity();
+
+    if ((line<numLines-1) && (ch==numChars)) {
+        line = line + 1;
+        ch = 0;
     }
+    return symbols[line][ch].getPos();
+}
+
+
+std::vector<int> document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAfter,std::vector<int> newPos,
+                                              const std::pair<int, int> indexes, int level) {
+
+    int i0=indexes.first;
+    // change 2 to any other number to change base multiplication
+    int base=base*2;
+    char boundaryStrategy= retrieveStrategy(level);
+
+    int id1= posBefore[0];
+    int id2= posAfter[0];
+    if(id2-id1>1){
+        int newDigit= generateIdBetween(id1,id2,boundaryStrategy);
+        newPos.push_back(newDigit);
+    }else if( id2-id1==1){
+        newPos.push_back(id1);
+        // pos1.slice(1) will remove from the posBefore the first element
+        std::vector<int> pos1=posBefore;
+        pos1.erase(pos1.begin());
+        std::vector<int> pos2;
+        return generatePosBetween(pos1, pos2, newPos, indexes,level+1);
+
+    }else if(id1==id2){
+        if(symbols[i0][id1].getSiteId()<symbols[i0][id2].getSiteId()){
+            newPos.push_back(id1);
+            //pos1.slice(1)
+            std::vector<int> pos1=posBefore;
+            pos1.erase(pos1.begin());
+            std::vector<int> pos2;
+            return generatePosBetween(pos1,pos2,newPos,indexes,level+1);
+        }else{
+           newPos.push_back(id1);
+            //pos1.slice(1)
+            std::vector<int> pos1=posBefore;
+            pos1.erase(pos1.begin());
+            //pos2.slice(1)
+            std::vector<int> pos2=posAfter;
+            pos2.erase(pos2.begin());
+            return generatePosBetween(pos1,pos2,newPos,indexes,level+1);
+        }
+    }
+    return newPos;
+}
+
+
+char document::retrieveStrategy(const int level) {
+    if(strategyCache[level]){
+        return strategyCache[level];
+    }
+
+    int value=round(rand());
+    switch (strategy){
+        case 'p': strategy='+';
+        case 'm': strategy='-';
+        case 'r': strategy=value==0? '+':'-';
+        default: strategy=(level%2)==0 ?'+':'-';
+    }
+    strategyCache[level]=strategy;
+    return strategy;
+}
+
+
+int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) const {
+    int boundary=10;
+    if((id2-id1)<boundary){
+        id1+=1;
+    }else{
+        if(boundaryStrategy=='-'){
+            id1=id2-boundary;
+        }else {
+            id1+=1;
+            id2=id1+boundary;
+        }
+    }
+    return floor(rand()*(id2-id1))+id1;
 }
 
 symbol document::localRemove(const std::pair<int, int> &indexes) {
     int i0=indexes.first;
     int i1=indexes.second;
-    //FIXME: non c'è nessun controllo sugli indici, non è sicuro
+    checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
     symbols[i0].erase(symbols[i0].begin()+i1);
 
@@ -156,16 +225,7 @@ void document::remoteInsert(const symbol &toInsert) {
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
-
-    //FIXME: usi questo codice spesso, racchiudilo in una funzione e usa quella
-    float mul_fct=1.5; //just to avoid too many reallocations
-
-    if(i0>=symbols.capacity())
-        symbols.resize((i0+1)*mul_fct);
-
-    if(i1>=symbols[i0].capacity())
-        symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
-
+    checkIndex(i0,i1);
     char sym=symbols[i0][i1].getCh();
 
     if(sym==emptyChar){ symbols[i0][i1]=toInsert;}
@@ -181,8 +241,7 @@ void document::remoteRemove(const symbol &toRemove) {
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
-    //FIXME: doppia condizione inutile, basta solo una delle due
-    if(i0==-1 && i1==-1){
+    if(i0==-1 || i1==-1){
         return;
     }
     //FIXME: se lo lasci come ultima opzione, puoi evitare di scrivere questo codice
@@ -190,8 +249,6 @@ void document::remoteRemove(const symbol &toRemove) {
         return;
     }
     else {
-        //FIXME: a che serve sym?
-        symbol sym=symbols[i0][i1];
         symbols[i0].erase(symbols[i0].begin()+i1);
     }
 }
@@ -199,10 +256,7 @@ void document::remoteRemove(const symbol &toRemove) {
 std::wstring document::toText() const {
     std::wstring str;
     std::wostringstream str1;
-    //FIXME: il compilatore dice che size e sizes non sono mai usate. Potresti toglierle
-    int size= symbols.size();
     int i=0;
-    int sizes= symbols[i].size();
     for (int i=0;i<symbols.size();i++) {
         for (int j = 0; j < symbols[i].size(); j++) {
             wchar_t value = symbols[i][j].getCh();
@@ -216,12 +270,7 @@ std::wstring document::toText() const {
 }
 
 void document::close(const user &noLongerActive) {
-    auto first = activeUsers.begin();
     for(auto p:activeUsers) {
-        //FIXME: non usi mai c, non capisco a cosa serve.
-        // Anche la prima istruzione non mi sembri serva a qualcosa.
-        // Se usi la remove_if viene anche più semplice.
-        std::pair<user *, privilege> c = *first;
         user old_User = *p.first;
         if (old_User == noLongerActive) {
             activeUsers.remove(p);
@@ -325,8 +374,7 @@ std::pair<int, int> document::findInsertIndex(const symbol &symbol) const {
 
 }
 
-//FIXME: se aChar non viene modificato, passalo come const reference, lo stesso per il vettore
-std::pair<int, int> document::findEndPosition(symbol aChar, std::vector<Symposium::symbol> vector, int lines) const {
+std::pair<int, int> document::findEndPosition(const symbol aChar, const std::vector<Symposium::symbol> vector, int lines) const {
     std::pair<int,int> ind;
     if(aChar== emptySymbol){
         ind={lines,0}; return ind;
@@ -336,8 +384,8 @@ std::pair<int, int> document::findEndPosition(symbol aChar, std::vector<Symposiu
     return ind;
 
 }
-//FIXME: se ch non viene modificato, passalo come const reference, lo stesso per il vettore
-int document::findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector) const {
+
+int document::findInsertInLine(const symbol ch, const std::vector<Symposium::symbol> vector) const {
     int ind=0;
     int left=0;
     int right= vector.size()-1;
@@ -350,8 +398,7 @@ int document::findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector)
         ind=vector.size();
         return ind;
     }
-    //FIXME: se usi la ricerca binaria o qualsiasi altro pezzo di codice più di una volta,
-    // specialmente se lungo, mettilo in una funzione a parte e chiamala dove ti serve
+
     while(left+1<right){
         mid=left-(right-left)/2;
 
@@ -397,9 +444,6 @@ std::pair<int, int> document::findPosition(const symbol &symbol) const {
         i0=-1; i1=-1; ind={i0,i1}; return ind;
     }
 
-    //FIXME: se usi la ricerca binaria o qualsiasi altro pezzo di codice più di una volta,
-    // specialmente se lungo, mettilo in una funzione a parte e chiamala dove ti serve
-
     // binary search
     while(minLine+1<maxLine){
         midLine=minLine+(maxLine-minLine)/2;
@@ -432,8 +476,8 @@ std::pair<int, int> document::findPosition(const symbol &symbol) const {
     }
 
 }
-//FIXME: se il vettore non viene modificato, passalo come const reference
-int document::findIndexInLine(const symbol &symbol, std::vector<Symposium::symbol> vector) const {
+
+int document::findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector) const {
     int left=0;
     int right=vector.size()-1;
     int mid;
@@ -458,14 +502,22 @@ int document::findIndexInLine(const symbol &symbol, std::vector<Symposium::symbo
     if(symbol==vector[left]){
         return left;
     }
-    //FIXME: perchè else if? A logica dovrebbe essere un else.
-    // Se c'è possibilità di non entrare in nessuno dei due rami
-    // è un problema logico importante.
-    else if(symbol==vector[left]){
+
+    else{
         return right;
     }
 
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

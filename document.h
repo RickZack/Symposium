@@ -47,6 +47,8 @@ namespace Symposium {
         std::vector<std::vector<symbol> > symbols;                      /**< container of characters and metadata for CRDT*/
         std::forward_list<std::pair<user *, privilege>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
         int numchar;                                                    /**< number of printable characters */
+        std::vector<char> strategyCache ;
+        wchar_t  strategy='r';
 
         static constexpr wchar_t  emptyChar='~';
         static const symbol emptySymbol;
@@ -128,19 +130,95 @@ namespace Symposium {
          */
         virtual std::set<int> retrieveSiteIds() const;
 
-    private:
-        //FIXME: manca tutta la documentazione per queste funzioni!
-        void generatePosition(const std::pair<int, int> indexes) const;
+        /**
+         * @brief it checks if the index i0 and i1 are coherent with the capacity of @e symbols
+         * @param i0 the first index to check
+         * @param i1 the second index to check
+         */
+        void checkIndex(int i0, int i1);
 
+    private:
+        /**
+         * @brief it determines the globally unique fractional index position of the new character.
+         * @param indexes position of the adjacent characters used to generate the position of the new one
+         * @param toInsert the value to insert
+         */
+        void generatePosition(const std::pair<int, int> indexes, const symbol &toInsert);
+
+        /**
+         * @brief it searches for the position of the inserted symbol
+         * @param symbol inserted symbol
+         * @return position
+         */
         std::pair<int, int> findInsertIndex(const symbol &symbol) const;
 
-        std::pair<int,int> findEndPosition(symbol aChar, std::vector<Symposium::symbol> vector, int lines) const;
+        /**
+         * @brief it finds the position of the last Symbol to insert the symbol at the end of @e vector
+         * @param aChar the lastSymbol in the vector
+         * @param vector is the LastLine in the vector
+         * @param lines is the number of lines in the vector
+         * @return the position
+         */
+        std::pair<int,int> findEndPosition(const symbol aChar, const std::vector<Symposium::symbol> vector, int lines) const;
 
-        int findInsertInLine(symbol ch, std::vector<Symposium::symbol> vector) const;
+        /**
+         * @brief it searches for the symbol that is inserted in the middle of the line
+         * @param ch symbol
+         * @param vector line in which the symbol is searched
+         * @return
+         */
+        int findInsertInLine(const symbol ch, const std::vector<Symposium::symbol> vector) const;
 
+        /**
+         * @brief it searches for the position of a symbol in order to find it and eliminate it
+         * @param symbol the symbol to search
+         * @return the position of @e symbol
+         */
         std::pair<int, int> findPosition(const symbol &symbol) const;
 
-        int findIndexInLine(const symbol &symbol, std::vector<Symposium::symbol> vector) const;
+
+        int findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector) const;
+
+        /**
+         * @brief searches the position before the one of the considered value
+         * @param pair the indexes
+         * @return the searched position
+         */
+        std::vector<int> findPosBefore(const std::pair<int, int> pair) const;
+
+        /**
+         * @brief searches the position after the one of the considered value
+         * @param pair the indexes
+         * @return the searched position
+         */
+        std::vector<int> findPosAfter(const std::pair<int, int> pair) const;
+
+        /**
+         * @brief recoursive algorithm to dynamically generates the relative position of a symbol inserted in between two other ones
+         * @param vector the posBefore
+         * @param vector1 the posAfter
+         * @return the searched position
+         */
+        std::vector<int>
+        generatePosBetween(std::vector<int> vector, std::vector<int> vector1,std::vector<int> vector2,
+                           const std::pair<int, int> pair,int level);
+        /**
+         * @brief finds the id of the symbol inserted in between two other onws
+         * @param id1
+         * @param id2
+         * @param boundaryStrategy
+         * @return
+         */
+
+        int generateIdBetween(int id1, int id2,const char boundaryStrategy) const;
+
+        /**
+         * @brief it modifies the @e strategy parameter
+         * @param level
+         * @return
+         */
+        char retrieveStrategy(const int level);
+
     };
 }
 
