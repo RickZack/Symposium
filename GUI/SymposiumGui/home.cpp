@@ -37,6 +37,7 @@ void home::on_directory_clicked()
 {
     directoryWindow=new directory(this);
     directoryWindow->show();
+    this->hide();
 }
 
 void home::closeEvent(QCloseEvent *event)

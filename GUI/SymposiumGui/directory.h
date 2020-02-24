@@ -3,11 +3,12 @@
 
 #include <QMainWindow>
 #include <QCloseEvent>
+#include <QApplication>
+#include <QtWidgets/qwidget.h>
+
 #include "inserturi.h"
 #include "textedit.h"
-#include "newfolderwindow.h"
-#include "folder1.h"
-#include <stdlib.h>
+#include "notepad.h"
 
 namespace Ui {
 class directory;
@@ -22,6 +23,10 @@ public:
     ~directory();
     void listGenerate(std::string str, int count);
     void openWindow(std::string str1);
+    // this variable is used to say that a window has been opened and to enable the button BACK.
+    int aperto=0;
+    QList<std::string> values;
+
 
 
 private slots:
@@ -31,18 +36,17 @@ private slots:
     void on_pushButton_2_clicked();
     void on_pushButton_3_clicked();
     void on_pushButton_4_clicked();
-
-    void on_pushButton_5_clicked();
+    void on_back_button_clicked();
 
 private:
     Ui::directory *ui;
     inserturi *uriWindow;
     TextEdit *textEditWindow;
-    newFolderWindow *folderWindow;
     QListWidgetItem *item1;
-    folder1 *folder1Window;
+    notepad *notepadWindow;
 
     std::string str;
+    std::string old_str;
     int countDir;
     std::string id;
     void closeEvent(QCloseEvent *event);
@@ -50,6 +54,7 @@ private:
     int count=10;
     std::string separate_word(std::string& string);
     int number_elements(std::string& string);
+    std::string generateString(std::string str);
 
 };
 

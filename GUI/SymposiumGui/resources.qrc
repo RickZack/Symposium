@@ -54,6 +54,12 @@
         <file>cartelle/document_image.png</file>
         <file>cartelle/Document-Add-icon.png</file>
         <file>cartelle/new_folder.png</file>
+        <file>cartelle/home_icon.png</file>
+        <file>cartelle/link_icon.png</file>
+        <file>cartelle/delete_icon.png</file>
+        <file>cartelle/open_icon.png</file>
+        <file>cartelle/create_icon.png</file>
+        <file>cartelle/back_icon.png</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/file.png</file>

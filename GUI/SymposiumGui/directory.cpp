@@ -1,5 +1,6 @@
 #include "directory.h"
 #include "ui_directory.h"
+#include "home.h"
 #include <ostream>
 
 directory::directory(QWidget *parent) :
@@ -12,10 +13,25 @@ directory::directory(QWidget *parent) :
     QPixmap pix_document(":/resources/cartelle/Document-Add-icon");
     ui->label_4->setPixmap(pix_document);
 
-
     str="directory 1 Folder1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
     int count=number_elements(str);
     listGenerate(str, count);
+    values.push_back(str);
+
+    ui->back_button->setDisabled(true);
+    ui->back_button->hide();
+
+    ui->actionHome->setIcon(QIcon(":/resources/cartelle/home_icon"));
+    ui->actionUri->setIcon(QIcon(":/resources/cartelle/link_icon"));
+
+    ui->pushButton->setIcon(QIcon(":/resources/cartelle/open_icon"));
+    ui->pushButton_2->setIcon(QIcon(":/resources/cartelle/delete_icon"));
+    ui->pushButton_3->setIcon(QIcon(":/resources/cartelle/create_icon"));
+    ui->pushButton_4->setIcon(QIcon(":/resources/cartelle/create_icon"));
+    ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
+
+
+
 
 }
 
@@ -25,8 +41,9 @@ directory::~directory()
 }
 
 
-void directory::listGenerate(std::string str, int count)
+void directory::listGenerate(std::string str_first, int count)
 {
+    std::string str=generateString(str_first);
     std::string word;
     countDir=-1;
     for(int i=0; i<count; i++)
@@ -86,27 +103,37 @@ std::string directory::separate_word(std::string& string)
     return separato;
 }
 
+//this method is useful to delete from the string the \n in such way to visualize the list of element without spaces.
+std::string directory::generateString(std::string string)
+{
+    for(size_t i = 0; i < string.size(); i++)
+      if(string[i] == '\n')
+          string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
+    return string;
+}
+
+// this method counts the number of elements in the string
 int directory::number_elements(std::string& string)
 {
     int count=0;
     for(size_t i = 0; i < string.size(); i++)
       if(string[i] == '\n')
           count++;
-    string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
     return count;
 }
 
 // this method opens the home window
 void directory::on_actionHome_triggered()
 {
-    this->close();
+    home *homeWindow=new home(this);
+    homeWindow->show();
+    this->hide();
 }
 
-// this method opens the uri window
+// this method opens the uri window // !!!!!!
 void directory::on_actionUri_triggered()
 {
     uriWindow=new inserturi(this);
-    this->hide();
     uriWindow->show();
 }
 
@@ -125,24 +152,19 @@ void directory::on_pushButton_clicked()
              QString value= items->whatsThis();
              if(value=="directory")
              {
+                 aperto++;
                  // open the folder Window
-                 //folder1Window=new folder1(this);
-                 //folder1Window->show();
                  std::string str1="directory 1 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
-                 //folder1Window->openWindow(str1);
                  this->openWindow(str1);
-
 
              }
              else if(value=="file")
+
              {
-                 //open the textEdit Window
-                 textEditWindow= new TextEdit(this);
-                 const QRect availableGeometry = QApplication::desktop()->availableGeometry(textEditWindow);
-                 textEditWindow->resize(availableGeometry.width() / 2, (availableGeometry.height() * 2) / 3);
-                 textEditWindow->move((availableGeometry.width() - textEditWindow->width()) / 2,
-                         (availableGeometry.height() - textEditWindow->height()) / 2);
-                 textEditWindow->show();
+                 //open the notePad Window
+                 notepadWindow= new notepad(this);
+                 notepadWindow->show();
+
              }
              else
              {
@@ -157,12 +179,18 @@ void directory::on_pushButton_clicked()
     }
 }
 
+//this method opens the new window referred to another folder and it saves in the List<QString> the string referred to the attual folder
+// this is useful to move from a folder to another one.
 void directory::openWindow(std::string str1){
     ui->myListWidget->clear();
     int counter=number_elements(str1);
     listGenerate(str1,counter);
+    values.push_back(str1);
+    ui->back_button->setDisabled(false);
+    ui->back_button->show();
     this->show();
 }
+
 // this method deletes a selected folder or a selected document or a selected symlink
 void directory::on_pushButton_2_clicked()
 {
@@ -215,6 +243,7 @@ void directory::on_pushButton_3_clicked()
         std::string new_str="directory 1 "+name.toStdString()+'\n';
         QListWidgetItem *item= new QListWidgetItem(QIcon(":/resources/cartelle/folder_icon"),name);
         ui->myListWidget->addItem(item);
+        item->setWhatsThis("directory");
     }//if
     else
     {
@@ -239,18 +268,49 @@ void directory::closeEvent(QCloseEvent *event)
 
 }
 
-
 //this method creates a new document
 void directory::on_pushButton_4_clicked()
 {
+    // server message to say that everything is ok
+    bool msg=true;
+    if(msg)
+    {
+        count++;
+        QString name= ui->name_2->text();
+        ui->name_2->setText(" ");
+        //da passare al server: nome del document scelto dall'utente
+        std::string name_folder=name.toStdString();
+        QListWidgetItem *item= new QListWidgetItem(QIcon(":/resources/cartelle/document_image"),name);
+        ui->myListWidget->addItem(item);
+        item->setWhatsThis("file");
+    }//if
+    else
+    {
+      QMessageBox::warning(this, "Error Message","It is no possible to open the selected folder");
+    }
 }
 
-void directory::on_pushButton_5_clicked()
+//this method acts when the back button is clicked.
+void directory::on_back_button_clicked()
 {
-    ui->myListWidget->clear();
-    str="directory 1 Folder1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
-    int count=number_elements(str);
-    listGenerate(str,count);
-    // al posto di this dovrei passare il parent precedente.
+    if(aperto!=0)
+    {
+        ui->myListWidget->clear();
+        int dim=values.size();
+        if(dim!=1)
+            values.removeLast();
+        // prelevo la stringa relativa alla finestra precedente a quella aperta
+        std::string new_str= values.last();
+        dim=values.size();
+        int count=number_elements(new_str);
+        listGenerate(new_str,count);
+        aperto--;
+    }
+    if(aperto==0)
+    {
+        ui->back_button->setDisabled(true);
+        ui->back_button->hide();
+    }
+
     this->show();
 }

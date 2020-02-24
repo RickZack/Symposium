@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>890</width>
-    <height>618</height>
+    <width>1079</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,16 +25,16 @@
      <rect>
       <x>10</x>
       <y>90</y>
-      <width>871</width>
-      <height>421</height>
+      <width>1061</width>
+      <height>431</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>520</y>
+      <x>370</x>
+      <y>530</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -46,8 +46,8 @@
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>460</x>
-      <y>520</y>
+      <x>480</x>
+      <y>530</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -97,9 +97,15 @@
      <rect>
       <x>410</x>
       <y>40</y>
-      <width>61</width>
+      <width>81</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>61</width>
+      <height>0</height>
+     </size>
     </property>
     <property name="text">
      <string>CREATE</string>
@@ -127,11 +133,17 @@
    <widget class="QPushButton" name="pushButton_4">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>980</x>
       <y>40</y>
-      <width>61</width>
+      <width>81</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>61</width>
+      <height>0</height>
+     </size>
     </property>
     <property name="text">
      <string>CREATE</string>
@@ -175,17 +187,40 @@
      <string>NEW DOCUMENT</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="back_button">
     <property name="geometry">
      <rect>
-      <x>790</x>
-      <y>0</y>
-      <width>93</width>
-      <height>28</height>
+      <x>590</x>
+      <y>530</y>
+      <width>91</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>BACK</string>
+     <string>Back</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>40</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Insert the name of your document:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="name_2">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>40</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
     </property>
    </widget>
   </widget>
@@ -194,27 +229,47 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>890</width>
+     <width>1079</width>
      <height>26</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuGo_To">
-    <property name="title">
-     <string>Go To</string>
-    </property>
-    <addaction name="actionHome"/>
-    <addaction name="actionUri"/>
-   </widget>
-   <addaction name="menuGo_To"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionHome"/>
+   <addaction name="actionUri"/>
+   <addaction name="separator"/>
   </widget>
   <action name="actionHome">
+   <property name="icon">
+    <iconset>
+     <normaloff>cartelle/home_icon.png</normaloff>cartelle/home_icon.png</iconset>
+   </property>
    <property name="text">
     <string>Home</string>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Home&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
   </action>
   <action name="actionUri">
+   <property name="icon">
+    <iconset>
+     <normaloff>cartelle/link_icon.png</normaloff>cartelle/link_icon.png</iconset>
+   </property>
    <property name="text">
-    <string>Uri</string>
+    <string>Add Link</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Add Link&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
  </widget>

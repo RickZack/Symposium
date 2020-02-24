@@ -186,6 +186,7 @@ void TextEdit::closeEvent(QCloseEvent *e)
        e->ignore();
 }
 
+
 void TextEdit::setupFileActions()
 {
     QToolBar *tb = addToolBar(tr("File Actions"));
@@ -277,6 +278,7 @@ void TextEdit::setupEditActions()
 #endif
 }
 
+//da copiare in NOTEPAD
 void TextEdit::setupTextActions()
 {
     QToolBar *tb = addToolBar(tr("Format Actions"));

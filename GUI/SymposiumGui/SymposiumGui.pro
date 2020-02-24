@@ -38,7 +38,6 @@ SOURCES += \
         deleteaccount.cpp \
         directory.cpp \
         exit.cpp \
-        folder1.cpp \
         home.cpp \
         icon.cpp \
         inserturi.cpp \
@@ -57,7 +56,7 @@ SOURCES += \
         ../../SymServer.cpp \
         ../../user.cpp \
         ../../lib/hash/sha256.cpp \
-        newfolderwindow.cpp \
+        notepad.cpp \
         sigin.cpp \
         signup.cpp \
         textedit.cpp
@@ -73,7 +72,6 @@ HEADERS += \
         deleteaccount.h \
         directory.h \
         exit.h \
-        folder1.h \
         home.h \
         icon.h \
         inserturi.h \
@@ -94,7 +92,7 @@ HEADERS += \
         ../../SymServer.h \
         ../../user.h \
         ../../lib/hash/sha256.h \
-        newfolderwindow.h \
+        notepad.h \
         sigin.h \
         signup.h \
         textedit.h
@@ -116,6 +114,7 @@ FORMS += \
         inserturi.ui \
         mainwindow.ui \
         newfolderwindow.ui \
+        notepad.ui \
         sigin.ui \
         signup.ui
 
