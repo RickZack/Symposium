@@ -24,7 +24,7 @@ void inserturi::on_dir_clicked()
 
 void inserturi::change_text()
 {
-    path=dirWindow->path;
+    path=dirWindow->pathId;
     nameDir=dirWindow->nameOfDir;
     if(!nameDir.empty())
         ui->dir->setText(QString::fromStdString(dirWindow->nameOfDir));
