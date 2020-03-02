@@ -8,14 +8,19 @@ choosedir::choosedir(QWidget *parent) :
     ui(new Ui::choosedir)
 {
     ui->setupUi(this);
-    std::string str="directory 1 directory1\n file 9      file9 owner\n symlink 10      symlink10 modify\n directory 2  directory2\n directory 3   directory3\n directory 4  directory4\n directory 5 directory5\n directory 6  directory6\n directory 7   directory7\n directory 8 directory8\n";
+    std::string str="directory 1 directory1\n directory 2  directory2\n symlink 10   link10 owner\n directory 3   directory3\n file 9    file9 owner\n directory 4  directory4\n directory 5 directory5\n directory 6  directory6\n directory 7   directory7\n directory 8 directory8\n";
 
 
 
     int count=number_elements(str);
 
+    ui->tree->setColumnCount(3);
+    ui->tree->headerItem()->setText(0, "name of folder:");
+    ui->tree->header()->setVisible(true);
+    ui->tree->setColumnHidden(1, true);
+    ui->tree->setColumnHidden(2, true);
 
-    listGenerate(str, count);
+    treeGenerate(str, count);
 
     connect(ui->choose, SIGNAL(clicked()), parent, SLOT(change_text()));
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(reset_text()));
@@ -27,115 +32,127 @@ choosedir::~choosedir()
     delete ui;
 }
 
-
-
-
-void choosedir::listGenerate(std::string str, int count)
+void choosedir::treeGenerate(std::string str, int count)
 {
-    std::string word;
-    countDir=-1;
-    path="/";
-    pathForUser="/";
+    std::string name;
+    std::string path="/";
+    std::string pathUser="/home/";
+    std::string type;
     int indent=0;
-    spaces=0;
+    QTreeWidgetItem *fatherAbs=new QTreeWidgetItem();
+    fatherAbs->setIcon(0, QIcon("://icon/folder.png"));
+    fatherAbs->setText(0, "home");
+    fatherAbs->setText(1, QString::fromStdString(path));
+    fatherAbs->setText(2, QString::fromStdString(pathUser));
+    ui->tree->addTopLevelItem(fatherAbs);
+    QTreeWidgetItem *father=new QTreeWidgetItem();
+    father=nullptr;
+    std::stack<QTreeWidgetItem *> listOfFathers;
+
     for(int i=0; i<count; i++)
     {
-        word=separate_word(str);
-        QVariant v;
+        type=separate_word(str);
         id=separate_word(str);
+        spaces=0;
+        name=separate_word(str);
 
-        if(word=="directory")
+        if(spaces==0)
         {
-            spaces=0;
-            word=separate_word(str);
-            QListWidgetItem *item=new QListWidgetItem(QIcon("://icon/folder.png"), QString::fromStdString(word));
-            countDir++;
-            v.setValue(countDir);
-            item->setData(Qt::UserRole,v);
-            ui->list->addItem(item);
-
-
-            if(spaces==indent)
+            listOfFathers=std::stack<QTreeWidgetItem *>();
+            father=fatherAbs;
+            if(type=="directory")
             {
-             std::size_t found2 = path.find_last_of("/");
-             path.erase(found2, path.size());
-             found2=pathForUser.find_last_of("/");
-             pathForUser.erase(found2, pathForUser.size());
-             }
-             else if(spaces<indent)
-             {
-              for(int i=0; i<=indent-spaces; i++)
-              {
-               std::size_t found2 = path.find_last_of("/");
-               path.erase(found2, path.size());
-               found2=pathForUser.find_last_of("/");
-               pathForUser.erase(found2, pathForUser.size());
-              }
-               indent=spaces;
-
-              }
-              else if(spaces>indent)
-              {
-               indent++;
-               }
-               path=path+"/"+id;
-               pathForUser=pathForUser+"/"+word;
-               paths.push_back(path);
-               pathsForUser.push_back(pathForUser);
-
-
-
-            //mettere anche le icone traslate, vedere nel link di Riccardo
-
-            //NB riccordarsi di cambiare il codice di Symposium nella print!
+                path="/"+id+"/";
+                pathUser="/home/"+name+"/";
+            }
+        }
+        else if(spaces==indent+1)
+        {
+            father=listOfFathers.top();
+            if(type=="directory")
+            {
+                path=path+id+"/";
+                pathUser=pathUser+name+"/";
+            }
+        }
+        else if(spaces<indent)
+        {
+            for(int i=0; i<=indent-spaces; i++)
+            {
+                listOfFathers.pop();
+            }
+            if(type=="directory")
+            {
+                for(int i=0; i<=indent-spaces; i++)
+                {
+                    std::size_t found = path.find_last_of("/");
+                    path.erase(found, path.size());
+                    found = path.find_last_of("/");
+                    path.erase(found, path.size());
+                    path=path+"/";
+                    found=pathUser.find_last_of("/");
+                    pathUser.erase(found, pathUser.size());
+                    found=pathUser.find_last_of("/");
+                    pathUser.erase(found, pathUser.size());
+                    pathUser=pathUser+"/";
+                }
+                path=path+id+"/";
+                pathUser=pathUser+name+"/";
+            }
+            father=listOfFathers.top();
         }
 
-        else if(word=="file")
+
+
+        if(type=="directory")
         {
-            int spaces2=spaces;
-            word=separate_word(str);
-            QListWidgetItem *item=new QListWidgetItem(QIcon("://icon/file.png"), QString::fromStdString(word));
-            v.setValue(-1);
-            item->setData(Qt::UserRole,v);
-            ui->list->addItem(item);
-            word=separate_word(str);
-            spaces=spaces2;
+            QTreeWidgetItem *item=new QTreeWidgetItem();
+            item->setIcon(0, QIcon("://icon/folder.png"));
+            item->setText(0, QString::fromStdString(name));
+            item->setText(1, QString::fromStdString(path));
+            item->setText(2, QString::fromStdString(pathUser));
+            father->addChild(item);
+            listOfFathers.push(item);
+            indent=spaces;
+           }
+
+        else if(type=="file")
+        {
+            QTreeWidgetItem *item=new QTreeWidgetItem();
+            item->setIcon(0, QIcon("://icon/file.png"));
+            item->setText(0, QString::fromStdString(name));
+            item->setText(1, "");
+            item->setText(2, "");
+            father->addChild(item);
+            std::string word=separate_word(str);
         }
         else
         {
-            int spaces2=spaces;
-            word=separate_word(str);
-            QListWidgetItem *item=new QListWidgetItem(QIcon("://icon/link.png"), QString::fromStdString(word));
-            v.setValue(-1);
-            item->setData(Qt::UserRole,v);
-            ui->list->addItem(item);
-            word=separate_word(str);
-            spaces=spaces2;
+            QTreeWidgetItem *item=new QTreeWidgetItem();
+            item->setIcon(0, QIcon("://icon/link.png"));
+            item->setText(0, QString::fromStdString(name));
+            item->setText(1, "");
+            item->setText(2, "");
+            father->addChild(item);
+            std::string word=separate_word(str);
         }
     }
-    path="";
+
+
+
+
 }
 
 
-void choosedir::on_list_itemClicked(QListWidgetItem *item)
+void choosedir::on_tree_itemClicked(QTreeWidgetItem *item, int column)
 {
-    QVariant v = item->data(Qt::UserRole);
-    int countDir = v.value<int>();
 
-    if(countDir!=-1)
-    {
-        std::string name = pathsForUser.at(countDir);
-        path=paths.at(countDir);
-        name.erase(std::remove(name.begin(), name.end(), ' '), name.end());
-        nameOfDir=name;
-        ui->nameDir->setText(QString::fromStdString(name));
-    }
-    else {
-        nameOfDir="";
-        path="";
-        ui->nameDir->setText(QString::fromStdString(nameOfDir));
-    }
+    QString pathUser=item->text(2);
+    nameOfDir=pathUser.toStdString();
+    pathId=(item->text(1)).toStdString();
+    ui->nameDir->setText(pathUser);
 }
+
 
 
 std::string choosedir::separate_word(std::string& string)
@@ -149,7 +166,7 @@ std::string choosedir::separate_word(std::string& string)
     if(separato=="")
     {
         spaces++;
-        return " "+separate_word(string);
+        return separate_word(string);
     }
     return separato;
 }
@@ -172,3 +189,4 @@ void choosedir::on_choose_clicked()
     else
         this->hide();
 }
+

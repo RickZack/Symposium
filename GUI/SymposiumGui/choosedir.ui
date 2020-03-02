@@ -21,18 +21,8 @@
     <rect>
      <x>100</x>
      <y>290</y>
-     <width>411</width>
+     <width>421</width>
      <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QListWidget" name="list">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>20</y>
-     <width>411</width>
-     <height>251</height>
     </rect>
    </property>
   </widget>
@@ -61,6 +51,76 @@
    <property name="text">
     <string>CANCEL</string>
    </property>
+  </widget>
+  <widget class="QTreeWidget" name="tree">
+   <property name="geometry">
+    <rect>
+     <x>95</x>
+     <y>20</y>
+     <width>431</width>
+     <height>251</height>
+    </rect>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAsNeeded</enum>
+   </property>
+   <property name="sizeAdjustPolicy">
+    <enum>QAbstractScrollArea::AdjustToContents</enum>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
+   <property name="showDropIndicator" stdset="0">
+    <bool>true</bool>
+   </property>
+   <property name="indentation">
+    <number>25</number>
+   </property>
+   <property name="uniformRowHeights">
+    <bool>false</bool>
+   </property>
+   <property name="animated">
+    <bool>true</bool>
+   </property>
+   <property name="headerHidden">
+    <bool>false</bool>
+   </property>
+   <property name="columnCount">
+    <number>3</number>
+   </property>
+   <attribute name="headerVisible">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="headerCascadingSectionResizes">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="headerDefaultSectionSize">
+    <number>125</number>
+   </attribute>
+   <attribute name="headerHighlightSections">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="headerShowSortIndicator" stdset="0">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="headerStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <column>
+    <property name="text">
+     <string notr="true">1</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string notr="true">2</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string notr="true">3</string>
+    </property>
+   </column>
   </widget>
  </widget>
  <resources/>

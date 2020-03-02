@@ -40,7 +40,7 @@
      <item>
       <widget class="QPushButton" name="InsertUri">
        <property name="text">
-        <string>INSERT URI</string>
+        <string>ADD A LINK</string>
        </property>
       </widget>
      </item>
