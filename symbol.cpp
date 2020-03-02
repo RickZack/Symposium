@@ -92,6 +92,10 @@ bool symbol::isVerified() const{
     return verified;
 }
 
+int symbol::getCounter() const {
+    return counter;
+}
+
 std::ostream& operator<<(std::ostream& os, symbol s){
     os<<"char= "<<s.getCh()<<", siteId= "<<s.getSiteId()<<", pos= "<<"[";
     for(auto val:s.getPos())

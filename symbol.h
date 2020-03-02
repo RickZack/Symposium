@@ -50,6 +50,8 @@ namespace Symposium {
 
         int getSiteId() const;
 
+        int getCounter() const;
+
         const std::vector<int> &getPos() const;
 
         bool isVerified() const;

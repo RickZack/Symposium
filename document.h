@@ -143,7 +143,7 @@ namespace Symposium {
          * @param indexes position of the adjacent characters used to generate the position of the new one
          * @param toInsert the value to insert
          */
-        void generatePosition(const std::pair<int, int> indexes, const symbol &toInsert);
+        symbol generatePosition(const std::pair<int, int> indexes, const symbol &toInsert);
 
         /**
          * @brief it searches for the position of the inserted symbol
@@ -184,14 +184,14 @@ namespace Symposium {
          * @param pair the indexes
          * @return the searched position
          */
-        std::vector<int> findPosBefore(const std::pair<int, int> pair) const;
+        symbol findPosBefore(const std::pair<int, int> pair) const;
 
         /**
          * @brief searches the position after the one of the considered value
          * @param pair the indexes
          * @return the searched position
          */
-        std::vector<int> findPosAfter(const std::pair<int, int> pair) const;
+        symbol findPosAfter(const std::pair<int, int> pair) const;
 
         /**
          * @brief recoursive algorithm to dynamically generates the relative position of a symbol inserted in between two other ones
@@ -200,8 +200,9 @@ namespace Symposium {
          * @return the searched position
          */
         std::vector<int>
-        generatePosBetween(std::vector<int> vector, std::vector<int> vector1,std::vector<int> vector2,
-                           const std::pair<int, int> pair,int level);
+        generatePosBetween(std::vector<int> vector, std::vector<int> vector1, std::vector<int> vector2, int level,
+                           int i,
+                           int i1);
         /**
          * @brief finds the id of the symbol inserted in between two other onws
          * @param id1

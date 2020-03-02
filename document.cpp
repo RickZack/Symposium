@@ -85,66 +85,124 @@ symbol document::localInsert(const std::pair<int, int> &indexes, symbol &toInser
     int i1=indexes.second;
     checkIndex(i0,i1);
 
-    generatePosition(indexes,toInsert);
+    symbol newSymb= generatePosition(indexes,toInsert);
     char sym=symbols[i0][i1].getCh();
 
     if(sym==emptyChar){
-        symbols[i0][i1]=toInsert;
+        //symbols[i0][i1]=toInsert;
+        symbols[i0][i1]=newSymb;
     }
     else {
-        symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
+        //symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
+        symbols[i0].insert(symbols[i0].begin() + i1, newSymb);
         }
 
-    return toInsert;
+    return newSymb;
 }
 
-void document::generatePosition(const std::pair<int, int> indexes,const symbol &toInsert){
-    std::vector<int> posBefore= findPosBefore(indexes);
-    std::vector <int> posAfter= findPosAfter(indexes);
+symbol document::generatePosition(const std::pair<int, int> indexes,const symbol &toInsert){
+    std::vector<int> posBefore;
+    int siteIdB;
+    symbol symB=findPosBefore(indexes);
+    if(symB==emptySymbol){
+        siteIdB=-1;
+    }else{
+        posBefore.push_back(symB.getPos().front());
+        siteIdB=symB.getSiteId();
+    }
+
+    std::vector <int> posAfter;
+    int siteIdA;
+    symbol symA=findPosAfter(indexes);
+    if(symA==emptySymbol){
+        siteIdA=-1;
+    }else{
+        posAfter.push_back(symA.getPos().front());
+        siteIdA=symB.getSiteId();
+    }
     int level=0;
-    std::vector<int> newPos= generatePosBetween(posBefore, posAfter, newPos, indexes,level);
+    std::vector<int> inPos;
+    std::vector<int> newPos= generatePosBetween(posBefore, posAfter, inPos, level, siteIdB, siteIdA);
+
+    symbol newSymbol(toInsert.getCh(),toInsert.getSiteId(),toInsert.getCounter(),newPos,false);
+    return newSymbol;
 }
 
 
-std::vector<int> document::findPosBefore(const std::pair<int, int> indexes) const {
 
-    int i0=indexes.first;
-    int i1=indexes.second;
-    wchar_t ch=symbols[i0][i1].getCh();
-    int line= symbols[i0].size();
-    if(ch==0 && line!=0){
+
+symbol document::findPosBefore(const std::pair<int, int> indexes) const {
+
+    int line=indexes.first;
+    int ch=indexes.second;
+
+    // I don't have position before the considered one
+    // FIRST LIMIT CASE
+    if(ch==0 && line==0){
+        symbol sym=emptySymbol;
+        return sym;
+    }
+        // SECOND LIMIT CASE: I have to change line
+    else if(ch==0 && line!=0){
         line=line-1;
         ch=symbols[line].size();
+    }else{
+        ch=ch-1;
     }
-    return symbols[line][ch-1].getPos();
+    symbol sym=symbols[line][ch];
+    return sym;
 }
 
-std::vector<int> document::findPosAfter(const std::pair<int, int> indexes) const {
-    int i0=indexes.first;
-    int i1=indexes.second;
-    wchar_t ch=symbols[i0][i1].getCh();
-    int line= symbols[i0].size();
+symbol document::findPosAfter(const std::pair<int, int> indexes) const {
+    int line=indexes.first;
+    int ch=indexes.second;
+
     int numLines=symbols.size();
-    int numChars=symbols[line].capacity();
-
-    if ((line<numLines-1) && (ch==numChars)) {
-        line = line + 1;
-        ch = 0;
+    int numChars=0;
+    for(int i=0;i<symbols[line].size();i++){
+        if (symbols[line][i]!=emptySymbol){
+            numChars++;
+        }
     }
-    return symbols[line][ch].getPos();
+
+    // If I have lines after the considered one, but I'm at the end of the considered line
+    if(line==numLines-1 && ch==numChars){
+        symbol sym=emptySymbol;
+        return sym;
+    }else if(line<numLines-1 && ch==numChars){
+        line=line+1;
+        ch=0;
+    }else if(line>numLines-1&& ch==0){
+        symbol sym=emptySymbol;
+        return sym;
+    }
+    symbol sym=symbols[line][ch];
+    return sym;
 }
 
 
-std::vector<int> document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAfter,std::vector<int> newPos,
-                                              const std::pair<int, int> indexes, int level) {
+std::vector<int>
+document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAfter, std::vector<int> newPos, int level,
+                             int siteIdB,int siteIdA) {
 
-    int i0=indexes.first;
     // change 2 to any other number to change base multiplication
-    int base=base*2;
+    int base=pow(2,level)*32;
     char boundaryStrategy= retrieveStrategy(level);
+    int id1,id2;
 
-    int id1= posBefore[0];
-    int id2= posAfter[0];
+    if(posBefore.empty()){
+        //id1=indexes.first;
+        id1=0;
+    }else{
+        id1=posBefore[0];
+    }
+    if(posAfter.empty()){
+        //id1=indexes.second;
+        id2=base;
+    }else{
+        id2=posAfter[0];
+    }
+
     if(id2-id1>1){
         int newDigit= generateIdBetween(id1,id2,boundaryStrategy);
         newPos.push_back(newDigit);
@@ -154,16 +212,16 @@ std::vector<int> document::generatePosBetween(std::vector<int> posBefore, std::v
         std::vector<int> pos1=posBefore;
         pos1.erase(pos1.begin());
         std::vector<int> pos2;
-        return generatePosBetween(pos1, pos2, newPos, indexes,level+1);
+        return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
 
     }else if(id1==id2){
-        if(symbols[i0][id1].getSiteId()<symbols[i0][id2].getSiteId()){
+        if(siteIdB<siteIdA){
             newPos.push_back(id1);
             //pos1.slice(1)
             std::vector<int> pos1=posBefore;
             pos1.erase(pos1.begin());
             std::vector<int> pos2;
-            return generatePosBetween(pos1,pos2,newPos,indexes,level+1);
+            return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
         }else{
            newPos.push_back(id1);
             //pos1.slice(1)
@@ -172,27 +230,31 @@ std::vector<int> document::generatePosBetween(std::vector<int> posBefore, std::v
             //pos2.slice(1)
             std::vector<int> pos2=posAfter;
             pos2.erase(pos2.begin());
-            return generatePosBetween(pos1,pos2,newPos,indexes,level+1);
+            return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
         }
     }
+
     return newPos;
+
 }
 
 
-char document::retrieveStrategy(const int level) {
-    if(strategyCache[level]){
+char document::retrieveStrategy(const int level){
+
+   if(!strategyCache.empty()){
         return strategyCache[level];
     }
 
-    int value=round(rand());
+    int value=rand()%2;
     switch (strategy){
-        case 'p': strategy='+';
-        case 'm': strategy='-';
-        case 'r': strategy=value==0? '+':'-';
-        default: strategy=(level%2)==0 ?'+':'-';
+        case 'p': strategy='+'; break;
+        case 'm': strategy='-'; break;
+        case 'r': strategy=value==0? '+':'-';break;
+        default: strategy=(level%2)==0 ?'+':'-'; break;
     }
-    strategyCache[level]=strategy;
+    strategyCache.insert(strategyCache.begin()+level,strategy);
     return strategy;
+
 }
 
 
@@ -208,7 +270,7 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
             id2=id1+boundary;
         }
     }
-    return floor(rand()*(id2-id1))+id1;
+    return floor(rand()%(id2-id1))+id1;
 }
 
 symbol document::localRemove(const std::pair<int, int> &indexes) {
