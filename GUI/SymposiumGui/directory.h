@@ -7,8 +7,7 @@
 #include <QtWidgets/qwidget.h>
 
 #include "inserturi.h"
-#include "textedit.h"
-#include "notepad.h"
+#include "choosepriv.h"
 
 namespace Ui {
 class directory;
@@ -41,9 +40,8 @@ private slots:
 private:
     Ui::directory *ui;
     inserturi *uriWindow;
-    TextEdit *textEditWindow;
     QListWidgetItem *item1;
-    notepad *notepadWindow;
+    choosepriv *chooseprivWindow;
 
     std::string str;
     std::string old_str;

@@ -34,6 +34,7 @@ SOURCES += \
         activetimerlink.cpp \
         changeuserinfo.cpp \
         choosedir.cpp \
+        choosepriv.cpp \
         currentusers.cpp \
         deleteaccount.cpp \
         directory.cpp \
@@ -68,6 +69,7 @@ HEADERS += \
         activetimerlink.h \
         changeuserinfo.h \
         choosedir.h \
+        choosepriv.h \
         currentusers.h \
         deleteaccount.h \
         directory.h \
@@ -104,6 +106,7 @@ FORMS += \
         activetimerlink.ui \
         changeuserinfo.ui \
         choosedir.ui \
+        choosepriv.ui \
         currentusers.ui \
         deleteaccount.ui \
         directory.ui \

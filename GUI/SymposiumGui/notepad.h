@@ -5,6 +5,7 @@
 #include  <QtCore>
 #include  <QtGui>
 #include <QTextEdit>
+#include <QCloseEvent>
 
 
 #include "currentusers.h"
@@ -12,6 +13,7 @@
 #include "activetimerlink.h"
 #include "activecounterlink.h"
 #include "activealwayslink.h"
+
 
 
 
@@ -74,6 +76,8 @@ private:
     void activeAlwaysLink();
     void timerLink();
     void counterLink();
+
+    void closeEvent(QCloseEvent *event);
 
     QAction *actionTextBold;
     QAction *actionTextUnderline;

@@ -60,6 +60,9 @@
         <file>cartelle/open_icon.png</file>
         <file>cartelle/create_icon.png</file>
         <file>cartelle/back_icon.png</file>
+        <file>cartelle/owner_icon.jpg</file>
+        <file>cartelle/reader_icon.jpg</file>
+        <file>cartelle/writer_icon.jpg</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/file.png</file>

@@ -161,10 +161,10 @@ void directory::on_pushButton_clicked()
              else if(value=="file")
 
              {
-                 //open the notePad Window
-                 notepadWindow= new notepad(this);
-                 notepadWindow->show();
-
+                 // I have to open the choosepriv first
+                 chooseprivWindow= new choosepriv(this);
+                 chooseprivWindow->show();
+                 this->hide();
              }
              else
              {
