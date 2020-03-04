@@ -464,18 +464,10 @@ void notepad::counterLink()
 }
 
 void notepad::closeEvent(QCloseEvent *event){
-        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
-                                                                    tr("Are you sure to quit?\n"),
-                                                                     QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn != QMessageBox::Yes) {
-            event->ignore();
-        } else {
-            // potrebbe essere passata dal server la stringa relativa all'ultima cartella aperta
-            // oppure aprire direttamente la directory iniziale
-            event->ignore();
-            directory *dirWindow=new directory(this);
-            dirWindow->show();
-            this->hide();
-        }
+    // potrebbe essere passata dal server la stringa relativa all'ultima cartella aperta
+    // oppure aprire direttamente la directory iniziale
+    event->ignore();
+    directory *dirWindow=new directory(this);
+    dirWindow->show();
+    this->hide();
 }

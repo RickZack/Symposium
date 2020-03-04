@@ -52,3 +52,11 @@ void inserturi::on_owner_clicked()
     privilege="owner";
 }
 
+void inserturi::closeEvent(QCloseEvent *event){
+    event->ignore();
+    if(this->openUri){
+        directory *dir=new directory(this);
+        dir->show();
+    }
+    this->hide();
+}

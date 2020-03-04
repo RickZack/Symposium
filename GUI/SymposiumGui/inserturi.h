@@ -14,6 +14,7 @@ class inserturi : public QDialog
 public:
     explicit inserturi(QWidget *parent = nullptr);
     ~inserturi();
+    bool openUri=false;
 
 private slots:
     void on_dir_clicked();
@@ -23,6 +24,8 @@ private slots:
     void on_writer_clicked();
 
     void on_owner_clicked();
+
+    void closeEvent(QCloseEvent *e);
 
 public slots:
     void change_text();
