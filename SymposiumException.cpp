@@ -90,3 +90,10 @@ const char* messageException::messageErrors[]={"Action is not consistent with th
 messageException::messageException(messageExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
         SymposiumException(file, line, func, messageErrors[static_cast<int>(exceptionCode)]){};
+
+
+const char* clientdispatcherException::clientdispatcherErrors[]={"The action of this message is not valid", "Unrecognized class of message", "The action of this message is not allowed"};
+
+clientdispatcherException::clientdispatcherException(clientdispatcherExceptionCodes exceptionCode, const char *file, int line,
+                                       const char *func) :
+        SymposiumException(file, line, func, clientdispatcherErrors[static_cast<int>(exceptionCode)]){};

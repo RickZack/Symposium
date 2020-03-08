@@ -134,6 +134,18 @@ namespace Symposium{
         virtual ~messageException()=default;
     };
 
+    class clientdispatcherException : public SymposiumException {
+        static const char* clientdispatcherErrors[];
+    public:
+        /**
+         * @brief Specific error codes for @ref clientdispatcherException. They are used as indexes to the error table string
+         */
+        enum clientdispatcherExceptionCodes{UnknownMessageAction=0, UnknownClassOfMessage, MsgActionNotAllowed};
+
+        explicit clientdispatcherException(clientdispatcherExceptionCodes exceptionCode, const char *file, int line, const char *func);
+        virtual ~clientdispatcherException()=default;
+    };
+
 
 }
 
