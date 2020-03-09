@@ -3,8 +3,10 @@
 
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QMovie>
 #include "success.h"
 #include "waiting.h"
+
 
 namespace Ui {
 class login;

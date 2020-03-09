@@ -110,6 +110,36 @@ color: #8DB0BB</string>
      <string>the credentials are wrong, try again</string>
     </property>
    </widget>
+   <widget class="QLabel" name="wait">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>180</y>
+      <width>71</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;
+color:#002627;</string>
+    </property>
+    <property name="text">
+     <string>waiting...</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="gif">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>180</y>
+      <width>55</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

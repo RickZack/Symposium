@@ -7,17 +7,24 @@ login::login(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->error->hide();
+    ui->gif->hide();
+    ui->wait->hide();
+    QMovie *movie = new QMovie(":/img/loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 }
 
 void login::errorLogin()
 {
-    waitingWindow->close();
+    ui->gif->hide();
+    ui->wait->hide();
     ui->error->show();
 }
 
 void login::errorConnection()
 {
-    waitingWindow->close();
+    ui->gif->hide();
+    ui->wait->hide();
     QMessageBox::information(this,
                              tr("Connection Error"), tr("Check your internet connection, there is some problem"), QMessageBox::Ok);
 }
@@ -29,7 +36,8 @@ void login::errorConnection()
 
 void login::successLogin()
 {
-    waitingWindow->close();
+    ui->gif->hide();
+    ui->wait->hide();
     close();
     successWindow= new success(this);
     successWindow->show();
@@ -37,8 +45,8 @@ void login::successLogin()
 
 void login::waiting()
 {
-    waitingWindow= new class waiting(this);
-    waitingWindow->show();
+    ui->gif->show();
+    ui->wait->show();
 }
 
 login::~login()
@@ -50,7 +58,8 @@ void login::on_button_clicked()
 {
     QString username= ui->name->text();
     QString password = ui->password->text();
-    waiting();
+    if(username!="" && password!="")
+        waiting();
 }
 
 
