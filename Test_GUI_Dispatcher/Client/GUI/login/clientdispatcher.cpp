@@ -10,20 +10,12 @@ Clientdispatcher::Clientdispatcher(QObject *parent) : QObject(parent)
 }
 
 void Clientdispatcher::sendMessage(QString s){
-    qDebug() << "Entrato " << s;
     QTextStream out(&(this->socket));
     //inviamo un messaggio
     out << s;
     out.flush();
-    qDebug() << "dopo flush";
     if (out.status() != QTextStream::Ok)
         qDebug() << "Errore";
-}
-
-void Clientdispatcher::sendMessage(){
-    QTextStream out(&(this->socket));
-    //inviamo un messaggio
-    out << "test";
 }
 
 void Clientdispatcher::readyRead(){

@@ -66,8 +66,7 @@ void login::on_button_clicked()
     QString password = ui->password->text();
     if(username!="" && password!=""){
         waiting();
-        std::thread i([&]{this->cl->logIn(username,password);});
-        i.join();
+        this->cl->logIn(username,password);
     }
     else {
         ui->haveto->show();

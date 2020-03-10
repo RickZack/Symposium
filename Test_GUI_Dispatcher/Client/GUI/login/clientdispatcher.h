@@ -22,7 +22,6 @@ class login;
         Clientdispatcher(QObject *parent = nullptr);
         void logIn(const QString &username, const QString &pwd);
         void setlg(login* lg);
-        void sendMessage();
         void sendMessage(QString s);
 
     public slots:
