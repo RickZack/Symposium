@@ -140,6 +140,22 @@ color:#002627;</string>
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="haveto">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>190</y>
+      <width>321</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;; color: rgb(255, 0, 0);</string>
+    </property>
+    <property name="text">
+     <string>You have to digit username and password </string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

@@ -9,6 +9,7 @@ login::login(QWidget *parent) :
     ui->error->hide();
     ui->gif->hide();
     ui->wait->hide();
+    ui->haveto->hide();
     QMovie *movie = new QMovie(":/img/loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
@@ -16,6 +17,7 @@ login::login(QWidget *parent) :
 
 void login::errorLogin()
 {
+    ui->haveto->hide();
     ui->gif->hide();
     ui->wait->hide();
     ui->error->show();
@@ -23,6 +25,7 @@ void login::errorLogin()
 
 void login::errorConnection()
 {
+    ui->haveto->hide();
     ui->gif->hide();
     ui->wait->hide();
     QMessageBox::information(this,
@@ -36,6 +39,7 @@ void login::errorConnection()
 
 void login::successLogin()
 {
+    ui->haveto->hide();
     ui->gif->hide();
     ui->wait->hide();
     close();
@@ -45,6 +49,7 @@ void login::successLogin()
 
 void login::waiting()
 {
+    ui->haveto->hide();
     ui->gif->show();
     ui->wait->show();
 }
@@ -60,6 +65,9 @@ void login::on_button_clicked()
     QString password = ui->password->text();
     if(username!="" && password!="")
         waiting();
+    else {
+        ui->haveto->show();
+    }
 }
 
 
