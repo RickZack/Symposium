@@ -42,6 +42,7 @@ void ServerDispatcher::incomingConnection(qintptr socketDescriptor){
 }
 
 void ServerDispatcher::readyRead(){
+    qDebug() << "Entrato ";
     //questa funzione viene chiamata quando un qualche client ha inviato qualcosa
     //otteniamo il socket che ha ricevuto i dati
     QTcpSocket* readSocket = qobject_cast<QTcpSocket*>(sender());
@@ -50,12 +51,19 @@ void ServerDispatcher::readyRead(){
     //leggiamo quanto ricevuto
     QString line = stream.readAll();
     qDebug() << "socketdescriptor - " << readSocket->socketDescriptor() << ": " << line << "\n";
+
+    if(line == "mario mario"){
+        this->sendMessage("OK");
+    }else{
+        this->sendMessage("KO");
+    }
+
     //inviamo la risposta
-    this->sendMessage();
+    //this->sendMessage();
 }
 
-void ServerDispatcher::sendMessage(){
+void ServerDispatcher::sendMessage(QString s){
     QTextStream out(this->tmp);
     //inviamo un messaggio
-    out << "ciao client";
+    out << s;
 }

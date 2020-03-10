@@ -3,10 +3,15 @@
 # Project created by QtCreator 2020-03-09T15:15:16
 #
 #-------------------------------------------------
+QT -= gui
 
 QT       += core gui
 
+QT += network widgets
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+requires(qtConfig(filedialog))
+qtHaveModule(printsupport): QT += printsupport
 
 TARGET = login
 TEMPLATE = app
@@ -23,15 +28,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
+CONFIG -= app_bundle
 
 SOURCES += \
         main.cpp \
         login.cpp \
-        success.cpp
+        success.cpp \
+        clientdispatcher.cpp
 
 HEADERS += \
         login.h \
-        success.h
+        success.h \
+        clientdispatcher.h
 
 FORMS += \
         login.ui \

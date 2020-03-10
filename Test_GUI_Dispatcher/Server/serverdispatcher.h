@@ -19,7 +19,7 @@
     public:
         ServerDispatcher();
         void startServer();
-        void sendMessage();
+        void sendMessage(QString s);
 
     protected:
         void incomingConnection(qintptr socketDescriptor) override;

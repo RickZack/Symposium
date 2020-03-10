@@ -5,6 +5,9 @@
 #include <QMessageBox>
 #include <QMovie>
 #include "success.h"
+#include "clientdispatcher.h"
+
+class Clientdispatcher;
 
 
 namespace Ui {
@@ -21,6 +24,7 @@ public:
     void errorConnection();
     void successLogin();
     void waiting();
+    void setClientDispatcher(Clientdispatcher *cl);
     ~login();
 
 private slots:
@@ -30,6 +34,7 @@ private:
     Ui::login *ui;
     success *successWindow;
     class waiting *waitingWindow;
+    Clientdispatcher *cl;
 };
 
 #endif // LOGIN_H

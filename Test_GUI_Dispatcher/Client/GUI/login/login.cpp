@@ -1,6 +1,7 @@
 #include "login.h"
 #include "ui_login.h"
 
+
 login::login(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::login)
@@ -63,11 +64,18 @@ void login::on_button_clicked()
 {
     QString username= ui->name->text();
     QString password = ui->password->text();
-    if(username!="" && password!="")
+    if(username!="" && password!=""){
         waiting();
+        std::thread i([&]{this->cl->logIn(username,password);});
+        i.join();
+    }
     else {
         ui->haveto->show();
     }
+}
+
+void login::setClientDispatcher(Clientdispatcher *cl){
+    this->cl = cl;
 }
 
 
