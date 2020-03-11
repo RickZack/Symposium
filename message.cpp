@@ -125,6 +125,7 @@ clientMessage & clientMessage::clearAuthParam() {
     actionOwner.second.clear();
     return *this;
 }
+BOOST_CLASS_EXPORT(Symposium::clientMessage)
 
 askResMessage::askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                              const std::string &path,
@@ -211,6 +212,7 @@ void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
             throw messageException(messageException::askResMes, UnpackFileLineFunction());
     }
 }
+BOOST_CLASS_EXPORT(Symposium::askResMessage)
 
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                             const user &newUser,
@@ -248,6 +250,7 @@ bool serverMessage::isRelatedTo(const clientMessage &other) const {
 msgOutcome serverMessage::getResult() const {
     return result;
 }
+BOOST_CLASS_EXPORT(Symposium::serverMessage)
 
 loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId)
                            : message(msgId), serverMessage(result, msgId), loggedUser(loggedUser) {
@@ -586,6 +589,7 @@ void updateDocMessage::invokeMethod(SymServer &server) {
             throw messageException(messageException::upDoc, UnpackFileLineFunction());
     }
 }
+BOOST_CLASS_EXPORT(Symposium::updateDocMessage)
 
 userDataMessage::userDataMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                                  msgOutcome result,

@@ -42,18 +42,31 @@
 #include "resourceType.h"
 #include "SymposiumException.h"
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include "boost/serialization/unordered_map.hpp"
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/assume_abstract.hpp>
+#include <boost/serialization/export.hpp>
+
 /**
  * @interface message message.h message
  * @brief class used as interface for a message
  */
  namespace Symposium {
      class message {
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version)
+         {
+             ar & msgId & action;
+         }
      protected:
          static int msgCounter;
          int msgId;                 /**< random identifier for the message, used when a message is followed by an answer*/
          msgType action;            /**< Defines the action for the current message */
 
-         message(int msgId);
+         message(int msgId=0);
 
      public:
          int getMsgId() const;
@@ -77,7 +90,19 @@
  */
      class clientMessage : public virtual message {
          std::pair<std::string, std::string> actionOwner; /**< Defines the user (username, password) that has just performed the action */
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version)
+         {
+             // save/load base class information
+             ar & boost::serialization::base_object<Symposium::message>(*this);
+             ar & actionOwner;
+         }
+
      protected:
+         //Needed by boost::serialization
+         clientMessage()=default;
          clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
      public:
 
@@ -131,6 +156,7 @@
          virtual ~clientMessage() override = default;
      };
 
+
     /**
      * @brief class used to model a message sent by a client asking for a resource
      *
@@ -141,6 +167,18 @@
      * If @e action is "changeResName" then @e resourceId is the new file name.
      */
      class askResMessage : public clientMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version)
+         {
+             // save/load base class information
+             ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+             ar & path & name & resourceId &accessMode;
+         }
+         //Needed by boost::serialization
+         askResMessage()=default;
+
          std::string path;          /**< path where to put the resource */
          std::string name;          /**< name to assign to the resource */
          std::string resourceId;    /**< when a sharing request is made, contains the path to the resource (the uri). */
@@ -224,6 +262,17 @@
      * @brief class used to model a message sent by a client to close a resource
      */
      class updateDocMessage : public clientMessage {
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version)
+         {
+             // save/load base class information
+             ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+             ar & resourceId;
+         }
+         //Needed by boost::serialization
+         updateDocMessage()=default;
+
          int resourceId;            /**< identifier of the resource on which perform the action */
      public:
 
@@ -254,11 +303,20 @@
  * @brief class used to model a message sent by the server
  */
      class serverMessage : public virtual message {
-         /**< result of an operation asked to the server */
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version)
+         {
+             // save/load base class information
+             ar & boost::serialization::base_object<Symposium::message>(*this);
+             ar & result;
+         }
+         //Needed by boost::serialization
+         serverMessage()=default;
      protected:
          serverMessage(msgOutcome result, int msgId = 0);
 
-         msgOutcome result;
+         msgOutcome result;         /**< result of an operation asked to the server */
      public:
 
          /**
