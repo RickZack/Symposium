@@ -93,7 +93,7 @@ signUpMessage clientdispatcher::signUp(const std::string &username, const std::s
     }
 }
 
-clientMessage clientdispatcher::logIn(const std::string &username, const std::string &pwd) {
+void clientdispatcher::logIn(const std::string &username, const std::string &pwd) {
     std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.logIn(username,pwd));
     try {
         sendMessage(mess);
