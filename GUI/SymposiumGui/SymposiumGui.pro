@@ -4,7 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += core gui
+
+QT += network widgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 requires(qtConfig(filedialog))
@@ -60,7 +62,9 @@ SOURCES += \
         notepad.cpp \
         sigin.cpp \
         signup.cpp \
-        textedit.cpp
+        textedit.cpp \
+        Dispatcher/clientdispatcher.cpp \
+        Dispatcher/serverdispatcher.cpp
 
 HEADERS += \
         about.h \
@@ -97,7 +101,9 @@ HEADERS += \
         notepad.h \
         sigin.h \
         signup.h \
-        textedit.h
+        textedit.h \
+        Dispatcher/clientdispatcher.h \
+        Dispatcher/serverdispatcher.h
 
 FORMS += \
         about.ui \

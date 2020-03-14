@@ -40,9 +40,10 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-#include "../SymposiumException.h"
-#include "../message.h"
-#include "../SymClient.h"
+#include "../../../SymposiumException.h"
+#include "../../../message.h"
+#include "../../../SymClient.h"
+#include "../sigin.h"
 
 namespace Symposium {
 
@@ -55,13 +56,14 @@ namespace Symposium {
         QTcpSocket socket;
         QHostAddress svAddress = QHostAddress("127.0.0.1");
         quint16 svPort = 1234;
+        void *currentWindow;
 
     public:
         clientdispatcher(QObject *parent = nullptr);
         void sendMessage(const std::shared_ptr<clientMessage> MessageToSend);
         //void sendMessage_withBoost(const std::shared_ptr<clientMessage> MessageToSend);
         signUpMessage signUp(const std::string &username, const std::string &pwd, const std::string &nickname, const std::string &iconPath);
-        clientMessage logIn(const std::string &username, const std::string &pwd);
+        void logIn(const std::string &username, const std::string &pwd);
         askResMessage openSource(const std::string &path, const std::string &name, privilege reqPriv);
         askResMessage openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName);
         askResMessage createNewSource(const std::string &path, const std::string &name);
@@ -78,6 +80,13 @@ namespace Symposium {
         clientMessage logout();
         updateDocMessage mapSiteIdToUser(const document &currentDoc);
         void test_sendMessage();
+
+        /**
+         * @brief constructs a @ref signUpMessage to send to the server to ask for registration
+         * @param a pointer to a sigin window
+         */
+        void setSignIn(sigin *si);
+
 
     private:
         /*int getmsgaction(const std::shared_ptr<clientMessage> Message);

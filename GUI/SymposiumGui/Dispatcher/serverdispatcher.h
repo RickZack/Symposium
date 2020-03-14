@@ -33,9 +33,9 @@
 
 #include <QtNetwork>
 #include <boost/archive/text_iarchive.hpp>
-#include "../SymposiumException.h"
+#include "../../../SymposiumException.h"
 //#include "../message.h"
-#include "../SymServer.h"
+#include "../../../SymServer.h"
 
 
  namespace Symposium {
