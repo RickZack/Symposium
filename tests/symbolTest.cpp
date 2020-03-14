@@ -27,9 +27,16 @@
  *
  * Created on 18 ottobre 2019, 15:52
  */
+
+#define BOOST_SERIALIZATION_DYN_LINK 1
 #include <gtest/gtest.h>
 #include <iostream>
 #include "../symbol.h"
+
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+
 
 using namespace Symposium;
 TEST(symbolTest, symbolComparisonFromSameHost){
@@ -43,4 +50,26 @@ TEST(symbolTest, symbolComparisonFromDifferentHost){
     symbol s2('b', 1, 0, {1}, false);
     EXPECT_GT(s2, s1);
     EXPECT_FALSE(s2<s1);
+}
+
+struct symbolSerialization: ::testing::Test{
+    std::stringstream stream;
+
+    void storeSymbol(const symbol& u){
+        boost::archive::text_oarchive oa(stream);
+        oa<<u;
+    }
+    void loadSymbol(symbol& u){
+        boost::archive::text_iarchive ia(stream);
+        ia>>u;
+    }
+};
+
+TEST_F(symbolSerialization, serialize){
+    symbol toStore('a', 0, 0, {1}, false);
+    symbol toLoad('b', 0, 1, {1, 5}, false);
+    ASSERT_NE(toStore, toLoad);
+    storeSymbol(toStore);
+    loadSymbol(toLoad);
+    EXPECT_EQ(toLoad, toStore);
 }

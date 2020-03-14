@@ -28,8 +28,9 @@
  * Created on 13 Giugno 2019, 16.44
  */
 #include <tuple>
-#include "symbol.h"
 #include <iostream>
+#include "symbol.h"
+
 using namespace Symposium;
 
 symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos, bool verified) : ch(ch), siteId(siteId),

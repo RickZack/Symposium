@@ -29,8 +29,12 @@
  */
 
 #include <gtest/gtest.h>
-#include "../uri.h"
 #include <cstdlib>
+
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
+#include "../uri.h"
 
 using namespace Symposium;
 

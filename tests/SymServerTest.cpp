@@ -947,3 +947,25 @@ TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdWithUnknownSiteId){
                                          std::pair<int, user>(3, SymServer::unknownUser)});
     EXPECT_EQ(expected, mapping);
 }
+
+struct SymServerSerialization: ::testing::Test{
+    SymServer toStore, toLoad;
+    std::stringstream stream;
+
+    void store(const SymServer& u){
+        boost::archive::text_oarchive oa(stream);
+        oa<<u;
+    }
+    void load(SymServer& u){
+        boost::archive::text_iarchive ia(stream);
+        ia>>u;
+    }
+};
+
+TEST_F(SymServerSerialization, serialize){
+    toStore.addUser(const_cast<user &>(SymServer::unknownUser));
+    EXPECT_NE(toStore, toLoad);
+    store(toStore);
+    load(toLoad);
+    EXPECT_EQ(toStore, toLoad);
+}

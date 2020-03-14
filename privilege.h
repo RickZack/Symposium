@@ -30,7 +30,7 @@
 #ifndef SYMPOSIUM_PRIVILEGE_H
 #define SYMPOSIUM_PRIVILEGE_H
 #include <iostream>
-#include "Symposium.h"
+//#include "Symposium.h"
 
 namespace Symposium {
     /**

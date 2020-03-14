@@ -38,16 +38,9 @@
 #include "symbol.h"
 #include "uri.h"
 #include "messageData.h"
-#include "filesystem.h"
 #include "resourceType.h"
 #include "SymposiumException.h"
 
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include "boost/serialization/unordered_map.hpp"
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/assume_abstract.hpp>
-#include <boost/serialization/export.hpp>
 
 /**
  * @interface message message.h message
@@ -57,10 +50,7 @@
      class message {
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version)
-         {
-             ar & msgId & action;
-         }
+         void serialize(Archive &ar, const unsigned int version);
      protected:
          static int msgCounter;
          int msgId;                 /**< random identifier for the message, used when a message is followed by an answer*/
@@ -93,12 +83,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version)
-         {
-             // save/load base class information
-             ar & boost::serialization::base_object<Symposium::message>(*this);
-             ar & actionOwner;
-         }
+         void serialize(Archive &ar, const unsigned int version);
 
      protected:
          //Needed by boost::serialization
@@ -170,12 +155,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version)
-         {
-             // save/load base class information
-             ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
-             ar & path & name & resourceId &accessMode;
-         }
+         void serialize(Archive &ar, const unsigned int version);
          //Needed by boost::serialization
          askResMessage()=default;
 
@@ -235,6 +215,12 @@
  * @brief class used to model a sign up message sent by a client
  */
      class signUpMessage : public clientMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         signUpMessage()=default;
+
          user newUser;          /**< new SympUser data inserted by the user */
      public:
 
@@ -264,12 +250,7 @@
      class updateDocMessage : public clientMessage {
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version)
-         {
-             // save/load base class information
-             ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
-             ar & resourceId;
-         }
+         void serialize(Archive &ar, const unsigned int version);
          //Needed by boost::serialization
          updateDocMessage()=default;
 
@@ -305,15 +286,11 @@
      class serverMessage : public virtual message {
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version)
-         {
-             // save/load base class information
-             ar & boost::serialization::base_object<Symposium::message>(*this);
-             ar & result;
-         }
+         void serialize(Archive &ar, const unsigned int version);
+
+     protected:
          //Needed by boost::serialization
          serverMessage()=default;
-     protected:
          serverMessage(msgOutcome result, int msgId = 0);
 
          msgOutcome result;         /**< result of an operation asked to the server */
@@ -351,6 +328,13 @@
  * In this message <em> action=msgType::registration </em> or <em> action=msgType::login </em>
  */
      class loginMessage : public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         //Needed by boost::serialization
+         loginMessage()=default;
+
          user loggedUser;
      public:
 
@@ -407,6 +391,13 @@
  * @brief class used to model an answer message sent by a server for a @link askResMessage askResMessage @endlink
  */
      class sendResMessage : public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         //Needed by boost::serialization
+         sendResMessage()=default;
+
          int symId;             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
          std::shared_ptr<filesystem> resource;
      public:

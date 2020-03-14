@@ -27,13 +27,54 @@
  *
  * Created on 18 Giugno 2019, 22.02
  */
+
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/unique_ptr.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 #include "filesystem.h"
 #include "symbol.h"
 #include "user.h"
+
+BOOST_CLASS_EXPORT_IMPLEMENT(Symposium::file)
+BOOST_CLASS_EXPORT_IMPLEMENT(Symposium::symlink)
+BOOST_CLASS_EXPORT_IMPLEMENT(Symposium::directory)
+
 using namespace Symposium;
 
 uint_positive_cnt filesystem::idCounter;
 std::shared_ptr<directory> directory::root;
+
+
+template<class Archive>
+void filesystem::serialize(Archive &ar, const unsigned int version){
+    ar & id & name & sharingPolicy & strategy;
+};
+
+template<class Archive>
+void file::serialize(Archive &ar, const unsigned int version){
+    ar & boost::serialization::base_object<Symposium::filesystem>(*this);
+    ar & realPath & doc;
+};
+
+template<class Archive>
+void symlink::serialize(Archive &ar, const unsigned int version){
+    ar & boost::serialization::base_object<Symposium::filesystem>(*this);
+    ar & pathToFile & fileName;
+};
+
+
+template<class Archive>
+void directory::serialize(Archive &ar, const unsigned int version){
+    ar & boost::serialization::base_object<Symposium::filesystem>(*this);
+    ar & root & contained & parent & self;
+}
+
 
 filesystem::filesystem(const std::string &name, const uint_positive_cnt::type idToAssign) : name(name){
     if(idToAssign==0){
@@ -109,6 +150,14 @@ bool filesystem::pathIsValid2(const std::string &toCheck) {
 bool filesystem::moreOwner(const std::string &username)
 {
     return strategy->moreOwner(username);
+}
+
+bool filesystem::operator==(const filesystem &rhs) const {
+    return id == rhs.id;
+}
+
+bool filesystem::operator!=(const filesystem &rhs) const {
+    return !(rhs == *this);
 }
 
 
@@ -204,6 +253,16 @@ void file::replacement(const std::shared_ptr<file> replace){
 
 const std::string &file::getRealPath() const {
     return realPath;
+}
+
+bool file::operator==(const file &rhs) const {
+    return static_cast<const Symposium::filesystem &>(*this) == static_cast<const Symposium::filesystem &>(rhs) &&
+           realPath == rhs.realPath &&
+           doc == rhs.doc;
+}
+
+bool file::operator!=(const file &rhs) const {
+    return !(rhs == *this);
 }
 
 directory::directory(const std::string &name, const int &idToAssign) : filesystem(name, idToAssign) {
@@ -511,5 +570,3 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool recurs
 const std::string &Symposium::symlink::getFileName() const {
     return fileName;
 }
-
-

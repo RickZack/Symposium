@@ -34,10 +34,13 @@
 #include <forward_list>
 #include <string>
 #include <set>
-//#include "symbol.h"
-#include "privilege.h"
 #include "Symposium.h"
+#include "privilege.h"
 #include "symbol.h"
+
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/forward_list.hpp>
+#include <boost/serialization/utility.hpp>
 
 
 namespace Symposium {
@@ -53,6 +56,13 @@ namespace Symposium {
         static constexpr wchar_t  emptyChar='~';
         static const symbol emptySymbol;
 
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version){
+            //TODO:
+            // Need to save activeUsers without filesystem
+            ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
+        };
     public:
         document(int id = document::idCounter);
 

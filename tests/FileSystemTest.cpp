@@ -28,7 +28,8 @@
  * Created on 22 agosto 2019, 13.38
  */
 
-
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <cstdlib>
@@ -39,7 +40,11 @@
 #include "../AccessStrategy.h"
 #include "../symbol.h"
 
+#include <boost/serialization/shared_ptr.hpp>
+
+
 using namespace Symposium;
+
 
 struct documentMock: public document {
     documentMock() : document(0) {};
@@ -742,4 +747,50 @@ TEST(FileSystemTest, DISABLED_printSymTest)
     f1= d->addFile("file1", "/root", 0);
     class symlink sym("sym", "/root", "file1");
     EXPECT_EQ("sym", sym.print(u1.getUsername()));
+}
+
+struct filesystemSerialization: ::testing::Test{
+    std::shared_ptr<filesystem> toStore, toLoad;
+    std::stringstream stream;
+
+    filesystemSerialization(){
+    }
+    void storeFilesystemObj(std::shared_ptr<filesystem> &as){
+        boost::archive::text_oarchive oa(stream);
+        oa<<as;
+    }
+
+    void loadFilesystemObj(std::shared_ptr<filesystem> &as){
+        boost::archive::text_iarchive ia(stream);
+        ia>>as;
+    }
+    ~filesystemSerialization() override{
+    }
+};
+
+TEST_F(filesystemSerialization, file){
+    toStore=std::shared_ptr<file>(new file("filename", "./path"));
+    toLoad=std::shared_ptr<file>(new file("filename", "./anotherPath"));
+    ASSERT_NE(*dynamic_cast<file*>(toStore.get()), *dynamic_cast<file*>(toLoad.get()));
+    storeFilesystemObj(toStore);
+    loadFilesystemObj(toLoad);
+    EXPECT_EQ(*dynamic_cast<file*>(toStore.get()), *dynamic_cast<file*>(toLoad.get()));
+}
+
+TEST_F(filesystemSerialization, directory){
+    toStore=directory::getRoot();
+    toLoad=directory::emptyDir();
+    ASSERT_NE(*dynamic_cast<directory*>(toStore.get()), *dynamic_cast<directory*>(toLoad.get()));
+    storeFilesystemObj(toStore);
+    loadFilesystemObj(toLoad);
+    EXPECT_EQ(*dynamic_cast<directory*>(toStore.get()), *dynamic_cast<directory*>(toLoad.get()));
+}
+
+TEST_F(filesystemSerialization, symlink){
+    toStore=std::shared_ptr<Symposium::symlink>(new Symposium::symlink("name", "./path", "filename"));
+    toLoad=std::shared_ptr<Symposium::symlink>(new Symposium::symlink("name2", "./path", "filename"));
+    ASSERT_NE(*dynamic_cast<Symposium::symlink*>(toStore.get()), *dynamic_cast<Symposium::symlink*>(toLoad.get()));
+    storeFilesystemObj(toStore);
+    loadFilesystemObj(toLoad);
+    EXPECT_EQ(*dynamic_cast<Symposium::symlink*>(toStore.get()), *dynamic_cast<Symposium::symlink*>(toLoad.get()));
 }

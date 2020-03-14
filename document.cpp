@@ -35,6 +35,7 @@
 #include <cmath>
 
 
+
 using namespace Symposium;
 int document::idCounter=0;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});

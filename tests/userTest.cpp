@@ -379,3 +379,25 @@ TEST_F(UserTestRobust, newDirUsesCorrectlyIdToAssign){
     EXPECT_CALL(*dir, addDirectory("ciao", id)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
     u1.newDirectory("ciao", ".", id);
 }
+
+struct userSerialization: ::testing::Test{
+    std::stringstream stream;
+
+    void storeUser(const user& u){
+        boost::archive::text_oarchive oa(stream);
+        oa<<u;
+    }
+    void loadUser(user& u){
+        boost::archive::text_iarchive ia(stream);
+        ia>>u;
+    }
+};
+
+TEST_F(userSerialization, serialize){
+    user toStore("username", UserTestRobust::goodPwd, "nickname", "", 0, nullptr);
+    user toLoad("username2", UserTestRobust::goodPwd, "nickname", "", 1, nullptr);
+    ASSERT_NE(toStore, toLoad);
+    storeUser(toStore);
+    loadUser(toLoad);
+    EXPECT_EQ(toLoad, toStore);
+}

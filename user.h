@@ -37,9 +37,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <tuple>
+
 #include "Symposium.h"
 #include "lib/hash/sha256.h"
-#include <tuple>
+
 
 namespace Symposium {
 //TODO: complete information about the functions: do they throw exceptions? What is the exception safety?
@@ -69,6 +71,10 @@ namespace Symposium {
         static constexpr char noChar[] ="1234567890?!$+-/.,@ˆ_ ";
         static constexpr char noNum[] ="abcdefghijklmnopqrstuvwxyz?!$+-/.,@ˆ_ ";
         static constexpr char noSpecialChar[] ="abcdefghijklmnopqrstuvwxyz1234567890 ";
+
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version);
 
     public:
         user() = default;

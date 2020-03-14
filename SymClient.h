@@ -34,17 +34,18 @@
 #include <forward_list>
 #include <queue>
 #include <map>
+
+
 #include "Symposium.h"
 #include "user.h"
 #include "document.h"
 #include "message.h"
-#include <type_traits>
-
 
 namespace Symposium {
 /*
  * //TODO: dummy class to represent a color, maybe use some Qt component
  */
+
     class MyColor {
         int dummy;
     public:

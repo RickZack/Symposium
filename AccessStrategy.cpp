@@ -124,3 +124,4 @@ bool TrivialAccess::moreOwner(std::string username) const{
 
 
 BOOST_CLASS_EXPORT(Symposium::RMOAccess)
+BOOST_CLASS_EXPORT(Symposium::TrivialAccess)

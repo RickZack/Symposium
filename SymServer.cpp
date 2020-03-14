@@ -33,6 +33,13 @@
 #include <regex>
 #include "SymposiumException.h"
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
 using namespace Symposium;
 
 uint_positive_cnt SymServer::idCounter;
@@ -343,6 +350,12 @@ SymServer::SymServer() {
 rootDir=directory::getRoot();
 }
 
+template<class Archive>
+void SymServer::serialize(Archive &ar, const unsigned int version)
+{
+    ar & registered /*& idCounter*/  & rootDir;
+}
+
 bool SymServer::userIsActive(const std::string &username) const{
     return active.count(username)==1;
 }
@@ -453,6 +466,16 @@ void SymServer::generateSimpleResponse(int recvSiteId, msgType action) {
     auto response=std::make_shared<serverMessage>(action, msgOutcome::success);
     insertMessageForSiteIds({recvSiteId}, response);
 }
+
+bool SymServer::operator==(const SymServer &rhs) const {
+    return registered == rhs.registered;
+}
+
+bool SymServer::operator!=(const SymServer &rhs) const {
+    return !(rhs == *this);
+}
+
+BOOST_CLASS_EXPORT(Symposium::SymServer)
 
 
 

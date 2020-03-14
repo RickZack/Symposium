@@ -36,6 +36,16 @@
 #include <forward_list>
 #include <queue>
 #include <map>
+
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/assume_abstract.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+
+
 #include "Symposium.h"
 #include "user.h"
 #include "message.h"
@@ -52,6 +62,11 @@
  */
  namespace Symposium {
      class SymServer {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
      protected:
          std::unordered_map<std::string, user> registered;                                                 /**< registered users, indexed by username */
          std::unordered_map<std::string, const user *> active;                                             /**< active users, indexed by username */
@@ -66,6 +81,11 @@
 
          //Some methods are virtual in order to use the mocks in tests
          SymServer();
+
+         bool operator==(const SymServer &rhs) const;
+
+         bool operator!=(const SymServer &rhs) const;
+
 
          /**
           * @brief adds a new user to the set of users registered to the system

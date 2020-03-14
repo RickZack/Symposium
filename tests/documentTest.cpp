@@ -28,6 +28,11 @@
  * Created on 09 agosto 2019, 13:22
  */
 #include <gtest/gtest.h>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
+#include "../filesystem.h"
 #include "../document.h"
 #include "../symbol.h"
 #include "../user.h"
@@ -180,4 +185,27 @@ TEST_F(documentTest, canRetrieveSiteIds){
     expected.insert(2);
 
     EXPECT_EQ(expected, d.retrieveSiteIds());
+}
+
+struct documentSerializationTest: ::testing::Test{
+    document d1, d2;
+    std::stringstream stream;
+
+    void store(const document &as){
+        boost::archive::text_oarchive oa(stream);
+        oa<<as;
+    }
+    void load(document &as){
+        boost::archive::text_iarchive ia(stream);
+        ia>>as;
+    }
+};
+
+TEST_F(documentSerializationTest, serialize){
+    symbol s1('a', 0, 0, std::vector<int>(), false);
+    d1.localInsert({0,0}, s1);
+    ASSERT_NE(d1, d2);
+    store(d1);
+    load(d2);
+    EXPECT_EQ(d2, d1);
 }

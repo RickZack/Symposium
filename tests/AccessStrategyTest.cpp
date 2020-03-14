@@ -153,8 +153,8 @@ TEST_F(AccessStrategySerializationTest, RMOAccessSerialization){
 TEST_F(AccessStrategySerializationTest, TrivialAccessSerialization){
     TrivialToStore->setPrivilege(u1, privilege::owner);
     TrivialToStore->setPrivilege(u2, privilege::readOnly);
-    storeAccessStrategy(RMOtoStore);
-    loadAccessStrategy(RMOtoLoad);
+    storeAccessStrategy(TrivialToStore);
+    loadAccessStrategy(TrivialToLoad);
     //if no compilation errors it works
     SUCCEED();
 }
