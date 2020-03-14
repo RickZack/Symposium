@@ -59,8 +59,6 @@ namespace Symposium {
         friend class boost::serialization::access;
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version){
-            //TODO:
-            // Need to save activeUsers without filesystem
             ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
         };
     public:

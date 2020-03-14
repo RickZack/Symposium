@@ -241,6 +241,10 @@
           */
          void invokeMethod(SymServer &server) override;
 
+         bool operator==(const signUpMessage &rhs) const;
+
+         bool operator!=(const signUpMessage &rhs) const;
+
          virtual ~signUpMessage() override{};
      };
 
@@ -275,6 +279,10 @@
           * type @ref mapMessage is sent back to the client
           */
          void invokeMethod(SymServer &server) override;
+
+         bool operator==(const updateDocMessage &rhs) const;
+
+         bool operator!=(const updateDocMessage &rhs) const;
 
          ~updateDocMessage() override = default;
 
@@ -317,6 +325,10 @@
           */
          bool isRelatedTo(const clientMessage &other) const;
 
+         bool operator==(const serverMessage &rhs) const;
+
+         bool operator!=(const serverMessage &rhs) const;
+
          virtual ~serverMessage() = default;
      };
 
@@ -354,6 +366,10 @@
           */
          void invokeMethod(SymClient &client) override;
 
+         bool operator==(const loginMessage &rhs) const;
+
+         bool operator!=(const loginMessage &rhs) const;
+
          virtual ~loginMessage() = default;
      };
 
@@ -365,6 +381,13 @@
  * In this message <em> action=msgType::mapChangesToUser </em>: calls
  */
      class mapMessage : public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         //Needed by boost::serialization
+         mapMessage()=default;
+
          std::map<int, user> siteIdToUser;
      public:
 
@@ -383,6 +406,10 @@
           * @e client passed as parameter.
           */
          void invokeMethod(SymClient &client) override;
+
+         bool operator==(const mapMessage &rhs) const;
+
+         bool operator!=(const mapMessage &rhs) const;
 
          virtual ~mapMessage() = default;
      };
@@ -436,6 +463,12 @@
  * set basing on @e userPrivilege
  */
      class updateActiveMessage : public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         updateActiveMessage()= default;
          user newUser;              /**< user who joined the document */
          int resourceId;            /**< identifier of the opened resource */
          privilege userPrivilege;   /**< the privilege @e newUser has on @e resourceId */
@@ -463,6 +496,10 @@
           */
          void invokeMethod(SymClient &client) override;
 
+         bool operator==(const updateActiveMessage &rhs) const;
+
+         bool operator!=(const updateActiveMessage &rhs) const;
+
          ~updateActiveMessage() override = default;
      };
 
@@ -474,6 +511,13 @@
  * Object of this class have <em> action=msgType::changePrivileges </em>
  */
      class privMessage : public clientMessage, public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         privMessage()= default;
+
          std::string resourceId;    /**< path to the resource (the uri) */
          std::string targetUser;    /**< username of the user whose privilege on @e resourceId has to be changed */
          privilege newPrivilege;    /**< new privilege to assign to @e targetUser for @e resourceId */
@@ -512,6 +556,10 @@
 
          void completeAction(SymClient &client, msgOutcome serverResult) override;
 
+         bool operator==(const privMessage &rhs) const;
+
+         bool operator!=(const privMessage &rhs) const;
+
          virtual ~privMessage() = default;
      };
 
@@ -523,6 +571,14 @@
  * Object of this class have <em> action=msgType::insertSymbol </em> or <em> action=msgType::removeSymbol </em>
  */
      class symbolMessage : public clientMessage, public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         //Needed for boost::serialization
+         symbolMessage(): sym('a', 0, 0, {}){}
+
          int siteId;                /**< siteId of the client that send the message */
          int resourceId;            /**< id of the resource the client is working on*/
          symbol sym;                /**< symbol to be inserted or deleted*/
@@ -591,6 +647,10 @@
           //TODO: complete description
           void completeAction(SymClient &client, msgOutcome serverResult) override;
 
+         bool operator==(const symbolMessage &rhs) const;
+
+         bool operator!=(const symbolMessage &rhs) const;
+
          virtual ~symbolMessage() = default;
      };
 
@@ -601,6 +661,14 @@
  * The server forwards this message to other clients that are enabled to see the sharing preferences of a document.
  */
      class uriMessage : public clientMessage, public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         //Needed for boost::serialization
+         uriMessage()= default;
+
          std::string path;
          std::string name;
          uri sharingPrefs;
@@ -634,6 +702,10 @@
 
          void completeAction(SymClient &client, msgOutcome serverResult) override;
 
+         bool operator==(const uriMessage &rhs) const;
+
+         bool operator!=(const uriMessage &rhs) const;
+
          virtual ~uriMessage() = default;
      };
 
@@ -642,6 +714,14 @@
  * @brief class used to model a message to change the parameters of a user
  */
      class userDataMessage : public clientMessage, public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         //Needed for boost::serialization
+         userDataMessage()= default;
+
          user newUserData;
      public:
 
@@ -672,6 +752,10 @@
          void invokeMethod(SymClient &client) override;
 
          void completeAction(SymClient &client, msgOutcome serverResult) override;
+
+         bool operator==(const userDataMessage &rhs) const;
+
+         bool operator!=(const userDataMessage &rhs) const;
 
          ~userDataMessage() override = default;
 

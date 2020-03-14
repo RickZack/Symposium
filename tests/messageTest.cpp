@@ -27,7 +27,7 @@
  *
  * Created on 13 agosto 2019, 16:09
  */
-#define BOOST_SERIALIZATION_DYN_LINK 1
+
 #include <gtest/gtest.h>
 #include <boost/serialization/unique_ptr.hpp>
 #include <gmock/gmock.h>
@@ -895,7 +895,7 @@ struct messageSerialization: public testing::Test{
 
 TEST_F(messageSerialization, clientMessage){
     toStore=std::unique_ptr<clientMessage>(new clientMessage(msgType::login, {"try","pass"},10));
-    toLoad=std::unique_ptr<message>(new clientMessage(msgType::login, {"",""}));
+    toLoad=std::unique_ptr<message>(new clientMessage(msgType::login, {"",""},10));
     ASSERT_NE(*dynamic_cast<clientMessage*>(toStore.get()), *dynamic_cast<clientMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -903,8 +903,8 @@ TEST_F(messageSerialization, clientMessage){
 }
 
 TEST_F(messageSerialization, serverMessage){
-    toStore=std::unique_ptr<serverMessage>(new serverMessage(msgType::login, msgOutcome::success));
-    toLoad=std::unique_ptr<serverMessage>(new serverMessage(msgType::login, msgOutcome::failure));
+    toStore=std::unique_ptr<serverMessage>(new serverMessage(msgType::login, msgOutcome::success,10));
+    toLoad=std::unique_ptr<serverMessage>(new serverMessage(msgType::login, msgOutcome::failure,10));
     ASSERT_NE(*dynamic_cast<serverMessage*>(toStore.get()), *dynamic_cast<serverMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -912,8 +912,8 @@ TEST_F(messageSerialization, serverMessage){
 }
 
 TEST_F(messageSerialization, askResMessage){
-    toStore=std::unique_ptr<askResMessage>(new askResMessage(msgType::openRes, {"", ""}, "", ""));
-    toLoad=std::unique_ptr<askResMessage>(new askResMessage(msgType::openRes, {"", ""}, "path", "name"));
+    toStore=std::unique_ptr<askResMessage>(new askResMessage(msgType::openRes, {"", ""}, "", "","",privilege::readOnly,10));
+    toLoad=std::unique_ptr<askResMessage>(new askResMessage(msgType::openRes, {"", ""}, "path", "name", "",privilege::modify, 10));
     ASSERT_NE(*dynamic_cast<askResMessage*>(toStore.get()), *dynamic_cast<askResMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -921,8 +921,8 @@ TEST_F(messageSerialization, askResMessage){
 }
 
 TEST_F(messageSerialization, updateDocMessage){
-    toStore=std::unique_ptr<updateDocMessage>(new updateDocMessage(msgType::mapChangesToUser, {"",""}, 100));
-    toLoad=std::unique_ptr<updateDocMessage>(new updateDocMessage(msgType::mapChangesToUser, {"",""}, 10));
+    toStore=std::unique_ptr<updateDocMessage>(new updateDocMessage(msgType::mapChangesToUser, {"",""}, 100,10));
+    toLoad=std::unique_ptr<updateDocMessage>(new updateDocMessage(msgType::mapChangesToUser, {"",""}, 10,10));
     ASSERT_NE(*dynamic_cast<updateDocMessage*>(toStore.get()), *dynamic_cast<updateDocMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -930,8 +930,8 @@ TEST_F(messageSerialization, updateDocMessage){
 }
 
 TEST_F(messageSerialization, signUpMessage){
-    toStore=std::unique_ptr<signUpMessage>(new signUpMessage(msgType::registration, {"", ""}, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr)));
-    toLoad=std::unique_ptr<signUpMessage>(new signUpMessage(msgType::registration, {"", ""}, user()));
+    toStore=std::unique_ptr<signUpMessage>(new signUpMessage(msgType::registration, {"", ""}, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr),10));
+    toLoad=std::unique_ptr<signUpMessage>(new signUpMessage(msgType::registration, {"", ""}, user(),10));
     ASSERT_NE(*dynamic_cast<signUpMessage*>(toStore.get()), *dynamic_cast<signUpMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -939,8 +939,8 @@ TEST_F(messageSerialization, signUpMessage){
 }
 
 TEST_F(messageSerialization, loginMessage){
-    toStore=std::unique_ptr<loginMessage>(new loginMessage(msgType::login, msgOutcome::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr)));
-    toLoad=std::unique_ptr<loginMessage>(new loginMessage(msgType::login, msgOutcome::success, user()));
+    toStore=std::unique_ptr<loginMessage>(new loginMessage(msgType::login, msgOutcome::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr),10));
+    toLoad=std::unique_ptr<loginMessage>(new loginMessage(msgType::login, msgOutcome::success, user(),10));
     ASSERT_NE(*dynamic_cast<loginMessage*>(toStore.get()), *dynamic_cast<loginMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -948,10 +948,67 @@ TEST_F(messageSerialization, loginMessage){
 }
 
 TEST_F(messageSerialization, sendResMessage){
-    toStore=std::unique_ptr<sendResMessage>(new sendResMessage(msgType::openRes, msgOutcome::success, directory::getRoot()));
-    toLoad=std::unique_ptr<sendResMessage>(new sendResMessage(msgType::openRes, msgOutcome::success, directory::emptyDir()));
+    toStore=std::unique_ptr<sendResMessage>(new sendResMessage(msgType::openRes, msgOutcome::success, directory::getRoot(), 10));
+    toLoad=std::unique_ptr<sendResMessage>(new sendResMessage(msgType::openRes, msgOutcome::success, directory::emptyDir(), 10));
     ASSERT_NE(*dynamic_cast<sendResMessage*>(toStore.get()), *dynamic_cast<sendResMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
     EXPECT_EQ(*dynamic_cast<sendResMessage*>(toStore.get()), *dynamic_cast<sendResMessage*>(toLoad.get()));
+}
+
+TEST_F(messageSerialization, updateActiveMessage){
+    toStore=std::unique_ptr<updateActiveMessage>(new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr), 10,privilege::readOnly, 10));
+    toLoad=std::unique_ptr<updateActiveMessage>(new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, user(), 10, privilege::readOnly, 10));
+    ASSERT_NE(*dynamic_cast<updateActiveMessage*>(toStore.get()), *dynamic_cast<updateActiveMessage*>(toLoad.get()));
+    storeMessage(toStore);
+    loadMessage(toLoad);
+    EXPECT_EQ(*dynamic_cast<updateActiveMessage*>(toStore.get()), *dynamic_cast<updateActiveMessage*>(toLoad.get()));
+}
+
+TEST_F(messageSerialization, mapMessage){
+    std::map<int, user> expected({
+                                         std::pair<int, user>(2, SymServer::unknownUser),
+                                         std::pair<int, user>(3, SymServer::unknownUser)});
+    toStore=std::unique_ptr<mapMessage>(new mapMessage(msgType::mapChangesToUser, msgOutcome::success, expected,10));
+    toLoad=std::unique_ptr<mapMessage>(new mapMessage(msgType::mapChangesToUser, msgOutcome::success, std::map<int, user>(),10));
+    ASSERT_NE(*dynamic_cast<mapMessage*>(toStore.get()), *dynamic_cast<mapMessage*>(toLoad.get()));
+    storeMessage(toStore);
+    loadMessage(toLoad);
+    EXPECT_EQ(*dynamic_cast<mapMessage*>(toStore.get()), *dynamic_cast<mapMessage*>(toLoad.get()));
+}
+
+TEST_F(messageSerialization, privMessage){
+    toStore=std::unique_ptr<privMessage>(new privMessage(msgType::changePrivileges, {"", ""}, msgOutcome::success, "./10/11", "user", privilege::readOnly, 10));
+    toLoad=std::unique_ptr<privMessage>(new privMessage(msgType::changePrivileges, {"", ""}, msgOutcome::success, "./10/11", "user2", privilege::readOnly,10));
+    ASSERT_NE(*dynamic_cast<privMessage*>(toStore.get()), *dynamic_cast<privMessage*>(toLoad.get()));
+    storeMessage(toStore);
+    loadMessage(toLoad);
+    EXPECT_EQ(*dynamic_cast<privMessage*>(toStore.get()), *dynamic_cast<privMessage*>(toLoad.get()));
+}
+
+TEST_F(messageSerialization, symbolMessage){
+    toStore=std::unique_ptr<symbolMessage>(new symbolMessage(msgType::insertSymbol, {"",""},msgOutcome ::success, 10, 10, symbol('a', 0, 1, std::vector<int>(), false), 10));
+    toLoad=std::unique_ptr<symbolMessage>(new symbolMessage(msgType::insertSymbol, {"",""},msgOutcome ::success, 10, 10, symbol('b', 0, 1, std::vector<int>(), false), 10));
+    ASSERT_NE(*dynamic_cast<symbolMessage*>(toStore.get()), *dynamic_cast<symbolMessage*>(toLoad.get()));
+    storeMessage(toStore);
+    loadMessage(toLoad);
+    EXPECT_EQ(*dynamic_cast<symbolMessage*>(toStore.get()), *dynamic_cast<symbolMessage*>(toLoad.get()));
+}
+
+TEST_F(messageSerialization, uriMessage){
+toStore=std::unique_ptr<uriMessage>(new uriMessage(msgType::shareRes, {"",""},msgOutcome ::success, "path", "name", uri(uriPolicy::activeAlways), 10));
+toLoad=std::unique_ptr<uriMessage>(new uriMessage(msgType::shareRes, {"",""},msgOutcome ::success, "path", "name", uri(), 10));
+ASSERT_NE(*dynamic_cast<uriMessage*>(toStore.get()), *dynamic_cast<uriMessage*>(toLoad.get()));
+storeMessage(toStore);
+loadMessage(toLoad);
+EXPECT_EQ(*dynamic_cast<uriMessage*>(toStore.get()), *dynamic_cast<uriMessage*>(toLoad.get()));
+}
+
+TEST_F(messageSerialization, userDataMessage){
+    toStore=std::unique_ptr<userDataMessage>(new userDataMessage(msgType::changeUserData, {"",""},msgOutcome ::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr), 10));
+    toLoad=std::unique_ptr<userDataMessage>(new userDataMessage(msgType::changeUserData, {"",""},msgOutcome ::success, user(), 10));
+    ASSERT_NE(*dynamic_cast<userDataMessage*>(toStore.get()), *dynamic_cast<userDataMessage*>(toLoad.get()));
+    storeMessage(toStore);
+    loadMessage(toLoad);
+    EXPECT_EQ(*dynamic_cast<userDataMessage*>(toStore.get()), *dynamic_cast<userDataMessage*>(toLoad.get()));
 }
