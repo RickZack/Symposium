@@ -353,7 +353,7 @@ rootDir=directory::getRoot();
 template<class Archive>
 void SymServer::serialize(Archive &ar, const unsigned int version)
 {
-    ar & registered /*& idCounter*/  & rootDir;
+    ar & registered & idCounter  & rootDir;
 }
 
 bool SymServer::userIsActive(const std::string &username) const{
@@ -468,7 +468,7 @@ void SymServer::generateSimpleResponse(int recvSiteId, msgType action) {
 }
 
 bool SymServer::operator==(const SymServer &rhs) const {
-    return registered == rhs.registered;
+    return registered == rhs.registered && idCounter == rhs.idCounter;
 }
 
 bool SymServer::operator!=(const SymServer &rhs) const {

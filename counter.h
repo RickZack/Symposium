@@ -33,6 +33,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <limits>
+#include <boost/serialization/access.hpp>
 
 template <typename Source, typename Dest, std::enable_if_t<std::is_integral<Source>::value && std::is_integral<Dest>::value, int> =0>
 struct type_not_narrow{
@@ -59,6 +60,13 @@ class basic_counter{
             return !(rhs == *this);
         }
     };
+
+protected:
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version){
+        ar & cnt;
+    }
 
 public:
     static constexpr T start_val=N;
@@ -284,6 +292,7 @@ struct positive_cnt : private basic_counter<T, 1>{
     using basic_counter<T, 1>::start_val;
     using basic_counter<T, 1>::operator++;
     using basic_counter<T, 1>::operator T;
+    using basic_counter<T, 1>::serialize;
 };
 
 using byte_positive_cnt=positive_cnt<uint8_t>;
