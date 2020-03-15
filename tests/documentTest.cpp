@@ -209,3 +209,5 @@ TEST_F(documentSerializationTest, serialize){
     load(d2);
     EXPECT_EQ(d2, d1);
 }
+
+//TODO: add tests for method updateCursorPos

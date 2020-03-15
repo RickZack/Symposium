@@ -1012,3 +1012,5 @@ TEST_F(messageSerialization, userDataMessage){
     loadMessage(toLoad);
     EXPECT_EQ(*dynamic_cast<userDataMessage*>(toStore.get()), *dynamic_cast<userDataMessage*>(toLoad.get()));
 }
+
+//TODO: add tests for cursorMessage

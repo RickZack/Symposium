@@ -869,3 +869,28 @@ bool userDataMessage::operator!=(const userDataMessage &rhs) const {
     return !(rhs == *this);
 }
 BOOST_CLASS_EXPORT(Symposium::userDataMessage)
+
+cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
+int siteId, int row, int col, int msgId): clientMessage(action, actionOwner, msgId), serverMessage(action, result, msgId), siteId(siteId), row(row),
+          col(col) {
+    //TODO: implement
+}
+
+template<class Archive>
+void cursorMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & siteId & row & col;
+}
+
+void cursorMessage::invokeMethod(SymServer &server) {
+    clientMessage::invokeMethod(server);
+}
+
+void cursorMessage::invokeMethod(SymClient &client) {
+    serverMessage::invokeMethod(client);
+}
+
+BOOST_CLASS_EXPORT(Symposium::cursorMessage)
