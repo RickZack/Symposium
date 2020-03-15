@@ -55,7 +55,7 @@ const std::vector<std::vector<symbol>> &document::getSymbols() const {
     return symbols;
 }
 
-const std::forward_list<std::pair<user *, privilege>> &document::getActiveUsers() const {
+const std::forward_list<std::pair<const user *, privilege>> &document::getActiveUsers() const {
     return activeUsers;
 }
 
@@ -63,10 +63,8 @@ int document::getNumchar() const {
     return numchar;
 }
 
-//FIXME: discuss to change the forward list to <const user*, privilege>,
-// avoid casts as much as possible
 document & document::access(const user &newActive, privilege accessPriv) {
-    std::pair<user*, privilege> p{const_cast<user*>(&newActive),accessPriv};
+    std::pair<const user*, privilege> p{&newActive,accessPriv};
     activeUsers.push_front(p);
     return *this;
 }

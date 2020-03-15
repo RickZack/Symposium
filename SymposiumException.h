@@ -79,7 +79,7 @@ namespace Symposium{
          */
         enum SymServerExceptionCodes{userAlreadyExist=0, userWrongParam, userNotRegistered, userWrongPwd,
             userAlreadyActive, userNotLogged, userNotWorkingOnDoc, actionUserNotLoggedOrTargetUserNotRegistered,
-            userWorkingOnDoc, userNotFound};
+            userWorkingOnDoc, userNotFound, noUserWorkingOnRes};
 
         explicit SymServerException(SymServerExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~SymServerException()=default;

@@ -370,7 +370,7 @@
           * Some of them are also virtual to be overridden in test suites (read ./tests/SymServerTest.cpp)
           */
          virtual bool userIsRegistered(const std::string &toCheck) const noexcept ;
-         virtual user findUserBySiteId(int id) const;
+         virtual user findUserBySiteId(int id) const noexcept;
          virtual bool userIsActive(const std::string &username) const;
 
          /*
@@ -451,7 +451,7 @@
           * of siteIds associated with every resource that the user left opened
           * @param loggedOut the user that just logged out
           */
-         void settleResIdToSiteId(const user &loggedOut);
+         void handleLeavingUser(const user &loggedOut);
 
          /**
           * @brief generate a simple response with msgOutcome::success for a client request

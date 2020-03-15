@@ -54,9 +54,8 @@ const user & SymServer::addUser(user &newUser) {
     auto userDir=rootDir->addDirectory(newUser.getUsername());
     newUser.setHome(userDir);
     newUser.setSiteId(idCounter++);
-    //FIXME: return registerUser(...);
-    user& inserted=registerUser(newUser);
-    return inserted;
+    return registerUser(newUser);
+
 }
 
 const user SymServer::login(const std::string &username, const std::string &pwd) {
@@ -86,10 +85,7 @@ SymServer::openSource(const std::string &opener, const std::string &path, const 
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
     std::shared_ptr<file> fileReq= target.openFile(path, name, reqPriv);
-    //FIXME: Need to check if the user is working on the document, call handleUserState(). Two reasons:
-    // - list of active users if document must contain unique users
-    // - list of opened documents for opener must contain unique documents (otherwise double close() will cause problems)
-    // Non dovrei usare funzioni di filesystem, bisogna accede a filesystem attraverso user
+    handleUserState(opener, fileReq->getDoc().getId());
     document& docReq= fileReq->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
@@ -111,9 +107,9 @@ SymServer::openNewSource(const std::string &opener, const std::string &resourceI
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
-    //FIXME: Need to check if the user is working on the document, call handleUserState().
-    // Ideas: call getFile()->getDoc()->getId();
+
     std::pair<int, std::shared_ptr<file>> fileReq=target.accessFile(resourceId, destPath, destName);
+    handleUserState(opener, fileReq.second->getDoc().getId());
     document& docReq=fileReq.second->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
@@ -196,10 +192,6 @@ int
 SymServer::handleAccessToDoc(const std::string &actionUser, const std::string &resName,
                              const std::string &pathFromUserHome, const user &actionU) {
     std::shared_ptr<file> fileReq= actionU.openFile(pathFromUserHome, resName, privilege::owner);
-    //FIXME: se l'utente stava già lavorando sul documento, esso contiene già una entry per lo user attivo
-    // per l'utente corrente, quindi access crea un duplicato nella lista.
-    // Idea: usare sempre getDoc(), tanto il metodo chiamante chiama user::setUserPrivilege che controlla
-    // i privilegi.
     document& docReq=fileReq->access(actionU, privilege::owner);
     int docId=docReq.getId();
     if(!userIsWorkingOnDocument(actionUser, docId).first)
@@ -260,7 +252,6 @@ SymServer::removeResource(const std::string &remover, const std::string &resPath
 }
 
 void SymServer::closeSource(const std::string &actionUser, int resIdtoClose) {
-    //FIXME: the following tree lines can be replaced by a call to handleUserState()
     std::pair<bool, document*> toClose=userIsWorkingOnDocument(actionUser, resIdtoClose);
     if(!toClose.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
@@ -371,9 +362,7 @@ std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string 
     return result;
 }
 
-//OPTIMIZE: can ever this method throw? Can the for-in throw?
-// if not, add noexcept
-user SymServer::findUserBySiteId(int id) const {
+user SymServer::findUserBySiteId(int id) const noexcept{
     for(const auto& elem:registered)
         if(elem.second.getSiteId()==id)
             return elem.second;
@@ -395,9 +384,8 @@ void SymServer::removeRegistered(const std::string &username) {
 std::forward_list<int> SymServer::siteIdsFor(int resId, int siteIdToExclude) const {
     auto it=resIdToSiteId.find(resId);
     auto siteIds=it->second;
-    //TODO: fix this exception error
     if(it == resIdToSiteId.end())
-        throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
+        throw SymServerException(SymServerException::noUserWorkingOnRes, UnpackFileLineFunction());
     if(siteIdToExclude>=0)
         siteIds.remove(siteIdToExclude);
     return siteIds;
@@ -412,8 +400,7 @@ void SymServer::insertMessageForSiteIds(const std::forward_list<int>& siteIds, s
 std::forward_list<int> SymServer::resIdOfDocOfUser(const std::string &username) const {
     std::forward_list<int> resIds;
     if(workingDoc.count(username)==0) return resIds;
-    //FIXME: at() used to make the method const, boundary check is not necessary. Way to do so?
-    for(const auto* d:workingDoc.at(username)){
+    for(const auto* d:workingDoc.find(username)->second){
         resIds.push_front(d->getId());
     }
     return resIds;
@@ -435,17 +422,16 @@ void SymServer::closeAllDocsAndPropagateMex(const user &loggedOut, const std::fo
         auto toSend=std::make_shared<updateActiveMessage>(msgType::removeActiveUser, msgOutcome::success, loggedOut.makeCopyNoPwd(), doc->getId());
         insertMessageForSiteIds(siteIdsFor(doc->getId(), loggedOut.getSiteId()), toSend);
     }
-    settleResIdToSiteId(loggedOut);
-    workingDoc.erase(loggedOut.getUsername());
+    handleLeavingUser(loggedOut);
 }
 
-//FIXME: better name, inspect usages
-void SymServer::settleResIdToSiteId(const user &loggedOut) {
+void SymServer::handleLeavingUser(const user &loggedOut) {
     auto l=resIdOfDocOfUser(loggedOut.getUsername());
     for (int resId:l){
         resIdToSiteId[resId].remove(loggedOut.getSiteId());
     }
-    //FIXME: need to remove also the entry in siteIds associated with loggedOut.getSiteId() siteIdToMex
+    workingDoc.erase(loggedOut.getUsername());
+    siteIdToMex.erase(loggedOut.getSiteId());
 }
 
 std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessage() {

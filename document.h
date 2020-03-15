@@ -48,7 +48,7 @@ namespace Symposium {
         static int idCounter;                                           /**< id to be assigned to the next created document */
         int id;                                                         /**< unique identifier for the document */
         std::vector<std::vector<symbol> > symbols;                      /**< container of characters and metadata for CRDT*/
-        std::forward_list<std::pair<user *, privilege>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
+        std::forward_list<std::pair<const user *, privilege>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
         int numchar;                                                    /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
@@ -70,7 +70,7 @@ namespace Symposium {
 
         const std::vector<std::vector<symbol>> &getSymbols() const;
 
-        const std::forward_list<std::pair<user *, privilege>> &getActiveUsers() const;
+        const std::forward_list<std::pair<const user *, privilege>> &getActiveUsers() const;
 
         int getNumchar() const;
 

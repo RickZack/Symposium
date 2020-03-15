@@ -47,7 +47,8 @@ const char* SymServerException::SymServerErrors[]={"the user already exists",
                               "the user has wrong parameters", "the user is not registered", "wrong password",
                               "user already active","the user is not logged in", "user is not working on the document",
                               "actionUser is not logged in or targetUser is not registered",
-                              "user is working on the document", "user not found"};
+                              "user is working on the document", "user not found",
+                              "There are no users working on this resource"};
 
 SymServerException::SymServerException(SymServerExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :

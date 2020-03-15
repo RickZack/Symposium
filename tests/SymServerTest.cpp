@@ -208,7 +208,7 @@ protected:
      * here it's necessary to make the function SymServer::mapSiteIdToUser
      * take the mocked user from SymServerAccesser in tests
      */
-    user findUserBySiteId(int id) const override {
+    user findUserBySiteId(int id) const noexcept override {
         for(const auto& elem:registered)
             if(elem.second.getSiteId()==id)
                 return elem.second;
