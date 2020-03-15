@@ -18,6 +18,8 @@ home::~home()
 void home::on_delete_2_clicked()
 {
     deleteAccountWindow = new deleteAccount(this);
+    //deleteAccountWindow->setClientDispatcher(*cl);
+    //cl->setDeleteAccount(deleteAccountWindow);
     deleteAccountWindow->show();
 }
 
@@ -30,6 +32,8 @@ void home::on_InsertUri_clicked()
 void home::on_modify_clicked()
 {
     changeWindow = new changeUserInfo(this);
+    //changeWindow->setClientDispatcher(*cl);
+    //cl->setChangeUserInfo(changeWindow);
     changeWindow->show();
 }
 
@@ -53,3 +57,8 @@ void home::closeEvent(QCloseEvent *event)
         }
 
 }
+
+/*void home::setClientDispatcher(clientdispatcher *cl){
+    this->cl = cl;
+}*/
+

@@ -43,7 +43,9 @@
 #include "../../../SymposiumException.h"
 #include "../../../message.h"
 #include "../../../SymClient.h"
-#include "../sigin.h"
+
+
+class sigin;
 
 namespace Symposium {
 
@@ -85,7 +87,7 @@ namespace Symposium {
          * @brief constructs a @ref signUpMessage to send to the server to ask for registration
          * @param a pointer to a sigin window
          */
-        void setSignIn(sigin *si);
+        //void setSignIn(sigin *si);
 
 
     private:

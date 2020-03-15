@@ -13,6 +13,19 @@ deleteAccount::deleteAccount(QWidget *parent) :
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(delete_click()));
 }
 
+void deleteAccount::successDeleteAccount()
+{
+    QMessageBox::information(parentWidget(),
+                             tr("Delete Account"), tr("Your account has been successfully deleted"), QMessageBox::Ok);
+}
+
+void deleteAccount::unsuccessDeleteAccount()
+{
+    this->close();
+    window=new unsuccessdeleteaccount(this);
+    window->show();
+}
+
 deleteAccount::~deleteAccount()
 {
     delete ui;
@@ -20,6 +33,10 @@ deleteAccount::~deleteAccount()
 
 void deleteAccount::delete_click()
 {
-    QMessageBox::information(parentWidget(),
-                             tr("Delete Account"), tr("Your account has been successfully deleted"), QMessageBox::Ok);
+    //cl->removeUser()
+
 }
+
+/*void deleteAccount::setClientDispatcher(clientdispatcher *cl){
+    this->cl = cl;
+}*/

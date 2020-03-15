@@ -20,6 +20,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    //void setClientDispatcher(clientdispatcher *cl)
 
 private slots:
 
@@ -38,6 +39,7 @@ private:
     class exit *exitWindow;
     sigin *signinWindow;
     signup *signupWindow;
+    //clientdispatcher *cl;
 
     void closeEvent(QCloseEvent *event);
 };

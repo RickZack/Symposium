@@ -28,7 +28,9 @@
  * Created on 9 Febbraio 2020, 16.23
  */
 
+#include "../sigin.h"
 #include "clientdispatcher.h"
+
 
 using namespace Symposium;
 

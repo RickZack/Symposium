@@ -5,6 +5,8 @@
 #include <QCloseEvent>
 #include "home.h"
 #include "icon.h"
+#include "errorconnection.h"
+//#include "Dispatcher clientdispatcher.h"
 
 namespace Ui {
 class signup;
@@ -16,6 +18,11 @@ class signup : public QDialog
 
 public:
     explicit signup(QWidget *parent = nullptr);
+    //void setClientDispatcher(clientdispatcher *cl);
+    void errorConnection();
+    void errorUsernameSignUp();
+    void errorPasswordSignUp();
+    void successSignUp();
     ~signup();
 
 private slots:
@@ -28,6 +35,9 @@ private:
     Ui::signup *ui;
     home *homeWindow;
     icon *iconWindow;
+    errorconnection *errorWindow;
+    std::string iconPath="";
+    //Symposium::clientdispatcher *cl;
     void reject();
 };
 

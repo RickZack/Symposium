@@ -222,6 +222,8 @@ namespace Symposium {
 
         const document &getDoc() const;
 
+        const std::unordered_map<std::string, privilege> getUsers();
+
         /**
          * @brief retrieve the privilege of a user on the current file
          * @param targetUser the user whose privilege is to be retrieved

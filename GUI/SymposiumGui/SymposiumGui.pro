@@ -40,6 +40,7 @@ SOURCES += \
         currentusers.cpp \
         deleteaccount.cpp \
         directory.cpp \
+        errorconnection.cpp \
         exit.cpp \
         home.cpp \
         icon.cpp \
@@ -64,7 +65,8 @@ SOURCES += \
         signup.cpp \
         textedit.cpp \
         Dispatcher/clientdispatcher.cpp \
-        Dispatcher/serverdispatcher.cpp
+        Dispatcher/serverdispatcher.cpp \
+        unsuccessdeleteaccount.cpp
 
 HEADERS += \
         about.h \
@@ -77,6 +79,7 @@ HEADERS += \
         currentusers.h \
         deleteaccount.h \
         directory.h \
+        errorconnection.h \
         exit.h \
         home.h \
         icon.h \
@@ -103,7 +106,8 @@ HEADERS += \
         signup.h \
         textedit.h \
         Dispatcher/clientdispatcher.h \
-        Dispatcher/serverdispatcher.h
+        Dispatcher/serverdispatcher.h \
+        unsuccessdeleteaccount.h
 
 FORMS += \
         about.ui \
@@ -116,6 +120,7 @@ FORMS += \
         currentusers.ui \
         deleteaccount.ui \
         directory.ui \
+        errorconnection.ui \
         exit.ui \
         folder1.ui \
         home.ui \
@@ -125,7 +130,8 @@ FORMS += \
         newfolderwindow.ui \
         notepad.ui \
         sigin.ui \
-        signup.ui
+        signup.ui \
+        unsuccessdeleteaccount.ui
 
 
 DEFINES = BOOST_ALL_NO_LIB

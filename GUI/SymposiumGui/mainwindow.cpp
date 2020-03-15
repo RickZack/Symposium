@@ -36,6 +36,10 @@ void MainWindow::on_SignIn_clicked()
 {
     hide();
     signinWindow= new sigin(this);
+    //cl->setSignIn(signinWindow);
+
+    //signinWindow->setClientDispatcher(cl);
+
     signinWindow->show();
 }
 
@@ -43,6 +47,8 @@ void MainWindow::on_SignUp_clicked()
 {
     hide();
     signupWindow= new signup(this);
+    //cl->setSignUp(signupWindow);
+    //signupWindow->setClientDispatcher(cl);
     signupWindow->show();
 }
 
@@ -56,6 +62,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
             event->ignore();
         } else {
             event->accept();
+            //cl->:logout();
         }
 
 }
+
+/*void MainWindow::setClientDispatcher(clientdispatcher *cl){
+    this->cl = cl;
+}*/

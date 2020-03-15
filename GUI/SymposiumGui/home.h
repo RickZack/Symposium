@@ -7,6 +7,7 @@
 #include "inserturi.h"
 #include "changeuserinfo.h"
 #include "directory.h"
+//#include "Dispatcher/clientdispatcher.h"
 
 namespace Ui {
 class home;
@@ -18,6 +19,7 @@ class home : public QMainWindow
 
 public:
     explicit home(QWidget *parent = nullptr);
+    //void setClientDispatcher(clientdispatcher *cl);
     ~home();
 
 private slots:
@@ -35,6 +37,7 @@ private:
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
     directory *directoryWindow;
+    //Symposium::clientdispatcher *cl;
 
     void closeEvent(QCloseEvent *event);
 };

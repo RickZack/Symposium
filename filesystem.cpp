@@ -171,6 +171,12 @@ resourceType file::resType() const {
     return resourceType::file;
 }
 
+const std::unordered_map<std::string, privilege> file::getUsers()
+{
+    return strategy->getPermission();
+}
+
+
 privilege file::getUserPrivilege(const std::string &targetUser) const {
 
     privilege userPriv= strategy->getPrivilege(targetUser);
