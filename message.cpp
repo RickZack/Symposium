@@ -871,9 +871,11 @@ bool userDataMessage::operator!=(const userDataMessage &rhs) const {
 BOOST_CLASS_EXPORT(Symposium::userDataMessage)
 
 cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-int siteId, int row, int col, int msgId): clientMessage(action, actionOwner, msgId), serverMessage(action, result, msgId), siteId(siteId), row(row),
-          col(col) {
-    //TODO: implement
+                        int siteId, int row, int col, int msgId): clientMessage(actionOwner, msgId),
+                        serverMessage(result, msgId), siteId(siteId), row(row),col(col){
+    if(action!=msgType::updateCursor)
+        throw messageException(messageException::action, UnpackFileLineFunction());
+    this->action=action;
 }
 
 template<class Archive>
@@ -887,10 +889,16 @@ void cursorMessage::serialize(Archive &ar, const unsigned int version)
 
 void cursorMessage::invokeMethod(SymServer &server) {
     clientMessage::invokeMethod(server);
+    //if(action!=msgType::updateCursor)
+    //        throw messageException(messageException::cursor, UnpackFileLineFunction());
+    //server.updateCursorPos(int siteId, int resouceId, int row, int col);
 }
 
 void cursorMessage::invokeMethod(SymClient &client) {
     serverMessage::invokeMethod(client);
+    //if(action!=msgType::updateCursor)
+    //        throw messageException(messageException::cursor, UnpackFileLineFunction());
+    //client.updateCursorPos(int siteId, int row, int col);
 }
 
 BOOST_CLASS_EXPORT(Symposium::cursorMessage)

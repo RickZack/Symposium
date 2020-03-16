@@ -6,7 +6,11 @@
 #include "home.h"
 #include "icon.h"
 #include "errorconnection.h"
-//#include "Dispatcher clientdispatcher.h"
+
+
+namespace Symposium{
+class clientdispatcher;
+}
 
 namespace Ui {
 class signup;
@@ -18,7 +22,7 @@ class signup : public QDialog
 
 public:
     explicit signup(QWidget *parent = nullptr);
-    //void setClientDispatcher(clientdispatcher *cl);
+    void setClientDispatcher( Symposium::clientdispatcher *cl);
     void errorConnection();
     void errorUsernameSignUp();
     void errorPasswordSignUp();
@@ -37,7 +41,7 @@ private:
     icon *iconWindow;
     errorconnection *errorWindow;
     std::string iconPath="";
-    //Symposium::clientdispatcher *cl;
+    Symposium::clientdispatcher *cl;
     void reject();
 };
 

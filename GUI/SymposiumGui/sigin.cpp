@@ -38,15 +38,18 @@ void sigin::errorSignIn()
 void sigin::successSignIn()
 {
     hide();
-    homeWindow= new home(parentWidget());
-    //homewindow->setClientDispatcher(*cl);
+    homeWindow = new home(parentWidget());
+    homeWindow->setClientDispatcher(cl);
     //cl->setHome(home *homeWindow);
     homeWindow->show();
 }
 
-/*void sigin::setClientDispatcher(clientdispatcher *cl){
+
+
+
+void sigin::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
-}*/
+}
 
 void sigin::on_signin_clicked()
 {
@@ -57,6 +60,8 @@ void sigin::on_signin_clicked()
     QString username= ui->username->text();
     QString password = ui->password->text();
 
+    //---------------------------------------------PARTE DA DECOMENTARE
+
     /*if(username!="" && password!=""){
         waiting();
         this->cl->logIn(username.toStdString(), password.toStdString());
@@ -66,7 +71,7 @@ void sigin::on_signin_clicked()
     }*/
 
 
-    //---PARTE DA CANCELLARE SUCCESSIVAMENTE
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     if(username=="test" && password=="test")
     {
         hide();
@@ -92,7 +97,7 @@ void sigin::closeEvent(QCloseEvent *event)
             event->ignore();
         } else {
             event->accept();
-            //cl->:logout();
+            cl->logout();
         }
 
 }

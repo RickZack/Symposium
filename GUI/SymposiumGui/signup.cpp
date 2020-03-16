@@ -1,5 +1,6 @@
 #include "signup.h"
 #include "ui_signup.h"
+#include "Dispatcher/clientdispatcher.h"
 
 signup::signup(QWidget *parent) :
     QDialog(parent),
@@ -38,14 +39,15 @@ void signup::successSignUp()
 {
     hide();
     homeWindow= new home(parentWidget());
-    //homewindow->setClientDispatcher(clientdispatcher *cl);
-    //cl->setHome(home *homeWindow);
+    homeWindow->setClientDispatcher(cl);
+    //cl->setHome(homeWindow);
     homeWindow->show();
 }
 
-/*void sigup::setClientDispatcher(clientdispatcher *cl){
+
+void signup::setClientDispatcher( Symposium::clientdispatcher *cl){
     this->cl = cl;
-}*/
+}
 
 signup::~signup()
 {
@@ -61,6 +63,8 @@ void signup::on_signin_clicked()
     QString password = ui->password->text();
     QString nickname =ui->nickname->text();
 
+    //--------------------------------------------------------------PARTE DA DECOMENTARE
+
     /*if(username!="" && password!="" && nickname!=""){
         waiting();
         this->cl->signUp(username.toStdString(), password.toStdString(), nickname.toStdString(), iconPath);
@@ -70,7 +74,7 @@ void signup::on_signin_clicked()
     }*/
 
 
-    //---PARTE DA CANCELLARE SUCCESSIVAMENTE
+    //--------------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
 
     if(username!="" && password!="" && nickname!="")
     {
@@ -112,6 +116,6 @@ void signup::reject()
         if (resBtn == QMessageBox::Yes)
         {
             QDialog::reject();
-            //cl->:logout();
+            cl->logout();
         }
 }

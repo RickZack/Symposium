@@ -128,7 +128,7 @@ namespace Symposium{
         /**
          * @brief Specific error codes for @ref messageException. They are used as indexes to the error table string
          */
-        enum messageExceptionCodes{action=0, notClient, notSucc, askResMes, sendResMes, symb, upAct, upDoc, userData};
+        enum messageExceptionCodes{action=0, notClient, notSucc, askResMes, sendResMes, symb, upAct, upDoc, userData, cursor};
 
         explicit messageException(messageExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~messageException()=default;

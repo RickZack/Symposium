@@ -7,6 +7,7 @@ inserturi::inserturi(QWidget *parent) :
     ui(new Ui::inserturi)
 {
     ui->setupUi(this);
+    //showDir=cl->showDir(true);
     ui->writer->click();
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
 }
@@ -19,7 +20,9 @@ inserturi::~inserturi()
 void inserturi::on_dir_clicked()
 {
     dirWindow=new choosedir(this);
+    dirWindow->pathDir=showDir;
     dirWindow->show();
+    pathId=dirWindow->pathId;
 }
 
 void inserturi::change_text()
@@ -39,16 +42,19 @@ void inserturi::reset_text()
 
 void inserturi::on_reader_clicked()
 {
-    privilege="reader";
+    privilege=Symposium::privilege::readOnly;
 }
 
 void inserturi::on_writer_clicked()
 {
-    privilege="writer";
+    privilege=Symposium::privilege::modify;
 }
 
 void inserturi::on_owner_clicked()
 {
-    privilege="owner";
+    privilege=Symposium::privilege::owner;
 }
 
+void inserturi::setClientDispatcher(Symposium::clientdispatcher *cl){
+    this->cl = cl;
+}

@@ -1,5 +1,6 @@
 #include "home.h"
 #include "ui_home.h"
+#include "Dispatcher/clientdispatcher.h"
 
 home::home(QWidget *parent) :
     QMainWindow(parent),
@@ -18,7 +19,7 @@ home::~home()
 void home::on_delete_2_clicked()
 {
     deleteAccountWindow = new deleteAccount(this);
-    //deleteAccountWindow->setClientDispatcher(*cl);
+    deleteAccountWindow->setClientDispatcher(cl);
     //cl->setDeleteAccount(deleteAccountWindow);
     deleteAccountWindow->show();
 }
@@ -26,13 +27,15 @@ void home::on_delete_2_clicked()
 void home::on_InsertUri_clicked()
 {
     inserturiWindow = new inserturi(this);
+    //inserturiWindow->setClientDispatcher(cl);
+    //cl->setInsertUri(inserturiWindow);
     inserturiWindow->show();
 }
 
 void home::on_modify_clicked()
 {
     changeWindow = new changeUserInfo(this);
-    //changeWindow->setClientDispatcher(*cl);
+    changeWindow->setClientDispatcher(cl);
     //cl->setChangeUserInfo(changeWindow);
     changeWindow->show();
 }
@@ -53,12 +56,13 @@ void home::closeEvent(QCloseEvent *event)
         if (resBtn != QMessageBox::Yes) {
             event->ignore();
         } else {
+            cl->logout();
             event->accept();
         }
 
 }
 
-/*void home::setClientDispatcher(clientdispatcher *cl){
+void home::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
-}*/
+}
 

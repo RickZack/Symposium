@@ -4,6 +4,16 @@
 #include <QDialog>
 #include "icon.h"
 #include <QMessageBox>
+#include "../../user.h"
+#include "errorconnection.h"
+#include "errorlogout.h"
+
+
+
+namespace Symposium{
+class clientdispatcher;
+}
+
 
 namespace Ui {
 class changeUserInfo;
@@ -15,6 +25,12 @@ class changeUserInfo : public QDialog
 
 public:
     explicit changeUserInfo(QWidget *parent = nullptr);
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
+    void errorConnection();
+    void errorConnectionLogout();
+    void errorUsernameEditUser();
+    void errorPasswordEditUser();
+    void successEditUser();
     ~changeUserInfo();
 
 private slots:
@@ -28,6 +44,11 @@ private slots:
 private:
     Ui::changeUserInfo *ui;
     icon *iconWindow;
+    std::string img;
+    Symposium::user us;
+    Symposium::clientdispatcher *cl;
+    errorconnection *errorWindow;
+    errorlogout *errorLog;
 };
 
 #endif // CHANGEUSERINFO_H

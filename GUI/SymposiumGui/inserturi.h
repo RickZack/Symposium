@@ -3,6 +3,15 @@
 
 #include <QDialog>
 #include "choosedir.h"
+#include "../../privilege.h"
+
+
+
+namespace Symposium{
+class clientdispatcher;
+}
+
+
 namespace Ui {
 class inserturi;
 }
@@ -13,6 +22,7 @@ class inserturi : public QDialog
 
 public:
     explicit inserturi(QWidget *parent = nullptr);
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~inserturi();
 
 private slots:
@@ -33,7 +43,10 @@ private:
     choosedir *dirWindow;
     std::string path;
     std::string nameDir;
-    std::string privilege;
+    Symposium::privilege privilege;
+    std::string showDir;
+    std::string pathId;
+    Symposium::clientdispatcher *cl;
 };
 
 #endif // INSERTURI_H

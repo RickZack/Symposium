@@ -22,6 +22,7 @@ class choosedir : public QDialog
 public:
     std::string pathId;
     std::string nameOfDir;
+    std::string pathDir;
     explicit choosedir(QWidget *parent = nullptr);
     ~choosedir();
     void treeGenerate(std::string str, int count);

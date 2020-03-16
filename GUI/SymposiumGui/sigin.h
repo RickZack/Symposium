@@ -24,7 +24,7 @@ public:
     void errorConnection();
     void errorSignIn();
     void successSignIn();
-    //void setClientDispatcher(clientdispatcher *cl);
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
 
 
 private slots:
