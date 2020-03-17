@@ -41,6 +41,7 @@ SOURCES += \
         deleteaccount.cpp \
         directory.cpp \
         errorconnection.cpp \
+        errorlogout.cpp \
         exit.cpp \
         home.cpp \
         icon.cpp \
@@ -80,6 +81,7 @@ HEADERS += \
         deleteaccount.h \
         directory.h \
         errorconnection.h \
+        errorlogout.h \
         exit.h \
         home.h \
         icon.h \
@@ -121,6 +123,7 @@ FORMS += \
         deleteaccount.ui \
         directory.ui \
         errorconnection.ui \
+        errorlogout.ui \
         exit.ui \
         folder1.ui \
         home.ui \

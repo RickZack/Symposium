@@ -1,23 +1,42 @@
 #include "changeuserinfo.h"
 #include "ui_changeuserinfo.h"
+#include "Dispatcher/clientdispatcher.h"
 
 changeUserInfo::changeUserInfo(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::changeUserInfo)
 {
     ui->setupUi(this);
-    ui->username->setText("Mario");
-    ui->password->setText("password");
-    ui->nickname->setText("Rossi");
+    ui->erroruser->hide();
+    ui->errorpassword->hide();
 
-    QPixmap pix(":/resources/avatar/beaver.png");
+    //-----------------------------------------------------PARTE DA DECOMENTARE
+
+    /*
+     us=cl->getUser();
+    ui->username->setText(QString::fromStdString(us.getUsername()));
+    ui->password->setText("");
+    ui->nickname->setText(QString::fromStdString(us.getNickname()));
+    img=us.getIconPath();
+     */
+
+
+    //-----------------------------------------------------PARTE DA CANCELLARE
+    ui->username->setText("Mario");
+    ui->password->setText("");
+    ui->nickname->setText("Rossi");
+    img=":/resources/avatar/beaver.png";
+
+
+    //---------------------------------------------------------------------------
+
+    QPixmap pix(QString::fromStdString(img));
     int w=ui->img->width();
     int h=ui->img->height();
     ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 
 
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->confirm, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->confirm, SIGNAL(clicked()), this, SLOT(confirm_click()));
 }
 
@@ -34,8 +53,8 @@ void changeUserInfo::on_iconButt_clicked()
 
 void changeUserInfo::chooseIcon()
 {
-    std::string msg=iconWindow->msg;
-    QString msg2=QString::fromStdString(msg);
+    img=iconWindow->msg;
+    QString msg2=QString::fromStdString(img);
     QPixmap pix(msg2);
     int w=ui->img->width();
     int h=ui->img->height();
@@ -45,16 +64,56 @@ void changeUserInfo::chooseIcon()
 
 void changeUserInfo::confirm_click()
 {
+    ui->erroruser->hide();
+    ui->errorpassword->hide();
+    QString username = ui->username->text();
+    QString password = ui->password->text();
+    QString nickname = ui->nickname->text();
+    //QString imagine = QString::fromStdString(img);
+    Symposium::user usNew(username.toStdString(), password.toStdString(), nickname.toStdString(), img, us.getSiteId(), us.getHome());
+    //cl->editUser(usNew);
+
+    //------------------------------------------------------------------PARTE DA CANCELLARE
+    QString stringa="Your information has been successfully modified";
     QMessageBox::information(parentWidget(),
-                             tr("Confirm"), tr("Your information has been successfully modified"), QMessageBox::Ok);
+                             tr("Confirm"), stringa, QMessageBox::Ok);
+    //--------------------------------------------------------------------------
 }
 
 
-//NB: QUESTA FUNZIONE CAMBIA I DATI QUANDO SI CAMBIA IL TESTO NELLA CASELLA
-/*void changeUserInfo::on_username_textEdited(const QString &arg1)
+void changeUserInfo::setClientDispatcher(Symposium::clientdispatcher *cl){
+    this->cl = cl;
+}
+
+void changeUserInfo::errorConnection()
 {
-    QPixmap pix(":/resources/avatar/owl.png");
-    int w=ui->img->width();
-    int h=ui->img->height();
-    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
-}*/
+    errorWindow = new errorconnection(this);
+    errorWindow->show();
+}
+
+void changeUserInfo::errorConnectionLogout()
+{
+    errorLog = new errorlogout(this);
+    this->close();
+    parentWidget()->close();
+    errorLog->show();
+}
+
+void changeUserInfo::errorUsernameEditUser()
+{
+    ui->erroruser->show();
+}
+
+void changeUserInfo::errorPasswordEditUser()
+{
+    ui->errorpassword->show();
+}
+
+void changeUserInfo::successEditUser()
+{
+    this->close();
+    QString stringa="Your information has been successfully modified";
+    QMessageBox::information(parentWidget(),
+                             tr("Confirm"), stringa, QMessageBox::Ok);
+
+}

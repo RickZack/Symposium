@@ -91,7 +91,7 @@ const char* messageException::messageErrors[]={"Action is not consistent with th
                                                "The action had not succeded", "This is not an askRes message",
                                                "This is not a sendRes  message", "This is not a symbol message",
                                                "This is not an updateActive message", "This is not an updateDoc message",
-                                               "This is not an userData message"};
+                                               "This is not an userData message", "This is not a cursor message"};
 
 messageException::messageException(messageExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :

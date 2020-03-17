@@ -1,5 +1,6 @@
 #include "deleteaccount.h"
 #include "ui_deleteaccount.h"
+#include "Dispatcher/clientdispatcher.h"
 
 deleteAccount::deleteAccount(QWidget *parent) :
     QDialog(parent),
@@ -37,6 +38,22 @@ void deleteAccount::delete_click()
 
 }
 
-/*void deleteAccount::setClientDispatcher(clientdispatcher *cl){
+void deleteAccount::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
-}*/
+}
+
+void deleteAccount::errorConnection()
+{
+    errorWindow = new errorconnection(this);
+    errorWindow->show();
+}
+
+void deleteAccount::errorConnectionLogout()
+{
+    errorLog = new errorlogout(this);
+    this->close();
+    parentWidget()->close();
+    errorLog->show();
+}
+
+
