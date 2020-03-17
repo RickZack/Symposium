@@ -778,12 +778,14 @@
          cursorMessage():serverMessage(msgOutcome::success, 1){}
 
          int siteId;
+         int resourceId;
          int row;
          int col;
 
      public:
          cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                       int siteId, int row, int col, int msgId = 0);
+                       int siteId,
+                       int resourceId, int row, int col, int msgId = 0);
 
          void invokeMethod(SymServer &server) override;
 

@@ -215,6 +215,7 @@
          virtual void remoteRemove(const std::string &remover, int resourceId, symbolMessage &rmMsg);
          //dispatchMessages ->function to be active in background to send messages from server to client
          //updateActiveUsers(); ->useful or just done inside other functions?
+         virtual void updateCursorPos(const std::string &targetUser, int resId, unsigned int row, unsigned int col);
 
          /**
           * @brief edit the privilege of @e targetUser user for the resource @e resName in @e resPath to @e newPrivilege

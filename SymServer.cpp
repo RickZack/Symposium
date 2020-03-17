@@ -461,6 +461,10 @@ bool SymServer::operator!=(const SymServer &rhs) const {
     return !(rhs == *this);
 }
 
+void SymServer::updateCursorPos(const std::string &targetUser, int resId, unsigned int row, unsigned int col) {
+    //TODO: implement
+}
+
 BOOST_CLASS_EXPORT(Symposium::SymServer)
 
 

@@ -879,8 +879,9 @@ bool userDataMessage::operator!=(const userDataMessage &rhs) const {
 BOOST_CLASS_EXPORT(Symposium::userDataMessage)
 
 cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                        int siteId, int row, int col, int msgId): clientMessage(actionOwner, msgId),
-                        serverMessage(result, msgId), siteId(siteId), row(row),col(col){
+                             int siteId,
+                             int resourceId, int row, int col, int msgId) : clientMessage(actionOwner, msgId),
+                                                                            serverMessage(result, msgId), siteId(siteId), row(row), col(col){
     if(action!=msgType::updateCursor)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
@@ -892,7 +893,7 @@ void cursorMessage::serialize(Archive &ar, const unsigned int version)
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
-    ar & siteId & row & col;
+    ar & siteId & resourceId & row & col;
 }
 
 void cursorMessage::invokeMethod(SymServer &server) {

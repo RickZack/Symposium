@@ -244,6 +244,10 @@ namespace Symposium {
          */
         virtual void verifySymbol(int resourceId, const symbol &sym);
 
+        virtual cursorMessage updateCursorPos(int resourceId, unsigned int row, unsigned int col);
+
+        virtual void updateCursorPos(int userSiteId, int resourceId, unsigned int row, unsigned int col);
+
         /**
          * @brief constructs a @ref privMessage to send to the server to ask to change privileges for a resource
          * @param targetUser the user whose privilege has to be modified
