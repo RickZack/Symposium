@@ -67,7 +67,7 @@ const std::vector<msgType> secondGroup={msgType::createRes, msgType::createNewDi
                                   msgType::removeRes};
 const std::vector<msgType> thirdGroup={msgType::mapChangesToUser, msgType::changePrivileges, msgType::shareRes,
                                  msgType::insertSymbol, msgType::removeSymbol};
-const std::vector<msgType> fourthGroup={msgType::addActiveUser, msgType::removeActiveUser, msgType::closeRes};
+const std::vector<msgType> fourthGroup={msgType::addActiveUser, msgType::removeActiveUser, msgType::closeRes, msgType::updateCursor};
 
 /*
  * An EXPECT_THROW by Google Test that also prints the action the caused the not-throwing
@@ -121,6 +121,7 @@ std::ostream& operator<<(std::ostream& output, msgType m){
         case msgType::addActiveUser: return output<<"msgType::addActiveUser";
         case msgType::removeActiveUser: return output<<"msgType::removeActiveUser";
         case msgType::closeRes: return output<<"msgType::closeRes";
+        case msgType::updateCursor: return output<<"msgType::updateCursor";
 
         default: return output<<"operator<< not defined for this value";
     }
@@ -174,7 +175,7 @@ TEST_P(updateDocMsgForbiddenActions, updateDocThrowExceptionInConstruction) {
 INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(firstGroup));
 INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_CASE_P(AllButMapChangesFromThirdGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
-INSTANTIATE_TEST_CASE_P(AllButCloseResFromFourthGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-1)));
+INSTANTIATE_TEST_CASE_P(AllButCloseResFromFourthGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-2)));
 
 struct loginMsgForbiddenActions: signUpMsgForbiddenActions {};
 TEST_P(loginMsgForbiddenActions, loginThrowExceptionInConstruction) {
@@ -274,6 +275,17 @@ INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, userDataMsgForbiddenActions, test
 INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
+//Added on 17/03/2020, after introduction of cursorMessage
+struct cursorMsgForbiddenActions: simpleMsgTypeTest {};
+TEST_P(cursorMsgForbiddenActions, cursorThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new cursorMessage(action, {"", ""}, msgOutcome::success, 0, 0, 0, 0, 0), action, messageException);
+}
+INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, cursorMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, cursorMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_CASE_P(AllButSymInsRemFromThirdGroup, cursorMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_CASE_P(allButCursorUpdateFromFourthGroup, cursorMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-1)));
+
 //After bug found 11/12/2019: not only we need to throw when an action is illegal, but we do need to NOT
 //throw when it's legal! The following test should assure complete coverage for this consistency check
 struct askResMsgLegalActions: simpleMsgTypeTest{};
@@ -356,6 +368,13 @@ TEST_P(userDataMsgLegalActions, userNoDataThrowExceptionInConstruction) {
 }
 INSTANTIATE_TEST_CASE_P(ChangeUserData, userDataMsgLegalActions, testing::Values(msgType::changeUserData));
 
+//Added on 17/03/2020, after introduction of cursorMessage
+struct cursorMsgLegalActions: simpleMsgTypeTest {};
+TEST_P(cursorMsgLegalActions, cursorUpdateNoThrowExceptionInConstruction) {
+    msgType action = GetParam();
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new cursorMessage(action, {"", ""}, msgOutcome::success, 1, 1, 1, 1), action);
+}
+INSTANTIATE_TEST_CASE_P(updateCursorPos, cursorMsgLegalActions, testing::Values(msgType::updateCursor));
 
 /*
  * Basic logic tests for messages sent ONLY by the client (clientMessage)
@@ -875,6 +894,8 @@ TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUserOnOtherClient){
     fromServer->invokeMethod(client);
 }
 
+//TODO: add tests for cursorMessage, for flow control
+
 struct messageSerialization: public testing::Test{
     std::unique_ptr<message> toStore, toLoad;
     std::stringstream stream;
@@ -1013,4 +1034,11 @@ TEST_F(messageSerialization, userDataMessage){
     EXPECT_EQ(*dynamic_cast<userDataMessage*>(toStore.get()), *dynamic_cast<userDataMessage*>(toLoad.get()));
 }
 
-//TODO: add tests for cursorMessage
+TEST_F(messageSerialization, cursorMessage){
+    toStore=std::unique_ptr<cursorMessage>(new cursorMessage(msgType::updateCursor, {"",""},msgOutcome ::success, 0, 0, 0, 0, 10));
+    toLoad=std::unique_ptr<cursorMessage>(new cursorMessage(msgType::updateCursor, {"",""},msgOutcome ::success, 0, 0, 0, 0, 10));
+    ASSERT_NE(*dynamic_cast<cursorMessage*>(toStore.get()), *dynamic_cast<cursorMessage*>(toLoad.get()));
+    storeMessage(toStore);
+    loadMessage(toLoad);
+    EXPECT_EQ(*dynamic_cast<cursorMessage*>(toStore.get()), *dynamic_cast<cursorMessage*>(toLoad.get()));
+}

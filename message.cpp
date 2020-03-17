@@ -881,7 +881,8 @@ BOOST_CLASS_EXPORT(Symposium::userDataMessage)
 cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                              int siteId,
                              int resourceId, int row, int col, int msgId) : clientMessage(actionOwner, msgId),
-                                                                            serverMessage(result, msgId), siteId(siteId), row(row), col(col){
+                                                                            serverMessage(result, msgId), siteId(siteId),
+                                                                            resourceId(resourceId), row(row), col(col){
     if(action!=msgType::updateCursor)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
@@ -908,6 +909,19 @@ void cursorMessage::invokeMethod(SymClient &client) {
     //if(action!=msgType::updateCursor)
     //        throw messageException(messageException::cursor, UnpackFileLineFunction());
     //client.updateCursorPos(int siteId, int row, int col);
+}
+
+bool cursorMessage::operator==(const cursorMessage &rhs) const {
+    return static_cast<const Symposium::clientMessage &>(*this) == static_cast<const Symposium::clientMessage &>(rhs) &&
+           static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           siteId == rhs.siteId &&
+           resourceId == rhs.resourceId &&
+           row == rhs.row &&
+           col == rhs.col;
+}
+
+bool cursorMessage::operator!=(const cursorMessage &rhs) const {
+    return !(rhs == *this);
 }
 
 BOOST_CLASS_EXPORT(Symposium::cursorMessage)

@@ -89,7 +89,7 @@
 
      protected:
          //Needed by boost::serialization
-         clientMessage()=default;
+         clientMessage():message(1){};
          clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
      public:
 
@@ -790,6 +790,10 @@
          void invokeMethod(SymServer &server) override;
 
          void invokeMethod(SymClient &client) override;
+
+         bool operator==(const cursorMessage &rhs) const;
+
+         bool operator!=(const cursorMessage &rhs) const;
 
          virtual ~cursorMessage()= default;
 
