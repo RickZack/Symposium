@@ -187,6 +187,27 @@ TEST_F(documentTest, canRetrieveSiteIds){
     EXPECT_EQ(expected, d.retrieveSiteIds());
 }
 
+TEST_F(documentTest, updateCursorPos){
+    user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    user someOtherUser("username2", "AP@ssw0rd!", "noempty", "", 1, nullptr);
+    d.access(someUser, privilege ::modify);
+    d.access(someOtherUser, privilege ::modify);
+
+
+    d.updateCursorPos(someUser.getSiteId(), 10, 20);
+    std::forward_list<std::pair<const user *, sessionData>> expected=d.getActiveUsers();
+    auto entrySomeUser=std::find_if(expected.begin(), expected.end(), [&](std::pair<const user *, sessionData> el){return el.first->getSiteId()==someUser.getSiteId();});
+    ASSERT_NE(entrySomeUser, expected.end());
+    EXPECT_EQ(entrySomeUser->second.row, 10);
+    EXPECT_EQ(entrySomeUser->second.col, 20);
+}
+
+TEST_F(documentTest, updateCursorPosNoThrowIfNoExistingUser){
+    user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    d.access(someUser, privilege ::modify);
+    EXPECT_NO_THROW(d.updateCursorPos(someUser.getSiteId()+1, 10, 20));
+}
+
 struct documentSerializationTest: ::testing::Test{
     document d1, d2;
     std::stringstream stream;
@@ -209,5 +230,3 @@ TEST_F(documentSerializationTest, serialize){
     load(d2);
     EXPECT_EQ(d2, d1);
 }
-
-//TODO: add tests for method updateCursorPos
