@@ -85,6 +85,8 @@
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
 
+
+
      protected:
          //Needed by boost::serialization
          clientMessage()=default;
@@ -295,13 +297,13 @@
          friend class boost::serialization::access;
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
-
+         serverMessage()=default;
      protected:
          //Needed by boost::serialization
-         serverMessage()=default;
          serverMessage(msgOutcome result, int msgId = 0);
 
          msgOutcome result;         /**< result of an operation asked to the server */
+         std::string errDescr;
      public:
 
          /**
@@ -309,6 +311,9 @@
           */
          serverMessage(msgType action, msgOutcome result, int msgId = 0);
 
+         const std::string &getErrDescr() const;
+
+         void setErrDescr(const std::string &errDescr);
 
          msgOutcome getResult() const;
 
@@ -345,7 +350,7 @@
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
          //Needed by boost::serialization
-         loginMessage()=default;
+         loginMessage():serverMessage(msgOutcome::success, 1){};
 
          user loggedUser;
      public:
@@ -386,7 +391,7 @@
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
          //Needed by boost::serialization
-         mapMessage()=default;
+         mapMessage(): serverMessage(msgOutcome::success, 1){}
 
          std::map<int, user> siteIdToUser;
      public:
@@ -423,7 +428,7 @@
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
          //Needed by boost::serialization
-         sendResMessage()=default;
+         sendResMessage():serverMessage(msgOutcome::success, 1){}
 
          int symId;             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
          std::shared_ptr<filesystem> resource;
@@ -468,7 +473,7 @@
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
 
-         updateActiveMessage()= default;
+         updateActiveMessage():serverMessage(msgOutcome::success, 1){}
          user newUser;              /**< user who joined the document */
          int resourceId;            /**< identifier of the opened resource */
          privilege userPrivilege;   /**< the privilege @e newUser has on @e resourceId */
@@ -516,7 +521,7 @@
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
 
-         privMessage()= default;
+         privMessage():serverMessage(msgOutcome::success, 1){}
 
          std::string resourceId;    /**< path to the resource (the uri) */
          std::string targetUser;    /**< username of the user whose privilege on @e resourceId has to be changed */
@@ -577,7 +582,7 @@
          void serialize(Archive &ar, const unsigned int version);
 
          //Needed for boost::serialization
-         symbolMessage(): sym('a', 0, 0, {}){}
+         symbolMessage(): serverMessage(msgOutcome::success, 1), sym('a', 0, 0, {}){}
 
          int siteId;                /**< siteId of the client that send the message */
          int resourceId;            /**< id of the resource the client is working on*/
@@ -667,7 +672,7 @@
          void serialize(Archive &ar, const unsigned int version);
 
          //Needed for boost::serialization
-         uriMessage()= default;
+         uriMessage():serverMessage(msgOutcome::success, 1){}
 
          std::string path;
          std::string name;
@@ -720,7 +725,7 @@
          void serialize(Archive &ar, const unsigned int version);
 
          //Needed for boost::serialization
-         userDataMessage()= default;
+         userDataMessage():serverMessage(msgOutcome::success, 1){}
 
          user newUserData;
      public:
@@ -770,7 +775,7 @@
          void serialize(Archive &ar, const unsigned int version);
 
          //Needed for boost::serialization
-         cursorMessage()= default;
+         cursorMessage():serverMessage(msgOutcome::success, 1){}
 
          int siteId;
          int row;

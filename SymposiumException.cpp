@@ -37,10 +37,15 @@ using namespace Symposium;
 SymposiumException::SymposiumException(const char *file, const int line, const char *func,
                                        const char *errDescr) {
     snprintf(errorMsg, msgMaxLen, "function: %s, in file: %s, line %d: %s", func, file, line, errDescr);
+    errorCodeMsg=errDescr;
 }
 
 const char *SymposiumException::what() const noexcept {
     return errorMsg;
+}
+
+const char *SymposiumException::getErrorCodeMsg() const noexcept {
+    return errorCodeMsg;
 }
 
 const char* SymServerException::SymServerErrors[]={"the user already exists",

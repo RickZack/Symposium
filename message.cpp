@@ -296,7 +296,7 @@ void serverMessage::serialize(Archive &ar, const unsigned int version)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::message>(*this);
-    ar & result;
+    ar & result & errDescr;
 }
 
 void serverMessage::invokeMethod(SymClient &client) {
@@ -319,6 +319,14 @@ bool serverMessage::operator==(const serverMessage &rhs) const {
 
 bool serverMessage::operator!=(const serverMessage &rhs) const {
     return !(rhs == *this);
+}
+
+const std::string &serverMessage::getErrDescr() const {
+    return errDescr;
+}
+
+void serverMessage::setErrDescr(const std::string &errDescr) {
+    serverMessage::errDescr = errDescr;
 }
 
 BOOST_CLASS_EXPORT(Symposium::serverMessage)

@@ -53,12 +53,16 @@ namespace Symposium{
     class SymposiumException: public std::exception{
         static constexpr int msgMaxLen = 400;
         char errorMsg[msgMaxLen];
+        const char *errorCodeMsg;
     protected:
         SymposiumException(const char *file, const int line, const char *func,
                            const char *errDescr);
 
     public:
         const char *what() const noexcept override;
+
+        const char *getErrorCodeMsg() const noexcept ;
+
         ~SymposiumException() override=default;
     };
 
