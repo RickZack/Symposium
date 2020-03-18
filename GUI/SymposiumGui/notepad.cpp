@@ -79,6 +79,11 @@ notepad::~notepad()
     delete ui;
 }
 
+void notepad::setId(std::string id)
+{
+    this->idDoc=id;
+}
+
 
 void notepad::on_Export_PDF_triggered()
 {
@@ -464,18 +469,75 @@ void notepad::counterLink()
 }
 
 void notepad::closeEvent(QCloseEvent *event){
-        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
-                                                                    tr("Are you sure to quit?\n"),
-                                                                     QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn != QMessageBox::Yes) {
-            event->ignore();
-        } else {
-            // potrebbe essere passata dal server la stringa relativa all'ultima cartella aperta
-            // oppure aprire direttamente la directory iniziale
-            event->ignore();
-            directory *dirWindow=new directory(this);
-            dirWindow->show();
-            this->hide();
-        }
+    // potrebbe essere passata dal server la stringa relativa all'ultima cartella aperta
+    // oppure aprire direttamente la directory iniziale
+
+    //closeSource(this->id)
+    event->ignore();
+    directory *dirWindow=new directory(this);
+    dirWindow->show();
+    this->hide();
 }
+
+void notepad::keyReleaseEvent(QKeyEvent *event)
+{
+    QTextCursor cursor= ui->textEdit->textCursor();
+    if (event->key()==Qt::Key_Backspace){
+        int column=cursor.positionInBlock();
+        int row= cursor.blockNumber();
+        std::pair<int, int> indexes={row,column};
+        // id del documento che ho aperto e la coppia di indici
+        //localRemouve(this->idDoc,pairs)
+
+    }else if(event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
+             ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||
+             event->key()==Qt::Key_F3 ||event->key()==Qt::Key_F4 ||event->key()==Qt::Key_F5 ||event->key()==Qt::Key_F6 ||
+             event->key()==Qt::Key_F7 ||event->key()==Qt::Key_F8 ||event->key()==Qt::Key_F9 ||event->key()==Qt::Key_F10 ||
+             event->key()==Qt::Key_F11 || event->key()==Qt::Key_F12 || event->key()==Qt::Key_Menu ||
+             event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
+             event->key()==Qt::Key_Tab || event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
+             event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
+             event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier){
+        return;
+    }else{
+        QString testo=event->text();
+        int column=cursor.positionInBlock();
+        column= column-1;
+        int row= cursor.blockNumber();
+        QByteArray ba = testo.toLocal8Bit();
+        // char
+        const char *ch = ba.data();
+        std::pair<int, int> indexes={row,column};
+        //localInsert(this->siteId,sym,indexes);
+
+        QTextCharFormat format = cursor.charFormat();
+
+
+        QFont font= format.font();
+
+
+        bool isBold= font.bold();
+        if(isBold==true){
+            qDebug()<<"isBold"<<true;
+        }else
+            qDebug()<<"isBold"<<false;
+
+        bool isUnderlined=font.underline();
+        if(isUnderlined==true){
+            qDebug()<<"isUnderlined"<<true;
+        }else
+            qDebug()<<"isUnderlined"<<false;
+
+        bool isItalic=font.italic();
+        if(isItalic==true){
+            qDebug()<<"isItalic"<<true;
+        }else
+            qDebug()<<"isItalic"<<false;
+
+        qDebug()<<"family"<<font.family();
+        qDebug()<<"font"<<font;
+        qDebug()<<"color"<< ui->textEdit->textColor();
+
+    }
+}
+

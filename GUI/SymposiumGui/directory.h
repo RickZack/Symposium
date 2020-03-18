@@ -25,6 +25,7 @@ public:
     // this variable is used to say that a window has been opened and to enable the button BACK.
     int aperto=0;
     QList<std::string> values;
+    std::string path;
 
 
 
@@ -53,6 +54,7 @@ private:
     std::string separate_word(std::string& string);
     int number_elements(std::string& string);
     std::string generateString(std::string str);
+    std::string searchForId(std::string word,std::string str,int count);
 
 };
 
