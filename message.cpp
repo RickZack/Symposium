@@ -352,7 +352,7 @@ const user &loginMessage::getLoggedUser() const {
 
 void loginMessage::invokeMethod(SymClient &client) {
     auto msg= client.retrieveRelatedMessage(*this);
-    client.setLoggedUser(loggedUser);
+    client.logIn(loggedUser);
 }
 
 bool loginMessage::operator==(const loginMessage &rhs) const {
@@ -898,18 +898,15 @@ void cursorMessage::serialize(Archive &ar, const unsigned int version)
 }
 
 void cursorMessage::invokeMethod(SymServer &server) {
-    clientMessage::invokeMethod(server);
     if(action!=msgType::updateCursor)
             throw messageException(messageException::cursor, UnpackFileLineFunction());
-    server.updateCursorPos(getActionOwner().first, resourceId, row, col);
+    server.updateCursorPos(getActionOwner().first, resourceId, *this);
 }
 
 void cursorMessage::invokeMethod(SymClient &client) {
-    serverMessage::invokeMethod(client);
     if(action!=msgType::updateCursor)
             throw messageException(messageException::cursor, UnpackFileLineFunction());
-    client.updateCursorPos(siteId, row, col);
-    //TODO: implement
+    client.updateCursorPos(siteId, resourceId, row, col);
 }
 
 bool cursorMessage::operator==(const cursorMessage &rhs) const {
@@ -923,6 +920,18 @@ bool cursorMessage::operator==(const cursorMessage &rhs) const {
 
 bool cursorMessage::operator!=(const cursorMessage &rhs) const {
     return !(rhs == *this);
+}
+
+int cursorMessage::getResourceId() const {
+    return resourceId;
+}
+
+int cursorMessage::getRow() const {
+    return row;
+}
+
+int cursorMessage::getCol() const {
+    return col;
 }
 
 BOOST_CLASS_EXPORT(Symposium::cursorMessage)

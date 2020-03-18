@@ -402,7 +402,7 @@ public:
     MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string& actionUser, const std::string&, const std::string&, const uri&));
     MOCK_METHOD2(editUser, const user&(const std::string&, user&));
     MOCK_METHOD2(closeSource, void(const std::string&, int));
-    MOCK_METHOD4(updateCursorPos, void(const std::string&, int, unsigned int, unsigned int));
+    MOCK_METHOD3(updateCursorPos, void(const std::string&, int, cursorMessage&));
 };
 
 struct clientMessageTest: public testing::Test{
@@ -899,10 +899,11 @@ TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUserOnOtherClient){
 
 //Added on 18/03/2020, after introduction of cursorMessage
 TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursor){
-    unsigned int row=1, col=1;
+    srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
     fromClient=new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col);
+    cursorMessage* cr= static_cast<cursorMessage*>(fromClient);
 
-    EXPECT_CALL(server, updateCursorPos(username, resourceId, row, col));
+    EXPECT_CALL(server, updateCursorPos(username, resourceId, *cr));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::updateCursor, msgOutcome::success, fromClient->getMsgId());
@@ -915,7 +916,7 @@ TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursor){
 }
 
 TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursorOnOtherClient){
-    unsigned int row=1, col=1;
+    srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
     fromClient=new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col);
 
     fromServer= new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col, fromClient->getMsgId());

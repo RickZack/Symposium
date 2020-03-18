@@ -215,7 +215,14 @@
          virtual void remoteRemove(const std::string &remover, int resourceId, symbolMessage &rmMsg);
          //dispatchMessages ->function to be active in background to send messages from server to client
          //updateActiveUsers(); ->useful or just done inside other functions?
-         virtual void updateCursorPos(const std::string &targetUser, int resId, unsigned int row, unsigned int col);
+
+         /**
+          * @brief update the current position of user's cursor inside one of the documents he's working on
+          * @param targetUser the user whose cursor position has changed
+          * @param resourceId the id of the document in which the user's cursor has been moved
+          * @param crMsg the message received by the client
+          */
+         virtual void updateCursorPos(const std::string &targetUser, int resourceId, cursorMessage& crMsg);
 
          /**
           * @brief edit the privilege of @e targetUser user for the resource @e resName in @e resPath to @e newPrivilege

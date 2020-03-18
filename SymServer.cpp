@@ -169,6 +169,20 @@ void SymServer::remoteRemove(const std::string &remover, int resourceId, symbolM
     generateSimpleResponse(actionU.getSiteId(), msgType::removeSymbol);
 }
 
+void SymServer::updateCursorPos(const std::string &targetUser, int resourceId, cursorMessage &crMsg) {
+    if(!userIsActive(targetUser))
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
+    std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(targetUser, resourceId);
+    user& actionU=getRegistered(targetUser);
+    if(!docRetrieved.first)
+        throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
+    crMsg.clearAuthParam();
+    docRetrieved.second->updateCursorPos(actionU.getSiteId(), crMsg.getRow(), crMsg.getCol());
+    insertMessageForSiteIds(siteIdsFor(resourceId, actionU.getSiteId()), std::shared_ptr<serverMessage>(new cursorMessage(crMsg)));
+
+    generateSimpleResponse(actionU.getSiteId(), msgType::updateCursor);
+}
+
 privilege SymServer::editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
                                    const std::string &resName, privilege newPrivilege) {
     if(!userIsActive(actionUser) || !userIsRegistered(targetUser))
@@ -461,9 +475,6 @@ bool SymServer::operator!=(const SymServer &rhs) const {
     return !(rhs == *this);
 }
 
-void SymServer::updateCursorPos(const std::string &targetUser, int resId, unsigned int row, unsigned int col) {
-    //TODO: implement
-}
 
 BOOST_CLASS_EXPORT(Symposium::SymServer)
 

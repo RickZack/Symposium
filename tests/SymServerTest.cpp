@@ -76,6 +76,7 @@ struct SymServerDocMock: public document{
     MOCK_METHOD1(remoteRemove, void(const symbol &toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_CONST_METHOD0(retrieveSiteIds, std::set<int>());
+    MOCK_METHOD3(updateCursorPos, void(unsigned, unsigned, unsigned));
 };
 
 /*
@@ -389,8 +390,8 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     SymServerUserMock* justInserted;
 
     SymServerTestFilesystemFunctionality():
-            loggedUser(loggedUserUsername, loggedUserPwd, "m@ario", "./userIcons/test.jpg", 0, nullptr),
-            anotherUser(anotherUserUsername, anotherUserPwd, "lupoLucio", "./userIcons/test.jpg", 1, nullptr),
+            loggedUser(loggedUserUsername, loggedUserPwd, "m@ario", "./userIcons/test.jpg", 1, nullptr),
+            anotherUser(anotherUserUsername, anotherUserPwd, "lupoLucio", "./userIcons/test.jpg", 2, nullptr),
             server(),
             userDir(new ::testing::NiceMock<SymServerdirMock>("/")),
             fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")),
@@ -947,6 +948,59 @@ TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdWithUnknownSiteId){
                                          std::pair<int, user>(3, SymServer::unknownUser)});
     EXPECT_EQ(expected, mapping);
 }
+
+TEST_F(SymServerTestFilesystemFunctionality, updateCursorPosCallsupdateCursorPosOnDocAndGenerateCorrectResponse){
+    setStageForOpenedDocForLoggedUser();
+    srand(time(NULL)); int row=rand()%1000, col=rand()%1000;
+
+
+    cursorMessage received(msgType::updateCursor, {loggedUserUsername, {}}, msgOutcome::success, loggedUser.getSiteId(), doc.getId(), row, col);
+    serverMessage response(msgType::updateCursor, msgOutcome::success);
+    EXPECT_CALL(doc, updateCursorPos(loggedUser.getSiteId(), row, col));
+
+    server.updateCursorPos(loggedUserUsername, doc.getId(), received);
+    EXPECT_TRUE(server.thereIsMessageForUser(loggedUser.getSiteId(), response).first);
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, updateCursorPosCallsupdateCursorPosOnDocAndPropagateChanges){
+    setStageForOpenedDocForLoggedUser();
+    std::initializer_list<int> siteIds{anotherUser.getSiteId()};
+    server.forceSiteIdForResId(&doc, anotherUser);
+    srand(time(NULL)); int row=rand()%1000, col=rand()%1000;
+
+    cursorMessage received(msgType::updateCursor, {loggedUserUsername, {}}, msgOutcome::success, loggedUser.getSiteId(), doc.getId(), row, col);
+
+    cursorMessage toSend(msgType::updateCursor, {{}, {}}, msgOutcome::success, loggedUser.getSiteId(), doc.getId(), row, col);
+    EXPECT_CALL(doc, updateCursorPos(loggedUser.getSiteId(), row, col));
+    server.updateCursorPos(loggedUserUsername, doc.getId(), received);
+
+
+    ASSERT_NO_FATAL_FAILURE(messageAssociatedWithRightUsers(siteIds, toSend, {loggedUser.getSiteId()}));
+}
+
+
+
+TEST_F(SymServerTestFilesystemFunctionality, updateCursorOfUnloggedUser){
+    srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
+    cursorMessage received(msgType::updateCursor, {loggedUserUsername, {}}, msgOutcome::success, loggedUser.getSiteId(), doc.getId(), row, col);
+    EXPECT_THROW(server.updateCursorPos(loggedUserUsername, doc.getId(), received), SymServerException);
+    /*
+     * Cases in which, for an error, the operation goes wrong, so an exception is raised, are to be handled
+     * externally, in the module that controls the connection
+     */
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, updateCursorOnDocumentNotOpened){
+    srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
+    cursorMessage received(msgType::updateCursor, {loggedUserUsername, {}}, msgOutcome::success, loggedUser.getSiteId(), doc.getId(), row, col);
+    EXPECT_THROW(server.updateCursorPos(loggedUserUsername, doc.getId(), received), SymServerException);
+    /*
+     * Cases in which, for an error, the operation goes wrong, so an exception is raised, are to be handled
+     * externally, in the module that controls the connection
+     */
+}
+
+
 
 struct SymServerSerialization: ::testing::Test{
     SymServer toStore, toLoad;

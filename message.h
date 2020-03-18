@@ -769,7 +769,7 @@
      /**
       * @brief class used to model a message to update the position of a user's cursor
       */
-     class cursorMessage: public virtual clientMessage, public virtual serverMessage{
+     class cursorMessage: public clientMessage, public serverMessage{
          friend class boost::serialization::access;
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
@@ -790,6 +790,12 @@
          void invokeMethod(SymServer &server) override;
 
          void invokeMethod(SymClient &client) override;
+
+         int getResourceId() const;
+
+         int getRow() const;
+
+         int getCol() const;
 
          bool operator==(const cursorMessage &rhs) const;
 
