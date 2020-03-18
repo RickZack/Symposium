@@ -128,6 +128,7 @@ struct SymClientDocMock: public document{
     MOCK_METHOD2(access, document&(const user&, privilege));
     MOCK_METHOD2(localInsert, symbol(const std::pair<int, int>& index, symbol &toInsert));
     MOCK_METHOD1(localRemove, symbol(const std::pair<int, int> index));
+    MOCK_METHOD3(updateCursorPos, void(unsigned int, unsigned int, unsigned int));
 };
 
 struct SymClientTest : ::testing::Test{
@@ -586,4 +587,24 @@ TEST_F(SymClientTest, retrieveRelatedMessageThrowsOnMissingMessage){
     // the list of unanswered messages is empty at the moment
     serverMessage responseFromServer(msgType::login, msgOutcome::success);
     EXPECT_THROW(client.retrieveRelatedMessage(responseFromServer), SymClientException);
+}
+
+TEST_F(SymClientTest, updateCursorPosConstructsGoodMessageAndInsertInUnanswered){
+setStageForOpenedDoc();
+srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
+auto mex=client.updateCursorPos(docSentByServer.getId(), row, col);
+messageHasCorrectOwner(mex);
+
+cursorMessage expected(msgType::updateCursor, {username, ""}, msgOutcome::success, userReceived.getSiteId(), docSentByServer.getId(), row, col, mex.getMsgId());
+messageAreAnalogous(mex, expected);
+EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
+}
+
+TEST_F(SymClientTest, updateCursorPosCallsUpdateCursorPosOnDoc){
+setStageForOpenedDoc();
+srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
+int anotherUserSiteId=userReceived.getSiteId()+1;
+
+EXPECT_CALL(docSentByServer, updateCursorPos(anotherUserSiteId, row, col));
+client.updateCursorPos(anotherUserSiteId, docSentByServer.getId(), row, col);
 }

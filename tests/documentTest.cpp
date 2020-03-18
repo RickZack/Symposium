@@ -188,18 +188,20 @@ TEST_F(documentTest, canRetrieveSiteIds){
 }
 
 TEST_F(documentTest, updateCursorPos){
+    srand(time(NULL)); //to have some randomness on row and exp_col numbers
+    unsigned int exp_row=rand()%1000, exp_col=rand()%1000;
     user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
     user someOtherUser("username2", "AP@ssw0rd!", "noempty", "", 1, nullptr);
     d.access(someUser, privilege ::modify);
     d.access(someOtherUser, privilege ::modify);
 
 
-    d.updateCursorPos(someUser.getSiteId(), 10, 20);
+    d.updateCursorPos(someUser.getSiteId(), exp_row, exp_col);
     std::forward_list<std::pair<const user *, sessionData>> expected=d.getActiveUsers();
     auto entrySomeUser=std::find_if(expected.begin(), expected.end(), [&](std::pair<const user *, sessionData> el){return el.first->getSiteId()==someUser.getSiteId();});
     ASSERT_NE(entrySomeUser, expected.end());
-    EXPECT_EQ(entrySomeUser->second.row, 10);
-    EXPECT_EQ(entrySomeUser->second.col, 20);
+    EXPECT_EQ(entrySomeUser->second.row, exp_row);
+    EXPECT_EQ(entrySomeUser->second.col, exp_col);
 }
 
 TEST_F(documentTest, updateCursorPosNoThrowIfNoExistingUser){

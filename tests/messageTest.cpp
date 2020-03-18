@@ -402,6 +402,7 @@ public:
     MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string& actionUser, const std::string&, const std::string&, const uri&));
     MOCK_METHOD2(editUser, const user&(const std::string&, user&));
     MOCK_METHOD2(closeSource, void(const std::string&, int));
+    MOCK_METHOD4(updateCursorPos, void(const std::string&, int, unsigned int, unsigned int));
 };
 
 struct clientMessageTest: public testing::Test{
@@ -532,6 +533,8 @@ public:
     MOCK_METHOD2(verifySymbol, void(int, const symbol&));
     MOCK_METHOD1(retrieveRelatedMessage, std::shared_ptr<clientMessage>(const serverMessage&));
     MOCK_METHOD1(logout, void(bool msgRcv));
+
+    MOCK_METHOD4(updateCursorPos, void(int, int, unsigned int, unsigned int));
 };
 
 struct serverMessageTest: public testing::Test{
@@ -678,8 +681,8 @@ struct DoubleEndMessageTest: public testing::Test{
     serverMessage *fromServer;
     clientMessage *fromClient;
     user u;
-    ::testing::NiceMock<SymClientMock> client;
-    ::testing::NiceMock<SymServerMock> server;
+    ::testing::StrictMock<SymClientMock> client;
+    ::testing::StrictMock<SymServerMock> server;
     symbol dummySymbol;
     uri dummyUri;
     privilege priv;
@@ -894,7 +897,31 @@ TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUserOnOtherClient){
     fromServer->invokeMethod(client);
 }
 
-//TODO: add tests for cursorMessage, for flow control
+//Added on 18/03/2020, after introduction of cursorMessage
+TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursor){
+    unsigned int row=1, col=1;
+    fromClient=new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col);
+
+    EXPECT_CALL(server, updateCursorPos(username, resourceId, row, col));
+    fromClient->invokeMethod(server);
+
+    fromServer= new serverMessage(msgType::updateCursor, msgOutcome::success, fromClient->getMsgId());
+    //client uses the message previously sent to the server to retrieve the parameters for the required action:
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
+    //no action is required when the response is received
+    fromServer->invokeMethod(client);
+
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
+}
+
+TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursorOnOtherClient){
+    unsigned int row=1, col=1;
+    fromClient=new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col);
+
+    fromServer= new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col, fromClient->getMsgId());
+    EXPECT_CALL(client, updateCursorPos(u.getSiteId(), resourceId, row, col));
+    fromServer->invokeMethod(client);
+}
 
 struct messageSerialization: public testing::Test{
     std::unique_ptr<message> toStore, toLoad;
