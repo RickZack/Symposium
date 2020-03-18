@@ -898,10 +898,17 @@ void cursorMessage::serialize(Archive &ar, const unsigned int version)
 }
 
 void cursorMessage::invokeMethod(SymServer &server) {
-    //TODO: implement
+    clientMessage::invokeMethod(server);
+    if(action!=msgType::updateCursor)
+            throw messageException(messageException::cursor, UnpackFileLineFunction());
+    server.updateCursorPos(getActionOwner().first, resourceId, row, col);
 }
 
 void cursorMessage::invokeMethod(SymClient &client) {
+    serverMessage::invokeMethod(client);
+    if(action!=msgType::updateCursor)
+            throw messageException(messageException::cursor, UnpackFileLineFunction());
+    client.updateCursorPos(siteId, row, col);
     //TODO: implement
 }
 

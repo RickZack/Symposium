@@ -1,6 +1,8 @@
 #include "currentusers.h"
 #include "ui_currentusers.h"
 
+
+
 currentUsers::currentUsers(QWidget *parent, bool modify) :
     QDialog(parent),
     ui(new Ui::currentUsers), modify(modify)
@@ -28,8 +30,67 @@ currentUsers::~currentUsers()
     delete ui;
 }
 
+void currentUsers::setClientDispatcher(Symposium::clientdispatcher *cl){
+    this->cl = cl;
+}
+
+void currentUsers::successEditPrivilege()
+{
+    QMessageBox::information(parentWidget(),
+                             tr("Modify Privilege"), tr("The privilege was successfully modify!"), QMessageBox::Ok);
+
+    //onlineUsers=cl->allUser(documentID);
+    changeList();
+
+}
+
+void currentUsers::errorEditPrivilege(std::string errorMess)
+{
+    QString error=QString::fromStdString(errorMess);
+    QMessageBox::information(parentWidget(),
+                             tr("Modify Privilege"), error, QMessageBox::Ok);
+}
+
+void currentUsers::errorConnection()
+{
+    errorWindow = new errorconnection(this);
+    errorWindow->show();
+}
+
+void currentUsers::errorConnectionLogout()
+{
+    errorLog = new errorlogout(this);
+    this->close();
+    parentWidget()->close();
+    errorLog->show();
+}
+
 void currentUsers::insertusers()
 {
+    //---------------------------------------------PARTE DA DECOMENTARE
+
+   /*
+
+    for(auto it: onlineUsers)
+    {
+        QVariant v;
+        v.setValue(it.first->getSiteId());
+        std::string nick=it.first->getNickname();
+        if(it.first->getUsername()==user->getUsername())
+            nick="You";
+        nick=nick+" with a privilege ";
+        std::ostringstream priv;
+        priv<<it.second.p;
+        nick=nick+priv.str();
+        std::string icon=it.first->getIconPath();
+        QListWidgetItem *item=new QListWidgetItem(QIcon(QString::fromStdString(icon)), QString::fromStdString(nick));
+        item->setData(Qt::UserRole,v);
+        ui->userslist->addItem(item);
+    }
+    */
+    //---------------------------------------------------------
+
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     for(auto it: activeUsers)
     {
         QVariant v;
@@ -48,6 +109,7 @@ void currentUsers::insertusers()
 
     }
 
+    //----------------------------------------------------------------------------------------
 }
 
 void currentUsers::on_userslist_itemClicked(QListWidgetItem *item)
@@ -73,6 +135,8 @@ void currentUsers::on_userslist_itemClicked(QListWidgetItem *item)
 
 }
 
+
+//--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE PERCHE' DEVE ESSERE FATTA DAL NOTEPAD.CPP
 void currentUsers::listusers()
 {
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
@@ -85,8 +149,10 @@ void currentUsers::listusers()
     activeUsers.push_front(p1);
     activeUsers.push_front(p2);
     activeUsers.push_front(p3);
-    activeUsers.push_front(p4);
+    activeUsers.push_front(p4);    
 }
+//----------------------------------------------------------------------------------------
+
 
 void currentUsers::userPrivilege(){
     privilegeUser=Symposium::privilege::owner;
@@ -117,15 +183,18 @@ void currentUsers::on_none_clicked()
 void currentUsers::on_button_clicked()
 {
     QString nick;
+    std::string username;
     QString priv;
     for(auto it: activeUsers)
     {
         if(userToChangeSiteId==it.first->getSiteId())
         {
             nick=QString::fromStdString(it.first->getNickname());
+            username=it.first->getUsername();
         }
 
     }
+
     switch (newPrivelege)
     {
         case Symposium::privilege::owner:
@@ -151,12 +220,22 @@ void currentUsers::on_button_clicked()
                                                                     QMessageBox::Yes);
         if (resBtn == QMessageBox::Yes)
         {
+            //cl->editPrivilege(username, newPrivelege);
+
+            //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
             changeUserPrivilege();
             changeList();
+            //---------------------------------------------------------------------------------
         }
 
 }
 
+
+
+
+
+
+//--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
 void currentUsers::changeUserPrivilege()
 {
     std::pair<Symposium::user *, Symposium::privilege> p;
@@ -179,9 +258,38 @@ void currentUsers::changeUserPrivilege()
     }
 
 }
+//---------------------------------------------------------------------------------
 
 void currentUsers::changeList()
 {
+     //---------------------------------------------PARTE DA DECOMENTARE
+
+    /*
+     ui->userslist->clear();
+    for(auto it: onlineUsers)
+    {
+        QVariant v;
+        v.setValue(it.first->getSiteId());
+        std::string nick=it.first->getNickname();
+        if(it.first->getUsername()==user->getUsername())
+            nick="You";
+        nick=nick+" with a privilege ";
+        std::ostringstream priv;
+        priv<<it.second.p;
+        nick=nick+priv.str();
+        std::string icon=it.first->getIconPath();
+        QListWidgetItem *item=new QListWidgetItem(QIcon(QString::fromStdString(icon)), QString::fromStdString(nick));
+        item->setData(Qt::UserRole,v);
+        ui->userslist->addItem(item);
+    }
+     */
+
+
+    //-------------------------------------------------------------------
+
+
+
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     ui->userslist->clear();
     for(auto it: activeUsers)
     {
@@ -200,5 +308,6 @@ void currentUsers::changeList()
         ui->userslist->addItem(item);
 
     }
+    //---------------------------------------------------------------------------------
 }
 

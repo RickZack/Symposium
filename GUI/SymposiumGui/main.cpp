@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     Symposium::clientdispatcher cl;
+    //cl.connectionClient();
     w.setClientDispatcher(&cl);
     w.show();
 

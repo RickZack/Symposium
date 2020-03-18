@@ -9,6 +9,13 @@
 
 #include "../../user.h"
 #include "../../privilege.h"
+#include "../../document.h"
+#include "errorconnection.h"
+#include "errorlogout.h"
+
+namespace Symposium{
+class clientdispatcher;
+}
 
 
 namespace Ui {
@@ -20,7 +27,15 @@ class currentUsers : public QDialog
     Q_OBJECT
 
 public:
+    int documentId;
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
+
     explicit currentUsers(QWidget *parent = nullptr, bool modify=false);
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
+    void successEditPrivilege();
+    void errorEditPrivilege(std::string errorMess);
+    void errorConnection();
+    void errorConnectionLogout();
     ~currentUsers();
 
 private slots:
@@ -46,6 +61,9 @@ private:
     Symposium::user *user=new Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
     int userToChangeSiteId;
     Symposium::user userToChange;
+    Symposium::clientdispatcher *cl;
+    errorconnection *errorWindow;
+    errorlogout *errorLog;
 
     void listusers();
     void insertusers();

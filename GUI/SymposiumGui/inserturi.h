@@ -3,17 +3,6 @@
 
 #include <QDialog>
 #include "choosedir.h"
-#include "../../privilege.h"
-#include "errorconnection.h"
-#include "errorlogout.h"
-
-
-
-namespace Symposium{
-class clientdispatcher;
-}
-
-
 namespace Ui {
 class inserturi;
 }
@@ -24,13 +13,8 @@ class inserturi : public QDialog
 
 public:
     explicit inserturi(QWidget *parent = nullptr);
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
-    void invalidUri();
-    void privilegeTooBig();
-    void DirectoryFileNotExist();
-    void errorConnection();
-    void errorConnectionLogout();
     ~inserturi();
+    bool openUri=false;
 
 private slots:
     void on_dir_clicked();
@@ -41,7 +25,7 @@ private slots:
 
     void on_owner_clicked();
 
-    void on_add_clicked();
+    void closeEvent(QCloseEvent *e);
 
 public slots:
     void change_text();
@@ -52,12 +36,7 @@ private:
     choosedir *dirWindow;
     std::string path;
     std::string nameDir;
-    Symposium::privilege privilege;
-    std::string showDir;
-    std::string pathId;
-    Symposium::clientdispatcher *cl;
-    errorconnection *errorWindow;
-    errorlogout *errorLog;
+    std::string privilege;
 };
 
 #endif // INSERTURI_H
