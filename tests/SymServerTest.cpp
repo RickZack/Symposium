@@ -208,7 +208,7 @@ protected:
      * here it's necessary to make the function SymServer::mapSiteIdToUser
      * take the mocked user from SymServerAccesser in tests
      */
-    user findUserBySiteId(int id) const override {
+    user findUserBySiteId(int id) const noexcept override {
         for(const auto& elem:registered)
             if(elem.second.getSiteId()==id)
                 return elem.second;
@@ -946,4 +946,26 @@ TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdWithUnknownSiteId){
                                          std::pair<int, user>(2, SymServer::unknownUser),
                                          std::pair<int, user>(3, SymServer::unknownUser)});
     EXPECT_EQ(expected, mapping);
+}
+
+struct SymServerSerialization: ::testing::Test{
+    SymServer toStore, toLoad;
+    std::stringstream stream;
+
+    void store(const SymServer& u){
+        boost::archive::text_oarchive oa(stream);
+        oa<<u;
+    }
+    void load(SymServer& u){
+        boost::archive::text_iarchive ia(stream);
+        ia>>u;
+    }
+};
+
+TEST_F(SymServerSerialization, serialize){
+    toStore.addUser(const_cast<user &>(SymServer::unknownUser));
+    EXPECT_NE(toStore, toLoad);
+    store(toStore);
+    load(toLoad);
+    EXPECT_EQ(toStore, toLoad);
 }

@@ -46,7 +46,7 @@
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>420</y>
+     <y>440</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -87,8 +87,8 @@
   <widget class="QPushButton" name="signin">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>420</y>
+     <x>110</x>
+     <y>440</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -195,7 +195,7 @@ text-align: left;</string>
   <widget class="QLabel" name="msg">
    <property name="geometry">
     <rect>
-     <x>100</x>
+     <x>120</x>
      <y>380</y>
      <width>321</width>
      <height>21</height>
@@ -206,6 +206,45 @@ text-align: left;</string>
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="haveto">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>370</y>
+     <width>371</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>You cannot leave username or password or nickname empty</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="usernameExist">
+   <property name="geometry">
+    <rect>
+     <x>114</x>
+     <y>390</y>
+     <width>341</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>This username is already exist, choose another one</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="passwordNotCorrect">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>410</y>
+     <width>351</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>This password is not secure, check all requested points for it</string>
    </property>
   </widget>
  </widget>

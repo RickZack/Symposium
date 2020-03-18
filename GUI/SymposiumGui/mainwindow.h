@@ -9,6 +9,10 @@
 #include "sigin.h"
 #include "signup.h"
 
+namespace Symposium{
+class clientdispatcher;
+}
+
 namespace Ui {
 class MainWindow;
 }
@@ -20,6 +24,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
 
 private slots:
 
@@ -38,6 +43,7 @@ private:
     class exit *exitWindow;
     sigin *signinWindow;
     signup *signupWindow;
+    Symposium::clientdispatcher *cl;
 
     void closeEvent(QCloseEvent *event);
 };

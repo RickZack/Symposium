@@ -38,9 +38,9 @@
 #include "symbol.h"
 #include "uri.h"
 #include "messageData.h"
-#include "filesystem.h"
 #include "resourceType.h"
 #include "SymposiumException.h"
+
 
 /**
  * @interface message message.h message
@@ -48,12 +48,15 @@
  */
  namespace Symposium {
      class message {
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
      protected:
          static int msgCounter;
          int msgId;                 /**< random identifier for the message, used when a message is followed by an answer*/
          msgType action;            /**< Defines the action for the current message */
 
-         message(int msgId);
+         message(int msgId=0);
 
      public:
          int getMsgId() const;
@@ -77,7 +80,16 @@
  */
      class clientMessage : public virtual message {
          std::pair<std::string, std::string> actionOwner; /**< Defines the user (username, password) that has just performed the action */
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+
+
      protected:
+         //Needed by boost::serialization
+         clientMessage()=default;
          clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
      public:
 
@@ -131,6 +143,7 @@
          virtual ~clientMessage() override = default;
      };
 
+
     /**
      * @brief class used to model a message sent by a client asking for a resource
      *
@@ -141,6 +154,13 @@
      * If @e action is "changeResName" then @e resourceId is the new file name.
      */
      class askResMessage : public clientMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         //Needed by boost::serialization
+         askResMessage()=default;
+
          std::string path;          /**< path where to put the resource */
          std::string name;          /**< name to assign to the resource */
          std::string resourceId;    /**< when a sharing request is made, contains the path to the resource (the uri). */
@@ -197,6 +217,12 @@
  * @brief class used to model a sign up message sent by a client
  */
      class signUpMessage : public clientMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         signUpMessage()=default;
+
          user newUser;          /**< new SympUser data inserted by the user */
      public:
 
@@ -217,6 +243,10 @@
           */
          void invokeMethod(SymServer &server) override;
 
+         bool operator==(const signUpMessage &rhs) const;
+
+         bool operator!=(const signUpMessage &rhs) const;
+
          virtual ~signUpMessage() override{};
      };
 
@@ -224,6 +254,12 @@
      * @brief class used to model a message sent by a client to close a resource
      */
      class updateDocMessage : public clientMessage {
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         //Needed by boost::serialization
+         updateDocMessage()=default;
+
          int resourceId;            /**< identifier of the resource on which perform the action */
      public:
 
@@ -246,6 +282,10 @@
           */
          void invokeMethod(SymServer &server) override;
 
+         bool operator==(const updateDocMessage &rhs) const;
+
+         bool operator!=(const updateDocMessage &rhs) const;
+
          ~updateDocMessage() override = default;
 
      };
@@ -254,11 +294,16 @@
  * @brief class used to model a message sent by the server
  */
      class serverMessage : public virtual message {
-         /**< result of an operation asked to the server */
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         serverMessage()=default;
      protected:
+         //Needed by boost::serialization
          serverMessage(msgOutcome result, int msgId = 0);
 
-         msgOutcome result;
+         msgOutcome result;         /**< result of an operation asked to the server */
+         std::string errDescr;
      public:
 
          /**
@@ -266,6 +311,9 @@
           */
          serverMessage(msgType action, msgOutcome result, int msgId = 0);
 
+         const std::string &getErrDescr() const;
+
+         void setErrDescr(const std::string &errDescr);
 
          msgOutcome getResult() const;
 
@@ -282,6 +330,10 @@
           */
          bool isRelatedTo(const clientMessage &other) const;
 
+         bool operator==(const serverMessage &rhs) const;
+
+         bool operator!=(const serverMessage &rhs) const;
+
          virtual ~serverMessage() = default;
      };
 
@@ -293,6 +345,13 @@
  * In this message <em> action=msgType::registration </em> or <em> action=msgType::login </em>
  */
      class loginMessage : public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         //Needed by boost::serialization
+         loginMessage():serverMessage(msgOutcome::success, 1){};
+
          user loggedUser;
      public:
 
@@ -312,6 +371,10 @@
           */
          void invokeMethod(SymClient &client) override;
 
+         bool operator==(const loginMessage &rhs) const;
+
+         bool operator!=(const loginMessage &rhs) const;
+
          virtual ~loginMessage() = default;
      };
 
@@ -323,6 +386,13 @@
  * In this message <em> action=msgType::mapChangesToUser </em>: calls
  */
      class mapMessage : public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         //Needed by boost::serialization
+         mapMessage(): serverMessage(msgOutcome::success, 1){}
+
          std::map<int, user> siteIdToUser;
      public:
 
@@ -342,6 +412,10 @@
           */
          void invokeMethod(SymClient &client) override;
 
+         bool operator==(const mapMessage &rhs) const;
+
+         bool operator!=(const mapMessage &rhs) const;
+
          virtual ~mapMessage() = default;
      };
 
@@ -349,6 +423,13 @@
  * @brief class used to model an answer message sent by a server for a @link askResMessage askResMessage @endlink
  */
      class sendResMessage : public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+         //Needed by boost::serialization
+         sendResMessage():serverMessage(msgOutcome::success, 1){}
+
          int symId;             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
          std::shared_ptr<filesystem> resource;
      public:
@@ -387,6 +468,12 @@
  * set basing on @e userPrivilege
  */
      class updateActiveMessage : public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         updateActiveMessage():serverMessage(msgOutcome::success, 1){}
          user newUser;              /**< user who joined the document */
          int resourceId;            /**< identifier of the opened resource */
          privilege userPrivilege;   /**< the privilege @e newUser has on @e resourceId */
@@ -414,6 +501,10 @@
           */
          void invokeMethod(SymClient &client) override;
 
+         bool operator==(const updateActiveMessage &rhs) const;
+
+         bool operator!=(const updateActiveMessage &rhs) const;
+
          ~updateActiveMessage() override = default;
      };
 
@@ -425,6 +516,13 @@
  * Object of this class have <em> action=msgType::changePrivileges </em>
  */
      class privMessage : public clientMessage, public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         privMessage():serverMessage(msgOutcome::success, 1){}
+
          std::string resourceId;    /**< path to the resource (the uri) */
          std::string targetUser;    /**< username of the user whose privilege on @e resourceId has to be changed */
          privilege newPrivilege;    /**< new privilege to assign to @e targetUser for @e resourceId */
@@ -463,6 +561,10 @@
 
          void completeAction(SymClient &client, msgOutcome serverResult) override;
 
+         bool operator==(const privMessage &rhs) const;
+
+         bool operator!=(const privMessage &rhs) const;
+
          virtual ~privMessage() = default;
      };
 
@@ -474,6 +576,14 @@
  * Object of this class have <em> action=msgType::insertSymbol </em> or <em> action=msgType::removeSymbol </em>
  */
      class symbolMessage : public clientMessage, public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         //Needed for boost::serialization
+         symbolMessage(): serverMessage(msgOutcome::success, 1), sym('a', 0, 0, {}){}
+
          int siteId;                /**< siteId of the client that send the message */
          int resourceId;            /**< id of the resource the client is working on*/
          symbol sym;                /**< symbol to be inserted or deleted*/
@@ -542,6 +652,10 @@
           //TODO: complete description
           void completeAction(SymClient &client, msgOutcome serverResult) override;
 
+         bool operator==(const symbolMessage &rhs) const;
+
+         bool operator!=(const symbolMessage &rhs) const;
+
          virtual ~symbolMessage() = default;
      };
 
@@ -552,6 +666,14 @@
  * The server forwards this message to other clients that are enabled to see the sharing preferences of a document.
  */
      class uriMessage : public clientMessage, public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         //Needed for boost::serialization
+         uriMessage():serverMessage(msgOutcome::success, 1){}
+
          std::string path;
          std::string name;
          uri sharingPrefs;
@@ -585,14 +707,26 @@
 
          void completeAction(SymClient &client, msgOutcome serverResult) override;
 
+         bool operator==(const uriMessage &rhs) const;
+
+         bool operator!=(const uriMessage &rhs) const;
+
          virtual ~uriMessage() = default;
      };
 
 
-/**
- * @brief class used to model a message to change the parameters of a user
- */
+    /**
+     * @brief class used to model a message to change the parameters of a user
+     */
      class userDataMessage : public clientMessage, public serverMessage {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         //Needed for boost::serialization
+         userDataMessage():serverMessage(msgOutcome::success, 1){}
+
          user newUserData;
      public:
 
@@ -624,9 +758,44 @@
 
          void completeAction(SymClient &client, msgOutcome serverResult) override;
 
+         bool operator==(const userDataMessage &rhs) const;
+
+         bool operator!=(const userDataMessage &rhs) const;
+
          ~userDataMessage() override = default;
 
      };
+
+     /**
+      * @brief class used to model a message to update the position of a user's cursor
+      */
+     class cursorMessage: public virtual clientMessage, public virtual serverMessage{
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
+         //Needed for boost::serialization
+         cursorMessage():serverMessage(msgOutcome::success, 1){}
+
+         int siteId;
+         int resourceId;
+         int row;
+         int col;
+
+     public:
+         cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
+                       int siteId,
+                       int resourceId, int row, int col, int msgId = 0);
+
+         void invokeMethod(SymServer &server) override;
+
+         void invokeMethod(SymClient &client) override;
+
+         virtual ~cursorMessage()= default;
+
+     };
+
+
 
  }
 

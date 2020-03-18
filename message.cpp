@@ -29,12 +29,24 @@
  */
 #include <string>
 #include <iostream>
+#include "filesystem.h"
 #include "message.h"
 #include "SymServer.h"
 #include "SymClient.h"
 #include "resourceType.h"
 
+
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/map.hpp>
+
 using namespace Symposium;
+
+
 
 //FIXME: put unsigned, siteIds must be positive, because a negative id is assumed as "no user present"
 int message::msgCounter=1;
@@ -47,6 +59,12 @@ message::message(int msgId){
     }
     else
         this->msgId=msgId;
+}
+
+template<class Archive>
+void message::serialize(Archive &ar, const unsigned int version)
+{
+    ar & msgId & action;
 }
 
 int message::getMsgId() const {
@@ -75,6 +93,14 @@ clientMessage::clientMessage(msgType action, const std::pair<std::string, std::s
 
 clientMessage::clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId)
         : message(msgId), actionOwner(actionOwner) {
+}
+
+template<class Archive>
+void clientMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::message>(*this);
+    ar & actionOwner;
 }
 
 const std::pair<std::string, std::string> &clientMessage::getActionOwner() const {
@@ -125,6 +151,7 @@ clientMessage & clientMessage::clearAuthParam() {
     actionOwner.second.clear();
     return *this;
 }
+BOOST_CLASS_EXPORT(Symposium::clientMessage)
 
 askResMessage::askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                              const std::string &path,
@@ -136,6 +163,14 @@ askResMessage::askResMessage(msgType action, const std::pair<std::string, std::s
         throw messageException(messageException::action, UnpackFileLineFunction());
 
     this->action=action;
+}
+
+template<class Archive>
+void askResMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & path & name & resourceId & accessMode;
 }
 
 void askResMessage::invokeMethod(SymServer &server) {
@@ -211,6 +246,7 @@ void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
             throw messageException(messageException::askResMes, UnpackFileLineFunction());
     }
 }
+BOOST_CLASS_EXPORT(Symposium::askResMessage)
 
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                             const user &newUser,
@@ -221,6 +257,14 @@ signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::s
     this->action=action;
 }
 
+template<class Archive>
+void signUpMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & newUser;
+}
+
 void signUpMessage::invokeMethod(SymServer &ss) {
     ss.addUser(newUser);
 }
@@ -229,11 +273,30 @@ const user &signUpMessage::getNewUser() const {
     return newUser;
 }
 
+bool signUpMessage::operator==(const signUpMessage &rhs) const {
+    return static_cast<const Symposium::clientMessage &>(*this) == static_cast<const Symposium::clientMessage &>(rhs) &&
+           newUser == rhs.newUser;
+}
+
+bool signUpMessage::operator!=(const signUpMessage &rhs) const {
+    return !(rhs == *this);
+}
+
+BOOST_CLASS_EXPORT(Symposium::signUpMessage)
+
 serverMessage::serverMessage(msgType action, msgOutcome result, int msgId) : message(msgId), result(result) {
     this->action=action;
 }
 
 serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), result(result) {
+}
+
+template<class Archive>
+void serverMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::message>(*this);
+    ar & result & errDescr;
 }
 
 void serverMessage::invokeMethod(SymClient &client) {
@@ -249,11 +312,38 @@ msgOutcome serverMessage::getResult() const {
     return result;
 }
 
+bool serverMessage::operator==(const serverMessage &rhs) const {
+    return static_cast<const Symposium::message &>(*this) == static_cast<const Symposium::message &>(rhs) &&
+           result == rhs.result;
+}
+
+bool serverMessage::operator!=(const serverMessage &rhs) const {
+    return !(rhs == *this);
+}
+
+const std::string &serverMessage::getErrDescr() const {
+    return errDescr;
+}
+
+void serverMessage::setErrDescr(const std::string &errDescr) {
+    serverMessage::errDescr = errDescr;
+}
+
+BOOST_CLASS_EXPORT(Symposium::serverMessage)
+
 loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId)
                            : message(msgId), serverMessage(result, msgId), loggedUser(loggedUser) {
     if(action!=msgType::login && action!=msgType::registration)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
+}
+
+template<class Archive>
+void loginMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & loggedUser;
 }
 
 const user &loginMessage::getLoggedUser() const {
@@ -265,11 +355,30 @@ void loginMessage::invokeMethod(SymClient &client) {
     client.setLoggedUser(loggedUser);
 }
 
+bool loginMessage::operator==(const loginMessage &rhs) const {
+    return static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           loggedUser == rhs.loggedUser;
+}
+
+bool loginMessage::operator!=(const loginMessage &rhs) const {
+    return !(rhs == *this);
+}
+
+BOOST_CLASS_EXPORT(Symposium::loginMessage)
+
 mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<int, user> &siteIdToUser, int msgId)
         : message(msgId), serverMessage(result, msgId), siteIdToUser(siteIdToUser) {
     if(action!=msgType::mapChangesToUser)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
+}
+
+template<class Archive>
+void mapMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & siteIdToUser;
 }
 
 const std::map<int, user> & mapMessage::getSiteIdToUser() const {
@@ -281,6 +390,17 @@ void mapMessage::invokeMethod(SymClient &client) {
     client.setUserColors(siteIdToUser);
 }
 
+bool mapMessage::operator==(const mapMessage &rhs) const {
+    return static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           siteIdToUser == rhs.siteIdToUser;
+}
+
+bool mapMessage::operator!=(const mapMessage &rhs) const {
+    return !(rhs == *this);
+}
+
+BOOST_CLASS_EXPORT(Symposium::mapMessage)
+
 sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, int symId, int msgId)
         : message(msgId), serverMessage(result, msgId), resource{resource} {
     if(action!=msgType::createRes && action!=msgType::createNewDir && action!=msgType::openNewRes
@@ -289,6 +409,14 @@ sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_pt
     this->action=action;
     if(symId!=0)
         this->symId=symId;
+}
+
+template<class Archive>
+void sendResMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & symId & resource;
 }
 
 std::shared_ptr<filesystem> sendResMessage::getResource() const {
@@ -331,6 +459,7 @@ void sendResMessage::invokeMethod(SymClient &client) {
             throw messageException(messageException::sendResMes, UnpackFileLineFunction());
     }
 }
+BOOST_CLASS_EXPORT(Symposium::sendResMessage)
 
 privMessage::privMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                          const std::string &resourceId, const std::string &targetUser, privilege newPrivilege,
@@ -340,6 +469,15 @@ privMessage::privMessage(msgType action, const std::pair<std::string, std::strin
     if(action!=msgType::changePrivileges)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
+}
+
+template<class Archive>
+void privMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & resourceId & targetUser & newPrivilege;
 }
 
 const std::string &privMessage::getResourceId() const {
@@ -408,6 +546,20 @@ void privMessage::completeAction(SymClient &client, msgOutcome serverResult) {
 
 }
 
+bool privMessage::operator==(const privMessage &rhs) const {
+    return static_cast<const Symposium::clientMessage &>(*this) == static_cast<const Symposium::clientMessage &>(rhs) &&
+           static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           resourceId == rhs.resourceId &&
+           targetUser == rhs.targetUser &&
+           newPrivilege == rhs.newPrivilege;
+}
+
+bool privMessage::operator!=(const privMessage &rhs) const {
+    return !(rhs == *this);
+}
+
+BOOST_CLASS_EXPORT(Symposium::privMessage)
+
 symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                              int siteId,
                              int resourceId, const symbol &sym, int msgId)
@@ -416,6 +568,15 @@ symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::s
     if(action!=msgType::insertSymbol && action!=msgType::removeSymbol)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
+}
+
+template<class Archive>
+void symbolMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & siteId & resourceId & sym;
 }
 
 int symbolMessage::getSiteId() const {
@@ -485,6 +646,19 @@ void symbolMessage::completeAction(SymClient &client, msgOutcome serverResult) {
 
 }
 
+bool symbolMessage::operator==(const symbolMessage &rhs) const {
+    return static_cast<const Symposium::clientMessage &>(*this) == static_cast<const Symposium::clientMessage &>(rhs) &&
+           static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           siteId == rhs.siteId &&
+           resourceId == rhs.resourceId &&
+           sym == rhs.sym;
+}
+
+bool symbolMessage::operator!=(const symbolMessage &rhs) const {
+    return !(rhs == *this);
+}
+BOOST_CLASS_EXPORT(Symposium::symbolMessage)
+
 uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                        const std::string &path, const std::string &name, const uri &sharingPrefs, int msgId)
                        : message(msgId), clientMessage(actionOwner, msgId),
@@ -495,6 +669,15 @@ uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string>
     this->action=action;
     this->path=path;
     this->name=name;
+}
+
+template<class Archive>
+void uriMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & path & name & sharingPrefs;
 }
 
 const uri &uriMessage::getSharingPrefs() const {
@@ -518,6 +701,19 @@ void uriMessage::completeAction(SymClient &client, msgOutcome serverResult) {
         throw messageException(messageException::notSucc, UnpackFileLineFunction());
 }
 
+bool uriMessage::operator==(const uriMessage &rhs) const {
+    return static_cast<const Symposium::clientMessage &>(*this) == static_cast<const Symposium::clientMessage &>(rhs) &&
+           static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           path == rhs.path &&
+           name == rhs.name &&
+           sharingPrefs == rhs.sharingPrefs;
+}
+
+bool uriMessage::operator!=(const uriMessage &rhs) const {
+    return !(rhs == *this);
+}
+BOOST_CLASS_EXPORT(Symposium::uriMessage)
+
 updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, const user &newUser, int resourceId,
                                          privilege priv,
                                          int msgId)
@@ -527,6 +723,15 @@ updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, cons
     if(action!=msgType::addActiveUser && action!=msgType::removeActiveUser)
         throw messageException(messageException::action, UnpackFileLineFunction());
 }
+
+template<class Archive>
+void updateActiveMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & newUser & resourceId & userPrivilege;
+}
+
 
 const user &updateActiveMessage::getNewUser() const {
     return newUser;
@@ -557,6 +762,19 @@ void updateActiveMessage::invokeMethod(SymClient &client) {
 
 }
 
+bool updateActiveMessage::operator==(const updateActiveMessage &rhs) const {
+    return static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           newUser == rhs.newUser &&
+           resourceId == rhs.resourceId &&
+           userPrivilege == rhs.userPrivilege;
+}
+
+bool updateActiveMessage::operator!=(const updateActiveMessage &rhs) const {
+    return !(rhs == *this);
+}
+
+BOOST_CLASS_EXPORT(Symposium::updateActiveMessage)
+
 updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                                    int resourceId, int msgId)
                                  : message(msgId), clientMessage(actionOwner, msgId),
@@ -564,6 +782,14 @@ updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, 
     if(action!=msgType::mapChangesToUser && action!=msgType::closeRes)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
+}
+
+template<class Archive>
+void updateDocMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & resourceId;
 }
 
 int updateDocMessage::getResourceId() const {
@@ -587,6 +813,17 @@ void updateDocMessage::invokeMethod(SymServer &server) {
     }
 }
 
+bool updateDocMessage::operator==(const updateDocMessage &rhs) const {
+    return static_cast<const Symposium::clientMessage &>(*this) == static_cast<const Symposium::clientMessage &>(rhs) &&
+           resourceId == rhs.resourceId;
+}
+
+bool updateDocMessage::operator!=(const updateDocMessage &rhs) const {
+    return !(rhs == *this);
+}
+
+BOOST_CLASS_EXPORT(Symposium::updateDocMessage)
+
 userDataMessage::userDataMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                                  msgOutcome result,
                                  const user &newUserData, int msgId)
@@ -594,6 +831,15 @@ userDataMessage::userDataMessage(msgType action, const std::pair<std::string, st
                                    serverMessage(action, result, msgId), newUserData(newUserData) {
    if(action!=msgType::changeUserData && action !=msgType::changeUserPwd)
        throw messageException(messageException::action, UnpackFileLineFunction());
+}
+
+template<class Archive>
+void userDataMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & newUserData;
 }
 
 void userDataMessage::invokeMethod(SymServer &server) {
@@ -621,3 +867,47 @@ void userDataMessage::completeAction(SymClient &client, msgOutcome serverResult)
         throw messageException(messageException::userData, UnpackFileLineFunction());
 }
 
+bool userDataMessage::operator==(const userDataMessage &rhs) const {
+    return static_cast<const Symposium::clientMessage &>(*this) == static_cast<const Symposium::clientMessage &>(rhs) &&
+           static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           newUserData == rhs.newUserData;
+}
+
+bool userDataMessage::operator!=(const userDataMessage &rhs) const {
+    return !(rhs == *this);
+}
+BOOST_CLASS_EXPORT(Symposium::userDataMessage)
+
+cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
+                             int siteId,
+                             int resourceId, int row, int col, int msgId) : clientMessage(actionOwner, msgId),
+                                                                            serverMessage(result, msgId), siteId(siteId), row(row), col(col){
+    if(action!=msgType::updateCursor)
+        throw messageException(messageException::action, UnpackFileLineFunction());
+    this->action=action;
+}
+
+template<class Archive>
+void cursorMessage::serialize(Archive &ar, const unsigned int version)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & siteId & resourceId & row & col;
+}
+
+void cursorMessage::invokeMethod(SymServer &server) {
+    clientMessage::invokeMethod(server);
+    if(action!=msgType::updateCursor)
+            throw messageException(messageException::cursor, UnpackFileLineFunction());
+    server.updateCursorPos(getActionOwner().first, resourceId, row, col);
+}
+
+void cursorMessage::invokeMethod(SymClient &client) {
+    serverMessage::invokeMethod(client);
+    if(action!=msgType::updateCursor)
+            throw messageException(messageException::cursor, UnpackFileLineFunction());
+    client.updateCursorPos(siteId, row, col);
+}
+
+BOOST_CLASS_EXPORT(Symposium::cursorMessage)

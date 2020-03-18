@@ -32,6 +32,7 @@ class notepad : public QMainWindow
 public:
     explicit notepad(QWidget *parent = nullptr);
     ~notepad();
+    void setId(std::string id);
 
 
 private slots:
@@ -51,6 +52,8 @@ private slots:
     void textColor();
     void textAlign(QAction *a);
     void currentCharFormatChanged(const QTextCharFormat &format);
+
+
 
 private:
     Ui::notepad *ui;
@@ -78,6 +81,7 @@ private:
     void counterLink();
 
     void closeEvent(QCloseEvent *event);
+    void keyReleaseEvent(QKeyEvent *e);
 
     QAction *actionTextBold;
     QAction *actionTextUnderline;
@@ -93,6 +97,10 @@ private:
     QComboBox *comboSize;
 
     QTextEdit *textEdit;
+
+    std::string idDoc;
+
+
 };
 
 #endif // NOTEPAD_H

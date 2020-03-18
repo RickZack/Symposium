@@ -66,7 +66,9 @@ namespace Symposium {
 
         addActiveUser,        /**< used by server, for propagating the document opening of an user, see @ref updateActiveMessage */
         removeActiveUser,     /**< used by server, for propagating the document closing of an user, see @ref updateActiveMessage */
-        closeRes              /**< used by client, when a user wants to close a document, see @ref updateDocMessage */
+        closeRes,             /**< used by client, when a user wants to close a document, see @ref updateDocMessage */
+
+        updateCursor          /**< used by client, when a user changes the cursor's position, see @ref cursorMessage */
     };
 }
 #endif //SYMPOSIUM_MESSAGEDATA_H

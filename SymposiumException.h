@@ -53,12 +53,16 @@ namespace Symposium{
     class SymposiumException: public std::exception{
         static constexpr int msgMaxLen = 400;
         char errorMsg[msgMaxLen];
+        const char *errorCodeMsg;
     protected:
         SymposiumException(const char *file, const int line, const char *func,
                            const char *errDescr);
 
     public:
         const char *what() const noexcept override;
+
+        const char *getErrorCodeMsg() const noexcept ;
+
         ~SymposiumException() override=default;
     };
 
@@ -79,7 +83,7 @@ namespace Symposium{
          */
         enum SymServerExceptionCodes{userAlreadyExist=0, userWrongParam, userNotRegistered, userWrongPwd,
             userAlreadyActive, userNotLogged, userNotWorkingOnDoc, actionUserNotLoggedOrTargetUserNotRegistered,
-            userWorkingOnDoc, userNotFound};
+            userWorkingOnDoc, userNotFound, noUserWorkingOnRes};
 
         explicit SymServerException(SymServerExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~SymServerException()=default;
@@ -128,10 +132,22 @@ namespace Symposium{
         /**
          * @brief Specific error codes for @ref messageException. They are used as indexes to the error table string
          */
-        enum messageExceptionCodes{action=0, notClient, notSucc, askResMes, sendResMes, symb, upAct, upDoc, userData};
+        enum messageExceptionCodes{action=0, notClient, notSucc, askResMes, sendResMes, symb, upAct, upDoc, userData, cursor};
 
         explicit messageException(messageExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~messageException()=default;
+    };
+
+    class clientdispatcherException : public SymposiumException {
+        static const char* clientdispatcherErrors[];
+    public:
+        /**
+         * @brief Specific error codes for @ref clientdispatcherException. They are used as indexes to the error table string
+         */
+        enum clientdispatcherExceptionCodes{UnknownMessageAction=0, UnknownClassOfMessage, MsgActionNotAllowed};
+
+        explicit clientdispatcherException(clientdispatcherExceptionCodes exceptionCode, const char *file, int line, const char *func);
+        virtual ~clientdispatcherException()=default;
     };
 
 

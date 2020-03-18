@@ -96,6 +96,11 @@ bool RMOAccess::moreOwner(std::string username) const
     return ((i > 1)&&own);
 }
 
+std::unordered_map<std::string, privilege> RMOAccess::getPermission() const
+{
+    return permission;
+}
+
 
 
 bool RMOAccess::operator==(const RMOAccess &rhs) const {
@@ -122,5 +127,10 @@ bool TrivialAccess::moreOwner(std::string username) const{
     return false;
 }
 
+std::unordered_map<std::string, privilege> TrivialAccess::getPermission() const
+{
+    return std::unordered_map<std::string, privilege>();
+}
 
 BOOST_CLASS_EXPORT(Symposium::RMOAccess)
+BOOST_CLASS_EXPORT(Symposium::TrivialAccess)

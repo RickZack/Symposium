@@ -4,7 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += core gui
+
+QT += network widgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 requires(qtConfig(filedialog))
@@ -38,6 +40,8 @@ SOURCES += \
         currentusers.cpp \
         deleteaccount.cpp \
         directory.cpp \
+        errorconnection.cpp \
+        errorlogout.cpp \
         exit.cpp \
         home.cpp \
         icon.cpp \
@@ -60,7 +64,10 @@ SOURCES += \
         notepad.cpp \
         sigin.cpp \
         signup.cpp \
-        textedit.cpp
+        textedit.cpp \
+        Dispatcher/clientdispatcher.cpp \
+        Dispatcher/serverdispatcher.cpp \
+        unsuccessdeleteaccount.cpp
 
 HEADERS += \
         about.h \
@@ -73,6 +80,8 @@ HEADERS += \
         currentusers.h \
         deleteaccount.h \
         directory.h \
+        errorconnection.h \
+        errorlogout.h \
         exit.h \
         home.h \
         icon.h \
@@ -97,7 +106,10 @@ HEADERS += \
         notepad.h \
         sigin.h \
         signup.h \
-        textedit.h
+        textedit.h \
+        Dispatcher/clientdispatcher.h \
+        Dispatcher/serverdispatcher.h \
+        unsuccessdeleteaccount.h
 
 FORMS += \
         about.ui \
@@ -110,6 +122,8 @@ FORMS += \
         currentusers.ui \
         deleteaccount.ui \
         directory.ui \
+        errorconnection.ui \
+        errorlogout.ui \
         exit.ui \
         folder1.ui \
         home.ui \
@@ -119,7 +133,8 @@ FORMS += \
         newfolderwindow.ui \
         notepad.ui \
         sigin.ui \
-        signup.ui
+        signup.ui \
+        unsuccessdeleteaccount.ui
 
 
 DEFINES = BOOST_ALL_NO_LIB

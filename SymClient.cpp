@@ -281,3 +281,11 @@ document* SymClient::getActiveDocumentbyID(int id){
     }
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
 }
+
+cursorMessage SymClient::updateCursorPos(int resourceId, unsigned int row, unsigned int col) {
+    return cursorMessage(msgType::updateCursor, {"",""}, msgOutcome::success, 0, 0, 0, 0);
+}
+
+void SymClient::updateCursorPos(int userSiteId, int resourceId, unsigned int row, unsigned int col){
+    //TODO: to implement
+}

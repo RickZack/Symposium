@@ -35,6 +35,7 @@
 #include <cmath>
 
 
+
 using namespace Symposium;
 int document::idCounter=0;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
@@ -54,7 +55,7 @@ const std::vector<std::vector<symbol>> &document::getSymbols() const {
     return symbols;
 }
 
-const std::forward_list<std::pair<user *, privilege>> &document::getActiveUsers() const {
+const std::forward_list<std::pair<const user *, sessionData>> &document::getActiveUsers() const {
     return activeUsers;
 }
 
@@ -62,10 +63,8 @@ int document::getNumchar() const {
     return numchar;
 }
 
-//FIXME: discuss to change the forward list to <const user*, privilege>,
-// avoid casts as much as possible
 document & document::access(const user &newActive, privilege accessPriv) {
-    std::pair<user*, privilege> p{const_cast<user*>(&newActive),accessPriv};
+    std::pair<const user*, sessionData> p{&newActive,accessPriv};
     activeUsers.push_front(p);
     return *this;
 }
@@ -80,7 +79,7 @@ void document::checkIndex(int i0, int i1) {
 
 
 symbol document::localInsert(const std::pair<int, int> &indexes, symbol &toInsert) {
-
+    //TODO: take into account new position of cursor
     int i0=indexes.first;
     int i1=indexes.second;
     checkIndex(i0,i1);
@@ -274,6 +273,7 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
 }
 
 symbol document::localRemove(const std::pair<int, int> &indexes) {
+    //TODO: take into account new position of cursor
     int i0=indexes.first;
     int i1=indexes.second;
     checkIndex(i0,i1);
@@ -284,6 +284,7 @@ symbol document::localRemove(const std::pair<int, int> &indexes) {
 }
 
 void document::remoteInsert(const symbol &toInsert) {
+    //TODO: take into account new position of cursor
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
@@ -300,6 +301,7 @@ void document::remoteInsert(const symbol &toInsert) {
 
 
 void document::remoteRemove(const symbol &toRemove) {
+    //TODO: take into account new position of cursor
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
@@ -571,8 +573,9 @@ int document::findIndexInLine(const symbol &symbol, const std::vector<Symposium:
 
 }
 
-
-
+void document::updateCursorPos(unsigned int targetSiteId, unsigned int newRow, unsigned int newCol) {
+    //TODO:implement
+}
 
 
 

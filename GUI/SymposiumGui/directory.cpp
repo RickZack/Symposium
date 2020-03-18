@@ -13,6 +13,8 @@ directory::directory(QWidget *parent) :
     QPixmap pix_document(":/resources/cartelle/Document-Add-icon");
     ui->label_4->setPixmap(pix_document);
 
+    // METODO DISPATCHER CHE RESTITUISCE LA STRINGA
+    // str=getStr();
     str="directory 1 Folder1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
     int count=number_elements(str);
     listGenerate(str, count);
@@ -60,9 +62,10 @@ void directory::listGenerate(std::string str_first, int count)
             v.setValue(countDir);
             item->setData(Qt::UserRole,v);
             item->setWhatsThis("directory");
+            item->setText(QString::fromStdString(word));
             ui->myListWidget->addItem(item);
 
-            //NB riccordarsi di cambiare il codice di Symposium nella print!
+
         }
 
         else if(word=="file")
@@ -86,6 +89,35 @@ void directory::listGenerate(std::string str_first, int count)
             word=separate_word(str);
         }
     }
+}
+
+std::string directory::searchForId(std::string word,std::string str,int count)
+{
+    std::string id_to_return;
+    for(int i=0;i<count;i++){
+
+        std::string type=separate_word(str);
+        if(type=="directory"){
+        std::string id=separate_word(str);
+        std::string name=separate_word(str);
+        name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
+        if(name==word){
+            id_to_return=id;
+            i=count;
+        }
+        }
+        else{
+            std::string id=separate_word(str);
+            std::string name=separate_word(str);
+            std::string priv=separate_word(str);
+            if(name==word){
+                id_to_return=id;
+                i=count;
+            }
+            }
+}
+
+   return id_to_return;
 }
 
 std::string directory::separate_word(std::string& string)
@@ -130,7 +162,7 @@ void directory::on_actionHome_triggered()
     this->hide();
 }
 
-// this method opens the uri window // !!!!!!
+// this method opens the uri window
 void directory::on_actionUri_triggered()
 {
     uriWindow=new inserturi(this);
@@ -144,41 +176,48 @@ void directory::on_actionUri_triggered()
 void directory::on_pushButton_clicked()
 {
 
-    // the bool msg is used to have a connection with the server.
-    // Now, it is settsded to true, but then it will be modified by the dispatcher
-    bool msg=true;
-    if(msg){
         // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
         QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
         foreach(QListWidgetItem *items, selectedItem){
              QString value= items->whatsThis();
+             std::string nameSource=items->text().toStdString();
+             std::string id=searchForId(nameSource,str,count);
+             // dermine the path of the folders in which I enter.
+
              if(value=="directory")
              {
+                 path+=id+'/'; // ok lo crea in modo corretto
+                 std::string pth=path; //solo per visualizzare che lo crea in modo corretto. Dopo si può cancellare
                  aperto++;
                  // open the folder Window
-                 std::string str1="directory 1 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
-                 this->openWindow(str1);
+                 // str1=getStr(INT ID);
+                 std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
+                 str=str1;
+                 this->openWindow(str);
 
              }
+
              else if(value=="file")
 
+                 // id and path
              {
+                 std::string id=searchForId(nameSource,str,count);
                  // I have to open the choosepriv first
                  chooseprivWindow= new choosepriv(this);
-                 chooseprivWindow->show();
+                 chooseprivWindow->getPath(path,id);
                  this->hide();
              }
              else
              {
                  // it is a SymLink
+                 // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
+                 // path e nome che ce li ho.
+
+
              }
 
      }// foreach
-}//if
-    else
-    {
-        QMessageBox::warning(this, "Error Message","It is no possible to open the selected folder");
-    }
+
 }
 
 //this method opens the new window referred to another folder and it saves in the List<QString> the string referred to the attual folder
@@ -196,60 +235,65 @@ void directory::openWindow(std::string str1){
 // this method deletes a selected folder or a selected document or a selected symlink
 void directory::on_pushButton_2_clicked()
 {
-   bool msg=true;
-   if(msg)
-   {
-       if (count>1)
+
+   QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
+   foreach(QListWidgetItem *items, item){
+       std::string nameSource=items->text().toStdString();
+       std::string id=searchForId(nameSource,str,count);
+       std::string pt=path;
+       // bool msg=remouveResource(path, id)
+       bool msg=true;
+       if(msg)
        {
-          count--;
-          QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
-            foreach(QListWidgetItem *items, item){
-                QString name=items->text();
-                // nome da passare al server
-                std::string name_std=name.toStdString();
-                ui->myListWidget->removeItemWidget(items);
-                delete items;
-                ui->myListWidget->currentItem()->setSelected(false);
-        }// foreach
+           if (count>1)
+           {
+              count--;
+                    ui->myListWidget->removeItemWidget(items);
+                    delete items;
+                    ui->myListWidget->currentItem()->setSelected(false);
+           }// if
+           else
+           {
+                     ui->myListWidget->removeItemWidget(items);
+                     delete items;
+               count=0;
+
+           }//else
+
        }// if
        else
        {
-           QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
-             foreach(QListWidgetItem *items, item){
-                 ui->myListWidget->removeItemWidget(items);
-                 delete items;
-             }// foreach
-           count=0;
+           QMessageBox::warning(this, "Error Message","It is no possible to delete the selected folder");
+       }
 
-       }//else
-
-   }// if
-   else
-   {
-       QMessageBox::warning(this, "Error Message","It is no possible to delete the selected folder");
-   }
-
+   }//foreach
 }
 
 // this method creates a new folder
 void directory::on_pushButton_3_clicked()
 {
-    bool msg=true;
-    if(msg)
+
+    QString name= ui->name->text();
+    std::string nameFolder=name.toStdString();
+    ui->name->setText(" ");
+    // std::string id=createNewDir(path,id);
+    std::string id="1"; //PER ESEMPIO
+
+    if(id!="-1")
+     // OK dal dispatcher, posso creare la nuova cartella. Tutti i controlli sono andati bene
     {
         count++;
-        QString name= ui->name->text();
-        ui->name->setText(" ");
-        //da passare al server: nome del folder
-        std::string name_folder=name.toStdString();
-        std::string new_str="directory 1 "+name.toStdString()+'\n';
-        QListWidgetItem *item= new QListWidgetItem(QIcon(":/resources/cartelle/folder_icon"),name);
-        ui->myListWidget->addItem(item);
-        item->setWhatsThis("directory");
+        std::string new_str=" directory "+id+' '+name.toStdString()+'\n';
+        str=str+new_str;
+        ui->myListWidget->clear();
+        int count=number_elements(str);
+        listGenerate(str,count);
+
     }//if
     else
     {
       QMessageBox::warning(this, "Error Message","It is no possible to open the selected folder");
+
     }
 
 }
@@ -273,22 +317,26 @@ void directory::closeEvent(QCloseEvent *event)
 //this method creates a new document
 void directory::on_pushButton_4_clicked()
 {
-    // server message to say that everything is ok
-    bool msg=true;
-    if(msg)
+
+    QString name= ui->name_2->text();
+    std::string nameDocument=name.toStdString();
+    ui->name_2->setText(" ");
+    //std::string id=createNewDir(path,nameDocument);
+    std::string id="1"; //PER ESEMPIO
+
+    if(id!="-1")
+         // OK dal dispatcher, posso creare il nuovo documento
     {
         count++;
-        QString name= ui->name_2->text();
-        ui->name_2->setText(" ");
-        //da passare al server: nome del document scelto dall'utente
-        std::string name_folder=name.toStdString();
-        QListWidgetItem *item= new QListWidgetItem(QIcon(":/resources/cartelle/document_image"),name);
-        ui->myListWidget->addItem(item);
-        item->setWhatsThis("file");
+        std::string new_str=" file "+id+' '+name.toStdString()+'\n';
+        str=str+new_str;
+        ui->myListWidget->clear();
+        int count=number_elements(str);
+        listGenerate(str,count);
     }//if
     else
     {
-      QMessageBox::warning(this, "Error Message","It is no possible to open the selected folder");
+      QMessageBox::warning(this, "Error Message","It is no possible to open the selected Document");
     }
 }
 

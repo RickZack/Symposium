@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "Dispatcher/clientdispatcher.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -36,6 +37,10 @@ void MainWindow::on_SignIn_clicked()
 {
     hide();
     signinWindow= new sigin(this);
+    //cl->setSignIn(signinWindow);
+
+    signinWindow->setClientDispatcher(cl);
+
     signinWindow->show();
 }
 
@@ -43,6 +48,8 @@ void MainWindow::on_SignUp_clicked()
 {
     hide();
     signupWindow= new signup(this);
+    //cl->setSignUp(signupWindow);
+    signupWindow->setClientDispatcher(cl);
     signupWindow->show();
 }
 
@@ -58,4 +65,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
             event->accept();
         }
 
+}
+
+void MainWindow::setClientDispatcher(Symposium::clientdispatcher *cl){
+    this->cl = cl;
 }

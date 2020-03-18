@@ -34,7 +34,8 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include "Symposium.h"
+//#include "Symposium.h"
+#include <boost/serialization/access.hpp>
 
 namespace Symposium {
     class symbol {
@@ -43,6 +44,16 @@ namespace Symposium {
         int counter;
         std::vector<int> pos;
         bool verified;  /**< true if the symbol has been verified by the server or has been inserted by remoteInsert */
+
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version){
+            //Need to save activeUsers without filesystem
+            ar & ch & siteId & counter & pos & verified;
+        };
+        //Needed by boost::serialization
+        symbol()=default;
+
     public:
         symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos, bool verified=false);
 

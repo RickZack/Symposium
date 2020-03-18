@@ -40,7 +40,7 @@
 #include <regex>
 
 #include "privilege.h"
-#include "Symposium.h"
+//#include "Symposium.h"
 #include "resourceType.h"
 #include "uri.h"
 
@@ -49,6 +49,17 @@
 #include "AccessStrategy.h"
 #include "SymposiumException.h"
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/assume_abstract.hpp>
+
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(Symposium::filesystem)
+BOOST_CLASS_EXPORT_KEY(Symposium::file)
+BOOST_CLASS_EXPORT_KEY(Symposium::directory)
+BOOST_CLASS_EXPORT_KEY(Symposium::symlink)
 
 
 /*
@@ -58,15 +69,15 @@
  * any of the functions of "user"
  */
 namespace Symposium {
-   /**
-     * @interface filesystem filesystem.h filesystem
-     * @brief class used as interface for a filesystem, made using @e Composite pattern
-     *
-     * In the application design only objects of subclass @link file file @endlink can be shared, but
-     * @e sharingPolicy could refer to a directory. This is done on purpose to allow future extensions
-     * of this module. As long as the mentioned behaviour is desired, for objects of subclasses @link directory directory @endlink
-     * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
-     */
+    /**
+      * @interface filesystem filesystem.h filesystem
+      * @brief class used as interface for a filesystem, made using @e Composite pattern
+      *
+      * In the application design only objects of subclass @link file file @endlink can be shared, but
+      * @e sharingPolicy could refer to a directory. This is done on purpose to allow future extensions
+      * of this module. As long as the mentioned behaviour is desired, for objects of subclasses @link directory directory @endlink
+      * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
+      */
     class filesystem {
         static uint_positive_cnt idCounter;  /**< id to be assigned to the next created filesystem object */
         uint_positive_cnt::type id;          /**< unique identifier for the filesystem object, used also for identifying objects along a path */
@@ -74,8 +85,17 @@ namespace Symposium {
         std::string name;                    /**< resource name */
         uri sharingPolicy;                   /**< sharing policy applied to the resource */
         std::unique_ptr<AccessStrategy> strategy;
+
+
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version);
+
+        //Needed by boost::serialization
+        filesystem() = default;
+
     public:
-        filesystem(const std::string &name, const uint_positive_cnt::type idToAssign=0);
+        filesystem(const std::string &name, const uint_positive_cnt::type idToAssign = 0);
 
         uint_positive_cnt::type getId() const;
 
@@ -149,7 +169,9 @@ namespace Symposium {
 
         virtual void send() const = 0; //not clear how to set this
 
-        virtual std::string print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const = 0;
+        virtual std::string
+        print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const = 0;
+
         /**
          * @brief separate the last part of path which indicate the id of the resource, example: path=./1/2/3 result 1/2 and 3
          * @param path the path to divide
@@ -172,21 +194,35 @@ namespace Symposium {
 
         bool moreOwner(const std::string &username);
 
-        virtual ~filesystem()= default;
+        bool operator==(const filesystem &rhs) const;
+
+        bool operator!=(const filesystem &rhs) const;
+
+        virtual ~filesystem() = default;
     };
 
-/**
- * @brief class used to model a file in the filesystem
- */
+    /**
+     * @brief class used to model a file in the filesystem
+     */
     class file : public filesystem {
         std::string realPath;      /**< file's path internal to the actual working directory of the system */
         document doc;              /**< document to handle */
+
+
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version);
+
+        //Needed by boost::serialization
+        file()=default;
     public:
         file(const std::string &name, const std::string &realPath, uint_positive_cnt::type idToAssign=0);
 
         const std::string &getRealPath() const;
 
         const document &getDoc() const;
+
+        const std::unordered_map<std::string, privilege> getUsers();
 
         /**
          * @brief retrieve the privilege of a user on the current file
@@ -264,10 +300,13 @@ namespace Symposium {
 
         virtual bool validateAction(const std::string &userName, privilege priv);
 
+        bool operator==(const file &rhs) const;
+
+        bool operator!=(const file &rhs) const;
+
         virtual ~file() override=default;
 
     };
-
 
     /**
      * @brief class used to model a pointer to an object of class @link file file @endlink
@@ -279,7 +318,14 @@ namespace Symposium {
     class symlink : public filesystem {
         std::string pathToFile;    /**< absolute path to a @e file, obtained as concatenation of @e id */
         std::string fileName;      /**< name of the file pointed, meaning its @e id */
-        
+
+        friend class boost::serialization::access;
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version);
+
+
+        symlink()=default;
     public:
         symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
                 uint_positive_cnt::type idToAssign=0);
@@ -317,8 +363,11 @@ namespace Symposium {
          */
         virtual std::string print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const override;
 
-        ~symlink() override = default;
+
+        virtual ~symlink() override=default;
     };
+
+
 
 
     /**
@@ -330,6 +379,13 @@ namespace Symposium {
         std::vector<std::shared_ptr<filesystem> > contained;    /**< filesystem objects contained in the directory */
         std::weak_ptr<directory> parent;                        /**< pointer to the parent directory */
         std::weak_ptr<directory> self;                          /**< pointer to itself */
+
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version);
+
+        //Needed by boost::serialization
+        directory()=default;
 
     protected:
         directory(const std::string &name, const int &idToAssign=0);
@@ -408,6 +464,10 @@ namespace Symposium {
         static std::tuple<std::string, std::string> separateFirst(std::string path);
     };
 
-
 }
+
+
+
+
+
 #endif //SYMPOSIUM_FILESYSTEM_H

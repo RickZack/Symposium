@@ -30,6 +30,11 @@
 #ifndef SYMPOSIUM_SYMPOSIUM_H
 #define SYMPOSIUM_SYMPOSIUM_H
 
+#include <boost/serialization/access.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/export.hpp>
+
 /**
  * @brief Contains the forward declaration of classes used in the original Symposium software.
  *
@@ -52,6 +57,7 @@ namespace Symposium{
     class directory;
     class file;
     class symlink;
+
 
     enum class msgOutcome:char;
     enum class msgType;

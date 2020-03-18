@@ -75,6 +75,8 @@ namespace Symposium {
 
         virtual privilege getPrivilege(const std::string &targetUser) const =0;
 
+        virtual std::unordered_map<std::string, privilege> getPermission() const =0;
+
         virtual bool moreOwner(std::string username) const =0;
 
         virtual ~AccessStrategy()= default;
@@ -102,6 +104,8 @@ namespace Symposium {
         privilege setPrivilege(const std::string &targetUser, privilege toGrant) override;
 
         privilege getPrivilege(const std::string &targetUser) const override;
+
+        std::unordered_map<std::string, privilege> getPermission() const override;
 
         bool moreOwner(std::string username) const override;
 
@@ -131,6 +135,8 @@ namespace Symposium {
         privilege setPrivilege(const std::string &targetUser, privilege toGrant) override;
 
         privilege getPrivilege(const std::string &targetUser) const override;
+
+        std::unordered_map<std::string, privilege> getPermission() const override;
 
         bool moreOwner(std::string username) const override;
 

@@ -8,6 +8,12 @@
 #include "changeuserinfo.h"
 #include "directory.h"
 
+
+
+namespace Symposium{
+class clientdispatcher;
+}
+
 namespace Ui {
 class home;
 }
@@ -18,6 +24,7 @@ class home : public QMainWindow
 
 public:
     explicit home(QWidget *parent = nullptr);
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~home();
 
 private slots:
@@ -35,6 +42,7 @@ private:
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
     directory *directoryWindow;
+    Symposium::clientdispatcher *cl;
 
     void closeEvent(QCloseEvent *event);
 };

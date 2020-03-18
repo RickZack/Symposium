@@ -33,7 +33,21 @@
 #include "filesystem.h"
 #include "SymposiumException.h"
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 using namespace Symposium;
+
+BOOST_CLASS_EXPORT(Symposium::user)
+
+template<class Archive>
+void user::serialize(Archive &ar, const unsigned int version){
+    //TODO: save home
+    ar & username & pwdHash & hashSalt & siteId & nickname & iconPath & home;
+};
 
 user::user(const std::string &username, const std::string &pwd, const std::string &nickname,
            const std::string &iconPath,

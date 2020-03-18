@@ -36,6 +36,16 @@
 #include <forward_list>
 #include <queue>
 #include <map>
+
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/assume_abstract.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+
+
 #include "Symposium.h"
 #include "user.h"
 #include "message.h"
@@ -52,6 +62,11 @@
  */
  namespace Symposium {
      class SymServer {
+
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, const unsigned int version);
+
      protected:
          std::unordered_map<std::string, user> registered;                                                 /**< registered users, indexed by username */
          std::unordered_map<std::string, const user *> active;                                             /**< active users, indexed by username */
@@ -66,6 +81,11 @@
 
          //Some methods are virtual in order to use the mocks in tests
          SymServer();
+
+         bool operator==(const SymServer &rhs) const;
+
+         bool operator!=(const SymServer &rhs) const;
+
 
          /**
           * @brief adds a new user to the set of users registered to the system
@@ -195,6 +215,7 @@
          virtual void remoteRemove(const std::string &remover, int resourceId, symbolMessage &rmMsg);
          //dispatchMessages ->function to be active in background to send messages from server to client
          //updateActiveUsers(); ->useful or just done inside other functions?
+         virtual void updateCursorPos(const std::string &targetUser, int resId, unsigned int row, unsigned int col);
 
          /**
           * @brief edit the privilege of @e targetUser user for the resource @e resName in @e resPath to @e newPrivilege
@@ -350,7 +371,7 @@
           * Some of them are also virtual to be overridden in test suites (read ./tests/SymServerTest.cpp)
           */
          virtual bool userIsRegistered(const std::string &toCheck) const noexcept ;
-         virtual user findUserBySiteId(int id) const;
+         virtual user findUserBySiteId(int id) const noexcept;
          virtual bool userIsActive(const std::string &username) const;
 
          /*
@@ -431,7 +452,7 @@
           * of siteIds associated with every resource that the user left opened
           * @param loggedOut the user that just logged out
           */
-         void settleResIdToSiteId(const user &loggedOut);
+         void handleLeavingUser(const user &loggedOut);
 
          /**
           * @brief generate a simple response with msgOutcome::success for a client request

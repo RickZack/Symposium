@@ -34,18 +34,49 @@
 #include <forward_list>
 #include <string>
 #include <set>
-//#include "symbol.h"
-#include "privilege.h"
 #include "Symposium.h"
+#include "privilege.h"
 #include "symbol.h"
+
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/forward_list.hpp>
+#include <boost/serialization/utility.hpp>
+#include <chrono>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/binary_object.hpp>
 
 
 namespace Symposium {
+    struct sessionData{
+        friend class boost::serialization::access;
+        unsigned int row, col;
+        std::chrono::system_clock::time_point tmstmp;
+        privilege p;
+        sessionData(privilege p=privilege::none, unsigned int row=0, unsigned int col=0): p{p}, row{row}, col{col}{
+            tmstmp=std::chrono::system_clock::now();
+        }
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version){
+            ar & row & col & boost::serialization::make_binary_object(&tmstmp, sizeof(tmstmp)) & p;
+        };
+
+        bool operator==(const sessionData &rhs) const {
+            return row == rhs.row &&
+                   col == rhs.col &&
+                   tmstmp == rhs.tmstmp &&
+                   p == rhs.p;
+        }
+
+        bool operator!=(const sessionData &rhs) const {
+            return !(rhs == *this);
+        }
+    };
+
     class document {
         static int idCounter;                                           /**< id to be assigned to the next created document */
         int id;                                                         /**< unique identifier for the document */
         std::vector<std::vector<symbol> > symbols;                      /**< container of characters and metadata for CRDT*/
-        std::forward_list<std::pair<user *, privilege>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
+        std::forward_list<std::pair<const user *, sessionData>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
         int numchar;                                                    /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
@@ -53,18 +84,23 @@ namespace Symposium {
         static constexpr wchar_t  emptyChar='~';
         static const symbol emptySymbol;
 
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version){
+            ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
+        };
     public:
         document(int id = document::idCounter);
-
-
 
         int getId() const;
 
         const std::vector<std::vector<symbol>> &getSymbols() const;
 
-        const std::forward_list<std::pair<user *, privilege>> &getActiveUsers() const;
+        const std::forward_list<std::pair<const user *, sessionData>> &getActiveUsers() const;
 
         int getNumchar() const;
+
+
 
         bool operator==(const document &rhs) const;
 
@@ -105,6 +141,14 @@ namespace Symposium {
          * @param toRemove symbol to remove
          */
         virtual void remoteRemove(const symbol &toRemove);
+
+        /**
+         * @brief update the position of the cursor for the user @e target
+         * @param targetSiteId the user whose cursor's position has been changed
+         * @param newRow the new row number
+         * @param newCol the new column number
+         */
+        virtual void updateCursorPos(unsigned int targetSiteId, unsigned int newRow, unsigned int newCol);
 
         /**
          * @brief give a representation of the document ad sequence of wide characters
@@ -222,5 +266,6 @@ namespace Symposium {
 
     };
 }
+
 
 #endif //SYMPOSIUM_DOCUMENT_H

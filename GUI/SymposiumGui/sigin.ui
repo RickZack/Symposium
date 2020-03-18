@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>384</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,7 +69,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>230</y>
+     <y>280</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -82,7 +82,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>230</y>
+     <y>280</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -121,6 +121,45 @@
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="haveto">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>190</y>
+     <width>301</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>You have to digit username and password to sign in</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="waiting">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>220</y>
+     <width>181</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Waiting the response of server</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="tryAgain">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>240</y>
+     <width>321</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Your username or password is wrong, please try again</string>
    </property>
   </widget>
  </widget>
