@@ -38,6 +38,7 @@ public:
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~notepad();
     void setId(std::string id);
+    void setIdDoc(std::string id);
 
 
 private slots:
@@ -91,6 +92,7 @@ private:
 
     void closeEvent(QCloseEvent *event);
     void keyReleaseEvent(QKeyEvent *e);
+
 
     QAction *actionTextBold;
     QAction *actionTextUnderline;

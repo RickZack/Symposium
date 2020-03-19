@@ -1,6 +1,6 @@
 #include "notepad.h"
 #include "ui_notepad.h"
-#include "directory.h"
+//#include "directory.h"
 
 #include <QAction>
 #include <QApplication>
@@ -79,10 +79,15 @@ notepad::~notepad()
 {
     delete ui;
 }
-
 void notepad::setId(std::string id)
 {
     this->idDoc=id;
+
+}
+
+void notepad::setIdDoc(std::string id)
+{
+    this->documentId=std::stoi(id);
 }
 
 
@@ -477,16 +482,21 @@ void notepad::counterLink()
     counterlinkwindow->show();
 }
 
+
+
 void notepad::closeEvent(QCloseEvent *event){
     // potrebbe essere passata dal server la stringa relativa all'ultima cartella aperta
     // oppure aprire direttamente la directory iniziale
 
+    int doc=documentId;
     //closeSource(this->id)
     event->ignore();
-    directory *dirWindow=new directory(this);
-    dirWindow->show();
-    this->hide();
+    this->notepad::hide();
+
+
+
 }
+
 
 void notepad::keyReleaseEvent(QKeyEvent *event)
 {

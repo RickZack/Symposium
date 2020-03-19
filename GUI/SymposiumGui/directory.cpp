@@ -204,7 +204,7 @@ void directory::on_pushButton_clicked()
                  // I have to open the choosepriv first
                  chooseprivWindow= new choosepriv(this);
                  chooseprivWindow->getPath(path,id);
-                 this->hide();
+                 //this->hide();
              }
              else
              {
@@ -296,6 +296,7 @@ void directory::on_pushButton_3_clicked()
     }
 
 }
+
 
 //this method closes the window directory
 void directory::closeEvent(QCloseEvent *event)
