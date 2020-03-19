@@ -38,7 +38,6 @@ SOURCES += \
         changeuserinfo.cpp \
         choosedir.cpp \
         choosepriv.cpp \
-        currentusers.cpp \
         deleteaccount.cpp \
         directory.cpp \
         errorconnection.cpp \
@@ -80,7 +79,6 @@ HEADERS += \
         changeuserinfo.h \
         choosedir.h \
         choosepriv.h \
-        currentusers.h \
         deleteaccount.h \
         directory.h \
         errorconnection.h \
@@ -124,7 +122,6 @@ FORMS += \
         changeuserinfo.ui \
         choosedir.ui \
         choosepriv.ui \
-        currentusers.ui \
         deleteaccount.ui \
         directory.ui \
         errorconnection.ui \

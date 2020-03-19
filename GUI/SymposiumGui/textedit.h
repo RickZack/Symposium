@@ -55,7 +55,6 @@
 #include <QMap>
 #include <QPointer>
 
-#include "currentusers.h"
 #include "../../privilege.h"
 #include "activetimerlink.h"
 #include "activecounterlink.h"
@@ -126,7 +125,7 @@ private slots:
 
 private:
 
-    currentUsers *currentuserswindow;
+
     Symposium::privilege priv;
     std::string pathToFile;
     activetimerlink *timerlinkwindow;

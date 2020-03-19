@@ -44,6 +44,7 @@ const QString rsrcPath = ":/resources/images/mac";
 const QString rsrcPath = ":/resources/images/win";
 #endif
 
+#include "Dispatcher/clientdispatcher.h"
 
 notepad::notepad(QWidget *parent) :
     QMainWindow(parent),
@@ -56,7 +57,7 @@ notepad::notepad(QWidget *parent) :
 
     priv=Symposium::privilege::owner;
     pathToFile="/1/2/3/4/5/6/7";
-
+    //us=cl->getUser();
     QMenu *userMenu=menuBar()->addMenu(tr("Users"));
     userMenu->addAction(tr("Online Users"), this, &notepad::visualizeUsers);
     if(priv==Symposium::privilege::owner)
@@ -425,6 +426,9 @@ void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 void notepad::visualizeUsers()
 {
     onlineuser = new onlineusers(this);
+    onlineuser->documentId=this->documentId;
+    onlineuser->setClientDispatcher(cl);
+    onlineuser->user=us;
     //onlineuser->onlineUsers=cl->onlineUser(documentID);
     onlineuser->show();
 }
@@ -432,6 +436,9 @@ void notepad::visualizeUsers()
 void notepad::visualizeAllUsers()
 {
     alluserWindow = new alluser(this);
+    alluserWindow->documentID=this->documentId;
+    alluserWindow->setClientDispatcher(cl);
+    alluserWindow->us=this->us;
     //alluserWindow->users=cl->allUser(documentID);
     alluserWindow->show();
 }
@@ -543,3 +550,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
+void notepad::setClientDispatcher(Symposium::clientdispatcher *cl)
+{
+    this->cl = cl;
+}

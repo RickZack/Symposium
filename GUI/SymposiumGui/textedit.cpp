@@ -762,14 +762,12 @@ void TextEdit::about()
 
 void TextEdit::visualizeUsers()
 {
-    currentuserswindow = new currentUsers(this);
-    currentuserswindow->show();
+
 }
 
 void TextEdit::visualizeAllUsers()
 {
-    currentuserswindow = new currentUsers(this);
-    currentuserswindow->show();
+
 }
 
 void TextEdit::inactiveLink()

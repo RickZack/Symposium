@@ -17,6 +17,9 @@
 
 
 
+namespace Symposium{
+class clientdispatcher;
+}
 
 class QComboBox;
 class QFontComboBox;
@@ -32,6 +35,7 @@ class notepad : public QMainWindow
 
 public:
     explicit notepad(QWidget *parent = nullptr);
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~notepad();
     void setId(std::string id);
 
@@ -59,6 +63,9 @@ private slots:
 private:
     Ui::notepad *ui;
     QString mFilename;
+    int documentId;
+    Symposium::user us;
+    Symposium::clientdispatcher *cl;
 
     onlineusers *onlineuser;
     alluser *alluserWindow;

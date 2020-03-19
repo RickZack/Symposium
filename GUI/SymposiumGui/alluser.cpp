@@ -12,6 +12,8 @@ alluser::alluser(QWidget *parent) :
     ui->tree->setColumnCount(2);
     ui->tree->headerItem()->setText(0, "user:");
     ui->tree->headerItem()->setText(1, "privilege:");
+    ui->tree->setColumnWidth(0, 200);
+    us=Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
     privelege=Symposium::privilege::owner;
     if(privelege!=Symposium::privilege::owner)
     {
@@ -66,6 +68,7 @@ void alluser::errorConnectionLogout()
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
+    parentWidget()->parentWidget()->close();
     errorLog->show();
 }
 
@@ -91,7 +94,10 @@ void alluser::insertusers()
     for(auto it:users)
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
-        item->setText(0, QString::fromStdString(it.first));
+        if(it.first!=us.getUsername())
+            item->setText(0, QString::fromStdString(it.first));
+        else
+            item->setText(0, QString::fromStdString(it.first)+" (you)");
         std::ostringstream priv;
         priv<<it.second;
         item->setText(1, QString::fromStdString(priv.str()));

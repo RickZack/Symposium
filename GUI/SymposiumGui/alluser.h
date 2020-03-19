@@ -9,6 +9,7 @@
 #include "../../privilege.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include "../../user.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -25,7 +26,9 @@ class alluser : public QDialog
 
 public:
     Symposium::privilege privelege;
+    Symposium::user us;
     std::unordered_map<std::string, Symposium::privilege> users;
+    int documentID;
     explicit alluser(QWidget *parent = nullptr);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void successEditPrivilege();
