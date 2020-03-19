@@ -32,7 +32,6 @@ public:
     void errorConnectionLogout();
     void successInsert();
     ~inserturi();
-    bool openWindow;
 
 private slots:
     void on_dir_clicked();

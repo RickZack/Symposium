@@ -48,13 +48,8 @@ void inserturi::reset_text()
 
 void inserturi::closeEvent(QCloseEvent *event)
 {
-    event->ignore();
-    if(this->openWindow==true){
-        directory *dir= new directory(this);
-        dir->show();
-        //this->hide();
-    }
-    this->hide();
+        parentWidget()->show();
+
 }
 
 void inserturi::on_reader_clicked()

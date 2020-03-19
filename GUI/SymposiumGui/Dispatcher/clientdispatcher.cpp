@@ -46,7 +46,7 @@ clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), finestreD
     //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
     connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
     qDebug() << "Connection Successful\n";
-    this->client.setClientDispatcher(this);
+    //this->client.setClientDispatcher(this);
     this->finestraLogin = nullptr;
     this->finestraSignup = nullptr;
 }

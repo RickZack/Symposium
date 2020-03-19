@@ -166,7 +166,6 @@ void directory::on_actionHome_triggered()
 void directory::on_actionUri_triggered()
 {
     uriWindow=new inserturi(this);
-    uriWindow->openWindow=true;
     uriWindow->show();
     this->hide();
 }
