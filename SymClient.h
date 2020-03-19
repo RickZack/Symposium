@@ -78,7 +78,7 @@ namespace Symposium {
         user loggedUser;                                                          /**< logged user and its data */
         std::forward_list<std::shared_ptr<file>> activeFile;                      /**< list of active documents */
         std::forward_list<document *> activeDoc;                                  /**< list of files the active documents are related to */
-        std::map<std::pair<int, int>, std::pair<user, MyColor>> userColors;       /**< map {siteId, documentId}->{user, color}  */
+        std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, MyColor>> userColors;       /**< map {siteId, documentId}->{user, color}  */
         //clientdispatcher* dispatcher;                                             /**< pointer to client dispatcher */
         std::forward_list<std::shared_ptr<clientMessage>> unanswered;             /**< messages sent by client that have not been received an answer */
 
@@ -160,7 +160,7 @@ namespace Symposium {
          */
         virtual void openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
                                    const std::string &destName,
-                                   int idToAssign, const std::shared_ptr<file> fileAsked);
+                                   uint_positive_cnt::type idToAssign, const std::shared_ptr<file> fileAsked);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to create a file
@@ -180,7 +180,7 @@ namespace Symposium {
          * the previously sent @ref askResMessage and @e idToAssign taken from the file object contained
          * in the @ref sendResMessage just received
          */
-        virtual void createNewSource(const std::string &path, const std::string &name, int idToAssign);
+        virtual void createNewSource(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to create a directory
@@ -200,7 +200,7 @@ namespace Symposium {
          * the previously sent @ref askResMessage and @e idToAssign taken from the directory object contained
          * in the @ref sendResMessage just received
          */
-        virtual void createNewDir(const std::string &path, const std::string &name, int idToAssign);
+        virtual void createNewDir(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign);
 
         /**
          * @brief insert a symbol on an opened document and constructs a message to sent to the server
@@ -208,7 +208,7 @@ namespace Symposium {
          * @param newSym the symbol to insert
          * @return a properly constructed @ref symbolMessage to send to the server
          */
-        virtual symbolMessage localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index);
+        virtual symbolMessage localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<unsigned int, unsigned int> &index);
 
         /**
          * @brief remove a symbol on an opened document and constructs a message to sent to the server
@@ -216,7 +216,7 @@ namespace Symposium {
          * @param indexes the position of the symbol to remove
          * @return a properly constructed @ref symbolMessage to send to the server
          */
-        virtual symbolMessage localRemove(int resourceId, const std::pair<int, int> indexes);
+        virtual symbolMessage localRemove(uint_positive_cnt::type resourceId, const std::pair<unsigned int, unsigned int> indexes);
 
         /**
          * @brief propagate a symbol insertion on document content made by another user
@@ -225,7 +225,7 @@ namespace Symposium {
          *
          * This method is called after having received a @ref symbolMessage
          */
-        virtual void remoteInsert(int resourceId, const symbol &newSym);
+        virtual void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym);
 
         /**
          * @brief propagate a symbol deletion on document content made by another user
@@ -234,7 +234,7 @@ namespace Symposium {
          *
          * This method is called after having received a @ref symbolMessage
          */
-        virtual void remoteRemove(int resourceId, const symbol &rmSym);
+        virtual void remoteRemove(uint_positive_cnt::type resourceId, const symbol &rmSym);
 
         /**
          * @brief set the symbol of the opened document that has @e resourceId to "verified"
@@ -246,11 +246,11 @@ namespace Symposium {
          * message is retrieved and @ref symbolMessage::completeAction is called: it calls this method if the
          * outcome is positive.
          */
-        virtual void verifySymbol(int resourceId, const symbol &sym);
+        virtual void verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym);
 
-        virtual cursorMessage updateCursorPos(int resourceId, unsigned int row, unsigned int col);
+        virtual cursorMessage updateCursorPos(uint_positive_cnt::type resourceId, unsigned int row, unsigned int col);
 
-        virtual void updateCursorPos(int userSiteId, int resourceId, unsigned int row, unsigned int col);
+        virtual void updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type resourceId, unsigned int row, unsigned int col);
 
         /**
          * @brief constructs a @ref privMessage to send to the server to ask to change privileges for a resource
@@ -405,7 +405,7 @@ namespace Symposium {
         * When a user client side wants to remove a resource, it sends a @ref updateDocMessage and removes the document with
         * id @e resourceId from @e activeDoc and @e activeFile.
         */
-        updateDocMessage closeSource(int resourceId);
+        updateDocMessage closeSource(uint_positive_cnt::type resourceId);
 
         /**
          * @brief changes user's data
@@ -461,7 +461,7 @@ namespace Symposium {
          * Receive the mapping siteId->user from the server and assigns to each user a unique color among the colors
          * assigned to the users working on the same document.
          */
-        virtual void setUserColors(const std::map<int, user> &siteIdToUser);
+        virtual void setUserColors(const std::map<uint_positive_cnt::type, user> &siteIdToUser);
 
         /**
          * @brief add @e targetUser to the list of active users of the document
@@ -469,14 +469,14 @@ namespace Symposium {
          * @param targetUser the user to add
          * @param Priv the privilege of the user to add
          */
-        virtual void addActiveUser(int resourceId, user &targetUser, privilege Priv);
+        virtual void addActiveUser(uint_positive_cnt::type resourceId, user &targetUser, privilege Priv);
 
         /**
          * @brief remove @e targetUser to the list of active users of the document
          * @param resourceId the id of the document the update refers to
          * @param targetUser the user to remove
          */
-        virtual void removeActiveUser(int resourceId, user &targetUser);
+        virtual void removeActiveUser(uint_positive_cnt::type resourceId, user &targetUser);
 
         /**
          * @brief retrieve a @ref clientMessage previously sent by the client related to @e smex, removing it from @e unanswered
@@ -490,7 +490,7 @@ namespace Symposium {
 //        void setClientDispatcher(clientdispatcher *cl);
 
     private:
-        document* getActiveDocumentbyID(int id);
+        document* getActiveDocumentbyID(uint_positive_cnt::type id);
 
         /**
              * @brief set all the details of the user just logged

@@ -53,7 +53,7 @@ namespace Symposium {
  */
     class uri {
         uriPolicy activePolicy;    /**< the policy currently active */
-        int sharesLeft;            /**< number of shares that can still be accepted */
+        unsigned int sharesLeft;            /**< number of shares that can still be accepted */
         std::chrono::system_clock::time_point stopTime; /**< end time of sharing */
         privilege granted;         /**< privilege that the resource owner decided to grant via uri */
 
@@ -71,7 +71,7 @@ namespace Symposium {
 
         uriPolicy getActivePolicy() const;
 
-        int getSharesLeft() const;
+        unsigned int getSharesLeft() const;
 
         privilege getGranted() const;
 
@@ -106,7 +106,7 @@ namespace Symposium {
          * @param newPrivilege the privilege to set
          */
 
-        void activateCount(int shares, privilege newPrivilege = defaultPrivilege);
+        void activateCount(unsigned int shares, privilege newPrivilege = defaultPrivilege);
 
         /**
          * @brief set activePolicy as activeTimer with @ref newPrivilege

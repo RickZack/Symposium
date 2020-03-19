@@ -75,7 +75,8 @@ struct SymServerDocMock: public document{
     MOCK_METHOD1(remoteInsert, void(const symbol &toInsert));
     MOCK_METHOD1(remoteRemove, void(const symbol &toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
-    MOCK_CONST_METHOD0(retrieveSiteIds, std::set<int>());
+    MOCK_CONST_METHOD0(retrieveSiteIds, std::set<uint_positive_cnt::type>());
+
     MOCK_METHOD3(updateCursorPos, void(unsigned, unsigned, unsigned));
 };
 
@@ -470,7 +471,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         return ::testing::AssertionSuccess();
     }
 
-    void messageAssociatedWithRightUsers(const std::initializer_list<int>& siteIds, const serverMessage &toSend, const std::initializer_list<int>& siteIdsNoMex= {}){
+    void messageAssociatedWithRightUsers(const std::initializer_list<uint_positive_cnt::type>& siteIds, const serverMessage &toSend, const std::initializer_list<uint_positive_cnt::type>& siteIdsNoMex= {}){
         for(int s:siteIds) {
             EXPECT_TRUE(server.thereIsMessageForUser(s, toSend).first)
                                 << "Message not associated with siteId " << s;
@@ -600,7 +601,7 @@ TEST_F(SymServerTestFilesystemFunctionality, createNewDirOfUnloggedUser){
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDocAndPropagateChanges){
     setStageForOpenedDocForLoggedUser();
-    std::initializer_list<int> siteIds{anotherUser.getSiteId()};
+    std::initializer_list<uint_positive_cnt::type> siteIds{anotherUser.getSiteId()};
     server.forceSiteIdForResId(&doc, anotherUser);
 
     symbol toInsert('a', 0, 0, {}, false);
@@ -616,7 +617,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDocA
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDocAndGenerateCorrectResponse){
     setStageForOpenedDocForLoggedUser();
-    std::initializer_list<int> siteIds{anotherUser.getSiteId()};
+    std::initializer_list<uint_positive_cnt::type> siteIds{anotherUser.getSiteId()};
     server.forceSiteIdForResId(&doc, anotherUser);
 
     symbol symSent('a', 0, 0, {}, false);
@@ -652,7 +653,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertOnDocumentNotOpened){
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDocAndPropagateChanges){
     setStageForOpenedDocForLoggedUser();
-    std::initializer_list<int> siteIds{anotherUser.getSiteId()};
+    std::initializer_list<uint_positive_cnt::type> siteIds{anotherUser.getSiteId()};
     server.forceSiteIdForResId(&doc, anotherUser);
 
     symbol toRemove('a', 0, 0, {}, false);
@@ -668,7 +669,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDocA
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDocAndGenerateCorrectResponse){
     setStageForOpenedDocForLoggedUser();
-    std::initializer_list<int> siteIds{anotherUser.getSiteId()};
+    std::initializer_list<uint_positive_cnt::type> siteIds{anotherUser.getSiteId()};
     server.forceSiteIdForResId(&doc, anotherUser);
 
     symbol toRemove('a', 0, 0, {}, false);
@@ -737,7 +738,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUs
     setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
-    std::initializer_list<int> siteIds{thirdUser.getSiteId()};
+    std::initializer_list<uint_positive_cnt::type> siteIds{thirdUser.getSiteId()};
     /*
      * Let's suppose that a message like that has been received by the server
      */
@@ -927,12 +928,12 @@ TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCorrectMapping){
     setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilege(defaultPrivilege);
-    std::set<int> siteIdsToReturn({loggedUser.getSiteId(), anotherUser.getSiteId()});
+    std::set<uint_positive_cnt::type> siteIdsToReturn({loggedUser.getSiteId(), anotherUser.getSiteId()});
     EXPECT_CALL(doc,retrieveSiteIds()).WillOnce(::testing::Return(siteIdsToReturn));
     auto mapping=server.mapSiteIdToUser(loggedUserUsername, doc.getId());
-    std::map<int, user> expected({
-        std::pair<int, user>(loggedUser.getSiteId(), loggedUser),
-        std::pair<int, user>(anotherUser.getSiteId(), anotherUser)});
+    std::map<uint_positive_cnt::type, user> expected({
+        std::pair<uint_positive_cnt::type, user>(loggedUser.getSiteId(), loggedUser),
+        std::pair<uint_positive_cnt::type, user>(anotherUser.getSiteId(), anotherUser)});
     EXPECT_EQ(expected, mapping);
 }
 
@@ -940,12 +941,12 @@ TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdWithUnknownSiteId){
     setStageForAccessedDoc(loggedUser);
     //loggedUser and anotherUser have siteId 0 and 1,
     // so 2 and 3 are siteId without association with registered users in SymServer
-    std::set<int> siteIdsToReturn({2,3});
+    std::set<uint_positive_cnt::type> siteIdsToReturn({2,3});
     EXPECT_CALL(doc,retrieveSiteIds()).WillOnce(::testing::Return(siteIdsToReturn));
     auto mapping=server.mapSiteIdToUser(loggedUserUsername, doc.getId());
-    std::map<int, user> expected({
-                                         std::pair<int, user>(2, SymServer::unknownUser),
-                                         std::pair<int, user>(3, SymServer::unknownUser)});
+    std::map<uint_positive_cnt::type, user> expected({
+                                         std::pair<uint_positive_cnt::type, user>(2, SymServer::unknownUser),
+                                         std::pair<uint_positive_cnt::type, user>(3, SymServer::unknownUser)});
     EXPECT_EQ(expected, mapping);
 }
 
@@ -964,7 +965,7 @@ TEST_F(SymServerTestFilesystemFunctionality, updateCursorPosCallsupdateCursorPos
 
 TEST_F(SymServerTestFilesystemFunctionality, updateCursorPosCallsupdateCursorPosOnDocAndPropagateChanges){
     setStageForOpenedDocForLoggedUser();
-    std::initializer_list<int> siteIds{anotherUser.getSiteId()};
+    std::initializer_list<uint_positive_cnt::type> siteIds{anotherUser.getSiteId()};
     server.forceSiteIdForResId(&doc, anotherUser);
     srand(time(NULL)); int row=rand()%1000, col=rand()%1000;
 

@@ -260,16 +260,16 @@
          //Needed by boost::serialization
          updateDocMessage()=default;
 
-         int resourceId;            /**< identifier of the resource on which perform the action */
+         uint_positive_cnt::type resourceId;            /**< identifier of the resource on which perform the action */
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         updateDocMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, int resourceId,
+         updateDocMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type resourceId,
                           int msgId = 0);
 
-         int getResourceId() const;
+         uint_positive_cnt::type getResourceId() const;
 
          /**
           * @brief asks the server for an action on the document indicated by @e resourceId the @e actionUser is working on
@@ -393,15 +393,15 @@
          //Needed by boost::serialization
          mapMessage(): serverMessage(msgOutcome::success, 1){}
 
-         std::map<int, user> siteIdToUser;
+         std::map<uint_positive_cnt::type, user> siteIdToUser;
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         mapMessage(msgType action, msgOutcome result, const std::map<int, user> &siteIdToUser, int msgId = 0);
+         mapMessage(msgType action, msgOutcome result, const std::map<uint_positive_cnt::type, user> &siteIdToUser, int msgId = 0);
 
-         const std::map<int, user> &getSiteIdToUser() const;
+         const std::map<uint_positive_cnt::type, user> & getSiteIdToUser() const;
 
          /**
           * @brief update the mapping siteId->pair<user, color> with the information sent by the server
@@ -430,14 +430,14 @@
          //Needed by boost::serialization
          sendResMessage():serverMessage(msgOutcome::success, 1){}
 
-         int symId;             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
+         uint_positive_cnt::type symId;             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
          std::shared_ptr<filesystem> resource;
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, int symId=0, int msgId = 0);
+         sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, uint_positive_cnt::type symId=0, int msgId = 0);
 
          std::shared_ptr<filesystem> getResource() const;
 
@@ -475,14 +475,14 @@
 
          updateActiveMessage():serverMessage(msgOutcome::success, 1){}
          user newUser;              /**< user who joined the document */
-         int resourceId;            /**< identifier of the opened resource */
+         uint_positive_cnt::type resourceId;            /**< identifier of the opened resource */
          privilege userPrivilege;   /**< the privilege @e newUser has on @e resourceId */
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         updateActiveMessage(msgType action, msgOutcome result, const user &newUser, int resourceId,
+         updateActiveMessage(msgType action, msgOutcome result, const user &newUser, uint_positive_cnt::type resourceId,
                              privilege priv = privilege::readOnly, int msgId = 0);
 
          const user &getNewUser() const;
@@ -584,8 +584,8 @@
          //Needed for boost::serialization
          symbolMessage(): serverMessage(msgOutcome::success, 1), sym('a', 0, 0, {}){}
 
-         int siteId;                /**< siteId of the client that send the message */
-         int resourceId;            /**< id of the resource the client is working on*/
+         uint_positive_cnt::type siteId;                /**< siteId of the client that send the message */
+         uint_positive_cnt::type resourceId;            /**< id of the resource the client is working on*/
          symbol sym;                /**< symbol to be inserted or deleted*/
      public:
 
@@ -593,12 +593,12 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          symbolMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                       int siteId,
-                       int resourceId, const symbol &sym, int msgId = 0);
+                       uint_positive_cnt::type siteId,
+                       uint_positive_cnt::type resourceId, const symbol &sym, int msgId = 0);
 
-         int getSiteId() const;
+         uint_positive_cnt::type getSiteId() const;
 
-         int getResourceId() const;
+         uint_positive_cnt::type getResourceId() const;
 
          /**
           * @brief set the contained symbol as "verified" calling @ref symbol::setVerified on @e sym
@@ -777,21 +777,21 @@
          //Needed for boost::serialization
          cursorMessage():serverMessage(msgOutcome::success, 1){}
 
-         int siteId;
-         int resourceId;
+         uint_positive_cnt::type siteId;
+         uint_positive_cnt::type resourceId;
          int row;
          int col;
 
      public:
          cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                       int siteId,
-                       int resourceId, int row, int col, int msgId = 0);
+                       uint_positive_cnt::type siteId,
+                       uint_positive_cnt::type resourceId, int row, int col, int msgId = 0);
 
          void invokeMethod(SymServer &server) override;
 
          void invokeMethod(SymClient &client) override;
 
-         int getResourceId() const;
+         uint_positive_cnt::type getResourceId() const;
 
          int getRow() const;
 

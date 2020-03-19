@@ -69,7 +69,7 @@ struct SymClientAccesser: public SymClient{
         return loggedUser;
     }
 
-    std::map<std::pair<int, int>, std::pair<user, MyColor>>& getUserColors(){
+    std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, MyColor>>& getUserColors(){
         return userColors;
     };
     std::pair<bool, std::shared_ptr<clientMessage>> thereIsUnansweredMex(int msgId){
@@ -126,8 +126,8 @@ struct SymClientDocMock: public document{
     MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_METHOD2(access, document&(const user&, privilege));
-    MOCK_METHOD2(localInsert, symbol(const std::pair<int, int>& index, symbol &toInsert));
-    MOCK_METHOD1(localRemove, symbol(const std::pair<int, int> index));
+    MOCK_METHOD2(localInsert, symbol(const std::pair<unsigned, unsigned>& index, symbol &toInsert));
+    MOCK_METHOD1(localRemove, symbol(const std::pair<unsigned, unsigned> index));
     MOCK_METHOD3(updateCursorPos, void(unsigned int, unsigned int, unsigned int));
 };
 
@@ -148,7 +148,7 @@ struct SymClientTest : ::testing::Test{
     std::shared_ptr<SymClientFileMock> fileInUserFilesystem;
     std::shared_ptr<SymClientDirMock> dirSentByServer;
     SymClientDocMock docInUserFilesystem, docSentByServer;
-    static const std::pair<int, int> indexes;
+    static const std::pair<unsigned, unsigned> indexes;
     SymClientTest(): userReceived(username, pwd, nickname, iconPath, 0, std::shared_ptr<SymClientDirMock>(new SymClientDirMock(username))),
                      fileSentByServer(new SymClientFileMock(filename, "./dir1/dir2")),
                      fileInUserFilesystem(new SymClientFileMock(filename, "./dir1/dir2")),
@@ -231,7 +231,7 @@ const std::string SymClientTest::filename="file1";
 const std::string SymClientTest::destPath="./dir1/dir2";
 const std::string SymClientTest::anotherUsername="anotherUsername";
 uri SymClientTest::newPreferences(uriPolicy::activeAlways);
-const std::pair<int, int> SymClientTest::indexes={0,0};
+const std::pair<unsigned, unsigned> SymClientTest::indexes={0,0};
 
 TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
     client.setLoggedUser(userReceived);
@@ -538,7 +538,7 @@ TEST_F(SymClientTest, mapSiteIdToUserConstructsGoodMessageAndInsertInUnanswered)
 
 TEST_F(SymClientTest, setUserColorsAssignesDifferentColorToUsers){
     //correctness of mapping has already been verified on SymServer class, here we don't care about the wrong mapping
-    std::map<int, user> sampleMapping({{0, userReceived},{1, userReceived}});
+    std::map<uint_positive_cnt::type, user> sampleMapping({{0, userReceived},{1, userReceived}});
     client.setUserColors(sampleMapping);
     EXPECT_TRUE(everyUserHasDifferentColor());
 }

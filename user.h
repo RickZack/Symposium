@@ -81,11 +81,11 @@ namespace Symposium {
 
         user(const std::string &username, const std::string &pwd, const std::string &nickname,
              const std::string &iconPath,
-             int siteId, std::shared_ptr<directory> home);
+             uint_positive_cnt::type siteId, std::shared_ptr<directory> home);
 
         const std::string &getUsername() const;
 
-        int getSiteId() const;
+        uint_positive_cnt::type getSiteId() const;
 
         const std::string &getNickname() const;
 

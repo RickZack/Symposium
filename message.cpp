@@ -366,7 +366,7 @@ bool loginMessage::operator!=(const loginMessage &rhs) const {
 
 BOOST_CLASS_EXPORT(Symposium::loginMessage)
 
-mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<int, user> &siteIdToUser, int msgId)
+mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<uint_positive_cnt::type, user> &siteIdToUser, int msgId)
         : message(msgId), serverMessage(result, msgId), siteIdToUser(siteIdToUser) {
     if(action!=msgType::mapChangesToUser)
         throw messageException(messageException::action, UnpackFileLineFunction());
@@ -381,7 +381,7 @@ void mapMessage::serialize(Archive &ar, const unsigned int version)
     ar & siteIdToUser;
 }
 
-const std::map<int, user> & mapMessage::getSiteIdToUser() const {
+const std::map<uint_positive_cnt::type, user> & mapMessage::getSiteIdToUser() const {
     return siteIdToUser;
 }
 
@@ -401,7 +401,7 @@ bool mapMessage::operator!=(const mapMessage &rhs) const {
 
 BOOST_CLASS_EXPORT(Symposium::mapMessage)
 
-sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, int symId, int msgId)
+sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, uint_positive_cnt::type symId, int msgId)
         : message(msgId), serverMessage(result, msgId), resource{resource} {
     if(action!=msgType::createRes && action!=msgType::createNewDir && action!=msgType::openNewRes
     && action!=msgType::openRes)
@@ -562,8 +562,8 @@ bool privMessage::operator!=(const privMessage &rhs) const {
 BOOST_CLASS_EXPORT(Symposium::privMessage)
 
 symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                             int siteId,
-                             int resourceId, const symbol &sym, int msgId)
+                             uint_positive_cnt::type siteId,
+                             uint_positive_cnt::type resourceId, const symbol &sym, int msgId)
                              : message(msgId), clientMessage(actionOwner, msgId),
                                serverMessage(result, msgId), siteId(siteId), resourceId(resourceId), sym(sym) {
     if(action!=msgType::insertSymbol && action!=msgType::removeSymbol)
@@ -580,11 +580,11 @@ void symbolMessage::serialize(Archive &ar, const unsigned int version)
     ar & siteId & resourceId & sym;
 }
 
-int symbolMessage::getSiteId() const {
+uint_positive_cnt::type symbolMessage::getSiteId() const {
     return siteId;
 }
 
-int symbolMessage::getResourceId() const {
+uint_positive_cnt::type symbolMessage::getResourceId() const {
     return resourceId;
 }
 
@@ -715,7 +715,7 @@ bool uriMessage::operator!=(const uriMessage &rhs) const {
 }
 BOOST_CLASS_EXPORT(Symposium::uriMessage)
 
-updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, const user &newUser, int resourceId,
+updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, const user &newUser, uint_positive_cnt::type resourceId,
                                          privilege priv,
                                          int msgId)
                                          : message(msgId), serverMessage(result, msgId),
@@ -777,7 +777,7 @@ bool updateActiveMessage::operator!=(const updateActiveMessage &rhs) const {
 BOOST_CLASS_EXPORT(Symposium::updateActiveMessage)
 
 updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
-                                   int resourceId, int msgId)
+                                   uint_positive_cnt::type resourceId, int msgId)
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    resourceId(resourceId) {
     if(action!=msgType::mapChangesToUser && action!=msgType::closeRes)
@@ -793,7 +793,7 @@ void updateDocMessage::serialize(Archive &ar, const unsigned int version)
     ar & resourceId;
 }
 
-int updateDocMessage::getResourceId() const {
+uint_positive_cnt::type updateDocMessage::getResourceId() const {
     return resourceId;
 }
 
@@ -880,8 +880,8 @@ bool userDataMessage::operator!=(const userDataMessage &rhs) const {
 BOOST_CLASS_EXPORT(Symposium::userDataMessage)
 
 cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                             int siteId,
-                             int resourceId, int row, int col, int msgId) : clientMessage(actionOwner, msgId),
+                             uint_positive_cnt::type siteId,
+                             uint_positive_cnt::type resourceId, int row, int col, int msgId) : clientMessage(actionOwner, msgId),
                                                                             serverMessage(result, msgId), siteId(siteId),
                                                                             resourceId(resourceId), row(row), col(col){
     if(action!=msgType::updateCursor)
@@ -923,7 +923,7 @@ bool cursorMessage::operator!=(const cursorMessage &rhs) const {
     return !(rhs == *this);
 }
 
-int cursorMessage::getResourceId() const {
+uint_positive_cnt::type cursorMessage::getResourceId() const {
     return resourceId;
 }
 

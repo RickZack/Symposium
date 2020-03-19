@@ -51,8 +51,8 @@ void user::serialize(Archive &ar, const unsigned int version){
 
 user::user(const std::string &username, const std::string &pwd, const std::string &nickname,
            const std::string &iconPath,
-           int siteId, std::shared_ptr<directory> home) : username(username), siteId(siteId),
-                                                          nickname(nickname), iconPath(iconPath), home(home)
+           uint_positive_cnt::type siteId, std::shared_ptr<directory> home) : username(username), siteId(siteId),
+                                                                   nickname(nickname), iconPath(iconPath), home(home)
 {
     if(pwd.length()<=5)
         throw userException(userException::shortPwd, UnpackFileLineFunction());
@@ -82,7 +82,7 @@ const std::string &user::getUsername() const {
     return username;
 }
 
-int user::getSiteId() const {
+uint_positive_cnt::type user::getSiteId() const {
     return siteId;
 }
 

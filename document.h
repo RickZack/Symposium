@@ -73,8 +73,8 @@ namespace Symposium {
     };
 
     class document {
-        static int idCounter;                                           /**< id to be assigned to the next created document */
-        int id;                                                         /**< unique identifier for the document */
+        static uint_positive_cnt idCounter;                                           /**< id to be assigned to the next created document */
+        uint_positive_cnt::type id;                                                         /**< unique identifier for the document */
         std::vector<std::vector<symbol> > symbols;                      /**< container of characters and metadata for CRDT*/
         std::forward_list<std::pair<const user *, sessionData>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
         int numchar;                                                    /**< number of printable characters */
@@ -90,9 +90,9 @@ namespace Symposium {
             ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
         };
     public:
-        document(int id = document::idCounter);
+        document(uint_positive_cnt::type id = document::idCounter);
 
-        int getId() const;
+        uint_positive_cnt::type getId() const;
 
         const std::vector<std::vector<symbol>> &getSymbols() const;
 
@@ -122,13 +122,13 @@ namespace Symposium {
          * @brief insert a symbol in the document as consequence of an user's action on the GUI
          * @param toInsert symbol to insert
          */
-        virtual symbol localInsert(const std::pair<int, int> &indexes, symbol &toInsert);
+        virtual symbol localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert);
 
         /**
          * @brief remove a symbol in the document as consequence of an user's action on the GUI
          * @param indexes symbol to remove
          */
-        virtual symbol localRemove(const std::pair<int, int> &indexes);
+        virtual symbol localRemove(const std::pair<unsigned int, unsigned int> &indexes);
 
         /**
          * @brief insert a symbol in the document as consequence of a remote user's action
@@ -148,7 +148,7 @@ namespace Symposium {
          * @param newRow the new row number
          * @param newCol the new column number
          */
-        virtual void updateCursorPos(unsigned int targetSiteId, unsigned int newRow, unsigned int newCol);
+        virtual void updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol);
 
         /**
          * @brief give a representation of the document ad sequence of wide characters
@@ -172,14 +172,14 @@ namespace Symposium {
          * @brief retrieves the set of siteId in the current document
          * @return a set of siteIds
          */
-        virtual std::set<int> retrieveSiteIds() const;
+        virtual std::set<uint_positive_cnt::type> retrieveSiteIds() const;
 
         /**
          * @brief it checks if the index i0 and i1 are coherent with the capacity of @e symbols
          * @param i0 the first index to check
          * @param i1 the second index to check
          */
-        void checkIndex(int i0, int i1);
+        void checkIndex(unsigned int i0, unsigned int i1);
 
     private:
         /**
@@ -187,14 +187,14 @@ namespace Symposium {
          * @param indexes position of the adjacent characters used to generate the position of the new one
          * @param toInsert the value to insert
          */
-        symbol generatePosition(const std::pair<int, int> indexes, const symbol &toInsert);
+        symbol generatePosition(const std::pair<unsigned int, unsigned int> indexes, const symbol &toInsert);
 
         /**
          * @brief it searches for the position of the inserted symbol
          * @param symbol inserted symbol
          * @return position
          */
-        std::pair<int, int> findInsertIndex(const symbol &symbol) const;
+        std::pair<unsigned int, unsigned int> findInsertIndex(const symbol &symbol) const;
 
         /**
          * @brief it finds the position of the last Symbol to insert the symbol at the end of @e vector
@@ -203,7 +203,8 @@ namespace Symposium {
          * @param lines is the number of lines in the vector
          * @return the position
          */
-        std::pair<int,int> findEndPosition(const symbol aChar, const std::vector<Symposium::symbol> vector, int lines) const;
+        std::pair<unsigned int, unsigned int>
+        findEndPosition(const symbol aChar, const std::vector<Symposium::symbol> vector, int lines) const;
 
         /**
          * @brief it searches for the symbol that is inserted in the middle of the line
@@ -218,24 +219,24 @@ namespace Symposium {
          * @param symbol the symbol to search
          * @return the position of @e symbol
          */
-        std::pair<int, int> findPosition(const symbol &symbol) const;
+        std::pair<unsigned int, unsigned int> findPosition(const symbol &symbol) const;
 
 
-        int findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector) const;
+        unsigned int findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector) const;
 
         /**
          * @brief searches the position before the one of the considered value
          * @param pair the indexes
          * @return the searched position
          */
-        symbol findPosBefore(const std::pair<int, int> pair) const;
+        symbol findPosBefore(const std::pair<unsigned int, unsigned int> pair) const;
 
         /**
          * @brief searches the position after the one of the considered value
          * @param pair the indexes
          * @return the searched position
          */
-        symbol findPosAfter(const std::pair<int, int> pair) const;
+        symbol findPosAfter(const std::pair<unsigned int, unsigned int> pair) const;
 
         /**
          * @brief recoursive algorithm to dynamically generates the relative position of a symbol inserted in between two other ones

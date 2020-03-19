@@ -191,7 +191,7 @@ INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, loginMsgForbiddenActions, testing
 struct mapMsgForbiddenActions: simpleMsgTypeTest {};
 TEST_P(mapMsgForbiddenActions, mapThrowExceptionInConstruction) {
     msgType action = GetParam();
-    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new mapMessage(action, msgOutcome::success, std::map<int, user>()), action, messageException);
+    EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new mapMessage(action, msgOutcome::success, std::map<uint_positive_cnt::type, user>()), action, messageException);
 }
 INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(firstGroup));
 INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(secondGroup));
@@ -394,15 +394,15 @@ public:
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, const std::string&));
     MOCK_METHOD3(createNewDir, std::shared_ptr<directory>(const std::string&, const std::string&, const std::string&));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&));
-    MOCK_METHOD2(mapSiteIdToUser, std::map<int, user>(const std::string&, int));
+    MOCK_METHOD2(mapSiteIdToUser, std::map<uint_positive_cnt::type, user>(const std::string&, uint_positive_cnt::type));
 
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, const std::string&, privilege));
-    MOCK_METHOD3(remoteInsert, void(const std::string&, int resourceId, symbolMessage&));
-    MOCK_METHOD3(remoteRemove, void(const std::string&, int, symbolMessage& rmMsg));
+    MOCK_METHOD3(remoteInsert, void(const std::string&, uint_positive_cnt::type resourceId, symbolMessage&));
+    MOCK_METHOD3(remoteRemove, void(const std::string&, uint_positive_cnt::type, symbolMessage& rmMsg));
     MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string& actionUser, const std::string&, const std::string&, const uri&));
     MOCK_METHOD2(editUser, const user&(const std::string&, user&));
-    MOCK_METHOD2(closeSource, void(const std::string&, int));
-    MOCK_METHOD3(updateCursorPos, void(const std::string&, int, cursorMessage&));
+    MOCK_METHOD2(closeSource, void(const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD3(updateCursorPos, void(const std::string&, uint_positive_cnt::type, cursorMessage&));
 };
 
 struct clientMessageTest: public testing::Test{
@@ -515,26 +515,26 @@ TEST_F(clientMessageTest, updateDocMsgTestCallsCloseSource){
 class SymClientMock: public SymClient{
 public:
     MOCK_METHOD1(setLoggedUser, void(const user&));
-    MOCK_METHOD1(setUserColors, void(const std::map<int, user>&));
-    MOCK_METHOD3(createNewSource, void(const std::string&, const std::string&, int));
-    MOCK_METHOD3(createNewDir, void(const std::string&, const std::string&, int));
+    MOCK_METHOD1(setUserColors, void(const std::map<uint_positive_cnt::type, user>&));
+    MOCK_METHOD3(createNewSource, void(const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD3(createNewDir, void(const std::string&, const std::string&, uint_positive_cnt::type));
     MOCK_METHOD4(openSource, void(const std::string&, const std::string&, const std::shared_ptr<file>, privilege priv));
-    MOCK_METHOD6(openNewSource, void(const std::string &resId, privilege reqPriv, const std::string &destPath, const std::string &destName, int idToAssign, const std::shared_ptr<file> fileAsked));
+    MOCK_METHOD6(openNewSource, void(const std::string &resId, privilege reqPriv, const std::string &destPath, const std::string &destName, uint_positive_cnt::type idToAssign, const std::shared_ptr<file> fileAsked));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, bool));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, bool));
-    MOCK_METHOD3(addActiveUser, void(int, user&, privilege));
-    MOCK_METHOD2(removeActiveUser, void(int, user&));
+    MOCK_METHOD3(addActiveUser, void(uint_positive_cnt::type, user&, privilege));
+    MOCK_METHOD2(removeActiveUser, void(uint_positive_cnt::type, user&));
 
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, privilege, bool));
-    MOCK_METHOD2(remoteInsert, void(int, const symbol&));
-    MOCK_METHOD2(remoteRemove, void(int, const symbol&));
+    MOCK_METHOD2(remoteInsert, void(uint_positive_cnt::type, const symbol&));
+    MOCK_METHOD2(remoteRemove, void(uint_positive_cnt::type, const symbol&));
     MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const uri&, bool msgRcv));
     MOCK_METHOD2(editUser, const user(user&, bool));
-    MOCK_METHOD2(verifySymbol, void(int, const symbol&));
+    MOCK_METHOD2(verifySymbol, void(uint_positive_cnt::type, const symbol&));
     MOCK_METHOD1(retrieveRelatedMessage, std::shared_ptr<clientMessage>(const serverMessage&));
     MOCK_METHOD1(logout, void(bool msgRcv));
 
-    MOCK_METHOD4(updateCursorPos, void(int, int, unsigned int, unsigned int));
+    MOCK_METHOD4(updateCursorPos, void(uint_positive_cnt::type, uint_positive_cnt::type, unsigned int, unsigned int));
 };
 
 struct serverMessageTest: public testing::Test{
@@ -563,7 +563,7 @@ TEST_F(serverMessageTest, loginMsgTestCallsSetLoggedUser){
 }
 
 TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
-    std::map<int, user> siteIdToUser;
+    std::map<uint_positive_cnt::type, user> siteIdToUser;
     m=new mapMessage(msgType::mapChangesToUser, msgOutcome::success, siteIdToUser);
     EXPECT_CALL(client, setUserColors(siteIdToUser));
     //Even if the retrieved message is not useful to call setLoggedUser(), it's necessary to
@@ -1015,11 +1015,11 @@ TEST_F(messageSerialization, updateActiveMessage){
 }
 
 TEST_F(messageSerialization, mapMessage){
-    std::map<int, user> expected({
+    std::map<uint_positive_cnt::type, user> expected({
                                          std::pair<int, user>(2, SymServer::unknownUser),
                                          std::pair<int, user>(3, SymServer::unknownUser)});
     toStore=std::unique_ptr<mapMessage>(new mapMessage(msgType::mapChangesToUser, msgOutcome::success, expected,10));
-    toLoad=std::unique_ptr<mapMessage>(new mapMessage(msgType::mapChangesToUser, msgOutcome::success, std::map<int, user>(),10));
+    toLoad=std::unique_ptr<mapMessage>(new mapMessage(msgType::mapChangesToUser, msgOutcome::success, std::map<uint_positive_cnt::type, user>(),10));
     ASSERT_NE(*dynamic_cast<mapMessage*>(toStore.get()), *dynamic_cast<mapMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
