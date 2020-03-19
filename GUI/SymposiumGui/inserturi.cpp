@@ -109,7 +109,7 @@ void inserturi::on_add_clicked()
                 ui->formatError->show();
             else
                 ;
-            //cl->openNewSource(const std::string &resourceId, privilege, path, ui->name->text().toStdString());
+            //cl->openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
         }
 
     }
