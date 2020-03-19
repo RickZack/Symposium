@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QListWidget>
+#include<QTreeWidget>
 #include <QMessageBox>
 #include <forward_list>
 #include <sstream>
@@ -30,7 +31,7 @@ public:
     int documentId;
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
 
-    explicit currentUsers(QWidget *parent = nullptr, bool modify=false);
+    explicit currentUsers(QWidget *parent = nullptr);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void successEditPrivilege();
     void errorEditPrivilege(std::string errorMess);
@@ -39,8 +40,6 @@ public:
     ~currentUsers();
 
 private slots:
-    void on_userslist_itemClicked(QListWidgetItem *item);
-
     void on_owner_clicked();
 
     void on_modify_clicked();
@@ -51,16 +50,15 @@ private slots:
 
     void on_none_clicked();
 
+    void on_tree_itemClicked(QTreeWidgetItem *item, int column);
+
 private:
     Ui::currentUsers *ui;
-    bool modify;
-    int number;
     std::forward_list<std::pair<Symposium::user *, Symposium::privilege>> activeUsers;
     Symposium::privilege privilegeUser;
     Symposium::privilege newPrivelege;
     Symposium::user *user=new Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
-    int userToChangeSiteId;
-    Symposium::user userToChange;
+    std::string username;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
@@ -68,7 +66,6 @@ private:
     void listusers();
     void insertusers();
     void userPrivilege();
-    void changeUserPrivilege();
     void changeList();
 };
 

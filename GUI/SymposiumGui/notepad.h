@@ -8,7 +8,8 @@
 #include <QCloseEvent>
 
 
-#include "currentusers.h"
+#include "onlineusers.h"
+#include "alluser.h"
 #include "../../privilege.h"
 #include "activetimerlink.h"
 #include "activecounterlink.h"
@@ -59,7 +60,8 @@ private:
     Ui::notepad *ui;
     QString mFilename;
 
-    currentUsers *currentuserswindow;
+    onlineusers *onlineuser;
+    alluser *alluserWindow;
     Symposium::privilege priv;
     std::string pathToFile;
     activetimerlink *timerlinkwindow;

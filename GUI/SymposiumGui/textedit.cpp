@@ -768,7 +768,7 @@ void TextEdit::visualizeUsers()
 
 void TextEdit::visualizeAllUsers()
 {
-    currentuserswindow = new currentUsers(this, true);
+    currentuserswindow = new currentUsers(this);
     currentuserswindow->show();
 }
 

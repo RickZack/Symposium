@@ -58,9 +58,9 @@ notepad::notepad(QWidget *parent) :
     pathToFile="/1/2/3/4/5/6/7";
 
     QMenu *userMenu=menuBar()->addMenu(tr("Users"));
-    userMenu->addAction(tr("Current Users"), this, &notepad::visualizeUsers);
+    userMenu->addAction(tr("Online Users"), this, &notepad::visualizeUsers);
     if(priv==Symposium::privilege::owner)
-    userMenu->addAction(tr("Show all users and allow to modify privilege of users"), this, &notepad::visualizeAllUsers);
+    userMenu->addAction(tr("All users"), this, &notepad::visualizeAllUsers);
     if(priv==Symposium::privilege::owner)
     {
         QMenu *shareMenu=menuBar()->addMenu(tr("Share File"));
@@ -424,14 +424,16 @@ void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 
 void notepad::visualizeUsers()
 {
-    currentuserswindow = new currentUsers(this);
-    currentuserswindow->show();
+    onlineuser = new onlineusers(this);
+    //onlineuser->onlineUsers=cl->onlineUser(documentID);
+    onlineuser->show();
 }
 
 void notepad::visualizeAllUsers()
 {
-    currentuserswindow = new currentUsers(this, true);
-    currentuserswindow->show();
+    alluserWindow = new alluser(this);
+    //alluserWindow->users=cl->allUser(documentID);
+    alluserWindow->show();
 }
 
 void notepad::inactiveLink()

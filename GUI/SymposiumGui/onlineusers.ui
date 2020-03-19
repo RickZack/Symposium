@@ -1,23 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>currentUsers</class>
- <widget class="QDialog" name="currentUsers">
+ <class>onlineusers</class>
+ <widget class="QDialog" name="onlineusers">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>432</width>
-    <height>681</height>
+    <width>400</width>
+    <height>739</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <widget class="QTreeWidget" name="tree">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>30</y>
+     <width>321</width>
+     <height>461</height>
+    </rect>
+   </property>
+   <column>
+    <property name="text">
+     <string notr="true">1</string>
+    </property>
+   </column>
+  </widget>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>500</y>
+     <x>80</x>
+     <y>510</y>
      <width>241</width>
      <height>161</height>
     </rect>
@@ -66,21 +81,6 @@
      </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QTreeWidget" name="tree">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>20</y>
-     <width>321</width>
-     <height>461</height>
-    </rect>
-   </property>
-   <column>
-    <property name="text">
-     <string notr="true">1</string>
-    </property>
-   </column>
   </widget>
  </widget>
  <resources/>

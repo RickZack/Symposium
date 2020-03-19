@@ -5,6 +5,7 @@
 #include <QCloseEvent>
 #include <QApplication>
 #include <QtWidgets/qwidget.h>
+#include <QListWidgetItem>
 
 #include "inserturi.h"
 #include "choosepriv.h"

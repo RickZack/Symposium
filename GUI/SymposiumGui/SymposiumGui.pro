@@ -34,6 +34,7 @@ SOURCES += \
         activealwayslink.cpp \
         activecounterlink.cpp \
         activetimerlink.cpp \
+        alluser.cpp \
         changeuserinfo.cpp \
         choosedir.cpp \
         choosepriv.cpp \
@@ -62,6 +63,7 @@ SOURCES += \
         ../../user.cpp \
         ../../lib/hash/sha256.cpp \
         notepad.cpp \
+        onlineusers.cpp \
         sigin.cpp \
         signup.cpp \
         textedit.cpp \
@@ -74,6 +76,7 @@ HEADERS += \
         activealwayslink.h \
         activecounterlink.h \
         activetimerlink.h \
+        alluser.h \
         changeuserinfo.h \
         choosedir.h \
         choosepriv.h \
@@ -104,6 +107,7 @@ HEADERS += \
         ../../user.h \
         ../../lib/hash/sha256.h \
         notepad.h \
+        onlineusers.h \
         sigin.h \
         signup.h \
         textedit.h \
@@ -116,6 +120,7 @@ FORMS += \
         activealwayslink.ui \
         activecounterlink.ui \
         activetimerlink.ui \
+        alluser.ui \
         changeuserinfo.ui \
         choosedir.ui \
         choosepriv.ui \
@@ -132,6 +137,7 @@ FORMS += \
         mainwindow.ui \
         newfolderwindow.ui \
         notepad.ui \
+        onlineusers.ui \
         sigin.ui \
         signup.ui \
         unsuccessdeleteaccount.ui

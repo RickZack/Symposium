@@ -1,25 +1,34 @@
 #include "currentusers.h"
 #include "ui_currentusers.h"
+#include "Dispatcher/clientdispatcher.h"
 
 
-
-currentUsers::currentUsers(QWidget *parent, bool modify) :
+currentUsers::currentUsers(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::currentUsers), modify(modify)
-{
-    ui->setupUi(this);
-    ui->button->setDisabled(true);
-    ui->owner->hide();
-    ui->owner->setDisabled(true);
-    ui->reader->hide();
-    ui->reader->setDisabled(true);
-    ui->modify->hide();
-    ui->modify->setDisabled(true);
-    ui->none->hide();
-    ui->none->setDisabled(true);
-    ui->button->hide();
-    ui->label->hide();
+    ui(new Ui::currentUsers){
+
     userPrivilege();
+    if(privilegeUser!=Symposium::privilege::owner)
+    {
+        ui->setupUi(this);
+        ui->button->setDisabled(true);
+        ui->owner->hide();
+        ui->owner->setDisabled(true);
+        ui->reader->hide();
+        ui->reader->setDisabled(true);
+        ui->modify->hide();
+        ui->modify->setDisabled(true);
+        ui->none->hide();
+        ui->none->setDisabled(true);
+        ui->button->hide();
+        ui->label->hide();
+    }
+    ui->tree->setColumnCount(3);
+    ui->tree->headerItem()->setText(0, "");
+    ui->tree->headerItem()->setText(1, "username:");
+    ui->tree->headerItem()->setText(2, "privilege:");
+    ui->tree->header()->setVisible(true);
+    ui->tree->setColumnWidth(0, 10);
     listusers();
     insertusers();
 
@@ -73,66 +82,41 @@ void currentUsers::insertusers()
 
     for(auto it: onlineUsers)
     {
-        QVariant v;
-        v.setValue(it.first->getSiteId());
-        std::string nick=it.first->getNickname();
+        QTreeWidgetItem *item=new QTreeWidgetItem();
+        std::string icon=it.first->getIconPath();
+        item->setIcon(0, QIcon(QString::fromStdString(icon)));
         if(it.first->getUsername()==user->getUsername())
-            nick="You";
-        nick=nick+" with a privilege ";
+            item->setText(1, QString::fromStdString(it.first->getUsername())+" (you)");
+        else
+            item->setText(1, QString::fromStdString(it.first->getUsername()));
         std::ostringstream priv;
         priv<<it.second.p;
-        nick=nick+priv.str();
-        std::string icon=it.first->getIconPath();
-        QListWidgetItem *item=new QListWidgetItem(QIcon(QString::fromStdString(icon)), QString::fromStdString(nick));
-        item->setData(Qt::UserRole,v);
-        ui->userslist->addItem(item);
+        item->setText(2, QString::fromStdString(priv.str()));
+        ui->tree->addTopLevelItem(item);
+
     }
     */
     //---------------------------------------------------------
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
+
     for(auto it: activeUsers)
     {
-        QVariant v;
-        v.setValue(it.first->getSiteId());
-        std::string nick=it.first->getNickname();
+        QTreeWidgetItem *item=new QTreeWidgetItem();
+        std::string icon=it.first->getIconPath();
+        item->setIcon(0, QIcon(QString::fromStdString(icon)));
         if(it.first->getUsername()==user->getUsername())
-            nick="You";
-        nick=nick+" with a privilege ";
+            item->setText(1, QString::fromStdString(it.first->getUsername())+" (you)");
+        else
+            item->setText(1, QString::fromStdString(it.first->getUsername()));
         std::ostringstream priv;
         priv<<it.second;
-        nick=nick+priv.str();
-        std::string icon=it.first->getIconPath();
-        QListWidgetItem *item=new QListWidgetItem(QIcon(QString::fromStdString(icon)), QString::fromStdString(nick));
-        item->setData(Qt::UserRole,v);
-        ui->userslist->addItem(item);
+        item->setText(2, QString::fromStdString(priv.str()));
+        ui->tree->addTopLevelItem(item);
 
     }
 
     //----------------------------------------------------------------------------------------
-}
-
-void currentUsers::on_userslist_itemClicked(QListWidgetItem *item)
-{
-    QVariant v = item->data(Qt::UserRole);
-
-    if(privilegeUser==Symposium::privilege::owner && modify)
-    {
-        ui->label->show();
-        ui->button->setDisabled(false);
-        ui->owner->show();
-        ui->owner->setDisabled(false);
-        ui->reader->show();
-        ui->reader->setDisabled(false);
-        ui->modify->show();
-        ui->modify->setDisabled(false);
-        ui->none->show();
-        ui->none->setDisabled(false);
-        ui->button->show();
-        ui->owner->click();
-    }
-    userToChangeSiteId = v.value<int>();
-
 }
 
 
@@ -182,19 +166,7 @@ void currentUsers::on_none_clicked()
 
 void currentUsers::on_button_clicked()
 {
-    QString nick;
-    std::string username;
     QString priv;
-    for(auto it: activeUsers)
-    {
-        if(userToChangeSiteId==it.first->getSiteId())
-        {
-            nick=QString::fromStdString(it.first->getNickname());
-            username=it.first->getUsername();
-        }
-
-    }
-
     switch (newPrivelege)
     {
         case Symposium::privilege::owner:
@@ -212,8 +184,7 @@ void currentUsers::on_button_clicked()
 
     }
 
-    QString text="You are sure you want to change privilege in "+priv+" to "+nick+"?\n";
-    //std::string str=text.toStdString();
+    QString text="You are sure you want to change privilege in "+priv+" to "+QString::fromStdString(username)+"?\n";
     QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Change privilege",
                                                                     text,
                                                                      QMessageBox::No | QMessageBox::Yes,
@@ -223,7 +194,6 @@ void currentUsers::on_button_clicked()
             //cl->editPrivilege(username, newPrivelege);
 
             //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-            changeUserPrivilege();
             changeList();
             //---------------------------------------------------------------------------------
         }
@@ -232,82 +202,28 @@ void currentUsers::on_button_clicked()
 
 
 
-
-
-
-//--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-void currentUsers::changeUserPrivilege()
-{
-    std::pair<Symposium::user *, Symposium::privilege> p;
-    bool changeOk=false;
-    for(auto it: activeUsers)
-    {
-        if(it.first->getSiteId()==userToChangeSiteId)
-        {
-            if(it.second!=newPrivelege)
-            { p=it;
-              p.second=newPrivelege;
-              changeOk=true;}
-        }
-    }
-    if(changeOk)
-    {
-        activeUsers.remove_if([this](std::pair<Symposium::user *, Symposium::privilege> it)
-        {return it.first->getSiteId()==userToChangeSiteId && newPrivelege!=it.second;});
-        activeUsers.push_front(p);
-    }
-
-}
-//---------------------------------------------------------------------------------
-
 void currentUsers::changeList()
 {
-     //---------------------------------------------PARTE DA DECOMENTARE
-
-    /*
-     ui->userslist->clear();
+    ui->tree->clear();
     for(auto it: onlineUsers)
     {
-        QVariant v;
-        v.setValue(it.first->getSiteId());
-        std::string nick=it.first->getNickname();
+        QTreeWidgetItem *item=new QTreeWidgetItem();
+        std::string icon=it.first->getIconPath();
+        item->setIcon(0, QIcon(QString::fromStdString(icon)));
         if(it.first->getUsername()==user->getUsername())
-            nick="You";
-        nick=nick+" with a privilege ";
+            item->setText(1, QString::fromStdString(it.first->getUsername())+" (you)");
+        else
+            item->setText(1, QString::fromStdString(it.first->getUsername()));
         std::ostringstream priv;
         priv<<it.second.p;
-        nick=nick+priv.str();
-        std::string icon=it.first->getIconPath();
-        QListWidgetItem *item=new QListWidgetItem(QIcon(QString::fromStdString(icon)), QString::fromStdString(nick));
-        item->setData(Qt::UserRole,v);
-        ui->userslist->addItem(item);
-    }
-     */
-
-
-    //-------------------------------------------------------------------
-
-
-
-    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-    ui->userslist->clear();
-    for(auto it: activeUsers)
-    {
-        QVariant v;
-        v.setValue(it.first->getSiteId());
-        std::string nick=it.first->getNickname();
-        if(it.first->getUsername()==user->getUsername())
-            nick="You";
-        nick=nick+" with a privilege ";
-        std::ostringstream priv;
-        priv<<it.second;
-        nick=nick+priv.str();
-        std::string icon=it.first->getIconPath();
-        QListWidgetItem *item=new QListWidgetItem(QIcon(QString::fromStdString(icon)), QString::fromStdString(nick));
-        item->setData(Qt::UserRole,v);
-        ui->userslist->addItem(item);
+        item->setText(2, QString::fromStdString(priv.str()));
+        ui->tree->addTopLevelItem(item);
 
     }
-    //---------------------------------------------------------------------------------
 }
 
+
+void currentUsers::on_tree_itemClicked(QTreeWidgetItem *item, int column)
+{
+    username=item->text(1).toStdString();
+}
