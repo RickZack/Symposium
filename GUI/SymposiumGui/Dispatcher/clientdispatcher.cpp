@@ -185,7 +185,7 @@ void clientdispatcher::signUp(const std::string &username, const std::string &pw
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        //((signup*)this->currentWindow)->errorConnection();
+        this->finestraLogin->errorConnection();
     }
 }
 
