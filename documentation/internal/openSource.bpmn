@@ -183,7 +183,7 @@
       <bpmn:incoming>SequenceFlow_0t6ud18</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0pidon4</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:subProcess id="SubProcess_06k2nwg" name="Call void::openSource(fileAsked)">
+    <bpmn:subProcess id="SubProcess_06k2nwg" name="Call void::openSource(path, name, fileAsked)">
       <bpmn:incoming>SequenceFlow_1xcg5rv</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0rehsij</bpmn:outgoing>
     </bpmn:subProcess>

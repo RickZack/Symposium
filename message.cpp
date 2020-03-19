@@ -437,7 +437,8 @@ void sendResMessage::invokeMethod(SymClient &client) {
             if(type==resourceType::file)
             {
                 std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
-                client.openSource(f, resource->getUserPrivilege(mex2->getActionOwner().first));
+                client.openSource(mex2->getPath(), mex2->getName(), f,
+                                  resource->getUserPrivilege(mex2->getActionOwner().first));
             }
             break;
         }

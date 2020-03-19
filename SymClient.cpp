@@ -27,11 +27,13 @@
  *
  * Created on 24 Giugno 2019, 19.25
  */
+
 #include "SymClient.h"
 #include "uri.h"
 #include "message.h"
 #include "filesystem.h"
 #include "SymposiumException.h"
+//#include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
 
 using namespace Symposium;
 
@@ -51,6 +53,8 @@ signUpMessage SymClient::signUp(const std::string &username, const std::string &
 
 void SymClient::signUp(const user &logged) {
     setLoggedUser(logged);
+    //notifichiamo alla gui il successo
+    //this->dispatcher->successSignUp();
 }
 
 clientMessage SymClient::logIn(const std::string &username, const std::string &pwd) {
@@ -61,6 +65,8 @@ clientMessage SymClient::logIn(const std::string &username, const std::string &p
 
 void SymClient::logIn(const user &logged) {
     setLoggedUser(logged);
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successLogin();
 }
 
 askResMessage SymClient::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
@@ -69,9 +75,13 @@ askResMessage SymClient::openSource(const std::string &path, const std::string &
     return *mess;
 }
 
-void SymClient::openSource(const std::shared_ptr<file> fileAsked, privilege reqPriv) {
+void SymClient::openSource(const std::string &path, const std::string &name, const std::shared_ptr<file> fileAsked,
+                           privilege reqPriv) {
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
-    this->getLoggedUser().getHome()->getFile(fileAsked->getRealPath(),fileAsked->getName())->replacement(fileAsked);
+    //FIXME: getRealPath returns another path, see documentation
+    //this->getLoggedUser().getHome()->getFile(fileAsked->getRealPath(),fileAsked->getName())->replacement(fileAsked);
+    auto p=getLoggedUser().openFile(path, name, reqPriv);
+    p->replacement(fileAsked);
     activeFile.push_front(fileAsked);
     activeDoc.push_front(&doc);
 }
@@ -139,6 +149,7 @@ void SymClient::remoteRemove(int resourceId, const symbol &rmSym) {
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                      privilege newPrivilege) {
+    //FIXME: non è questo che devi passare al messaggio, vedi documentazione
     std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
     std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {SymClient::getLoggedUser().getUsername(),""}, msgOutcome::success, idres, targetUser, newPrivilege));
     unanswered.push_front(mess);
@@ -170,10 +181,11 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
 std::shared_ptr<filesystem>
 SymClient::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName,
                           bool msgRcv) {
-    return SymClient::getLoggedUser().renameResource(resPath, resName, newName);
+    return getLoggedUser().renameResource(resPath, resName, newName);
 }
 
 askResMessage SymClient::removeResource(const std::string &resPath, const std::string &resName) {
+    //FIXME: non è questo che devi passare al messaggio, è il percorso completo
     std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
     std::shared_ptr<askResMessage> mess(new askResMessage(msgType::removeRes, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, idres, uri::getDefaultPrivilege(), 0));
     unanswered.push_front(mess);
@@ -251,6 +263,10 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
     }
     throw SymClientException(SymClientException::noRelatedMessage, UnpackFileLineFunction());
 }
+
+/*void SymClient::setClientDispatcher(clientdispatcher *cl){
+    this->dispatcher = cl;
+}*/
 
 void SymClient::verifySymbol(int resourceId, const symbol &sym) {
     //TODO: to implement

@@ -35,11 +35,11 @@
 #include <queue>
 #include <map>
 
-
 #include "Symposium.h"
 #include "user.h"
 #include "document.h"
 #include "message.h"
+//#include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
 
 namespace Symposium {
 /*
@@ -62,6 +62,8 @@ namespace Symposium {
         return std::get<0>(lhs)<std::get<0>(rhs) && std::get<1>(lhs)<std::get<1>(rhs);
     }
 
+    //class clientdispatcher;
+
     /**
      * @brief class used to model a client of Symposium system
      *
@@ -69,6 +71,7 @@ namespace Symposium {
      * multiple documents at the same time, then it can have multiple windows all sharing the same @e loggedUser object.
      * The server is enabled to accept request for different documents by the same user
      */
+
     class SymClient {
     protected:
         //ADD: stuff for connectivity, necessary to define constructor
@@ -76,7 +79,7 @@ namespace Symposium {
         std::forward_list<std::shared_ptr<file>> activeFile;                      /**< list of active documents */
         std::forward_list<document *> activeDoc;                                  /**< list of files the active documents are related to */
         std::map<std::pair<int, int>, std::pair<user, MyColor>> userColors;       /**< map {siteId, documentId}->{user, color}  */
-
+        //clientdispatcher* dispatcher;                                             /**< pointer to client dispatcher */
         std::forward_list<std::shared_ptr<clientMessage>> unanswered;             /**< messages sent by client that have not been received an answer */
 
         /*
@@ -133,7 +136,8 @@ namespace Symposium {
          * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
          * @param fileAsked the file sent back by the server in a @ref sendResMessage
          */
-        virtual void openSource(const std::shared_ptr<file> fileAsked, privilege reqPriv);
+        virtual void openSource(const std::string &path, const std::string &name, const std::shared_ptr<file> fileAsked,
+                                privilege reqPriv);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to open a document
@@ -383,8 +387,8 @@ namespace Symposium {
          * @param condition a filter condition to apply to each document to decide whether to list it or not
          * @return the string containing the list of files that respect @e condition
          */
-        template<typename C, typename=std::enable_if<std::is_invocable_r<bool,C>::value>>
-        std::string show(C condition){}
+/*        template<typename C, typename=std::enable_if<std::is_invocable_r<bool,C>::value>>
+        std::string show(C condition){}*/
 
         /**
          * @brief visualize which user made which change in the document, using @e userColors
@@ -483,6 +487,11 @@ namespace Symposium {
 
         virtual ~SymClient() = default;
 
+//        void setClientDispatcher(clientdispatcher *cl);
+
+    private:
+        document* getActiveDocumentbyID(int id);
+
         /**
              * @brief set all the details of the user just logged
              * @param loggedUser the user object containing all the information of the logged user
@@ -491,9 +500,6 @@ namespace Symposium {
              * calls setLoggedUser, passing the user object transmitted by the user
              */
         virtual void setLoggedUser(const user &loggedUser);
-
-    private:
-        document* getActiveDocumentbyID(int id);
     };
 
 //TODO: add methods to allow consumption of messages sent by server as answer to client messages. E.g:

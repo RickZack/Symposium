@@ -67,17 +67,24 @@ void ServerDispatcher::incomingConnection(qintptr socketDescriptor){
     //quando un socket connesso ad un client riceve dei dati, mi emette il segnale di readyRead, che mi chiama lo slot readyRead()
     connect(Connected_Clients.value(socketDescriptor), SIGNAL(readyRead()), this, SLOT(readyRead()));
 
+    this->tmp = temp;
+
+    user target("username", "P@assW0rd!!", "noempty", "", 0, nullptr);
+
+    std::shared_ptr<loginMessage> me = std::make_shared<loginMessage>(msgType::login, msgOutcome::success, target);
+
+    this->sendMessage(me,1);
+
 }
 
 void ServerDispatcher::readyRead(){
     //questa funzione viene chiamata quando un qualche client ha inviato qualcosa
     //stream di stringa che conterrà i dati che abbiamo ricevuto, prima di essere de-serializzati
     std::stringstream accumulo;
-    uri c;
     //boost::archive::text_iarchive ia(accumulo);
-    qDebug() << "\n" << "boost creato\n";
     //creiamo la variabile che conterrà il messaggio che abbiamo ricevuto dal client
     std::shared_ptr<clientMessage> mes;
+    //clientMessage testmes = new clientMessage();
     //otteniamo il socket che ha ricevuto i dati
     QTcpSocket* readSocket = qobject_cast<QTcpSocket*>(sender());
     //associamo il textstream al socket ha ricevuto dei dati
@@ -96,10 +103,35 @@ void ServerDispatcher::readyRead(){
     //nella variabile accumulo abbiamo lo stream inviato dal client
     qDebug() << "\n" << "ricevuto: " << QString::fromStdString(accumulo.str());
     boost::archive::text_iarchive ia(accumulo);
-    ia >> c;
+    ia >> mes;
     //mes->invokeMethod(this->server);
 }
 
-/*void ServerDispatcher::sendMessage(const std::shared_ptr<serverMessage> MessageToSend, int siteID){
-    
-}*/
+void ServerDispatcher::sendMessage(const std::shared_ptr<serverMessage> MessageToSend, int siteID){
+    std::stringstream ofs;
+    boost::archive::text_oarchive oa(ofs);
+    QTextStream out(this->tmp);
+    serverMessage msg = *MessageToSend;
+    serverMessage des(Symposium::msgType::login,Symposium::msgOutcome::success);
+    oa << msg;
+    qDebug() << "inviato: "<< QString::fromStdString(ofs.str());
+    out << QString::fromStdString(ofs.str());
+    boost::archive::text_iarchive ia(ofs);
+    ia >> des;
+    qDebug() << "deserializzato correttamente\n";
+    qDebug() << "id-message del messaggio originale: " << msg.getMsgId() << "\n";
+    qDebug() << "id-message del messaggio deserializzato: " << des.getMsgId() << "\n";
+    /*if (out.status() != QTextStream::Ok){
+        throw sendFailure();
+    }else{
+        if((msg.getAction()==Symposium::msgType::login) || (msg.getAction()==Symposium::msgType::registration) || (msg.getAction()==Symposium::msgType::removeUser) ||
+               (msg.getAction()==Symposium::msgType::changeUserData) || (msg.getAction()==Symposium::msgType::openNewRes) || (msg.getAction()==Symposium::msgType::changePrivileges)){
+            //messaggio per cui dobbiamo ricevere risposta dal server
+            this->timer.start(TEMPOATTESA);
+            this->message = MessageToSend;
+        }else if(msg.getAction()==Symposium::msgType::logout){
+            this->socket.close();
+            this->client.logout();
+        }
+    }*/
+}

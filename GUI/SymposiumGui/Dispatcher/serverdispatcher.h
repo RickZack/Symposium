@@ -32,7 +32,11 @@
 #define SERVERDISPATCHER_H
 
 #include <QtNetwork>
+#include <iostream>
+#include <sstream>
 #include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
 #include "../../../SymposiumException.h"
 //#include "../message.h"
 #include "../../../SymServer.h"
@@ -54,6 +58,7 @@
             QMap<int, QTcpSocket*> Connected_Clients;   //QMap<SocketDescriptor, QTcpSocket>
             QMap<int, int> Connected_SymUser;           //QMap<SiteID, SocketDescriptor>
             clientMessage temp;
+            QTcpSocket* tmp;
 
 
         public:

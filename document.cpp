@@ -64,8 +64,10 @@ int document::getNumchar() const {
 }
 
 document & document::access(const user &newActive, privilege accessPriv) {
-    std::pair<const user*, sessionData> p{&newActive,accessPriv};
-    activeUsers.push_front(p);
+    if(std::find_if(activeUsers.begin(), activeUsers.end(), [&](auto p){return p.first->getSiteId()==newActive.getSiteId();})==activeUsers.end()) {
+        std::pair<const user *, sessionData> p{&newActive, accessPriv};
+        activeUsers.push_front(p);
+    }
     return *this;
 }
 
