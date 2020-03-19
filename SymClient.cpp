@@ -27,11 +27,13 @@
  *
  * Created on 24 Giugno 2019, 19.25
  */
+
 #include "SymClient.h"
 #include "uri.h"
 #include "message.h"
 #include "filesystem.h"
 #include "SymposiumException.h"
+#include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
 
 using namespace Symposium;
 
@@ -51,6 +53,8 @@ signUpMessage SymClient::signUp(const std::string &username, const std::string &
 
 void SymClient::signUp(const user &logged) {
     setLoggedUser(logged);
+    //notifichiamo alla gui il successo
+    this->dispatcher->successSignUp();
 }
 
 clientMessage SymClient::logIn(const std::string &username, const std::string &pwd) {
@@ -61,6 +65,8 @@ clientMessage SymClient::logIn(const std::string &username, const std::string &p
 
 void SymClient::logIn(const user &logged) {
     setLoggedUser(logged);
+    //notifichiamo alla gui il successo
+    this->dispatcher->successLogin();
 }
 
 askResMessage SymClient::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
@@ -256,6 +262,10 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
         }
     }
     throw SymClientException(SymClientException::noRelatedMessage, UnpackFileLineFunction());
+}
+
+void SymClient::setClientDispatcher(clientdispatcher *cl){
+    this->dispatcher = cl;
 }
 
 void SymClient::verifySymbol(int resourceId, const symbol &sym) {
