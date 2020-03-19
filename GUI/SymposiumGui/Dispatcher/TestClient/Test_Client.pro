@@ -25,41 +25,39 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++17     
 
 SOURCES += \
-        ../../../AccessStrategy.cpp \
-        ../../../SymClient.cpp \
-        ../../../SymServer.cpp \
-        ../../../SymposiumException.cpp \
-        ../../../document.cpp \
-        ../../../filesystem.cpp \
-        ../../../lib/hash/sha256.cpp \
-        clientdispatcher.cpp \
+        ../../../../AccessStrategy.cpp \
+        ../../../../SymClient.cpp \
+        ../../../../SymServer.cpp \
+        ../../../../SymposiumException.cpp \
+        ../../../../document.cpp \
+        ../../../../filesystem.cpp \
+        ../../../../lib/hash/sha256.cpp \
+        ../clientdispatcher.cpp \
         mainClient.cpp \
-        serverdispatcher.cpp \
-        ../../../message.cpp \
-        ../../../resourceType.cpp \
-        ../../../symbol.cpp \
-        ../../../user.cpp \
-        ../../../uri.cpp \
-        ../../../privilege.cpp
+        ../../../../message.cpp \
+        ../../../../resourceType.cpp \
+        ../../../../symbol.cpp \
+        ../../../../user.cpp \
+        ../../../../uri.cpp \
+        ../../../../privilege.cpp
 
 HEADERS += \
-        ../../../AccessStrategy.h \
-        ../../../SymClient.h \
-        ../../../SymServer.h \
-        ../../../SymposiumException.h \
-        ../../../document.h \
-        ../../../filesystem.h \
-        ../../../lib/hash/sha256.h \
-        ../../../message.h \
-        ../../../messageData.h \
-        ../../../resourceType.h \
-        ../../../symbol.h \
-        ../../../uri.h \
-        ../../../Symposium.h \
-        ../../../privilege.h \
-        ../../../user.h \
-        clientdispatcher.h \
-        serverdispatcher.h
+        ../../../../AccessStrategy.h \
+        ../../../../SymClient.h \
+        ../../../../SymServer.h \
+        ../../../../SymposiumException.h \
+        ../../../../document.h \
+        ../../../../filesystem.h \
+        ../../../../lib/hash/sha256.h \
+        ../../../../message.h \
+        ../../../../messageData.h \
+        ../../../../resourceType.h \
+        ../../../../symbol.h \
+        ../../../../uri.h \
+        ../../../../Symposium.h \
+        ../../../../privilege.h \
+        ../../../../user.h \
+        ../clientdispatcher.h
 
 DEFINES = BOOST_ALL_NO_LIB
 Boost_USE_STATIC_LIBS = ON

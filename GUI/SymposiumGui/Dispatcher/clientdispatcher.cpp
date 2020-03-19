@@ -17,7 +17,7 @@
  */
 
 /*
- * File:   serverdispatcher.cpp
+ * File:   clientdispatcher.cpp
  * Project: Symposium
  * Authors:
  *          Riccardo Zaccone <riccardo.zaccone at studenti.polito.it>
@@ -29,29 +29,39 @@
  */
 
 #include "../sigin.h"
+#include "../signup.h"
+#include "../exit.h"
+#include "../deleteaccount.h"
+#include "../changeuserinfo.h"
+#include "../textedit.h"
+#include "../../../filesystem.h"
 #include "clientdispatcher.h"
-
 
 using namespace Symposium;
 
-clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent)
+clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), finestreDocumenti()
 {
     //connettiamo il socket all'indirizzo del server
     this->socket.connectToHost(svAddress, svPort);
     //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
     connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
     qDebug() << "Connection Successful\n";
+    this->client.setClientDispatcher(this);
+    this->finestraLogin = nullptr;
+    this->finestraSignup = nullptr;
 }
 
 void clientdispatcher::readyRead(){
+    qDebug() << "Ricevuto qualcosa";
     //questa funzione viene chiamata quando il server ci ha inviato qualcosa
     //stream di stringa che conterrà i dati che abbiamo ricevuto, prima di essere de-serializzati
     std::stringstream accumulo;
     std::shared_ptr<serverMessage> mes;
-    boost::archive::text_iarchive ia(accumulo);
+    serverMessage des(Symposium::msgType::login,Symposium::msgOutcome::success);
     //associamo il textstream al socket
     QTextStream stream(&(this->socket));
     //leggiamo la prima linea di dati ricevuti
+    qDebug() << "Leggiamo prima riga";
     QString line = stream.readLine();
     //la salviamo nello stream
     accumulo << line.toLocal8Bit().constData();
@@ -64,46 +74,133 @@ void clientdispatcher::readyRead(){
     }while(!line.isNull());
     //nella variabile accumulo abbiamo lo stream inviato dal server
     qDebug() << "\n" << "ricevuto: " << QString::fromStdString(accumulo.str());
-    //ia >> mes;
-    //mes->invokeMethod(this->client);
+    boost::archive::text_iarchive ia(accumulo);
+    ia >> des;
+    qDebug() << "server dice: " << QString::fromStdString("ok");
+    qDebug() << "id messaggio ricevuto: " << des.getMsgId();
+    mes = std::make_shared<serverMessage>(des);
+    try {
+        mes->invokeMethod(this->client);
+    } catch (messageException& e) {
+        //eccezione di insuccesso dell'operazione
+        switch(currentWindow){
+        case 1:{
+            if(this->finestraLogin!=nullptr)
+                this->finestraLogin->errorSignIn();
+        }case 2:{
+            //finestraSignup->errorSignUp(e.getErrorCodeMsg());
+        }
+        }
+
+        //qDebug() << QString::fromStdString(mes->getErrDescr());
+    } catch (SymClientException& e){
+        //eccezione di relatedMessage non trovato,
+        switch(currentWindow){
+        case 1:{
+            this->finestraLogin->errorSignIn();
+        }case 2:{
+
+        }
+        }
+    }
+
+
+
+
+
+    /*if(mes->isRelatedTo(*(this->message))){
+        //abbiamo ricevuto la risposta che stavamo aspettando
+        this->timer.stop();
+        switch(this->message->getAction()){
+        case Symposium::msgType::login:{
+            //il messaggio ricevuto è la risposta al login
+            if(mes->getResult()==Symposium::msgOutcome::success){
+                //((sigin*)this->currentWindow)->successSignIn();
+            }else{
+                //((sigin*)this->currentWindow)->errorSignIn();
+            }
+        }case Symposium::msgType::registration:{
+            //il messaggio ricevuto è la risposta alla registrazione
+
+            //DA VERIFICARE GLI ERRORI
+
+        }case Symposium::msgType::removeUser:{
+            //il messaggio ricevuto è la risposta alla rimozione dell'utente
+            if(mes->getResult()==Symposium::msgOutcome::success){
+                //((deleteAccount*)this->currentWindow)->successDeleteAccount();
+            }else{
+                //((deleteAccount*)this->currentWindow)->unsuccessDeleteAccount();
+            }
+        }case Symposium::msgType::changeUserData:{
+            //il messaggio ricevuto è la risposta al cambio dei dati dell'utente
+
+            //DA VERIFICARE GLI ERRORI
+
+        }case Symposium::msgType::openNewRes:{
+            //il messaggio ricevuto è la risposta alla openNewSource
+
+            //DA VERIFICARE GLI ERRORI
+        }case Symposium::msgType::changePrivileges:{
+            //il messaggio ricevuto è la risposta al cambio dei privilegi di un utente su un documento
+
+            //DA VERIFICARE GLI ERRORI
+        }
+        }
+    }*/
+   // mes->invokeMethod(this->client);
 }
 
 void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageToSend){
     std::stringstream ofs;
     boost::archive::text_oarchive oa(ofs);
     QTextStream out(&(this->socket));
-
-    uri c;
-
     clientMessage msg = *MessageToSend;
-    oa << c;
-    qDebug() << QString::fromStdString(ofs.str());
+    oa << msg;
+    //qDebug() << QString::fromStdString(ofs.str());
     out << QString::fromStdString(ofs.str());
-    if (out.status() != QTextStream::Ok)
+    if (out.status() != QTextStream::Ok){
         throw sendFailure();
+    }else{
+        this->timer.start(TEMPOATTESA);
+        /*if((msg.getAction()==Symposium::msgType::login) || (msg.getAction()==Symposium::msgType::registration) || (msg.getAction()==Symposium::msgType::removeUser) ||
+               (msg.getAction()==Symposium::msgType::changeUserData) || (msg.getAction()==Symposium::msgType::openNewRes) || (msg.getAction()==Symposium::msgType::changePrivileges)){
+            //messaggio per cui dobbiamo ricevere risposta dal server
+            this->timer.start(TEMPOATTESA);
+            this->message = MessageToSend;
+        }else if(msg.getAction()==Symposium::msgType::logout){
+            this->socket.close();
+            this->client.logout();
+        }*/
+    }
 }
 
-signUpMessage clientdispatcher::signUp(const std::string &username, const std::string &pwd, const std::string &nickname, const std::string &iconPath){
+void clientdispatcher::signUp(const std::string &username, const std::string &pwd, const std::string &nickname, const std::string &iconPath){
     std::shared_ptr<signUpMessage> mess = std::make_shared<signUpMessage>(this->client.signUp(username,pwd,nickname,iconPath));
     try {
+        //disconnettiamo il timer da altri eventuali slot
+        this->timer.disconnect();
+        //connettiamo il timer al giusto metodo
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::signupExpired);
+        //inviamo il messaggio
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
+        //((signup*)this->currentWindow)->errorConnection();
     }
 }
 
 void clientdispatcher::logIn(const std::string &username, const std::string &pwd) {
     std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.logIn(username,pwd));
     try {
+        //disconnettiamo il timer da altri eventuali slot
+        this->timer.disconnect();
+        //connettiamo il timer al giusto metodo
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::signinExpired);
+        //inviamo il messaggio
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
+        this->finestraLogin->errorConnection();
     }
 }
 
@@ -119,15 +216,18 @@ askResMessage clientdispatcher::openSource(const std::string &path, const std::s
     }
 }
 
-askResMessage clientdispatcher::openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName) {
+void clientdispatcher::openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.openNewSource(resourceId,reqPriv,destPath,destName));
     try {
+        //disconnettiamo il timer da altri eventuali slot
+        this->timer.disconnect();
+        //connettiamo il timer al giusto metodo
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::openNewSourceExpired);
+        //inviamo il messaggio
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
+        //((TextEdit*)this->currentWindow)->errorConnection();
     }
 }
 
@@ -182,12 +282,15 @@ symbolMessage clientdispatcher::localRemove(int resourceId, const std::pair<int,
 privMessage clientdispatcher::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName, privilege newPrivilege) {
     std::shared_ptr<privMessage> mess = std::make_shared<privMessage>(this->client.editPrivilege(targetUser,resPath,resName,newPrivilege));
     try {
+        //disconnettiamo il timer da altri eventuali slot
+        this->timer.disconnect();
+        //connettiamo il timer al giusto metodo
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::editPrivilegeExpired);
+        //inviamo il messaggio
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
+        //((TextEdit*)this->currentWindow)->errorConnection();
     }
 }
 
@@ -239,39 +342,42 @@ updateDocMessage clientdispatcher::closeSource(int resourceId) {
     }
 }
 
-userDataMessage clientdispatcher::editUser(user &newUserData) {
+void clientdispatcher::editUser(user &newUserData) {
     std::shared_ptr<userDataMessage> mess = std::make_shared<userDataMessage>(this->client.editUser(newUserData));
     try {
+        //disconnettiamo il timer da altri eventuali slot
+        this->timer.disconnect();
+        //connettiamo il timer al giusto metodo
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::editUserExpired);
+        //inviamo il messaggio
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
+        //((changeUserInfo*)this->currentWindow)->errorConnection();
     }
 }
 
-clientMessage clientdispatcher::removeUser() {
+void clientdispatcher::removeUser() {
     std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.removeUser());
     try {
+        //disconnettiamo il timer da altri eventuali slot
+        this->timer.disconnect();
+        //connettiamo il timer al giusto metodo
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::removeUserExpired);
+        //inviamo il messaggio
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
+       //((deleteAccount*)this->currentWindow)->errorConnection();
     }
 }
 
-clientMessage clientdispatcher::logout() {
+void clientdispatcher::logout() {
     std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.logout());
     try {
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
-        //errore nell'invio del messaggio
-
+        //errore nell'invio del messaggio, ma non scateniamo nulla
     }
 }
 
@@ -287,12 +393,138 @@ updateDocMessage clientdispatcher::mapSiteIdToUser(const document &currentDoc) {
     }
 }
 
+void clientdispatcher::successLogin(){
+    this->finestraLogin->successSignIn();
+}
 
+void clientdispatcher::successSignUp(){
+    this->finestraSignup->successSignUp();
+}
 
+const std::forward_list<std::pair<const user *, sessionData>> clientdispatcher::onlineUser(int documentID){
+    //return (this->client.getActiveDocumentbyID(documentID))->getActiveUsers();
+}
 
+std::unordered_map<std::string, privilege> clientdispatcher::allUser(int documentID){
+    //return (this->client.getFilebyDocumentID(documentID))->getUsers();
+}
 
+user clientdispatcher::getUser(){
+    //return this->client.getLoggedUser();
+}
 
+std::string clientdispatcher::showHome(){
+    return this->client.showDir();
+}
 
+std::string clientdispatcher::showDir(bool recursive){
+    return this->client.showDir(recursive);
+}
+
+void clientdispatcher::setSignIn(sigin *si){
+    this->finestraLogin = si;
+    this->currentWindow = 1;
+}
+
+void clientdispatcher::setTextEdit(int resourceID, notepad *te){
+    this->finestreDocumenti.push_back(std::make_pair(resourceID,te));
+}
+
+void clientdispatcher::setSignUp(signup *su){
+    this->finestraSignup = su;
+    this->currentWindow = 2;
+}
+
+void clientdispatcher::setInsertUri(inserturi *iu){
+    this->finestraInsertUri = iu;
+    this->currentWindow = 3;
+}
+
+void clientdispatcher::setHome(home *ho){
+    this->finestraHome = ho;
+    this->currentWindow = 4;
+}
+
+void clientdispatcher::setExit(Ui::exit *ex){
+    this->finestraEsci = ex;
+    this->currentWindow = 11;
+}
+
+void clientdispatcher::setDirectory(directory *dr){
+    //DA RIVEDERE
+    //this->currentWindow = dr;
+}
+
+void clientdispatcher::setDeleteAccount(deleteAccount *da){
+    this->finestraEliminaAccount = da;
+    this->currentWindow = 5;
+}
+
+void clientdispatcher::setChooseDir(choosedir *cd){
+    this->finestraSceltaDir = cd;
+    this->currentWindow = 6;
+}
+
+void clientdispatcher::setChangeUserInfo(changeUserInfo *cui){
+    this->finestraModificaUser = cui;
+    this->currentWindow = 7;
+}
+
+void clientdispatcher::setActiveCounterLink(activecounterlink *acl){
+    this->finestraActiveCounterLink = acl;
+    this->currentWindow = 8;
+}
+
+void clientdispatcher::setActiveTimerLink(activetimerlink *atl){
+    this->finestraActiveTimerLink = atl;
+    this->currentWindow = 9;
+}
+
+void clientdispatcher::setActiveAlwaysLink(activealwayslink *aal){
+    this->finestraActiveAlwaysLink = aal;
+    this->currentWindow = 10;
+}
+
+void clientdispatcher::signinExpired(){
+    this->timer.stop();
+    this->finestraLogin->errorConnection();
+    qDebug() << "Timer scaduto\n";
+}
+
+void clientdispatcher::signupExpired(){
+    this->timer.stop();
+    qDebug() << "Timer scaduto\n";
+    //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
+    //((signup*)this->currentWindow)->errorConnection();
+}
+
+void clientdispatcher::removeUserExpired(){
+    this->timer.stop();
+    qDebug() << "Timer scaduto\n";
+    //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
+    //((deleteaccount*)this->currentWindow)->errorConnection();
+}
+
+void clientdispatcher::editUserExpired(){
+    this->timer.stop();
+    qDebug() << "Timer scaduto\n";
+    //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
+    //((changeuserinfo*)this->currentWindow)->errorConnection();
+}
+
+void clientdispatcher::openNewSourceExpired(){
+    this->timer.stop();
+    qDebug() << "Timer scaduto\n";
+    //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
+    //((TextEdit*)this->currentWindow)->errorConnection();
+}
+
+void clientdispatcher::editPrivilegeExpired(){
+    this->timer.stop();
+    qDebug() << "Timer scaduto\n";
+    //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
+    //((TextEdit*)this->currentWindow)->errorConnection();
+}
 
 
 
@@ -423,10 +655,6 @@ updateDocMessage clientdispatcher::mapSiteIdToUser(const document &currentDoc) {
     qDebug() << "Send Succesfull\n";
 
 }*/
-
-void clientdispatcher::test_sendMessage(){
-    this->socket.write("ciao");
-}
 
 /*int clientdispatcher::getmsgaction(const std::shared_ptr<clientMessage> Message){
     switch(Message->getAction()){

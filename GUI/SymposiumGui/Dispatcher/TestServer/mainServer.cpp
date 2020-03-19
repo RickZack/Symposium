@@ -1,7 +1,6 @@
 #include <iostream>
 
-#include "serverdispatcher.h"
-#include "clientdispatcher.h"
+#include "../serverdispatcher.h"
 
 
 
@@ -12,10 +11,7 @@ int main(int argc, char *argv[]) {
         //creiamo un server e facciamolo partire
         Symposium::ServerDispatcher server;
 
-
         server.startServer();
-
-        //Symposium::clientdispatcher client;
 
         return a.exec();
 }
