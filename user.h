@@ -118,7 +118,7 @@ namespace Symposium {
          * @param recursive indicates whether the visit must be recursive or not
          * @return a concatenation string of the content of the home directory to be showed by the GUI
          */
-        std::string showDir(bool recursive = false) const;
+        virtual std::string showDir(bool recursive = false) const;
 
         /**
          * @brief creates a new file named @e fileName in @e pathFromHome

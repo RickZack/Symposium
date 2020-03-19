@@ -133,7 +133,8 @@ namespace Symposium {
          * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
          * @param fileAsked the file sent back by the server in a @ref sendResMessage
          */
-        virtual void openSource(const std::shared_ptr<file> fileAsked, privilege reqPriv);
+        virtual void openSource(const std::string &path, const std::string &name, const std::shared_ptr<file> fileAsked,
+                                privilege reqPriv);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to open a document

@@ -518,7 +518,7 @@ public:
     MOCK_METHOD1(setUserColors, void(const std::map<int, user>&));
     MOCK_METHOD3(createNewSource, void(const std::string&, const std::string&, int));
     MOCK_METHOD3(createNewDir, void(const std::string&, const std::string&, int));
-    MOCK_METHOD2(openSource, void(const std::shared_ptr<file>, privilege priv));
+    MOCK_METHOD4(openSource, void(const std::string&, const std::string&, const std::shared_ptr<file>, privilege priv));
     MOCK_METHOD6(openNewSource, void(const std::string &resId, privilege reqPriv, const std::string &destPath, const std::string &destName, int idToAssign, const std::shared_ptr<file> fileAsked));
     MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, bool));
     MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, bool));
@@ -602,7 +602,7 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
     dummyFile->setUserPrivilege(clientMessageTest::username, uri::getDefaultPrivilege());
     cm= new askResMessage(msgType::openRes, {clientMessageTest::username, {}}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
     m=new sendResMessage(msgType::openRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, openSource(dummyFile, dummyFile->getUserPrivilege(clientMessageTest::username)));
+    EXPECT_CALL(client, openSource(clientMessageTest::path, clientMessageTest::name, dummyFile, dummyFile->getUserPrivilege(clientMessageTest::username)));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);

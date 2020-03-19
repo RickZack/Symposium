@@ -257,10 +257,6 @@ void file::replacement(const std::shared_ptr<file> replace){
     this->strategy=std::move(replace->strategy);
 }
 
-const std::string &file::getRealPath() const {
-    return realPath;
-}
-
 bool file::operator==(const file &rhs) const {
     return static_cast<const Symposium::filesystem &>(*this) == static_cast<const Symposium::filesystem &>(rhs) &&
            realPath == rhs.realPath &&

@@ -45,13 +45,13 @@ struct SymClientUserMock: public user{
     MOCK_CONST_METHOD3(accessFile, std::pair<int, std::shared_ptr<file>>(const std::string &resId, const std::string &path, const std::string &fileName));
     MOCK_CONST_METHOD3(newFile, std::shared_ptr<file>(const std::string &filename, const std::string &path, uint_positive_cnt::type id));
     MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string &filename, const std::string &path, uint_positive_cnt::type id));
-    MOCK_METHOD4(editPrivilege, privilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
+    MOCK_CONST_METHOD4(editPrivilege, privilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
             privilege newPrivilege));
-    MOCK_CONST_METHOD3(shareResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, uri &newPrefs));
+    MOCK_CONST_METHOD3(shareResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, const uri &newPrefs));
     MOCK_CONST_METHOD3(renameResource, std::shared_ptr<filesystem>(const std::string &resPath, const std::string &resName, const std::string &newName));
     MOCK_CONST_METHOD2(removeResource, std::shared_ptr<filesystem>(const std::string &path, const std::string &name));
     MOCK_CONST_METHOD1(showDir, std::string(bool rec));
-    MOCK_METHOD2(editUser, user(user&, bool));
+    MOCK_METHOD1(setNewData, void(const user&));
 };
 
 struct SymClientAccesser: public SymClient{
@@ -151,6 +151,7 @@ struct SymClientTest : ::testing::Test{
     static const std::pair<int, int> indexes;
     SymClientTest(): userReceived(username, pwd, nickname, iconPath, 0, std::shared_ptr<SymClientDirMock>(new SymClientDirMock(username))),
                      fileSentByServer(new SymClientFileMock(filename, "./dir1/dir2")),
+                     fileInUserFilesystem(new SymClientFileMock(filename, "./dir1/dir2")),
                      docInUserFilesystem(120), docSentByServer(120),
                      dirSentByServer(new SymClientDirMock(filename)){};
     bool everyUserHasDifferentColor(){
@@ -180,14 +181,14 @@ struct SymClientTest : ::testing::Test{
     void correctInsertionOfFileAndDocumentInLists(int idOfDocActive, document *presentInUserFile, int idOfFileActive) {
         std::pair<bool, document*> docActive=client.docIsInActive(idOfDocActive);
         ASSERT_TRUE(docActive.first);
-        EXPECT_TRUE(docActive.second==presentInUserFile);
+        EXPECT_TRUE(*docActive.second==*presentInUserFile);
         EXPECT_TRUE(client.fileIsInActive(idOfFileActive));
     }
     void setStageForOpenedDoc(){
         setStageForLoggedUser();
         EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::Return(fileInUserFilesystem));
         EXPECT_CALL(*fileSentByServer, access(userReceived, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(docSentByServer));
-        client.openSource(fileSentByServer, uri::getDefaultPrivilege());
+        client.openSource(path, filename, fileSentByServer, uri::getDefaultPrivilege());
         ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
         //tests that the document returned by openFile() has now the same content of the document sent by the server
         EXPECT_EQ(docInUserFilesystem, docSentByServer);
@@ -284,9 +285,9 @@ TEST_F(SymClientTest, openSourceOpensDocAndPutInActiveAndRemovesFromUnanswered)
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openSource on client
     //the data use to call openFile must be taken from the relative askResMessage in unanswered
-    EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::Return(fileInUserFilesystem));
-    EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openSource(fileSentByServer, privilege::readOnly);
+    EXPECT_CALL(userReceived, openFile(path, filename, privilege::readOnly)).WillOnce(::testing::Return(fileInUserFilesystem));
+    EXPECT_CALL(*fileSentByServer, access(userReceived, privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
+    client.openSource(path, filename, fileSentByServer, privilege::readOnly);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
     //tests that the document returned by openFile() has now the same content of the document sent by the server
     EXPECT_EQ(docInUserFilesystem, docSentByServer);
@@ -305,13 +306,13 @@ TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered)
 {
     setStageForLoggedUser();
-    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym");
+    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym");
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openNewSource on client
     //the data use to call accessFile must be taken from the relative askResMessage in unanswered
-    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink(::testing::_, ::testing::_, path, filename, ::testing::_));
-    EXPECT_CALL(*fileSentByServer, getDoc()).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, "sym", fileSentByServer->getId(), fileSentByServer);
+    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink(::testing::_, ::testing::_, "./", "sym", ::testing::_));
+    EXPECT_CALL(*fileSentByServer, access(client.getLoggedUser(), privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
+    client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym", fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
     //EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -460,7 +461,7 @@ TEST_F(SymClientTest, renameResourceCallsRenameResourceOnUser){
     setStageForLoggedUser();
     SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
     EXPECT_CALL(logUser, renameResource(path, filename, "newName"));
-    client.shareResource(path, filename, newPreferences, true);
+    client.renameResource(path, filename, "newName", true);
 }
 
 TEST_F(SymClientTest, removeResourceConstructsGoodMessageAndInsertInUnanswered){
@@ -479,14 +480,14 @@ TEST_F(SymClientTest, removeResourceCallsRemoveResourceOnUser){
     client.removeResource(path, filename, true);
 }
 
-TEST_F(SymClientTest, closeSourceConstructsGoodMessageAndNotInsertInUnanswered){
+TEST_F(SymClientTest, closeSourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForOpenedDoc();
     EXPECT_CALL(docSentByServer, close(userReceived));
     auto mex=client.closeSource(docSentByServer.getId());
     messageHasCorrectOwner(mex);
     updateDocMessage expected(msgType::closeRes, {username, ""}, docSentByServer.getId());
     messageAreAnalogous(mex, expected);
-    EXPECT_FALSE(client.thereIsUnansweredMex(mex.getMsgId()).first);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, showDirCallsShowDirOnUserRecursive){
@@ -552,7 +553,7 @@ TEST_F(SymClientTest, addActiveUserCallsAccessOnDoc){
 TEST_F(SymClientTest, removeActiveUserCallsCloseOnDoc){
     setStageForOpenedDoc();
     EXPECT_CALL(docSentByServer, close(userReceived));
-    client.addActiveUser(docSentByServer.getId(), userReceived, aPrivilege);
+    client.removeActiveUser(docSentByServer.getId(), userReceived);
 }
 
 TEST_F(SymClientTest, editUserConstructsGoodMessageAndInsertInUnanswered){
@@ -569,8 +570,8 @@ TEST_F(SymClientTest, editUserCallsSetNewDataOnLoggedUser){
     setStageForLoggedUser();
     SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
     user newData; newData.setNickname("newNickname");
-    EXPECT_CALL(logUser, editUser(newData, true));
-    client.removeResource(path, filename, true);
+    EXPECT_CALL(logUser, setNewData(newData));
+    client.editUser(newData, true);
 }
 
 TEST_F(SymClientTest, retrieveRelatedMessageReturnCorrectMessage){
@@ -590,21 +591,21 @@ TEST_F(SymClientTest, retrieveRelatedMessageThrowsOnMissingMessage){
 }
 
 TEST_F(SymClientTest, updateCursorPosConstructsGoodMessageAndInsertInUnanswered){
-setStageForOpenedDoc();
-srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
-auto mex=client.updateCursorPos(docSentByServer.getId(), row, col);
-messageHasCorrectOwner(mex);
+    setStageForOpenedDoc();
+    srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
+    auto mex=client.updateCursorPos(docSentByServer.getId(), row, col);
+    messageHasCorrectOwner(mex);
 
-cursorMessage expected(msgType::updateCursor, {username, ""}, msgOutcome::success, userReceived.getSiteId(), docSentByServer.getId(), row, col, mex.getMsgId());
-messageAreAnalogous(mex, expected);
-EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
+    cursorMessage expected(msgType::updateCursor, {username, ""}, msgOutcome::success, userReceived.getSiteId(), docSentByServer.getId(), row, col, mex.getMsgId());
+    messageAreAnalogous(mex, expected);
+    EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 
 TEST_F(SymClientTest, updateCursorPosCallsUpdateCursorPosOnDoc){
-setStageForOpenedDoc();
-srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
-int anotherUserSiteId=userReceived.getSiteId()+1;
+    setStageForOpenedDoc();
+    srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
+    int anotherUserSiteId=userReceived.getSiteId()+1;
 
-EXPECT_CALL(docSentByServer, updateCursorPos(anotherUserSiteId, row, col));
-client.updateCursorPos(anotherUserSiteId, docSentByServer.getId(), row, col);
+    EXPECT_CALL(docSentByServer, updateCursorPos(anotherUserSiteId, row, col));
+    client.updateCursorPos(anotherUserSiteId, docSentByServer.getId(), row, col);
 }
