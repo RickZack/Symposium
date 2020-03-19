@@ -52,14 +52,14 @@
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
      protected:
-         static int msgCounter;
-         int msgId;                 /**< random identifier for the message, used when a message is followed by an answer*/
+         static uint_positive_cnt msgCounter;
+         uint_positive_cnt::type msgId;                 /**< random identifier for the message, used when a message is followed by an answer*/
          msgType action;            /**< Defines the action for the current message */
 
-         message(int msgId=0);
+         message(uint_positive_cnt::type msgId= 0);
 
      public:
-         int getMsgId() const;
+         uint_positive_cnt::type getMsgId() const;
 
          msgType getAction() const;
 
@@ -90,13 +90,13 @@
      protected:
          //Needed by boost::serialization
          clientMessage():message(1){};
-         clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
+         clientMessage(const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type msgId = 0);
      public:
 
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, int msgId = 0);
+         clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type msgId = 0);
 
 
          const std::pair<std::string, std::string> &getActionOwner() const;
@@ -172,7 +172,7 @@
           */
          askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, const std::string &path,
                        const std::string &name, const std::string &resourceId = "", privilege accessMode=uri::getDefaultPrivilege(),
-                       int msgId = 0);
+                       uint_positive_cnt::type msgId = 0);
 
          /**
           * @brief perform an action regarding a resource for the user @e actionOwner
@@ -230,7 +230,7 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, const user &newUser,
-                       int msgId = 0);
+                       uint_positive_cnt::type msgId = 0);
 
          const user &getNewUser() const;
 
@@ -267,7 +267,7 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          updateDocMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type resourceId,
-                          int msgId = 0);
+                          uint_positive_cnt::type msgId = 0);
 
          uint_positive_cnt::type getResourceId() const;
 
@@ -300,7 +300,7 @@
          serverMessage()=default;
      protected:
          //Needed by boost::serialization
-         serverMessage(msgOutcome result, int msgId = 0);
+         serverMessage(msgOutcome result, uint_positive_cnt::type msgId = 0);
 
          msgOutcome result;         /**< result of an operation asked to the server */
          std::string errDescr;
@@ -309,7 +309,7 @@
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         serverMessage(msgType action, msgOutcome result, int msgId = 0);
+         serverMessage(msgType action, msgOutcome result, uint_positive_cnt::type msgId = 0);
 
          const std::string &getErrDescr() const;
 
@@ -358,7 +358,7 @@
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId = 0);
+         loginMessage(msgType action, msgOutcome result, const user &loggedUser, uint_positive_cnt::type msgId = 0);
 
          const user &getLoggedUser() const;
 
@@ -399,7 +399,7 @@
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         mapMessage(msgType action, msgOutcome result, const std::map<uint_positive_cnt::type, user> &siteIdToUser, int msgId = 0);
+         mapMessage(msgType action, msgOutcome result, const std::map<uint_positive_cnt::type, user> &siteIdToUser, uint_positive_cnt::type msgId = 0);
 
          const std::map<uint_positive_cnt::type, user> & getSiteIdToUser() const;
 
@@ -437,7 +437,7 @@
          /**
           * @throws messageException if @e action is not consistent with the message type
           */
-         sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, uint_positive_cnt::type symId=0, int msgId = 0);
+         sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, uint_positive_cnt::type symId=0, uint_positive_cnt::type msgId = 0);
 
          std::shared_ptr<filesystem> getResource() const;
 
@@ -483,7 +483,7 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          updateActiveMessage(msgType action, msgOutcome result, const user &newUser, uint_positive_cnt::type resourceId,
-                             privilege priv = privilege::readOnly, int msgId = 0);
+                             privilege priv = privilege::readOnly, uint_positive_cnt::type msgId = 0);
 
          const user &getNewUser() const;
 
@@ -533,7 +533,7 @@
           */
          privMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                      const std::string &resourceId, const std::string &targetUser, privilege newPrivilege,
-                     int msgId = 0);
+                     uint_positive_cnt::type msgId = 0);
 
          const std::string &getResourceId() const;
 
@@ -594,7 +594,7 @@
           */
          symbolMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                        uint_positive_cnt::type siteId,
-                       uint_positive_cnt::type resourceId, const symbol &sym, int msgId = 0);
+                       uint_positive_cnt::type resourceId, const symbol &sym, uint_positive_cnt::type msgId = 0);
 
          uint_positive_cnt::type getSiteId() const;
 
@@ -683,7 +683,7 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                    const std::string &path, const std::string &name, const uri &sharingPrefs, int msgId = 0);
+                    const std::string &path, const std::string &name, const uri &sharingPrefs, uint_positive_cnt::type msgId = 0);
 
          const uri &getSharingPrefs() const;
 
@@ -734,7 +734,7 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          userDataMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                         const user &newUserData, int msgId = 0);
+                         const user &newUserData, uint_positive_cnt::type msgId = 0);
 
          /**
           * @brief asks the server to modify a user's data
@@ -785,7 +785,7 @@
      public:
          cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                        uint_positive_cnt::type siteId,
-                       uint_positive_cnt::type resourceId, int row, int col, int msgId = 0);
+                       uint_positive_cnt::type resourceId, int row, int col, uint_positive_cnt::type msgId = 0);
 
          void invokeMethod(SymServer &server) override;
 

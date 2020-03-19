@@ -49,9 +49,9 @@ using namespace Symposium;
 
 
 //FIXME: put unsigned, siteIds must be positive, because a negative id is assumed as "no user present"
-int message::msgCounter=1;
+uint_positive_cnt message::msgCounter;
 
-message::message(int msgId){
+message::message(uint_positive_cnt::type msgId){
     if(msgId==0)
     {
         this->msgId=msgCounter;
@@ -67,7 +67,7 @@ void message::serialize(Archive &ar, const unsigned int version)
     ar & msgId & action;
 }
 
-int message::getMsgId() const {
+uint_positive_cnt::type message::getMsgId() const {
     return msgId;
 }
 
@@ -84,14 +84,14 @@ bool message::operator!=(const message &rhs) const {
     return !(rhs == *this);
 }
 
-clientMessage::clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, int msgId)
+clientMessage::clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type msgId)
         : message(msgId), actionOwner(actionOwner) {
     if(action!=msgType::login && action!=msgType::removeUser && action!=msgType::logout)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
 }
 
-clientMessage::clientMessage(const std::pair<std::string, std::string> &actionOwner, int msgId)
+clientMessage::clientMessage(const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type msgId)
         : message(msgId), actionOwner(actionOwner) {
 }
 
@@ -155,7 +155,7 @@ BOOST_CLASS_EXPORT(Symposium::clientMessage)
 
 askResMessage::askResMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                              const std::string &path,
-                             const std::string &name, const std::string &resourceId, privilege accessMode, int msgId)
+                             const std::string &name, const std::string &resourceId, privilege accessMode, uint_positive_cnt::type msgId)
         : message(msgId), clientMessage( actionOwner, msgId), path(path), name(name),
           resourceId(resourceId), accessMode(accessMode) {
     if(action!=msgType::createRes && action!= msgType::openRes && action!=msgType::openNewRes&& action!=msgType::changeResName
@@ -250,7 +250,7 @@ BOOST_CLASS_EXPORT(Symposium::askResMessage)
 
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                             const user &newUser,
-                             int msgId)
+                             uint_positive_cnt::type msgId)
                              : message(msgId), clientMessage(actionOwner, msgId), newUser(newUser) {
     if(action!=msgType::registration)
         throw messageException(messageException::action, UnpackFileLineFunction());
@@ -284,11 +284,11 @@ bool signUpMessage::operator!=(const signUpMessage &rhs) const {
 
 BOOST_CLASS_EXPORT(Symposium::signUpMessage)
 
-serverMessage::serverMessage(msgType action, msgOutcome result, int msgId) : message(msgId), result(result) {
+serverMessage::serverMessage(msgType action, msgOutcome result, uint_positive_cnt::type msgId) : message(msgId), result(result) {
     this->action=action;
 }
 
-serverMessage::serverMessage(msgOutcome result, int msgId) : message(msgId), result(result) {
+serverMessage::serverMessage(msgOutcome result, uint_positive_cnt::type msgId) : message(msgId), result(result) {
 }
 
 template<class Archive>
@@ -331,7 +331,7 @@ void serverMessage::setErrDescr(const std::string &errDescr) {
 
 BOOST_CLASS_EXPORT(Symposium::serverMessage)
 
-loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, int msgId)
+loginMessage::loginMessage(msgType action, msgOutcome result, const user &loggedUser, uint_positive_cnt::type msgId)
                            : message(msgId), serverMessage(result, msgId), loggedUser(loggedUser) {
     if(action!=msgType::login && action!=msgType::registration)
         throw messageException(messageException::action, UnpackFileLineFunction());
@@ -366,7 +366,7 @@ bool loginMessage::operator!=(const loginMessage &rhs) const {
 
 BOOST_CLASS_EXPORT(Symposium::loginMessage)
 
-mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<uint_positive_cnt::type, user> &siteIdToUser, int msgId)
+mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<uint_positive_cnt::type, user> &siteIdToUser, uint_positive_cnt::type msgId)
         : message(msgId), serverMessage(result, msgId), siteIdToUser(siteIdToUser) {
     if(action!=msgType::mapChangesToUser)
         throw messageException(messageException::action, UnpackFileLineFunction());
@@ -401,7 +401,7 @@ bool mapMessage::operator!=(const mapMessage &rhs) const {
 
 BOOST_CLASS_EXPORT(Symposium::mapMessage)
 
-sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, uint_positive_cnt::type symId, int msgId)
+sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, uint_positive_cnt::type symId, uint_positive_cnt::type msgId)
         : message(msgId), serverMessage(result, msgId), resource{resource} {
     if(action!=msgType::createRes && action!=msgType::createNewDir && action!=msgType::openNewRes
     && action!=msgType::openRes)
@@ -464,7 +464,7 @@ BOOST_CLASS_EXPORT(Symposium::sendResMessage)
 
 privMessage::privMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                          const std::string &resourceId, const std::string &targetUser, privilege newPrivilege,
-                         int msgId)
+                         uint_positive_cnt::type msgId)
                          : message(msgId), clientMessage(actionOwner, msgId),
                            serverMessage(result, msgId), resourceId(resourceId), targetUser(targetUser), newPrivilege(newPrivilege) {
     if(action!=msgType::changePrivileges)
@@ -563,7 +563,7 @@ BOOST_CLASS_EXPORT(Symposium::privMessage)
 
 symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                              uint_positive_cnt::type siteId,
-                             uint_positive_cnt::type resourceId, const symbol &sym, int msgId)
+                             uint_positive_cnt::type resourceId, const symbol &sym, uint_positive_cnt::type msgId)
                              : message(msgId), clientMessage(actionOwner, msgId),
                                serverMessage(result, msgId), siteId(siteId), resourceId(resourceId), sym(sym) {
     if(action!=msgType::insertSymbol && action!=msgType::removeSymbol)
@@ -661,7 +661,7 @@ bool symbolMessage::operator!=(const symbolMessage &rhs) const {
 BOOST_CLASS_EXPORT(Symposium::symbolMessage)
 
 uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
-                       const std::string &path, const std::string &name, const uri &sharingPrefs, int msgId)
+                       const std::string &path, const std::string &name, const uri &sharingPrefs, uint_positive_cnt::type msgId)
                        : message(msgId), clientMessage(actionOwner, msgId),
                          serverMessage(result, msgId), sharingPrefs(sharingPrefs) {
     if(action!=msgType::shareRes)
@@ -717,7 +717,7 @@ BOOST_CLASS_EXPORT(Symposium::uriMessage)
 
 updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, const user &newUser, uint_positive_cnt::type resourceId,
                                          privilege priv,
-                                         int msgId)
+                                         uint_positive_cnt::type msgId)
                                          : message(msgId), serverMessage(result, msgId),
                                            newUser(newUser), resourceId(resourceId), userPrivilege(priv) {
     this->action=action;
@@ -777,7 +777,7 @@ bool updateActiveMessage::operator!=(const updateActiveMessage &rhs) const {
 BOOST_CLASS_EXPORT(Symposium::updateActiveMessage)
 
 updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
-                                   uint_positive_cnt::type resourceId, int msgId)
+                                   uint_positive_cnt::type resourceId, uint_positive_cnt::type msgId)
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    resourceId(resourceId) {
     if(action!=msgType::mapChangesToUser && action!=msgType::closeRes)
@@ -827,7 +827,7 @@ BOOST_CLASS_EXPORT(Symposium::updateDocMessage)
 
 userDataMessage::userDataMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
                                  msgOutcome result,
-                                 const user &newUserData, int msgId)
+                                 const user &newUserData, uint_positive_cnt::type msgId)
                                  : message(msgId), clientMessage(actionOwner, msgId),
                                    serverMessage(action, result, msgId), newUserData(newUserData) {
    if(action!=msgType::changeUserData && action !=msgType::changeUserPwd)
@@ -881,7 +881,7 @@ BOOST_CLASS_EXPORT(Symposium::userDataMessage)
 
 cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                              uint_positive_cnt::type siteId,
-                             uint_positive_cnt::type resourceId, int row, int col, int msgId) : clientMessage(actionOwner, msgId),
+                             uint_positive_cnt::type resourceId, int row, int col, uint_positive_cnt::type msgId) : clientMessage(actionOwner, msgId),
                                                                             serverMessage(result, msgId), siteId(siteId),
                                                                             resourceId(resourceId), row(row), col(col){
     if(action!=msgType::updateCursor)
