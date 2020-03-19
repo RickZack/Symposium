@@ -32,6 +32,7 @@ public:
     void errorConnectionLogout();
     void successInsert();
     ~inserturi();
+    bool openWindow;
 
 private slots:
     void on_dir_clicked();
@@ -47,6 +48,7 @@ private slots:
 public slots:
     void change_text();
     void reset_text();
+    void closeEvent(QCloseEvent *event);
 
 private:
     Ui::inserturi *ui;

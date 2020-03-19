@@ -46,6 +46,17 @@ void inserturi::reset_text()
     ui->dir->setText("choose the directory...");
 }
 
+void inserturi::closeEvent(QCloseEvent *event)
+{
+    event->ignore();
+    if(this->openWindow==true){
+        directory *dir= new directory(this);
+        dir->show();
+        //this->hide();
+    }
+    this->hide();
+}
+
 void inserturi::on_reader_clicked()
 {
     privilege=Symposium::privilege::readOnly;

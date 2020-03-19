@@ -1,6 +1,5 @@
 #include "choosepriv.h"
 #include "ui_choosepriv.h"
-#include "directory.h"
 
 choosepriv::choosepriv(QWidget *parent) :
     QMainWindow(parent),
@@ -45,14 +44,15 @@ void choosepriv::on_pushButton_clicked()
     // QUESTO ANDRA' TOLTO DA QUI E LASCIATO SOLTANTO NEL successOpen()
     notepadWindow= new notepad(this);
     notepadWindow->setId(this->idSource);
-    notepadWindow->show();
+    notepadWindow->setIdDoc(this->idSource);
     this->hide();
+    notepadWindow->show();
 }
 
 void choosepriv::on_pushButton_2_clicked()
 {
-    directory *dirWindow=new directory(this);
-    dirWindow->show();
+    //directory *dirWindow=new directory(this);
+    //dirWindow->show();
     this->hide();
 }
 
@@ -69,7 +69,9 @@ void choosepriv::successOpen(){
     notepadWindow= new notepad(this);
     notepadWindow->show();
     notepadWindow->setId(this->idSource);
+    notepadWindow->setIdDoc(this->idSource);
     this->hide();
+
 }
 
 void choosepriv::failure(){
