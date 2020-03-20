@@ -29,6 +29,24 @@ public:
     std::string path;
 
 
+    //--------------------------------------------------------------------------
+    void successRename();
+    void failureRename(std::string msg);
+    void errorConnection();
+    //--------------------------------------------------------------------------
+
+    //---------------------------------------------------------------------------
+    void successRemouve();
+    void failureRemouve(std::string str);
+    //---------------------------------------------------------------------------
+
+    //---------------------------------------------------------------------------
+    void successCreate(std::string id);
+    void failureCreate(std::string msg);
+    //---------------------------------------------------------------------------
+
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
+
 
 private slots:
     void on_actionHome_triggered();
@@ -38,12 +56,15 @@ private slots:
     void on_pushButton_3_clicked();
     void on_pushButton_4_clicked();
     void on_back_button_clicked();
+    void on_renameButt_clicked();
+    void on_okButton_clicked();
 
 private:
     Ui::directory *ui;
     inserturi *uriWindow;
     QListWidgetItem *item1;
     choosepriv *chooseprivWindow;
+    Symposium::clientdispatcher *cl;
 
     std::string str;
     std::string old_str;

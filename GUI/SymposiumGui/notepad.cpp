@@ -129,16 +129,6 @@ void notepad::on_actionPaste_triggered()
     ui->textEdit->paste();
 }
 
-void notepad::on_actionUndo_triggered()
-{
-    ui->textEdit->undo();
-}
-
-void notepad::on_actionRedo_triggered()
-{
-    ui->textEdit->redo();
-}
-
 
 void notepad::setupTextActions()
 {
@@ -489,7 +479,7 @@ void notepad::closeEvent(QCloseEvent *event){
     // oppure aprire direttamente la directory iniziale
 
     int doc=documentId;
-    //closeSource(this->id)
+    //cl->closeSource(this->doc)
     event->ignore();
     this->notepad::hide();
 
@@ -556,6 +546,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         qDebug()<<"family"<<font.family();
         qDebug()<<"font"<<font;
         qDebug()<<"color"<< ui->textEdit->textColor();
+
 
     }
 }

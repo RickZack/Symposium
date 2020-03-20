@@ -64,9 +64,12 @@ void choosepriv::getPath(std::string path,std::string idSource)
 }
 
 
+// il successOpen riceve un documento, e stampa tutti i simboli che sono in esso presenti
+// successOpen(document doc)
 void choosepriv::successOpen(){
 
     notepadWindow= new notepad(this);
+    // cl->setNotepad(notepadWindow)
     notepadWindow->show();
     notepadWindow->setId(this->idSource);
     notepadWindow->setIdDoc(this->idSource);
@@ -74,7 +77,11 @@ void choosepriv::successOpen(){
 
 }
 
-void choosepriv::failure(){
+// failure(std::string stringaDaStampare)
+void choosepriv::failureOpen(){
      QMessageBox::warning(this, "Error Message","Something has gone wrong");
 
 }
+
+//void choosepriv::errorConnection()-> per ora stampa un messaggio di errore.
+

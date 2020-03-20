@@ -14,7 +14,7 @@ directory::directory(QWidget *parent) :
     ui->label_4->setPixmap(pix_document);
 
     // METODO DISPATCHER CHE RESTITUISCE LA STRINGA
-    // str=getStr();
+    // str=showHome(); === getStr()=Ksenia
     str="directory 1 Folder1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
     int count=number_elements(str);
     listGenerate(str, count);
@@ -22,6 +22,11 @@ directory::directory(QWidget *parent) :
 
     ui->back_button->setDisabled(true);
     ui->back_button->hide();
+
+    ui->renameLabel->hide();
+    ui->okButton->hide();
+    ui->renameName->hide();
+
 
     ui->actionHome->setIcon(QIcon(":/resources/cartelle/home_icon"));
     ui->actionUri->setIcon(QIcon(":/resources/cartelle/link_icon"));
@@ -189,7 +194,7 @@ void directory::on_pushButton_clicked()
                  std::string pth=path; //solo per visualizzare che lo crea in modo corretto. Dopo si può cancellare
                  aperto++;
                  // open the folder Window
-                 // str1=getStr(INT ID);
+                 // str1=cl->getStr(INT ID);
                  std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
                  str=str1;
                  this->openWindow(str);
@@ -231,6 +236,10 @@ void directory::openWindow(std::string str1){
     this->show();
 }
 
+
+//-------------------------------------------------------------------------------------
+// REMOUVE RESOURCE
+
 // this method deletes a selected folder or a selected document or a selected symlink
 void directory::on_pushButton_2_clicked()
 {
@@ -239,8 +248,11 @@ void directory::on_pushButton_2_clicked()
    foreach(QListWidgetItem *items, item){
        std::string nameSource=items->text().toStdString();
        std::string id=searchForId(nameSource,str,count);
-       std::string pt=path;
-       // bool msg=remouveResource(path, id)
+       //cl->remouveResource(path,id);
+
+       //-------------------------------------------------------------------
+       //DA RIMUOVERE
+
        bool msg=true;
        if(msg)
        {
@@ -266,7 +278,37 @@ void directory::on_pushButton_2_clicked()
        }
 
    }//foreach
+   //----------------------------------------------------------------------------------------------------
 }
+
+void directory::successRemouve(){
+    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
+    foreach(QListWidgetItem *items, item){
+        if (count>1)
+        {
+           count--;
+                 ui->myListWidget->removeItemWidget(items);
+                 delete items;
+                 ui->myListWidget->currentItem()->setSelected(false);
+        }// if
+        else
+        {
+                  ui->myListWidget->removeItemWidget(items);
+                  delete items;
+            count=0;
+
+        }//else
+
+    }
+}
+
+void directory::failureRemouve(std::string msg){
+    QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
+}
+//-----------------------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------------------
+// CREATE NEW DIR
 
 // this method creates a new folder
 void directory::on_pushButton_3_clicked()
@@ -274,8 +316,11 @@ void directory::on_pushButton_3_clicked()
 
     QString name= ui->name->text();
     std::string nameFolder=name.toStdString();
+    // anche questo da eliminare
     ui->name->setText(" ");
-    // std::string id=createNewDir(path,id);
+    // std::string id=createNewDir(path,nameFolder);
+    //--------------------------------------------------------------------
+    // DA ELIMINARE
     std::string id="1"; //PER ESEMPIO
 
     if(id!="-1")
@@ -294,9 +339,26 @@ void directory::on_pushButton_3_clicked()
       QMessageBox::warning(this, "Error Message","It is no possible to open the selected folder");
 
     }
+    //-----------------------------------------------------------------------------------------
 
 }
 
+void directory::successCreate(std::string id){
+    QString name= ui->name->text();
+    ui->name->setText(" ");
+    count++;
+    std::string new_str=" directory "+id+' '+name.toStdString()+'\n';
+    str=str+new_str;
+    ui->myListWidget->clear();
+    int count=number_elements(str);
+    listGenerate(str,count);
+
+}
+
+void directory::failureCreate(std::string msg){
+    QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
+}
+//-----------------------------------------------------------------------------------------
 
 //this method closes the window directory
 void directory::closeEvent(QCloseEvent *event)
@@ -321,7 +383,7 @@ void directory::on_pushButton_4_clicked()
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
     ui->name_2->setText(" ");
-    //std::string id=createNewDir(path,nameDocument);
+    //std::string id=createNewSource(path,nameDocument);
     std::string id="1"; //PER ESEMPIO
 
     if(id!="-1")
@@ -363,4 +425,70 @@ void directory::on_back_button_clicked()
     }
 
     this->show();
+}
+
+
+
+//----------------------------------------------------------------------------------------
+// RENAME RESOURCE
+
+// if the rename button is clicked
+void directory::on_renameButt_clicked()
+{
+    ui->renameName->show();
+    ui->renameLabel->show();
+    ui->okButton->show();
+}
+
+
+void directory::on_okButton_clicked()
+{
+    QString newName=ui->renameLabel->text();
+    QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
+    foreach(QListWidgetItem *items, selectedItem){
+         std::string oldName=items->text().toStdString();
+         std::string id=searchForId(oldName,str,count);
+         //cl->renameResource(this->path,id or oldName, newName);
+         //------------------------------------------------------
+         // QUESTE RIGHE VANNO LASCIATE SOLO NEL SUCCESS RENAME
+         items->setText(" ");
+         items->setText(newName);
+         ui->myListWidget->currentItem()->setSelected(false);
+         ui->renameLabel->setText(" ");
+         ui->okButton->hide();
+         ui->renameLabel->hide();
+         ui->renameName->hide();
+         //-------------------------------------------------------
+    }
+
+}
+
+void directory::successRename(){
+    QString newName=ui->renameName->text();
+    ui->renameName->setText(" ");
+    QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
+    foreach(QListWidgetItem *items, selectedItem){
+        items->setText(" ");
+        items->setText(newName);
+        ui->myListWidget->currentItem()->setSelected(false);
+        ui->renameLabel->setText(" ");
+        ui->okButton->hide();
+        ui->renameLabel->hide();
+        ui->renameName->hide();
+    }
+}
+
+void directory::failureRename(std::string msg){
+     QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
+
+}
+
+void directory::errorConnection(){
+    QMessageBox::information(this,"Error Message","ERROR CONNECTION");
+}
+
+//-------------------------------------------------------------------------------------------
+void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
+{
+    this->cl = cl;
 }

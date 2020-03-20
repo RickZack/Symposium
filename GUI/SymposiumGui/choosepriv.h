@@ -17,7 +17,7 @@ public:
     ~choosepriv();
     void getPath(std::string path,std::string idSource);
     void successOpen();
-    void failure();
+    void failureOpen();
 
 private slots:
     void on_pushButton_clicked();

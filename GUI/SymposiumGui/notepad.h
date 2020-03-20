@@ -46,8 +46,6 @@ private slots:
     void on_Export_PDF_triggered();
     void on_actionCopy_triggered();
     void on_actionCut_triggered();
-    void on_actionUndo_triggered();
-    void on_actionRedo_triggered();
 
     void textBold();
     void textUnderline();
