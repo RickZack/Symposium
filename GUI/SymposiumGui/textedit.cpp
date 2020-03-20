@@ -787,20 +787,20 @@ void TextEdit::inactiveLink()
 
 void TextEdit::activeAlwaysLink()
 {
-    alwayslinkwindow = new activealwayslink(this, pathToFile);
+    alwayslinkwindow = new activealwayslink(this, 3);
     alwayslinkwindow->show();
 
 }
 
 void TextEdit::timerLink()
 {
-    timerlinkwindow = new activetimerlink(this, pathToFile);
+    timerlinkwindow = new activetimerlink(this, 3);
     timerlinkwindow->show();
 }
 
 void TextEdit::counterLink()
 {
-    counterlinkwindow = new activecounterlink(this, pathToFile);
+    counterlinkwindow = new activecounterlink(this, 3);
     counterlinkwindow->show();
 }
 

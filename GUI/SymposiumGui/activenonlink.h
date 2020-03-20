@@ -1,9 +1,8 @@
-#ifndef ACTIVECOUNTERLINK_H
-#define ACTIVECOUNTERLINK_H
+#ifndef ACTIVENONLINK_H
+#define ACTIVENONLINK_H
 
 #include <QDialog>
 #include <QMessageBox>
-#include "../../privilege.h"
 #include "../../uri.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
@@ -13,38 +12,29 @@ class clientdispatcher;
 }
 
 namespace Ui {
-class activecounterlink;
+class activenonlink;
 }
 
-class activecounterlink : public QDialog
+class activenonlink : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit activecounterlink(QWidget *parent = nullptr, int documentId=0);
+    explicit activenonlink(QWidget *parent = nullptr, int documentId=0);
     void errorLink();
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
     void errorConnectionLogout();
-    ~activecounterlink();
+    ~activenonlink();
 
 private slots:
-    void on_ok_clicked();
+    void on_pushButton_2_clicked();
 
-    void on_owner_clicked();
-
-    void on_writer_clicked();
-
-    void on_reader_clicked();
-
-    void on_cancel_clicked();
+    void on_pushButton_clicked();
 
 private:
-    Ui::activecounterlink *ui;
-    std::string pathToFile;
-    Symposium::privilege privilegeToGrant;
-    unsigned int numCounter;
+    Ui::activenonlink *ui;
     Symposium::uri u;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
@@ -52,4 +42,4 @@ private:
     int documentId;
 };
 
-#endif // ACTIVECOUNTERLINK_H
+#endif // ACTIVENONLINK_H

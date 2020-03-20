@@ -1,14 +1,53 @@
 #include "activecounterlink.h"
 #include "ui_activecounterlink.h"
 
-activecounterlink::activecounterlink(QWidget *parent, std::string pathToFile) :
+activecounterlink::activecounterlink(QWidget *parent, int documentId) :
     QDialog(parent),
-    ui(new Ui::activecounterlink), pathToFile(pathToFile)
+    ui(new Ui::activecounterlink), documentId(documentId)
 {
     ui->setupUi(this);
     ui->writer->click();
     privilegeToGrant=Symposium::privilege::modify;
+    numCounter=0;
 }
+
+void activecounterlink::errorLink()
+{
+    this->close();
+    QMessageBox::information(parentWidget(),
+                                tr("Links"), "There are some errors.\n", QMessageBox::Ok);
+
+}
+
+void activecounterlink::successLink(std::string path)
+{
+    this->close();
+    QMessageBox::information(parentWidget(),
+                                    tr("Links"), "All links are active now for a limit of another "
+                                 +QString::number(numCounter)+" shares.\n This is the link: "
+                                 +QString::fromStdString(path), QMessageBox::Ok);
+}
+
+void activecounterlink::setClientDispatcher(Symposium::clientdispatcher *cl)
+{
+    this->cl = cl;
+}
+
+void activecounterlink::errorConnection()
+{
+    errorWindow = new errorconnection(this);
+    errorWindow->show();
+}
+
+void activecounterlink::errorConnectionLogout()
+{
+    errorLog = new errorlogout(this);
+    this->close();
+    parentWidget()->close();
+    parentWidget()->parentWidget()->close();
+    errorLog->show();
+}
+
 
 activecounterlink::~activecounterlink()
 {
@@ -17,13 +56,21 @@ activecounterlink::~activecounterlink()
 
 void activecounterlink::on_ok_clicked()
 {
-    int i=ui->counter->value();
-    this->close();
-    if(i==5)
+    numCounter=ui->counter->value();
+    if(numCounter!=0)
     {
-        QMessageBox::information(parentWidget(),
-                                    tr("Links"), "All links are active now for a limit of another "+QString::number(i)+" shares.\n This is the link: "+QString::fromStdString(pathToFile), QMessageBox::Ok);
+        u.activateCount(numCounter, privilegeToGrant);
+        //cl->shareResource(documentId, u);
     }
+
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
+    this->close();
+    QMessageBox::information(parentWidget(),
+                                    tr("Links"), "All links are active now for a limit of another "
+                                 +QString::number(numCounter)+" shares.\n This is the link: "
+                                 +QString::fromStdString(pathToFile), QMessageBox::Ok);
+
+    //----------------------------------------------------------------------------------
 
 }
 

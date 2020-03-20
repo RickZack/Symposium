@@ -435,6 +435,7 @@ void notepad::visualizeUsers()
     onlineuser->setClientDispatcher(cl);
     onlineuser->user=us;
     //onlineuser->onlineUsers=cl->onlineUser(documentID);
+    //cl->setOnlineUser(onlineuser);
     onlineuser->show();
 }
 
@@ -445,40 +446,41 @@ void notepad::visualizeAllUsers()
     alluserWindow->setClientDispatcher(cl);
     alluserWindow->us=this->us;
     //alluserWindow->users=cl->allUser(documentID);
+    //cl->setAllUser(alluserWindow);
     alluserWindow->show();
 }
 
 void notepad::inactiveLink()
 {
-    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Inactive link",
-                                                                    "Are you sure, you want to deactivate all links?",
-                                                                     QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn == QMessageBox::Yes)
-        {
-
-        }
-     QMessageBox::information(parentWidget(),
-                                 tr("Links"), tr("All links are inactive now"), QMessageBox::Ok);
+    nonlinkwindow = new activenonlink(this, documentId);
+    nonlinkwindow->setClientDispatcher(cl);
+    //cl->setActiveNonLink(nonlinkwindow);
+    nonlinkwindow->show();
 
 }
 
 void notepad::activeAlwaysLink()
 {
-    alwayslinkwindow = new activealwayslink(this, pathToFile);
+    alwayslinkwindow = new activealwayslink(this, documentId);
+    alwayslinkwindow->setClientDispatcher(cl);
+    //cl->setActiveAlwaysLink(alwayslinkwindow);
     alwayslinkwindow->show();
 
 }
 
 void notepad::timerLink()
 {
-    timerlinkwindow = new activetimerlink(this, pathToFile);
+    timerlinkwindow = new activetimerlink(this, documentId);
+    timerlinkwindow->setClientDispatcher(cl);
+    //cl->setActiveTimerLink(timerlinkwindow);
     timerlinkwindow->show();
 }
 
 void notepad::counterLink()
 {
-    counterlinkwindow = new activecounterlink(this, pathToFile);
+    counterlinkwindow = new activecounterlink(this, documentId);
+    counterlinkwindow->setClientDispatcher(cl);
+    //cl->setActiveCounterLink(counterlinkwindow);
     counterlinkwindow->show();
 }
 
