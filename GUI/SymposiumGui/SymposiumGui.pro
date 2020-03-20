@@ -33,6 +33,7 @@ SOURCES += \
         about.cpp \
         activealwayslink.cpp \
         activecounterlink.cpp \
+        activenonlink.cpp \
         activetimerlink.cpp \
         alluser.cpp \
         changeuserinfo.cpp \
@@ -74,6 +75,7 @@ HEADERS += \
         about.h \
         activealwayslink.h \
         activecounterlink.h \
+        activenonlink.h \
         activetimerlink.h \
         alluser.h \
         changeuserinfo.h \
@@ -117,6 +119,7 @@ FORMS += \
         about.ui \
         activealwayslink.ui \
         activecounterlink.ui \
+        activenonlink.ui \
         activetimerlink.ui \
         alluser.ui \
         changeuserinfo.ui \

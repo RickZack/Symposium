@@ -179,7 +179,7 @@ TEST_F(documentTest, canRetrieveSiteIds){
     d.localInsert(i2, s2);
     d.localInsert(i3, s3);
 
-    std::set<int> expected;
+    std::set<uint_positive_cnt::type> expected;
     expected.insert(0);
     expected.insert(1);
     expected.insert(2);

@@ -14,6 +14,7 @@
 #include "activetimerlink.h"
 #include "activecounterlink.h"
 #include "activealwayslink.h"
+#include "activenonlink.h"
 
 
 
@@ -73,6 +74,7 @@ private:
     activetimerlink *timerlinkwindow;
     activecounterlink *counterlinkwindow;
     activealwayslink *alwayslinkwindow;
+    activenonlink *nonlinkwindow;
 
 
     void setupTextActions();

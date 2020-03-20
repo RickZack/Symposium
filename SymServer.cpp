@@ -143,7 +143,7 @@ std::shared_ptr<directory> SymServer::createNewDir(const std::string &opener, co
     return target.newDirectory(name, path);
 }
 
-void SymServer::remoteInsert(const std::string &inserter, int resourceId, symbolMessage &symMsg) {
+void SymServer::remoteInsert(const std::string &inserter, uint_positive_cnt::type resourceId, symbolMessage &symMsg) {
     if(!userIsActive(inserter))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(inserter, resourceId);
@@ -155,7 +155,7 @@ void SymServer::remoteInsert(const std::string &inserter, int resourceId, symbol
     generateSimpleResponse(getRegistered(inserter).getSiteId(), msgType::insertSymbol);
 }
 
-void SymServer::remoteRemove(const std::string &remover, int resourceId, symbolMessage &rmMsg) {
+void SymServer::remoteRemove(const std::string &remover, uint_positive_cnt::type resourceId, symbolMessage &rmMsg) {
     if(!userIsActive(remover))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(remover, resourceId);
@@ -169,7 +169,7 @@ void SymServer::remoteRemove(const std::string &remover, int resourceId, symbolM
     generateSimpleResponse(actionU.getSiteId(), msgType::removeSymbol);
 }
 
-void SymServer::updateCursorPos(const std::string &targetUser, int resourceId, cursorMessage &crMsg) {
+void SymServer::updateCursorPos(const std::string &targetUser, uint_positive_cnt::type resourceId, cursorMessage &crMsg) {
     if(!userIsActive(targetUser))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(targetUser, resourceId);
@@ -193,7 +193,7 @@ privilege SymServer::editPrivilege(const std::string &actionUser, const std::str
     handleUserState(targetUser, docId);
     privilege oldPriv=actionU.editPrivilege(targetUser, pathFromUserHome, resName, newPrivilege);
 
-    std::forward_list<int> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(actionUser), actionU.getSiteId());
+    std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(actionUser), actionU.getSiteId());
 
     auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, std::to_string(docId), targetUser, privilege::readOnly);
     insertMessageForSiteIds(setSiteIds, toSend);
@@ -235,7 +235,7 @@ std::shared_ptr<filesystem> SymServer::shareResource(const std::string &actionUs
     auto toSend=std::make_shared<uriMessage>(msgType::shareRes, make_pair(actionUser, ""), msgOutcome ::success, resPath, resName, newPrefs);
     int docId= std::dynamic_pointer_cast<file>(res)->getDoc().getId();
 
-    std::forward_list<int> setSiteIds= siteIdsFor(docId, actionU.getSiteId());
+    std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdsFor(docId, actionU.getSiteId());
     insertMessageForSiteIds(setSiteIds, toSend);
 
     generateSimpleResponse(actionU.getSiteId(), msgType::shareRes);
@@ -265,7 +265,7 @@ SymServer::removeResource(const std::string &remover, const std::string &resPath
     return res;
 }
 
-void SymServer::closeSource(const std::string &actionUser, int resIdtoClose) {
+void SymServer::closeSource(const std::string &actionUser, uint_positive_cnt::type resIdtoClose) {
     std::pair<bool, document*> toClose=userIsWorkingOnDocument(actionUser, resIdtoClose);
     if(!toClose.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
@@ -289,7 +289,7 @@ const user & SymServer::editUser(const std::string &username, user &newUserData)
     auto toSend= std::make_shared<userDataMessage>(msgType::changeUserData, std::make_pair(username, ""), msgOutcome::success, toEdit.makeCopyNoPwd());
 
     //notification to other clients interested in changes on this user
-    std::forward_list<int> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(username), toEdit.getSiteId());
+    std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(username), toEdit.getSiteId());
     insertMessageForSiteIds(setSiteIds, toSend);
 
     generateSimpleResponse(toEdit.getSiteId(), msgType::changeUserData);
@@ -319,12 +319,12 @@ void SymServer::logout(const std::string &username) {
     generateSimpleResponse(toLogOut.getSiteId(), msgType::logout);
 }
 
-std::map<int, user> SymServer::mapSiteIdToUser(const std::string& actionUser, int resourceId) {
+std::map<uint_positive_cnt::type, user> SymServer::mapSiteIdToUser(const std::string& actionUser, uint_positive_cnt::type resourceId) {
     std::pair<bool, document*> retrieved=userIsWorkingOnDocument(actionUser, resourceId);
     if(!retrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
-    std::set<int> siteIds=retrieved.second->retrieveSiteIds();
-    std::map<int, user> result;
+    std::set<uint_positive_cnt::type> siteIds=retrieved.second->retrieveSiteIds();
+    std::map<uint_positive_cnt::type, user> result;
     //FIXME: così potrebbe essere lenta, complessità theta(N*size(siteIds))
     // con N pari alla dimensione di registered.
     // Idea: findUserBySiteId potrebbe ricevere un elenco di siteId e tornare
@@ -395,7 +395,7 @@ void SymServer::removeRegistered(const std::string &username) {
     registered.erase(username);
 }
 
-std::forward_list<int> SymServer::siteIdsFor(int resId, int siteIdToExclude) const {
+std::forward_list<uint_positive_cnt::type> SymServer::siteIdsFor(uint_positive_cnt::type resId, uint_positive_cnt::type siteIdToExclude) const {
     auto it=resIdToSiteId.find(resId);
     auto siteIds=it->second;
     if(it == resIdToSiteId.end())
@@ -405,14 +405,14 @@ std::forward_list<int> SymServer::siteIdsFor(int resId, int siteIdToExclude) con
     return siteIds;
 }
 
-void SymServer::insertMessageForSiteIds(const std::forward_list<int>& siteIds, std::shared_ptr<serverMessage> toSend) {
-    for(int id:siteIds){
+void SymServer::insertMessageForSiteIds(const std::forward_list<uint_positive_cnt::type> &siteIds, std::shared_ptr<serverMessage> toSend) {
+    for(uint_positive_cnt::type id:siteIds){
         siteIdToMex[id].push(toSend);
     }
 }
 
-std::forward_list<int> SymServer::resIdOfDocOfUser(const std::string &username) const {
-    std::forward_list<int> resIds;
+std::forward_list<uint_positive_cnt::type> SymServer::resIdOfDocOfUser(const std::string &username) const {
+    std::forward_list<uint_positive_cnt::type> resIds;
     if(workingDoc.count(username)==0) return resIds;
     for(const auto* d:workingDoc.find(username)->second){
         resIds.push_front(d->getId());
@@ -420,14 +420,15 @@ std::forward_list<int> SymServer::resIdOfDocOfUser(const std::string &username) 
     return resIds;
 }
 
-std::forward_list<int> SymServer::siteIdOfUserOfDoc(const std::forward_list<int> &resIds, int siteIdToExclude) const {
+std::forward_list<uint_positive_cnt::type>
+SymServer::siteIdOfUserOfDoc(const std::forward_list<uint_positive_cnt::type> &resIds, unsigned int siteIdToExclude) const {
     std::set<int> siteIds;
     for(int resId:resIds){
         for(int siteId:siteIdsFor(resId, siteIdToExclude)){
             siteIds.insert(siteId);
         }
     }
-    return std::forward_list<int>(siteIds.begin(), siteIds.end());
+    return std::forward_list<uint_positive_cnt::type>(siteIds.begin(), siteIds.end());
 }
 
 void SymServer::closeAllDocsAndPropagateMex(const user &loggedOut, const std::forward_list<document*>& listOfDocs) {
@@ -462,7 +463,7 @@ std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessa
     return result;
 }
 
-void SymServer::generateSimpleResponse(int recvSiteId, msgType action) {
+void SymServer::generateSimpleResponse(unsigned int recvSiteId, msgType action) {
     auto response=std::make_shared<serverMessage>(action, msgOutcome::success);
     insertMessageForSiteIds({recvSiteId}, response);
 }

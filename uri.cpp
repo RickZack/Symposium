@@ -36,7 +36,7 @@ uriPolicy uri::getActivePolicy() const {
     return activePolicy;
 }
 
-int uri::getSharesLeft() const {
+unsigned int uri::getSharesLeft() const {
     return sharesLeft;
 }
 
@@ -66,7 +66,7 @@ void uri::activateAlways(privilege newPrivilege) {
     activePolicy=uriPolicy::activeAlways;
 }
 
-void uri::activateCount(int shares, privilege newPrivilege) {
+void uri::activateCount(unsigned int shares, privilege newPrivilege) {
     if(shares<=0)
     {
         activePolicy=uriPolicy::inactive;

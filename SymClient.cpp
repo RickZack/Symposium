@@ -95,7 +95,7 @@ SymClient::openNewSource(const std::string &resourceId, privilege reqPriv, const
 
 void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
                               const std::string &destName,
-                              int idToAssign, const std::shared_ptr<file> fileAsked) {
+                              uint_positive_cnt::type idToAssign, const std::shared_ptr<file> fileAsked) {
     this->getLoggedUser().getHome()->addLink(destPath, destName, resId, (*fileAsked).getName(), idToAssign);
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
@@ -108,7 +108,7 @@ askResMessage SymClient::createNewSource(const std::string &path, const std::str
     return *mess;
 }
 
-void SymClient::createNewSource(const std::string &path, const std::string &name, int idToAssign) {
+void SymClient::createNewSource(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
     std::shared_ptr<file> file = this->getLoggedUser().newFile(name, path, idToAssign);
     document& docReq = file->access(this->getLoggedUser(), privilege::owner);
     activeFile.push_front(file);
@@ -121,28 +121,28 @@ askResMessage SymClient::createNewDir(const std::string &path, const std::string
     return *mess;
 }
 
-void SymClient::createNewDir(const std::string &path, const std::string &name, int idToAssign) {
+void SymClient::createNewDir(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
     this->getLoggedUser().newDirectory(name,path,idToAssign);
 }
 
 
-symbolMessage SymClient::localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index) {
+symbolMessage SymClient::localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<unsigned int, unsigned int> &index) {
     document* d = this->getActiveDocumentbyID(resourceId);
     d->localInsert(index, const_cast<symbol &>(newSym));
     return symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, newSym);
 }
 
-symbolMessage SymClient::localRemove(int resourceId, const std::pair<int, int> indexes) {
+symbolMessage SymClient::localRemove(uint_positive_cnt::type resourceId, const std::pair<unsigned int, unsigned int> indexes) {
     document* d = this->getActiveDocumentbyID(resourceId);
     return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, d->localRemove(indexes));
 }
 
-void SymClient::remoteInsert(int resourceId, const symbol &newSym) {
+void SymClient::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
     d->remoteInsert(newSym);
 }
 
-void SymClient::remoteRemove(int resourceId, const symbol &rmSym) {
+void SymClient::remoteRemove(uint_positive_cnt::type resourceId, const symbol &rmSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
     d->remoteRemove(rmSym);
 }
@@ -201,7 +201,7 @@ std::string SymClient::showDir(bool recursive) const {
     return getLoggedUser().showDir(recursive);
 }
 
-updateDocMessage SymClient::closeSource(int resourceId) {
+updateDocMessage SymClient::closeSource(uint_positive_cnt::type resourceId) {
     document* d = getActiveDocumentbyID(resourceId);
     activeFile.remove_if([resourceId](std::shared_ptr<file> it){return (it->getDoc().getId() == resourceId);});
     activeDoc.remove(d);
@@ -238,15 +238,15 @@ updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
     return *mess;
 }
 //con questo metodo associamo agli utenti i colori (che sono diversi per ogni client), da fare con qcolor
-void SymClient::setUserColors(const std::map<int, user> &siteIdToUser) {
+void SymClient::setUserColors(const std::map<uint_positive_cnt::type, user> &siteIdToUser) {
     //TODO:implement
 }
 
-void SymClient::addActiveUser(int resourceId, user &targetUser, privilege Priv) {
+void SymClient::addActiveUser(uint_positive_cnt::type resourceId, user &targetUser, privilege Priv) {
     getActiveDocumentbyID(resourceId)->access(targetUser, Priv);
 }
 
-void SymClient::removeActiveUser(int resourceId, user &targetUser) {
+void SymClient::removeActiveUser(uint_positive_cnt::type resourceId, user &targetUser) {
     getActiveDocumentbyID(resourceId)->close(targetUser);
 }
 
@@ -268,7 +268,7 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
     this->dispatcher = cl;
 }*/
 
-void SymClient::verifySymbol(int resourceId, const symbol &sym) {
+void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
     //TODO: to implement
 }
 
@@ -290,7 +290,7 @@ bool filterPrivilege::operator()(std::shared_ptr<file> file) {
     return false;
 }
 
-document* SymClient::getActiveDocumentbyID(int id){
+document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
     for (document *it:this->activeDoc){
         if((*it).getId() == id)
             return (it);
@@ -298,10 +298,10 @@ document* SymClient::getActiveDocumentbyID(int id){
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
 }
 
-cursorMessage SymClient::updateCursorPos(int resourceId, unsigned int row, unsigned int col) {
+cursorMessage SymClient::updateCursorPos(uint_positive_cnt::type resourceId, unsigned int row, unsigned int col) {
     return cursorMessage(msgType::updateCursor, {"",""}, msgOutcome::success, 0, 0, 0, 0);
 }
 
-void SymClient::updateCursorPos(int userSiteId, int resourceId, unsigned int row, unsigned int col){
+void SymClient::updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type resourceId, unsigned int row, unsigned int col){
     //TODO: to implement
 }

@@ -72,7 +72,7 @@
          std::unordered_map<std::string, const user *> active;                                             /**< active users, indexed by username */
          std::unordered_map<std::string, std::forward_list<document *>> workingDoc;                        /**< list of document each user is working on */
          std::unordered_map<int, std::queue<std::shared_ptr<serverMessage>>> siteIdToMex;                  /**< messages queues associated with every user by means of @e siteId */
-         std::unordered_map<int, std::forward_list<int>> resIdToSiteId;                                    /**< list of users involved in a document, by means of @e siteIds and @e resIds */
+         std::unordered_map<int, std::forward_list<uint_positive_cnt::type>> resIdToSiteId;                                    /**< list of users involved in a document, by means of @e siteIds and @e resIds */
          static uint_positive_cnt idCounter;                                                               /**< siteId to be assigned to the next registered user */
          std::shared_ptr<directory> rootDir;                                                               /**< virtual filesystem of the Symposium server */
 
@@ -198,7 +198,7 @@
           * update its own copy of the document and propagate the update to the other clients putting the message in
           * @e workingQueue
           */
-         virtual void remoteInsert(const std::string &inserter, int resourceId, symbolMessage &symMsg);
+         virtual void remoteInsert(const std::string &inserter, uint_positive_cnt::type resourceId, symbolMessage &symMsg);
 
          /**
           * @brief update a document removing a symbol
@@ -212,7 +212,7 @@
           * update its own copy of the document and propagate the update to the other clients putting the message in
           * @e workingQueue
           */
-         virtual void remoteRemove(const std::string &remover, int resourceId, symbolMessage &rmMsg);
+         virtual void remoteRemove(const std::string &remover, uint_positive_cnt::type resourceId, symbolMessage &rmMsg);
          //dispatchMessages ->function to be active in background to send messages from server to client
          //updateActiveUsers(); ->useful or just done inside other functions?
 
@@ -222,7 +222,7 @@
           * @param resourceId the id of the document in which the user's cursor has been moved
           * @param crMsg the message received by the client
           */
-         virtual void updateCursorPos(const std::string &targetUser, int resourceId, cursorMessage& crMsg);
+         virtual void updateCursorPos(const std::string &targetUser, uint_positive_cnt::type resourceId, cursorMessage& crMsg);
 
          /**
           * @brief edit the privilege of @e targetUser user for the resource @e resName in @e resPath to @e newPrivilege
@@ -298,7 +298,7 @@
          * This method is invoked by receiving a @ref updateDocMessage and has the effect of calling
          * @ref document::close and the removal of @e actionUser from @e workingDoc for @e toClose
          */
-         virtual void closeSource(const std::string &actionUser, int resIdtoClose);
+         virtual void closeSource(const std::string &actionUser, uint_positive_cnt::type resIdtoClose);
 
          /**
           * @brief changes user's data
@@ -340,7 +340,7 @@
           * the map with users in @e registered.
           * Sends to the client a @ref mapMessage
           */
-         virtual std::map<int, user> mapSiteIdToUser(const std::string &actionUser, int resourceId);
+         virtual std::map<uint_positive_cnt::type, user> mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::type resourceId);
          //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
          /**
@@ -422,14 +422,14 @@
           * @param siteIdToExclude a siteId to exclude from the result, tipically the one of the user who asked for this
           * @return a list of siteIds
           */
-         virtual std::forward_list<int> siteIdsFor(int resId, int siteIdToExclude=-1) const;
+         virtual std::forward_list<uint_positive_cnt::type> siteIdsFor(uint_positive_cnt::type resId, uint_positive_cnt::type siteIdToExclude=-1) const;
 
          /**
           * @brief extract the resIds of the documents associated with the user names @e username
           * @param username the name of the user for which the mapping is needed
           * @return a list of resIds
           */
-         virtual std::forward_list<int> resIdOfDocOfUser(const std::string& username) const;
+         virtual std::forward_list<uint_positive_cnt::type> resIdOfDocOfUser(const std::string& username) const;
 
          /**
           * @brief extract the siteIds of the users that are associated with at least one of resIds in @e resIds
@@ -437,14 +437,15 @@
           * @param siteIdToExclude a siteId to exclude from the result, tipically the one of the user who asked for this
           * @return a list of siteIds
           */
-         virtual std::forward_list<int> siteIdOfUserOfDoc(const std::forward_list<int> &resIds, int siteIdToExclude=-1) const;
+         virtual std::forward_list<uint_positive_cnt::type>
+         siteIdOfUserOfDoc(const std::forward_list<uint_positive_cnt::type> &resIds, unsigned int siteIdToExclude= -1) const;
 
          /**
           * @brief Insert a copy of the message @e toSend in the message queue associated with every siteIds in @e siteIds
           * @param siteIds the list of user (by means of their siteId) the message @e toSend should be forwarded to
           * @param toSend the message to send to every user that has siteId in @e siteIds
           */
-         void insertMessageForSiteIds(const std::forward_list<int>& siteIds, std::shared_ptr<serverMessage> toSend);
+         void insertMessageForSiteIds(const std::forward_list<uint_positive_cnt::type> &siteIds, std::shared_ptr<serverMessage> toSend);
 
         /**
          * @brief Call document::close on all the documents left opened by the user that just logged out and propagate
@@ -466,7 +467,7 @@
           * @param recvSiteId the siteId of the client to send the confirm to
           * @param action the msgType of the received clientMessage
           */
-         void generateSimpleResponse(int recvSiteId, msgType action);
+         void generateSimpleResponse(unsigned int recvSiteId, msgType action);
      };
  }
 

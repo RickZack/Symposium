@@ -37,17 +37,17 @@
 
 
 using namespace Symposium;
-int document::idCounter=0;
+uint_positive_cnt document::idCounter;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 
 //FIXME: valore di default di id ignorato, potenziale errore
-document::document(int id) : id(id), symbols(1,std::vector<symbol>(1,emptySymbol)) {
+document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)) {
     id=idCounter;
     idCounter++;
 
 }
 
-int document::getId() const {
+uint_positive_cnt::type document::getId() const {
     return id;
 }
 
@@ -71,7 +71,7 @@ document & document::access(const user &newActive, privilege accessPriv) {
     return *this;
 }
 
-void document::checkIndex(int i0, int i1) {
+void document::checkIndex(unsigned int i0, unsigned int i1) {
     float mul_fct=1.5; //just to avoid too many reallocations
     if(i0>=symbols.capacity())
         symbols.resize((i0+1)*mul_fct);
@@ -80,7 +80,7 @@ void document::checkIndex(int i0, int i1) {
 }
 
 
-symbol document::localInsert(const std::pair<int, int> &indexes, symbol &toInsert) {
+symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
     //TODO: take into account new position of cursor
     int i0=indexes.first;
     int i1=indexes.second;
@@ -101,7 +101,7 @@ symbol document::localInsert(const std::pair<int, int> &indexes, symbol &toInser
     return newSymb;
 }
 
-symbol document::generatePosition(const std::pair<int, int> indexes,const symbol &toInsert){
+symbol document::generatePosition(const std::pair<unsigned int, unsigned int> indexes, const symbol &toInsert){
     std::vector<int> posBefore;
     int siteIdB;
     symbol symB=findPosBefore(indexes);
@@ -132,7 +132,7 @@ symbol document::generatePosition(const std::pair<int, int> indexes,const symbol
 
 
 
-symbol document::findPosBefore(const std::pair<int, int> indexes) const {
+symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> indexes) const {
 
     int line=indexes.first;
     int ch=indexes.second;
@@ -154,7 +154,7 @@ symbol document::findPosBefore(const std::pair<int, int> indexes) const {
     return sym;
 }
 
-symbol document::findPosAfter(const std::pair<int, int> indexes) const {
+symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexes) const {
     int line=indexes.first;
     int ch=indexes.second;
 
@@ -274,7 +274,7 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
     return floor(rand()%(id2-id1))+id1;
 }
 
-symbol document::localRemove(const std::pair<int, int> &indexes) {
+symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes) {
     //TODO: take into account new position of cursor
     int i0=indexes.first;
     int i1=indexes.second;
@@ -355,9 +355,9 @@ void document::load(const std::string &loadPath) {
     //TODO:implement
 }
 
-std::set<int> document::retrieveSiteIds() const{
-    std::set<int> siteIds;
-    std::set<int>::iterator it=siteIds.begin();
+std::set<uint_positive_cnt::type> document::retrieveSiteIds() const{
+    std::set<uint_positive_cnt::type> siteIds;
+    std::set<uint_positive_cnt::type>::iterator it=siteIds.begin();
     for(int i=0;i<symbols.size();i++){
         for(int j=0;j<symbols[i].size();j++){
             siteIds.insert(it,symbols[i][j].getSiteId());
@@ -378,7 +378,7 @@ bool document::operator!=(const document &rhs) const {
 
 
 
-std::pair<int, int> document::findInsertIndex(const symbol &symbol) const {
+std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &symbol) const {
     std::pair<int,int> ind;
     int i0=0; int i1=0;
     int minLine=0;
@@ -440,7 +440,8 @@ std::pair<int, int> document::findInsertIndex(const symbol &symbol) const {
 
 }
 
-std::pair<int, int> document::findEndPosition(const symbol aChar, const std::vector<Symposium::symbol> vector, int lines) const {
+std::pair<unsigned int, unsigned int>
+document::findEndPosition(const symbol aChar, const std::vector<Symposium::symbol> vector, int lines) const {
     std::pair<int,int> ind;
     if(aChar== emptySymbol){
         ind={lines,0}; return ind;
@@ -485,7 +486,7 @@ int document::findInsertInLine(const symbol ch, const std::vector<Symposium::sym
 
 }
 
-std::pair<int, int> document::findPosition(const symbol &symbol) const {
+std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbol) const {
     std::pair<int,int> ind;
     int i0=0; int i1=0;
     int minLine=0;
@@ -543,7 +544,7 @@ std::pair<int, int> document::findPosition(const symbol &symbol) const {
 
 }
 
-int document::findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector) const {
+unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector) const {
     int left=0;
     int right=vector.size()-1;
     int mid;
@@ -575,7 +576,7 @@ int document::findIndexInLine(const symbol &symbol, const std::vector<Symposium:
 
 }
 
-void document::updateCursorPos(unsigned int targetSiteId, unsigned int newRow, unsigned int newCol) {
+void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol) {
     //TODO:implement
 }
 
