@@ -7,7 +7,7 @@
 #include "inserturi.h"
 #include "changeuserinfo.h"
 #include "directory.h"
-
+#include "errorconnection.h"
 
 
 namespace Symposium{
@@ -25,6 +25,8 @@ class home : public QMainWindow
 public:
     explicit home(QWidget *parent = nullptr);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
+    void successLogout();
+    void errorConnection();
     ~home();
 
 private slots:
@@ -36,6 +38,8 @@ private slots:
 
     void on_directory_clicked();
 
+    void logout();
+
 private:
     Ui::home *ui;
     deleteAccount *deleteAccountWindow;
@@ -43,6 +47,7 @@ private:
     changeUserInfo *changeWindow;
     directory *directoryWindow;
     Symposium::clientdispatcher *cl;
+    errorconnection *errorWindow;
 
     void closeEvent(QCloseEvent *event);
 };

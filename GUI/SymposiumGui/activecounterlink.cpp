@@ -1,5 +1,6 @@
 #include "activecounterlink.h"
 #include "ui_activecounterlink.h"
+#include <QMovie>
 
 activecounterlink::activecounterlink(QWidget *parent, int documentId) :
     QDialog(parent),
@@ -9,18 +10,31 @@ activecounterlink::activecounterlink(QWidget *parent, int documentId) :
     ui->writer->click();
     privilegeToGrant=Symposium::privilege::modify;
     numCounter=0;
+    ui->waiting->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 }
 
-void activecounterlink::errorLink()
+void activecounterlink::unsuccessLink(std::string errorMess)
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     this->close();
+    QString error=QString::fromStdString(errorMess);
     QMessageBox::information(parentWidget(),
-                                tr("Links"), "There are some errors.\n", QMessageBox::Ok);
-
+                             tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
 }
 
 void activecounterlink::successLink(std::string path)
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     this->close();
     QMessageBox::information(parentWidget(),
                                     tr("Links"), "All links are active now for a limit of another "
@@ -35,12 +49,20 @@ void activecounterlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void activecounterlink::errorConnection()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     errorWindow = new errorconnection(this);
     errorWindow->show();
 }
 
 void activecounterlink::errorConnectionLogout()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
@@ -61,6 +83,10 @@ void activecounterlink::on_ok_clicked()
     {
         u.activateCount(numCounter, privilegeToGrant);
         //cl->shareResource(documentId, u);
+        ui->waiting->show();
+        ui->gif->show();
+        ui->cancel->setDisabled(true);
+        ui->ok->setDisabled(true);
     }
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE

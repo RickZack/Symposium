@@ -1,6 +1,7 @@
 #include "alluser.h"
 #include "ui_alluser.h"
 #include "Dispatcher/clientdispatcher.h"
+#include <QMovie>
 
 alluser::alluser(QWidget *parent, Symposium::privilege privelege, int documentID, Symposium::user user, std::string pathFile) :
     QDialog(parent),
@@ -31,6 +32,11 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, int documentID
     }
     if(privelege==Symposium::privilege::owner)
         ui->modify->click();
+    ui->waiting->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 }
 
 void alluser::setClientDispatcher(Symposium::clientdispatcher *cl)
@@ -40,6 +46,9 @@ void alluser::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void alluser::successEditPrivilege()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->button->setDisabled(false);
     QMessageBox::information(parentWidget(),
                              tr("Modify Privilege"), tr("The privilege was successfully modify!"), QMessageBox::Ok);
 
@@ -52,24 +61,33 @@ void alluser::successEditPrivilege()
 
 void alluser::errorEditPrivilege(std::string errorMess)
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->button->setDisabled(false);
     QString error=QString::fromStdString(errorMess);
     QMessageBox::information(parentWidget(),
-                             tr("Modify Privilege"), error, QMessageBox::Ok);
+                             tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
 }
 
 void alluser::errorConnection()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->button->setDisabled(false);
     errorWindow = new errorconnection(this);
-    errorWindow->show();
+    errorWindow->exec();
 }
 
 void alluser::errorConnectionLogout()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->button->setDisabled(false);
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();
-    errorLog->show();
+    errorLog->exec();
 }
 
 alluser::~alluser()
@@ -137,8 +155,12 @@ void alluser::on_button_clicked()
                                                                     QMessageBox::No | QMessageBox::Yes,
                                                                     QMessageBox::Yes);
         if (resBtn == QMessageBox::Yes)
-            ;
-        //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
+        {
+            ui->waiting->show();
+            ui->gif->show();
+            ui->button->setDisabled(true);
+            //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
+        }
     }
 }
 

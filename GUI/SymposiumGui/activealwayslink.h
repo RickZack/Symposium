@@ -22,7 +22,7 @@ class activealwayslink : public QDialog
 
 public:
     explicit activealwayslink(QWidget *parent = nullptr,  int documentId=0);
-    void errorLink();
+    void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();

@@ -9,19 +9,33 @@ activetimerlink::activetimerlink(QWidget *parent, int documentId) :
     ui->time->setDateTime(QDateTime::currentDateTime());
     ui->writer->click();
     privilegeToGrant=Symposium::privilege::modify;
+    ui->waiting->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 
 }
 
-void activetimerlink::errorLink()
+void activetimerlink::unsuccessLink(std::string errorMess)
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     this->close();
+    QString error=QString::fromStdString(errorMess);
     QMessageBox::information(parentWidget(),
-                                tr("Links"), "There are some errors.\n", QMessageBox::Ok);
+                             tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
 
 }
 
 void activetimerlink::successLink(std::string path)
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     this->close();
     QMessageBox::information(parentWidget(),
                                     tr("Links"), "All links are active now until "
@@ -36,12 +50,20 @@ void activetimerlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void activetimerlink::errorConnection()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     errorWindow = new errorconnection(this);
     errorWindow->show();
 }
 
 void activetimerlink::errorConnectionLogout()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
@@ -66,6 +88,10 @@ void activetimerlink::on_ok_clicked()
     endTime=std::chrono::system_clock::from_time_t(std::mktime(&tm));
 
     u.activateTimer(endTime, privilegeToGrant);
+    ui->waiting->show();
+    ui->gif->show();
+    ui->cancel->setDisabled(true);
+    ui->ok->setDisabled(true);
     //cl->shareResource(documentId, u);
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE

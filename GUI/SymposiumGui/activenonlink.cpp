@@ -6,18 +6,32 @@ activenonlink::activenonlink(QWidget *parent, int documentId) :
     ui(new Ui::activenonlink), documentId(documentId)
 {
     ui->setupUi(this);
+    ui->waiting->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 }
 
-void activenonlink::errorLink()
+void activenonlink::unsuccessLink(std::string errorMess)
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     this->close();
+    QString error=QString::fromStdString(errorMess);
     QMessageBox::information(parentWidget(),
-                                tr("Links"), "There are some errors.\n", QMessageBox::Ok);
+                             tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
 
 }
 
 void activenonlink::successLink(std::string path)
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     this->close();
     QMessageBox::information(parentWidget(),
                                     tr("Links"), "All links have been deactivate now.\n", QMessageBox::Ok);
@@ -30,12 +44,20 @@ void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void activenonlink::errorConnection()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     errorWindow = new errorconnection(this);
     errorWindow->show();
 }
 
 void activenonlink::errorConnectionLogout()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
@@ -48,13 +70,17 @@ activenonlink::~activenonlink()
     delete ui;
 }
 
-void activenonlink::on_pushButton_2_clicked()
+void activenonlink::on_ok_clicked()
 {
-    this->close();
-}
-
-void activenonlink::on_pushButton_clicked()
-{
+    ui->waiting->show();
+    ui->gif->show();
+    ui->cancel->setDisabled(true);
+    ui->ok->setDisabled(true);
     u.deactivate();
     //cl->shareResource(documentId, u);
+}
+
+void activenonlink::on_cancel_clicked()
+{
+    this->close();
 }

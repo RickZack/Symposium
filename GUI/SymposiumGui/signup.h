@@ -24,8 +24,7 @@ public:
     explicit signup(QWidget *parent = nullptr);
     void setClientDispatcher( Symposium::clientdispatcher *cl);
     void errorConnection();
-    void errorUsernameSignUp();
-    void errorPasswordSignUp();
+    void errorSignUp(std::string errorMess);
     void successSignUp();
     ~signup();
 
@@ -43,6 +42,7 @@ private:
     std::string iconPath="";
     Symposium::clientdispatcher *cl;
     void reject();
+    void waiting();
 };
 
 #endif // SIGNUP_H

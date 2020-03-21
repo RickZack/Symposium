@@ -28,7 +28,7 @@ public:
     void errorConnection();
     void errorConnectionLogout();
     void successDeleteAccount();
-    void unsuccessDeleteAccount();
+    void errorDeleteUser(std::string errorMess);
     ~deleteAccount();
 
 private slots:

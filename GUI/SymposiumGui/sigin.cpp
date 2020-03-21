@@ -13,6 +13,10 @@ sigin::sigin(QWidget *parent) :
     ui->haveto->hide();
     ui->waiting->hide();
     ui->tryAgain->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 
 }
 
@@ -23,15 +27,24 @@ sigin::~sigin()
 
 void sigin::errorConnection()
 {
+    ui->signin->setDisabled(false);
+    ui->cancel->setDisabled(false);
     errorWindow = new errorconnection(this);
-    errorWindow->show();
+    errorWindow->exec();
+    ui->haveto->hide();
+    ui->tryAgain->hide();
+    ui->waiting->hide();
+    ui->gif->hide();
 }
 
 void sigin::errorSignIn()
 {
+    ui->signin->setDisabled(false);
+    ui->cancel->setDisabled(false);
     ui->haveto->hide();
     ui->tryAgain->show();
     ui->waiting->hide();
+    ui->gif->hide();
 
 }
 
@@ -56,6 +69,7 @@ void sigin::on_signin_clicked()
     ui->haveto->hide();
     ui->waiting->hide();
     ui->tryAgain->hide();
+    ui->gif->hide();
 
     QString username= ui->username->text();
     QString password = ui->password->text();
@@ -97,7 +111,7 @@ void sigin::closeEvent(QCloseEvent *event)
             event->ignore();
         } else {
             event->accept();
-            cl->logout();
+            //cl->closeConnection();
         }
 
 }
@@ -105,5 +119,8 @@ void sigin::closeEvent(QCloseEvent *event)
 void sigin::waiting()
 {
     ui->waiting->show();
+    ui->gif->show();
+    ui->signin->setDisabled(true);
+    ui->cancel->setDisabled(true);
 
 }

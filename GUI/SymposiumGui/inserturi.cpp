@@ -10,12 +10,15 @@ inserturi::inserturi(QWidget *parent) :
     //showDir=cl->showDir(true);
     ui->writer->click();
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
-    ui->dirError->hide();
     ui->dirEmpty->hide();
     ui->linkError->hide();
-    ui->privError->hide();
     ui->nameError->hide();
     ui->formatError->hide();
+    ui->waiting->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 }
 
 inserturi::~inserturi()
@@ -27,7 +30,7 @@ void inserturi::on_dir_clicked()
 {
     dirWindow=new choosedir(this);
     dirWindow->pathDir=showDir;
-    dirWindow->show();
+    dirWindow->exec();
     pathId=dirWindow->pathId;
 }
 
@@ -71,29 +74,17 @@ void inserturi::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
 }
 
-void inserturi::invalidUri()
+void inserturi::unsuccessInsert(std::string errorMess)
 {
-    ui->linkError->show();
-}
-
-void inserturi::privilegeTooBig()
-{
-    ui->privError->show();
-}
-
-void inserturi::DirectoryFileNotExist()
-{
-    //showDir=cl->showDir(true);
-    ui->dirError->show();
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->linkError->setText(QString::fromStdString(errorMess));
 }
 
 void inserturi::on_add_clicked()
 {
-    ui->dirError->hide();
     ui->dirEmpty->hide();
     ui->linkError->hide();
-    ui->privError->hide();
-    ui->nameError->hide();
     ui->formatError->hide();
     if(path=="")
     {
@@ -114,8 +105,13 @@ void inserturi::on_add_clicked()
             if(resourceId=="")
                 ui->formatError->show();
             else
-                ;
-            //cl->openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
+            {
+                ui->waiting->show();
+                ui->gif->show();
+                ui->add->setDisabled(true);
+                ui->cancel->setDisabled(true);
+                //cl->openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
+            }
         }
 
     }
@@ -124,12 +120,20 @@ void inserturi::on_add_clicked()
 
 void inserturi::errorConnection()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->add->setDisabled(false);
+    ui->cancel->setDisabled(false);
     errorWindow = new errorconnection(this);
     errorWindow->show();
 }
 
 void inserturi::errorConnectionLogout()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->add->setDisabled(false);
+    ui->cancel->setDisabled(false);
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
@@ -138,6 +142,10 @@ void inserturi::errorConnectionLogout()
 
 void inserturi::successInsert()
 {
+    ui->add->setDisabled(false);
+    ui->cancel->setDisabled(false);
+    ui->waiting->hide();
+    ui->gif->hide();
     QMessageBox::information(parentWidget(),
                              tr("Insert Link"), tr("The operation was successfully done!"), QMessageBox::Ok);
 }

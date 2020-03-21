@@ -68,8 +68,8 @@
   <widget class="QPushButton" name="signin">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>280</y>
+     <x>50</x>
+     <y>320</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -82,7 +82,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>280</y>
+     <y>310</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -139,8 +139,8 @@
   <widget class="QLabel" name="waiting">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>220</y>
+     <x>170</x>
+     <y>230</y>
      <width>181</width>
      <height>20</height>
     </rect>
@@ -153,13 +153,26 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>240</y>
+     <y>270</y>
      <width>321</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
     <string>Your username or password is wrong, please try again</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="gif">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>210</y>
+     <width>55</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
    </property>
   </widget>
  </widget>

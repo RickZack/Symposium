@@ -28,8 +28,7 @@ public:
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
     void errorConnectionLogout();
-    void errorUsernameEditUser();
-    void errorPasswordEditUser();
+    void errorEditUser(std::string errorMess);
     void successEditUser();
     ~changeUserInfo();
 

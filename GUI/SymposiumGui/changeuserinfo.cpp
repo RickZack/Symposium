@@ -1,14 +1,14 @@
 #include "changeuserinfo.h"
 #include "ui_changeuserinfo.h"
 #include "Dispatcher/clientdispatcher.h"
+#include <QMovie>
 
 changeUserInfo::changeUserInfo(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::changeUserInfo)
 {
     ui->setupUi(this);
-    ui->erroruser->hide();
-    ui->errorpassword->hide();
+    ui->error->hide();
 
     //-----------------------------------------------------PARTE DA DECOMENTARE
 
@@ -35,9 +35,16 @@ changeUserInfo::changeUserInfo(QWidget *parent) :
     int h=ui->img->height();
     ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 
+    ui->waiting->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
+
 
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->confirm, SIGNAL(clicked()), this, SLOT(confirm_click()));
+
 }
 
 changeUserInfo::~changeUserInfo()
@@ -64,13 +71,16 @@ void changeUserInfo::chooseIcon()
 
 void changeUserInfo::confirm_click()
 {
-    ui->erroruser->hide();
-    ui->errorpassword->hide();
+    ui->waiting->show();
+    ui->gif->show();
+    ui->confirm->setDisabled(true);
+    ui->cancel->setDisabled(true);
+    ui->error->hide();
     QString username = ui->username->text();
     QString password = ui->password->text();
     QString nickname = ui->nickname->text();
     //QString imagine = QString::fromStdString(img);
-    Symposium::user usNew(username.toStdString(), password.toStdString(), nickname.toStdString(), img, us.getSiteId(), us.getHome());
+    //Symposium::user usNew(username.toStdString(), password.toStdString(), nickname.toStdString(), img, us.getSiteId(), us.getHome());
     //cl->editUser(usNew);
 
     //------------------------------------------------------------------PARTE DA CANCELLARE
@@ -87,31 +97,45 @@ void changeUserInfo::setClientDispatcher(Symposium::clientdispatcher *cl){
 
 void changeUserInfo::errorConnection()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->confirm->setDisabled(false);
+    ui->cancel->setDisabled(false);
     errorWindow = new errorconnection(this);
     errorWindow->show();
 }
 
 void changeUserInfo::errorConnectionLogout()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->confirm->setDisabled(false);
+    ui->cancel->setDisabled(false);
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
     errorLog->show();
 }
 
-void changeUserInfo::errorUsernameEditUser()
+void changeUserInfo::errorEditUser(std::string errorMess)
 {
-    ui->erroruser->show();
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->confirm->setDisabled(false);
+    ui->cancel->setDisabled(false);
+    ui->error->setText(QString::fromStdString(errorMess));
+    ui->error->show();
 }
 
-void changeUserInfo::errorPasswordEditUser()
-{
-    ui->errorpassword->show();
-}
+
 
 void changeUserInfo::successEditUser()
 {
     this->close();
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->confirm->setDisabled(false);
+    ui->cancel->setDisabled(false);
     QString stringa="Your information has been successfully modified";
     QMessageBox::information(parentWidget(),
                              tr("Confirm"), stringa, QMessageBox::Ok);

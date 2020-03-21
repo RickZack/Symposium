@@ -12,7 +12,7 @@ class unsuccessdeleteaccount : public QDialog
     Q_OBJECT
 
 public:
-    explicit unsuccessdeleteaccount(QWidget *parent = nullptr);
+    explicit unsuccessdeleteaccount(QWidget *parent = nullptr, std::string error="");
     ~unsuccessdeleteaccount();
 
 private slots:
@@ -20,6 +20,7 @@ private slots:
 
 private:
     Ui::unsuccessdeleteaccount *ui;
+    std::string error;
 };
 
 #endif // UNSUCCESSDELETEACCOUNT_H

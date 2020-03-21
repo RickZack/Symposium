@@ -133,40 +133,14 @@ text-align: left;
   <widget class="QLabel" name="formatError">
    <property name="geometry">
     <rect>
-     <x>74</x>
-     <y>430</y>
+     <x>70</x>
+     <y>370</y>
      <width>461</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
     <string>Invalid format of link</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="dirError">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>350</y>
-     <width>521</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>The directory, you chose, does not exist or the owner(s) deleted requested file.</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="privError">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>370</y>
-     <width>391</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>You chose too big privilege, try with a smaller one</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="name">
@@ -183,7 +157,7 @@ text-align: left;
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>410</y>
+     <y>350</y>
      <width>401</width>
      <height>16</height>
     </rect>
@@ -218,7 +192,33 @@ text-align: left;
     </rect>
    </property>
    <property name="text">
-    <string>Sorry, too late! the link is not valid anymore, contact the owner of the file</string>
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="gif">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>420</y>
+     <width>71</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="waiting">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>440</y>
+     <width>55</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Waiting...</string>
    </property>
   </widget>
  </widget>

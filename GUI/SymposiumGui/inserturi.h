@@ -25,9 +25,7 @@ class inserturi : public QDialog
 public:
     explicit inserturi(QWidget *parent = nullptr);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
-    void invalidUri();
-    void privilegeTooBig();
-    void DirectoryFileNotExist();
+    void unsuccessInsert(std::string errorMess);
     void errorConnection();
     void errorConnectionLogout();
     void successInsert();

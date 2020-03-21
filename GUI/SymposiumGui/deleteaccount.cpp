@@ -20,12 +20,13 @@ void deleteAccount::successDeleteAccount()
                              tr("Delete Account"), tr("Your account has been successfully deleted"), QMessageBox::Ok);
 }
 
-void deleteAccount::unsuccessDeleteAccount()
+void deleteAccount::errorDeleteUser(std::string errorMess)
 {
     this->close();
-    window=new unsuccessdeleteaccount(this);
-    window->show();
+    window=new unsuccessdeleteaccount(this, errorMess);
+    window->exec();
 }
+
 
 deleteAccount::~deleteAccount()
 {
@@ -45,7 +46,7 @@ void deleteAccount::setClientDispatcher(Symposium::clientdispatcher *cl){
 void deleteAccount::errorConnection()
 {
     errorWindow = new errorconnection(this);
-    errorWindow->show();
+    errorWindow->exec();
 }
 
 void deleteAccount::errorConnectionLogout()
@@ -53,7 +54,7 @@ void deleteAccount::errorConnectionLogout()
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
-    errorLog->show();
+    errorLog->exec();
 }
 
 

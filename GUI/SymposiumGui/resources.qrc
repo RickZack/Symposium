@@ -72,5 +72,6 @@
         <file>Document1.txt</file>
         <file>Document2.txt</file>
         <file>Document3.txt</file>
+        <file>icon/ajax-loader.gif</file>
     </qresource>
 </RCC>

@@ -6,6 +6,7 @@
 #include "../../uri.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include <QMovie>
 
 namespace Symposium{
 class clientdispatcher;
@@ -21,7 +22,7 @@ class activenonlink : public QDialog
 
 public:
     explicit activenonlink(QWidget *parent = nullptr, int documentId=0);
-    void errorLink();
+    void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
@@ -29,9 +30,10 @@ public:
     ~activenonlink();
 
 private slots:
-    void on_pushButton_2_clicked();
 
-    void on_pushButton_clicked();
+    void on_ok_clicked();
+
+    void on_cancel_clicked();
 
 private:
     Ui::activenonlink *ui;

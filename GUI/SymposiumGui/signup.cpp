@@ -12,32 +12,42 @@ signup::signup(QWidget *parent) :
     QPixmap pix(":/resources/avatar/beaver.png");
     iconPath=":/resources/avatar/beaver.png";
     ui->haveto->hide();
-    ui->usernameExist->hide();
-    ui->passwordNotCorrect->hide();
+    ui->errorMess->hide();
     int w=ui->img->width();
     int h=ui->img->height();
     ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    ui->waiting->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 }
 
 void signup::errorConnection()
 {
+    ui->iconButt->setDisabled(false);
+    ui->signin->setDisabled(false);
+    ui->cancel->setDisabled(false);
     errorWindow = new errorconnection(this);
-    errorWindow->show();
+    errorWindow->exec();
 }
 
-void signup::errorUsernameSignUp()
+void signup::errorSignUp(std::string errorMess)
 {
-    ui->usernameExist->show();
+    ui->iconButt->setDisabled(false);
+    ui->signin->setDisabled(false);
+    ui->cancel->setDisabled(false);
+    ui->errorMess->setText(QString::fromStdString(errorMess));
+    ui->errorMess->show();
 }
 
-void signup::errorPasswordSignUp()
-{
-    ui->passwordNotCorrect->show();
-}
 
 void signup::successSignUp()
 {
     hide();
+    ui->iconButt->setDisabled(false);
+    ui->signin->setDisabled(false);
+    ui->cancel->setDisabled(false);
     homeWindow= new home(parentWidget());
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(homeWindow);
@@ -57,8 +67,7 @@ signup::~signup()
 void signup::on_signin_clicked()
 {
     ui->haveto->hide();
-    ui->usernameExist->hide();
-    ui->passwordNotCorrect->hide();
+    ui->errorMess->hide();
     QString username= ui->username->text();
     QString password = ui->password->text();
     QString nickname =ui->nickname->text();
@@ -93,7 +102,7 @@ void signup::on_signin_clicked()
 void signup::on_iconButt_clicked()
 {
     iconWindow = new icon(this);
-    iconWindow->show();
+    iconWindow->exec();
 }
 
 void signup::chooseIcon()
@@ -116,6 +125,15 @@ void signup::reject()
         if (resBtn == QMessageBox::Yes)
         {
             QDialog::reject();
-            cl->logout();
+            //cl->closeConnection();
         }
+}
+
+void signup::waiting()
+{
+    ui->waiting->show();
+    ui->gif->show();
+    ui->iconButt->setDisabled(true);
+    ui->signin->setDisabled(true);
+    ui->cancel->setDisabled(true);
 }

@@ -1,7 +1,7 @@
 #include "onlineusers.h"
 #include "ui_onlineusers.h"
 #include "Dispatcher/clientdispatcher.h"
-
+#include <QMovie>
 
 
 
@@ -35,7 +35,11 @@ onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, int do
         ui->modify->click();
     listusers();
     insertusers();
-
+    ui->waiting->hide();
+    ui->gif->hide();
+    QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
+    ui->gif->setMovie(movie);
+    movie->start();
 
 }
 
@@ -94,6 +98,9 @@ void onlineusers::setClientDispatcher(Symposium::clientdispatcher *cl){
 
 void onlineusers::successEditPrivilege()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->button->setDisabled(false);
     QMessageBox::information(parentWidget(),
                              tr("Modify Privilege"), tr("The privilege was successfully modify!"), QMessageBox::Ok);
 
@@ -104,24 +111,33 @@ void onlineusers::successEditPrivilege()
 
 void onlineusers::errorEditPrivilege(std::string errorMess)
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->button->setDisabled(false);
     QString error=QString::fromStdString(errorMess);
     QMessageBox::information(parentWidget(),
-                             tr("Modify Privilege"), error, QMessageBox::Ok);
+                             tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
 }
 
 void onlineusers::errorConnection()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->button->setDisabled(false);
     errorWindow = new errorconnection(this);
-    errorWindow->show();
+    errorWindow->exec();
 }
 
 void onlineusers::errorConnectionLogout()
 {
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->button->setDisabled(false);
     errorLog = new errorlogout(this);
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();
-    errorLog->show();
+    errorLog->exec();
 }
 
 void onlineusers::on_button_clicked()
@@ -152,9 +168,13 @@ void onlineusers::on_button_clicked()
         if (resBtn == QMessageBox::Yes)
         {
             //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
+            ui->waiting->show();
+            ui->gif->show();
+            ui->button->setDisabled(true);
 
             //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
             changeList();
+
             //---------------------------------------------------------------------------------
         }
 }
