@@ -62,7 +62,7 @@ namespace Symposium {
         return std::get<0>(lhs)<std::get<0>(rhs) && std::get<1>(lhs)<std::get<1>(rhs);
     }
 
-    //class clientdispatcher;
+//    class clientdispatcher;
 
     /**
      * @brief class used to model a client of Symposium system
@@ -79,7 +79,7 @@ namespace Symposium {
         std::forward_list<std::shared_ptr<file>> activeFile;                      /**< list of active documents */
         std::forward_list<document *> activeDoc;                                  /**< list of files the active documents are related to */
         std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, MyColor>> userColors;       /**< map {siteId, documentId}->{user, color}  */
-        //clientdispatcher* dispatcher;                                             /**< pointer to client dispatcher */
+//        clientdispatcher* dispatcher;                                             /**< pointer to client dispatcher */
         std::forward_list<std::shared_ptr<clientMessage>> unanswered;             /**< messages sent by client that have not been received an answer */
 
         /*
@@ -488,9 +488,18 @@ namespace Symposium {
         virtual ~SymClient() = default;
 
 //        void setClientDispatcher(clientdispatcher *cl);
+		
+		const user getLoggedUser();
 
+        const std::forward_list<std::pair<const user *, sessionData>> onlineUsersonDocument(int documentID);
+
+        const std::unordered_map<std::string, privilege> allUsersonDocument(int documentID);
+
+		
     private:
         document* getActiveDocumentbyID(uint_positive_cnt::type id);
+		
+		const std::shared_ptr<file> getFilebyDocumentID(int id);
 
         /**
              * @brief set all the details of the user just logged

@@ -50,6 +50,9 @@ class notepad;
 class signup;
 class inserturi;
 class home;
+class directory;
+class onlineusers;
+class alluser;
 
 namespace Ui{
     class exit;
@@ -61,6 +64,8 @@ class changeUserInfo;
 class activecounterlink;
 class activetimerlink;
 class activealwayslink;
+class activenonlink;
+
 
 
 const int TEMPOATTESA = 2000;       //Tempo per cui si attende risposta dal server
@@ -89,6 +94,10 @@ namespace Symposium{
         activetimerlink* finestraActiveTimerLink;       //9
         activealwayslink* finestraActiveAlwaysLink;     //10
         Ui::exit* finestraEsci;                         //11
+        directory* finestraDirectory;                   //12
+        onlineusers* finestraOnlineUser;                //13
+        alluser* finestraAllUser;                       //14
+        activenonlink* finestraActiveNonLink;           //15
         std::vector<std::pair<int,notepad*>> finestreDocumenti;         //coppia resourceID-Puntatore a finestra
         //std::shared_ptr<clientMessage> message;      //Contiene il messaggio che abbiamo inviato e di cui attendiamo risposta dal server
 
@@ -140,7 +149,7 @@ namespace Symposium{
         askResMessage createNewDir(const std::string &path, const std::string &name);
         symbolMessage localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index);
         symbolMessage localRemove(int resourceId, const std::pair<int, int> indexes);
-        privMessage editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName, privilege newPrivilege);
+        privMessage editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, int documentID);
         uriMessage shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
         askResMessage renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
         askResMessage removeResource(const std::string &resPath, const std::string &resName);
@@ -185,6 +194,16 @@ namespace Symposium{
         void successLogin();
 
         void successSignUp();
+
+        void successLogout();
+
+        void successDeleteAccount();
+
+        void successEditUser();
+
+        void successInsertUri();
+
+        void successEditPrivilege();
 
 
         /**
@@ -266,6 +285,12 @@ namespace Symposium{
          */
         void setActiveAlwaysLink(activealwayslink *aal);
 
+        void setOnlineUser(onlineusers *ou);
+
+        void setAllUser(alluser *au);
+
+        void setActiveNonLink(activenonlink *anl);
+
 
     private:
         /*int getmsgaction(const std::shared_ptr<clientMessage> Message);
@@ -288,6 +313,7 @@ namespace Symposium{
         void editUserExpired();
         void openNewSourceExpired();
         void editPrivilegeExpired();
+        void logoutExpired();
     };
 }
 
