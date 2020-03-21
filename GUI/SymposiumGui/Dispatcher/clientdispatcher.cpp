@@ -34,6 +34,8 @@
 #include "../deleteaccount.h"
 #include "../changeuserinfo.h"
 #include "../textedit.h"
+#include "../onlineusers.h"
+#include "../alluser.h"
 #include "../../../filesystem.h"
 #include "clientdispatcher.h"
 
@@ -46,9 +48,7 @@ clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), finestreD
     //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
     connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
     qDebug() << "Connection Successful\n";
-    //this->client.setClientDispatcher(this);
-    this->finestraLogin = nullptr;
-    this->finestraSignup = nullptr;
+    this->client.setClientDispatcher(this);
 }
 
 void clientdispatcher::readyRead(){
@@ -83,23 +83,55 @@ void clientdispatcher::readyRead(){
         mes->invokeMethod(this->client);
     } catch (messageException& e) {
         //eccezione di insuccesso dell'operazione
+
         switch(currentWindow){
         case 1:{
-            if(this->finestraLogin!=nullptr)
-                this->finestraLogin->errorSignIn();
+            //this->finestraLogin->errorSignIn("Login Error! Please check data entered");
         }case 2:{
-            //finestraSignup->errorSignUp(e.getErrorCodeMsg());
+            //this->finestraSignup->errorSignUp(mes->getErrDescr());
+        }case 3:{
+            //QUESTO FUNZIONA SE SI CAMBIA IL TIPO DELLE ECCEZIONI CHE VENGONO LANCIATE IN MESSAGE COME SCRITTO SUL GRUPPO, ALTRIMENTI DA VARIARE
+
+            //this->finestraInsertUri->unsuccessInsert(mes->getErrDescr());
+        }case 5:{
+            //this->finestraEliminaAccount->errorDeleteUser(mes->getErrDescr());
+        }case 7:{
+
+            //CHANGEUSERDATA, DA RIVEDERE PERCHE' RICADIAMO IN QUESTO CASO IN 2 ECCEZIONI, CHE DEVO POTER DISCRIMINARE
+
+            //this->finestraModificaUser->errorEditUser(mes->getErrDescr());
+        }case 11:{
+            //this->finestraEsci->errorConnectionLogout(mes->getErrDescr());
+        }case 13:{
+            this->finestraOnlineUser->errorEditPrivilege(mes->getErrDescr());
+        }case 14:{
+            this->finestraAllUser->errorEditPrivilege(mes->getErrDescr());
         }
         }
 
         //qDebug() << QString::fromStdString(mes->getErrDescr());
     } catch (SymClientException& e){
-        //eccezione di relatedMessage non trovato,
+        //eccezione di relatedMessage non trovato
+
+        //DA VEDERE CHE MESSAGGIO DEVE DARE SULLA FINESTRA
+
         switch(currentWindow){
         case 1:{
             this->finestraLogin->errorSignIn();
         }case 2:{
-
+            //this->finestraSignup->errorSignUp();
+        }case 3:{
+            //this->finestraInsertUri->unsuccessInsert();
+        }case 5:{
+            //this->finestraEliminaAccount->errorDeleteUser();
+        }case 7:{
+            //this->finestraModificaUser->errorEditUser();
+        }case 11:{
+            //this->finestraEsci->errorLogout();
+        }case 13:{
+            //this->finestraOnlineUser->errorEditPrivilege();
+        }case 14:{
+            //this->finestraAllUser->errorEditPrivilege();
         }
         }
     }
@@ -227,7 +259,7 @@ void clientdispatcher::openNewSource(const std::string &resourceId, privilege re
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        //((TextEdit*)this->currentWindow)->errorConnection();
+        this->finestraInsertUri->errorConnection();
     }
 }
 
@@ -279,8 +311,8 @@ symbolMessage clientdispatcher::localRemove(int resourceId, const std::pair<int,
     }
 }
 
-privMessage clientdispatcher::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName, privilege newPrivilege) {
-    std::shared_ptr<privMessage> mess = std::make_shared<privMessage>(this->client.editPrivilege(targetUser,resPath,resName,newPrivilege));
+privMessage clientdispatcher::editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, int documentID) {
+    std::shared_ptr<privMessage> mess = std::make_shared<privMessage>(this->client.editPrivilege(targetUser,resPath, std::to_string(documentID), newPrivilege));
     try {
         //disconnettiamo il timer da altri eventuali slot
         this->timer.disconnect();
@@ -289,8 +321,11 @@ privMessage clientdispatcher::editPrivilege(const std::string &targetUser, const
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
-        //errore nell'invio del messaggio
-        //((TextEdit*)this->currentWindow)->errorConnection();
+        if(this->currentWindow==13){
+            this->finestraOnlineUser->errorConnection();
+        }else{
+            this->finestraAllUser->errorConnection();
+        }
     }
 }
 
@@ -353,7 +388,7 @@ void clientdispatcher::editUser(user &newUserData) {
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        //((changeUserInfo*)this->currentWindow)->errorConnection();
+        this->finestraModificaUser->errorConnection();
     }
 }
 
@@ -368,16 +403,22 @@ void clientdispatcher::removeUser() {
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-       //((deleteAccount*)this->currentWindow)->errorConnection();
+        this->finestraEliminaAccount->errorConnection();
     }
 }
 
 void clientdispatcher::logout() {
     std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.logout());
     try {
+        //disconnettiamo il timer da altri eventuali slot
+        this->timer.disconnect();
+        //connettiamo il timer al giusto metodo
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::logoutExpired);
+        //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
-        //errore nell'invio del messaggio, ma non scateniamo nulla
+        //errore nell'invio del messaggio
+        //this->finestraEsci->errorConnection();
     }
 }
 
@@ -401,16 +442,40 @@ void clientdispatcher::successSignUp(){
     this->finestraSignup->successSignUp();
 }
 
+void clientdispatcher::successLogout(){
+    //this->finestraEsci->successLogout();
+}
+
+void clientdispatcher::successDeleteAccount(){
+    this->finestraEliminaAccount->successDeleteAccount();
+}
+
+void clientdispatcher::successEditUser(){
+    this->finestraModificaUser->successEditUser();
+}
+
+void clientdispatcher::successInsertUri(){
+    this->finestraInsertUri->successInsert();
+}
+
+void clientdispatcher::successEditPrivilege(){
+    if(this->currentWindow==13){
+       this->finestraOnlineUser->successEditPrivilege();
+    }else{
+       this->finestraAllUser->successEditPrivilege();
+    }
+}
+
 const std::forward_list<std::pair<const user *, sessionData>> clientdispatcher::onlineUser(int documentID){
-    //return (this->client.getActiveDocumentbyID(documentID))->getActiveUsers();
+    return (this->client.onlineUsersonDocument(documentID));
 }
 
 std::unordered_map<std::string, privilege> clientdispatcher::allUser(int documentID){
-    //return (this->client.getFilebyDocumentID(documentID))->getUsers();
+    return (this->client.allUsersonDocument(documentID));
 }
 
 user clientdispatcher::getUser(){
-    //return this->client.getLoggedUser();
+    return this->client.getLoggedUser();
 }
 
 std::string clientdispatcher::showHome(){
@@ -451,8 +516,8 @@ void clientdispatcher::setExit(Ui::exit *ex){
 }
 
 void clientdispatcher::setDirectory(directory *dr){
-    //DA RIVEDERE
-    //this->currentWindow = dr;
+    this->finestraDirectory = dr;
+    this->currentWindow = 12;
 }
 
 void clientdispatcher::setDeleteAccount(deleteAccount *da){
@@ -491,11 +556,32 @@ void clientdispatcher::signinExpired(){
     qDebug() << "Timer scaduto\n";
 }
 
+void clientdispatcher::setOnlineUser(onlineusers *ou){
+    this->finestraOnlineUser = ou;
+    this->currentWindow = 13;
+}
+
+void clientdispatcher::setAllUser(alluser *au){
+    this->finestraAllUser = au;
+    this->currentWindow = 14;
+}
+
+void clientdispatcher::setActiveNonLink(activenonlink *anl){
+    this->finestraActiveNonLink = anl;
+    this->currentWindow = 15;
+}
+
 void clientdispatcher::signupExpired(){
     this->timer.stop();
     qDebug() << "Timer scaduto\n";
     //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
     //((signup*)this->currentWindow)->errorConnection();
+}
+
+void clientdispatcher::logoutExpired(){
+    this->timer.stop();
+    qDebug() << "Timer scaduto\n";
+    //VEDERE COSA BISOGNA FARE
 }
 
 void clientdispatcher::removeUserExpired(){
@@ -525,317 +611,3 @@ void clientdispatcher::editPrivilegeExpired(){
     //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
     //((TextEdit*)this->currentWindow)->errorConnection();
 }
-
-
-
-
-
-
-
-
-/*void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageToSend){
-    //questa funzione invia il messaggio al server
-    //QByteArray dat;
-    //QDataStream out(&dat, QIODevice::WriteOnly);
-    //std::stringstream stream;
-    //boost::archive::text_oarchive oa(stream);
-    //oa << t;
-    //out << t;
-    //this->socket.write(&oa,sizeof(oa));
-    //this->socket.write("ciao");
-
-    QTextStream stream(&(this->socket));
-    int msgaction;
-    int msgtype;
-
-    try{
-        msgaction = getmsgaction(MessageToSend);
-        msgtype = getClassOfMessage(*MessageToSend);
-
-    }catch(Symposium::clientdispatcherException t){
-        //messaggio con action non tra quelli possibili oppure classe del messaggio sconosciuta, annulliamo l'invio del messaggio
-
-        //VEDERE COME FARE PER ANNULLARE INVIO DEL MESSAGGIO
-    }
-
-
-    QString straction(msgaction);
-    QString strtype(msgtype);
-
-    QString actionOwner(getActionOwner(MessageToSend));
-
-    try {
-
-        switch(msgtype){
-        case 1:{
-            //messaggio askresmessage
-            auto mess = dynamic_cast<const askResMessage*>(MessageToSend.get());
-            QString path = QString::fromStdString(mess->getPath());
-            QString name = QString::fromStdString(mess->getName());
-            QString resID = QString::fromStdString(mess->getResourceId());
-            QString msgId = QString::number(mess->getMsgId());
-            QString accMod = QString::number(getPrivilege(mess->getaccessMode()));
-            //abbiamo tutti i campi del messaggio, componiamo lo stream
-            stream << msgtype << ";" << msgaction << ";" << actionOwner << ";" << path << ";" << name << ";" << resID << ";" << accMod << ";" << msgId;
-            qDebug() << msgtype << ";" << msgaction << ";" << actionOwner << ";" << path << ";" << name << ";" << resID << ";" << accMod << ";" << msgId << "\n";
-            break;
-        }case 2:{
-            //messaggio signupmessage
-            auto mess = dynamic_cast<const signUpMessage*>(MessageToSend.get());
-            QString newUser(getnewUser(mess->getNewUser()));
-            QString msgId = QString::number(mess->getMsgId());
-            //abbiamo tutti i campi del messaggio, componiamo lo stream
-            stream << msgtype << ";" << msgaction << ";" << actionOwner << ";" << newUser << ";" << msgId;
-            qDebug() << msgtype << ";" << msgaction << ";" << actionOwner << ";" << newUser << ";" << msgId << "\n";
-            break;
-        }case 3:{
-            //messaggio updatedocmessage
-            auto mess = dynamic_cast<const updateDocMessage*>(MessageToSend.get());
-            QString resID = QString::number(mess->getResourceId());
-            QString msgId = QString::number(mess->getMsgId());
-            //abbiamo tutti i campi del messaggio, componiamo lo stream
-            stream << msgtype << ";" << msgaction << ";" << actionOwner << ";" << resID << ";" << msgId;
-            qDebug() << msgtype << ";" << msgaction << ";" << actionOwner << ";" << resID << ";" << msgId << "\n";
-            break;
-        }case 9:{
-            //messaggio privmessage
-            auto mess = dynamic_cast<const privMessage*>(MessageToSend.get());
-            QString result(getmsgOutcome(mess->getResult()));
-            QString resID = QString::fromStdString(mess->getResourceId());
-            QString targUser = QString::fromStdString(mess->getTargetUser());
-            QString priv = QString::number(getPrivilege(mess->getNewPrivilege()));
-            QString msgId = QString::number(mess->getMsgId());
-            //abbiamo tutti i campi del messaggio, componiamo lo stream
-            stream << msgtype << ";" << msgaction << ";" << actionOwner << ";" << result << ";" << resID << ";" << targUser<< ";" << priv << ";" << msgId;
-            qDebug() << msgtype << ";" << msgaction << ";" << actionOwner << ";" << result << ";" << resID << ";" << targUser<< ";" << priv << ";" << msgId << "\n";
-            break;
-        }case 10:{
-            //messaggio symbolmessage
-            auto mess = dynamic_cast<const symbolMessage*>(MessageToSend.get());
-            QString result(getmsgOutcome(mess->getResult()));
-            QString siteID = QString::number(mess->getSiteId());
-            QString resID = QString::number(mess->getResourceId());
-            QString symbol = getSymbolserialized(mess->getSym());
-            QString msgId = QString::number(mess->getMsgId());
-            //abbiamo tutti i campi del messaggio, componiamo lo stream
-            stream << msgtype << ";" << msgaction << ";" << actionOwner << ";" << result << ";" << siteID << ";" << resID << ";" << symbol << ";" << msgId;
-            qDebug() << msgtype << ";" << msgaction << ";" << actionOwner << ";" << result << ";" << siteID << ";" << resID << ";" << symbol << ";" << msgId << "\n";
-            break;
-        }case 11:{
-            //messaggio urimessage
-            auto mess = dynamic_cast<const uriMessage*>(MessageToSend.get());
-            QString result(getmsgOutcome(mess->getResult()));
-            QString path = QString::fromStdString(mess->getPath());
-            QString name = QString::fromStdString(mess->getName());
-            QString msgId = QString::number(mess->getMsgId());
-            //abbiamo tutti i campi del messaggio, componiamo lo stream
-            stream << msgtype << ";" << msgaction << ";" << actionOwner << ";" << result << ";" << path << ";" << name << ";" << getUriserialized(mess->getSharingPrefs()) <<
-                      ";" << msgId;
-            qDebug() << msgtype << ";" << msgaction << ";" << actionOwner << ";" << result << ";" << path << ";" << name << ";" << getUriserialized(mess->getSharingPrefs()) <<
-                        ";" << msgId << "\n";
-            break;
-        }case 12:{
-            //messaggio userdatamessage
-            auto mess = dynamic_cast<const userDataMessage*>(MessageToSend.get());
-            QString result(getmsgOutcome(mess->getResult()));
-
-            //DA VEDERE COME INVIARE L'UTENTE, IN QUANTO CONTIENE ALL'INTERNO TUTTA LA SUA DIRECTORY, QUINDI SAREBBE TUTTA DA SERIALIZZARE!
-        }default:{
-            //Se cadiamo in questo caso, significa che il messaggio da inviare NON è un tipo di messaggio che il client può inviare, quindi ERRORE
-            throw clientdispatcherException(clientdispatcherException::MsgActionNotAllowed, UnpackFileLineFunction());
-        }
-
-        }
-    }catch (Symposium::clientdispatcherException t){
-        //action del messaggio non tra quelle consentite per l'invio da parte del client, quindi notifichiamo l'annullamento dell'invio
-
-        //VEDERE COME FARE PER ANNULLARE INVIO DEL MESSAGGIO
-    }
-
-    qDebug() << "Send Succesfull\n";
-
-}*/
-
-/*int clientdispatcher::getmsgaction(const std::shared_ptr<clientMessage> Message){
-    switch(Message->getAction()){
-    case Symposium::msgType::registration:
-        return 1;
-        break;
-    case Symposium::msgType::login:
-        return 2;
-        break;
-    case Symposium::msgType::changeUserData:
-        return 3;
-        break;
-    case Symposium::msgType::changeUserPwd:
-        return 4;
-        break;
-    case Symposium::msgType::removeUser:
-        return 5;
-        break;
-    case Symposium::msgType::logout:
-        return 6;
-        break;
-    case Symposium::msgType::createRes:
-        return 7;
-        break;
-    case Symposium::msgType::createNewDir:
-        return 8;
-        break;
-    case Symposium::msgType::openRes:
-        return 9;
-        break;
-    case Symposium::msgType::openNewRes:
-        return 10;
-        break;
-    case Symposium::msgType::changeResName:
-        return 11;
-        break;
-    case Symposium::msgType::removeRes:
-        return 12;
-        break;
-    case Symposium::msgType::mapChangesToUser:
-        return 13;
-        break;
-    case Symposium::msgType::changePrivileges:
-        return 14;
-        break;
-    case Symposium::msgType::shareRes:
-        return 15;
-        break;
-    case Symposium::msgType::insertSymbol:
-        return 16;
-        break;
-    case Symposium::msgType::removeSymbol:
-        return 17;
-        break;
-    case Symposium::msgType::addActiveUser:
-        return 18;
-        break;
-    case Symposium::msgType::removeActiveUser:
-        return 19;
-        break;
-    case Symposium::msgType::closeRes:
-        return 20;
-        break;
-    default:
-        throw clientdispatcherException(clientdispatcherException::UnknownMessageAction, UnpackFileLineFunction());
-        break;
-    }
-}
-
-int clientdispatcher::getClassOfMessage(const clientMessage& Message){
-    if(dynamic_cast<const Symposium::askResMessage*>(&Message)){
-        return 1;
-    }else if(dynamic_cast<const Symposium::signUpMessage*>(&Message)){
-        return 2;
-    }else if(dynamic_cast<const Symposium::updateDocMessage*>(&Message)){
-        return 3;
-    }else if(dynamic_cast<const Symposium::serverMessage*>(&Message)){
-        return 4;
-    }else if(dynamic_cast<const Symposium::loginMessage*>(&Message)){
-        return 5;
-    }else if(dynamic_cast<const Symposium::mapMessage*>(&Message)){
-        return 6;
-    }else if(dynamic_cast<const Symposium::sendResMessage*>(&Message)){
-        return 7;
-    }else if(dynamic_cast<const Symposium::updateActiveMessage*>(&Message)){
-        return 8;
-    }else if(dynamic_cast<const Symposium::privMessage*>(&Message)){
-        return 9;
-    }else if(dynamic_cast<const Symposium::symbolMessage*>(&Message)){
-        return 10;
-    }else if(dynamic_cast<const Symposium::uriMessage*>(&Message)){
-        return 11;
-    }else if(dynamic_cast<const Symposium::userDataMessage*>(&Message)){
-        return 12;
-    }else if(dynamic_cast<const Symposium::clientMessage*>(&Message)){
-        return 13;
-    }else{
-        throw clientdispatcherException(clientdispatcherException::UnknownClassOfMessage, UnpackFileLineFunction());
-    }
-}
-
-QString clientdispatcher::getActionOwner(const std::shared_ptr<clientMessage> Message){
-    //la funzione restituisce l'actionOwner del messaggio, come user;pass
-    QString s = QString::fromStdString(Message->getActionOwner().first + ";" + Message->getActionOwner().second);
-    return s;
-}
-
-int clientdispatcher::getPrivilege(const privilege priv){
-    switch(priv){
-    case Symposium::privilege::none:
-        return 1;
-    case Symposium::privilege::readOnly:
-        return 2;
-    case Symposium::privilege::modify:
-        return 3;
-    case Symposium::privilege::owner:
-        return 4;
-    default:
-        return 0;
-    }
-}
-
-QString clientdispatcher::getnewUser(const user& utente){
-    //l'ultimo parametro del nuovo utente sarebbe il puntatore al suo filesystem, ma essendo sempre nullo (perchè utente ancora da creare), lo ometto
-    QString s = QString::fromStdString(utente.getUsername() + ";" + utente.getPwdHash() + ";" + utente.getNickname() + ";" + utente.getIconPath() + ";") +
-            QString::number(utente.getSiteId());
-    return s;
-}
-
-int clientdispatcher::getmsgOutcome(const msgOutcome& Message){
-    switch(Message){
-    case Symposium::msgOutcome::failure:
-        return 1;
-    case Symposium::msgOutcome::success:
-        return 2;
-    default:
-        return 0;
-    }
-}
-
-QString clientdispatcher::getSymbolserialized(const symbol& sym){
-    wchar_t cr = sym.getCh();
-    std::vector<int> vc = sym.getPos();
-    QString s = QString::fromWCharArray(&cr) + ";" + sym.getSiteId() + ";" + sym.getCounter() + ";";
-    std::vector<int>::iterator it = vc.begin();
-    while(it != vc.end()){
-        //i vari elementi sono separati da uno spazio " "
-        s = s + " " + *it;
-        it++;
-    }
-    s = s + ";" + sym.getVerified();
-    return s;
-}
-
-QString clientdispatcher::getUriserialized(const uri& uri){
-    int actpol;
-    QString s;
-    switch(uri.getActivePolicy()){
-    case Symposium::uriPolicy::inactive:
-        actpol = 1;
-        break;
-    case Symposium::uriPolicy::activeAlways:
-        actpol = 2;
-        break;
-    case Symposium::uriPolicy::activeCount:
-        actpol = 3;
-        break;
-    case Symposium::uriPolicy::activeTimer:
-        actpol = 4;
-        break;
-    default:
-        actpol = 0;
-        break;
-    }
-    s = QString::number(actpol) + ";" + QString::number(uri.getSharesLeft()) + ";";
-    //convertiamo lo stopTime dell'uri in stringa
-    std::time_t t = std::chrono::system_clock::to_time_t(uri.getStopTime());
-    std::string ts = std::ctime(&t);
-    ts.resize(ts.size()-1);
-    s = s + QString::fromStdString(ts) + ";" + QString::number(getPrivilege(uri.getGranted()));
-    return s;
-}*/
-
-

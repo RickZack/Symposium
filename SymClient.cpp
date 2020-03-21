@@ -54,7 +54,7 @@ signUpMessage SymClient::signUp(const std::string &username, const std::string &
 void SymClient::signUp(const user &logged) {
     setLoggedUser(logged);
     //notifichiamo alla gui il successo
-    //this->dispatcher->successSignUp();
+//    this->dispatcher->successSignUp();
 }
 
 clientMessage SymClient::logIn(const std::string &username, const std::string &pwd) {
@@ -100,6 +100,8 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
     activeDoc.push_front(&doc);
+	//notifichiamo alla gui il successo
+//    this->dispatcher->successInsertUri();
 }
 
 askResMessage SymClient::createNewSource(const std::string &path, const std::string &name) {
@@ -150,8 +152,8 @@ void SymClient::remoteRemove(uint_positive_cnt::type resourceId, const symbol &r
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                      privilege newPrivilege) {
     //FIXME: non è questo che devi passare al messaggio, vedi documentazione
-    std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
-    std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {SymClient::getLoggedUser().getUsername(),""}, msgOutcome::success, idres, targetUser, newPrivilege));
+    //std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
+    std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, resName, targetUser, newPrivilege));
     unanswered.push_front(mess);
     return *mess;
 }
@@ -159,6 +161,8 @@ privMessage SymClient::editPrivilege(const std::string &targetUser, const std::s
 privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                    privilege newPrivilege, bool msgRcv) {
     return this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege);
+	//notifichiamo alla gui il successo
+//    this->dispatcher->successEditPrivilege();
 }
 
 uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) {    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0));
@@ -218,6 +222,8 @@ const user SymClient::editUser(user &newUserData, bool msgRcv) {
     user old = SymClient::getLoggedUser();
     this->setLoggedUser(newUserData);
     return old;
+	//notifichiamo alla gui il successo
+//    this->dispatcher->successEditUser();
 }
 
 clientMessage SymClient::removeUser() {
@@ -229,7 +235,8 @@ clientMessage SymClient::logout() {
 }
 
 void SymClient::logout(bool msgRcv){
-    //TODO: Boh, conferma azione. Fatto solo per uniformità. Magari ci sarà da dire qualcosa alla GUI.
+/*    if(msgRcv==true)
+        this->dispatcher->successLogout();*/
 }
 
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
@@ -268,12 +275,31 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
     this->dispatcher = cl;
 }*/
 
+const user SymClient::getLoggedUser(){
+    return this->loggedUser;
+}
+
 void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
     //TODO: to implement
 }
 
 filterShared::filterShared(const user &currentUser): currentUser{currentUser} {
     //TODO: to implement
+}
+
+const std::forward_list<std::pair<const user *, sessionData>> SymClient::onlineUsersonDocument(int documentID){
+    return ((this->getActiveDocumentbyID(documentID))->getActiveUsers());
+}
+
+const std::unordered_map<std::string, privilege> SymClient::allUsersonDocument(int documentID){
+    return ((this->getFilebyDocumentID(documentID))->getUsers());
+}
+
+const std::shared_ptr<file> SymClient::getFilebyDocumentID(int id){
+    for (std::shared_ptr<file> it:this->activeFile){
+        if((it->getDoc()).getId() == id)
+            return (it);
+    }
 }
 
 bool filterShared::operator()(std::shared_ptr<file> file) {
