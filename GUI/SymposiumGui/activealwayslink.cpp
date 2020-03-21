@@ -3,9 +3,9 @@
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
 
-activealwayslink::activealwayslink(QWidget *parent, int documentId) :
+activealwayslink::activealwayslink(QWidget *parent, int documentId, std::string pathFile) :
     QDialog(parent),
-    ui(new Ui::activealwayslink),  documentId(documentId)
+    ui(new Ui::activealwayslink),  documentId(documentId), pathFile(pathFile)
 {
     ui->setupUi(this);
     ui->writer->click();
@@ -102,7 +102,7 @@ void activealwayslink::on_ok_clicked()
     ui->gif->show();
     ui->cancel->setDisabled(true);
     ui->ok->setDisabled(true);
-    //cl->shareResource(documentId, u);
+    //cl->shareResource(pathFile, documentId, u);
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     this->close();

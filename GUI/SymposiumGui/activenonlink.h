@@ -21,7 +21,7 @@ class activenonlink : public QDialog
     Q_OBJECT
 
 public:
-    explicit activenonlink(QWidget *parent = nullptr, int documentId=0);
+    explicit activenonlink(QWidget *parent = nullptr, int documentId=0, std::string pathFile="");
     void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
@@ -38,6 +38,7 @@ private slots:
 private:
     Ui::activenonlink *ui;
     Symposium::uri u;
+    std::string pathFile;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;

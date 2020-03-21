@@ -79,9 +79,10 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
         {
             QString nameLabel=QString::fromStdString(it.first->getUsername());
             QLabel *labelCursor=new QLabel("|", this);
-            labelCursor->setStyleSheet("color: red; font-weight: bold;");
+            QString str="#ffd1dc";
+            labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
-            newLabel->setStyleSheet("color: red; font-size: 9px; font-weight: bold;");
+            newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
             std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
             labels.insert(std::pair<int, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
 
@@ -109,9 +110,10 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
         {
             QString nameLabel=QString::fromStdString(it.first->getUsername());
             QLabel *labelCursor=new QLabel("|", this);
-            labelCursor->setStyleSheet("color: red; font-weight: bold;");
+            QString str="#ffd1dc";
+            labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
-            newLabel->setStyleSheet("color: red; font-size: 9px; font-weight: bold;");
+            newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
             std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
             labels.insert(std::pair<int, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
 
@@ -155,9 +157,10 @@ void qtexteditlabels::addUser(int siteId, std::string name)
     j=0;
     QString nameLabel=QString::fromStdString(name);
     QLabel *labelCursor=new QLabel("|", this);
-    labelCursor->setStyleSheet("color: red; font-weight: bold;");
+    QString str="#ffd1dc";
+    labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
     QLabel *newLabel=new QLabel(nameLabel, this);
-    newLabel->setStyleSheet("color: red; font-size: 9px; font-weight: bold;");
+    newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
     std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
     labels.insert(std::pair<int, std::pair<QLabel*, QLabel*>>(siteId, pairs));
 

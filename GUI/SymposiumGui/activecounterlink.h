@@ -21,7 +21,7 @@ class activecounterlink : public QDialog
     Q_OBJECT
 
 public:
-    explicit activecounterlink(QWidget *parent = nullptr, int documentId=0);
+    explicit activecounterlink(QWidget *parent = nullptr, int documentId=0, std::string pathFile="");
     void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
@@ -42,7 +42,7 @@ private slots:
 
 private:
     Ui::activecounterlink *ui;
-    std::string pathToFile;
+    std::string pathFile;
     Symposium::privilege privilegeToGrant;
     unsigned int numCounter;
     Symposium::uri u;

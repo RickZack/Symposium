@@ -26,7 +26,7 @@ class activetimerlink : public QDialog
     Q_OBJECT
 
 public:
-    explicit activetimerlink(QWidget *parent = nullptr, int documentId=0);
+    explicit activetimerlink(QWidget *parent = nullptr, int documentId=0, std::string pathFile="");
     void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
@@ -47,7 +47,7 @@ private slots:
 
 private:
     Ui::activetimerlink *ui;
-    std::string pathToFile;
+    std::string pathFile;
     Symposium::privilege privilegeToGrant;
     Symposium::uri u;
     Symposium::clientdispatcher *cl;

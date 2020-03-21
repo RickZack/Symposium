@@ -1,9 +1,9 @@
 #include "activenonlink.h"
 #include "ui_activenonlink.h"
 
-activenonlink::activenonlink(QWidget *parent, int documentId) :
+activenonlink::activenonlink(QWidget *parent, int documentId, std::string pathFile) :
     QDialog(parent),
-    ui(new Ui::activenonlink), documentId(documentId)
+    ui(new Ui::activenonlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
     ui->waiting->hide();
@@ -77,7 +77,7 @@ void activenonlink::on_ok_clicked()
     ui->cancel->setDisabled(true);
     ui->ok->setDisabled(true);
     u.deactivate();
-    //cl->shareResource(documentId, u);
+    //cl->shareResource(pathFile, documentId, u);
 }
 
 void activenonlink::on_cancel_clicked()

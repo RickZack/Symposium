@@ -1,9 +1,9 @@
 #include "activetimerlink.h"
 #include "ui_activetimerlink.h"
 
-activetimerlink::activetimerlink(QWidget *parent, int documentId) :
+activetimerlink::activetimerlink(QWidget *parent, int documentId, std::string pathFile) :
     QDialog(parent),
-    ui(new Ui::activetimerlink), documentId(documentId)
+    ui(new Ui::activetimerlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
     ui->time->setDateTime(QDateTime::currentDateTime());
@@ -92,13 +92,13 @@ void activetimerlink::on_ok_clicked()
     ui->gif->show();
     ui->cancel->setDisabled(true);
     ui->ok->setDisabled(true);
-    //cl->shareResource(documentId, u);
+    //cl->shareResource(pathFile, documentId, u);
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     this->close();
     QMessageBox::information(parentWidget(),
                                     tr("Links"), "All links are active now until "+QString::fromStdString(time)
-                             +".\n This is the link: "+QString::fromStdString(pathToFile), QMessageBox::Ok);
+                             +".\n This is the link: "+QString::fromStdString(pathFile), QMessageBox::Ok);
     //----------------------------------------------------------------------------------------------------
 
 

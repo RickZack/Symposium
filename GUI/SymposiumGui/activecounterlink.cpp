@@ -2,9 +2,9 @@
 #include "ui_activecounterlink.h"
 #include <QMovie>
 
-activecounterlink::activecounterlink(QWidget *parent, int documentId) :
+activecounterlink::activecounterlink(QWidget *parent, int documentId, std::string pathFile) :
     QDialog(parent),
-    ui(new Ui::activecounterlink), documentId(documentId)
+    ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
     ui->writer->click();
@@ -82,7 +82,7 @@ void activecounterlink::on_ok_clicked()
     if(numCounter!=0)
     {
         u.activateCount(numCounter, privilegeToGrant);
-        //cl->shareResource(documentId, u);
+        //cl->shareResource(pathFile, documentId, u);
         ui->waiting->show();
         ui->gif->show();
         ui->cancel->setDisabled(true);
@@ -94,7 +94,7 @@ void activecounterlink::on_ok_clicked()
     QMessageBox::information(parentWidget(),
                                     tr("Links"), "All links are active now for a limit of another "
                                  +QString::number(numCounter)+" shares.\n This is the link: "
-                                 +QString::fromStdString(pathToFile), QMessageBox::Ok);
+                                 +QString::fromStdString(pathFile), QMessageBox::Ok);
 
     //----------------------------------------------------------------------------------
 

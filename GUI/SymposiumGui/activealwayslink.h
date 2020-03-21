@@ -21,7 +21,7 @@ class activealwayslink : public QDialog
     Q_OBJECT
 
 public:
-    explicit activealwayslink(QWidget *parent = nullptr,  int documentId=0);
+    explicit activealwayslink(QWidget *parent = nullptr,  int documentId=0, std::string pathFile="");
     void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
@@ -49,6 +49,7 @@ private:
     errorconnection *errorWindow;
     errorlogout *errorLog;
     int documentId;
+    std::string pathFile;
 };
 
 
