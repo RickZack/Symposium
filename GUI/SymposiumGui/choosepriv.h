@@ -13,11 +13,17 @@ class choosepriv : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit choosepriv(QWidget *parent = nullptr);
+    explicit choosepriv(QWidget *parent = nullptr,std::string path=" ", std::string idSource=" ", std::string oldPriv=" ");
     ~choosepriv();
-    void getPath(std::string path,std::string idSource);
     void successOpen();
     void failureOpen();
+
+    std::string path;
+    std::string idSource;
+    std::string oldPriv;
+
+    Symposium::privilege priv=Symposium::privilege::none;
+    Symposium::privilege privOpen=Symposium::privilege::none;
 
 private slots:
     void on_pushButton_clicked();
@@ -29,8 +35,6 @@ private:
     Ui::choosepriv *ui;
     notepad *notepadWindow;
     std::string privilege;
-    std::string path;
-    std::string idSource;
 };
 
 #endif // CHOOSEPRIV_H

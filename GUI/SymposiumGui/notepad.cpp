@@ -46,9 +46,9 @@ const QString rsrcPath = ":/resources/images/win";
 
 #include "Dispatcher/clientdispatcher.h"
 
-notepad::notepad(QWidget *parent) :
+notepad::notepad(QWidget *parent, int documentId, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile) :
     QMainWindow(parent),
-    ui(new Ui::notepad)
+    documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),ui(new Ui::notepad)
 {
     ui->setupUi(this);
     this->setCentralWidget(ui->textEdit);
@@ -87,7 +87,7 @@ notepad::notepad(QWidget *parent) :
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
     Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
-    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::readOnly, 10, 3)};
+    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 10, 3)};
     std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 7, 6)};
     std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 20, 0)};
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
@@ -109,16 +109,6 @@ notepad::notepad(QWidget *parent) :
 notepad::~notepad()
 {
     delete ui;
-}
-void notepad::setId(std::string id)
-{
-    this->idDoc=id;
-
-}
-
-void notepad::setIdDoc(std::string id)
-{
-    this->documentId=std::stoi(id);
 }
 
 void notepad::moveUserCursor(int siteID, int block, int column)

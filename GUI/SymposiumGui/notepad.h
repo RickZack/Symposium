@@ -35,11 +35,10 @@ class notepad : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit notepad(QWidget *parent = nullptr);
+    explicit notepad(QWidget *parent = nullptr, int documentId=0,Symposium::privilege priv=Symposium::privilege::none,Symposium::privilege privOpen=Symposium::privilege::none,std::string pathToFile=" ");
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~notepad();
-    void setId(std::string id);
-    void setIdDoc(std::string id);
+
     void moveUserCursor(int siteID, int block, int column);
     void removeUserCursor(int siteID);
     void addUserCursor(int siteID, std::string username);
@@ -74,9 +73,9 @@ private:
 
     onlineusers *onlineuser;
     alluser *alluserWindow;
+    std::string pathToFile;
     Symposium::privilege priv;
     Symposium::privilege privOpen;
-    std::string pathToFile;
     activetimerlink *timerlinkwindow;
     activecounterlink *counterlinkwindow;
     activealwayslink *alwayslinkwindow;

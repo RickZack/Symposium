@@ -15,7 +15,7 @@ directory::directory(QWidget *parent) :
 
     // METODO DISPATCHER CHE RESTITUISCE LA STRINGA
     // str=showHome(); === getStr()=Ksenia
-    str="directory 1 Folder1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
+    str="directory 1 Folder1\n file 9 Folder1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
     int count=number_elements(str);
     listGenerate(str, count);
     values.push_back(str);
@@ -46,6 +46,7 @@ directory::~directory()
 {
     delete ui;
 }
+
 
 
 void directory::listGenerate(std::string str_first, int count)
@@ -115,14 +116,38 @@ std::string directory::searchForId(std::string word,std::string str,int count)
             std::string id=separate_word(str);
             std::string name=separate_word(str);
             std::string priv=separate_word(str);
-            if(name==word){
-                id_to_return=id;
-                i=count;
-            }
             }
 }
 
    return id_to_return;
+}
+
+std::pair<std::string,std::string> directory::searchForPriv(std::string word,std::string str,int count)
+{
+    std::string priv_to_return;
+    std::string id_to_return;
+    std::pair<std::string, std::string> idPriv;
+    for(int i=0;i<count;i++){
+
+            std::string type=separate_word(str);
+            if(type=="directory"){
+                std::string id=separate_word(str);
+                std::string name=separate_word(str);
+            }else{
+                std::string id=separate_word(str);
+                std::string name=separate_word(str);
+                std::string priv=separate_word(str);
+                if(name==word){
+                    priv.erase(std::remove(priv.begin(), priv.end(), '\n'), priv.end());
+                    priv_to_return=priv;
+                    id_to_return=id;
+                    i=count;
+                }
+           }
+       }
+
+    idPriv={id_to_return,priv_to_return};
+    return idPriv;
 }
 
 std::string directory::separate_word(std::string& string)
@@ -140,7 +165,6 @@ std::string directory::separate_word(std::string& string)
     return separato;
 }
 
-//this method is useful to delete from the string the \n in such way to visualize the list of element without spaces.
 std::string directory::generateString(std::string string)
 {
     for(size_t i = 0; i < string.size(); i++)
@@ -149,7 +173,6 @@ std::string directory::generateString(std::string string)
     return string;
 }
 
-// this method counts the number of elements in the string
 int directory::number_elements(std::string& string)
 {
     int count=0;
@@ -159,7 +182,6 @@ int directory::number_elements(std::string& string)
     return count;
 }
 
-// this method opens the home window
 void directory::on_actionHome_triggered()
 {
     home *homeWindow=new home(this);
@@ -167,7 +189,6 @@ void directory::on_actionHome_triggered()
     this->hide();
 }
 
-// this method opens the uri window
 void directory::on_actionUri_triggered()
 {
     uriWindow=new inserturi(this);
@@ -175,8 +196,7 @@ void directory::on_actionUri_triggered()
     this->hide();
 }
 
-
-// this method opens a selected folder or a selected document or a selected symlink
+//opens a selected source
 void directory::on_pushButton_clicked()
 {
 
@@ -185,11 +205,10 @@ void directory::on_pushButton_clicked()
         foreach(QListWidgetItem *items, selectedItem){
              QString value= items->whatsThis();
              std::string nameSource=items->text().toStdString();
-             std::string id=searchForId(nameSource,str,count);
              // dermine the path of the folders in which I enter.
-
              if(value=="directory")
              {
+                 std::string id=searchForId(nameSource,str,count);
                  path+=id+'/'; // ok lo crea in modo corretto
                  std::string pth=path; //solo per visualizzare che lo crea in modo corretto. Dopo si può cancellare
                  aperto++;
@@ -197,19 +216,20 @@ void directory::on_pushButton_clicked()
                  // str1=cl->getStr(INT ID);
                  std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
                  str=str1;
+
                  this->openWindow(str);
 
              }
 
              else if(value=="file")
 
-                 // id and path
+                 // id and path e privilegio con cui apre
              {
-                 std::string id=searchForId(nameSource,str,count);
+                 std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
+                 std::string id=idPriv.first;
+                 std::string initialPriv=idPriv.second;
                  // I have to open the choosepriv first
-                 chooseprivWindow= new choosepriv(this);
-                 chooseprivWindow->getPath(path,id);
-                 //this->hide();
+                 chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
              }
              else
              {
@@ -218,14 +238,14 @@ void directory::on_pushButton_clicked()
                  // path e nome che ce li ho.
 
 
+
+
              }
 
      }// foreach
 
 }
 
-//this method opens the new window referred to another folder and it saves in the List<QString> the string referred to the attual folder
-// this is useful to move from a folder to another one.
 void directory::openWindow(std::string str1){
     ui->myListWidget->clear();
     int counter=number_elements(str1);
@@ -236,18 +256,20 @@ void directory::openWindow(std::string str1){
     this->show();
 }
 
-
-//-------------------------------------------------------------------------------------
-// REMOUVE RESOURCE
-
-// this method deletes a selected folder or a selected document or a selected symlink
+//acts when the user clicks on the button "DELETE"
 void directory::on_pushButton_2_clicked()
 {
-
+   std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
    foreach(QListWidgetItem *items, item){
        std::string nameSource=items->text().toStdString();
-       std::string id=searchForId(nameSource,str,count);
+       std::string typeSource=items->whatsThis().toStdString();
+       if(typeSource=="directory"){
+            id=searchForId(nameSource,str,count);
+       }else{
+           std::pair<std::string,std::string> idPriv=searchForPriv(nameSource,str,count);
+           id=idPriv.first;
+       }
        //cl->remouveResource(path,id);
 
        //-------------------------------------------------------------------
@@ -305,10 +327,6 @@ void directory::successRemouve(){
 void directory::failureRemouve(std::string msg){
     QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
 }
-//-----------------------------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------------------------
-// CREATE NEW DIR
 
 // this method creates a new folder
 void directory::on_pushButton_3_clicked()
@@ -358,7 +376,6 @@ void directory::successCreate(std::string id){
 void directory::failureCreate(std::string msg){
     QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
 }
-//-----------------------------------------------------------------------------------------
 
 //this method closes the window directory
 void directory::closeEvent(QCloseEvent *event)
@@ -376,14 +393,17 @@ void directory::closeEvent(QCloseEvent *event)
 
 }
 
-//this method creates a new document
+// creates a new file
 void directory::on_pushButton_4_clicked()
 {
 
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
-    ui->name_2->setText(" ");
-    //std::string id=createNewSource(path,nameDocument);
+
+    ui->name_2->setText(" "); // da rimuovere
+    //cl->createNewSource(path,nameDocument);
+    //----------------------------------------------------------------------
+    // DA RIMUOVERE
     std::string id="1"; //PER ESEMPIO
 
     if(id!="-1")
@@ -400,9 +420,26 @@ void directory::on_pushButton_4_clicked()
     {
       QMessageBox::warning(this, "Error Message","It is no possible to open the selected Document");
     }
+    //-----------------------------------------------------------------------------------------------
 }
 
-//this method acts when the back button is clicked.
+void directory::successNewSource(std::string id, std::string priv){
+
+    QString name= ui->name_2->text();
+    std::string nameDocument=name.toStdString();
+    ui->name_2->setText(" ");
+    count++;
+    std::string new_str=" file "+id+' '+name.toStdString()+' '+priv+'\n';
+    str=str+new_str;
+    ui->myListWidget->clear();
+    int count=number_elements(str);
+    listGenerate(str,count);
+}
+
+void directory::failureNewSource(std::string msg){
+    QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
+}
+
 void directory::on_back_button_clicked()
 {
     if(aperto!=0)
@@ -413,6 +450,11 @@ void directory::on_back_button_clicked()
             values.removeLast();
         // prelevo la stringa relativa alla finestra precedente a quella aperta
         std::string new_str= values.last();
+
+        //two times because I have to remouve id/n
+        path.pop_back();
+        path.pop_back();
+
         dim=values.size();
         int count=number_elements(new_str);
         listGenerate(new_str,count);
@@ -427,19 +469,12 @@ void directory::on_back_button_clicked()
     this->show();
 }
 
-
-
-//----------------------------------------------------------------------------------------
-// RENAME RESOURCE
-
-// if the rename button is clicked
 void directory::on_renameButt_clicked()
 {
     ui->renameName->show();
     ui->renameLabel->show();
     ui->okButton->show();
 }
-
 
 void directory::on_okButton_clicked()
 {
@@ -484,10 +519,10 @@ void directory::failureRename(std::string msg){
 }
 
 void directory::errorConnection(){
-    QMessageBox::information(this,"Error Message","ERROR CONNECTION");
+    errorWindow = new errorconnection(this);
+    errorWindow->show();
 }
 
-//-------------------------------------------------------------------------------------------
 void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
