@@ -27,9 +27,11 @@ class alluser : public QDialog
 public:
     Symposium::privilege privelege;
     Symposium::user us;
+    std::string pathFile;
     std::unordered_map<std::string, Symposium::privilege> users;
     int documentID;
-    explicit alluser(QWidget *parent = nullptr);
+    explicit alluser(QWidget *parent = nullptr, Symposium::privilege privelege=Symposium::privilege::readOnly,
+                     int documentID=0, Symposium::user user=Symposium::user(), std::string pathFile="");
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void successEditPrivilege();
     void errorEditPrivilege(std::string errorMess);

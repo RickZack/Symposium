@@ -64,6 +64,7 @@ SOURCES += \
         ../../lib/hash/sha256.cpp \
         notepad.cpp \
         onlineusers.cpp \
+        qtexteditlabels.cpp \
         sigin.cpp \
         signup.cpp \
         textedit.cpp \
@@ -108,6 +109,7 @@ HEADERS += \
         ../../lib/hash/sha256.h \
         notepad.h \
         onlineusers.h \
+        qtexteditlabels.h \
         sigin.h \
         signup.h \
         textedit.h \

@@ -23,8 +23,10 @@ class onlineusers : public QDialog
     Q_OBJECT
 
 public:
-    explicit onlineusers(QWidget *parent = nullptr);
+    explicit onlineusers(QWidget *parent = nullptr, Symposium::privilege privelege=Symposium::privilege::readOnly,
+                         int documentID=0, Symposium::user user=Symposium::user(), std::string pathFile="");
     int documentId;
+    std::string pathFile;
     Symposium::user user;
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
 

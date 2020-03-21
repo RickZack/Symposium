@@ -2,9 +2,9 @@
 #include "ui_alluser.h"
 #include "Dispatcher/clientdispatcher.h"
 
-alluser::alluser(QWidget *parent) :
+alluser::alluser(QWidget *parent, Symposium::privilege privelege, int documentID, Symposium::user user, std::string pathFile) :
     QDialog(parent),
-    ui(new Ui::alluser)
+    privelege(privelege), us(user), pathFile(pathFile),  documentID(documentID),  ui(new Ui::alluser)
 {
     ui->setupUi(this);
     listusers();
@@ -138,7 +138,7 @@ void alluser::on_button_clicked()
                                                                     QMessageBox::Yes);
         if (resBtn == QMessageBox::Yes)
             ;
-        //cl->editPrivilege(username, newPrivelege);
+        //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
     }
 }
 

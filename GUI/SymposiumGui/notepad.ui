@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTextEdit" name="textEdit">
+   <widget class="qtexteditlabels" name="textEdit">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -141,6 +141,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>qtexteditlabels</class>
+   <extends>QTextEdit</extends>
+   <header location="global">qtexteditlabels.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

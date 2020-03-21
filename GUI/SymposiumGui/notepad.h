@@ -40,6 +40,9 @@ public:
     ~notepad();
     void setId(std::string id);
     void setIdDoc(std::string id);
+    void moveUserCursor(int siteID, int block, int column);
+    void removeUserCursor(int siteID);
+    void addUserCursor(int siteID, std::string username);
 
 
 private slots:
@@ -60,6 +63,8 @@ private slots:
 
 
 
+    void on_textEdit_cursorPositionChanged();
+
 private:
     Ui::notepad *ui;
     QString mFilename;
@@ -70,6 +75,7 @@ private:
     onlineusers *onlineuser;
     alluser *alluserWindow;
     Symposium::privilege priv;
+    Symposium::privilege privOpen;
     std::string pathToFile;
     activetimerlink *timerlinkwindow;
     activecounterlink *counterlinkwindow;

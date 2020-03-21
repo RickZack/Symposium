@@ -6,9 +6,9 @@
 
 
 
-onlineusers::onlineusers(QWidget *parent) :
+onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, int documentID, Symposium::user user, std::string pathFile) :
     QDialog(parent),
-    ui(new Ui::onlineusers)
+    pathFile(pathFile), user(user),  ui(new Ui::onlineusers),  documentID(documentID), privelege(privelege)
 {
     ui->setupUi(this);
     ui->tree->setColumnCount(2);
@@ -151,7 +151,7 @@ void onlineusers::on_button_clicked()
                                                                     QMessageBox::Yes);
         if (resBtn == QMessageBox::Yes)
         {
-            //cl->editPrivilege(username, newPrivelege);
+            //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
 
             //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
             changeList();
