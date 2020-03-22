@@ -53,11 +53,6 @@ class home;
 class directory;
 class onlineusers;
 class alluser;
-
-namespace Ui{
-    class exit;
-}
-
 class deleteAccount;
 class choosedir;
 class changeUserInfo;
@@ -93,7 +88,6 @@ namespace Symposium{
         activecounterlink* finestraActiveCounterLink;   //8
         activetimerlink* finestraActiveTimerLink;       //9
         activealwayslink* finestraActiveAlwaysLink;     //10
-        Ui::exit* finestraEsci;                         //11
         directory* finestraDirectory;                   //12
         onlineusers* finestraOnlineUser;                //13
         alluser* finestraAllUser;                       //14
@@ -149,11 +143,15 @@ namespace Symposium{
         askResMessage createNewDir(const std::string &path, const std::string &name);
         symbolMessage localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index);
         symbolMessage localRemove(int resourceId, const std::pair<int, int> indexes);
-        privMessage editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, int documentID);
-        uriMessage shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
+        void editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, int documentID);
+        void shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
         askResMessage renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
         askResMessage removeResource(const std::string &resPath, const std::string &resName);
         updateDocMessage closeSource(int resourceId);
+        void moveMyCursor(int resId, int block, int column);
+        void addUserCursor(int siteID, std::string username, int resourceID);
+        void moveUserCursor(int resId, int block, int column, int siteId);
+        void removeUserCursor(int siteID, int resourceID);
 
         /**
          * @brief method to provide the current user to the GUI
@@ -195,8 +193,6 @@ namespace Symposium{
 
         void successSignUp();
 
-        void successLogout();
-
         void successDeleteAccount();
 
         void successEditUser();
@@ -204,6 +200,10 @@ namespace Symposium{
         void successInsertUri();
 
         void successEditPrivilege();
+
+        void successShareResource(std::string path);
+
+        void closeConnection();
 
 
         /**
@@ -236,12 +236,6 @@ namespace Symposium{
          * @param a pointer to the Home window
          */
         void setHome(home *ho);
-
-        /**
-         * @brief this method assign to @ref finestraEsci the pointer to the Exit window
-         * @param a pointer to the Exit window
-         */
-        void setExit(Ui::exit *ex);
 
         /**
          * @brief this method assign to @ref finestraSceltaDir the pointer to the directory window
@@ -301,6 +295,7 @@ namespace Symposium{
         QString getnewUser(const user& utente);
         QString getSymbolserialized(const symbol& sym);
         QString getUriserialized(const uri& uri);*/
+        notepad* getCorrectNotepadbyResourceID(int resourceID);
 
         //classi per eccezioni
         class sendFailure{};
@@ -314,6 +309,7 @@ namespace Symposium{
         void openNewSourceExpired();
         void editPrivilegeExpired();
         void logoutExpired();
+        void shareResourceExpired();
     };
 }
 

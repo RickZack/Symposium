@@ -160,9 +160,9 @@ privMessage SymClient::editPrivilege(const std::string &targetUser, const std::s
 
 privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                    privilege newPrivilege, bool msgRcv) {
-    return this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege);
-	//notifichiamo alla gui il successo
+    //notifichiamo alla gui il successo
 //    this->dispatcher->successEditPrivilege();
+    return this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege);
 }
 
 uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) {    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0));
@@ -172,6 +172,8 @@ uriMessage SymClient::shareResource(const std::string &resPath, const std::strin
 
 std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv) {    //TODO: modified this method, return the file: FATTO
     std::shared_ptr<filesystem> fil = this->getLoggedUser().shareResource(resPath, resName, newPrefs);
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successShareResource("/" + resPath);
     return fil;
 }
 
@@ -221,9 +223,9 @@ userDataMessage SymClient::editUser(user &newUserData) {
 const user SymClient::editUser(user &newUserData, bool msgRcv) {
     user old = SymClient::getLoggedUser();
     this->setLoggedUser(newUserData);
-    return old;
-	//notifichiamo alla gui il successo
+    //notifichiamo alla gui il successo
 //    this->dispatcher->successEditUser();
+    return old;
 }
 
 clientMessage SymClient::removeUser() {
@@ -235,8 +237,7 @@ clientMessage SymClient::logout() {
 }
 
 void SymClient::logout(bool msgRcv){
-/*    if(msgRcv==true)
-        this->dispatcher->successLogout();*/
+    //non facciamo niente
 }
 
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
@@ -251,10 +252,16 @@ void SymClient::setUserColors(const std::map<uint_positive_cnt::type, user> &sit
 
 void SymClient::addActiveUser(uint_positive_cnt::type resourceId, user &targetUser, privilege Priv) {
     getActiveDocumentbyID(resourceId)->access(targetUser, Priv);
+    //dobbiamo aggiungiamo il cursore alla GUI, se necessario
+    if(Priv!=privilege::readOnly){
+//        this->dispatcher->addUserCursor(targetUser.getSiteId(),targetUser.getUsername(),resourceId);
+    }
 }
 
 void SymClient::removeActiveUser(uint_positive_cnt::type resourceId, user &targetUser) {
     getActiveDocumentbyID(resourceId)->close(targetUser);
+    //dobbiamo rimuovere il cursore dalla GUI, se il cursore non era presente, non la GUI non fa niente
+//    this->dispatcher->removeUserCursor(targetUser.getSiteId(),resourceId);
 }
 
 const user& SymClient::getLoggedUser() const{
@@ -274,10 +281,6 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
 /*void SymClient::setClientDispatcher(clientdispatcher *cl){
     this->dispatcher = cl;
 }*/
-
-const user SymClient::getLoggedUser(){
-    return this->loggedUser;
-}
 
 void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
     //TODO: to implement
@@ -324,10 +327,15 @@ document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
 }
 
+const user SymClient::userData(){
+    return this->loggedUser;
+}
+
 cursorMessage SymClient::updateCursorPos(uint_positive_cnt::type resourceId, unsigned int row, unsigned int col) {
     return cursorMessage(msgType::updateCursor, {"",""}, msgOutcome::success, 0, 0, 0, 0);
 }
 
 void SymClient::updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type resourceId, unsigned int row, unsigned int col){
     //TODO: to implement
+//    this->dispatcher->moveUserCursor(resourceId,row,col,userSiteId);
 }

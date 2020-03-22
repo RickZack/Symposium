@@ -39,7 +39,6 @@
 #include "user.h"
 #include "document.h"
 #include "message.h"
-//#include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
 
 namespace Symposium {
 /*
@@ -387,8 +386,8 @@ namespace Symposium {
          * @param condition a filter condition to apply to each document to decide whether to list it or not
          * @return the string containing the list of files that respect @e condition
          */
-/*        template<typename C, typename=std::enable_if<std::is_invocable_r<bool,C>::value>>
-        std::string show(C condition){}*/
+        template<typename C, typename=std::enable_if<std::is_invocable_r<bool,C>::value>>
+        std::string show(C condition){}
 
         /**
          * @brief visualize which user made which change in the document, using @e userColors
@@ -488,16 +487,17 @@ namespace Symposium {
         virtual ~SymClient() = default;
 
 //        void setClientDispatcher(clientdispatcher *cl);
-		
-		const user getLoggedUser();
 
         const std::forward_list<std::pair<const user *, sessionData>> onlineUsersonDocument(int documentID);
 
         const std::unordered_map<std::string, privilege> allUsersonDocument(int documentID);
 
+        const user userData();
 		
     private:
         document* getActiveDocumentbyID(uint_positive_cnt::type id);
+
+        const user* getActiveUserbyID(uint_positive_cnt::type userId, std::forward_list<std::pair<const user *, sessionData>> &l);
 		
 		const std::shared_ptr<file> getFilebyDocumentID(int id);
 

@@ -30,7 +30,6 @@
 
 #include "../sigin.h"
 #include "../signup.h"
-#include "../exit.h"
 #include "../deleteaccount.h"
 #include "../changeuserinfo.h"
 #include "../textedit.h"
@@ -86,26 +85,32 @@ void clientdispatcher::readyRead(){
 
         switch(currentWindow){
         case 1:{
-            //this->finestraLogin->errorSignIn("Login Error! Please check data entered");
+            this->finestraLogin->errorSignIn();
         }case 2:{
-            //this->finestraSignup->errorSignUp(mes->getErrDescr());
+            this->finestraSignup->errorSignUp(mes->getErrDescr());
         }case 3:{
             //QUESTO FUNZIONA SE SI CAMBIA IL TIPO DELLE ECCEZIONI CHE VENGONO LANCIATE IN MESSAGE COME SCRITTO SUL GRUPPO, ALTRIMENTI DA VARIARE
 
             //this->finestraInsertUri->unsuccessInsert(mes->getErrDescr());
         }case 5:{
-            //this->finestraEliminaAccount->errorDeleteUser(mes->getErrDescr());
+            this->finestraEliminaAccount->errorDeleteUser(mes->getErrDescr());
         }case 7:{
 
             //CHANGEUSERDATA, DA RIVEDERE PERCHE' RICADIAMO IN QUESTO CASO IN 2 ECCEZIONI, CHE DEVO POTER DISCRIMINARE
 
             //this->finestraModificaUser->errorEditUser(mes->getErrDescr());
-        }case 11:{
-            //this->finestraEsci->errorConnectionLogout(mes->getErrDescr());
+        }case 8:{
+            this->finestraActiveCounterLink->unsuccessLink(mes->getErrDescr());
+        }case 9:{
+            this->finestraActiveTimerLink->unsuccessLink(mes->getErrDescr());
+        }case 10:{
+            this->finestraActiveAlwaysLink->unsuccessLink(mes->getErrDescr());
         }case 13:{
             this->finestraOnlineUser->errorEditPrivilege(mes->getErrDescr());
         }case 14:{
             this->finestraAllUser->errorEditPrivilege(mes->getErrDescr());
+        }case 15:{
+            this->finestraActiveNonLink->unsuccessLink(mes->getErrDescr());
         }
         }
 
@@ -126,12 +131,18 @@ void clientdispatcher::readyRead(){
             //this->finestraEliminaAccount->errorDeleteUser();
         }case 7:{
             //this->finestraModificaUser->errorEditUser();
-        }case 11:{
-            //this->finestraEsci->errorLogout();
+        }case 8:{
+            //this->finestraActiveCounterLink->unsuccessLink();
+        }case 9:{
+            //this->finestraActiveTimerLink->unsuccessLink();
+        }case 10:{
+            //this->finestraActiveAlwaysLink->unsuccessLink();
         }case 13:{
             //this->finestraOnlineUser->errorEditPrivilege();
         }case 14:{
             //this->finestraAllUser->errorEditPrivilege();
+        }case 15:{
+            //this->finestraActiveNonLink->unsuccessLink();
         }
         }
     }
@@ -311,7 +322,7 @@ symbolMessage clientdispatcher::localRemove(int resourceId, const std::pair<int,
     }
 }
 
-privMessage clientdispatcher::editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, int documentID) {
+void clientdispatcher::editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, int documentID) {
     std::shared_ptr<privMessage> mess = std::make_shared<privMessage>(this->client.editPrivilege(targetUser,resPath, std::to_string(documentID), newPrivilege));
     try {
         //disconnettiamo il timer da altri eventuali slot
@@ -329,15 +340,26 @@ privMessage clientdispatcher::editPrivilege(const std::string &targetUser, std::
     }
 }
 
-uriMessage clientdispatcher::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) {
+void clientdispatcher::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) {
     std::shared_ptr<uriMessage> mess = std::make_shared<uriMessage>(this->client.shareResource(resPath,resName,newPrefs));
     try {
+        //disconnettiamo il timer da altri eventuali slot
+        this->timer.disconnect();
+        //connettiamo il timer al giusto metodo
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::shareResourceExpired);
+        //inviamo il messaggio
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
+        if(this->currentWindow==8){
+            this->finestraActiveCounterLink->errorConnection();
+        }else if(this->currentWindow==9){
+            this->finestraActiveTimerLink->errorConnection();
+        }else if(this->currentWindow==10){
+            this->finestraActiveAlwaysLink->errorConnection();
+        }else{
+            this->finestraActiveNonLink->errorConnection();
+        }
     }
 }
 
@@ -417,8 +439,7 @@ void clientdispatcher::logout() {
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
-        //errore nell'invio del messaggio
-        //this->finestraEsci->errorConnection();
+        //errore nell'invio del messaggio ma non facciamo nulla
     }
 }
 
@@ -434,16 +455,49 @@ updateDocMessage clientdispatcher::mapSiteIdToUser(const document &currentDoc) {
     }
 }
 
+void clientdispatcher::moveMyCursor(int resId, int block, int column){
+    std::shared_ptr<cursorMessage> mess = std::make_shared<cursorMessage>(this->client.updateCursorPos(resId, block, column));
+    try {
+        //inviamo il messaggio
+        sendMessage(mess);
+    } catch (clientdispatcher::sendFailure) {
+        //errore nell'invio del messaggio
+
+        //COSA FACCIAMO??
+
+    }
+}
+
+void clientdispatcher::moveUserCursor(int resId, int block, int column, int siteId){
+    notepad* finestra = this->getCorrectNotepadbyResourceID(resId);
+    finestra->moveUserCursor(siteId,block,column);
+}
+
+void clientdispatcher::addUserCursor(int siteID, std::string username, int resourceID){
+    notepad* finestra = this->getCorrectNotepadbyResourceID(resourceID);
+    finestra->addUserCursor(siteID,username);
+}
+
+void clientdispatcher::removeUserCursor(int siteID, int resourceID){
+    notepad* finestra = this->getCorrectNotepadbyResourceID(resourceID);
+    finestra->removeUserCursor(siteID);
+}
+
+
+
+notepad* clientdispatcher::getCorrectNotepadbyResourceID(int resourceID){
+    for (std::pair<int,notepad*> it:this->finestreDocumenti){
+        if(it.first == resourceID)
+            return (it.second);
+    }
+}
+
 void clientdispatcher::successLogin(){
     this->finestraLogin->successSignIn();
 }
 
 void clientdispatcher::successSignUp(){
     this->finestraSignup->successSignUp();
-}
-
-void clientdispatcher::successLogout(){
-    //this->finestraEsci->successLogout();
 }
 
 void clientdispatcher::successDeleteAccount(){
@@ -466,6 +520,22 @@ void clientdispatcher::successEditPrivilege(){
     }
 }
 
+void clientdispatcher::successShareResource(std::string path){
+    if(this->currentWindow==8){
+        this->finestraActiveCounterLink->successLink(path);
+    }else if(this->currentWindow==9){
+        this->finestraActiveTimerLink->successLink(path);
+    }else if(this->currentWindow==10){
+        this->finestraActiveAlwaysLink->successLink(path);
+    }else{
+        this->finestraActiveNonLink->successLink(path);
+    }
+}
+
+void clientdispatcher::closeConnection(){
+    this->socket.close();
+}
+
 const std::forward_list<std::pair<const user *, sessionData>> clientdispatcher::onlineUser(int documentID){
     return (this->client.onlineUsersonDocument(documentID));
 }
@@ -475,7 +545,7 @@ std::unordered_map<std::string, privilege> clientdispatcher::allUser(int documen
 }
 
 user clientdispatcher::getUser(){
-    return this->client.getLoggedUser();
+    return this->client.userData();
 }
 
 std::string clientdispatcher::showHome(){
@@ -508,11 +578,6 @@ void clientdispatcher::setInsertUri(inserturi *iu){
 void clientdispatcher::setHome(home *ho){
     this->finestraHome = ho;
     this->currentWindow = 4;
-}
-
-void clientdispatcher::setExit(Ui::exit *ex){
-    this->finestraEsci = ex;
-    this->currentWindow = 11;
 }
 
 void clientdispatcher::setDirectory(directory *dr){
@@ -606,6 +671,13 @@ void clientdispatcher::openNewSourceExpired(){
 }
 
 void clientdispatcher::editPrivilegeExpired(){
+    this->timer.stop();
+    qDebug() << "Timer scaduto\n";
+    //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
+    //((TextEdit*)this->currentWindow)->errorConnection();
+}
+
+void clientdispatcher::shareResourceExpired(){
     this->timer.stop();
     qDebug() << "Timer scaduto\n";
     //VEDERE SE BISOGNA CHIAMARE QUESTO METODO
