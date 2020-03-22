@@ -777,18 +777,26 @@
          //Needed for boost::serialization
          cursorMessage():serverMessage(msgOutcome::success, 1){}
 
-         uint_positive_cnt::type siteId;
-         uint_positive_cnt::type resourceId;
-         int row;
-         int col;
+         uint_positive_cnt::type siteId;                /**< siteId of the client that send the message */
+         uint_positive_cnt::type resourceId;            /**< resourceId of the resource on which the user cursor's position has changed */
+         int row;                                       /**< new row of the cursor */
+         int col;                                       /**< new column of the cursor */
 
      public:
          cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                        uint_positive_cnt::type siteId,
                        uint_positive_cnt::type resourceId, int row, int col, uint_positive_cnt::type msgId = 0);
 
+         /**
+          * @brief notify the server that the position of the user's cursor has changed
+          * @param server the server the user is active on
+          */
          void invokeMethod(SymServer &server) override;
 
+         /**
+          * @brief propagate the update of user cursor's position to other clients working on the same resource
+          * @param client the client on which propagate the change
+          */
          void invokeMethod(SymClient &client) override;
 
          uint_positive_cnt::type getResourceId() const;
