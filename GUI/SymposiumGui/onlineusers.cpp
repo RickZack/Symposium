@@ -15,7 +15,7 @@ onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, int do
     ui->tree->headerItem()->setText(0, "user:");
     ui->tree->headerItem()->setText(1, "privilege:");
     ui->tree->setColumnWidth(0, 200);
-    user=Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
+    this->user=Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
     privelege=Symposium::privilege::owner;
     if(privelege!=Symposium::privilege::owner)
     {
@@ -55,10 +55,11 @@ void onlineusers::listusers()
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
     Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
+    Symposium::user *u4=new Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
     std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify)};
     std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify)};
     std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly)};
-    std::pair<Symposium::user*, Symposium::sessionData> p4{&user, Symposium::sessionData(Symposium::privilege::owner)};
+    std::pair<Symposium::user*, Symposium::sessionData> p4{u4, Symposium::sessionData(Symposium::privilege::owner)};
     onlineUsers.push_front(p1);
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);
@@ -73,10 +74,10 @@ void onlineusers::insertusers()
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
         item->setIcon(0, QIcon(QString::fromStdString(it.first->getIconPath())));
-        if(user.getUsername()!=it.first->getUsername())
-            item->setText(0, QString::fromStdString(it.first->getUsername()));
+        if(user.getUsername()==it.first->getUsername())
+            item->setText(0, "(you)");
         else
-            item->setText(0, QString::fromStdString(it.first->getUsername())+" (you)");
+            item->setText(0, QString::fromStdString(it.first->getUsername()));
         std::ostringstream priv;
         priv<<it.second.p;
         item->setText(1, QString::fromStdString(priv.str()));

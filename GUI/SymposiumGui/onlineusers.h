@@ -2,6 +2,7 @@
 #define ONLINEUSERS_H
 
 #include <QDialog>
+
 #include <QMessageBox>
 #include <QTreeWidgetItem>
 #include <../../user.h>

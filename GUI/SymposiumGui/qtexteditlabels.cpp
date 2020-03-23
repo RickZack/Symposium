@@ -79,7 +79,7 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
         {
             QString nameLabel=QString::fromStdString(it.first->getUsername());
             QLabel *labelCursor=new QLabel("|", this);
-            QString str="#ffd1dc";
+            QString str="#ff0000";
             labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -110,7 +110,7 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
         {
             QString nameLabel=QString::fromStdString(it.first->getUsername());
             QLabel *labelCursor=new QLabel("|", this);
-            QString str="#ffd1dc";
+            QString str="#ff0000";
             labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -157,7 +157,7 @@ void qtexteditlabels::addUser(int siteId, std::string name)
     j=0;
     QString nameLabel=QString::fromStdString(name);
     QLabel *labelCursor=new QLabel("|", this);
-    QString str="#ffd1dc";
+    QString str="#ff0000";
     labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
     QLabel *newLabel=new QLabel(nameLabel, this);
     newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -176,12 +176,15 @@ void qtexteditlabels::addUser(int siteId, std::string name)
 
 void qtexteditlabels::removeUser(int siteId)
 {
-    QLabel *labelHide=labels.find(siteId)->second.first;
-    labelHide->hide();
-    labelHide=labels.find(siteId)->second.second;
-    labelHide->hide();
-    labels.erase(siteId);
-    cursors.erase(siteId);
+    if(labels.find(siteId)!=labels.end())
+    {
+        QLabel *labelHide=labels.find(siteId)->second.first;
+        labelHide->hide();
+        labelHide=labels.find(siteId)->second.second;
+        labelHide->hide();
+        labels.erase(siteId);
+        cursors.erase(siteId);
+    }
 }
 
 void qtexteditlabels::thisUserChangePosition(int siteId)

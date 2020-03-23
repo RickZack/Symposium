@@ -14,7 +14,7 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, int documentID
     ui->tree->headerItem()->setText(0, "user:");
     ui->tree->headerItem()->setText(1, "privilege:");
     ui->tree->setColumnWidth(0, 200);
-    us=Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
+    this->us=Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
     privelege=Symposium::privilege::owner;
     if(privelege!=Symposium::privilege::owner)
     {
@@ -111,15 +111,18 @@ void alluser::insertusers()
 {
     for(auto it:users)
     {
-        QTreeWidgetItem *item=new QTreeWidgetItem();
-        if(it.first!=us.getUsername())
-            item->setText(0, QString::fromStdString(it.first));
-        else
-            item->setText(0, QString::fromStdString(it.first)+" (you)");
-        std::ostringstream priv;
-        priv<<it.second;
-        item->setText(1, QString::fromStdString(priv.str()));
-        ui->tree->addTopLevelItem(item);
+        if(it.second!=Symposium::privilege::none)
+        {
+            QTreeWidgetItem *item=new QTreeWidgetItem();
+            if(it.first!=us.getUsername())
+                item->setText(0, QString::fromStdString(it.first));
+            else
+                item->setText(0,"(you)");
+            std::ostringstream priv;
+            priv<<it.second;
+            item->setText(1, QString::fromStdString(priv.str()));
+            ui->tree->addTopLevelItem(item);
+        }
     }
 }
 
