@@ -84,6 +84,8 @@ void SymClient::openSource(const std::string &path, const std::string &name, con
     p->replacement(fileAsked);
     activeFile.push_front(fileAsked);
     activeDoc.push_front(&doc);
+    //notifichiamo alla gui il successo
+ //   this->dispatcher->successOpenSource(doc);
 }
 
 askResMessage
@@ -115,6 +117,8 @@ void SymClient::createNewSource(const std::string &path, const std::string &name
     document& docReq = file->access(this->getLoggedUser(), privilege::owner);
     activeFile.push_front(file);
     activeDoc.push_front(&docReq);
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successCreateNewSource(std::to_string(idToAssign));
 }
 
 askResMessage SymClient::createNewDir(const std::string &path, const std::string &name) {
@@ -125,6 +129,8 @@ askResMessage SymClient::createNewDir(const std::string &path, const std::string
 
 void SymClient::createNewDir(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
     this->getLoggedUser().newDirectory(name,path,idToAssign);
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successCreateNewDir(std::to_string(idToAssign));
 }
 
 
@@ -142,11 +148,18 @@ symbolMessage SymClient::localRemove(uint_positive_cnt::type resourceId, const s
 void SymClient::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
     d->remoteInsert(newSym);
+    //notifica alla gui
+//    this->dispatcher->remoteInsert(resourceId,newSym);
 }
 
 void SymClient::remoteRemove(uint_positive_cnt::type resourceId, const symbol &rmSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
     d->remoteRemove(rmSym);
+    //notifica alla gui
+
+    //DOVE PRENDO IL PAIR DELLE COORDINATE DEL SYMBOL?
+
+    //this->dispatcher->remoteRemove(resourceId, ...);
 }
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
@@ -160,9 +173,10 @@ privMessage SymClient::editPrivilege(const std::string &targetUser, const std::s
 
 privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                    privilege newPrivilege, bool msgRcv) {
+    privilege* p = new privilege(this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege));
     //notifichiamo alla gui il successo
 //    this->dispatcher->successEditPrivilege();
-    return this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege);
+    return *p;
 }
 
 uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) {    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0));
@@ -171,7 +185,7 @@ uriMessage SymClient::shareResource(const std::string &resPath, const std::strin
 }
 
 std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv) {    //TODO: modified this method, return the file: FATTO
-    std::shared_ptr<filesystem> fil = this->getLoggedUser().shareResource(resPath, resName, newPrefs);
+    std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resName, newPrefs));
     //notifichiamo alla gui il successo
 //    this->dispatcher->successShareResource("/" + resPath);
     return fil;
@@ -187,7 +201,10 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
 std::shared_ptr<filesystem>
 SymClient::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName,
                           bool msgRcv) {
-    return getLoggedUser().renameResource(resPath, resName, newName);
+    std::shared_ptr<filesystem> f (getLoggedUser().renameResource(resPath, resName, newName));
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successRenameResource();
+    return f;
 }
 
 askResMessage SymClient::removeResource(const std::string &resPath, const std::string &resName) {
@@ -200,7 +217,10 @@ askResMessage SymClient::removeResource(const std::string &resPath, const std::s
 
 std::shared_ptr<filesystem>
 SymClient::removeResource(const std::string &resPath, const std::string &resName, bool msgRcv) {
-    return this->getLoggedUser().removeResource(resPath,resName);
+    std::shared_ptr<filesystem> f = this->getLoggedUser().removeResource(resPath,resName);
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successRemoveResource();
+    return f;
 }
 
 std::string SymClient::showDir(bool recursive) const {
@@ -278,9 +298,9 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
     throw SymClientException(SymClientException::noRelatedMessage, UnpackFileLineFunction());
 }
 
-/*void SymClient::setClientDispatcher(clientdispatcher *cl){
-    this->dispatcher = cl;
-}*/
+void SymClient::setClientDispatcher(clientdispatcher *cl){
+//    this->dispatcher = cl;
+}
 
 void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
     //TODO: to implement
@@ -338,4 +358,8 @@ cursorMessage SymClient::updateCursorPos(uint_positive_cnt::type resourceId, uns
 void SymClient::updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type resourceId, unsigned int row, unsigned int col){
     //TODO: to implement
 //    this->dispatcher->moveUserCursor(resourceId,row,col,userSiteId);
+}
+
+std::string SymClient::directoryContent(std::string &ID_Cartella, std::string &path){
+    return this->getLoggedUser().getHome()->getDir(path,ID_Cartella)->print(std::to_string(this->getLoggedUser().getSiteId()),false);
 }

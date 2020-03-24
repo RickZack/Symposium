@@ -121,7 +121,7 @@ namespace Symposium{
         void logIn(const std::string &username, const std::string &pwd);
 
 
-        askResMessage openSource(const std::string &path, const std::string &name, privilege reqPriv);
+        void openSource(const std::string &path, const std::string &name, privilege reqPriv);
 
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
@@ -139,15 +139,17 @@ namespace Symposium{
         std::unordered_map<std::string, privilege> allUser(int documentID);
 
 
-        askResMessage createNewSource(const std::string &path, const std::string &name);
-        askResMessage createNewDir(const std::string &path, const std::string &name);
-        symbolMessage localInsert(int resourceId, const symbol &newSym, const std::pair<int, int> &index);
-        symbolMessage localRemove(int resourceId, const std::pair<int, int> indexes);
+        void createNewSource(const std::string &path, const std::string &name);
+        void createNewDir(const std::string &path, const std::string &name);
+        void localInsert(int resourceId, wchar_t car, QFont font, QColor color, const std::pair<int, int> &index);
+        void localRemove(int resourceId, const std::pair<int, int> indexes);
+        void remoteInsert(int resourceId, const symbol &newSym);
+        void remoteRemove(int resourceId, std::pair<int, int> indexes);
         void editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, int documentID);
         void shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
-        askResMessage renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
-        askResMessage removeResource(const std::string &resPath, const std::string &resName);
-        updateDocMessage closeSource(int resourceId);
+        void renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
+        void removeResource(const std::string &resPath, const std::string &resName);
+        void closeSource(int resourceId);
         void moveMyCursor(int resId, int block, int column);
         void addUserCursor(int siteID, std::string username, int resourceID);
         void moveUserCursor(int resId, int block, int column, int siteId);
@@ -203,7 +205,19 @@ namespace Symposium{
 
         void successShareResource(std::string path);
 
+        void successOpenSource(document &doc);
+
+        void successRemoveResource();
+
+        void successCreateNewDir(const std::string ID);
+
+        void successCreateNewSource(const std::string ID);
+
+        void successRenameResource();
+
         void closeConnection();
+
+        std::string getStr(int ID_Cartella, std::string path);
 
 
         /**
@@ -296,6 +310,7 @@ namespace Symposium{
         QString getSymbolserialized(const symbol& sym);
         QString getUriserialized(const uri& uri);*/
         notepad* getCorrectNotepadbyResourceID(int resourceID);
+        void deleteActiveDocument(int resourceID);
 
         //classi per eccezioni
         class sendFailure{};
@@ -307,9 +322,15 @@ namespace Symposium{
         void removeUserExpired();
         void editUserExpired();
         void openNewSourceExpired();
+        void openSourceExpired();
         void editPrivilegeExpired();
         void logoutExpired();
         void shareResourceExpired();
+        void removeResourceExpired();
+        void createNewDirExpired();
+        void createNewSourceExpired();
+        void localRemoveExpired();
+        void closeSourceExpired();
     };
 }
 

@@ -61,7 +61,7 @@ namespace Symposium {
         return std::get<0>(lhs)<std::get<0>(rhs) && std::get<1>(lhs)<std::get<1>(rhs);
     }
 
-//    class clientdispatcher;
+    class clientdispatcher;
 
     /**
      * @brief class used to model a client of Symposium system
@@ -486,13 +486,15 @@ namespace Symposium {
 
         virtual ~SymClient() = default;
 
-//        void setClientDispatcher(clientdispatcher *cl);
+        void setClientDispatcher(clientdispatcher *cl);
 
         const std::forward_list<std::pair<const user *, sessionData>> onlineUsersonDocument(int documentID);
 
         const std::unordered_map<std::string, privilege> allUsersonDocument(int documentID);
 
         const user userData();
+
+        std::string directoryContent(std::string &ID_Cartella, std::string &path);
 		
     private:
         document* getActiveDocumentbyID(uint_positive_cnt::type id);
