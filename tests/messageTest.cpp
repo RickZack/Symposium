@@ -533,6 +533,7 @@ public:
     MOCK_METHOD2(verifySymbol, void(uint_positive_cnt::type, const symbol&));
     MOCK_METHOD1(retrieveRelatedMessage, std::shared_ptr<clientMessage>(const serverMessage&));
     MOCK_METHOD1(logout, void(bool msgRcv));
+    MOCK_METHOD1(removeUser, void(bool msgRcv));
 
     MOCK_METHOD4(updateCursorPos, void(uint_positive_cnt::type, uint_positive_cnt::type, unsigned int, unsigned int));
 };
@@ -671,6 +672,16 @@ TEST_F(serverMessageTest, updateActiveMsgTestCallsRemoveActiveUsers){
     //this will not be necessary in code because SymClient::removeActiveUser() is called from within the invokeMethod()
     updateActiveMessage* uam=static_cast<updateActiveMessage*>(m);
     EXPECT_CALL(client, removeActiveUser(uam->getResourceId(), sentByServer));
+    m->invokeMethod(client);
+}
+
+//Added on 24/03/2020 after adding void removeUser(bool) on client
+TEST_F(serverMessageTest, serverMsgTestCallsRemovUserOnClient){
+    cm= new clientMessage(msgType::removeUser, {clientMessageTest::username, {}});
+    m=new serverMessage(msgType::removeUser, msgOutcome::success);
+    EXPECT_CALL(client, removeUser(true));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
+
     m->invokeMethod(client);
 }
 

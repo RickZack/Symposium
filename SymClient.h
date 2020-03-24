@@ -425,7 +425,7 @@ namespace Symposium {
          * @brief confirm deletion of user
          * @param msgRcv indicates if the function is called because a userDataMessage was sent or not
          */
-        void removeUser(bool msgRcv);
+        virtual void removeUser(bool msgRcv);
 
         /**
          * @brief ask to disconnect a user from the system
