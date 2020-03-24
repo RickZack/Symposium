@@ -83,7 +83,7 @@ void SymClient::openSource(const std::string &path, const std::string &name, con
     auto p=getLoggedUser().openFile(path, name, reqPriv);
     p->replacement(fileAsked);
     activeFile.push_front(fileAsked);
-    activeDoc.push_front(&doc);
+    activeDoc.push_front({&doc, {}});
     //notifichiamo alla gui il successo
  //   this->dispatcher->successOpenSource(doc);
 }
@@ -101,7 +101,7 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
     this->getLoggedUser().getHome()->addLink(destPath, destName, resId, (*fileAsked).getName(), idToAssign);
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
-    activeDoc.push_front(&doc);
+    activeDoc.push_front({&doc,{}});
 	//notifichiamo alla gui il successo
 //    this->dispatcher->successInsertUri();
 }
@@ -116,7 +116,7 @@ void SymClient::createNewSource(const std::string &path, const std::string &name
     std::shared_ptr<file> file = this->getLoggedUser().newFile(name, path, idToAssign);
     document& docReq = file->access(this->getLoggedUser(), privilege::owner);
     activeFile.push_front(file);
-    activeDoc.push_front(&docReq);
+    activeDoc.push_front({&docReq,{}});
     //notifichiamo alla gui il successo
 //    this->dispatcher->successCreateNewSource(std::to_string(idToAssign));
 }
@@ -230,7 +230,7 @@ std::string SymClient::showDir(bool recursive) const {
 updateDocMessage SymClient::closeSource(uint_positive_cnt::type resourceId) {
     document* d = getActiveDocumentbyID(resourceId);
     activeFile.remove_if([resourceId](std::shared_ptr<file> it){return (it->getDoc().getId() == resourceId);});
-    activeDoc.remove(d);
+    activeDoc.remove_if([&](auto that){return that.first==d;});
     return updateDocMessage(msgType::closeRes, {SymClient::getLoggedUser().getUsername(), ""}, resourceId);
 }
 //FIXME: add and review tests for editUser
@@ -340,9 +340,9 @@ bool filterPrivilege::operator()(std::shared_ptr<file> file) {
 }
 
 document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
-    for (document *it:this->activeDoc){
-        if((*it).getId() == id)
-            return (it);
+    for (std::pair<document*, colorGen> it:this->activeDoc){
+        if((it.first->getId() == id))
+            return it.first;
     }
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
 }
@@ -363,3 +363,18 @@ void SymClient::updateCursorPos(uint_positive_cnt::type userSiteId, uint_positiv
 std::string SymClient::directoryContent(std::string &ID_Cartella, std::string &path){
     return this->getLoggedUser().getHome()->getDir(path,ID_Cartella)->print(std::to_string(this->getLoggedUser().getSiteId()),false);
 }
+
+void SymClient::removeUser(bool msgRcv) {
+    //TODO: to implement
+}
+
+Color SymClient::colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::type siteId) {
+    //TODO: implement
+    return Color();
+}
+
+const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &
+SymClient::getUserColors() const {
+    return userColors;
+}
+

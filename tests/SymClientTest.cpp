@@ -69,7 +69,7 @@ struct SymClientAccesser: public SymClient{
         return loggedUser;
     }
 
-    std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, MyColor>>& getUserColors(){
+    std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>& getUserColors(){
         return userColors;
     };
     std::pair<bool, std::shared_ptr<clientMessage>> thereIsUnansweredMex(int msgId){
@@ -87,12 +87,12 @@ struct SymClientAccesser: public SymClient{
         userMock= (SymClientUserMock *) &loggedUser;
     }
 
-    std::pair<bool, document*> docIsInActive(int id){
+    std::pair<bool, document* > docIsInActive(int id){
         std::pair<bool, document*> result(false, nullptr);
-        for(auto doc:activeDoc)
-            if(doc->getId()==id) {
+        for(auto entry:activeDoc)
+            if(entry.first->getId()==id) {
                 result.first = true;
-                result.second = doc;
+                result.second = entry.first;
             }
         return result;
     }
@@ -156,7 +156,7 @@ struct SymClientTest : ::testing::Test{
                      dirSentByServer(new SymClientDirMock(filename)){};
     bool everyUserHasDifferentColor(){
         auto mapped=client.getUserColors();
-        std::set<std::tuple<int, int, MyColor>> colors; //{siteId, documentId, color}
+        std::set<std::tuple<int, int, Color>> colors; //{siteId, documentId, color}
         return find_if(mapped.begin(), mapped.end(), [&colors](auto& elem){
             if(colors.find({elem.first.first, elem.first.second, elem.second.second})!=colors.end()){
                 return true;
