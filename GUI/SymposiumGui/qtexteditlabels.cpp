@@ -79,6 +79,8 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
         {
             QString nameLabel=QString::fromStdString(it.first->getUsername());
             QLabel *labelCursor=new QLabel("|", this);
+            //Color c=cl->getColor(documentId,it.first->getSiteId());
+            //QString str=QString::fromStdString(c.rgb_hex_string());
             QString str="#ff0000";
             labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
@@ -110,6 +112,8 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
         {
             QString nameLabel=QString::fromStdString(it.first->getUsername());
             QLabel *labelCursor=new QLabel("|", this);
+            //Color c=cl->getColor(documentId,it.first->getSiteId());
+            //QString str=QString::fromStdString(c.rgb_hex_string());
             QString str="#ff0000";
             labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
@@ -157,6 +161,8 @@ void qtexteditlabels::addUser(int siteId, std::string name)
     j=0;
     QString nameLabel=QString::fromStdString(name);
     QLabel *labelCursor=new QLabel("|", this);
+    //Color c=cl->getColor(documentId,it.first->getSiteId());
+    //QString str=QString::fromStdString(c.rgb_hex_string());
     QString str="#ff0000";
     labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
     QLabel *newLabel=new QLabel(nameLabel, this);

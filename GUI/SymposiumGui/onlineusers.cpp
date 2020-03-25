@@ -129,12 +129,12 @@ void onlineusers::errorConnection()
     errorWindow->exec();
 }
 
-void onlineusers::errorConnectionLogout()
+void onlineusers::errorConnectionLogout(std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();

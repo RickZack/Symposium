@@ -14,13 +14,14 @@ class errorlogout : public QDialog
     Q_OBJECT
 
 public:
-    explicit errorlogout(QWidget *parent = nullptr);
+    explicit errorlogout(QWidget *parent = nullptr, QString str="");
     ~errorlogout();
 
 private slots:
     void on_pushButton_clicked();
 
 private:
+    QString str;
     Ui::errorlogout *ui;
     MainWindow *w;
 };

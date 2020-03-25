@@ -125,19 +125,19 @@ void inserturi::errorConnection()
     ui->add->setDisabled(false);
     ui->cancel->setDisabled(false);
     errorWindow = new errorconnection(this);
-    errorWindow->show();
+    errorWindow->exec();
 }
 
-void inserturi::errorConnectionLogout()
+void inserturi::errorConnectionLogout(std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->add->setDisabled(false);
     ui->cancel->setDisabled(false);
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
-    errorLog->show();
+    errorLog->exec();
 }
 
 void inserturi::successInsert()

@@ -58,13 +58,13 @@ void activetimerlink::errorConnection()
     errorWindow->show();
 }
 
-void activetimerlink::errorConnectionLogout()
+void activetimerlink::errorConnectionLogout(std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->cancel->setDisabled(false);
     ui->ok->setDisabled(false);
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();

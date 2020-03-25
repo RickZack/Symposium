@@ -27,7 +27,7 @@ public:
     explicit changeUserInfo(QWidget *parent = nullptr);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     void errorEditUser(std::string errorMess);
     void successEditUser();
     ~changeUserInfo();

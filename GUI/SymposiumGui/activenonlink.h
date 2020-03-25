@@ -26,7 +26,7 @@ public:
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     ~activenonlink();
 
 private slots:

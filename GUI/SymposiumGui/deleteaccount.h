@@ -26,7 +26,7 @@ public:
     explicit deleteAccount(QWidget *parent = nullptr);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     void successDeleteAccount();
     void errorDeleteUser(std::string errorMess);
     ~deleteAccount();

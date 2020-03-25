@@ -49,6 +49,7 @@ SOURCES += \
         inserturi.cpp \
         main.cpp \
         mainwindow.cpp\
+        ../../Color.cpp\
         ../../uri.cpp\
         ../../privilege.cpp\
         ../../SymposiumException.cpp\
@@ -91,6 +92,7 @@ HEADERS += \
         icon.h \
         inserturi.h \
         mainwindow.h\
+        ../../Color.h\
         ../../uri.h \
         ../../privilege.h\
         ../../SymposiumException.h \

@@ -27,7 +27,7 @@ public:
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void unsuccessInsert(std::string errorMess);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     void successInsert();
     ~inserturi();
 
