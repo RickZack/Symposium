@@ -30,6 +30,7 @@
 #include <cmath>
 #include <ios>
 #include <sstream>
+#include <boost/random/random_device.hpp>
 #include "Color.h"
 
 using namespace Symposium;
@@ -39,9 +40,10 @@ Color::Color(uint8_t r, uint8_t g, uint8_t b) : rgb_dec(std::make_tuple(r,g,b)){
 Color::Color() : Color(0, 0, 0){}
 
 colorGen::colorGen() {
-    //TODO: use C++11 or Boost library for randomness
-    srand(time(NULL));
-    token=rand();
+    boost::random::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_real_distribution<> dis(1.0, 2.0);
+    token=dis(generator);
 }
 
 Color colorGen::operator()() {

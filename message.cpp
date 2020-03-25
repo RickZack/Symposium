@@ -123,7 +123,7 @@ void clientMessage::invokeMethod(SymServer &server) {
             break;
         }
         default:
-            throw messageException(messageException::notClient, UnpackFileLineFunction());
+            break;
     }
 
 }
@@ -134,6 +134,10 @@ void clientMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(action==msgType::logout)
     {
         client.logout(true);
+    }
+    if(action==msgType::removeUser)
+    {
+        client.removeUser(true);
     }
 }
 
@@ -201,7 +205,7 @@ void askResMessage::invokeMethod(SymServer &server) {
             break;
         }
         default:
-            throw messageException(messageException::askResMes, UnpackFileLineFunction());
+            break;
     }
 
 }
@@ -243,7 +247,7 @@ void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
             break;
         }
         default:
-            throw messageException(messageException::askResMes, UnpackFileLineFunction());
+            break;
     }
 }
 BOOST_CLASS_EXPORT(Symposium::askResMessage)
@@ -457,7 +461,7 @@ void sendResMessage::invokeMethod(SymClient &client) {
             break;
         }
         default:
-            throw messageException(messageException::sendResMes, UnpackFileLineFunction());
+            break;
     }
 }
 BOOST_CLASS_EXPORT(Symposium::sendResMessage)
@@ -604,7 +608,7 @@ void symbolMessage::invokeMethod(SymServer &server) {
             break;
         }
         default:
-            throw messageException(messageException::symb, UnpackFileLineFunction());
+            break;
     }
 
 }
@@ -621,7 +625,7 @@ void symbolMessage::invokeMethod(SymClient &client) {
             break;
         }
         default:
-            throw messageException(messageException::symb, UnpackFileLineFunction());
+            break;
     }
 
 }
@@ -758,7 +762,7 @@ void updateActiveMessage::invokeMethod(SymClient &client) {
             break;
         }
         default:
-            throw messageException(messageException::upAct, UnpackFileLineFunction());
+            break;
     }
 
 }
@@ -810,7 +814,7 @@ void updateDocMessage::invokeMethod(SymServer &server) {
             break;
         }
         default:
-            throw messageException(messageException::upDoc, UnpackFileLineFunction());
+            break;
     }
 }
 
@@ -844,28 +848,17 @@ void userDataMessage::serialize(Archive &ar, const unsigned int version)
 }
 
 void userDataMessage::invokeMethod(SymServer &server) {
-    if(action==msgType::changeUserData){
         server.editUser(getActionOwner().first,newUserData);
-    }
-    else
-        throw messageException(messageException::userData, UnpackFileLineFunction());
 }
 
 void userDataMessage::invokeMethod(SymClient &client) {
-    if(action==msgType::changeUserData){
         client.editUser(newUserData, false);
-    }
-    else
-        throw messageException(messageException::userData, UnpackFileLineFunction());
 }
 
 void userDataMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(serverResult==msgOutcome::failure)
         throw messageException(messageException::notSucc, UnpackFileLineFunction());
-    if(action==msgType::changeUserData)
-        client.editUser(newUserData, true);
-    else
-        throw messageException(messageException::userData, UnpackFileLineFunction());
+    client.editUser(newUserData, true);
 }
 
 bool userDataMessage::operator==(const userDataMessage &rhs) const {
@@ -899,14 +892,11 @@ void cursorMessage::serialize(Archive &ar, const unsigned int version)
 }
 
 void cursorMessage::invokeMethod(SymServer &server) {
-    if(action!=msgType::updateCursor)
-            throw messageException(messageException::cursor, UnpackFileLineFunction());
+
     server.updateCursorPos(getActionOwner().first, resourceId, *this);
 }
 
 void cursorMessage::invokeMethod(SymClient &client) {
-    if(action!=msgType::updateCursor)
-            throw messageException(messageException::cursor, UnpackFileLineFunction());
     client.updateCursorPos(siteId, resourceId, row, col);
 }
 
