@@ -110,3 +110,18 @@ void home::errorConnection()
     errorWindow->exec();
 }
 
+void home::errorConnectionLogout(std::string str)
+{
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->directory->setDisabled(false);
+    ui->modify->setDisabled(false);
+    ui->InsertUri->setDisabled(false);
+    ui->delete_2->setDisabled(false);
+    ui->logout->setDisabled(false);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
+    this->close();
+    parentWidget()->close();
+    errorLog->exec();
+}
+

@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>You have been inactive for too long, so you have logged out.</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">

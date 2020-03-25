@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <forward_list>
 #include "../../user.h"
+#include "../../Color.h"
 #include "../../document.h"
 
 namespace Symposium{

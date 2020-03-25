@@ -105,13 +105,13 @@ void changeUserInfo::errorConnection()
     errorWindow->show();
 }
 
-void changeUserInfo::errorConnectionLogout()
+void changeUserInfo::errorConnectionLogout(std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->confirm->setDisabled(false);
     ui->cancel->setDisabled(false);
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     errorLog->show();

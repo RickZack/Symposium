@@ -78,12 +78,12 @@ void alluser::errorConnection()
     errorWindow->exec();
 }
 
-void alluser::errorConnectionLogout()
+void alluser::errorConnectionLogout(std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();

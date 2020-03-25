@@ -36,7 +36,7 @@ public:
     void successEditPrivilege();
     void errorEditPrivilege(std::string errorMess);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     ~alluser();
 
 private slots:
