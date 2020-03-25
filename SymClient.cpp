@@ -145,16 +145,16 @@ symbolMessage SymClient::localRemove(uint_positive_cnt::type resourceId, const s
     return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, d->localRemove(indexes));
 }
 
-void SymClient::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym) {
+void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &newSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    d->remoteInsert(newSym);
+    d->remoteInsert(siteId, newSym);
     //notifica alla gui
 //    this->dispatcher->remoteInsert(resourceId,newSym);
 }
 
-void SymClient::remoteRemove(uint_positive_cnt::type resourceId, const symbol &rmSym) {
+void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &rmSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    d->remoteRemove(rmSym);
+    d->remoteRemove(siteId, rmSym);
     //notifica alla gui
 
     //DOVE PRENDO IL PAIR DELLE COORDINATE DEL SYMBOL?

@@ -285,7 +285,7 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     return sym;
 }
 
-void document::remoteInsert(const symbol &toInsert) {
+void document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
     //TODO: take into account new position of cursor
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
@@ -302,7 +302,7 @@ void document::remoteInsert(const symbol &toInsert) {
 }
 
 
-void document::remoteRemove(const symbol &toRemove) {
+void document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
     //TODO: take into account new position of cursor
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;

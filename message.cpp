@@ -617,11 +617,11 @@ void symbolMessage::invokeMethod(SymClient &client) {
     switch(action)
     {
         case msgType::insertSymbol:{
-            client.remoteInsert(resourceId,sym);
+            client.remoteInsert(siteId, resourceId, sym);
             break;
         }
         case msgType::removeSymbol:{
-            client.remoteRemove(resourceId,sym);
+            client.remoteRemove(siteId, resourceId, sym);
             break;
         }
         default:
@@ -642,9 +642,9 @@ void symbolMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     }
    else{
         if(action==msgType::insertSymbol)
-            client.remoteRemove(resourceId,sym);
+            client.remoteRemove(siteId, resourceId, sym);
         else if(action==msgType::removeSymbol)
-            client.remoteInsert(resourceId,sym);
+            client.remoteInsert(siteId, resourceId, sym);
         else
             throw messageException(messageException::notSucc, UnpackFileLineFunction());
     }

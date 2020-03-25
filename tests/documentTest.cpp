@@ -124,8 +124,8 @@ struct docRemoteInsertSymbolTest: public testing::TestWithParam<Insertion>{
 
 TEST_P(docRemoteInsertSymbolTest, InsertionPosOrder){
     Insertion input=GetParam();
-    d.remoteInsert(input.s1);
-    d.remoteInsert(input.s2);
+    d.remoteInsert(input.s1.getSiteId(), input.s1);
+    d.remoteInsert(input.s2.getSiteId(), input.s2);
     ASSERT_FALSE(d.getSymbols().empty());
     ASSERT_FALSE(d.getSymbols().front().empty());
     // bisogna considerare solo i primi due perchè gli altri sono emptyChar.
@@ -149,10 +149,73 @@ struct docRemoteRemoveSymbolTest: public testing::TestWithParam<Insertion>{
     docRemoteRemoveSymbolTest()= default;
 };
 
+struct updatePos{
+    symbol s1;
+    symbol s2;
+    std::pair<unsigned, unsigned> newIndex1;
+    std::pair<unsigned, unsigned> newIndex2;
+
+    updatePos(symbol s1, symbol s2, std::pair<unsigned, unsigned> n1, std::pair<unsigned, unsigned> n2): s1{s1}, s2{s2}, newIndex1{n1}, newIndex2{n2}{};
+};
+
+struct docRemoteInsertUpdateCursor: public testing::TestWithParam<updatePos>{
+    document d;
+    user user1;
+    user user2;
+    docRemoteInsertUpdateCursor(): user1("username", "AP@ssw0rd!", "noempty", "", 0, nullptr), user2("username", "AP@ssw0rd!", "noempty", "", 1, nullptr){}
+    ~docRemoteInsertUpdateCursor()= default;
+};
+
+TEST_P(docRemoteInsertUpdateCursor, InsertionUpdatePosition){
+    updatePos input=GetParam();
+    d.access(user1, privilege::modify); d.access(user2, privilege::modify);
+
+    d.remoteInsert(input.s1.getSiteId(), input.s1);
+    d.remoteInsert(input.s2.getSiteId(), input.s2);
+
+    sessionData u1=std::find_if(d.getActiveUsers().begin(), d.getActiveUsers().end(), [](auto el){return el.first->getSiteId()==0;})->second;
+    sessionData u2=std::find_if(d.getActiveUsers().begin(), d.getActiveUsers().end(), [](auto el){return el.first->getSiteId()==1;})->second;
+
+    EXPECT_TRUE(u1.row==input.newIndex1.first && u1.col==input.newIndex1.second);
+    EXPECT_TRUE(u1.row==input.newIndex2.first && u1.col==input.newIndex2.second);
+}
+updatePos updates[]={
+        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,1}, {0,2}},
+        updatePos{symbol('a', 1, 1, {1}, true), symbol('b', 0, 1, {1}, true), {0,2}, {0,1}}
+};
+INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertUpdateCursor, testing::ValuesIn(updates));
+
+//TODO: da rivedere
+struct docRemoteRemoveUpdateCursor: public testing::TestWithParam<updatePos>{
+    document d;
+    user user1;
+    user user2;
+    docRemoteRemoveUpdateCursor(): user1("username", "AP@ssw0rd!", "noempty", "", 0, nullptr), user2("username", "AP@ssw0rd!", "noempty", "", 1, nullptr){}
+    ~docRemoteRemoveUpdateCursor()= default;
+};
+
+TEST_P(docRemoteRemoveUpdateCursor, RemovalUpdatePosition){
+    updatePos input=GetParam();
+    d.access(user1, privilege::modify); d.access(user2, privilege::modify);
+
+    d.remoteInsert(input.s1.getSiteId(), input.s1);
+    d.remoteRemove(input.s2.getSiteId(), input.s1);
+
+    sessionData u1=std::find_if(d.getActiveUsers().begin(), d.getActiveUsers().end(), [](auto el){return el.first->getSiteId()==0;})->second;
+    sessionData u2=std::find_if(d.getActiveUsers().begin(), d.getActiveUsers().end(), [](auto el){return el.first->getSiteId()==1;})->second;
+
+    EXPECT_TRUE(u1.row==input.newIndex1.first && u1.col==input.newIndex1.second);
+    EXPECT_TRUE(u1.row==input.newIndex2.first && u1.col==input.newIndex2.second);
+}
+updatePos updates2[]={
+        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,1}, {0,0}}
+};
+INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCursor, testing::ValuesIn(updates2));
+
 TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrder){
     Insertion input=GetParam();
-    d.remoteInsert(input.s1);
-    d.remoteRemove(input.s2);
+    d.remoteInsert(1, input.s1);
+    d.remoteRemove(1, input.s2);
 
     ASSERT_FALSE(d.getSymbols().empty());
 

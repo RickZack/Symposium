@@ -132,15 +132,17 @@ namespace Symposium {
 
         /**
          * @brief insert a symbol in the document as consequence of a remote user's action
+         * @param siteId the site id of the user performing the insertion
          * @param toInsert symbol to insert
          */
-        virtual void remoteInsert(const symbol &toInsert);
+        virtual void remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert);
 
         /**
          * @brief remove a symbol in the document as consequence of a remote user's action
+         * @param siteId the site id of the user performing the removal
          * @param toRemove symbol to remove
          */
-        virtual void remoteRemove(const symbol &toRemove);
+        virtual void remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove);
 
         /**
          * @brief update the position of the cursor for the user @e target

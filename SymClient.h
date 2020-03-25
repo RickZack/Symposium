@@ -205,21 +205,25 @@ namespace Symposium {
 
         /**
          * @brief propagate a symbol insertion on document content made by another user
+         * @param siteId the site id of the user performing the insertion
          * @param resourceId the document the insertion refers to
          * @param newSym the symbol to insert
          *
          * This method is called after having received a @ref symbolMessage
          */
-        virtual void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym);
+        virtual void
+        remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &newSym);
 
         /**
          * @brief propagate a symbol deletion on document content made by another user
+         * @param siteId the site id of the user performing the removal
          * @param resourceId the document the deletion refers to
          * @param rmSym the symbol to remove
          *
          * This method is called after having received a @ref symbolMessage
          */
-        virtual void remoteRemove(uint_positive_cnt::type resourceId, const symbol &rmSym);
+        virtual void
+        remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &rmSym);
 
         /**
          * @brief set the symbol of the opened document that has @e resourceId to "verified"

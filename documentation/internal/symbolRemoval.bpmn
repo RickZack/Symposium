@@ -178,7 +178,7 @@
     </bpmn:subProcess>
     <bpmn:dataObjectReference id="DataObjectReference_15cekub" name="symbolMessage(messageType::removeSymbol {username, pwd}, resourceId, symToRemove)" dataObjectRef="DataObject_0iwt49l" />
     <bpmn:dataObject id="DataObject_0iwt49l" />
-    <bpmn:subProcess id="SubProcess_1qqzgep" name="Call void::remoteInsert(resourceId, symbol)">
+    <bpmn:subProcess id="SubProcess_1qqzgep" name="Call void::remoteInsert(siteId, resourceId, symbol)">
       <bpmn:incoming>SequenceFlow_019f1ep</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_156ajuv</bpmn:outgoing>
     </bpmn:subProcess>
@@ -440,7 +440,7 @@
       <bpmn:outgoing>SequenceFlow_16eiyqd</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_1dgdyl7</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:task id="Task_16oqfvi" name="Call void::remoteRemove(toRemove)">
+    <bpmn:task id="Task_16oqfvi" name="Call void::remoteRemove(siteId, toRemove)">
       <bpmn:incoming>SequenceFlow_1dgdyl7</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1hnsuyd</bpmn:outgoing>
     </bpmn:task>
@@ -542,7 +542,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_0jf1ror" sourceRef="Task_0vmb8ff" targetRef="ExclusiveGateway_04wn3re" />
     <bpmn:sequenceFlow id="SequenceFlow_1xovxvz" sourceRef="ExclusiveGateway_04wn3re" targetRef="ExclusiveGateway_0mcyaeq" />
     <bpmn:sequenceFlow id="SequenceFlow_1paujf3" sourceRef="ExclusiveGateway_0mcyaeq" targetRef="EndEvent_032eqov" />
-    <bpmn:subProcess id="SubProcess_1w4z9au" name="Call void::remoteRemove(resourceId, rmSym)">
+    <bpmn:subProcess id="SubProcess_1w4z9au" name="Call void::remoteRemove(siteId, resourceId, rmSym)">
       <bpmn:incoming>SequenceFlow_0ifioob</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0n9u3ge</bpmn:outgoing>
     </bpmn:subProcess>

@@ -526,8 +526,8 @@ public:
     MOCK_METHOD2(removeActiveUser, void(uint_positive_cnt::type, user&));
 
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, privilege, bool));
-    MOCK_METHOD2(remoteInsert, void(uint_positive_cnt::type, const symbol&));
-    MOCK_METHOD2(remoteRemove, void(uint_positive_cnt::type, const symbol&));
+    MOCK_METHOD3(remoteInsert, void(uint_positive_cnt::type, uint_positive_cnt::type, const symbol&));
+    MOCK_METHOD3(remoteRemove, void(uint_positive_cnt::type, uint_positive_cnt::type, const symbol&));
     MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const uri&, bool msgRcv));
     MOCK_METHOD2(editUser, const user(user&, bool));
     MOCK_METHOD2(verifySymbol, void(uint_positive_cnt::type, const symbol&));
@@ -754,7 +754,7 @@ TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilegeOnOtherClient){
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnSuccess){
-    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
     symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
     EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
@@ -774,7 +774,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnSuccess){
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnFailure){
-    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
     symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
     EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
@@ -785,7 +785,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnFailure){
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
     //We expect remoteRemove to be called by fromClient when the outcome is negative
-    EXPECT_CALL(client, remoteRemove(resourceId, fc->getSym()));
+    EXPECT_CALL(client, remoteRemove(fc->getSiteId(), resourceId, fc->getSym()));
     //when a serverMessage is received, a related message from the client is searched and completeAction() called
     //the retrived clientMessage has all the data needed to perform the action required
     fromServer->invokeMethod(client);
@@ -795,18 +795,18 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnFailure){
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnOtherClient){
-    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
 
     //the message from client is forwarded to and the symbol contained it's now verified
     symbol s=fc->getSym(); s.setVerified();
-    fromServer=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 0,resourceId, s);
-    EXPECT_CALL(client, remoteInsert(resourceId, s));
+    fromServer=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 10,resourceId, s);
+    EXPECT_CALL(client, remoteInsert(fc->getSiteId(), resourceId, s));
     fromServer->invokeMethod(client);
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnSuccess){
-    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
     symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
     EXPECT_CALL(server, remoteRemove(username, resourceId, *fc));
@@ -824,7 +824,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnSuccess){
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
-    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
     symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
     EXPECT_CALL(server, remoteRemove(username, resourceId, *fc));
@@ -835,7 +835,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
     //We expect remoteInsert to be called by fromClient when the outcome is negative, so that the removal done in advance is annulled
-    EXPECT_CALL(client, remoteInsert(resourceId, fc->getSym()));
+    EXPECT_CALL(client, remoteInsert(fc->getSiteId(), resourceId, fc->getSym()));
     //when a serverMessage is received, a related message from the client is searched and completeAction() called
     //the retrived clientMessage has all the data needed to perform the action required
     fromServer->invokeMethod(client);
@@ -845,13 +845,13 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
 }
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnOtherClient){
-    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, dummySymbol);
+    fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
 
     //the message from client is forwarded to the other client, but the password is cleaned and it's now verified
     symbol s=fc->getSym(); s.setVerified();
-    fromServer=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 0,resourceId, s);
-    EXPECT_CALL(client, remoteRemove(resourceId, s));
+    fromServer=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 10,resourceId, s);
+    EXPECT_CALL(client, remoteRemove(fc->getSiteId(), resourceId, s));
     fromServer->invokeMethod(client);
 }
 

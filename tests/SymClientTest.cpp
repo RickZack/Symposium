@@ -122,8 +122,8 @@ struct SymClientDirMock: public directory{
 
 struct SymClientDocMock: public document{
     SymClientDocMock(int id):document(id) {};
-    MOCK_METHOD1(remoteInsert, void(const symbol& toInsert));
-    MOCK_METHOD1(remoteRemove, void(const symbol& toRemove));
+    MOCK_METHOD2(remoteInsert, void(uint_positive_cnt::type siteId, const symbol& toInsert));
+    MOCK_METHOD2(remoteRemove, void(uint_positive_cnt::type siteId, const symbol& toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_METHOD2(access, document&(const user&, privilege));
     MOCK_METHOD2(localInsert, symbol(const std::pair<unsigned, unsigned>& index, symbol &toInsert));
@@ -428,17 +428,19 @@ TEST_F(SymClientTest, localRemoveConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, remoteInsertCallsremoteInsertOnRightDoc){
     setStageForOpenedDoc();
     symbol arrived('a', 1, 1, {}, true);
+    //siteId of the user performing the action is contained in the symbolMessage received by the client
     //resouceId of the document to insert the symbol into is contained in the symbolMessage received by the client
-    EXPECT_CALL(docSentByServer, remoteInsert(arrived));
-    client.remoteInsert(docSentByServer.getId(), arrived);
+    EXPECT_CALL(docSentByServer, remoteInsert(0, arrived));
+    client.remoteInsert(0, docSentByServer.getId(), arrived);
 }
 
 TEST_F(SymClientTest, remoteRemoveCallsremoteRemoveOnRightDoc){
     setStageForOpenedDoc();
     symbol arrived('a', 1, 1, {}, true);
+    //siteId of the user performing the action is contained in the symbolMessage received by the client
     //resouceId of the document to insert the symbol into is contained in the symbolMessage received by the client
-    EXPECT_CALL(docSentByServer, remoteRemove(arrived));
-    client.remoteRemove(docSentByServer.getId(), arrived);
+    EXPECT_CALL(docSentByServer, remoteRemove(0, arrived));
+    client.remoteRemove(0, docSentByServer.getId(), arrived);
 }
 
 TEST_F(SymClientTest, editPrivilegeConstructsGoodMessageAndInsertInUnanswered){
