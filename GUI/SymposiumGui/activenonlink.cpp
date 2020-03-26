@@ -1,7 +1,7 @@
 #include "activenonlink.h"
 #include "ui_activenonlink.h"
 
-activenonlink::activenonlink(QWidget *parent, int documentId, std::string pathFile) :
+activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
     QDialog(parent),
     ui(new Ui::activenonlink), pathFile(pathFile), documentId(documentId)
 {

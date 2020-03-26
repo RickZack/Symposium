@@ -62,7 +62,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
         if (resBtn != QMessageBox::Yes) {
             event->ignore();
         } else {
-            //cl->closeConnection();
             event->accept();
         }
 

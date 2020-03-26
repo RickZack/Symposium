@@ -3,7 +3,7 @@
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
 
-alluser::alluser(QWidget *parent, Symposium::privilege privelege, int documentID, Symposium::user user, std::string pathFile) :
+alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile) :
     QDialog(parent),
     privelege(privelege), us(user), pathFile(pathFile),  documentID(documentID),  ui(new Ui::alluser)
 {

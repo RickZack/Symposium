@@ -1,7 +1,7 @@
 #include "activetimerlink.h"
 #include "ui_activetimerlink.h"
 
-activetimerlink::activetimerlink(QWidget *parent, int documentId, std::string pathFile) :
+activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
     QDialog(parent),
     ui(new Ui::activetimerlink), pathFile(pathFile), documentId(documentId)
 {

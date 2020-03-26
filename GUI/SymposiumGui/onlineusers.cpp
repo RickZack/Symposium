@@ -6,7 +6,7 @@
 
 
 
-onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, int documentID, Symposium::user user, std::string pathFile) :
+onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile) :
     QDialog(parent),
     pathFile(pathFile), user(user),  ui(new Ui::onlineusers),  documentID(documentID), privelege(privelege)
 {

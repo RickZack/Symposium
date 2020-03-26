@@ -6,6 +6,7 @@
 #include "../../user.h"
 #include "../../Color.h"
 #include "../../document.h"
+#include "../../Symposium.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -50,29 +51,29 @@ public:
     void scrollContentsBy(int dx, int dy) override;
     void scroll();
     void changePosition(int block, int collumn);
-    void changePosition(int siteId, int block, int collumn);
-    void constractLabelsCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users, int siteId);
-    void insertCurrentUser(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, int siteId);
+    void changePosition(Symposium::uint_positive_cnt::type siteId, int block, int collumn);
+    void constractLabelsCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users, Symposium::uint_positive_cnt::type siteId);
+    void insertCurrentUser(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId);
     void showLabel(QLabel *labelCursor, QLabel *labelName);
-    void addUser(int siteId, std::string name);
-    void removeUser(int siteId);
-    void thisUserChangePosition(int siteId);
+    void addUser(Symposium::uint_positive_cnt::type siteId, std::string name);
+    void removeUser(Symposium::uint_positive_cnt::type siteId);
+    void thisUserChangePosition(Symposium::uint_positive_cnt::type siteId);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
-    void setDocumentId(int docId);
-    void setThisUserSiteId(int id);
+    void setDocumentId(Symposium::uint_positive_cnt::type docId);
+    void setThisUserSiteId(Symposium::uint_positive_cnt::type id);
     void setThisUserPrivilege(Symposium::privilege priv);
 
 
 private:
-    std::map<int, std::pair<QLabel*, QLabel*>> labels;
-    std::map<int, QTextCursor> cursors;
+    std::map<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>> labels;
+    std::map<Symposium::uint_positive_cnt::type, QTextCursor> cursors;
     int j=0;
     int i=0;
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users;
-    Symposium::privilege priv;
     Symposium::clientdispatcher *cl;
-    int thisUserSiteId=1;
-    int documentId;
+    Symposium::uint_positive_cnt::type thisUserSiteId=1;
+    Symposium::uint_positive_cnt::type documentId;
+    Symposium::privilege priv;
 };
 
 #endif // QTEXTEDITLABELS_H

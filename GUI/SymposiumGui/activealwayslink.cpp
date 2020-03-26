@@ -3,7 +3,7 @@
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
 
-activealwayslink::activealwayslink(QWidget *parent, int documentId, std::string pathFile) :
+activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
     QDialog(parent),
     ui(new Ui::activealwayslink),  documentId(documentId), pathFile(pathFile)
 {

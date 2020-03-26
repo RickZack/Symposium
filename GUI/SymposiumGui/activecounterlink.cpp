@@ -2,7 +2,7 @@
 #include "ui_activecounterlink.h"
 #include <QMovie>
 
-activecounterlink::activecounterlink(QWidget *parent, int documentId, std::string pathFile) :
+activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
     QDialog(parent),
     ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId)
 {
