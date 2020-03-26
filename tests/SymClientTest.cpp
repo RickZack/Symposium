@@ -117,7 +117,7 @@ struct SymClientFileMock: public file{
 
 struct SymClientDirMock: public directory{
     SymClientDirMock(const std::string &name) : directory(name) {};
-    MOCK_METHOD5(addLink, std::shared_ptr<class symlink>(const std::string&, const std::string&, const std::string&, const std::string&, int));
+    MOCK_METHOD5(addLink, std::shared_ptr<class symlink>(const std::string&, const std::string&, const std::string&, const std::string&, uint_positive_cnt::type));
 };
 
 struct SymClientDocMock: public document{
@@ -327,7 +327,7 @@ TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActiveAndRemovesFromUnaswered
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openNewSource on client
     //the data use to call accessFile must be taken from the relative askResMessage in unanswered
-    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink(::testing::_, ::testing::_, "./", "sym", ::testing::_));
+    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink("./", "sym", path, filename, fileSentByServer->getId()));
     EXPECT_CALL(*fileSentByServer, access(client.getLoggedUser(), privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym", fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
@@ -339,7 +339,7 @@ TEST_F(SymClientTest, openNewSourceGenerateColorForUser)
     setStageForLoggedUser();
     auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym");
 
-    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink(::testing::_, ::testing::_, "./", "sym", ::testing::_));
+    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink("./", "sym", path, filename, fileSentByServer->getId()));
     EXPECT_CALL(*fileSentByServer, access(client.getLoggedUser(), privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
     client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym", fileSentByServer->getId(), fileSentByServer);
 
