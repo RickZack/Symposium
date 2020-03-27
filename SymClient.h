@@ -36,32 +36,18 @@
 #include <map>
 
 #include "Symposium.h"
+#include "Color.h"
 #include "user.h"
 #include "document.h"
 #include "message.h"
 
 namespace Symposium {
-/*
- * //TODO: dummy class to represent a color, maybe use some Qt component
- */
 
-    class MyColor {
-        int dummy;
-    public:
-        bool operator==(const MyColor &rhs) const {
-            return dummy == rhs.dummy;
-        }
-
-        bool operator!=(const MyColor &rhs) const {
-            return !(rhs == *this);
-        }
-
-    };
-    constexpr bool operator<(const std::tuple<int, int, MyColor>& lhs, const std::tuple<int, int, MyColor>& rhs){
+    constexpr bool operator<(const std::tuple<int, int, Color>& lhs, const std::tuple<int, int, Color>& rhs){
         return std::get<0>(lhs)<std::get<0>(rhs) && std::get<1>(lhs)<std::get<1>(rhs);
     }
 
-//    class clientdispatcher;
+    class clientdispatcher;
 
     /**
      * @brief class used to model a client of Symposium system
@@ -76,8 +62,8 @@ namespace Symposium {
         //ADD: stuff for connectivity, necessary to define constructor
         user loggedUser;                                                          /**< logged user and its data */
         std::forward_list<std::shared_ptr<file>> activeFile;                      /**< list of active documents */
-        std::forward_list<document *> activeDoc;                                  /**< list of files the active documents are related to */
-        std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, MyColor>> userColors;       /**< map {siteId, documentId}->{user, color}  */
+        std::forward_list<std::pair<document *, colorGen> > activeDoc;            /**< list of files the active documents are related to */
+        std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> userColors;       /**< map {siteId, documentId}->{user, color}  */
 //        clientdispatcher* dispatcher;                                             /**< pointer to client dispatcher */
         std::forward_list<std::shared_ptr<clientMessage>> unanswered;             /**< messages sent by client that have not been received an answer */
 
@@ -219,21 +205,25 @@ namespace Symposium {
 
         /**
          * @brief propagate a symbol insertion on document content made by another user
+         * @param siteId the site id of the user performing the insertion
          * @param resourceId the document the insertion refers to
          * @param newSym the symbol to insert
          *
          * This method is called after having received a @ref symbolMessage
          */
-        virtual void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym);
+        virtual void
+        remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &newSym);
 
         /**
          * @brief propagate a symbol deletion on document content made by another user
+         * @param siteId the site id of the user performing the removal
          * @param resourceId the document the deletion refers to
          * @param rmSym the symbol to remove
          *
          * This method is called after having received a @ref symbolMessage
          */
-        virtual void remoteRemove(uint_positive_cnt::type resourceId, const symbol &rmSym);
+        virtual void
+        remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &rmSym);
 
         /**
          * @brief set the symbol of the opened document that has @e resourceId to "verified"
@@ -436,6 +426,12 @@ namespace Symposium {
         clientMessage removeUser();
 
         /**
+         * @brief confirm deletion of user
+         * @param msgRcv indicates if the function is called because a userDataMessage was sent or not
+         */
+        virtual void removeUser(bool msgRcv);
+
+        /**
          * @brief ask to disconnect a user from the system
          * @return a properly constructed @ref clientMessage to send to the server
          */
@@ -486,16 +482,31 @@ namespace Symposium {
 
         virtual ~SymClient() = default;
 
-//        void setClientDispatcher(clientdispatcher *cl);
+        void setClientDispatcher(clientdispatcher *cl);
 
         const std::forward_list<std::pair<const user *, sessionData>> onlineUsersonDocument(int documentID);
 
         const std::unordered_map<std::string, privilege> allUsersonDocument(int documentID);
 
         const user userData();
-		
+
+        std::string directoryContent(std::string &ID_Cartella, std::string &path);
+
+        /**
+         * @brief retrieve the color assigned to an user for a document
+         * @param resId the document the mapping is required for
+         * @param siteId the siteId of the user for which the color is asked
+         * @return the @ref Color corresponding to the user having @e siteId for the document having @e resId
+         */
+        Color colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::type siteId);
+
+        const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &
+        getUserColors() const;
+
     private:
         document* getActiveDocumentbyID(uint_positive_cnt::type id);
+
+        colorGen getColorGeneratorbyDocumentiID(uint_positive_cnt::type id);
 
         const user* getActiveUserbyID(uint_positive_cnt::type userId, std::forward_list<std::pair<const user *, sessionData>> &l);
 		

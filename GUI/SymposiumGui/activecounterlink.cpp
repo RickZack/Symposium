@@ -2,7 +2,7 @@
 #include "ui_activecounterlink.h"
 #include <QMovie>
 
-activecounterlink::activecounterlink(QWidget *parent, int documentId, std::string pathFile) :
+activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
     QDialog(parent),
     ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId)
 {
@@ -57,13 +57,13 @@ void activecounterlink::errorConnection()
     errorWindow->show();
 }
 
-void activecounterlink::errorConnectionLogout()
+void activecounterlink::errorConnectionLogout(std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->cancel->setDisabled(false);
     ui->ok->setDisabled(false);
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();

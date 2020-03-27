@@ -3,7 +3,7 @@
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
 
-activealwayslink::activealwayslink(QWidget *parent, int documentId, std::string pathFile) :
+activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
     QDialog(parent),
     ui(new Ui::activealwayslink),  documentId(documentId), pathFile(pathFile)
 {
@@ -56,13 +56,13 @@ void activealwayslink::errorConnection()
     errorWindow->show();
 }
 
-void activealwayslink::errorConnectionLogout()
+void activealwayslink::errorConnectionLogout(std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->cancel->setDisabled(false);
     ui->ok->setDisabled(false);
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();

@@ -2,11 +2,13 @@
 #define ONLINEUSERS_H
 
 #include <QDialog>
+
 #include <QMessageBox>
 #include <QTreeWidgetItem>
 #include <../../user.h>
 #include <../../document.h>
 #include "../../privilege.h"
+#include "../../Symposium.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
 
@@ -24,8 +26,8 @@ class onlineusers : public QDialog
 
 public:
     explicit onlineusers(QWidget *parent = nullptr, Symposium::privilege privelege=Symposium::privilege::readOnly,
-                         int documentID=0, Symposium::user user=Symposium::user(), std::string pathFile="");
-    int documentId;
+                         Symposium::uint_positive_cnt::type documentID=0, Symposium::user user=Symposium::user(), std::string pathFile="");
+    Symposium::uint_positive_cnt::type documentId;
     std::string pathFile;
     Symposium::user user;
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
@@ -34,7 +36,7 @@ public:
     void successEditPrivilege();
     void errorEditPrivilege(std::string errorMess);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     ~onlineusers();
 
 private slots:
@@ -52,7 +54,7 @@ private slots:
 
 private:
     Ui::onlineusers *ui;
-    int documentID;
+    Symposium::uint_positive_cnt::type documentID;
     Symposium::privilege privelege;
     Symposium::privilege newPrivelege;
     std::string username;

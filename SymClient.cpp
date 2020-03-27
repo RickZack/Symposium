@@ -33,6 +33,7 @@
 #include "message.h"
 #include "filesystem.h"
 #include "SymposiumException.h"
+#include "color.h"
 //#include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
 
 using namespace Symposium;
@@ -78,12 +79,16 @@ askResMessage SymClient::openSource(const std::string &path, const std::string &
 void SymClient::openSource(const std::string &path, const std::string &name, const std::shared_ptr<file> fileAsked,
                            privilege reqPriv) {
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
-    //FIXME: getRealPath returns another path, see documentation
-    //this->getLoggedUser().getHome()->getFile(fileAsked->getRealPath(),fileAsked->getName())->replacement(fileAsked);
     auto p=getLoggedUser().openFile(path, name, reqPriv);
     p->replacement(fileAsked);
     activeFile.push_front(fileAsked);
-    activeDoc.push_front(&doc);
+    colorGen* c = new colorGen();
+    activeDoc.push_front({&doc, *c});
+    Color f = (*c)();
+    this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
+    (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),f)));
+    //notifichiamo alla gui il successo
+ //   this->dispatcher->successOpenSource(doc);
 }
 
 askResMessage
@@ -96,10 +101,16 @@ SymClient::openNewSource(const std::string &resourceId, privilege reqPriv, const
 void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
                               const std::string &destName,
                               uint_positive_cnt::type idToAssign, const std::shared_ptr<file> fileAsked) {
-    this->getLoggedUser().getHome()->addLink(destPath, destName, resId, (*fileAsked).getName(), idToAssign);
+    std::string filePath = resId.substr(0,resId.find_last_of("/"));
+    std::string fileName = resId.substr(resId.find_last_of("/")+1);
+    (this->getLoggedUser().getHome()).get()->addLink(destPath, destName, filePath, fileName, idToAssign);
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
-    activeDoc.push_front(&doc);
+    colorGen* c = new colorGen();
+    std::shared_ptr<Color> col (new Color((*c)()));
+    activeDoc.push_front({&doc,*c});
+    this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
+                                    (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),*col)));
 	//notifichiamo alla gui il successo
 //    this->dispatcher->successInsertUri();
 }
@@ -114,7 +125,13 @@ void SymClient::createNewSource(const std::string &path, const std::string &name
     std::shared_ptr<file> file = this->getLoggedUser().newFile(name, path, idToAssign);
     document& docReq = file->access(this->getLoggedUser(), privilege::owner);
     activeFile.push_front(file);
-    activeDoc.push_front(&docReq);
+    colorGen* c = new colorGen();
+    Color f = (*c)();
+    activeDoc.push_front({&docReq,*c});
+    this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
+                                    (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),f)));
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successCreateNewSource(std::to_string(idToAssign));
 }
 
 askResMessage SymClient::createNewDir(const std::string &path, const std::string &name) {
@@ -125,44 +142,58 @@ askResMessage SymClient::createNewDir(const std::string &path, const std::string
 
 void SymClient::createNewDir(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
     this->getLoggedUser().newDirectory(name,path,idToAssign);
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successCreateNewDir(std::to_string(idToAssign));
 }
 
 
 symbolMessage SymClient::localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<unsigned int, unsigned int> &index) {
     document* d = this->getActiveDocumentbyID(resourceId);
     d->localInsert(index, const_cast<symbol &>(newSym));
-    return symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, newSym);
+    std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, newSym));
+    this->unanswered.push_front(mess);
+    return *mess;
 }
 
 symbolMessage SymClient::localRemove(uint_positive_cnt::type resourceId, const std::pair<unsigned int, unsigned int> indexes) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    return symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, d->localRemove(indexes));
+    std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, d->localRemove(indexes)));
+    this->unanswered.push_front(mess);
+    return *mess;
 }
 
-void SymClient::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym) {
+void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &newSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    d->remoteInsert(newSym);
+    d->remoteInsert(siteId, newSym);
+    //notifica alla gui
+//    this->dispatcher->remoteInsert(resourceId,newSym);
 }
 
-void SymClient::remoteRemove(uint_positive_cnt::type resourceId, const symbol &rmSym) {
+void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &rmSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    d->remoteRemove(rmSym);
+    d->remoteRemove(siteId, rmSym);
+    //notifica alla gui
+
+    //DOVE PRENDO IL PAIR DELLE COORDINATE DEL SYMBOL?
+
+    //this->dispatcher->remoteRemove(resourceId, ...);
 }
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                      privilege newPrivilege) {
     //FIXME: non è questo che devi passare al messaggio, vedi documentazione
     //std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
-    std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, resName, targetUser, newPrivilege));
+    std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, resPath + "/" + resName, targetUser, newPrivilege));
     unanswered.push_front(mess);
     return *mess;
 }
 
 privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                    privilege newPrivilege, bool msgRcv) {
+    privilege* p = new privilege(this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege));
     //notifichiamo alla gui il successo
 //    this->dispatcher->successEditPrivilege();
-    return this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege);
+    return *p;
 }
 
 uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) {    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resName, newPrefs, 0));
@@ -171,7 +202,7 @@ uriMessage SymClient::shareResource(const std::string &resPath, const std::strin
 }
 
 std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv) {    //TODO: modified this method, return the file: FATTO
-    std::shared_ptr<filesystem> fil = this->getLoggedUser().shareResource(resPath, resName, newPrefs);
+    std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resName, newPrefs));
     //notifichiamo alla gui il successo
 //    this->dispatcher->successShareResource("/" + resPath);
     return fil;
@@ -187,20 +218,26 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
 std::shared_ptr<filesystem>
 SymClient::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName,
                           bool msgRcv) {
-    return getLoggedUser().renameResource(resPath, resName, newName);
+    std::shared_ptr<filesystem> f (getLoggedUser().renameResource(resPath, resName, newName));
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successRenameResource();
+    return f;
 }
 
 askResMessage SymClient::removeResource(const std::string &resPath, const std::string &resName) {
     //FIXME: non è questo che devi passare al messaggio, è il percorso completo
-    std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
-    std::shared_ptr<askResMessage> mess(new askResMessage(msgType::removeRes, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, idres, uri::getDefaultPrivilege(), 0));
+    //std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
+    std::shared_ptr<askResMessage> mess(new askResMessage(msgType::removeRes, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, "", uri::getDefaultPrivilege(), 0));
     unanswered.push_front(mess);
     return *mess;
 }
 
 std::shared_ptr<filesystem>
 SymClient::removeResource(const std::string &resPath, const std::string &resName, bool msgRcv) {
-    return this->getLoggedUser().removeResource(resPath,resName);
+    std::shared_ptr<filesystem> f = this->getLoggedUser().removeResource(resPath,resName);
+    //notifichiamo alla gui il successo
+//    this->dispatcher->successRemoveResource();
+    return f;
 }
 
 std::string SymClient::showDir(bool recursive) const {
@@ -210,8 +247,11 @@ std::string SymClient::showDir(bool recursive) const {
 updateDocMessage SymClient::closeSource(uint_positive_cnt::type resourceId) {
     document* d = getActiveDocumentbyID(resourceId);
     activeFile.remove_if([resourceId](std::shared_ptr<file> it){return (it->getDoc().getId() == resourceId);});
-    activeDoc.remove(d);
-    return updateDocMessage(msgType::closeRes, {SymClient::getLoggedUser().getUsername(), ""}, resourceId);
+    activeDoc.remove_if([&](auto that){return that.first==d;});
+    d->close(this->getLoggedUser());
+    std::shared_ptr<updateDocMessage> mess (new updateDocMessage(msgType::closeRes,{SymClient::getLoggedUser().getUsername(), ""}, resourceId));
+    unanswered.push_front(mess);
+    return *mess;
 }
 //FIXME: add and review tests for editUser
 userDataMessage SymClient::editUser(user &newUserData) {
@@ -221,23 +261,30 @@ userDataMessage SymClient::editUser(user &newUserData) {
 }
 
 const user SymClient::editUser(user &newUserData, bool msgRcv) {
-    user old = SymClient::getLoggedUser();
-    this->setLoggedUser(newUserData);
+    user old = this->getLoggedUser();
+    //this->getLoggedUser().setNewData(newUserData);
+    this->loggedUser.setNewData(newUserData);
     //notifichiamo alla gui il successo
 //    this->dispatcher->successEditUser();
     return old;
 }
 
 clientMessage SymClient::removeUser() {
-    return clientMessage(msgType::removeUser, {SymClient::getLoggedUser().getUsername(), ""});
+    std::shared_ptr<clientMessage> mess (new clientMessage(msgType::removeUser, {SymClient::getLoggedUser().getUsername(), ""}));
+    this->unanswered.push_front(mess);
+    return *mess;
 }
 
 clientMessage SymClient::logout() {
-    return clientMessage(msgType::logout, {this->getLoggedUser().getUsername(), ""});
+    std::shared_ptr<clientMessage> mess (new clientMessage(msgType::logout, {this->getLoggedUser().getUsername(), ""}));
+    this->unanswered.push_front(mess);
+    return *mess;
 }
 
 void SymClient::logout(bool msgRcv){
-    //non facciamo niente
+    std::shared_ptr<user> u(new user());
+    this->setLoggedUser(*u);
+    this->userColors.clear();
 }
 
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
@@ -252,6 +299,13 @@ void SymClient::setUserColors(const std::map<uint_positive_cnt::type, user> &sit
 
 void SymClient::addActiveUser(uint_positive_cnt::type resourceId, user &targetUser, privilege Priv) {
     getActiveDocumentbyID(resourceId)->access(targetUser, Priv);
+    //recuperiamo il generatore di colore associato al documento
+    colorGen c = getColorGeneratorbyDocumentiID(resourceId);
+    //generiamo un colore per il nuovo utente
+    std::shared_ptr<Color> col (new Color(c()));
+    //inseriamolo nella mappa
+    this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
+                                    (std::make_pair(targetUser.getSiteId(),resourceId),std::make_pair(targetUser,*col)));
     //dobbiamo aggiungiamo il cursore alla GUI, se necessario
     if(Priv!=privilege::readOnly){
 //        this->dispatcher->addUserCursor(targetUser.getSiteId(),targetUser.getUsername(),resourceId);
@@ -272,15 +326,17 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
     for (std::shared_ptr<clientMessage> it:unanswered){
         if(smex.isRelatedTo(*it)){
             unanswered.remove(it);
+			//fermiamo il timer di attesa nel dispatcher
+//            this->dispatcher->stopTimer();
             return it;
         }
     }
     throw SymClientException(SymClientException::noRelatedMessage, UnpackFileLineFunction());
 }
 
-/*void SymClient::setClientDispatcher(clientdispatcher *cl){
-    this->dispatcher = cl;
-}*/
+void SymClient::setClientDispatcher(clientdispatcher *cl){
+//    this->dispatcher = cl;
+}
 
 void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
     //TODO: to implement
@@ -320,11 +376,18 @@ bool filterPrivilege::operator()(std::shared_ptr<file> file) {
 }
 
 document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
-    for (document *it:this->activeDoc){
-        if((*it).getId() == id)
-            return (it);
+    for (std::pair<document*, colorGen> it:this->activeDoc){
+        if((it.first->getId() == id))
+            return it.first;
     }
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
+}
+
+colorGen SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
+    for (std::pair<document*, colorGen> it:this->activeDoc){
+        if((it.first->getId() == id))
+            return (it.second);
+    }
 }
 
 const user SymClient::userData(){
@@ -332,10 +395,35 @@ const user SymClient::userData(){
 }
 
 cursorMessage SymClient::updateCursorPos(uint_positive_cnt::type resourceId, unsigned int row, unsigned int col) {
-    return cursorMessage(msgType::updateCursor, {"",""}, msgOutcome::success, 0, 0, 0, 0);
+    std::shared_ptr<cursorMessage> mess (new cursorMessage(msgType::updateCursor, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, this->getLoggedUser().getSiteId(), resourceId, row, col));
+    this->unanswered.push_front(mess);
+    return *mess;
 }
 
 void SymClient::updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type resourceId, unsigned int row, unsigned int col){
-    //TODO: to implement
+    document* d = getActiveDocumentbyID(resourceId);
+    d->updateCursorPos(userSiteId,row,col);
 //    this->dispatcher->moveUserCursor(resourceId,row,col,userSiteId);
 }
+
+std::string SymClient::directoryContent(std::string &ID_Cartella, std::string &path){
+    return this->getLoggedUser().getHome()->getDir(path,ID_Cartella)->print(std::to_string(this->getLoggedUser().getSiteId()),false);
+}
+
+void SymClient::removeUser(bool msgRcv) {
+    std::shared_ptr<user> u(new user());
+    this->setLoggedUser(*u);
+    this->userColors.clear();
+//	this->dispatcher->successDeleteAccount();
+}
+
+Color SymClient::colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::type siteId) {
+    //TODO: implement
+    return Color();
+}
+
+const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &
+SymClient::getUserColors() const {
+    return userColors;
+}
+

@@ -10,6 +10,7 @@
 #include "errorconnection.h"
 #include "errorlogout.h"
 #include "../../user.h"
+#include "../../Symposium.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -29,14 +30,14 @@ public:
     Symposium::user us;
     std::string pathFile;
     std::unordered_map<std::string, Symposium::privilege> users;
-    int documentID;
+    Symposium::uint_positive_cnt::type documentID;
     explicit alluser(QWidget *parent = nullptr, Symposium::privilege privelege=Symposium::privilege::readOnly,
-                     int documentID=0, Symposium::user user=Symposium::user(), std::string pathFile="");
+                     Symposium::uint_positive_cnt::type documentID=0, Symposium::user user=Symposium::user(), std::string pathFile="");
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void successEditPrivilege();
     void errorEditPrivilege(std::string errorMess);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     ~alluser();
 
 private slots:

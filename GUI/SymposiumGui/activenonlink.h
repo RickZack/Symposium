@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QMessageBox>
 #include "../../uri.h"
+#include "../../Symposium.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
 #include <QMovie>
@@ -21,12 +22,12 @@ class activenonlink : public QDialog
     Q_OBJECT
 
 public:
-    explicit activenonlink(QWidget *parent = nullptr, int documentId=0, std::string pathFile="");
+    explicit activenonlink(QWidget *parent = nullptr, Symposium::uint_positive_cnt::type documentId=0, std::string pathFile="");
     void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     ~activenonlink();
 
 private slots:
@@ -42,7 +43,7 @@ private:
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
-    int documentId;
+    Symposium::uint_positive_cnt::type documentId;
 };
 
 #endif // ACTIVENONLINK_H

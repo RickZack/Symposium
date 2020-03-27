@@ -72,8 +72,8 @@ struct SymServerFileMock: public file{
 struct SymServerDocMock: public document{
     SymServerDocMock():document(){};
     SymServerDocMock(const SymServerDocMock& mock){};
-    MOCK_METHOD1(remoteInsert, void(const symbol &toInsert));
-    MOCK_METHOD1(remoteRemove, void(const symbol &toRemove));
+    MOCK_METHOD2(remoteInsert, void(uint_positive_cnt::type siteId, const symbol &toInsert));
+    MOCK_METHOD2(remoteRemove, void(uint_positive_cnt::type siteId, const symbol &toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_CONST_METHOD0(retrieveSiteIds, std::set<uint_positive_cnt::type>());
 
@@ -608,7 +608,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDocA
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toInsert);
     //server must send and insert a symbol that is verified, but without the authentication parameters
     symbolMessage toSend(msgType::insertSymbol, {{}, {}}, msgOutcome::success, 0, doc.getId(), toInsert.setVerified(), received.getMsgId());
-    EXPECT_CALL(doc, remoteInsert(toSend.getSym()));
+    EXPECT_CALL(doc, remoteInsert(received.getSiteId(), toSend.getSym()));
     server.remoteInsert(loggedUserUsername, doc.getId(), received);
     auto res= server.thereIsMessageForUser(*siteIds.begin(), toSend);
     ASSERT_NO_FATAL_FAILURE(messageAssociatedWithRightUsers(siteIds, toSend, {loggedUser.getSiteId()}));
@@ -623,7 +623,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertCallsRemoteInsertOnDocA
     symbol symSent('a', 0, 0, {}, false);
     symbol toInsert=symSent.setVerified();
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), symSent);
-    EXPECT_CALL(doc, remoteInsert(toInsert));
+    EXPECT_CALL(doc, remoteInsert(received.getSiteId(), toInsert));
     server.remoteInsert(loggedUserUsername, doc.getId(), received);
 
     //send response (confirmation)
@@ -659,7 +659,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDocA
     symbol toRemove('a', 0, 0, {}, false);
     symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
     symbolMessage toSend(msgType::removeSymbol, {{}, {}}, msgOutcome::success, 0, doc.getId(), toRemove.setVerified(), received.getMsgId());
-    EXPECT_CALL(doc, remoteRemove(toSend.getSym()));
+    EXPECT_CALL(doc, remoteRemove(received.getSiteId(), toSend.getSym()));
     server.remoteRemove(loggedUserUsername, doc.getId(), received);
 
     auto res= server.thereIsMessageForUser(*siteIds.begin(), toSend);
@@ -675,7 +675,7 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDocA
     symbol toRemove('a', 0, 0, {}, false);
     symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
     symbolMessage toSend(msgType::removeSymbol, {{}, {}}, msgOutcome::success, 0, doc.getId(), toRemove.setVerified(), received.getMsgId());
-    EXPECT_CALL(doc, remoteRemove(toSend.getSym()));
+    EXPECT_CALL(doc, remoteRemove(received.getSiteId(), toSend.getSym()));
     server.remoteRemove(loggedUserUsername, doc.getId(), received);
 
     //send response (confirmation)

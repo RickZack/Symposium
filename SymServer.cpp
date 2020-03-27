@@ -150,7 +150,7 @@ void SymServer::remoteInsert(const std::string &inserter, uint_positive_cnt::typ
     if(!docRetrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     symMsg.clearAuthParam();
-    docRetrieved.second->remoteInsert(symMsg.verifySym().getSym());
+    docRetrieved.second->remoteInsert(symMsg.getSiteId(), symMsg.verifySym().getSym());
     insertMessageForSiteIds(siteIdsFor(resourceId, getRegistered(inserter).getSiteId()), std::shared_ptr<serverMessage>(new symbolMessage(symMsg)));
     generateSimpleResponse(getRegistered(inserter).getSiteId(), msgType::insertSymbol);
 }
@@ -163,7 +163,7 @@ void SymServer::remoteRemove(const std::string &remover, uint_positive_cnt::type
     if(!docRetrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     rmMsg.clearAuthParam();
-    docRetrieved.second->remoteRemove(rmMsg.verifySym().getSym());
+    docRetrieved.second->remoteRemove(0, rmMsg.verifySym().getSym());
     insertMessageForSiteIds(siteIdsFor(resourceId, actionU.getSiteId()), std::shared_ptr<serverMessage>(new symbolMessage(rmMsg)));
 
     generateSimpleResponse(actionU.getSiteId(), msgType::removeSymbol);

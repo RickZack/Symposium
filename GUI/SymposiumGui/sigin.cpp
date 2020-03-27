@@ -13,6 +13,7 @@ sigin::sigin(QWidget *parent) :
     ui->haveto->hide();
     ui->waiting->hide();
     ui->tryAgain->hide();
+    ui->password->setEchoMode(QLineEdit::Password);
     ui->gif->hide();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);

@@ -220,6 +220,11 @@ namespace Symposium {
 
         const document &getDoc() const;
 
+        /**
+         * @brief retrieve all users who can access the file invoke @ref AccessStrategy::getPermission
+         * @return unorder_map<username, privilege>
+         */
+
         const std::unordered_map<std::string, privilege> getUsers();
 
         /**
@@ -294,7 +299,19 @@ namespace Symposium {
 
         void deleteFromStrategy(const std::string &userName);
 
+        /**
+         * @brief substitute this file with the one pass as the parametr
+         *  @param replace the file to replace with
+         */
+
         void replacement(const std::shared_ptr<file> replace);
+
+        /**
+         * @brief invoke @ref AccessStrategy::validateAction
+         * @param userName of who wants to perform the action
+         * @param priv the privilege with which user wants to perform the action
+         * @return true if the operation is allowed, false instead
+         */
 
         virtual bool validateAction(const std::string &userName, privilege priv);
 
@@ -435,8 +452,6 @@ namespace Symposium {
          */
         virtual std::shared_ptr<filesystem>
         remove(const user &targetUser, const std::string &path, const std::string &resName);
-
-        void replacement(const std::shared_ptr<file> replace);
 
         void store(const std::string &storePath) const override;
 

@@ -176,7 +176,7 @@
       <bpmn:outgoing>SequenceFlow_1hgy0n3</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_0d6pnmo</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:subProcess id="Task_0yb3uuv" name="Call void::remoteRemove(resourceId, symbol)">
+    <bpmn:subProcess id="Task_0yb3uuv" name="Call void::remoteRemove(siteId, resourceId, symbol)">
       <bpmn:incoming>SequenceFlow_0d6pnmo</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_04h790f</bpmn:outgoing>
     </bpmn:subProcess>
@@ -499,7 +499,7 @@
       <bpmn:outgoing>SequenceFlow_1gnh3sq</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_0wax8gl</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:task id="Task_1nuujwa" name="Call void::remoteInsert(toInsert)">
+    <bpmn:task id="Task_1nuujwa" name="Call void::remoteInsert(siteId, toInsert)">
       <bpmn:incoming>SequenceFlow_0wax8gl</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0zlur11</bpmn:outgoing>
     </bpmn:task>
@@ -569,7 +569,7 @@
     <bpmn:endEvent id="EndEvent_17rq05h">
       <bpmn:incoming>SequenceFlow_0izb3f6</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:subProcess id="SubProcess_0rrofjl" name="Call void::remoteInsert(resourceId, newSym)">
+    <bpmn:subProcess id="SubProcess_0rrofjl" name="Call void::remoteInsert(siteId, resourceId, newSym)">
       <bpmn:incoming>SequenceFlow_0ltvmjp</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0tlg65x</bpmn:outgoing>
     </bpmn:subProcess>

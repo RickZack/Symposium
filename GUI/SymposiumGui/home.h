@@ -8,6 +8,7 @@
 #include "changeuserinfo.h"
 #include "directory.h"
 #include "errorconnection.h"
+#include "errorlogout.h"
 
 
 namespace Symposium{
@@ -27,6 +28,7 @@ public:
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void successLogout();
     void errorConnection();
+    void errorConnectionLogout(std::string str);
     ~home();
 
 private slots:
@@ -48,6 +50,7 @@ private:
     directory *directoryWindow;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
+    errorlogout *errorLog;
 
     void closeEvent(QCloseEvent *event);
 };

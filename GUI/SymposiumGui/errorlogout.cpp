@@ -3,11 +3,12 @@
 #include "mainwindow.h"
 
 
-errorlogout::errorlogout(QWidget *parent) :
+errorlogout::errorlogout(QWidget *parent, QString str) :
     QDialog(parent),
-    ui(new Ui::errorlogout)
+    str(str), ui(new Ui::errorlogout)
 {
     ui->setupUi(this);
+    ui->label->setText(str);
 }
 
 errorlogout::~errorlogout()

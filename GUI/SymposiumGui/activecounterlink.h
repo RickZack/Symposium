@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include "../../privilege.h"
 #include "../../uri.h"
+#include "../../Symposium.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
 
@@ -21,12 +22,12 @@ class activecounterlink : public QDialog
     Q_OBJECT
 
 public:
-    explicit activecounterlink(QWidget *parent = nullptr, int documentId=0, std::string pathFile="");
+    explicit activecounterlink(QWidget *parent = nullptr, Symposium::uint_positive_cnt::type documentId=0, std::string pathFile="");
     void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     ~activecounterlink();
 
 private slots:
@@ -49,7 +50,7 @@ private:
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
-    int documentId;
+    Symposium::uint_positive_cnt::type documentId;
 };
 
 #endif // ACTIVECOUNTERLINK_H

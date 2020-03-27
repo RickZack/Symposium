@@ -4,7 +4,9 @@
 #include <QDialog>
 #include "../../privilege.h"
 #include "../../uri.h"
+#include "../../Symposium.h"
 #include <QMessageBox>
+
 #include "errorconnection.h"
 #include "errorlogout.h"
 
@@ -21,12 +23,12 @@ class activealwayslink : public QDialog
     Q_OBJECT
 
 public:
-    explicit activealwayslink(QWidget *parent = nullptr,  int documentId=0, std::string pathFile="");
+    explicit activealwayslink(QWidget *parent = nullptr,  Symposium::uint_positive_cnt::type documentId=0, std::string pathFile="");
     void unsuccessLink(std::string errorMess);
     void successLink(std::string path);
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     void errorConnection();
-    void errorConnectionLogout();
+    void errorConnectionLogout(std::string str);
     ~activealwayslink();
 
 private slots:
@@ -48,7 +50,7 @@ private:
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
-    int documentId;
+    Symposium::uint_positive_cnt::type documentId;
     std::string pathFile;
 };
 

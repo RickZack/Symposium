@@ -1,7 +1,7 @@
 #include "activenonlink.h"
 #include "ui_activenonlink.h"
 
-activenonlink::activenonlink(QWidget *parent, int documentId, std::string pathFile) :
+activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
     QDialog(parent),
     ui(new Ui::activenonlink), pathFile(pathFile), documentId(documentId)
 {
@@ -52,13 +52,13 @@ void activenonlink::errorConnection()
     errorWindow->show();
 }
 
-void activenonlink::errorConnectionLogout()
+void activenonlink::errorConnectionLogout(std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->cancel->setDisabled(false);
     ui->ok->setDisabled(false);
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();

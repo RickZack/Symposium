@@ -49,9 +49,9 @@ void deleteAccount::errorConnection()
     errorWindow->exec();
 }
 
-void deleteAccount::errorConnectionLogout()
+void deleteAccount::errorConnectionLogout(std::string str)
 {
-    errorLog = new errorlogout(this);
+    errorLog = new errorlogout(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     errorLog->exec();
