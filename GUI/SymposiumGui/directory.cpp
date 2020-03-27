@@ -3,6 +3,7 @@
 #include "home.h"
 #include <ostream>
 
+
 directory::directory(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::directory)
@@ -31,7 +32,6 @@ directory::directory(QWidget *parent) :
     ui->actionHome->setIcon(QIcon(":/resources/cartelle/home_icon"));
     ui->actionUri->setIcon(QIcon(":/resources/cartelle/link_icon"));
 
-    ui->pushButton->setIcon(QIcon(":/resources/cartelle/open_icon"));
     ui->pushButton_2->setIcon(QIcon(":/resources/cartelle/delete_icon"));
     ui->pushButton_3->setIcon(QIcon(":/resources/cartelle/create_icon"));
     ui->pushButton_4->setIcon(QIcon(":/resources/cartelle/create_icon"));
@@ -46,7 +46,6 @@ directory::~directory()
 {
     delete ui;
 }
-
 
 
 void directory::listGenerate(std::string str_first, int count)
@@ -96,6 +95,7 @@ void directory::listGenerate(std::string str_first, int count)
         }
     }
 }
+
 
 std::string directory::searchForId(std::string word,std::string str,int count)
 {
@@ -196,56 +196,6 @@ void directory::on_actionUri_triggered()
     this->hide();
 }
 
-//opens a selected source
-void directory::on_pushButton_clicked()
-{
-
-        // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
-        QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
-        foreach(QListWidgetItem *items, selectedItem){
-             QString value= items->whatsThis();
-             std::string nameSource=items->text().toStdString();
-             // dermine the path of the folders in which I enter.
-             if(value=="directory")
-             {
-                 std::string id=searchForId(nameSource,str,count);
-                 path+=id+'/'; // ok lo crea in modo corretto
-                 std::string pth=path; //solo per visualizzare che lo crea in modo corretto. Dopo si può cancellare
-                 aperto++;
-                 // open the folder Window
-                 // str1=cl->getStr(this->id, this->path);
-                 std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
-                 str=str1;
-
-                 this->openWindow(str);
-
-             }
-
-             else if(value=="file")
-
-                 // id and path e privilegio con cui apre
-             {
-                 std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
-                 std::string id=idPriv.first;
-                 std::string initialPriv=idPriv.second;
-                 // I have to open the choosepriv first
-                 chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
-                 chooseprivWindow->show();
-             }
-             else
-             {
-                 // it is a SymLink
-                 // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
-                 // path e nome che ce li ho.
-
-
-
-
-             }
-
-     }// foreach
-
-}
 
 void directory::openWindow(std::string str1){
     ui->myListWidget->clear();
@@ -255,6 +205,20 @@ void directory::openWindow(std::string str1){
     ui->back_button->setDisabled(false);
     ui->back_button->show();
     this->show();
+}
+
+void directory::contextMenuEvent(QContextMenuEvent *event)
+{
+    if(event->MouseButtonPress==Qt::RightButton){
+        QMenu submenu;
+        submenu.addAction("Open");
+        submenu.addAction("Delete");
+        submenu.addAction("Rename");
+
+        QPoint globalPos=ui->myListWidget->cursor().pos();
+        submenu.exec(globalPos);
+
+    }
 }
 
 //acts when the user clicks on the button "DELETE"
@@ -518,3 +482,55 @@ void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
 }
+
+void directory::errorLogout(){
+    errorLogoutWindow= new errorlogout(this);
+    errorLogoutWindow->show();
+
+}
+
+
+void directory::on_myListWidget_itemDoubleClicked(QListWidgetItem *item)
+{
+
+    QString value= item->whatsThis();
+    std::string nameSource=item->text().toStdString();
+    // dermine the path of the folders in which I enter.
+    if(value=="directory")
+    {
+        std::string id=searchForId(nameSource,str,count);
+        path+=id+'/'; // ok lo crea in modo corretto
+        std::string pth=path; //solo per visualizzare che lo crea in modo corretto. Dopo si può cancellare
+        aperto++;
+        // open the folder Window
+        // str1=cl->getStr(this->id, this->path);
+        std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
+        str=str1;
+
+        this->openWindow(str);
+
+    }
+
+    else if(value=="file")
+
+        // id and path e privilegio con cui apre
+    {
+        std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
+        std::string id=idPriv.first;
+        std::string initialPriv=idPriv.second;
+        // I have to open the choosepriv first
+        chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
+        chooseprivWindow->show();
+    }
+    else
+    {
+        // it is a SymLink
+        // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
+        // path e nome che ce li ho.
+
+
+
+
+    }
+}
+

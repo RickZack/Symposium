@@ -6,10 +6,14 @@
 #include <QApplication>
 #include <QtWidgets/qwidget.h>
 #include <QListWidgetItem>
+#include <QMouseEvent>
+
+
 
 #include "inserturi.h"
 #include "choosepriv.h"
 #include "errorconnection.h"
+#include "errorlogout.h"
 
 namespace Ui {
 class directory;
@@ -23,7 +27,6 @@ public:
     explicit directory(QWidget *parent = nullptr);
     ~directory();
     void listGenerate(std::string str, int count);
-
 
     // this variable is used to say that a window has been opened and to enable the button BACK.
     int aperto=0;
@@ -69,6 +72,12 @@ public:
      * @param msg
      */
     void failureActionDirectory(std::string msg);
+
+    /**
+     * @brief errorLogout shows an error message and closes the window
+     */
+    void errorLogout();
+
 private slots:
 
     /**
@@ -81,13 +90,6 @@ private slots:
      * @brief directory::on_actionUri_triggered opens the uri window
      */
     void on_actionUri_triggered();
-
-
-    /**
-     * @brief directory::on_pushButton_clicked opens the selected directory/file/symlink
-     */
-    void on_pushButton_clicked();
-
 
     /**
      * @brief directory::on_pushButton_2_clicked acts when the user clicks on the button "DELETE"
@@ -120,6 +122,10 @@ private slots:
      */
     void on_okButton_clicked();
 
+    void on_myListWidget_itemDoubleClicked(QListWidgetItem *item);
+
+
+
 private:
     Ui::directory *ui;
     inserturi *uriWindow;
@@ -127,6 +133,7 @@ private:
     choosepriv *chooseprivWindow;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
+    errorlogout *errorLogoutWindow;
 
     std::string str;
     std::string old_str;
@@ -180,6 +187,11 @@ private:
      * @param str1 cointains all the sources inside the attual folder
      */
     void openWindow(std::string str1);
+
+
+    void contextMenuEvent(QContextMenuEvent *event) override;
 };
+
+
 
 #endif // DIRECTORY_H
