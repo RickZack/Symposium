@@ -44,8 +44,6 @@
 
 
 namespace Symposium {
-//TODO: complete information about the functions: do they throw exceptions? What is the exception safety?
-
 /**
  * @brief class used to model a user of the system
  *
@@ -79,6 +77,11 @@ namespace Symposium {
     public:
         user() = default;
 
+        /**
+      * @brief creates a new user
+      * @throws @ref userException if the password is not chosen appropriately
+      * @return the pointer to the file just created
+      */
         user(const std::string &username, const std::string &pwd, const std::string &nickname,
              const std::string &iconPath,
              uint_positive_cnt::type siteId, std::shared_ptr<directory> home);
@@ -144,6 +147,7 @@ namespace Symposium {
          * @param resId the uri of the resource to be linked by the symlink
          * @param path the path to put the resource into
          * @param fileName the name of the new link
+         * @throws @ref userException "User don't have any privilege to this file anymore"
          * @return the file just added
          */
         virtual std::pair<int, std::shared_ptr<file>>
@@ -166,6 +170,7 @@ namespace Symposium {
          * @param resPath relative path to the resource from the current user's @e home
          * @param resName the id of the target resource
          * @param newPrivilege the new privilege to be granted to @e targetUser
+         * @throws @ref userException "User cannot upgrade this privilege"
          * @return the old privilege of @e targetUser had on the resource
          * @warning the current user must be a owner of the target resource
          *
