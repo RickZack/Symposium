@@ -213,7 +213,7 @@ void directory::on_pushButton_clicked()
                  std::string pth=path; //solo per visualizzare che lo crea in modo corretto. Dopo si può cancellare
                  aperto++;
                  // open the folder Window
-                 // str1=cl->getStr(INT ID);
+                 // str1=cl->getStr(this->id, this->path);
                  std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
                  str=str1;
 
@@ -230,6 +230,7 @@ void directory::on_pushButton_clicked()
                  std::string initialPriv=idPriv.second;
                  // I have to open the choosepriv first
                  chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
+                 chooseprivWindow->show();
              }
              else
              {
@@ -324,7 +325,7 @@ void directory::successRemouve(){
     }
 }
 
-void directory::failureRemouve(std::string msg){
+void directory::failureActionDirectory(std::string msg){
     QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
 }
 
@@ -373,9 +374,6 @@ void directory::successCreate(std::string id){
 
 }
 
-void directory::failureCreate(std::string msg){
-    QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
-}
 
 //this method closes the window directory
 void directory::closeEvent(QCloseEvent *event)
@@ -423,22 +421,19 @@ void directory::on_pushButton_4_clicked()
     //-----------------------------------------------------------------------------------------------
 }
 
-void directory::successNewSource(std::string id, std::string priv){
+void directory::successNewSource(std::string id){
 
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
     ui->name_2->setText(" ");
     count++;
-    std::string new_str=" file "+id+' '+name.toStdString()+' '+priv+'\n';
+    std::string new_str=" file "+id+' '+name.toStdString()+' '+"owner"+'\n';
     str=str+new_str;
     ui->myListWidget->clear();
     int count=number_elements(str);
     listGenerate(str,count);
 }
 
-void directory::failureNewSource(std::string msg){
-    QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
-}
 
 void directory::on_back_button_clicked()
 {
@@ -483,7 +478,7 @@ void directory::on_okButton_clicked()
     foreach(QListWidgetItem *items, selectedItem){
          std::string oldName=items->text().toStdString();
          std::string id=searchForId(oldName,str,count);
-         //cl->renameResource(this->path,id or oldName, newName);
+         //cl->renameResource(this->path,id, newName);
          //------------------------------------------------------
          // QUESTE RIGHE VANNO LASCIATE SOLO NEL SUCCESS RENAME
          items->setText(" ");
@@ -513,10 +508,6 @@ void directory::successRename(){
     }
 }
 
-void directory::failureRename(std::string msg){
-     QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
-
-}
 
 void directory::errorConnection(){
     errorWindow = new errorconnection(this);

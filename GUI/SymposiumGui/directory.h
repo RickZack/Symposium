@@ -37,13 +37,6 @@ public:
     void successRename();
 
     /**
-     * @brief failureRename shows an error @e msg
-     * @param msg error message to show
-     */
-    void failureRename(std::string msg);
-
-
-    /**
      * @brief errorConnection acts when there is an error on the connection
      * It shows an error msg
      */
@@ -56,23 +49,10 @@ public:
     void successRemouve();
 
     /**
-     * @brief directory::failureRemouve shows an error message
-     * @param msg
-     */
-    void failureRemouve(std::string str);
-
-    /**
      * @brief successCreate create a new folder and updates the string str adding its info
      * @param id the id of the new created folder
      */
     void successCreate(std::string id);
-
-    /**
-     * @brief failureCreate shows an error message
-     * @param msg
-     */
-    void failureCreate(std::string msg);
-
 
     void setClientDispatcher(Symposium::clientdispatcher *cl);
 
@@ -81,13 +61,14 @@ public:
      * @param id  of the file
      * @param priv of the file
      */
-    void successNewSource(std::string id, std::string priv);
+    void successNewSource(std::string id);
+
 
     /**
-     * @brief failureNewSource shows an error @msg
+     * @brief failureActionDirectory shows an error message in case of the server doesn't answer
      * @param msg
      */
-    void failureNewSource(std::string msg);
+    void failureActionDirectory(std::string msg);
 private slots:
 
     /**
