@@ -391,7 +391,8 @@ const std::map<uint_positive_cnt::type, user> & mapMessage::getSiteIdToUser() co
 
 void mapMessage::invokeMethod(SymClient &client) {
     auto msg= client.retrieveRelatedMessage(*this);
-    client.setUserColors(siteIdToUser);
+    std::shared_ptr<updateDocMessage> mex2=std::dynamic_pointer_cast<updateDocMessage>(msg);
+    client.setUserColors(mex2->getResourceId(), siteIdToUser);
 }
 
 bool mapMessage::operator==(const mapMessage &rhs) const {
