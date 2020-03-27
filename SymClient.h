@@ -506,6 +506,8 @@ namespace Symposium {
     private:
         document* getActiveDocumentbyID(uint_positive_cnt::type id);
 
+        colorGen getColorGeneratorbyDocumentiID(uint_positive_cnt::type id);
+
         const user* getActiveUserbyID(uint_positive_cnt::type userId, std::forward_list<std::pair<const user *, sessionData>> &l);
 		
 		const std::shared_ptr<file> getFilebyDocumentID(int id);

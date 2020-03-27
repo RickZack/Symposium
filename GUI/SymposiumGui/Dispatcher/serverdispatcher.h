@@ -73,6 +73,10 @@
         protected:
             void incomingConnection(qintptr socketDescriptor) override;
 
+        private:
+            //classe per eccezione
+            class sendFailure{};
+
         public slots:
             void readyRead();
 

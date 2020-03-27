@@ -58,6 +58,12 @@ void ServerDispatcher::incomingConnection(qintptr socketDescriptor){
     //creiamo il socket per la nuova connessione
     QTcpSocket* temp = new QTcpSocket();
 
+    //impostiamo il keep_alive
+
+    //DA RIVEDERE
+
+    temp->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+
     //attacchiamo il socketdescriptor
     temp->setSocketDescriptor(socketDescriptor);
 
@@ -68,13 +74,6 @@ void ServerDispatcher::incomingConnection(qintptr socketDescriptor){
     connect(Connected_Clients.value(socketDescriptor), SIGNAL(readyRead()), this, SLOT(readyRead()));
 
     this->tmp = temp;
-
-    user target("username", "P@assW0rd!!", "noempty", "", 0, nullptr);
-
-    std::shared_ptr<loginMessage> me = std::make_shared<loginMessage>(msgType::login, msgOutcome::success, target);
-
-    this->sendMessage(me,1);
-
 }
 
 void ServerDispatcher::readyRead(){
@@ -104,7 +103,12 @@ void ServerDispatcher::readyRead(){
     qDebug() << "\n" << "ricevuto: " << QString::fromStdString(accumulo.str());
     boost::archive::text_iarchive ia(accumulo);
     ia >> mes;
-    //mes->invokeMethod(this->server);
+    try {
+         mes->invokeMethod(this->server);
+    } catch (SymServerException& e) {
+
+    }
+
 }
 
 void ServerDispatcher::sendMessage(const std::shared_ptr<serverMessage> MessageToSend, int siteID){
@@ -118,13 +122,10 @@ void ServerDispatcher::sendMessage(const std::shared_ptr<serverMessage> MessageT
     out << QString::fromStdString(ofs.str());
     boost::archive::text_iarchive ia(ofs);
     ia >> des;
-    qDebug() << "deserializzato correttamente\n";
-    qDebug() << "id-message del messaggio originale: " << msg.getMsgId() << "\n";
-    qDebug() << "id-message del messaggio deserializzato: " << des.getMsgId() << "\n";
-    /*if (out.status() != QTextStream::Ok){
+    if (out.status() != QTextStream::Ok){
         throw sendFailure();
     }else{
-        if((msg.getAction()==Symposium::msgType::login) || (msg.getAction()==Symposium::msgType::registration) || (msg.getAction()==Symposium::msgType::removeUser) ||
+        /*if((msg.getAction()==Symposium::msgType::login) || (msg.getAction()==Symposium::msgType::registration) || (msg.getAction()==Symposium::msgType::removeUser) ||
                (msg.getAction()==Symposium::msgType::changeUserData) || (msg.getAction()==Symposium::msgType::openNewRes) || (msg.getAction()==Symposium::msgType::changePrivileges)){
             //messaggio per cui dobbiamo ricevere risposta dal server
             this->timer.start(TEMPOATTESA);
@@ -132,6 +133,6 @@ void ServerDispatcher::sendMessage(const std::shared_ptr<serverMessage> MessageT
         }else if(msg.getAction()==Symposium::msgType::logout){
             this->socket.close();
             this->client.logout();
-        }
-    }*/
+        }*/
+    }
 }

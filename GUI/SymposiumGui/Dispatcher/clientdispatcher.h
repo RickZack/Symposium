@@ -63,7 +63,11 @@ class activenonlink;
 
 
 
-const int TEMPOATTESA = 2000;       //Tempo per cui si attende risposta dal server
+const int TEMPOATTESA = 180000;       //Tempo per cui si attende risposta dal server, in millisecondi
+
+const std::string TIMERSCADUTO = "Unable to receive response from server. Please, check your connection and login again.";
+
+const std::string IMPOSSINVIARE = "Unable to contact the server. Please, check your connection and login again.";
 
 namespace Symposium{
 
@@ -92,11 +96,13 @@ namespace Symposium{
         onlineusers* finestraOnlineUser;                //13
         alluser* finestraAllUser;                       //14
         activenonlink* finestraActiveNonLink;           //15
-        std::vector<std::pair<int,notepad*>> finestreDocumenti;         //coppia resourceID-Puntatore a finestra
+        std::vector<std::pair<uint_positive_cnt::type,notepad*>> finestreDocumenti;         //coppia resourceID-Puntatore a finestra
         //std::shared_ptr<clientMessage> message;      //Contiene il messaggio che abbiamo inviato e di cui attendiamo risposta dal server
 
     public:
         clientdispatcher(QObject *parent = nullptr);
+
+        void openConnection();
 
         /**
          * @brief send on the socket the message to deliver it to the server
@@ -134,26 +140,26 @@ namespace Symposium{
         /**
          * @brief it provides the list of online users on the current document
          */
-        const std::forward_list<std::pair<const user *, sessionData>> onlineUser(int documentID);
+        const std::forward_list<std::pair<const user *, sessionData>> onlineUser(uint_positive_cnt::type documentID);
 
-        std::unordered_map<std::string, privilege> allUser(int documentID);
+        std::unordered_map<std::string, privilege> allUser(uint_positive_cnt::type documentID);
 
 
         void createNewSource(const std::string &path, const std::string &name);
         void createNewDir(const std::string &path, const std::string &name);
-        void localInsert(int resourceId, wchar_t car, QFont font, QColor color, const std::pair<int, int> &index);
-        void localRemove(int resourceId, const std::pair<int, int> indexes);
-        void remoteInsert(int resourceId, const symbol &newSym);
-        void remoteRemove(int resourceId, std::pair<int, int> indexes);
-        void editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, int documentID);
+        void localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<int, int> &index);
+        void localRemove(uint_positive_cnt::type resourceId, const std::pair<int, int> indexes);
+        void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym);
+        void remoteRemove(uint_positive_cnt::type resourceId, std::pair<int, int> indexes);
+        void editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, uint_positive_cnt::type documentID);
         void shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
         void renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
         void removeResource(const std::string &resPath, const std::string &resName);
-        void closeSource(int resourceId);
-        void moveMyCursor(int resId, int block, int column);
-        void addUserCursor(int siteID, std::string username, int resourceID);
-        void moveUserCursor(int resId, int block, int column, int siteId);
-        void removeUserCursor(int siteID, int resourceID);
+        void closeSource(uint_positive_cnt::type resourceId);
+        void moveMyCursor(uint_positive_cnt::type resId, int block, int column);
+        void addUserCursor(uint_positive_cnt::type siteID, std::string username, uint_positive_cnt::type resourceID);
+        void moveUserCursor(uint_positive_cnt::type resId, int block, int column, uint_positive_cnt::type siteId);
+        void removeUserCursor(uint_positive_cnt::type siteID, uint_positive_cnt::type resourceID);
 
         /**
          * @brief method to provide the current user to the GUI
@@ -217,7 +223,7 @@ namespace Symposium{
 
         void closeConnection();
 
-        std::string getStr(int ID_Cartella, std::string path);
+        std::string getStr(uint_positive_cnt::type ID_Cartella, std::string path);
 
 
         /**
@@ -231,7 +237,7 @@ namespace Symposium{
          * @param resourceID the ID of the document
          * @param te a pointer to the notepad window
          */
-        void setTextEdit(int resourceID, notepad *te);
+        void setTextEdit(uint_positive_cnt::type resourceID, notepad *te);
 
         /**
          * @brief this method assign to @ref finestraSignup the pointer to the signup window
@@ -299,6 +305,8 @@ namespace Symposium{
 
         void setActiveNonLink(activenonlink *anl);
 
+        void stopTimer();
+
 
     private:
         /*int getmsgaction(const std::shared_ptr<clientMessage> Message);
@@ -309,8 +317,8 @@ namespace Symposium{
         QString getnewUser(const user& utente);
         QString getSymbolserialized(const symbol& sym);
         QString getUriserialized(const uri& uri);*/
-        notepad* getCorrectNotepadbyResourceID(int resourceID);
-        void deleteActiveDocument(int resourceID);
+        notepad* getCorrectNotepadbyResourceID(uint_positive_cnt::type resourceID);
+        void deleteActiveDocument(uint_positive_cnt::type resourceID);
 
         //classi per eccezioni
         class sendFailure{};
@@ -330,6 +338,7 @@ namespace Symposium{
         void createNewDirExpired();
         void createNewSourceExpired();
         void localRemoveExpired();
+        void localInsertExpired();
         void closeSourceExpired();
     };
 }
