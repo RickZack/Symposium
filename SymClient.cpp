@@ -33,7 +33,6 @@
 #include "message.h"
 #include "filesystem.h"
 #include "SymposiumException.h"
-#include "color.h"
 //#include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
 
 using namespace Symposium;
@@ -293,7 +292,8 @@ updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
     return *mess;
 }
 //con questo metodo associamo agli utenti i colori (che sono diversi per ogni client), da fare con qcolor
-void SymClient::setUserColors(const std::map<uint_positive_cnt::type, user> &siteIdToUser) {
+void
+SymClient::setUserColors(uint_positive_cnt::type resId, const std::map<uint_positive_cnt::type, user> &siteIdToUser) {
     //TODO:implement
 }
 

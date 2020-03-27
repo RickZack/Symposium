@@ -515,7 +515,7 @@ TEST_F(clientMessageTest, updateDocMsgTestCallsCloseSource){
 class SymClientMock: public SymClient{
 public:
     MOCK_METHOD1(setLoggedUser, void(const user&));
-    MOCK_METHOD1(setUserColors, void(const std::map<uint_positive_cnt::type, user>&));
+    MOCK_METHOD2(setUserColors, void(uint_positive_cnt::type, const std::map<uint_positive_cnt::type, user>&));
     MOCK_METHOD3(createNewSource, void(const std::string&, const std::string&, uint_positive_cnt::type));
     MOCK_METHOD3(createNewDir, void(const std::string&, const std::string&, uint_positive_cnt::type));
     MOCK_METHOD4(openSource, void(const std::string&, const std::string&, const std::shared_ptr<file>, privilege priv));
@@ -565,11 +565,12 @@ TEST_F(serverMessageTest, loginMsgTestCallsSetLoggedUser){
 
 TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
     std::map<uint_positive_cnt::type, user> siteIdToUser;
+    cm= new updateDocMessage(msgType::mapChangesToUser, {clientMessageTest::username, ""}, clientMessageTest::resourceId);
     m=new mapMessage(msgType::mapChangesToUser, msgOutcome::success, siteIdToUser);
-    EXPECT_CALL(client, setUserColors(siteIdToUser));
+    EXPECT_CALL(client, setUserColors(clientMessageTest::resourceId, siteIdToUser));
     //Even if the retrieved message is not useful to call setLoggedUser(), it's necessary to
     //notify that the server answered and check if the asked action has been completed successfully
-    EXPECT_CALL(client, retrieveRelatedMessage(*m));
+    EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);
 }

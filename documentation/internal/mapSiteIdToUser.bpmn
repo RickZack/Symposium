@@ -175,7 +175,7 @@
     </bpmn:task>
     <bpmn:sequenceFlow id="SequenceFlow_17a1ppy" sourceRef="ExclusiveGateway_0k71qip" targetRef="Task_1c3nzx0" />
     <bpmn:sequenceFlow id="SequenceFlow_0px8iy4" name="return clientMessage" sourceRef="Task_1c3nzx0" targetRef="ExclusiveGateway_0eawqf1" />
-    <bpmn:subProcess id="SubProcess_1ybs01h" name="void setUserColors(siteIdToUser);">
+    <bpmn:subProcess id="SubProcess_1ybs01h" name="void setUserColors(resId, siteIdToUser);">
       <bpmn:incoming>SequenceFlow_0yfuu3o</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1aozurw</bpmn:outgoing>
     </bpmn:subProcess>

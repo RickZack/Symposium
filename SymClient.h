@@ -451,12 +451,14 @@ namespace Symposium {
 
         /**
          * @brief assign to each user working on the same document on which @e loggedUser is working a unique color
+         * @param resId the identified of the document the mapping was requested for
          * @param siteIdToUser the mapping siteId->user asked to the server
          *
          * Receive the mapping siteId->user from the server and assigns to each user a unique color among the colors
          * assigned to the users working on the same document.
          */
-        virtual void setUserColors(const std::map<uint_positive_cnt::type, user> &siteIdToUser);
+        virtual void
+        setUserColors(uint_positive_cnt::type resId, const std::map<uint_positive_cnt::type, user> &siteIdToUser);
 
         /**
          * @brief add @e targetUser to the list of active users of the document
