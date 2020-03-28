@@ -38,12 +38,25 @@
 #include <boost/serialization/access.hpp>
 
 namespace Symposium {
+
+    struct format{
+        std::string familyType;
+        bool isBold;
+        bool isUnderlined;
+        bool isItalic;
+        int blue;
+        int red;
+        int green;
+
+    };
+
     class symbol {
         wchar_t ch;
         int siteId;
         int counter;
         std::vector<int> pos;
         bool verified;  /**< true if the symbol has been verified by the server or has been inserted by remoteInsert */
+        format charFormat;
 
         friend class boost::serialization::access;
         template<class Archive>
@@ -79,6 +92,10 @@ namespace Symposium {
         bool operator==(const symbol &rhs) const;
 
         bool operator!=(const symbol &rhs) const;
+
+        void setCharFormat(const format &value);
+
+        format getCharFormat() const;
     };
 }
 

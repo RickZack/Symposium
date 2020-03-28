@@ -64,6 +64,7 @@ private slots:
 
     void on_textEdit_cursorPositionChanged();
 
+
 private:
     Ui::notepad *ui;
     QString mFilename;
@@ -98,6 +99,7 @@ private:
     void closeEvent(QCloseEvent *event);
     void keyReleaseEvent(QKeyEvent *e);
 
+    void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt siteId);
 
     QAction *actionTextBold;
     QAction *actionTextUnderline;
@@ -115,6 +117,7 @@ private:
     QTextEdit *textEdit;
 
     std::string idDoc;
+
 
 
 };
