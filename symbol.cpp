@@ -33,6 +33,16 @@
 
 using namespace Symposium;
 
+void symbol::setCharFormat(const format &value)
+{
+    charFormat = value;
+}
+
+format symbol::getCharFormat() const
+{
+    return charFormat;
+}
+
 symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos, bool verified) : ch(ch), siteId(siteId),
                                                                                                   counter(counter), pos(pos), verified(verified) {}
 
@@ -96,6 +106,7 @@ bool symbol::isVerified() const{
 int symbol::getCounter() const {
     return counter;
 }
+
 
 std::ostream& operator<<(std::ostream& os, symbol s){
     os<<"char= "<<s.getCh()<<", siteId= "<<s.getSiteId()<<", pos= "<<"[";

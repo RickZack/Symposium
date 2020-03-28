@@ -78,6 +78,7 @@ public:
      */
     void errorLogout();
 
+    void openSource();
 private slots:
 
     /**
@@ -92,9 +93,9 @@ private slots:
     void on_actionUri_triggered();
 
     /**
-     * @brief directory::on_pushButton_2_clicked acts when the user clicks on the button "DELETE"
+     * @brief directory::deleteSource acts when the user chooses to delete a selected source
      */
-    void on_pushButton_2_clicked();
+    void deleteSource();
 
     /**
      * @brief on_pushButton_3_clicked acts when the user wants to create a new folder
@@ -112,9 +113,9 @@ private slots:
     void on_back_button_clicked();
 
     /**
-     * @brief on_renameButt_clicked acts when the user clicks on the button "RENAME"
+     * @brief renameSource acts when the user chooses to rename the selected source
      */
-    void on_renameButt_clicked();
+    void renameSource();
 
     /**
      * @brief on_okButton_clicked acts when the user inserts the new name of the folder and
@@ -125,6 +126,8 @@ private slots:
     void on_myListWidget_itemDoubleClicked(QListWidgetItem *item);
 
 
+
+    void on_okButton_2_clicked();
 
 private:
     Ui::directory *ui;

@@ -98,6 +98,8 @@ notepad::notepad(QWidget *parent, int documentId, Symposium::privilege priv, Sym
     ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());
     ui->textEdit->addUser(4, "Tizio");
     ui->textEdit->changePosition(4, 1, 1);
+
+
     //---------------------------------------------------------------------
 
     ui->textEdit->setCursorWidth(3);
@@ -524,13 +526,14 @@ void notepad::closeEvent(QCloseEvent *event){
 
 void notepad::keyReleaseEvent(QKeyEvent *event)
 {
+
     QTextCursor cursor= ui->textEdit->textCursor();
     if (event->key()==Qt::Key_Backspace){
         int column=cursor.positionInBlock();
         int row= cursor.blockNumber();
-        std::pair<int, int> indexes={row,column};
+        const std::pair<int, int> indexes={row,column};
         // id del documento che ho aperto e la coppia di indici
-        //localRemouve(this->idDoc,pairs)
+        //localRemouve(this->documentId,&indexes);
 
     }else if(event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
              ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||
@@ -547,43 +550,60 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         int column=cursor.positionInBlock();
         column= column-1;
         int row= cursor.blockNumber();
-        QByteArray ba = testo.toLocal8Bit();
-        // char
-        const char *ch = ba.data();
-        std::pair<int, int> indexes={row,column};
-        //localInsert(this->siteId,sym,indexes);
+
+        const wchar_t* ch=testo.toStdWString().c_str();
+        const std::pair<int, int> indexes={row,column};
+
 
         QTextCharFormat format = cursor.charFormat();
-
-
         QFont font= format.font();
-
-
         bool isBold= font.bold();
-        if(isBold==true){
-            qDebug()<<"isBold"<<true;
-        }else
-            qDebug()<<"isBold"<<false;
-
         bool isUnderlined=font.underline();
-        if(isUnderlined==true){
-            qDebug()<<"isUnderlined"<<true;
-        }else
-            qDebug()<<"isUnderlined"<<false;
-
         bool isItalic=font.italic();
-        if(isItalic==true){
-            qDebug()<<"isItalic"<<true;
-        }else
-            qDebug()<<"isItalic"<<false;
+        std::string fontFamily=font.family().toStdString();
+        QColor col=format.foreground().color();
+        int blue=col.blue();
+        int red=col.red();
+        int green=col.green();
 
-        qDebug()<<"family"<<font.family();
-        qDebug()<<"font"<<font;
-        qDebug()<<"color"<< ui->textEdit->textColor();
+        // struct format charFormat={familyFont,isBold,isUnderlined,isItalic,blue,red,yellow}
+        //std::vector<int> &pos;
+        //bool verified=false;
 
+        //cl->localInsert(this->documentId, symbol &sym, &indexes)
 
     }
 }
+
+void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt siteId){
+
+
+    /*
+    int row;
+    int column;
+
+    Symposium::format f= sym.getCharFormat();
+    QTextCharFormat ch_format;
+    QFont ch_font;
+    ch_font.setFamily(QString::fromStdString(f.familyType));
+    ch_font.setBold(f.isBold);
+    ch_font.setUnderline(f.isUnderlined);
+    ch_font.setItalic(f.isItalic);
+    QColor col(f.red,f.green,f.blue);
+    QBrush brh(col);
+
+    ch_format.setFont(ch_font);
+    ch_format.setBackground(brh);
+
+
+
+    ui->textEdit->changePosition(row,column);
+    ui->textEdit->textCursor().insertText("wchar_t",ch_format);
+   */
+
+}
+
+
 
 void notepad::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
@@ -594,4 +614,6 @@ void notepad::on_textEdit_cursorPositionChanged()
 {
     ui->textEdit->thisUserChangePosition(1);
     //ui->textEdit->thisUserChangePosition(us.getSiteId());
+
 }
+
