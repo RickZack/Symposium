@@ -129,6 +129,7 @@ struct SymClientDocMock: public document{
     MOCK_METHOD2(localInsert, symbol(const std::pair<unsigned, unsigned>& index, symbol &toInsert));
     MOCK_METHOD1(localRemove, symbol(const std::pair<unsigned, unsigned>& index));
     MOCK_METHOD3(updateCursorPos, void(unsigned int, unsigned int, unsigned int));
+    MOCK_METHOD1(verifySymbol, void(const symbol &sym));
 };
 
 struct SymClientTest : ::testing::Test{
@@ -439,6 +440,13 @@ TEST_F(SymClientTest, remoteRemoveCallsremoteRemoveOnRightDoc){
     //resouceId of the document to insert the symbol into is contained in the symbolMessage received by the client
     EXPECT_CALL(docSentByServer, remoteRemove(0, arrived));
     client.remoteRemove(0, docSentByServer.getId(), arrived);
+}
+
+TEST_F(SymClientTest, verifySymbolCallsVerifySymOnDoc){
+    setStageForOpenedDoc();
+    symbol arrived('a', 1, 1, {}, true);
+    EXPECT_CALL(docSentByServer, verifySymbol(arrived));
+    client.verifySymbol(docSentByServer.getId(), arrived);
 }
 
 TEST_F(SymClientTest, editPrivilegeConstructsGoodMessageAndInsertInUnanswered){

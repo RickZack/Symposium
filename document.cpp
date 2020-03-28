@@ -580,6 +580,10 @@ void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned in
     //TODO:implement
 }
 
+void document::verifySymbol(const symbol &toVerify) {
+    //TODO: implement
+}
+
 
 
 
