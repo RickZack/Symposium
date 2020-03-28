@@ -81,11 +81,10 @@ void SymClient::openSource(const std::string &path, const std::string &name, con
     auto p=getLoggedUser().openFile(path, name, reqPriv);
     p->replacement(fileAsked);
     activeFile.push_front(fileAsked);
-    colorGen* c = new colorGen();
-    activeDoc.push_front({&doc, *c});
-    Color f = (*c)();
+    colorGen c;
+    activeDoc.push_front({&doc, c});
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
-    (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),f)));
+    (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
  //   this->dispatcher->successOpenSource(doc);
 }
@@ -105,11 +104,10 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
     (this->getLoggedUser().getHome()).get()->addLink(destPath, destName, filePath, fileName, idToAssign);
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
-    colorGen* c = new colorGen();
-    std::shared_ptr<Color> col (new Color((*c)()));
-    activeDoc.push_front({&doc,*c});
+    colorGen c;
+    activeDoc.push_front({&doc,c});
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
-                                    (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),*col)));
+                                    (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
 	//notifichiamo alla gui il successo
 //    this->dispatcher->successInsertUri();
 }
@@ -124,11 +122,10 @@ void SymClient::createNewSource(const std::string &path, const std::string &name
     std::shared_ptr<file> file = this->getLoggedUser().newFile(name, path, idToAssign);
     document& docReq = file->access(this->getLoggedUser(), privilege::owner);
     activeFile.push_front(file);
-    colorGen* c = new colorGen();
-    Color f = (*c)();
-    activeDoc.push_front({&docReq,*c});
+    colorGen c;
+    activeDoc.push_front({&docReq,c});
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
-                                    (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),f)));
+                                    (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
 //    this->dispatcher->successCreateNewSource(std::to_string(idToAssign));
 }
@@ -156,7 +153,8 @@ symbolMessage SymClient::localInsert(uint_positive_cnt::type resourceId, const s
 
 symbolMessage SymClient::localRemove(uint_positive_cnt::type resourceId, const std::pair<unsigned int, unsigned int> indexes) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, d->localRemove(indexes)));
+    symbol s = d->localRemove(indexes);
+    std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, s));
     this->unanswered.push_front(mess);
     return *mess;
 }
@@ -180,8 +178,6 @@ void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
                                      privilege newPrivilege) {
-    //FIXME: non è questo che devi passare al messaggio, vedi documentazione
-    //std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
     std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, resPath + "/" + resName, targetUser, newPrivilege));
     unanswered.push_front(mess);
     return *mess;
@@ -224,8 +220,6 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
 }
 
 askResMessage SymClient::removeResource(const std::string &resPath, const std::string &resName) {
-    //FIXME: non è questo che devi passare al messaggio, è il percorso completo
-    //std::string idres = std::to_string(getLoggedUser().getHome()->getFile(resPath, resName)->getDoc().getId());
     std::shared_ptr<askResMessage> mess(new askResMessage(msgType::removeRes, {SymClient::getLoggedUser().getUsername(), ""}, resPath, resName, "", uri::getDefaultPrivilege(), 0));
     unanswered.push_front(mess);
     return *mess;
@@ -252,7 +246,7 @@ updateDocMessage SymClient::closeSource(uint_positive_cnt::type resourceId) {
     unanswered.push_front(mess);
     return *mess;
 }
-//FIXME: add and review tests for editUser
+
 userDataMessage SymClient::editUser(user &newUserData) {
     std::shared_ptr<userDataMessage> mess (new userDataMessage(msgType::changeUserData, std::pair(SymClient::getLoggedUser().getUsername(), ""), msgOutcome::success, newUserData));
     unanswered.push_front(mess);
@@ -260,12 +254,10 @@ userDataMessage SymClient::editUser(user &newUserData) {
 }
 
 const user SymClient::editUser(user &newUserData, bool msgRcv) {
-    user old = this->getLoggedUser();
-    //this->getLoggedUser().setNewData(newUserData);
-    this->loggedUser.setNewData(newUserData);
+    (const_cast<user&>(this->getLoggedUser())).setNewData(newUserData);
     //notifichiamo alla gui il successo
 //    this->dispatcher->successEditUser();
-    return old;
+    return this->getLoggedUser();
 }
 
 clientMessage SymClient::removeUser() {
@@ -291,10 +283,24 @@ updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
     unanswered.push_front(mess);
     return *mess;
 }
-//con questo metodo associamo agli utenti i colori (che sono diversi per ogni client), da fare con qcolor
-void
-SymClient::setUserColors(uint_positive_cnt::type resId, const std::map<uint_positive_cnt::type, user> &siteIdToUser) {
-    //TODO:implement
+
+void SymClient::setUserColors(uint_positive_cnt::type resId, const std::map<uint_positive_cnt::type, user> &siteIdToUser) {
+    //prendiamo il generatore di colore associato al documento
+    colorGen gen = this->getColorGeneratorbyDocumentiID(resId);
+    //iteratore alla mappa ricevuta
+    std::map<uint_positive_cnt::type, user>::const_iterator it = siteIdToUser.begin();
+    //iteratore alla mappa {siteId, documentId}->{user, color}
+    //std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>::iterator mp;
+    //scorriamo la mappa
+    while(it != siteIdToUser.end()){
+        //controlliamo se c'è già il pair, altrimenti inseriamo
+        if(this->userColors.find(std::make_pair(it->first,resId)) == this->userColors.end()){
+            //non è stato trovato, quindi inseriamo
+            this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
+                                            (std::make_pair(it->first,resId),std::make_pair(it->second,gen())));
+        }
+        it++;
+    }
 }
 
 void SymClient::addActiveUser(uint_positive_cnt::type resourceId, user &targetUser, privilege Priv) {
@@ -314,7 +320,7 @@ void SymClient::addActiveUser(uint_positive_cnt::type resourceId, user &targetUs
 
 void SymClient::removeActiveUser(uint_positive_cnt::type resourceId, user &targetUser) {
     getActiveDocumentbyID(resourceId)->close(targetUser);
-    //dobbiamo rimuovere il cursore dalla GUI, se il cursore non era presente, non la GUI non fa niente
+    //dobbiamo rimuovere il cursore dalla GUI, se il cursore non era presente, la GUI non fa niente
 //    this->dispatcher->removeUserCursor(targetUser.getSiteId(),resourceId);
 }
 
@@ -339,7 +345,8 @@ void SymClient::setClientDispatcher(clientdispatcher *cl){
 }
 
 void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
-    //TODO: to implement
+    document* d = this->getActiveDocumentbyID(resourceId);
+    d->verifySymbol(sym);
 }
 
 filterShared::filterShared(const user &currentUser): currentUser{currentUser} {
@@ -418,8 +425,12 @@ void SymClient::removeUser(bool msgRcv) {
 }
 
 Color SymClient::colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::type siteId) {
-    //TODO: implement
-    return Color();
+    std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>::iterator mp;
+    mp = this->userColors.find(std::make_pair(siteId,resId));
+    if(mp != this->userColors.end())
+        return mp->second.second;
+    else
+        throw SymClientException(SymClientException::nocolorOfUser, UnpackFileLineFunction());
 }
 
 const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &

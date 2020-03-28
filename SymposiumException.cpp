@@ -81,7 +81,7 @@ filesystemException::filesystemException(filesystemExceptionCodes exceptionCode,
                              const char *func) :
         SymposiumException(file, line, func, filesystemErrors[static_cast<int>(exceptionCode)]){};
 
-const char* SymClientException::SymClientErrors[]={"No active document with that ID", "No relative message found"};
+const char* SymClientException::SymClientErrors[]={"No active document with that ID", "No relative message found", "User not found on that document"};
 
 SymClientException::SymClientException(SymClientExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
