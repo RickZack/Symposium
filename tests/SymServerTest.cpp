@@ -72,8 +72,8 @@ struct SymServerFileMock: public file{
 struct SymServerDocMock: public document{
     SymServerDocMock():document(){};
     SymServerDocMock(const SymServerDocMock& mock){};
-    MOCK_METHOD2(remoteInsert, void(uint_positive_cnt::type siteId, const symbol &toInsert));
-    MOCK_METHOD2(remoteRemove, void(uint_positive_cnt::type siteId, const symbol &toRemove));
+    MOCK_METHOD2(remoteInsert, std::pair<unsigned int, unsigned int>(uint_positive_cnt::type siteId, const symbol &toInsert));
+    MOCK_METHOD2(remoteRemove, std::pair<unsigned int, unsigned int>(uint_positive_cnt::type siteId, const symbol &toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_CONST_METHOD0(retrieveSiteIds, std::set<uint_positive_cnt::type>());
 
