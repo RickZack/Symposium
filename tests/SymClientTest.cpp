@@ -127,7 +127,7 @@ struct SymClientDocMock: public document{
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_METHOD2(access, document&(const user&, privilege));
     MOCK_METHOD2(localInsert, symbol(const std::pair<unsigned, unsigned>& index, symbol &toInsert));
-    MOCK_METHOD1(localRemove, symbol(const std::pair<unsigned, unsigned> index));
+    MOCK_METHOD1(localRemove, symbol(const std::pair<unsigned, unsigned>& index));
     MOCK_METHOD3(updateCursorPos, void(unsigned int, unsigned int, unsigned int));
 };
 
