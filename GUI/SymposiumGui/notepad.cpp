@@ -528,6 +528,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
 {
 
     QTextCursor cursor= ui->textEdit->textCursor();
+    int pos=cursor.position();
     if (event->key()==Qt::Key_Backspace){
         int column=cursor.positionInBlock();
         int row= cursor.blockNumber();
@@ -543,8 +544,12 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
              event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
              event->key()==Qt::Key_Tab || event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
              event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
-             event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier){
+             event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier & event->text()!="\u0016"){
         return;
+    }else if(event->text()=="\u0016"){
+        this->contV_action(pos);
+
+
     }else{
         QString testo=event->text();
         int column=cursor.positionInBlock();
@@ -553,7 +558,6 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
 
         const wchar_t* ch=testo.toStdWString().c_str();
         const std::pair<int, int> indexes={row,column};
-
 
         QTextCharFormat format = cursor.charFormat();
         QFont font= format.font();
@@ -575,12 +579,49 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
-void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt siteId){
+void notepad::contV_action(int pos){
+    QTextCursor curs= ui->textEdit->textCursor();
+    int posAct= curs.position();
+    int posTmp=pos;
+    int dim=posAct-pos;
+    int count=0;
 
+    while(count!=dim){
+        curs.setPosition(posTmp,QTextCursor::MoveAnchor);
+        curs.setPosition(posTmp+1,QTextCursor::KeepAnchor);
+        QString charact=curs.selectedText();
+        curs.clearSelection();
+        int column=curs.positionInBlock();
+        column= column-1;
+        int row= curs.blockNumber();
+        const wchar_t* ch=charact.toStdWString().c_str();
+        const std::pair<int, int> indexes={row,column};
+        QTextCharFormat format = curs.charFormat();
+        QFont font= format.font();
+        bool isBold= font.bold();
+        bool isUnderlined=font.underline();
+        bool isItalic=font.italic();
+        std::string fontFamily=font.family().toStdString();
+        QColor col=format.foreground().color();
+        int blue=col.blue();
+        int red=col.red();
+        int green=col.green();
+        //cl->localInsert(this->documentId, &sym, &indexes)
+        count++;posTmp++;
+
+    }
+
+}
+
+void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){
 
     /*
-    int row;
-    int column;
+    int row=indexes.first;
+    int column=indexes.second;
+
+    QTextCursor curs=ui->textCursor();
+    int actBlock=curs.blockNumber();
+    int actColm=curs.positionInBlock();
 
     Symposium::format f= sym.getCharFormat();
     QTextCharFormat ch_format;
@@ -595,14 +636,25 @@ void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt si
     ch_format.setFont(ch_font);
     ch_format.setBackground(brh);
 
-
-
     ui->textEdit->changePosition(row,column);
-    ui->textEdit->textCursor().insertText("wchar_t",ch_format);
+    curs.insertText(sym.getChar,ch_format);
+    ui->textEdit->changePosition(actRow,actColm);
    */
 
 }
 
+void notepad::remoteDelete(std::pair<int,int> indexes){
+    int block=indexes.first;
+    int column=indexes.second;
+    column++;
+    QTextCursor curs=ui->textEdit->textCursor();
+    int actBlock=curs.blockNumber();
+    int actColm=curs.positionInBlock();
+    ui->textEdit->changePosition(block,column);
+    curs.deleteChar();
+    ui->textEdit->changePosition(actBlock,actColm);
+
+}
 
 
 void notepad::setClientDispatcher(Symposium::clientdispatcher *cl)

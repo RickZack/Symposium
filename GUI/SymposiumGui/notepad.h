@@ -42,6 +42,8 @@ public:
     void moveUserCursor(int siteID, int block, int column);
     void removeUserCursor(int siteID);
     void addUserCursor(int siteID, std::string username);
+    void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt siteId,std::pair<int,int> indexes);
+    void remoteDelete(std::pair<int, int> indexes);
 
 
 private slots:
@@ -49,7 +51,6 @@ private slots:
     void on_Export_PDF_triggered();
     void on_actionCopy_triggered();
     void on_actionCut_triggered();
-
     void textBold();
     void textUnderline();
     void textItalic();
@@ -59,9 +60,6 @@ private slots:
     void textColor();
     void textAlign(QAction *a);
     void currentCharFormatChanged(const QTextCharFormat &format);
-
-
-
     void on_textEdit_cursorPositionChanged();
 
 
@@ -99,7 +97,9 @@ private:
     void closeEvent(QCloseEvent *event);
     void keyReleaseEvent(QKeyEvent *e);
 
-    void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt siteId);
+    void contV_action(int pos);
+
+
 
     QAction *actionTextBold;
     QAction *actionTextUnderline;
