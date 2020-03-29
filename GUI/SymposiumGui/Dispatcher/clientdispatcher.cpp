@@ -337,9 +337,9 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
     }
 }
 
-void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym){
+void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId){
     notepad* n = getCorrectNotepadbyResourceID(resourceId);
-    //n->remoteInsert(newSym);
+    //n->remoteInsert(newSym, siteId);
 }
 
 void clientdispatcher::remoteRemove(uint_positive_cnt::type resourceId, std::pair<int, int> indexes){

@@ -285,7 +285,7 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     return sym;
 }
 
-void document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
+std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
     //TODO: take into account new position of cursor
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
@@ -298,21 +298,24 @@ void document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInse
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
     }
-
+    //FIXME: dummy return, fix
+    return std::pair<unsigned int, unsigned int>();
 }
 
 
-void document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
+std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
     //TODO: take into account new position of cursor
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
     if(i0==-1 || i1==-1){
-        return;
+        //FIXME: dummy return, fix
+        return std::pair<unsigned int, unsigned int>();
     }
     //FIXME: se lo lasci come ultima opzione, puoi evitare di scrivere questo codice
     else if(symbols[i0][i1]!=toRemove){
-        return;
+        //FIXME: dummy return, fix
+        return std::pair<unsigned int, unsigned int>();
     }
     else {
         symbols[i0].erase(symbols[i0].begin()+i1);
@@ -578,6 +581,10 @@ unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<S
 
 void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol) {
     //TODO:implement
+}
+
+void document::verifySymbol(const symbol &toVerify) {
+    //TODO: implement
 }
 
 

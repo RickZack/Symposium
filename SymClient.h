@@ -237,8 +237,25 @@ namespace Symposium {
          */
         virtual void verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym);
 
+        /**
+         * @brief constructs a message to sent to the server to inform other users that local user has moved his cursor
+         * @param resourceId the id of the document
+         * @param row X coordinate of the new position of cursor
+         * @param col Y coordinate of the new position of cursor
+         * @return a properly constructed @ref cursorMessage to send to the server
+         */
         virtual cursorMessage updateCursorPos(uint_positive_cnt::type resourceId, unsigned int row, unsigned int col);
 
+        /**
+         * @brief update the position of user's cursor that has that @ref userSiteId on the document
+         * @param userSiteId the site id of the user moving his cursor
+         * @param resourceId the id of the document
+         * @param row X coordinate of the new position of user's cursor
+         * @param col Y coordinate of the new position of user's cursor
+         *
+         * This method is called after having received a @ref cursorMessage
+         *
+         */
         virtual void updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type resourceId, unsigned int row, unsigned int col);
 
         /**
@@ -367,6 +384,11 @@ namespace Symposium {
         virtual std::shared_ptr<filesystem>
         removeResource(const std::string &resPath, const std::string &resName, bool msgRcv);
 
+        /**
+         * @brief show the content of user's root directory
+         * @param recursive true if the method should be recursive, false otherwise
+         * @return a string with all content of user's root directory
+         */
         std::string showDir(bool recursive=false) const;
 
 
@@ -482,16 +504,45 @@ namespace Symposium {
          */
         virtual std::shared_ptr<clientMessage> retrieveRelatedMessage(const serverMessage& smex);
 
+        /**
+         * @brief the default destroyer
+         */
         virtual ~SymClient() = default;
 
+        /**
+         * @brief set dispatcher pointer to a correct client dispatcher
+         * @param cl pointer to client dispatcher
+         *
+         * this function is important to invoke it for allow Symclient to communicate with other Symposium module
+         */
         void setClientDispatcher(clientdispatcher *cl);
 
+        /**
+         * @brief it provides the online users list on the specified document
+         * @param documentID the id of the document
+         * @return the list of online users
+         */
         const std::forward_list<std::pair<const user *, sessionData>> onlineUsersonDocument(int documentID);
 
+        /**
+         * @brief it provides the list of all users who modified the specified document
+         * @param documentID the id of the document
+         * @return the list of all users
+         */
         const std::unordered_map<std::string, privilege> allUsersonDocument(int documentID);
 
+        /**
+        * @brief it provides the logged user with all data
+        * @return the logged user
+        */
         const user userData();
 
+        /**
+        * @brief show the content of directory with ID @ref ID_Cartella
+        * @param ID_Cartella the ID of directory
+        * @param path path where the directory is located
+        * @return a string with all content of request directory
+        */
         std::string directoryContent(std::string &ID_Cartella, std::string &path);
 
         /**
@@ -502,17 +553,34 @@ namespace Symposium {
          */
         Color colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::type siteId);
 
+        /**
+         * @brief returns the map {siteId, documentId}->{user, color}
+         * @return the map specified
+         */
         const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &
         getUserColors() const;
 
     private:
+        /**
+         * @brief get the document with specified ID
+         * @param id the id of the request document
+         * @return the request document
+         */
         document* getActiveDocumentbyID(uint_positive_cnt::type id);
 
+        /**
+         * @brief get the @ref colorGen associated with document that it has the specified id
+         * @param id the document the colorGen is required for
+         * @return the colorGen associated with specified document
+         */
         colorGen getColorGeneratorbyDocumentiID(uint_positive_cnt::type id);
 
-        const user* getActiveUserbyID(uint_positive_cnt::type userId, std::forward_list<std::pair<const user *, sessionData>> &l);
-		
-		const std::shared_ptr<file> getFilebyDocumentID(int id);
+        /**
+         * @brief get the file that content the document with specified ID
+         * @param id the id of the content document into the file
+         * @return the file that content the document with specified ID
+         */
+        const std::shared_ptr<file> getFilebyDocumentID(int id);
 
         /**
              * @brief set all the details of the user just logged

@@ -122,13 +122,14 @@ struct SymClientDirMock: public directory{
 
 struct SymClientDocMock: public document{
     SymClientDocMock(int id):document(id) {};
-    MOCK_METHOD2(remoteInsert, void(uint_positive_cnt::type siteId, const symbol& toInsert));
-    MOCK_METHOD2(remoteRemove, void(uint_positive_cnt::type siteId, const symbol& toRemove));
+    MOCK_METHOD2(remoteInsert, std::pair<unsigned int, unsigned int>(uint_positive_cnt::type siteId, const symbol& toInsert));
+    MOCK_METHOD2(remoteRemove, std::pair<unsigned int, unsigned int>(uint_positive_cnt::type siteId, const symbol& toRemove));
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_METHOD2(access, document&(const user&, privilege));
     MOCK_METHOD2(localInsert, symbol(const std::pair<unsigned, unsigned>& index, symbol &toInsert));
     MOCK_METHOD1(localRemove, symbol(const std::pair<unsigned, unsigned>& index));
     MOCK_METHOD3(updateCursorPos, void(unsigned int, unsigned int, unsigned int));
+    MOCK_METHOD1(verifySymbol, void(const symbol &sym));
 };
 
 struct SymClientTest : ::testing::Test{
@@ -439,6 +440,13 @@ TEST_F(SymClientTest, remoteRemoveCallsremoteRemoveOnRightDoc){
     //resouceId of the document to insert the symbol into is contained in the symbolMessage received by the client
     EXPECT_CALL(docSentByServer, remoteRemove(0, arrived));
     client.remoteRemove(0, docSentByServer.getId(), arrived);
+}
+
+TEST_F(SymClientTest, verifySymbolCallsVerifySymOnDoc){
+    setStageForOpenedDoc();
+    symbol arrived('a', 1, 1, {}, true);
+    EXPECT_CALL(docSentByServer, verifySymbol(arrived));
+    client.verifySymbol(docSentByServer.getId(), arrived);
 }
 
 TEST_F(SymClientTest, editPrivilegeConstructsGoodMessageAndInsertInUnanswered){

@@ -108,6 +108,20 @@ TEST_F(documentTest, localRemovingSymbolsFromMiddle){
     d.localRemove(i2);
     EXPECT_EQ(L"ac", d.toText());
 }
+TEST_F(documentTest, verifySymbol){
+    std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2};
+    symbol s1('a', 0, 0, std::vector<int>(), false),
+            s2('b', 0, 1, std::vector<int>(), false),
+            s3('c', 0, 2, std::vector<int>(), false);
+    d.localInsert(i1, s1);
+    d.localInsert(i2, s2);
+    d.localInsert(i3, s3);
+
+    ASSERT_TRUE(d.getSymbols().size()>0 && d.getSymbols()[0].size()>=3);
+
+    d.verifySymbol(s2);
+    EXPECT_TRUE(d.getSymbols()[0][1].isVerified());
+}
 
 struct Insertion{
     symbol s1;

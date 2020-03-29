@@ -134,15 +134,23 @@ namespace Symposium {
          * @brief insert a symbol in the document as consequence of a remote user's action
          * @param siteId the site id of the user performing the insertion
          * @param toInsert symbol to insert
+         * @return the position of the inserted symbol
          */
-        virtual void remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert);
+        virtual std::pair<unsigned int, unsigned int> remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert);
 
         /**
          * @brief remove a symbol in the document as consequence of a remote user's action
          * @param siteId the site id of the user performing the removal
          * @param toRemove symbol to remove
+         * @return the position of the removed symbol
          */
-        virtual void remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove);
+        virtual std::pair<unsigned int, unsigned int> remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove);
+
+        /**
+         * @brief set a symbol inside the document as verified
+         * @param toVerify the symbol to be marked as verified
+         */
+        virtual void verifySymbol(const symbol& toVerify);
 
         /**
          * @brief update the position of the cursor for the user @e target
