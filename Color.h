@@ -43,12 +43,19 @@ namespace Symposium {
      */
     struct Color {
         std::tuple<uint8_t, uint8_t, uint8_t> rgb_dec; /**< A triplet containing the values for RGB encoding*/
-
         Color();
 
         Color(uint8_t r, uint8_t g, uint8_t b);
 
         std::string rgb_hex_string();
+
+        /**
+         * @brief conversion operator from Color to another type
+         * @tparam T the type which the Color has to be converted to
+         * @return an instance of type T that represent the converted value for Color
+         */
+        template<class T>
+        explicit operator T() const;
 
         bool operator==(const Color &rhs) const;
 
