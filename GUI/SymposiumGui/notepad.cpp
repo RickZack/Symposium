@@ -74,6 +74,11 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
         shareMenu->addAction(tr("Make all links active for a limit number of shares"), this, &notepad::counterLink);
     }
 
+    QMenu *userMenu2=menuBar()->addMenu(tr("ProvaCursori"));
+    userMenu2->addAction(tr("Add Cursor"), this, &notepad::addCursor);
+    userMenu2->addAction(tr("Change Cursor"), this, &notepad::changeCursorPos);
+    userMenu2->addAction(tr("Remove Cursor"), this, &notepad::removeCursor);
+
     //------------------------------------------------------PARTE DA DECOMMENTARE
 
     /*ui->textEdit->setDocumentId(documentId);
@@ -97,8 +102,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     onlineUsers.push_front(p3);
     ui->textEdit->constractLabelsCursors(onlineUsers, u1->getSiteId());
     ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());
-    ui->textEdit->addUser(4, "Tizio");
-    ui->textEdit->changePosition(4, 1, 1);
 
 
     //---------------------------------------------------------------------
@@ -121,17 +124,17 @@ Symposium::Color::operator QColor() const{
     return QColor(r,g,b);
 }
 
-void notepad::moveUserCursor(int siteID, int block, int column)
+void notepad::moveUserCursor(Symposium::uint_positive_cnt::type siteID, int block, int column)
 {
     ui->textEdit->changePosition(siteID, block, column);
 }
 
-void notepad::removeUserCursor(int siteID)
+void notepad::removeUserCursor(Symposium::uint_positive_cnt::type siteID)
 {
     ui->textEdit->removeUser(siteID);
 }
 
-void notepad::addUserCursor(int siteID, std::string username)
+void notepad::addUserCursor(Symposium::uint_positive_cnt::type siteID, std::string username)
 {
     ui->textEdit->addUser(siteID, username);
 }
@@ -628,6 +631,21 @@ void notepad::contV_action(int pos){
 
     }
 
+}
+
+void notepad::addCursor()
+{
+    ui->textEdit->addUser(4, "Tizio");
+}
+
+void notepad::removeCursor()
+{
+    ui->textEdit->removeUser(4);
+}
+
+void notepad::changeCursorPos()
+{
+    ui->textEdit->changePosition(4, 1, 1);
 }
 
 void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){

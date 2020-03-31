@@ -39,9 +39,9 @@ public:
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~notepad();
 
-    void moveUserCursor(int siteID, int block, int column);
-    void removeUserCursor(int siteID);
-    void addUserCursor(int siteID, std::string username);
+    void moveUserCursor(Symposium::uint_positive_cnt::type siteID, int block, int column);
+    void removeUserCursor(Symposium::uint_positive_cnt::type siteID);
+    void addUserCursor(Symposium::uint_positive_cnt::type siteID, std::string username);
     void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt siteId,std::pair<int,int> indexes);
     void remoteDelete(std::pair<int, int> indexes);
     void verifySymbol(Symposium::symbol sym, Symposium::uint_positive_cnt siteId, std::pair<int, int> indexes);
@@ -62,8 +62,6 @@ private slots:
     void textAlign(QAction *a);
     void currentCharFormatChanged(const QTextCharFormat &format);
     void on_textEdit_cursorPositionChanged();
-
-
 private:
     Ui::notepad *ui;
     QString mFilename;
@@ -100,6 +98,10 @@ private:
     void keyReleaseEvent(QKeyEvent *e);
 
     void contV_action(int pos);
+
+    void addCursor();
+    void removeCursor();
+    void changeCursorPos();
 
 
 
