@@ -486,7 +486,7 @@ void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
     this->cl = cl;
 }
 
-void directory::errorLogout(){
+void directory::errorConnectionLogout(){
     errorLogoutWindow= new errorlogout(this);
     this->close();
     errorLogoutWindow->show();

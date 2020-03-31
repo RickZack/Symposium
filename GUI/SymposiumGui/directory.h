@@ -76,9 +76,10 @@ public:
     /**
      * @brief errorLogout shows an error message and closes the window
      */
-    void errorLogout();
+    void errorConnectionLogout();
 
     void openSource();
+
 private slots:
 
     /**
