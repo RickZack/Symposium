@@ -42,10 +42,17 @@ namespace Symposium {
      * @brief Represent a color in RGB encoding
      */
     struct Color {
-        std::tuple<uint8_t, uint8_t, uint8_t> rgb_dec; /**< A triplet containing the values for RGB encoding*/
+        uint8_t r; /**< red value for RGB encoding*/
+        uint8_t g; /**< green value for RGB encoding*/
+        uint8_t b; /**< blue value for RGB encoding*/
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version);
+
         Color();
 
         Color(uint8_t r, uint8_t g, uint8_t b);
+        std::tuple<uint8_t, uint8_t, uint8_t> getRgb() const;
 
         std::string rgb_hex_string();
 

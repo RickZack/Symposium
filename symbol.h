@@ -34,7 +34,6 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-//#include "Symposium.h"
 #include "Color.h"
 #include <boost/serialization/access.hpp>
 
@@ -46,6 +45,13 @@ namespace Symposium {
         bool isUnderlined;
         bool isItalic;
         Color col;
+
+        format():format("", false, false, false, Color(0,0,0)){}
+        format(const std::string& ft, bool bold, bool underline, bool italic, Color col):
+        familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), col(col){}
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version);
 
     };
 
@@ -59,10 +65,7 @@ namespace Symposium {
 
         friend class boost::serialization::access;
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version){
-            //Need to save activeUsers without filesystem
-            ar & ch & siteId & counter & pos & verified;
-        };
+        void serialize(Archive &ar, const unsigned int version);
         //Needed by boost::serialization
         symbol()=default;
 
