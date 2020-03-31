@@ -53,7 +53,7 @@ void choosepriv::on_pushButton_clicked()
      //openSource(this->path,priv,idSource);
 
     // QUESTO ANDRA' TOLTO DA QUI E LASCIATO SOLTANTO NEL successOpen()
-    notepadWindow= new notepad(this,std::stoi(this->idSource),priv,privOpen,path);
+    notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
     this->hide();
     notepadWindow->show();
 }
@@ -70,7 +70,7 @@ void choosepriv::on_pushButton_2_clicked()
 // successOpen(document doc)
 notepad* choosepriv::successOpen(){
 
-    notepadWindow= new notepad(this,std::stoi(this->idSource),priv,privOpen,path);
+    notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
     // cl->setNotepad(notepadWindow)
     this->hide();
     notepadWindow->show();

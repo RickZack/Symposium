@@ -2,6 +2,7 @@
 #include "ui_notepad.h"
 //#include "directory.h"
 
+
 #include <QAction>
 #include <QApplication>
 #include <QClipboard>
@@ -46,7 +47,7 @@ const QString rsrcPath = ":/resources/images/win";
 
 #include "Dispatcher/clientdispatcher.h"
 
-notepad::notepad(QWidget *parent, int documentId, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile) :
+notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile) :
     QMainWindow(parent),
     documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),ui(new Ui::notepad)
 {
@@ -111,6 +112,13 @@ notepad::notepad(QWidget *parent, int documentId, Symposium::privilege priv, Sym
 notepad::~notepad()
 {
     delete ui;
+}
+
+template<>
+Symposium::Color::operator QColor() const{
+    uint8_t r,g,b;
+    std::tie(r,g,b)= this->rgb_dec;
+    return QColor(r,g,b);
 }
 
 void notepad::moveUserCursor(int siteID, int block, int column)
@@ -546,7 +554,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
              event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
              event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier & event->text()!="\u0016"){
         return;
-    }else if(event->text()=="\u0016"){
+    }else if(event->text()=="\u0016"){ // Control_V action
         this->contV_action(pos);
 
 
@@ -556,7 +564,8 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         column= column-1;
         int row= cursor.blockNumber();
 
-        const wchar_t* ch=testo.toStdWString().c_str();
+        std::string str=testo.toStdString();
+        wchar_t ch=str[0];
         const std::pair<int, int> indexes={row,column};
 
         QTextCharFormat format = cursor.charFormat();
@@ -569,13 +578,13 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         int blue=col.blue();
         int red=col.red();
         int green=col.green();
-
-        // struct format charFormat={familyFont,isBold,isUnderlined,isItalic,blue,red,yellow}
-        //std::vector<int> &pos;
-        //bool verified=false;
-
+        Symposium::Color myCol(red,blue,green);
+        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,myCol};
+        std::vector<int> pos;
+        // SISTEMARE IL SITEID E IL COUNTER IN SYMBOL
+        Symposium::symbol sym(ch,0,0,pos,false);
+        sym.setCharFormat(charFormat);
         //cl->localInsert(this->documentId, symbol &sym, &indexes)
-
     }
 }
 
@@ -594,10 +603,12 @@ void notepad::contV_action(int pos){
         int column=curs.positionInBlock();
         column= column-1;
         int row= curs.blockNumber();
-        const wchar_t* ch=charact.toStdWString().c_str();
+        std::string str=charact.toStdString();
+        wchar_t ch=str[0];
         const std::pair<int, int> indexes={row,column};
         QTextCharFormat format = curs.charFormat();
         QFont font= format.font();
+
         bool isBold= font.bold();
         bool isUnderlined=font.underline();
         bool isItalic=font.italic();
@@ -606,7 +617,13 @@ void notepad::contV_action(int pos){
         int blue=col.blue();
         int red=col.red();
         int green=col.green();
-        //cl->localInsert(this->documentId, &sym, &indexes)
+        Symposium::Color myCol(red,blue,green);
+        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,myCol};
+        std::vector<int> pos;
+        // SISTEMARE IL SITEID E IL COUNTER IN SYMBOL
+        Symposium::symbol sym(ch,0,0,pos,false);
+        sym.setCharFormat(charFormat);
+        //cl->localInsert(this->documentId, symbol &sym, &indexes)
         count++;posTmp++;
 
     }
@@ -615,33 +632,91 @@ void notepad::contV_action(int pos){
 
 void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){
 
-    /*
     int row=indexes.first;
     int column=indexes.second;
 
-    QTextCursor curs=ui->textCursor();
+    QTextCursor curs=ui->textEdit->textCursor();
     int actBlock=curs.blockNumber();
     int actColm=curs.positionInBlock();
 
+    //extract information from sym to build the character to insert in the textEdit block
     Symposium::format f= sym.getCharFormat();
-    QTextCharFormat ch_format;
-    QFont ch_font;
+    QTextCharFormat ch_format;QFont ch_font;
+
     ch_font.setFamily(QString::fromStdString(f.familyType));
     ch_font.setBold(f.isBold);
     ch_font.setUnderline(f.isUnderlined);
     ch_font.setItalic(f.isItalic);
-    QColor col(f.red,f.green,f.blue);
-    QBrush brh(col);
+    Symposium::Color col=f.col;
 
+    // conversion from Symposium::Color to QColor
+    QColor qCol;
+    qCol=static_cast<QColor>(col);
+
+    // the character is added to the textEditBlock with a lighter color
+    QColor lightCol=qCol.lighter(140);
+    QBrush brh(lightCol);
+
+    // set the font and the color to the character
     ch_format.setFont(ch_font);
-    ch_format.setBackground(brh);
+    ch_format.setForeground(brh);
 
+    // go to the position of the character
     ui->textEdit->changePosition(row,column);
-    curs.insertText(sym.getChar,ch_format);
-    ui->textEdit->changePosition(actRow,actColm);
-   */
+
+    //insert the character
+    wchar_t symch=sym.getCh();
+    QString ch;
+    ch[0]=symch;
+    curs.insertText(ch,ch_format);
+
+    // go back to the starting position
+    ui->textEdit->changePosition(actBlock,actColm);
 
 }
+
+void notepad::verifySymbol(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){
+
+    int row=indexes.first;
+    int column=indexes.second;
+
+    QTextCursor curs=ui->textEdit->textCursor();
+    int actBlock=curs.blockNumber();
+    int actColm=curs.positionInBlock();
+
+    //extract information from sym to build the character to insert in the textEdit block
+    Symposium::format f= sym.getCharFormat();
+    QTextCharFormat ch_format;QFont ch_font;
+
+    ch_font.setFamily(QString::fromStdString(f.familyType));
+    ch_font.setBold(f.isBold);
+    ch_font.setUnderline(f.isUnderlined);
+    ch_font.setItalic(f.isItalic);
+    Symposium::Color col=f.col;
+
+    // conversion from Symposium::Color to QColor
+    QColor qCol;
+    qCol=static_cast<QColor>(col);
+    QBrush brh(qCol);
+
+    // set the font and the color to the character
+    ch_format.setFont(ch_font);
+    ch_format.setForeground(brh);
+
+    // go to the position of the character
+    ui->textEdit->changePosition(row,column);
+
+    // delete the character and replace it with the same that has a defined Color
+    curs.deleteChar();
+    wchar_t symch=sym.getCh();
+    QString ch;
+    ch[0]=symch;
+    curs.insertText(ch,ch_format);
+
+    // go back to the starting position
+    ui->textEdit->changePosition(actBlock,actColm);
+}
+
 
 void notepad::remoteDelete(std::pair<int,int> indexes){
     int block=indexes.first;

@@ -35,7 +35,7 @@ class notepad : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit notepad(QWidget *parent = nullptr, int documentId=0,Symposium::privilege priv=Symposium::privilege::none,Symposium::privilege privOpen=Symposium::privilege::none,std::string pathToFile=" ");
+    explicit notepad(QWidget *parent = nullptr, Symposium::uint_positive_cnt::type documentID=0,Symposium::privilege priv=Symposium::privilege::none,Symposium::privilege privOpen=Symposium::privilege::none,std::string pathToFile=" ");
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~notepad();
 
@@ -44,6 +44,7 @@ public:
     void addUserCursor(int siteID, std::string username);
     void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt siteId,std::pair<int,int> indexes);
     void remoteDelete(std::pair<int, int> indexes);
+    void verifySymbol(Symposium::symbol sym, Symposium::uint_positive_cnt siteId, std::pair<int, int> indexes);
 
 
 private slots:
@@ -69,6 +70,7 @@ private:
     int documentId;
     Symposium::user us;
     Symposium::clientdispatcher *cl;
+    //std::tuple<uint8_t, uint8_t, uint8_t> rgb_dec;
 
     onlineusers *onlineuser;
     alluser *alluserWindow;
@@ -117,8 +119,6 @@ private:
     QTextEdit *textEdit;
 
     std::string idDoc;
-
-
 
 };
 

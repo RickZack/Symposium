@@ -35,6 +35,7 @@
 #include <iostream>
 #include <algorithm>
 //#include "Symposium.h"
+#include "Color.h"
 #include <boost/serialization/access.hpp>
 
 namespace Symposium {
@@ -44,9 +45,8 @@ namespace Symposium {
         bool isBold;
         bool isUnderlined;
         bool isItalic;
-        int blue;
-        int red;
-        int green;
+        Color col;
+
 
     };
 
