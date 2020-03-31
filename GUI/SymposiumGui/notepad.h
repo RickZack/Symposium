@@ -68,7 +68,6 @@ private:
     int documentId;
     Symposium::user us;
     Symposium::clientdispatcher *cl;
-    //std::tuple<uint8_t, uint8_t, uint8_t> rgb_dec;
 
     onlineusers *onlineuser;
     alluser *alluserWindow;
@@ -80,6 +79,7 @@ private:
     activealwayslink *alwayslinkwindow;
     activenonlink *nonlinkwindow;
 
+    bool insertOthCh=false;
 
     void setupTextActions();
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);

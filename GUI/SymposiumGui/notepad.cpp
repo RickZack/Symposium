@@ -650,6 +650,7 @@ void notepad::changeCursorPos()
 
 void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){
 
+    insertOthCh=true;
     int row=indexes.first;
     int column=indexes.second;
 
@@ -690,11 +691,13 @@ void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt si
 
     // go back to the starting position
     ui->textEdit->changePosition(actBlock,actColm);
+    insertOthCh=false;
 
 }
 
 void notepad::verifySymbol(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){
 
+    insertOthCh=true;
     int row=indexes.first;
     int column=indexes.second;
 
@@ -733,10 +736,13 @@ void notepad::verifySymbol(Symposium::symbol sym,Symposium::uint_positive_cnt si
 
     // go back to the starting position
     ui->textEdit->changePosition(actBlock,actColm);
+    insertOthCh=false;
 }
 
 
 void notepad::remoteDelete(std::pair<int,int> indexes){
+
+    insertOthCh=true;
     int block=indexes.first;
     int column=indexes.second;
     column++;
@@ -746,7 +752,7 @@ void notepad::remoteDelete(std::pair<int,int> indexes){
     ui->textEdit->changePosition(block,column);
     curs.deleteChar();
     ui->textEdit->changePosition(actBlock,actColm);
-
+    insertOthCh=false;
 }
 
 
@@ -757,8 +763,9 @@ void notepad::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void notepad::on_textEdit_cursorPositionChanged()
 {
-    ui->textEdit->thisUserChangePosition(1);
-    //ui->textEdit->thisUserChangePosition(us.getSiteId());
-
+    if(insertOthCh==false){
+        ui->textEdit->thisUserChangePosition(1);
+        //ui->textEdit->thisUserChangePosition(us.getSiteId());
+     }
 }
 

@@ -67,7 +67,7 @@ void choosepriv::on_pushButton_2_clicked()
 
 
 // il successOpen riceve un documento, e stampa tutti i simboli che sono in esso presenti
-// successOpen(document doc)
+
 notepad* choosepriv::successOpen(){
 
     notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);

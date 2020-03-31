@@ -47,7 +47,6 @@ namespace Symposium {
         bool isItalic;
         Color col;
 
-
     };
 
     class symbol {

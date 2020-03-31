@@ -488,6 +488,7 @@ void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void directory::errorLogout(){
     errorLogoutWindow= new errorlogout(this);
+    this->close();
     errorLogoutWindow->show();
 
 }
