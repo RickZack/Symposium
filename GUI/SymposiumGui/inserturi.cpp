@@ -1,6 +1,6 @@
 #include "inserturi.h"
 #include "ui_inserturi.h"
-#include "directory.h"
+#include "dirwind.h"
 
 inserturi::inserturi(QWidget *parent) :
     QDialog(parent),

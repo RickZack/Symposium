@@ -1,4 +1,4 @@
-#include "directory.h"
+#include "dirwind.h"
 #include "ui_directory.h"
 #include "home.h"
 #include <ostream>

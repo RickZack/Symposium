@@ -40,7 +40,7 @@ SOURCES += \
         choosedir.cpp \
         choosepriv.cpp \
         deleteaccount.cpp \
-        directory.cpp \
+        dirwind.cpp \
         errorconnection.cpp \
         errorlogout.cpp \
         exit.cpp \
@@ -84,7 +84,7 @@ HEADERS += \
         choosedir.h \
         choosepriv.h \
         deleteaccount.h \
-        directory.h \
+        dirwind.h \
         errorconnection.h \
         errorlogout.h \
         exit.h \
@@ -130,7 +130,7 @@ FORMS += \
         choosedir.ui \
         choosepriv.ui \
         deleteaccount.ui \
-        directory.ui \
+        dirwind.ui \
         errorconnection.ui \
         errorlogout.ui \
         exit.ui \

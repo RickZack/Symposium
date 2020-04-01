@@ -6,7 +6,7 @@
 #include "deleteaccount.h"
 #include "inserturi.h"
 #include "changeuserinfo.h"
-#include "directory.h"
+#include "dirwind.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
 
