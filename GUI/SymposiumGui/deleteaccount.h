@@ -24,14 +24,35 @@ class deleteAccount : public QDialog
 
 public:
     explicit deleteAccount(QWidget *parent = nullptr);
+    /**
+     * @brief setting of clientdispatcher
+     * @param cl clientdispatcher for reference
+     */
     void setClientDispatcher(Symposium::clientdispatcher *cl);
+    /**
+     * @brief called by clientdispatcher when there is some error with connection
+     */
     void errorConnection();
+    /**
+     * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
+     * @param str the string error to visualized for user
+     */
     void errorConnectionLogout(std::string str);
+    /**
+     * @brief called by clientdispatcher when the account was successfully deleted
+     */
     void successDeleteAccount();
+    /**
+     * @brief called by clientdispatcher when there is some error during the operation
+     * @param errorMess the messagge to show
+     */
     void errorDeleteUser(std::string errorMess);
     ~deleteAccount();
 
 private slots:
+    /**
+     * @brief invoke removeUser on clientdispatcher
+     */
     void delete_click();
 
 private:

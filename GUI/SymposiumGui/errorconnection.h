@@ -16,6 +16,9 @@ public:
     ~errorconnection();
 
 private slots:
+    /**
+     * @brief close current window
+     */
     void on_pushButton_clicked();
 
 private:

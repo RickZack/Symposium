@@ -16,6 +16,9 @@ public:
     ~unsuccessdeleteaccount();
 
 private slots:
+    /**
+     * @brief the user confirm he read the error information
+     */
     void on_pushButton_clicked();
 
 private:

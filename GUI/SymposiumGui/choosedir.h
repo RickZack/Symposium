@@ -25,6 +25,7 @@ public:
     std::string pathDir;
     explicit choosedir(QWidget *parent = nullptr);
     ~choosedir();
+
     void treeGenerate(std::string str, int count);
 
 private:
@@ -33,14 +34,27 @@ private:
     int spaces;
     std::string id;
 
-
+    /**
+     * @brief separate the first word in the string passed
+     * @param string the string to proccess
+     * @return the first word in the string
+     */
     std::string separate_word(std::string& string);
+    /**
+     * @brief count the number of elements presented in filesystem of the user
+     * @param string the string contained all elements
+     * @return a number of elemets
+     */
     int number_elements(std::string& string);
 
 private slots:
-
-
+    /**
+     * @brief confirm the directory selected
+     */
     void on_choose_clicked();
+    /**
+     * @brief select the directory
+     */
     void on_tree_itemClicked(QTreeWidgetItem *item, int column);
 };
 

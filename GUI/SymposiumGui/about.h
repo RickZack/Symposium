@@ -16,6 +16,9 @@ public:
     ~about();
 
 private slots:
+    /**
+     * @brief button for closing the window
+     */
     void on_ok_clicked();
 
 private:

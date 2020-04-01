@@ -25,16 +25,43 @@ class changeUserInfo : public QDialog
 
 public:
     explicit changeUserInfo(QWidget *parent = nullptr);
+    /**
+     * @brief setting of clientdispatcher
+     * @param cl clientdispatcher for reference
+     */
     void setClientDispatcher(Symposium::clientdispatcher *cl);
+    /**
+     * @brief called by clientdispatcher when there is some error with connection
+     */
     void errorConnection();
+    /**
+     * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
+     * @param str the string error to visualized for user
+     */
     void errorConnectionLogout(std::string str);
+    /**
+     * @brief called by clientdispatcher when there is some error to edit the information of the current user
+     * @param errorMess the messagge to show
+     */
     void errorEditUser(std::string errorMess);
+    /**
+     * @brief called by clientdispatcher when the edit of the information of the current user was successfully done
+     */
     void successEditUser();
     ~changeUserInfo();
 
 private slots:
+    /**
+     * @brief show the icon the user choose
+     */
     void chooseIcon();
+    /**
+     * @brief show window to choose icon
+     */
     void on_iconButt_clicked();
+    /**
+     * @brief invoke editUser on clientdispatcher
+     */
     void confirm_click();
 
 

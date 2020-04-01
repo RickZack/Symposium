@@ -18,6 +18,9 @@ public:
     ~errorlogout();
 
 private slots:
+    /**
+     * @brief close current window and show start window of the application
+     */
     void on_pushButton_clicked();
 
 private:
