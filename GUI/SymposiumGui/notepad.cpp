@@ -120,7 +120,7 @@ notepad::~notepad()
 template<>
 Symposium::Color::operator QColor() const{
     uint8_t r,g,b;
-    std::tie(r,g,b)= this->rgb_dec;
+    std::tie(r,g,b)= this->getRgb();
     return QColor(r,g,b);
 }
 
