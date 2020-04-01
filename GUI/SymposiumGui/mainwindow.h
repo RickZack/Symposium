@@ -27,13 +27,21 @@ public:
     void setClientDispatcher(Symposium::clientdispatcher *cl);
 
 private slots:
-
+    /**
+     * @brief show window about
+     */
     void on_about_clicked();
-
+    /**
+     * @brief quit
+     */
     void on_exit_clicked();
-
+    /**
+     * @brief show window to sign in
+     */
     void on_SignIn_clicked();
-
+    /**
+     * @brief show window to sign up
+     */
     void on_SignUp_clicked();
 
 
@@ -44,7 +52,9 @@ private:
     sigin *signinWindow;
     signup *signupWindow;
     Symposium::clientdispatcher *cl;
-
+    /**
+     * @brief quit from application
+     */
     void closeEvent(QCloseEvent *event);
 };
 

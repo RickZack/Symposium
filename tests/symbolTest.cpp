@@ -67,6 +67,8 @@ struct symbolSerialization: ::testing::Test{
 
 TEST_F(symbolSerialization, serialize){
     symbol toStore('a', 0, 0, {1}, false);
+    format f("Times New Roman", true, true, false, Color(255,0,0));
+    toStore.setCharFormat(f);
     symbol toLoad('b', 0, 1, {1, 5}, false);
     ASSERT_NE(toStore, toLoad);
     storeSymbol(toStore);

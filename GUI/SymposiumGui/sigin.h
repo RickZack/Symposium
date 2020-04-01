@@ -21,13 +21,29 @@ class sigin : public QDialog
 public:
     explicit sigin(QWidget *parent = nullptr);
     ~sigin();
+    /**
+     * @brief called by clientdispatcher when there is some error with connection
+     */
     void errorConnection();
+    /**
+     * @brief called by clientdispatcher when there is some error during the operation
+     */
     void errorSignIn();
+    /**
+     * @brief called by clientdispatcher when the log-in was successfully done
+     */
     void successSignIn();
+    /**
+     * @brief setting of clientdispatcher
+     * @param cl clientdispatcher for reference
+     */
     void setClientDispatcher(Symposium::clientdispatcher *cl);
 
 
 private slots:
+    /**
+     * @brief invoke logIn on clientdispatcher
+     */
     void on_signin_clicked();
 
 private:
@@ -36,8 +52,13 @@ private:
     home *homeWindow;
     errorconnection *errorWindow;
     Symposium::clientdispatcher *cl;
-
+    /**
+     * @brief quit from application
+     */
     void closeEvent(QCloseEvent *event);
+    /**
+     * @brief waiting of the conclusion of the operation by clientdispatcher
+     */
     void waiting();
 };
 

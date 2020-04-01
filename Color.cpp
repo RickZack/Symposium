@@ -31,13 +31,22 @@
 #include <ios>
 #include <sstream>
 #include <boost/random/random_device.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/export.hpp>
 #include "Color.h"
 
 using namespace Symposium;
 
-Color::Color(uint8_t r, uint8_t g, uint8_t b) : rgb_dec(std::make_tuple(r,g,b)){}
+Color::Color(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b){}
 
 Color::Color() : Color(0, 0, 0){}
+
+template<class Archive>
+void Color::serialize(Archive &ar, const unsigned int version){
+    ar & r & g & b;
+};
+BOOST_CLASS_EXPORT(Symposium::Color)
 
 colorGen::colorGen() {
     boost::random::random_device device;
@@ -77,15 +86,19 @@ Color colorGen::hsv_to_rbg(double h, double s, double v) {
 }
 
 std::string Color::rgb_hex_string() {
-    unsigned r,g,b;
     std::ostringstream out;
-    std::tie(r,g,b)=rgb_dec;
     out<<"#"<<std::hex<<r<<g<<b;
     return out.str();
 }
 
+std::tuple<uint8_t, uint8_t, uint8_t> Color::getRgb() const {
+    return std::tuple<uint8_t, uint8_t, uint8_t>(r, g, b);
+}
+
 bool Color::operator==(const Color &rhs) const {
-    return rgb_dec == rhs.rgb_dec;
+    return r == rhs.r &&
+           g == rhs.g &&
+           b == rhs.b;
 }
 
 bool Color::operator!=(const Color &rhs) const {

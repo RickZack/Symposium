@@ -29,6 +29,10 @@
  */
 #include <tuple>
 #include <iostream>
+#include <boost/serialization/export.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
 #include "symbol.h"
 
 using namespace Symposium;
@@ -45,6 +49,17 @@ format symbol::getCharFormat() const
 
 symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos, bool verified) : ch(ch), siteId(siteId),
                                                                                                   counter(counter), pos(pos), verified(verified) {}
+template<class Archive>
+void format::serialize(Archive &ar, const unsigned int version){
+    ar & familyType & isBold & isUnderlined & isItalic & col;
+};
+BOOST_CLASS_EXPORT(Symposium::format);
+
+template<class Archive>
+void symbol::serialize(Archive &ar, const unsigned int version){
+    ar & ch & siteId & counter & pos & verified & charFormat;
+};
+BOOST_CLASS_EXPORT(Symposium::symbol);
 
 wchar_t symbol::getCh() const {
     return ch;
