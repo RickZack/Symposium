@@ -45,7 +45,7 @@ public:
     void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt siteId,std::pair<int,int> indexes);
     void remoteDelete(std::pair<int, int> indexes);
     void verifySymbol(Symposium::symbol sym, Symposium::uint_positive_cnt siteId, std::pair<int, int> indexes);
-
+    void colorText(Symposium::document *doc);
 
 private slots:
     void on_actionPaste_triggered();

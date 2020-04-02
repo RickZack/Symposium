@@ -769,3 +769,75 @@ void notepad::on_textEdit_cursorPositionChanged()
      }
 }
 
+void notepad::colorText(Symposium::document *doc){
+
+    QTextCursor curs=ui->textEdit->textCursor();
+    // save in symbols all the symbols contained in the document
+    std::vector<std::vector<Symposium::symbol>> symbols= doc->getSymbols();
+    for(size_t i=0;i<symbols.size();i++){
+        // counter variable to count the number of characters that I have to highlight
+        int incr=1;
+        int jsupp=0;
+        for(size_t j=0;j<symbols[i].size();j++){
+            // the actual symbol
+            Symposium::symbol symF=symbols[i][j];
+            // the starting position of the selection
+            std::pair<int,int> indexes={i,jsupp};
+            // check if I am at the end of the row (last column) and I can't compare the actual symbol siteId with the next one.
+            // If I am at the end of the row, I have to highlight and I have to change the row.
+            if(j!=symbols.size()-1){
+                Symposium::symbol symS=symbols[i][j+1];
+                //check if the two successive symbols have the same siteId;
+                if(symF.getSiteId()==symS.getSiteId()){
+                incr++;
+                }
+                 else{
+                    // estraggo dal site id il colore -> chiedere a Cristian
+                    Symposium::Color userColor;
+                    //convert the Symposium::Color into a QColor;
+                    QColor qCol;
+                    qCol=static_cast<QColor>(userColor);
+                    int block=indexes.first; int column=indexes.second; column++;
+                    QTextCursor supportCurs=ui->textEdit->textCursor();
+                    QTextCharFormat highlightColor;
+                    highlightColor.setBackground(qCol);
+                    supportCurs.movePosition(QTextCursor::Start);
+                    supportCurs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
+                    supportCurs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,column);
+                    int pp=supportCurs.position();
+
+                    //highlight the text
+                    curs.setPosition(pp,QTextCursor::MoveAnchor);
+                    curs.setPosition(pp+incr,QTextCursor::KeepAnchor);
+                    curs.setCharFormat(highlightColor);
+                    ui->textEdit->setTextCursor(curs);
+
+                    incr=1;
+                    jsupp=j+1;
+             }
+            }
+            // estraggo dal site id il colore -> chiedere a Cristian
+            Symposium::Color userColor;
+            //convert the Symposium::Color into a QColor;
+            QColor qCol;
+            qCol=static_cast<QColor>(userColor);
+            int block=indexes.first; int column=indexes.second; column++;
+            QTextCursor supportCurs=ui->textEdit->textCursor();
+            QTextCharFormat highlightColor;
+            highlightColor.setBackground(qCol);
+            supportCurs.movePosition(QTextCursor::Start);
+            supportCurs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
+            supportCurs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,column);
+            int pp=supportCurs.position();
+
+            //highlight the text
+            curs.setPosition(pp,QTextCursor::MoveAnchor);
+            curs.setPosition(pp+incr,QTextCursor::KeepAnchor);
+            curs.setCharFormat(highlightColor);
+            ui->textEdit->setTextCursor(curs);
+            j=symbols[j].size();
+
+        }
+    }
+}
+
