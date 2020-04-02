@@ -52,7 +52,7 @@ void sigin::errorSignIn()
 void sigin::successSignIn()
 {
     hide();
-    homeWindow = new home(parentWidget());
+    homeWindow = new home(parentWidget(), pwd);
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(home *homeWindow);
     homeWindow->show();
@@ -74,6 +74,7 @@ void sigin::on_signin_clicked()
 
     QString username= ui->username->text();
     QString password = ui->password->text();
+    pwd=password.toStdString();
 
     //---------------------------------------------PARTE DA DECOMENTARE
 
@@ -90,7 +91,7 @@ void sigin::on_signin_clicked()
     if(username=="test" && password=="test")
     {
         hide();
-        homeWindow= new home(parentWidget());
+        homeWindow= new home(parentWidget(), pwd);
         homeWindow->show();
     }
     else {

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>513</width>
+    <width>795</width>
     <height>629</height>
    </rect>
   </property>
@@ -26,24 +26,11 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLineEdit" name="password">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>170</y>
-     <width>181</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QLabel" name="img">
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>280</y>
+     <y>230</y>
      <width>101</width>
      <height>91</height>
     </rect>
@@ -52,27 +39,11 @@
     <string>TextLabel</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>170</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
-   </property>
-   <property name="text">
-    <string>password:</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="confirm">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>570</y>
+     <x>50</x>
+     <y>560</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -101,7 +72,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>230</y>
+     <y>170</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -117,7 +88,7 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>370</y>
+     <y>340</y>
      <width>191</width>
      <height>41</height>
     </rect>
@@ -137,7 +108,7 @@ text-align: left;</string>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>60</x>
      <y>30</y>
      <width>381</width>
      <height>41</height>
@@ -154,7 +125,7 @@ text-align: left;</string>
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>230</y>
+     <y>170</y>
      <width>181</width>
      <height>31</height>
     </rect>
@@ -167,7 +138,7 @@ text-align: left;</string>
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>310</y>
+     <y>270</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -182,8 +153,8 @@ text-align: left;</string>
   <widget class="QPushButton" name="cancel">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>570</y>
+     <x>340</x>
+     <y>560</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -195,8 +166,8 @@ text-align: left;</string>
   <widget class="QLabel" name="gif">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>430</y>
+     <x>80</x>
+     <y>380</y>
      <width>55</width>
      <height>51</height>
     </rect>
@@ -208,8 +179,8 @@ text-align: left;</string>
   <widget class="QLabel" name="waiting">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>450</y>
+     <x>200</x>
+     <y>410</y>
      <width>191</width>
      <height>16</height>
     </rect>
@@ -221,10 +192,144 @@ text-align: left;</string>
   <widget class="QLabel" name="error">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>480</y>
-     <width>221</width>
-     <height>16</height>
+     <x>60</x>
+     <y>530</y>
+     <width>691</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="changepwd">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>470</y>
+     <width>161</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>change password</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="oldpwd">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>110</y>
+     <width>191</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="newpwd1">
+   <property name="geometry">
+    <rect>
+     <x>532</x>
+     <y>161</y>
+     <width>191</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="newpwd2">
+   <property name="geometry">
+    <rect>
+     <x>532</x>
+     <y>220</y>
+     <width>191</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelpwd1">
+   <property name="geometry">
+    <rect>
+     <x>414</x>
+     <y>120</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>old password</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelpwd2">
+   <property name="geometry">
+    <rect>
+     <x>404</x>
+     <y>170</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>new password</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelpwd3">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>220</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>repeat new password</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="confirm2">
+   <property name="geometry">
+    <rect>
+     <x>392</x>
+     <y>340</y>
+     <width>121</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>confirm pwd</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancel2">
+   <property name="geometry">
+    <rect>
+     <x>572</x>
+     <y>340</y>
+     <width>141</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>cancel</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="veroldpwd">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>115</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="vernewpwd">
+   <property name="geometry">
+    <rect>
+     <x>740</x>
+     <y>230</y>
+     <width>21</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">

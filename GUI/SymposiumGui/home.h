@@ -24,7 +24,7 @@ class home : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit home(QWidget *parent = nullptr);
+    explicit home(QWidget *parent = nullptr, std::string pwd="");
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -70,6 +70,7 @@ private slots:
 private:
     Ui::home *ui;
     deleteAccount *deleteAccountWindow;
+    std::string pwd;
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
     directory *directoryWindow;

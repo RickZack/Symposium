@@ -24,7 +24,8 @@ class changeUserInfo : public QDialog
     Q_OBJECT
 
 public:
-    explicit changeUserInfo(QWidget *parent = nullptr);
+    explicit changeUserInfo(QWidget *parent = nullptr, std::string pwd="");
+    std::string pwd;
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -67,14 +68,30 @@ private slots:
 
     //void on_username_textEdited(const QString &arg1);
 
+    void on_confirm2_clicked();
+
+    void on_cancel2_clicked();
+
+    void on_changepwd_clicked();
+
+    void on_oldpwd_textChanged(const QString &arg1);
+
+    void on_newpwd2_textChanged(const QString &arg1);
+
 private:
     Ui::changeUserInfo *ui;
     icon *iconWindow;
     std::string img;
+    std::string newpass;
     Symposium::user us;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
+
+    void hiddeninformation();
+    void showinformation();
+    void hiddenpwd();
+    void showpwd();
 };
 
 #endif // CHANGEUSERINFO_H

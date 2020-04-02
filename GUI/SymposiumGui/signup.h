@@ -58,6 +58,7 @@ private slots:
 
 private:
     Ui::signup *ui;
+    std::string pwd;
     home *homeWindow;
     icon *iconWindow;
     errorconnection *errorWindow;

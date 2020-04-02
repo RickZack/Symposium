@@ -51,6 +51,7 @@ private:
     Ui::sigin *ui;
     home *homeWindow;
     errorconnection *errorWindow;
+    std::string pwd;
     Symposium::clientdispatcher *cl;
     /**
      * @brief quit from application

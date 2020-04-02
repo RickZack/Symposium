@@ -48,7 +48,7 @@ void signup::successSignUp()
     ui->iconButt->setDisabled(false);
     ui->signin->setDisabled(false);
     ui->cancel->setDisabled(false);
-    homeWindow= new home(parentWidget());
+    homeWindow= new home(parentWidget(), pwd);
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(homeWindow);
     homeWindow->show();
@@ -71,6 +71,7 @@ void signup::on_signin_clicked()
     QString username= ui->username->text();
     QString password = ui->password->text();
     QString nickname =ui->nickname->text();
+    pwd=password.toStdString();
 
     //--------------------------------------------------------------PARTE DA DECOMENTARE
 
@@ -88,7 +89,7 @@ void signup::on_signin_clicked()
     if(username!="" && password!="" && nickname!="")
     {
         hide();
-        homeWindow= new home(parentWidget());
+        homeWindow= new home(parentWidget(), pwd);
         homeWindow->show();
     }
     else {

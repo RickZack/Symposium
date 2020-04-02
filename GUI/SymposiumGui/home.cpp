@@ -2,9 +2,9 @@
 #include "ui_home.h"
 #include "Dispatcher/clientdispatcher.h"
 
-home::home(QWidget *parent) :
+home::home(QWidget *parent, std::string pwd) :
     QMainWindow(parent),
-    ui(new Ui::home)
+    ui(new Ui::home), pwd(pwd)
 {
     ui->setupUi(this);
     connect(ui->logout, SIGNAL(clicked()), this, SLOT(logout()));
@@ -38,10 +38,11 @@ void home::on_InsertUri_clicked()
 
 void home::on_modify_clicked()
 {
-    changeWindow = new changeUserInfo(this);
+    changeWindow = new changeUserInfo(this, pwd);
     changeWindow->setClientDispatcher(cl);
     //cl->setChangeUserInfo(changeWindow);
     changeWindow->exec();
+    pwd=changeWindow->pwd;
 }
 
 void home::on_directory_clicked()
