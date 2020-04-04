@@ -596,6 +596,7 @@ void notepad::closeEvent(QCloseEvent *event){
 void notepad::keyReleaseEvent(QKeyEvent *event)
 {
 
+    // AGGIUNGERE CONTROLLO SELEZIONE!!!!!!!!!!!!!!!!!!!!!!
     QTextCursor cursor= ui->textEdit->textCursor();
     int pos=cursor.position();
     if (event->key()==Qt::Key_Backspace){
@@ -718,7 +719,7 @@ void notepad::changeCursorPos()
 }
 
 
-void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){
+void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt::type siteId, std::pair<int,int> indexes){
 
     insertOthCh=true;
     // take the position in which the character has to be added.
@@ -920,7 +921,7 @@ void notepad::verifySymbol2(){
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 
-void notepad::remoteDelete(std::pair<int,int> indexes,Symposium::uint_positive_cnt siteId){
+void notepad::remoteDelete(std::pair<int,int> indexes,Symposium::uint_positive_cnt::type siteId){
 
     insertOthCh=true;
 

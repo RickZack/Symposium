@@ -49,7 +49,7 @@ namespace Symposium {
 
         format():format("", false, false, false, 0,Color(0,0,0)){}
         format(const std::string& ft, bool bold, bool underline, bool italic, int size,Color col):
-        familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), col(col){}
+        familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), size(size),col(col){}
 
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version);

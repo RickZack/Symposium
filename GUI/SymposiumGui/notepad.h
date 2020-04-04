@@ -42,10 +42,34 @@ public:
     void moveUserCursor(Symposium::uint_positive_cnt::type siteID, int block, int column);
     void removeUserCursor(Symposium::uint_positive_cnt::type siteID);
     void addUserCursor(Symposium::uint_positive_cnt::type siteID, std::string username);
-    void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt siteId,std::pair<int,int> indexes);
-    void remoteDelete(std::pair<int, int> indexes, Symposium::uint_positive_cnt siteId);
+
+    /**
+     * @brief remoteInsert inserts a character derived from another user
+     * @param siteId referred to the user that wants to insert the char
+     * @param indexes the position in which the character has to be inserted
+     */
+    void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt::type siteId,std::pair<int,int> indexes);
+
+    /**
+     * @brief remoteDelete deletes a character derived from another user
+     * @param indexes the position in which the character that has to be removed is is
+     * @param siteId referred to the user that want to delete
+     */
+    void remoteDelete(std::pair<int, int> indexes, Symposium::uint_positive_cnt::type siteId);
+
+    /**
+     * @brief verifySymbol inserts the character with the right Color
+     * @param sym the symbol that has been verified
+     * @param siteId
+     * @param indexes
+     */
     void verifySymbol(Symposium::symbol sym, Symposium::uint_positive_cnt siteId, std::pair<int, int> indexes);
-    void verifySymbol(Symposium::symbol sym, std::pair<int, int> indexes);
+
+    /**
+     * @brief closeEvent closes the window
+     * @param event
+     */
+    void closeEvent(QCloseEvent *event);
 
 
 private slots:
@@ -98,9 +122,16 @@ private:
     void timerLink();
     void counterLink();
 
-    void closeEvent(QCloseEvent *event);
+    /**
+     * @brief keyReleaseEvent to handle with the keyboard actions
+     * @param e
+     */
     void keyReleaseEvent(QKeyEvent *e);
 
+    /**
+     * @brief contV_action to handle with the CONTROL-C CONTROL-V actions
+     * @param pos
+     */
     void contV_action(int pos);
 
     void addCursor();
@@ -129,13 +160,19 @@ private:
 
     std::string idDoc;
 
+    /**
+     * @brief fillTextEdit to fill the textEdit block with the characters already present
+     */
     void fillTextEdit();
+
+    //------------------------------------------------------------------------------------------------------------------------------------------
     void prova_remoteInsert();
     void verifySymbol2();
     void prova_remoteDelete();
     void colorText();
     void provaFill();
     void prova_colorText();
+    //------------------------------------------------------------------------------------------------------------------------------------------
 };
 
 #endif // NOTEPAD_H
