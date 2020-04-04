@@ -583,8 +583,9 @@ void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned in
     //TODO:implement
 }
 
-void document::verifySymbol(const symbol &toVerify) {
+std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVerify) {
     //TODO: implement
+    return std::pair<unsigned int, unsigned int>();
 }
 
 
