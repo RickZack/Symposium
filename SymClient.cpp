@@ -161,19 +161,16 @@ symbolMessage SymClient::localRemove(uint_positive_cnt::type resourceId, const s
 
 void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &newSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    d->remoteInsert(siteId, newSym);
+    std::pair<unsigned int, unsigned int> p = d->remoteInsert(siteId, newSym);
     //notifica alla gui
-//    this->dispatcher->remoteInsert(resourceId,newSym);
+//  this->dispatcher->remoteInsert(resourceId,newSym, p);
 }
 
 void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &rmSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    d->remoteRemove(siteId, rmSym);
+    std::pair<unsigned int, unsigned int> p = d->remoteRemove(siteId, rmSym);
     //notifica alla gui
-
-    //DOVE PRENDO IL PAIR DELLE COORDINATE DEL SYMBOL?
-
-    //this->dispatcher->remoteRemove(resourceId, ...);
+//  this->dispatcher->remoteRemove(resourceId, p);
 }
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
@@ -346,7 +343,10 @@ void SymClient::setClientDispatcher(clientdispatcher *cl){
 
 void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    d->verifySymbol(sym);
+    //Il metodo in verifySymbol mi deve restituire il pair delle coordinate (già detto a Martina che farà la modifica)
+    //std::pair<unsigned int, unsigned int> p = d->verifySymbol(sym);
+    //notifichiamo alla GUI
+//  this->dispatcher->verifySymbol(resourceId, sym, p);
 }
 
 filterShared::filterShared(const user &currentUser): currentUser{currentUser} {

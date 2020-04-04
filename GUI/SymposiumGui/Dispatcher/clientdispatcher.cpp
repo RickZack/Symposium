@@ -28,6 +28,7 @@
  * Created on 9 Febbraio 2020, 16.23
  */
 
+#include <chrono>
 #include "../sigin.h"
 #include "../signup.h"
 #include "../deleteaccount.h"
@@ -36,6 +37,7 @@
 #include "../onlineusers.h"
 #include "../alluser.h"
 #include "../../../filesystem.h"
+#include "../dirwind.h"
 #include "clientdispatcher.h"
 
 using namespace Symposium;
@@ -119,7 +121,7 @@ void clientdispatcher::readyRead(){
             this->finestraActiveAlwaysLink->unsuccessLink(mes->getErrDescr());
             break;
         }case 12:{
-            //this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
+            this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
         }case 13:{
             this->finestraOnlineUser->errorEditPrivilege(mes->getErrDescr());
             break;
@@ -180,7 +182,7 @@ void clientdispatcher::readyRead(){
     }
 }
 
-void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageToSend){
+void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageToSend, uint_positive_cnt::type resourceId){
     std::stringstream ofs;
     boost::archive::text_oarchive oa(ofs);
     QTextStream out(&(this->socket));
@@ -191,7 +193,21 @@ void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageT
     if (out.status() != QTextStream::Ok){
         throw sendFailure();
     }else{
-        this->timer.start(TEMPOATTESA);
+        std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+        TimerStart(tempo, resourceId);
+    }
+}
+
+void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend, uint_positive_cnt::type resourceId){
+    if(this->timer.isActive()){
+        //timer già attivo, quindi inseriamo in coda
+        attese.push(std::make_pair(timeToSend, resourceId));
+    }else{
+        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::TimerExpired);
+        std::chrono::milliseconds difftemp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - timeToSend;
+        int numero = TEMPOATTESA - difftemp.count();
+        this->timer.start(numero);
+        ResIDofWaitingMessage = resourceId;
     }
 }
 
@@ -200,10 +216,6 @@ void clientdispatcher::signUp(const std::string &username, const std::string &pw
     //Colleghiamo il client al server
     this->openConnection();
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::signupExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -220,10 +232,6 @@ void clientdispatcher::logIn(const std::string &username, const std::string &pwd
     //Colleghiamo il client al server
     this->openConnection();
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::signinExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -238,10 +246,6 @@ void clientdispatcher::logIn(const std::string &username, const std::string &pwd
 void clientdispatcher::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.openSource(path,name,reqPriv));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::openSourceExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -255,12 +259,8 @@ void clientdispatcher::openSource(const std::string &path, const std::string &na
 void clientdispatcher::openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.openNewSource(resourceId,reqPriv,destPath,destName));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::openNewSourceExpired);
         //inviamo il messaggio
-        sendMessage(mess);
+        sendMessage(mess, std::stoi(resourceId));
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeConnection();
@@ -272,10 +272,6 @@ void clientdispatcher::openNewSource(const std::string &resourceId, privilege re
 void clientdispatcher::createNewSource(const std::string &path, const std::string &name) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.createNewSource(path,name));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::createNewSourceExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -289,10 +285,6 @@ void clientdispatcher::createNewSource(const std::string &path, const std::strin
 void clientdispatcher::createNewDir(const std::string &path, const std::string &name) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.createNewDir(path,name));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::createNewDirExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -306,54 +298,47 @@ void clientdispatcher::createNewDir(const std::string &path, const std::string &
 void clientdispatcher::localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<int, int> &index) {
     std::shared_ptr<symbolMessage> mess = std::make_shared<symbolMessage>(this->client.localInsert(resourceId,newSym,index));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::localInsertExpired);
         //inviamo il messaggio
-        sendMessage(mess);
+        sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
-        // COSA FACCIAMO??
-
+        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
 void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std::pair<int, int> indexes) {
     std::shared_ptr<symbolMessage> mess = std::make_shared<symbolMessage>(this->client.localRemove(resourceId,indexes));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::localRemoveExpired);
         //inviamo il messaggio
-        sendMessage(mess);
+        sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
-        // COSA FACCIAMO?
-
+        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
-void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId){
+void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index){
     notepad* n = getCorrectNotepadbyResourceID(resourceId);
-    //n->remoteInsert(newSym, siteId);
+    //n->remoteInsert(newSym, siteId, index);
 }
 
 void clientdispatcher::remoteRemove(uint_positive_cnt::type resourceId, std::pair<int, int> indexes){
     notepad* n = getCorrectNotepadbyResourceID(resourceId);
-    //n->remoteRemove(indexes);
+    //n->remoteDelete(indexes);
+}
+
+void clientdispatcher::verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes){
+    notepad* n = getCorrectNotepadbyResourceID(resId);
+    n->verifySymbol(newSym, indexes);
+}
+
+Color clientdispatcher::getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID){
+    return this->client.colorOfUser(documentID, siteID);
 }
 
 void clientdispatcher::editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, uint_positive_cnt::type documentID) {
     std::shared_ptr<privMessage> mess = std::make_shared<privMessage>(this->client.editPrivilege(targetUser,resPath, std::to_string(documentID), newPrivilege));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::editPrivilegeExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -369,10 +354,6 @@ void clientdispatcher::editPrivilege(const std::string &targetUser, std::string 
 void clientdispatcher::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) {
     std::shared_ptr<uriMessage> mess = std::make_shared<uriMessage>(this->client.shareResource(resPath,resName,newPrefs));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::shareResourceExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -393,10 +374,6 @@ void clientdispatcher::shareResource(const std::string &resPath, const std::stri
 void clientdispatcher::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.renameResource(resPath,resName,newName));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::shareResourceExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -410,10 +387,6 @@ void clientdispatcher::renameResource(const std::string &resPath, const std::str
 void clientdispatcher::removeResource(const std::string &resPath, const std::string &resName) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.removeResource(resPath,resName));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::removeResourceExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -427,29 +400,19 @@ void clientdispatcher::removeResource(const std::string &resPath, const std::str
 void clientdispatcher::closeSource(uint_positive_cnt::type resourceId) {
     std::shared_ptr<updateDocMessage> mess = std::make_shared<updateDocMessage>(this->client.closeSource(resourceId));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::removeResourceExpired);
         //inviamo il messaggio
-        sendMessage(mess);
+        sendMessage(mess, resourceId);
         //eliminiamo il riferimento alla finestra del documento che è stato chiuso
         this->deleteActiveDocument(resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
-        //COSA FACCIAMO??
-
+        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
 void clientdispatcher::editUser(user &newUserData) {
     std::shared_ptr<userDataMessage> mess = std::make_shared<userDataMessage>(this->client.editUser(newUserData));
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::editUserExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -463,10 +426,6 @@ void clientdispatcher::editUser(user &newUserData) {
 void clientdispatcher::removeUser() {
     std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.removeUser());
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::removeUserExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
@@ -480,14 +439,11 @@ void clientdispatcher::removeUser() {
 void clientdispatcher::logout() {
     std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.logout());
     try {
-        //disconnettiamo il timer da altri eventuali slot
-        this->timer.disconnect();
-        //connettiamo il timer al giusto metodo
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::logoutExpired);
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
-        //errore nell'invio del messaggio ma non facciamo nulla
+        //errore nell'invio del messaggio
+        this->finestraHome->errorConnection();
     }
 }
 
@@ -507,12 +463,10 @@ void clientdispatcher::moveMyCursor(uint_positive_cnt::type resId, int block, in
     std::shared_ptr<cursorMessage> mess = std::make_shared<cursorMessage>(this->client.updateCursorPos(resId, block, column));
     try {
         //inviamo il messaggio
-        sendMessage(mess);
+        sendMessage(mess, resId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
-        //COSA FACCIAMO??
-
+        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -557,6 +511,13 @@ void clientdispatcher::deleteActiveDocument(uint_positive_cnt::type resourceID){
 
 void clientdispatcher::stopTimer(){
     this->timer.stop();
+    if(!this->attese.empty()){
+        std::pair<std::chrono::milliseconds, uint_positive_cnt::type> coppia = this->attese.front();
+        std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - coppia.first;
+        this->timer.start(TEMPOATTESA - tempo.count());
+        ResIDofWaitingMessage = coppia.second;
+        this->attese.pop();
+    }
 }
 
 void clientdispatcher::successLogin(){
@@ -600,23 +561,23 @@ void clientdispatcher::successShareResource(std::string path){
 }
 
 void clientdispatcher::successOpenSource(document &doc){
-    //this->setTextEdit(doc.getId(),this->finestraDirectory->successOpen(doc));
+    this->setTextEdit(doc.getId(),this->finestraChoosePriv->successOpen(doc));
 }
 
 void clientdispatcher::successRemoveResource(){
-    //this->finestraDirectory->successRemove();
+    this->finestraDirectory->successRemove();
 }
 
 void clientdispatcher::successCreateNewDir(const std::string ID){
-    //this->finestraDirectory->successCreate(ID);
+    this->finestraDirectory->successCreate(ID);
 }
 
 void clientdispatcher::successCreateNewSource(const std::string ID){
-    //this->finestraDirectory->successNewSource(ID);
+    this->finestraDirectory->successNewSource(ID);
 }
 
 void clientdispatcher::successRenameResource(){
-    //this->finestraDirectory->successRename();
+    this->finestraDirectory->successRename();
 }
 
 void clientdispatcher::closeConnection(){
@@ -667,7 +628,7 @@ void clientdispatcher::setHome(home *ho){
     this->currentWindow = 4;
 }
 
-void clientdispatcher::setDirectory(directory *dr){
+void clientdispatcher::setDirectory(dirwind *dr){
     this->finestraDirectory = dr;
     this->currentWindow = 12;
 }
@@ -702,11 +663,11 @@ void clientdispatcher::setActiveAlwaysLink(activealwayslink *aal){
     this->currentWindow = 10;
 }
 
-void clientdispatcher::signinExpired(){
+/*void clientdispatcher::signinExpired(){
     this->timer.stop();
     this->finestraLogin->errorConnection();
     qDebug() << "Timer scaduto\n";
-}
+}/*/
 
 void clientdispatcher::setOnlineUser(onlineusers *ou){
     this->finestraOnlineUser = ou;
@@ -723,28 +684,16 @@ void clientdispatcher::setActiveNonLink(activenonlink *anl){
     this->currentWindow = 15;
 }
 
-void clientdispatcher::signupExpired(){
+/*void clientdispatcher::signupExpired(){
     this->timer.stop();
     qDebug() << "Timer scaduto\n";
     //chiudiamo la connessione
     this->closeConnection();
     //dobbiamo notificare alla GUI
     this->finestraSignup->errorConnection();
-}
+}*/
 
-void clientdispatcher::logoutExpired(){
-
-    //SERVE QUESTO METODO???SE SI, SU QUALE FINESTRA INVOCO?
-
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    //this->finestraS->errorConnection();
-}
-
-void clientdispatcher::removeUserExpired(){
+/*void clientdispatcher::removeUserExpired(){
     this->timer.stop();
     qDebug() << "Timer scaduto\n";
     //chiudiamo la connessione
@@ -835,23 +784,23 @@ void clientdispatcher::createNewSourceExpired(){
     this->closeConnection();
     //dobbiamo notificare alla GUI
     //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
-}
+}*/
 
-void clientdispatcher::localRemoveExpired(){
+/*void clientdispatcher::localRemoveExpired(){
     this->timer.stop();
     qDebug() << "Timer scaduto\n";
 
     // COSA FACCIAMO
-}
+}*/
 
-void clientdispatcher::localInsertExpired(){
+/*void clientdispatcher::localInsertExpired(){
     this->timer.stop();
     qDebug() << "Timer scaduto\n";
 
     // COSA FACCIAMO??
-}
+}*/
 
-void clientdispatcher::closeSourceExpired(){
+/*void clientdispatcher::closeSourceExpired(){
     this->timer.stop();
 
     // COSA FACCIAMO??
@@ -862,4 +811,58 @@ void clientdispatcher::closeSourceExpired(){
     this->closeConnection();
     //dobbiamo notificare alla GUI
     //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
+}*/
+
+void clientdispatcher::TimerExpired(){
+    this->timer.stop();
+    qDebug() << "Timer scaduto\n";
+    //chiudiamo la connessione
+    this->closeConnection();
+    //dobbiamo notificare alla GUI. Prendiamo la finestra giusta
+    if(this->ResIDofWaitingMessage==0){
+        switch (this->currentWindow) {
+        case 1:{
+            this->finestraLogin->errorConnection();
+            break;
+        }case 2:{
+            this->finestraSignup->errorConnection();
+            break;
+        }case 3:{
+            this->finestraInsertUri->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 5:{
+            this->finestraEliminaAccount->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 7:{
+            this->finestraModificaUser->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 8:{
+            this->finestraActiveCounterLink->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 9:{
+            this->finestraActiveTimerLink->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 10:{
+            this->finestraActiveAlwaysLink->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 12:{
+            //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 13:{
+            this->finestraOnlineUser->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 14:{
+            this->finestraAllUser->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 15:{
+            this->finestraActiveNonLink->errorConnectionLogout(TIMERSCADUTO);
+            break;
+        }case 16:{
+
+        }
+        }
+    }else{
+        //il timer è scaduto su un messaggio di localinsert, localremove, closesource o movemycursor, notifichiamo l'errore sulla finestra directory
+        //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
+    }
 }

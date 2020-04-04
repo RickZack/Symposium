@@ -50,7 +50,7 @@ class notepad;
 class signup;
 class inserturi;
 class home;
-class directory;
+class dirwind;
 class onlineusers;
 class alluser;
 class deleteAccount;
@@ -60,6 +60,8 @@ class activecounterlink;
 class activetimerlink;
 class activealwayslink;
 class activenonlink;
+class choosepriv;
+class chrono;
 
 
 
@@ -82,6 +84,8 @@ namespace Symposium{
         quint16 svPort = 1234;
         int currentWindow = 0;                          //variabile che dice qual è la finestra attiva
         QTimer timer;
+        std::queue<std::pair<std::chrono::milliseconds, uint_positive_cnt::type>> attese;
+        uint_positive_cnt::type ResIDofWaitingMessage;
         sigin* finestraLogin;                           //1
         signup* finestraSignup;                         //2
         inserturi* finestraInsertUri;                   //3
@@ -92,15 +96,18 @@ namespace Symposium{
         activecounterlink* finestraActiveCounterLink;   //8
         activetimerlink* finestraActiveTimerLink;       //9
         activealwayslink* finestraActiveAlwaysLink;     //10
-        directory* finestraDirectory;                   //12
+        dirwind* finestraDirectory;                     //12
         onlineusers* finestraOnlineUser;                //13
         alluser* finestraAllUser;                       //14
         activenonlink* finestraActiveNonLink;           //15
+        choosepriv* finestraChoosePriv;                 //16
         std::vector<std::pair<uint_positive_cnt::type,notepad*>> finestreDocumenti;         //coppia resourceID-Puntatore a finestra
         //std::shared_ptr<clientMessage> message;      //Contiene il messaggio che abbiamo inviato e di cui attendiamo risposta dal server
 
     public:
         clientdispatcher(QObject *parent = nullptr);
+
+        void TimerStart(std::chrono::milliseconds timeToSend, uint_positive_cnt::type resourceId);
 
         void openConnection();
 
@@ -108,7 +115,7 @@ namespace Symposium{
          * @brief send on the socket the message to deliver it to the server
          * @param MessageToSend pointer to the message to be sent
          */
-        void sendMessage(const std::shared_ptr<clientMessage> MessageToSend);
+        void sendMessage(const std::shared_ptr<clientMessage> MessageToSend, uint_positive_cnt::type resourceId = 0);
 
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
@@ -149,7 +156,7 @@ namespace Symposium{
         void createNewDir(const std::string &path, const std::string &name);
         void localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<int, int> &index);
         void localRemove(uint_positive_cnt::type resourceId, const std::pair<int, int> indexes);
-        void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId);
+        void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index);
         void remoteRemove(uint_positive_cnt::type resourceId, std::pair<int, int> indexes);
         void editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, uint_positive_cnt::type documentID);
         void shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
@@ -160,6 +167,8 @@ namespace Symposium{
         void addUserCursor(uint_positive_cnt::type siteID, std::string username, uint_positive_cnt::type resourceID);
         void moveUserCursor(uint_positive_cnt::type resId, int block, int column, uint_positive_cnt::type siteId);
         void removeUserCursor(uint_positive_cnt::type siteID, uint_positive_cnt::type resourceID);
+        void verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes);
+        Color getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID);
 
         /**
          * @brief method to provide the current user to the GUI
@@ -261,7 +270,7 @@ namespace Symposium{
          * @brief this method assign to @ref finestraSceltaDir the pointer to the directory window
          * @param a pointer to the directory window
          */
-        void setDirectory(directory *dr);
+        void setDirectory(dirwind *dr);
 
         /**
          * @brief this method assign to @ref finestraEliminaAccount the pointer to the delete account window
@@ -325,21 +334,21 @@ namespace Symposium{
 
     public slots:
         void readyRead();
-        void signinExpired();
+        /*void signinExpired();
         void signupExpired();
         void removeUserExpired();
         void editUserExpired();
         void openNewSourceExpired();
         void openSourceExpired();
         void editPrivilegeExpired();
-        void logoutExpired();
         void shareResourceExpired();
         void removeResourceExpired();
         void createNewDirExpired();
         void createNewSourceExpired();
         void localRemoveExpired();
         void localInsertExpired();
-        void closeSourceExpired();
+        void closeSourceExpired();*/
+        void TimerExpired();
     };
 }
 

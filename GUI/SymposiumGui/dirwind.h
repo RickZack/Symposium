@@ -49,7 +49,7 @@ public:
     /**
      * @brief dirwind::successRemouve remouves the selected source
      */
-    void successRemouve();
+    void successRemove();
 
     /**
      * @brief successCreate create a new folder and updates the string str adding its info

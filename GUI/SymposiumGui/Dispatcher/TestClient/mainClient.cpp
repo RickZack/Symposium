@@ -11,5 +11,7 @@ int main(int argc, char *argv[]) {
     Symposium::clientdispatcher client;
     //client.logIn("mario","mario");
 
+    client.signUp("","","","");
+
     return a.exec();
 }

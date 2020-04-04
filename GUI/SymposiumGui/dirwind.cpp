@@ -265,7 +265,7 @@ void dirwind::deleteSource()
    //----------------------------------------------------------------------------------------------------
 }
 
-void dirwind::successRemouve(){
+void dirwind::successRemove(){
     QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, item){
         if (count>1)
