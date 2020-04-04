@@ -47,9 +47,9 @@ const QString rsrcPath = ":/resources/images/win";
 
 #include "Dispatcher/clientdispatcher.h"
 
-notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile) :
+notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,Symposium::document doc) :
     QMainWindow(parent),
-    documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),ui(new Ui::notepad)
+    documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)
 {
     ui->setupUi(this);
     this->setCentralWidget(ui->textEdit);
@@ -74,10 +74,20 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
         shareMenu->addAction(tr("Make all links active for a limit number of shares"), this, &notepad::counterLink);
     }
 
+
+    QMenu *menuSym=menuBar()->addMenu(tr("Prova RichText"));
+    menuSym->addAction(tr("Verify Sym"),this,&notepad::verifySymbol2);
+    menuSym->addAction(tr("Fill Text"),this,&notepad::provaFill);
+    menuSym->addAction(tr("Remote Insert"),this,&notepad::prova_remoteInsert);
+    menuSym->addAction(tr("Remote Delete"),this,&notepad::prova_remoteDelete);
+    menuSym->addAction(tr("Highlight"),this,&notepad::prova_colorText);\
+
+
     QMenu *userMenu2=menuBar()->addMenu(tr("ProvaCursori"));
     userMenu2->addAction(tr("Add Cursor"), this, &notepad::addCursor);
     userMenu2->addAction(tr("Change Cursor"), this, &notepad::changeCursorPos);
     userMenu2->addAction(tr("Remove Cursor"), this, &notepad::removeCursor);
+    this->fillTextEdit();
 
     //------------------------------------------------------PARTE DA DECOMMENTARE
 
@@ -123,6 +133,7 @@ Symposium::Color::operator QColor() const{
     std::tie(r,g,b)= this->getRgb();
     return QColor(r,g,b);
 }
+
 
 void notepad::moveUserCursor(Symposium::uint_positive_cnt::type siteID, int block, int column)
 {
@@ -193,6 +204,11 @@ void notepad::setupTextActions()
     actionTextBold->setFont(bold);
     tb->addAction(actionTextBold);
     actionTextBold->setCheckable(true);
+
+    const QIcon colorsIcon(":/resources/cartelle/color_icon");
+    actionSelect= menu->addAction(colorsIcon,tr("Select"),this,&notepad::colorText);
+
+
 
     const QIcon italicIcon = QIcon::fromTheme("format-text-italic", QIcon(rsrcPath + "/textitalic.png"));
     actionTextItalic = menu->addAction(italicIcon, tr("&Italic"), this, &notepad::textItalic);
@@ -410,8 +426,14 @@ void notepad::textColor()
         return;
     QTextCharFormat fmt;
     fmt.setForeground(col);
-    mergeFormatOnWordOrSelection(fmt);
+    //mergeFormatOnWordOrSelection(fmt);
     colorChanged(col);
+
+    //set a lighter color
+    QColor lightCol=col;
+    lightCol.setAlpha(180);
+    ui->textEdit->setTextColor(lightCol);
+
 }
 
 void notepad::textFamily(const QString &f)
@@ -464,6 +486,42 @@ void notepad::currentCharFormatChanged(const QTextCharFormat &format)
     fontChanged(format.font());
     colorChanged(format.foreground().color());
 
+}
+
+void notepad::fillTextEdit(){
+    insertOthCh=true;
+    QTextCursor curs=ui->textEdit->textCursor();
+    QString ch;
+    // save in symbols all the symbols contained in the document
+    std::vector<std::vector<Symposium::symbol>> symbols= this->doc.getSymbols();
+    for(size_t i=0;i<symbols.size();i++){
+        for(size_t j=0;j<symbols[i].size();j++){
+            int column=j;
+            //extract the symbol
+            Symposium::symbol sym=symbols[i][j];
+            //estract the character
+            ch[0]=sym.getCh();
+            Symposium::format format=sym.getCharFormat();
+            //estract the information about the font/color
+            QFont font; QTextCharFormat chFormat;
+            font.setFamily(QString::fromStdString(format.familyType));
+            font.setBold(format.isBold);
+            font.setUnderline(format.isUnderlined);
+            font.setItalic(format.isItalic);
+            font.setPointSize(format.size);
+            Symposium::Color col=format.col;
+            //conversion from Color to QColor
+            QColor qCol;
+            qCol=static_cast<QColor>(col);
+            chFormat.setFont(font); chFormat.setForeground(qCol);
+
+            // go to the position of the character
+            ui->textEdit->changePosition(i,column);
+        }
+        // to insert another Line
+        curs.insertBlock();
+    }
+    insertOthCh=false;
 }
 
 
@@ -562,7 +620,9 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
 
 
     }else{
+
         QString testo=event->text();
+
         int column=cursor.positionInBlock();
         column= column-1;
         int row= cursor.blockNumber();
@@ -572,24 +632,33 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         const std::pair<int, int> indexes={row,column};
 
         QTextCharFormat format = cursor.charFormat();
+        QColor col=format.foreground().color();
+        if(col==Qt::black){
+             col.setAlpha(100);
+            ui->textEdit->setTextColor(col);
+        }
+
         QFont font= format.font();
         bool isBold= font.bold();
         bool isUnderlined=font.underline();
         bool isItalic=font.italic();
+        int size=font.pointSize();
         std::string fontFamily=font.family().toStdString();
-        QColor col=format.foreground().color();
+        QColor colC=format.foreground().color();
         int blue=col.blue();
         int red=col.red();
         int green=col.green();
         Symposium::Color myCol(red,blue,green);
-        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,myCol};
+        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
         std::vector<int> pos;
         // SISTEMARE IL SITEID E IL COUNTER IN SYMBOL
         Symposium::symbol sym(ch,0,0,pos,false);
         sym.setCharFormat(charFormat);
         //cl->localInsert(this->documentId, symbol &sym, &indexes)
+
     }
 }
+
 
 void notepad::contV_action(int pos){
     QTextCursor curs= ui->textEdit->textCursor();
@@ -611,7 +680,7 @@ void notepad::contV_action(int pos){
         const std::pair<int, int> indexes={row,column};
         QTextCharFormat format = curs.charFormat();
         QFont font= format.font();
-
+        int size=font.pointSize();
         bool isBold= font.bold();
         bool isUnderlined=font.underline();
         bool isItalic=font.italic();
@@ -621,7 +690,7 @@ void notepad::contV_action(int pos){
         int red=col.red();
         int green=col.green();
         Symposium::Color myCol(red,blue,green);
-        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,myCol};
+        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
         std::vector<int> pos;
         // SISTEMARE IL SITEID E IL COUNTER IN SYMBOL
         Symposium::symbol sym(ch,0,0,pos,false);
@@ -648,9 +717,11 @@ void notepad::changeCursorPos()
     ui->textEdit->changePosition(4, 1, 1);
 }
 
+
 void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){
 
     insertOthCh=true;
+    // take the position in which the character has to be added.
     int row=indexes.first;
     int column=indexes.second;
 
@@ -666,38 +737,93 @@ void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt si
     ch_font.setBold(f.isBold);
     ch_font.setUnderline(f.isUnderlined);
     ch_font.setItalic(f.isItalic);
+    ch_font.setPointSize(f.size);
     Symposium::Color col=f.col;
 
     // conversion from Symposium::Color to QColor
     QColor qCol;
     qCol=static_cast<QColor>(col);
 
-    // the character is added to the textEditBlock with a lighter color
-    QColor lightCol=qCol.lighter(140);
-    QBrush brh(lightCol);
-
     // set the font and the color to the character
     ch_format.setFont(ch_font);
-    ch_format.setForeground(brh);
+    ch_format.setForeground(qCol);
 
     // go to the position of the character
-    ui->textEdit->changePosition(row,column);
+
+    curs.movePosition(QTextCursor::Start);
+    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,row);
+    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+    ui->textEdit->setTextCursor(curs);
+    ui->textEdit->changePosition(siteId,row,column++);
+
 
     //insert the character
     wchar_t symch=sym.getCh();
     QString ch;
     ch[0]=symch;
     curs.insertText(ch,ch_format);
-
-    // go back to the starting position
+    ui->textEdit->changePosition(siteId,row,column++);
     ui->textEdit->changePosition(actBlock,actColm);
     insertOthCh=false;
 
 }
-
-void notepad::verifySymbol(Symposium::symbol sym,Symposium::uint_positive_cnt siteId, std::pair<int,int> indexes){
+//------------------------------------------------------------------------------------------------------------------------------------------
+//prova remoteInsert
+void notepad::prova_remoteInsert(){
 
     insertOthCh=true;
+    // take the position in which the character has to be added.
+    int row=0;
+    int column=1;
+
+    QTextCursor curs=ui->textEdit->textCursor();
+    int actBlock=curs.blockNumber();
+    int actColm=curs.positionInBlock();
+
+    //QTextCursor curs=ui->textEdit->textCursor();
+
+    //extract information from sym to build the character to insert in the textEdit block
+
+    QTextCharFormat ch_format;QFont ch_font;
+
+    ch_font.setFamily("Times New Roman");
+    ch_font.setBold(true);
+    ch_font.setUnderline(true);
+    ch_font.setItalic(true);
+    ch_font.setPointSize(9);
+
+
+    // set the font and the color to the character
+    ch_format.setFont(ch_font);
+
+
+    // go to the position of the character
+    //ui->textEdit->changePosition(2,row,column);
+
+
+    curs.movePosition(QTextCursor::Start);
+    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,row);
+    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+    ui->textEdit->setTextCursor(curs);
+    ui->textEdit->changePosition(2,row,column++);
+
+
+    //insert the character
+
+    QString ch="F";
+
+    curs.insertText(ch,ch_format);
+    ui->textEdit->changePosition(2,row,column++);
+    ui->textEdit->changePosition(actBlock,actColm);
+
+    insertOthCh=false;
+
+}
+//------------------------------------------------------------------------------------------------------------------------------------------
+void notepad::verifySymbol(Symposium::symbol sym,std::pair<int,int> indexes){
+
+    insertOthCh=true;
+    //take the position of the character
     int row=indexes.first;
     int column=indexes.second;
 
@@ -713,6 +839,7 @@ void notepad::verifySymbol(Symposium::symbol sym,Symposium::uint_positive_cnt si
     ch_font.setBold(f.isBold);
     ch_font.setUnderline(f.isUnderlined);
     ch_font.setItalic(f.isItalic);
+    ch_font.setPointSize(f.size);
     Symposium::Color col=f.col;
 
     // conversion from Symposium::Color to QColor
@@ -724,8 +851,10 @@ void notepad::verifySymbol(Symposium::symbol sym,Symposium::uint_positive_cnt si
     ch_format.setFont(ch_font);
     ch_format.setForeground(brh);
 
-    // go to the position of the character
-    ui->textEdit->changePosition(row,column);
+      // go to the position of the character
+    curs.movePosition(QTextCursor::Start);
+    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, row);
+    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
 
     // delete the character and replace it with the same that has a defined Color
     curs.deleteChar();
@@ -739,19 +868,114 @@ void notepad::verifySymbol(Symposium::symbol sym,Symposium::uint_positive_cnt si
     insertOthCh=false;
 }
 
-
-void notepad::remoteDelete(std::pair<int,int> indexes){
+//--------------------------------------------------------------------------------------------------------------------------------------------------
+// SOLO PER TEST DI VERIFYSYMBOL
+void notepad::verifySymbol2(){
 
     insertOthCh=true;
+    int row=0;
+    int column=0;
+
+
+    QTextCursor curs=ui->textEdit->textCursor();
+    int actBlock=curs.blockNumber();
+    int actColm=curs.positionInBlock();
+
+    //extract information from sym to build the character to insert in the textEdit block
+    //Symposium::format f= sym.getCharFormat();
+    QTextCharFormat ch_format;QFont ch_font;
+
+    ch_font.setFamily(QString::fromStdString("Comic Sams Ms"));
+    ch_font.setBold(false);
+    ch_font.setUnderline(false);
+    ch_font.setItalic(false);
+    ch_font.setPointSize(8);
+    Symposium::Color col(255, 0, 0);
+
+    // conversion from Symposium::Color to QColor
+    QColor qCol;
+    qCol=static_cast<QColor>(col);
+    QBrush brh(qCol);
+
+    // set the font and the color to the character
+    ch_format.setFont(ch_font);
+    ch_format.setForeground(brh);
+
+    curs.movePosition(QTextCursor::Start);
+    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,row);
+    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+    ui->textEdit->setTextCursor(curs);
+
+
+    // delete the character and replace it with the same that has a defined Color
+    curs.deleteChar();
+    //wchar_t symch=sym.getCh();
+    QString ch;
+    //ch[0]=symch;
+    curs.insertText("H",ch_format);
+
+    // go back to the starting position
+    ui->textEdit->changePosition(actBlock,actColm);
+    insertOthCh=false;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------
+
+void notepad::remoteDelete(std::pair<int,int> indexes,Symposium::uint_positive_cnt siteId){
+
+    insertOthCh=true;
+
+    // the position of the character to delete
     int block=indexes.first;
     int column=indexes.second;
+    // in Qt the column starts from 1, while in symbols it starts from 0
     column++;
     QTextCursor curs=ui->textEdit->textCursor();
     int actBlock=curs.blockNumber();
     int actColm=curs.positionInBlock();
-    ui->textEdit->changePosition(block,column);
-    curs.deleteChar();
+    // go to the position of the character
+
+    curs.movePosition(QTextCursor::Start);
+    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
+    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+    ui->textEdit->setTextCursor(curs);
+    ui->textEdit->changePosition(2,block,column--);
+
+    curs.deletePreviousChar();
+
+    ui->textEdit->changePosition(siteId,block,column--);
     ui->textEdit->changePosition(actBlock,actColm);
+
+    insertOthCh=false;
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------
+// PROVA REMOTE DELETE DA CANCELLARE
+void notepad::prova_remoteDelete(){
+
+    insertOthCh=true;
+
+    // the position of the character to delete
+    int block=0;
+    int column=1;
+    // in Qt the column starts from 1, while in symbols it starts from 0
+    column++;
+
+    QTextCursor curs=ui->textEdit->textCursor();
+    int actBlock=curs.blockNumber();
+    int actColm=curs.positionInBlock();
+    // go to the position of the character
+
+    curs.movePosition(QTextCursor::Start);
+    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
+    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+    ui->textEdit->setTextCursor(curs);
+    ui->textEdit->changePosition(2,block,column--);
+
+    curs.deletePreviousChar();
+
+    ui->textEdit->changePosition(2,block,column--);
+    ui->textEdit->changePosition(actBlock,actColm);
+
     insertOthCh=false;
 }
 
@@ -769,11 +993,11 @@ void notepad::on_textEdit_cursorPositionChanged()
      }
 }
 
-void notepad::colorText(Symposium::document *doc){
+void notepad::colorText(){
 
     QTextCursor curs=ui->textEdit->textCursor();
     // save in symbols all the symbols contained in the document
-    std::vector<std::vector<Symposium::symbol>> symbols= doc->getSymbols();
+    std::vector<std::vector<Symposium::symbol>> symbols= this->doc.getSymbols();
     for(size_t i=0;i<symbols.size();i++){
         // counter variable to count the number of characters that I have to highlight
         int incr=1;
@@ -840,4 +1064,215 @@ void notepad::colorText(Symposium::document *doc){
         }
     }
 }
+void notepad::prova_colorText(){
+    std::vector<std::vector<std::pair<int,std::string>>> symbols(1);
+    std::vector<std::pair<int,std::string>>interno(12);
+    interno[0]={0,"C"};
+    interno[1]={0,"I"};
+    interno[2]={0,"A"};
+    interno[3]={0,"O"};
+    interno[4]={0," "};
+    interno[5]={1,"A"};
+    interno[6]={1," "};
+    interno[7]={1,"T"};
+    interno[8]={1,"U"};
+    interno[9]={1,"T"};
+    interno[10]={1,"T"};
+    interno[11]={1,"I"};
+
+    symbols[0]=interno;
+    int x=symbols[0].size();
+    /*
+    std::vector<std::string>interno2(4);
+    interno2[0]="C";
+    interno2[1]="O";
+    interno2[2]="M";
+    interno2[3]="E";
+    symbols[1]=interno2;
+    std::vector<std::string>interno3(10);
+    interno3[0]="S";
+    interno3[1]="T";
+    interno3[2]="A";
+    interno3[3]="I";
+    interno3[4]="?";
+    interno3[5]="I";
+    interno3[6]="O";
+    interno3[7]=" ";
+    interno3[8]="O";
+    interno3[9]="K";
+    symbols[2]=interno3;
+    std::vector<std::string>interno4(10);
+    interno4[0]="M";
+    interno4[1]="A";
+    interno4[2]="R";
+    interno4[3]="T";
+    interno4[4]="I";
+    interno4[5]="N";
+    interno4[6]="A";
+    symbols[3]=interno4;
+*/
+    QTextCursor curs=ui->textEdit->textCursor();
+    // save in symbols all the symbols contained in the document
+
+    for(size_t i=0;i<symbols.size();i++){
+        // counter variable to count the number of characters that I have to highlight
+        int incr=1;
+        int jsupp=0;
+        for(size_t j=0;j<symbols[i].size();j++){
+            std::pair<int,std::string> symF=symbols[i][j];
+            // the starting position of the selection
+            std::pair<int,int> indexes={i,jsupp};
+            // check if I am at the end of the row (last column) and I can't compare the actual symbol siteId with the next one.
+            // If I am at the end of the row, I have to highlight and I have to change the row.
+            if(j!=symbols[i].size()-1){
+                 std::pair<int,std::string> symS=symbols[i][j+1];
+                //check if the two successive symbols have the same siteId;
+                if(symF.first==symS.first){
+                incr++;
+                }
+                 else{
+                    QColor qCol;
+                    // estraggo dal site id il colore -> chiedere a Cristian
+                    if(symF.first==0){
+                        qCol=Qt::red;}
+                    else if(symF.first==1){
+                        qCol=Qt::yellow;
+                    }
+
+                    int block=indexes.first; int column=indexes.second;
+                    QTextCursor supportCurs=ui->textEdit->textCursor();
+                    QTextCharFormat highlightColor;
+                    highlightColor.setBackground(qCol);
+                    supportCurs.movePosition(QTextCursor::Start);
+                    supportCurs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
+                    supportCurs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,column);
+                    int pp=supportCurs.position();
+
+                    //highlight the text
+                    curs.setPosition(pp,QTextCursor::MoveAnchor);
+                    curs.setPosition(pp+incr,QTextCursor::KeepAnchor);
+                    curs.setCharFormat(highlightColor);
+                    ui->textEdit->setTextCursor(curs);
+
+                    incr=1;
+                    jsupp=j+1;
+             }
+            }else{
+            QColor qCol;
+            // estraggo dal site id il colore -> chiedere a Cristian
+            if(symF.first==0){
+                qCol=Qt::red;}
+            else if(symF.first==1){
+                qCol=Qt::yellow;
+            }
+
+            int block=indexes.first; int column=indexes.second;
+            QTextCursor supportCurs=ui->textEdit->textCursor();
+            QTextCharFormat highlightColor;
+            highlightColor.setBackground(qCol);
+            supportCurs.movePosition(QTextCursor::Start);
+            supportCurs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
+            supportCurs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,column);
+            int pp=supportCurs.position();
+
+            //highlight the text
+            curs.setPosition(pp,QTextCursor::MoveAnchor);
+            curs.setPosition(pp+incr,QTextCursor::KeepAnchor);
+            curs.setCharFormat(highlightColor);
+            ui->textEdit->setTextCursor(curs);
+            j=symbols[i].size();
+
+}
+
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+void notepad::provaFill(){
+    ui->textEdit->clear();
+    insertOthCh=true;
+    std::vector<std::vector<std::string>> symbols(100);
+    std::vector<std::string>interno(12);
+    interno[0]="C";
+    interno[1]="I";
+    interno[2]="A";
+    interno[3]="O";
+    interno[4]=" ";
+    interno[5]="A";
+    interno[6]=" ";
+    interno[7]="T";
+    interno[8]="U";
+    interno[9]="T";
+    interno[10]="T";
+    interno[11]="I";
+
+    symbols[0]=interno;
+    std::vector<std::string>interno2(4);
+    interno2[0]="C";
+    interno2[1]="O";
+    interno2[2]="M";
+    interno2[3]="E";
+    symbols[1]=interno2;
+    std::vector<std::string>interno3(10);
+    interno3[0]="S";
+    interno3[1]="T";
+    interno3[2]="A";
+    interno3[3]="I";
+    interno3[4]="?";
+    interno3[5]="I";
+    interno3[6]="O";
+    interno3[7]=" ";
+    interno3[8]="O";
+    interno3[9]="K";
+    symbols[2]=interno3;
+    std::vector<std::string>interno4(10);
+    interno4[0]="M";
+    interno4[1]="A";
+    interno4[2]="R";
+    interno4[3]="T";
+    interno4[4]="I";
+    interno4[5]="N";
+    interno4[6]="A";
+    symbols[3]=interno4;
+    QString parola;
+        QTextCursor curs=ui->textEdit->textCursor();
+
+       // curs.movePosition(QTextCursor::Start);
+        for(size_t i=0;i<symbols.size();i++){
+                for(size_t j=0;j<symbols[i].size();j++){
+                    std::string sym=symbols[i][j];
+
+            int colonna=j;
+            //estract the information about the font/color/format
+            QFont font; QTextCharFormat chFormat;
+            font.setFamily(QString::fromStdString("Comics Sams Ms"));
+            font.setBold(true);
+            font.setUnderline(false);
+            font.setItalic(false);
+            font.setPointSize(9);
+            Symposium::Color col(255,0,0);
+            //conversion from Color to QColor
+            QColor qCol;
+            qCol=static_cast<QColor>(col);
+            chFormat.setFont(font); chFormat.setForeground(qCol);
+            QTextBlockFormat f;
+
+            // go to the position of the character
+          ui->textEdit->changePosition(i,colonna++);
+          //curs.deleteChar();
+
+          curs.insertText(QString::fromStdString(sym),chFormat);
+          //ui->textEdit->append(QString::fromStdString(sym));
+
+
+    }
+          curs.insertBlock();
+    }
+
+    insertOthCh=false;
+
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------
+
 

@@ -50,7 +50,7 @@ void choosepriv::on_pushButton_clicked()
 
 
     // qui chiamo il metodo in cui gli passo il path e il privilege
-     //openSource(this->path,priv,idSource);
+     //cl->openSource(this->path,priv,idSource);
 
     // QUESTO ANDRA' TOLTO DA QUI E LASCIATO SOLTANTO NEL successOpen()
     notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
@@ -68,9 +68,9 @@ void choosepriv::on_pushButton_2_clicked()
 
 // il successOpen riceve un documento, e stampa tutti i simboli che sono in esso presenti
 
-notepad* choosepriv::successOpen(){
+notepad* choosepriv::successOpen(Symposium::document &doc){
 
-    notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
+    notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path,doc);
     // cl->setNotepad(notepadWindow)
     this->hide();
     notepadWindow->show();
@@ -80,6 +80,7 @@ notepad* choosepriv::successOpen(){
 
 }
 
+// DA CANCELLARE!
 // failure(std::string stringaDaStampare)
 void choosepriv::failureOpen(){
      QMessageBox::warning(this, "Error Message","Something has gone wrong");

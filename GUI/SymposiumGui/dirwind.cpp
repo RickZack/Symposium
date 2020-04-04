@@ -4,9 +4,9 @@
 #include <ostream>
 
 
-directory::directory(QWidget *parent) :
+dirwind::dirwind(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::directory)
+    ui(new Ui::dirwind)
 {
     ui->setupUi(this);
     QPixmap pix_folder(":/resources/cartelle/new_folder");
@@ -38,17 +38,15 @@ directory::directory(QWidget *parent) :
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
 
 
-
-
 }
 
-directory::~directory()
+dirwind::~dirwind()
 {
     delete ui;
 }
 
 
-void directory::listGenerate(std::string str_first, int count)
+void dirwind::listGenerate(std::string str_first, int count)
 {
     std::string str=generateString(str_first);
     std::string word;
@@ -97,7 +95,7 @@ void directory::listGenerate(std::string str_first, int count)
 }
 
 
-std::string directory::searchForId(std::string word,std::string str,int count)
+std::string dirwind::searchForId(std::string word,std::string str,int count)
 {
     std::string id_to_return;
     for(int i=0;i<count;i++){
@@ -122,7 +120,7 @@ std::string directory::searchForId(std::string word,std::string str,int count)
    return id_to_return;
 }
 
-std::pair<std::string,std::string> directory::searchForPriv(std::string word,std::string str,int count)
+std::pair<std::string,std::string> dirwind::searchForPriv(std::string word,std::string str,int count)
 {
     std::string priv_to_return;
     std::string id_to_return;
@@ -150,7 +148,7 @@ std::pair<std::string,std::string> directory::searchForPriv(std::string word,std
     return idPriv;
 }
 
-std::string directory::separate_word(std::string& string)
+std::string dirwind::separate_word(std::string& string)
 {
     std::string separato;
     std::size_t found = string.find_first_of(' ');
@@ -165,7 +163,7 @@ std::string directory::separate_word(std::string& string)
     return separato;
 }
 
-std::string directory::generateString(std::string string)
+std::string dirwind::generateString(std::string string)
 {
     for(size_t i = 0; i < string.size(); i++)
       if(string[i] == '\n')
@@ -173,7 +171,7 @@ std::string directory::generateString(std::string string)
     return string;
 }
 
-int directory::number_elements(std::string& string)
+int dirwind::number_elements(std::string& string)
 {
     int count=0;
     for(size_t i = 0; i < string.size(); i++)
@@ -182,14 +180,14 @@ int directory::number_elements(std::string& string)
     return count;
 }
 
-void directory::on_actionHome_triggered()
+void dirwind::on_actionHome_triggered()
 {
     home *homeWindow=new home(this);
     homeWindow->show();
     this->hide();
 }
 
-void directory::on_actionUri_triggered()
+void dirwind::on_actionUri_triggered()
 {
     uriWindow=new inserturi(this);
     uriWindow->show();
@@ -197,7 +195,7 @@ void directory::on_actionUri_triggered()
 }
 
 
-void directory::openWindow(std::string str1){
+void dirwind::openWindow(std::string str1){
     ui->myListWidget->clear();
     int counter=number_elements(str1);
     listGenerate(str1,counter);
@@ -207,24 +205,21 @@ void directory::openWindow(std::string str1){
     this->show();
 }
 
-void directory::contextMenuEvent(QContextMenuEvent *event)
+void dirwind::contextMenuEvent(QContextMenuEvent *event)
 {
-    if(event->MouseButtonPress==Qt::RightButton){
         QMenu submenu;
-        submenu.addAction(tr("Open"),this,&directory::openSource);
+        submenu.addAction(tr("Open"),this,&dirwind::openSelectedSource);
         submenu.addSeparator();
-        submenu.addAction(tr("Delete"),this,&directory::deleteSource);
+        submenu.addAction(tr("Delete"),this,&dirwind::deleteSource);
         submenu.addSeparator();
-        submenu.addAction(tr("Rename"),this,&directory::renameSource);
+        submenu.addAction(tr("Rename"),this,&dirwind::renameSource);
         QPoint globalPos=ui->myListWidget->cursor().pos();
         submenu.exec(globalPos);
-
-
     }
-}
+
 
 //acts when the user clicks on the button "DELETE"
-void directory::deleteSource()
+void dirwind::deleteSource()
 {
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
@@ -270,7 +265,7 @@ void directory::deleteSource()
    //----------------------------------------------------------------------------------------------------
 }
 
-void directory::successRemouve(){
+void dirwind::successRemouve(){
     QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, item){
         if (count>1)
@@ -291,12 +286,12 @@ void directory::successRemouve(){
     }
 }
 
-void directory::failureActionDirectory(std::string msg){
+void dirwind::failureActionDirectory(std::string msg){
     QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
 }
 
 // this method creates a new folder
-void directory::on_pushButton_3_clicked()
+void dirwind::on_pushButton_3_clicked()
 {
 
     QString name= ui->name->text();
@@ -328,7 +323,7 @@ void directory::on_pushButton_3_clicked()
 
 }
 
-void directory::successCreate(std::string id){
+void dirwind::successCreate(std::string id){
     QString name= ui->name->text();
     ui->name->setText(" ");
     count++;
@@ -342,7 +337,7 @@ void directory::successCreate(std::string id){
 
 
 //this method closes the window directory
-void directory::closeEvent(QCloseEvent *event)
+void dirwind::closeEvent(QCloseEvent *event)
 {
     QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
                                                                     tr("Are you sure to quit?\n"),
@@ -358,7 +353,7 @@ void directory::closeEvent(QCloseEvent *event)
 }
 
 // creates a new file
-void directory::on_pushButton_4_clicked()
+void dirwind::on_pushButton_4_clicked()
 {
 
     QString name= ui->name_2->text();
@@ -387,7 +382,7 @@ void directory::on_pushButton_4_clicked()
     //-----------------------------------------------------------------------------------------------
 }
 
-void directory::successNewSource(std::string id){
+void dirwind::successNewSource(std::string id){
 
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
@@ -401,7 +396,7 @@ void directory::successNewSource(std::string id){
 }
 
 
-void directory::on_back_button_clicked()
+void dirwind::on_back_button_clicked()
 {
     if(aperto!=0)
     {
@@ -430,7 +425,7 @@ void directory::on_back_button_clicked()
     this->show();
 }
 
-void directory::renameSource()
+void dirwind::renameSource()
 {
     ui->renameName->show();
     ui->renameLabel->show();
@@ -438,7 +433,7 @@ void directory::renameSource()
     ui->okButton_2->show();
 }
 
-void directory::on_okButton_clicked()
+void dirwind::on_okButton_clicked()
 {
     QString newName=ui->renameLabel->text();
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
@@ -455,12 +450,13 @@ void directory::on_okButton_clicked()
          ui->okButton->hide();
          ui->renameLabel->hide();
          ui->renameName->hide();
+         ui->okButton_2->hide();
          //-------------------------------------------------------
     }
 
 }
 
-void directory::successRename(){
+void dirwind::successRename(){
     QString newName=ui->renameName->text();
     ui->renameName->setText(" ");
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
@@ -472,21 +468,22 @@ void directory::successRename(){
         ui->okButton->hide();
         ui->renameLabel->hide();
         ui->renameName->hide();
+        ui->okButton_2->hide();
     }
 }
 
 
-void directory::errorConnection(){
+void dirwind::errorConnection(){
     errorWindow = new errorconnection(this);
     errorWindow->show();
 }
 
-void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
+void dirwind::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
 }
 
-void directory::errorConnectionLogout(){
+void dirwind::errorConnectionLogout(){
     errorLogoutWindow= new errorlogout(this);
     this->close();
     errorLogoutWindow->show();
@@ -494,7 +491,7 @@ void directory::errorConnectionLogout(){
 }
 
 
-void directory::on_myListWidget_itemDoubleClicked(QListWidgetItem *item)
+void dirwind::on_myListWidget_itemDoubleClicked(QListWidgetItem *item)
 {
 
     QString value= item->whatsThis();
@@ -538,7 +535,7 @@ void directory::on_myListWidget_itemDoubleClicked(QListWidgetItem *item)
     }
 }
 
-void directory::openSource(){
+void dirwind::openSelectedSource(){
     // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
@@ -569,6 +566,7 @@ void directory::openSource(){
              std::string initialPriv=idPriv.second;
              // I have to open the choosepriv first
              chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
+             //cl->setchoosepriv(chooseprivWindow)
              chooseprivWindow->show();
          }
          else
@@ -587,8 +585,7 @@ void directory::openSource(){
 }
 
 
-
-void directory::on_okButton_2_clicked()
+void dirwind::on_okButton_2_clicked()
 {
      ui->renameLabel->hide();
      ui->renameName->hide();

@@ -1,5 +1,5 @@
-#ifndef DIRECTORY_H
-#define DIRECTORY_H
+#ifndef DIRWIND_H
+#define DIRWIND_H
 
 #include <QMainWindow>
 #include <QCloseEvent>
@@ -16,16 +16,16 @@
 #include "errorlogout.h"
 
 namespace Ui {
-class directory;
+class dirwind;
 }
 
-class directory : public QMainWindow
+class dirwind : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit directory(QWidget *parent = nullptr);
-    ~directory();
+    explicit dirwind(QWidget *parent = nullptr);
+    ~dirwind();
     void listGenerate(std::string str, int count);
 
     // this variable is used to say that a window has been opened and to enable the button BACK.
@@ -47,7 +47,7 @@ public:
 
 
     /**
-     * @brief directory::successRemouve remouves the selected source
+     * @brief dirwind::successRemouve remouves the selected source
      */
     void successRemouve();
 
@@ -78,23 +78,23 @@ public:
      */
     void errorConnectionLogout();
 
-    void openSource();
+    void openSelectedSource();
 
 private slots:
 
     /**
-     * @brief directory::on_actionHome_triggered opens the home window
+     * @brief dirwind::on_actionHome_triggered opens the home window
      */
     void on_actionHome_triggered();
 
 
     /**
-     * @brief directory::on_actionUri_triggered opens the uri window
+     * @brief dirwind::on_actionUri_triggered opens the uri window
      */
     void on_actionUri_triggered();
 
     /**
-     * @brief directory::deleteSource acts when the user chooses to delete a selected source
+     * @brief dirwind::deleteSource acts when the user chooses to delete a selected source
      */
     void deleteSource();
 
@@ -131,7 +131,7 @@ private slots:
     void on_okButton_2_clicked();
 
 private:
-    Ui::directory *ui;
+    Ui::dirwind *ui;
     inserturi *uriWindow;
     QListWidgetItem *item1;
     choosepriv *chooseprivWindow;
@@ -150,7 +150,7 @@ private:
 
 
     /**
-     * @brief directory::number_elements counts the number of element inside the @e string
+     * @brief dirwind::number_elements counts the number of element inside the @e string
      * @param string that shows all the info about the sources
      * @return #of elements inside the string
      */
@@ -158,15 +158,15 @@ private:
 
 
     /**
-     * @brief directory::generateString deletes from the string the \n in such way to visualize the list of element without spaces
+     * @brief dirwind::generateString deletes from the string the \n in such way to visualize the list of element without spaces
      * @param string that shows all the info about the sources
      * @return the string without \n
      */
     std::string generateString(std::string str);
 
     /**
-     * @brief directory::searchForId extracts the id of the selected directory
-     * @param word the name of the selected directory
+     * @brief dirwind::searchForId extracts the id of the selected dirwind
+     * @param word the name of the selected dirwind
      * @param str the initial string
      * @param count the # of elements inside the string
      * @return id
@@ -175,7 +175,7 @@ private:
 
 
     /**
-     * @brief directory::searchForPriv extracts the id and priv of the selected file/symlink
+     * @brief dirwind::searchForPriv extracts the id and priv of the selected file/symlink
      * @param word the name of the selected source
      * @param str the initial string
      * @param count the # of elements inside the string
@@ -185,7 +185,7 @@ private:
 
 
     /**
-     * @brief directory::openWindow shows the scenario of a folder, opened starting from another one.
+     * @brief dirwind::openWindow shows the scenario of a folder, opened starting from another one.
      * It saves in a List<QString> the string that cointains all the sources inside the attual folder.
      * This is useful to move from a folder to another one
      * @param str1 cointains all the sources inside the attual folder
@@ -198,4 +198,4 @@ private:
 
 
 
-#endif // DIRECTORY_H
+#endif // dirwind_H

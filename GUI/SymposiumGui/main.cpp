@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     Symposium::clientdispatcher cl;
     w.setClientDispatcher(&cl);
-    w.show();
+    //w.show();
     notepad *notepadWindow = new notepad(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "");
     notepadWindow->show();
 

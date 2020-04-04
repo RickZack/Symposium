@@ -70,6 +70,8 @@ void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, 
     j=1;
 }
 
+
+
 void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId)
 {
     j=0;

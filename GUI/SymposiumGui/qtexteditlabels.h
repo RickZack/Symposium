@@ -48,6 +48,7 @@ public:
         this->append("Hello, World!\nAnotherLine.");
         this->append("Hello, World!\nAnotherLine.");
     }
+
     /**
      * @brief rewrite scrollContentsBy of the parent TextEdit class
      */
@@ -123,7 +124,6 @@ public:
      * @param priv the privilege of the user
      */
     void setThisUserPrivilege(Symposium::privilege priv);
-
 
 private:
     std::map<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>> labels;

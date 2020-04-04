@@ -15,7 +15,7 @@ class choosepriv : public QMainWindow
 public:
     explicit choosepriv(QWidget *parent = nullptr,std::string path=" ", std::string idSource=" ", std::string oldPriv=" ");
     ~choosepriv();
-    notepad* successOpen();
+    notepad* successOpen(Symposium::document &doc);
     void failureOpen();
 
     std::string path;

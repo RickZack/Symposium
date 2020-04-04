@@ -47,7 +47,7 @@ void home::on_modify_clicked()
 
 void home::on_directory_clicked()
 {
-    directoryWindow=new directory(this);
+    directoryWindow=new dirwind(this);
     directoryWindow->show();
     //cl->setDirectory(directoryWindow);
     this->hide();

@@ -73,7 +73,7 @@ private:
     std::string pwd;
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
-    directory *directoryWindow;
+    dirwind *directoryWindow;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
