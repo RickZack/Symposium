@@ -119,8 +119,9 @@ TEST_F(documentTest, verifySymbol){
 
     ASSERT_TRUE(d.getSymbols().size()>0 && d.getSymbols()[0].size()>=3);
 
-    d.verifySymbol(s2);
-    EXPECT_TRUE(d.getSymbols()[0][1].isVerified());
+    auto coord=d.verifySymbol(s2);
+    ASSERT_TRUE(coord.first==0 && coord.second==1);
+    EXPECT_TRUE(d.getSymbols()[coord.first][coord.second].isVerified());
 }
 
 struct Insertion{

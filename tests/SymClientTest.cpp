@@ -129,7 +129,7 @@ struct SymClientDocMock: public document{
     MOCK_METHOD2(localInsert, symbol(const std::pair<unsigned, unsigned>& index, symbol &toInsert));
     MOCK_METHOD1(localRemove, symbol(const std::pair<unsigned, unsigned>& index));
     MOCK_METHOD3(updateCursorPos, void(unsigned int, unsigned int, unsigned int));
-    MOCK_METHOD1(verifySymbol, void(const symbol &sym));
+    MOCK_METHOD1(verifySymbol, std::pair<unsigned int, unsigned int>(const symbol &sym));
 };
 
 struct SymClientTest : ::testing::Test{

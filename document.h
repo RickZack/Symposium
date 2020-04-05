@@ -150,7 +150,7 @@ namespace Symposium {
          * @brief set a symbol inside the document as verified
          * @param toVerify the symbol to be marked as verified
          */
-        virtual void verifySymbol(const symbol& toVerify);
+        virtual std::pair<unsigned int, unsigned int> verifySymbol(const symbol& toVerify);
 
         /**
          * @brief update the position of the cursor for the user @e target

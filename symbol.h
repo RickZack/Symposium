@@ -44,11 +44,11 @@ namespace Symposium {
         bool isBold;
         bool isUnderlined;
         bool isItalic;
-        int size;
+        unsigned size;
         Color col;
 
-        format():format("", false, false, false, 0,Color(0,0,0)){}
-        format(const std::string& ft, bool bold, bool underline, bool italic, int size,Color col):
+        format():format("", false, false, false, 12,Color(0,0,0)){}
+        format(const std::string& ft, bool bold, bool underline, bool italic, unsigned size, Color col):
         familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), size(size),col(col){}
 
         template<class Archive>
