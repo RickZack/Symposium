@@ -63,7 +63,7 @@ public:
      * @param siteId
      * @param indexes
      */
-    void verifySymbol(Symposium::symbol sym, Symposium::uint_positive_cnt siteId, std::pair<int, int> indexes);
+    void verifySymbol(Symposium::symbol sym, std::pair<int, int> indexes);
 
     /**
      * @brief closeEvent closes the window

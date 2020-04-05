@@ -821,6 +821,7 @@ void notepad::prova_remoteInsert(){
 
 }
 //------------------------------------------------------------------------------------------------------------------------------------------
+
 void notepad::verifySymbol(Symposium::symbol sym,std::pair<int,int> indexes){
 
     insertOthCh=true;
@@ -868,6 +869,7 @@ void notepad::verifySymbol(Symposium::symbol sym,std::pair<int,int> indexes){
     ui->textEdit->changePosition(actBlock,actColm);
     insertOthCh=false;
 }
+
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 // SOLO PER TEST DI VERIFYSYMBOL

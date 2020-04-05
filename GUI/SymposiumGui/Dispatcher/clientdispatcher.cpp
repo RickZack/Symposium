@@ -329,7 +329,7 @@ void clientdispatcher::remoteRemove(uint_positive_cnt::type resourceId, std::pai
 
 void clientdispatcher::verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes){
     notepad* n = getCorrectNotepadbyResourceID(resId);
-    n->verifySymbol(newSym, indexes);
+    //n->verifySymbol(newSym, indexes);
 }
 
 Color clientdispatcher::getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID){
