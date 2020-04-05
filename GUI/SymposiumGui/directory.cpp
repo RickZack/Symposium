@@ -484,7 +484,7 @@ void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
 }
 
 void directory::errorConnectionLogout(){
-    errorLogoutWindow= new errorlogout(this);
+    errorLogoutWindow= new errorlogout(this, QString::fromStdString(str));
     this->close();
     errorLogoutWindow->show();
 
