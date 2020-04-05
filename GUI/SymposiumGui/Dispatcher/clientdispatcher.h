@@ -50,7 +50,7 @@ class notepad;
 class signup;
 class inserturi;
 class home;
-class dirwind;
+class directory;
 class onlineusers;
 class alluser;
 class deleteAccount;
@@ -96,7 +96,7 @@ namespace Symposium{
         activecounterlink* finestraActiveCounterLink;   //8
         activetimerlink* finestraActiveTimerLink;       //9
         activealwayslink* finestraActiveAlwaysLink;     //10
-        dirwind* finestraDirectory;                     //12
+        ::directory* finestraDirectory;                     //12
         onlineusers* finestraOnlineUser;                //13
         alluser* finestraAllUser;                       //14
         activenonlink* finestraActiveNonLink;           //15
@@ -270,7 +270,7 @@ namespace Symposium{
          * @brief this method assign to @ref finestraSceltaDir the pointer to the directory window
          * @param a pointer to the directory window
          */
-        void setDirectory(dirwind *dr);
+        void setDirectory(::directory *dr);
 
         /**
          * @brief this method assign to @ref finestraEliminaAccount the pointer to the delete account window

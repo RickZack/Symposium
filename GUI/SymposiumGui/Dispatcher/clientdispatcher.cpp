@@ -37,7 +37,7 @@
 #include "../onlineusers.h"
 #include "../alluser.h"
 #include "../../../filesystem.h"
-#include "../dirwind.h"
+#include "../directory.h"
 #include "clientdispatcher.h"
 
 using namespace Symposium;
@@ -121,7 +121,7 @@ void clientdispatcher::readyRead(){
             this->finestraActiveAlwaysLink->unsuccessLink(mes->getErrDescr());
             break;
         }case 12:{
-            this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
+            //this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
         }case 13:{
             this->finestraOnlineUser->errorEditPrivilege(mes->getErrDescr());
             break;
@@ -565,19 +565,19 @@ void clientdispatcher::successOpenSource(document &doc){
 }
 
 void clientdispatcher::successRemoveResource(){
-    this->finestraDirectory->successRemove();
+    //this->finestraDirectory->successRemove();
 }
 
 void clientdispatcher::successCreateNewDir(const std::string ID){
-    this->finestraDirectory->successCreate(ID);
+    //this->finestraDirectory->successCreate(ID);
 }
 
 void clientdispatcher::successCreateNewSource(const std::string ID){
-    this->finestraDirectory->successNewSource(ID);
+    //this->finestraDirectory->successNewSource(ID);
 }
 
 void clientdispatcher::successRenameResource(){
-    this->finestraDirectory->successRename();
+    //this->finestraDirectory->successRename();
 }
 
 void clientdispatcher::closeConnection(){
@@ -628,7 +628,7 @@ void clientdispatcher::setHome(home *ho){
     this->currentWindow = 4;
 }
 
-void clientdispatcher::setDirectory(dirwind *dr){
+void clientdispatcher::setDirectory(::directory *dr){
     this->finestraDirectory = dr;
     this->currentWindow = 12;
 }

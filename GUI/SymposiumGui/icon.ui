@@ -33,7 +33,7 @@
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>600</y>
+     <y>560</y>
      <width>181</width>
      <height>41</height>
     </rect>
@@ -335,6 +335,19 @@
      </spacer>
     </item>
    </layout>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>630</y>
+     <width>271</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Icon made by Freepik from www.flaticon.com</string>
+   </property>
   </widget>
  </widget>
  <resources>

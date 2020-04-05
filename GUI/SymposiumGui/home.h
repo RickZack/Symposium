@@ -6,7 +6,7 @@
 #include "deleteaccount.h"
 #include "inserturi.h"
 #include "changeuserinfo.h"
-#include "dirwind.h"
+#include "directory.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
 
@@ -73,7 +73,7 @@ private:
     std::string pwd;
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
-    dirwind *directoryWindow;
+    directory *directoryWindow;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
