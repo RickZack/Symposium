@@ -63,6 +63,7 @@
    <addaction name="actionPaste"/>
    <addaction name="separator"/>
    <addaction name="separator"/>
+   <addaction name="actionhighlight"/>
   </widget>
   <action name="Export_PDF">
    <property name="icon">
@@ -138,6 +139,18 @@
   <action name="actionColor">
    <property name="text">
     <string>Color</string>
+   </property>
+  </action>
+  <action name="actionhighlight">
+   <property name="icon">
+    <iconset>
+     <normaloff>cartelle/color_icon.png</normaloff>cartelle/color_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>highlight</string>
+   </property>
+   <property name="toolTip">
+    <string>highlight</string>
    </property>
   </action>
  </widget>

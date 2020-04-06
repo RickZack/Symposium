@@ -2,7 +2,6 @@
 #include "ui_notepad.h"
 //#include "directory.h"
 
-
 #include <QAction>
 #include <QApplication>
 #include <QClipboard>
@@ -87,7 +86,10 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     userMenu2->addAction(tr("Add Cursor"), this, &notepad::addCursor);
     userMenu2->addAction(tr("Change Cursor"), this, &notepad::changeCursorPos);
     userMenu2->addAction(tr("Remove Cursor"), this, &notepad::removeCursor);
+
+    ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));
     this->fillTextEdit();
+
 
     //------------------------------------------------------PARTE DA DECOMMENTARE
 
@@ -619,7 +621,6 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
     }else if(event->text()=="\u0016"){ // Control_V action
         this->contV_action(pos);
 
-
     }else{
 
         QString testo=event->text();
@@ -643,7 +644,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         bool isBold= font.bold();
         bool isUnderlined=font.underline();
         bool isItalic=font.italic();
-        int size=font.pointSize();
+        unsigned size=font.pointSize();
         std::string fontFamily=font.family().toStdString();
         QColor colC=format.foreground().color();
         int blue=col.blue();
@@ -681,7 +682,7 @@ void notepad::contV_action(int pos){
         const std::pair<int, int> indexes={row,column};
         QTextCharFormat format = curs.charFormat();
         QFont font= format.font();
-        int size=font.pointSize();
+        unsigned size=font.pointSize();
         bool isBold= font.bold();
         bool isUnderlined=font.underline();
         bool isItalic=font.italic();
@@ -749,6 +750,15 @@ void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt::t
     ch_format.setFont(ch_font);
     ch_format.setForeground(qCol);
 
+    // check if the highlight button is activated;
+    // if yes-> highlight the inserted character with the color of the user
+    if(this->highActivated){
+        Symposium::Color colHigh=cl->getColor(this->documentId,sym.getSiteId());
+        QColor colUser;
+        colUser=static_cast<QColor>(colHigh);
+        ch_format.setBackground(colUser);
+    }
+
     // go to the position of the character
 
     curs.movePosition(QTextCursor::Start);
@@ -796,6 +806,10 @@ void notepad::prova_remoteInsert(){
 
     // set the font and the color to the character
     ch_format.setFont(ch_font);
+    if(this->highActivated){
+        QColor colUser=Qt::blue;
+        ch_format.setBackground(colUser);
+    }
 
 
     // go to the position of the character
@@ -853,6 +867,15 @@ void notepad::verifySymbol(Symposium::symbol sym,std::pair<int,int> indexes){
     ch_format.setFont(ch_font);
     ch_format.setForeground(brh);
 
+    // check if the highlight button is activated;
+    // if yes-> highlight the inserted character with the color of the user
+    if(this->highActivated){
+        Symposium::Color colHigh=cl->getColor(this->documentId,sym.getSiteId());
+        QColor colUser;
+        colUser=static_cast<QColor>(colHigh);
+        ch_format.setBackground(colUser);
+    }
+
       // go to the position of the character
     curs.movePosition(QTextCursor::Start);
     curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, row);
@@ -903,6 +926,13 @@ void notepad::verifySymbol2(){
     // set the font and the color to the character
     ch_format.setFont(ch_font);
     ch_format.setForeground(brh);
+
+    // check if the highlight button is activated;
+    // if yes-> highlight the inserted character with the color of the user
+    if(this->highActivated){
+        QColor colUser=Qt::red;
+        ch_format.setBackground(colUser);
+    }
 
     curs.movePosition(QTextCursor::Start);
     curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,row);
@@ -1020,6 +1050,7 @@ void notepad::colorText(){
                 }
                  else{
                     // estraggo dal site id il colore -> chiedere a Cristian
+                    //Symposium::Color userColor=cl->getColor(this->documentId,symF.getSiteId());
                     Symposium::Color userColor;
                     //convert the Symposium::Color into a QColor;
                     QColor qCol;
@@ -1043,7 +1074,7 @@ void notepad::colorText(){
                     jsupp=j+1;
              }
             }
-            // estraggo dal site id il colore -> chiedere a Cristian
+           // Symposium::Color userColor=cl->getColor(this->documentId,symF.getSiteId());
             Symposium::Color userColor;
             //convert the Symposium::Color into a QColor;
             QColor qCol;
@@ -1190,7 +1221,6 @@ void notepad::prova_colorText(){
         }
     }
 }
-
 //------------------------------------------------------------------------------------------------------------------------------------------------
 void notepad::provaFill(){
     ui->textEdit->clear();
@@ -1279,3 +1309,14 @@ void notepad::provaFill(){
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
 
+void notepad::on_actionhighlight_triggered()
+{
+    if(this->countActivated==0){
+        this->highActivated=true;
+        this->countActivated=1;
+    }else{
+        this->highActivated=false;
+        this->countActivated=0;
+    }
+    //this->colorText();
+}

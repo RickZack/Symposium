@@ -89,6 +89,8 @@ private slots:
     void on_textEdit_cursorPositionChanged();
 
 
+    void on_actionhighlight_triggered();
+
 private:
     Ui::notepad *ui;
     QString mFilename;
@@ -108,6 +110,8 @@ private:
     activenonlink *nonlinkwindow;
 
     bool insertOthCh=false;
+    bool highActivated=false;
+    int countActivated=0;
 
     void setupTextActions();
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
