@@ -5,7 +5,9 @@
 #include <QCloseEvent>
 #include "home.h"
 #include "icon.h"
+#include "exit.h"
 #include "errorconnection.h"
+#include "notification.h"
 
 
 namespace Symposium{
@@ -41,7 +43,6 @@ public:
      */
     void successSignUp();
 
-    void showEvent(QShowEvent* event);
     ~signup();
 
 private slots:
@@ -67,13 +68,19 @@ private:
     std::string pwd;
     home *homeWindow;
     icon *iconWindow;
+    class exit *ex;
+    notification *notWindow;
     errorconnection *errorWindow;
     std::string iconPath="";
     Symposium::clientdispatcher *cl;
     /**
      * @brief quit from application
      */
-    void reject();
+    void closeEvent(QCloseEvent *event);
+    /**
+     * @brief called when show() is invoked for this window and perform an animation
+     */
+    void showEvent(QShowEvent* event);
     /**
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */

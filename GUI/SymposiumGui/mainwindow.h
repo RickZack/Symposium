@@ -25,7 +25,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void setClientDispatcher(Symposium::clientdispatcher *cl);
-    void showEvent(QShowEvent* event);
 
 private slots:
     /**
@@ -49,7 +48,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     about *aboutWindow;
-    class exit *exitWindow;
+    class exit *ex;
     sigin *signinWindow;
     signup *signupWindow;
     Symposium::clientdispatcher *cl;
@@ -57,6 +56,10 @@ private:
      * @brief quit from application
      */
     void closeEvent(QCloseEvent *event);
+    /**
+     * @brief called when show() is invoked for this window and perform an animation
+     */
+    void showEvent(QShowEvent* event);
 };
 
 #endif // MAINWINDOW_H
