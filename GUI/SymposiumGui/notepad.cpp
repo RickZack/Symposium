@@ -53,9 +53,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     ui->setupUi(this);
     this->setCentralWidget(ui->textEdit);
 
-    QPalette palette= ui->textEdit->palette();
-    palette.setColor(QPalette::Text,Qt::yellow);
-    ui->textEdit->setPalette(palette);
+
 
     priv=Symposium::privilege::owner;
     privOpen=Symposium::privilege::owner;
@@ -426,7 +424,6 @@ void notepad::textStyle(int styleIndex)
 }
 
 
-
 void notepad::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
 {
     QTextCursor cursor = ui->textEdit->textCursor();
@@ -626,27 +623,12 @@ void notepad::closeEvent(QCloseEvent *event){
 
 void notepad::keyReleaseEvent(QKeyEvent *event)
 {
+
     QColor myColor= Qt::yellow; //da cancellare
     QTextCursor cursor= ui->textEdit->textCursor();
-    if(insertedChars==0){
-        QTextCharFormat ch=ui->textEdit->currentCharFormat();
-        QColor newCol=ch.foreground().color();
-        QString charact=event->text();
-        newCol.setAlpha(180);
-        ch.setForeground(newCol);
-        cursor.deletePreviousChar();
+    this->posBlock=cursor.blockNumber();
 
 
-        if(this->highActivated){
-           ch.setBackground(myColor);
-
-        }
-
-         cursor.insertText(charact,ch);
-    }
-
-
-    insertedChars++;
     int pos=cursor.position();
     if (event->key()==Qt::Key_Backspace){
         int column=cursor.positionInBlock();
@@ -669,6 +651,23 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         this->contV_action(pos);
 
     }else{
+
+        if(insertedChars==0){
+            QTextCharFormat ch=ui->textEdit->currentCharFormat();
+            QColor newCol=ch.foreground().color();
+            QString charact=event->text();
+            newCol.setAlpha(180);
+            ch.setForeground(newCol);
+            cursor.deletePreviousChar();
+
+            if(this->highActivated){
+               ch.setBackground(myColor);
+            }
+
+             cursor.insertText(charact,ch);
+        }
+
+        insertedChars++;
 
         QString testo=event->text();
 
@@ -707,6 +706,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         //cl->localInsert(this->documentId, symbol &sym, &indexes)
 
     }
+
 }
 
 
@@ -1069,12 +1069,16 @@ void notepad::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void notepad::on_textEdit_cursorPositionChanged()
 {
+    QTextCursor cc=ui->textEdit->textCursor();
     if(insertOthCh==false){
         ui->textEdit->thisUserChangePosition(1);
         QColor col=ui->textEdit->textColor();
         col.setAlpha(180);
         ui->textEdit->setTextColor(col);
+        if(this->highActivated && cc.blockNumber()!=this->posBlock)
+            this->insertedChars=0;
         //ui->textEdit->thisUserChangePosition(us.getSiteId());
+
      }
 }
 
@@ -1109,8 +1113,16 @@ void notepad::colorText(){
                     qCol=static_cast<QColor>(userColor);
                     int block=indexes.first; int column=indexes.second; column++;
                     QTextCursor supportCurs=ui->textEdit->textCursor();
+                    Symposium::format f=symF.getCharFormat();
+                    QFont font; font.setBold(f.isBold); font.setItalic(f.isItalic); font.setUnderline(f.isUnderlined);
+                    font.setPointSize(f.size);font.setFamily(QString::fromStdString(f.familyType));
                     QTextCharFormat highlightColor;
                     highlightColor.setBackground(qCol);
+                    Symposium::Color charColor;
+                    //convert the Symposium::Color into a QColor;
+                    QColor cCol;
+                    cCol=static_cast<QColor>(userColor);
+                    highlightColor.setForeground(cCol);
                     supportCurs.movePosition(QTextCursor::Start);
                     supportCurs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
                     supportCurs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,column);
@@ -1126,15 +1138,24 @@ void notepad::colorText(){
                     jsupp=j+1;
              }
             }
-           // Symposium::Color userColor=cl->getColor(this->documentId,symF.getSiteId());
+            // estraggo dal site id il colore -> chiedere a Cristian
+            //Symposium::Color userColor=cl->getColor(this->documentId,symF.getSiteId());
             Symposium::Color userColor;
             //convert the Symposium::Color into a QColor;
             QColor qCol;
             qCol=static_cast<QColor>(userColor);
             int block=indexes.first; int column=indexes.second; column++;
             QTextCursor supportCurs=ui->textEdit->textCursor();
+            Symposium::format f=symF.getCharFormat();
+            QFont font; font.setBold(f.isBold); font.setItalic(f.isItalic); font.setUnderline(f.isUnderlined);
+            font.setPointSize(f.size);font.setFamily(QString::fromStdString(f.familyType));
             QTextCharFormat highlightColor;
             highlightColor.setBackground(qCol);
+            Symposium::Color charColor;
+            //convert the Symposium::Color into a QColor;
+            QColor cCol;
+            cCol=static_cast<QColor>(userColor);
+            highlightColor.setForeground(cCol);
             supportCurs.movePosition(QTextCursor::Start);
             supportCurs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
             supportCurs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,column);
@@ -1196,35 +1217,8 @@ void notepad::prova_colorText(){
     interno4[5]={0,"N"};
     interno4[6]={0,"A"};
     symbols[3]=interno4;
-    /*
-    std::vector<std::string>interno2(4);
-    interno2[0]="C";
-    interno2[1]="O";
-    interno2[2]="M";
-    interno2[3]="E";
-    symbols[1]=interno2;
-    std::vector<std::string>interno3(10);
-    interno3[0]="S";
-    interno3[1]="T";
-    interno3[2]="A";
-    interno3[3]="I";
-    interno3[4]="?";
-    interno3[5]="I";
-    interno3[6]="O";
-    interno3[7]=" ";
-    interno3[8]="O";
-    interno3[9]="K";
-    symbols[2]=interno3;
-    std::vector<std::string>interno4(10);
-    interno4[0]="M";
-    interno4[1]="A";
-    interno4[2]="R";
-    interno4[3]="T";
-    interno4[4]="I";
-    interno4[5]="N";
-    interno4[6]="A";
-    symbols[3]=interno4;
-*/
+
+
     QTextCursor curs=ui->textEdit->textCursor();
     // save in symbols all the symbols contained in the document
 
@@ -1248,15 +1242,19 @@ void notepad::prova_colorText(){
                     QColor qCol;
                     // estraggo dal site id il colore -> chiedere a Cristian
                     if(symF.first==0){
-                        qCol=Qt::red;}
+                        qCol=Qt::red;
+                    }
                     else if(symF.first==1){
                         qCol=Qt::yellow;
                     }
+
 
                     int block=indexes.first; int column=indexes.second;
                     QTextCursor supportCurs=ui->textEdit->textCursor();
                     QTextCharFormat highlightColor;
                     highlightColor.setBackground(qCol);
+                    QFont font; font.setBold(true); font.setPointSize(9);
+                    highlightColor.setFont(font);
                     supportCurs.movePosition(QTextCursor::Start);
                     supportCurs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
                     supportCurs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,column);
@@ -1284,6 +1282,8 @@ void notepad::prova_colorText(){
             QTextCursor supportCurs=ui->textEdit->textCursor();
             QTextCharFormat highlightColor;
             highlightColor.setBackground(qCol);
+            QFont font; font.setBold(true); font.setPointSize(9);
+            highlightColor.setFont(font);
             supportCurs.movePosition(QTextCursor::Start);
             supportCurs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
             supportCurs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,column);
@@ -1396,12 +1396,14 @@ void notepad::provaFill(){
 
 void notepad::on_actionhighlight_triggered()
 {
+    QColor myColor= Qt::yellow;
     if(this->countActivated==0){
         this->highActivated=true;
         this->countActivated=1;
         this->insertedChars=0;
          //this->colorText();
         this->prova_colorText();
+
     }else{
         this->highActivated=false;
         this->countActivated=0;

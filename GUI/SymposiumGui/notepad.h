@@ -111,6 +111,8 @@ private:
     bool highActivated=false;
     int countActivated=0;
     int insertedChars=0;
+    int posBlock=0;
+    bool changedPos=false;
 
     void setupTextActions();
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
@@ -177,6 +179,7 @@ private:
     void prova_colorText();
     //------------------------------------------------------------------------------------------------------------------------------------------
     void deselectAll();
+
 };
 
 #endif // NOTEPAD_H
