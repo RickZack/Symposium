@@ -67,17 +67,9 @@ void home::logout()
 
 void home::closeEvent(QCloseEvent *event)
 {
-    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
-                                                                    tr("Are you sure to quit?\n"),
-                                                                     QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn != QMessageBox::Yes) {
-            event->ignore();
-        } else {
-            cl->logout();
-            //cl->closeConnection();
-            event->accept();
-        }
+    event->ignore();
+    ex = new class exit(this, true);
+    ex->exec();
 
 }
 

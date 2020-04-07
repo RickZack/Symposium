@@ -58,34 +58,12 @@ void signup::successSignUp()
     ui->signin->setDisabled(false);
     ui->cancel->setDisabled(false);
 
-    QMessageBox msgBox;
-    msgBox.setText("Your account has been successfully created");
-    msgBox.setWindowTitle("Success");
-    QPixmap pix(":/icon/logo1.png");
-    QIcon p(pix);
-    msgBox.setWindowIcon(p);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setBaseSize(QSize(390, 120));
-    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                         "color: rgb(58, 80, 116);"
-                         "font: 14pt 'Baskerville Old Face';} "
-                         "QLabel{color: rgb(58, 80, 116);} "
-                         "QPushButton { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px;}");
-    msgBox.setIcon(QMessageBox::Question);
-    msgBox.exec();
-
-
-    /*QMessageBox::information(parentWidget(),
-                             tr("Delete Account"), tr("Your account has been successfully created"), QMessageBox::Ok);*/
-
     homeWindow= new home(parentWidget(), pwd);
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(homeWindow);
     homeWindow->show();
+    notWindow = new notification(parentWidget(), "The account was successfully created");
+    notWindow->exec();
 }
 
 
@@ -96,10 +74,6 @@ void signup::setClientDispatcher( Symposium::clientdispatcher *cl){
 signup::~signup()
 {
     delete ui;
-    delete homeWindow;
-    delete iconWindow;
-    delete errorWindow;
-    delete cl;
 }
 
 void signup::on_signin_clicked()
@@ -154,27 +128,8 @@ void signup::on_signin_clicked()
             hide();
             homeWindow= new home(parentWidget(), pwd);
             homeWindow->show();
-            /*QMessageBox msgBox(parentWidget());
-            msgBox.setText("Your account has been successfully created");
-            msgBox.setWindowTitle("Success");
-            QPixmap pix(":/icon/logo1.png");
-            QIcon p(pix);
-            msgBox.setWindowIcon(p);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setBaseSize(QSize(390, 120));
-            msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                                 "color: rgb(58, 80, 116);"
-                                 "font: 14pt 'Baskerville Old Face';} "
-                                 "QLabel{color: rgb(58, 80, 116);} "
-                                 "QPushButton {"
-                                 "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                                 "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                                 "color: white; font: 14pt 'Baskerville Old Face'; "
-                                 "border-radius:15px; width: 80px; height: 30px;}");
-            msgBox.setIcon(QMessageBox::Information);
-            msgBox.exec();*/
-            //QMessageBox::information(homeWindow,
-                                         //tr("Success"), tr("Your account has been successfully created"), QMessageBox::Ok);
+            notWindow = new notification(parentWidget(), "Your account was successfully created");
+            notWindow->exec();
         }
     }
     else {
@@ -231,17 +186,12 @@ void signup::chooseIcon()
     ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
-void signup::reject()
+void signup::closeEvent(QCloseEvent *event)
 {
-    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
-                                                                    tr("Are you sure to quit?\n"),
-                                                                     QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn == QMessageBox::Yes)
-        {
-            QDialog::reject();
-            //cl->closeConnection();
-        }
+   event->ignore();
+   ex = new class exit(this, false);
+   ex->exec();
+
 }
 
 void signup::waiting()

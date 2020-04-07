@@ -64,6 +64,7 @@ SOURCES += \
         ../../user.cpp \
         ../../lib/hash/sha256.cpp \
         notepad.cpp \
+        notification.cpp \
         onlineusers.cpp \
         qtexteditlabels.cpp \
         sigin.cpp \
@@ -110,6 +111,7 @@ HEADERS += \
         ../../user.h \
         ../../lib/hash/sha256.h \
         notepad.h \
+        notification.h \
         onlineusers.h \
         qtexteditlabels.h \
         sigin.h \
@@ -141,6 +143,7 @@ FORMS += \
         mainwindow.ui \
         newfolderwindow.ui \
         notepad.ui \
+        notification.ui \
         onlineusers.ui \
         sigin.ui \
         signup.ui \

@@ -9,6 +9,7 @@
 #include "directory.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include "exit.h"
 
 
 namespace Symposium{
@@ -77,6 +78,7 @@ private:
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
+    class exit *ex;
     /**
      * @brief quit from application
      */

@@ -18,11 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete aboutWindow;
-    delete exitWindow;
-    delete signinWindow;
-    delete signupWindow;
-    delete cl;
 }
 
 
@@ -35,7 +30,9 @@ void MainWindow::on_about_clicked()
 
 void MainWindow::on_exit_clicked()
 {
-    QMessageBox msgBox;
+    ex = new class exit(this);
+    ex->exec();
+    /*QMessageBox msgBox;
     msgBox.setText("    Are you sure to quit??");
     msgBox.setWindowTitle("Exit");
     QPixmap pix(":/icon/logo1.png");
@@ -65,7 +62,7 @@ void MainWindow::on_exit_clicked()
     int ret=msgBox.exec();
 
         if (ret == QMessageBox::Yes)
-                qApp->quit();
+                qApp->quit();*/
 
 }
 
@@ -93,7 +90,10 @@ void MainWindow::on_SignUp_clicked()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    QMessageBox msgBox;
+    event->ignore();
+    ex = new class exit(this);
+    ex->exec();
+    /*QMessageBox msgBox;
     msgBox.setText("    Are you sure to quit??");
     msgBox.setWindowTitle("Exit");
     QPixmap pix(":/icon/logo1.png");
@@ -124,7 +124,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
         if (ret == QMessageBox::Yes)
                 event->accept();
-        else event->ignore();
+        else event->ignore();*/
 
 }
 
