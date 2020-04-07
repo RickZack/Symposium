@@ -483,7 +483,7 @@ void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
     this->cl = cl;
 }
 
-void directory::errorConnectionLogout(){
+void directory::errorConnectionLogout(std::string str){
     errorLogoutWindow= new errorlogout(this, QString::fromStdString(str));
     this->close();
     errorLogoutWindow->show();

@@ -17,6 +17,7 @@ class qtexteditlabels : public QTextEdit
 public:
     qtexteditlabels(QWidget* a):QTextEdit(a)
     {
+        /*
         this->append("Hello, World!\nAnotherLine. Hello, World! Hello, World! Hello, "
                      "World! Helloooo, World! Hello, World! Hello, World! Hello, World! "
                      "Hello, World! Hello, World! Hello, World! Hello, World!");
@@ -47,6 +48,7 @@ public:
         this->append("Hello, World!\nAnotherLine.");
         this->append("Hello, World!\nAnotherLine.");
         this->append("Hello, World!\nAnotherLine.");
+        */
     }
 
     /**

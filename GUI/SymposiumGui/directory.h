@@ -76,7 +76,7 @@ public:
     /**
      * @brief errorLogout shows an error message and closes the window
      */
-    void errorConnectionLogout();
+     void errorConnectionLogout(std::string str);
 
     void openSelectedSource();
 

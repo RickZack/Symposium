@@ -52,6 +52,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
 {
     ui->setupUi(this);
     this->setCentralWidget(ui->textEdit);
+
     priv=Symposium::privilege::owner;
     privOpen=Symposium::privilege::owner;
     //this->setToolButtonStyle(Qt::ToolButtonFollowStyle);
@@ -60,6 +61,10 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     ui->textEdit->setThisUserPrivilege(privOpen);
     pathToFile="/1/2/3/4/5/6/7";
     //us=cl->getUser();
+    // Symposium::Color colorSymp=cl->getColor(this->documentId,us->getSiteId());
+    // QColor myColor;
+    // myColor=static_cast<QColor>(colorSymp);
+
     QMenu *userMenu=menuBar()->addMenu(tr("Users"));
     userMenu->addAction(tr("Online Users"), this, &notepad::visualizeUsers);
     if(priv==Symposium::privilege::owner)
@@ -88,7 +93,11 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     userMenu2->addAction(tr("Remove Cursor"), this, &notepad::removeCursor);
 
     ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));
-    this->fillTextEdit();
+    //this->fillTextEdit();
+    this->provaFill();
+    QColor col=Qt::black;
+    col.setAlpha(70);
+    ui->textEdit->setTextColor(col);
 
 
     //------------------------------------------------------PARTE DA DECOMMENTARE
@@ -105,9 +114,9 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
     Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
-    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 10, 3)};
-    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 7, 6)};
-    std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 20, 0)};
+    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 0, 0)};
+    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 1, 3)};
+    std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 2, 0)};
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     onlineUsers.push_front(p1);
     onlineUsers.push_front(p2);
@@ -516,9 +525,18 @@ void notepad::fillTextEdit(){
             QColor qCol;
             qCol=static_cast<QColor>(col);
             chFormat.setFont(font); chFormat.setForeground(qCol);
+            // check if the highlight button is activated;
+            // if yes-> highlight the inserted character with the color of the user
+            if(this->highActivated){
+                Symposium::Color colHigh=cl->getColor(this->documentId,sym.getSiteId());
+                QColor colUser;
+                colUser=static_cast<QColor>(colHigh);
+                chFormat.setBackground(colUser);
+            }
 
             // go to the position of the character
             ui->textEdit->changePosition(i,column);
+            curs.insertText(ch,chFormat);
         }
         // to insert another Line
         curs.insertBlock();
@@ -598,7 +616,6 @@ void notepad::closeEvent(QCloseEvent *event){
 void notepad::keyReleaseEvent(QKeyEvent *event)
 {
 
-    // AGGIUNGERE CONTROLLO SELEZIONE!!!!!!!!!!!!!!!!!!!!!!
     QTextCursor cursor= ui->textEdit->textCursor();
     int pos=cursor.position();
     if (event->key()==Qt::Key_Backspace){
@@ -638,6 +655,9 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         if(col==Qt::black){
              col.setAlpha(100);
             ui->textEdit->setTextColor(col);
+        }
+        if(this->highActivated){
+            //ui->textEdit->setTextBackgroundColor(myColor);
         }
 
         QFont font= format.font();
@@ -1314,9 +1334,20 @@ void notepad::on_actionhighlight_triggered()
     if(this->countActivated==0){
         this->highActivated=true;
         this->countActivated=1;
+         //this->colorText();
     }else{
         this->highActivated=false;
         this->countActivated=0;
+        this->deselectAll();
+
     }
-    //this->colorText();
+
 }
+
+void notepad::deselectAll(){
+    this->provaFill();
+    //this->fillTextEdit();
+
+}
+
+
