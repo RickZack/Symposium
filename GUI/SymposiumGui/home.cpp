@@ -94,7 +94,7 @@ void home::successLogout()
     ui->InsertUri->setDisabled(false);
     ui->delete_2->setDisabled(false);
     ui->logout->setDisabled(false);
-    this->close();
+    this->hide();
     parentWidget()->show();
 }
 
@@ -121,7 +121,7 @@ void home::errorConnectionLogout(std::string str)
     ui->delete_2->setDisabled(false);
     ui->logout->setDisabled(false);
     errorLog = new errorlogout(this, QString::fromStdString(str));
-    this->close();
+    this->hide();
     parentWidget()->close();
     errorLog->exec();
 }

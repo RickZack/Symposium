@@ -73,10 +73,10 @@
         <file>Document1.txt</file>
         <file>Document2.txt</file>
         <file>Document3.txt</file>
-        <file>icon/ajax-loader.gif</file>
         <file>icon/no.png</file>
         <file>icon/ok.png</file>
         <file>icon/logo.png</file>
         <file>icon/logo1.png</file>
+        <file>icon/ajax-loader.gif</file>
     </qresource>
 </RCC>
