@@ -40,6 +40,8 @@ public:
      * @brief called by clientdispatcher when the signup was successfully done
      */
     void successSignUp();
+
+    void showEvent(QShowEvent* event);
     ~signup();
 
 private slots:
@@ -55,6 +57,10 @@ private slots:
      * @brief show icon window
      */
     void on_iconButt_clicked();
+    /**
+     * @brief check the correctness of the password
+     */
+    bool checkPassword(QString passwordToCheck);
 
 private:
     Ui::signup *ui;

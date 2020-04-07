@@ -25,6 +25,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void setClientDispatcher(Symposium::clientdispatcher *cl);
+    void showEvent(QShowEvent* event);
 
 private slots:
     /**

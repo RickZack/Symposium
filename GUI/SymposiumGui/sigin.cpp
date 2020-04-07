@@ -95,7 +95,12 @@ void sigin::on_signin_clicked()
         homeWindow->show();
     }
     else {
-
+        ui->haveto->hide();
+        ui->waiting->hide();
+        ui->tryAgain->hide();
+        ui->gif->hide();
+        ui->signin->setDisabled(false);
+        ui->cancel->setDisabled(false);
         ui->msg->setText("This credentials are not valid");
     }
     //--------------------------------------------------

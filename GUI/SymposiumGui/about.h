@@ -2,6 +2,7 @@
 #define ABOUT_H
 
 #include <QDialog>
+#include <QPropertyAnimation>
 
 namespace Ui {
 class about;
@@ -13,6 +14,7 @@ class about : public QDialog
 
 public:
     explicit about(QWidget *parent = nullptr);
+    void showEvent(QShowEvent* event);
     ~about();
 
 private slots:

@@ -71,22 +71,24 @@ void MainWindow::on_exit_clicked()
 
 void MainWindow::on_SignIn_clicked()
 {
-    hide();
     signinWindow= new sigin(this);
     //cl->setSignIn(signinWindow);
 
     signinWindow->setClientDispatcher(cl);
 
     signinWindow->show();
+    hide();
+
 }
 
 void MainWindow::on_SignUp_clicked()
 {
-    hide();
     signupWindow= new signup(this);
     //cl->setSignUp(signupWindow);
     signupWindow->setClientDispatcher(cl);
     signupWindow->show();
+    hide();
+
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -128,4 +130,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
+}
+
+void MainWindow::showEvent(QShowEvent* event)
+{
+QMainWindow::showEvent(event);
+
+ QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
+      anim->setStartValue(0.0);
+      anim->setEndValue(1.0);
+      anim->setDuration(1000);
+ anim->start(QAbstractAnimation::DeleteWhenStopped);
 }

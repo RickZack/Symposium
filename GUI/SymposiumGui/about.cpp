@@ -18,3 +18,14 @@ void about::on_ok_clicked()
 {
     this->close();
 }
+
+void about::showEvent(QShowEvent* event)
+{
+QDialog::showEvent(event);
+
+ QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
+      anim->setStartValue(0.0);
+      anim->setEndValue(1.0);
+      anim->setDuration(1000);
+ anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
