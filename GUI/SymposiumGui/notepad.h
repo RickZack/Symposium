@@ -87,8 +87,6 @@ private slots:
     void textAlign(QAction *a);
     void currentCharFormatChanged(const QTextCharFormat &format);
     void on_textEdit_cursorPositionChanged();
-
-
     void on_actionhighlight_triggered();
 
 private:
@@ -112,6 +110,7 @@ private:
     bool insertOthCh=false;
     bool highActivated=false;
     int countActivated=0;
+    int insertedChars=0;
 
     void setupTextActions();
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);

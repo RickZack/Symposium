@@ -53,6 +53,10 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     ui->setupUi(this);
     this->setCentralWidget(ui->textEdit);
 
+    QPalette palette= ui->textEdit->palette();
+    palette.setColor(QPalette::Text,Qt::yellow);
+    ui->textEdit->setPalette(palette);
+
     priv=Symposium::privilege::owner;
     privOpen=Symposium::privilege::owner;
     //this->setToolButtonStyle(Qt::ToolButtonFollowStyle);
@@ -95,9 +99,11 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));
     //this->fillTextEdit();
     this->provaFill();
-    QColor col=Qt::black;
-    col.setAlpha(70);
-    ui->textEdit->setTextColor(col);
+    QTextCharFormat fmt= ui->textEdit->currentCharFormat();
+    QColor lightCol=ui->textEdit->textColor();
+    lightCol.setAlpha(180);
+    fmt.setForeground(lightCol);
+    ui->textEdit->mergeCurrentCharFormat(fmt);
 
 
     //------------------------------------------------------PARTE DA DECOMMENTARE
@@ -115,7 +121,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
     Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
     std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 0, 0)};
-    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 1, 3)};
+    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 1, 2)};
     std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 2, 0)};
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     onlineUsers.push_front(p1);
@@ -128,6 +134,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID,
     //---------------------------------------------------------------------
 
     ui->textEdit->setCursorWidth(3);
+
     if(privOpen==Symposium::privilege::readOnly)
          ui->textEdit->setReadOnly(true);
 
@@ -481,6 +488,8 @@ void notepad::colorChanged(const QColor &c)
     QPixmap pix(16, 16);
     pix.fill(c);
     actionTextColor->setIcon(pix);
+    ui->textEdit->setTextColor(c);
+
 }
 
 void notepad::fontChanged(const QFont &f)
@@ -501,6 +510,7 @@ void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 
 void notepad::fillTextEdit(){
     insertOthCh=true;
+    QColor qCol;QTextCharFormat chFormat;
     QTextCursor curs=ui->textEdit->textCursor();
     QString ch;
     // save in symbols all the symbols contained in the document
@@ -514,7 +524,7 @@ void notepad::fillTextEdit(){
             ch[0]=sym.getCh();
             Symposium::format format=sym.getCharFormat();
             //estract the information about the font/color
-            QFont font; QTextCharFormat chFormat;
+            QFont font;
             font.setFamily(QString::fromStdString(format.familyType));
             font.setBold(format.isBold);
             font.setUnderline(format.isUnderlined);
@@ -522,7 +532,6 @@ void notepad::fillTextEdit(){
             font.setPointSize(format.size);
             Symposium::Color col=format.col;
             //conversion from Color to QColor
-            QColor qCol;
             qCol=static_cast<QColor>(col);
             chFormat.setFont(font); chFormat.setForeground(qCol);
             // check if the highlight button is activated;
@@ -542,6 +551,8 @@ void notepad::fillTextEdit(){
         curs.insertBlock();
     }
     insertOthCh=false;
+    this->colorChanged(qCol);
+    this->currentCharFormatChanged(chFormat);
 }
 
 
@@ -615,8 +626,27 @@ void notepad::closeEvent(QCloseEvent *event){
 
 void notepad::keyReleaseEvent(QKeyEvent *event)
 {
-
+    QColor myColor= Qt::yellow; //da cancellare
     QTextCursor cursor= ui->textEdit->textCursor();
+    if(insertedChars==0){
+        QTextCharFormat ch=ui->textEdit->currentCharFormat();
+        QColor newCol=ch.foreground().color();
+        QString charact=event->text();
+        newCol.setAlpha(180);
+        ch.setForeground(newCol);
+        cursor.deletePreviousChar();
+
+
+        if(this->highActivated){
+           ch.setBackground(myColor);
+
+        }
+
+         cursor.insertText(charact,ch);
+    }
+
+
+    insertedChars++;
     int pos=cursor.position();
     if (event->key()==Qt::Key_Backspace){
         int column=cursor.positionInBlock();
@@ -652,12 +682,10 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
 
         QTextCharFormat format = cursor.charFormat();
         QColor col=format.foreground().color();
-        if(col==Qt::black){
-             col.setAlpha(100);
-            ui->textEdit->setTextColor(col);
-        }
+
         if(this->highActivated){
-            //ui->textEdit->setTextBackgroundColor(myColor);
+
+            ui->textEdit->setTextBackgroundColor(myColor);
         }
 
         QFont font= format.font();
@@ -680,6 +708,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
 
     }
 }
+
 
 
 void notepad::contV_action(int pos){
@@ -1042,6 +1071,9 @@ void notepad::on_textEdit_cursorPositionChanged()
 {
     if(insertOthCh==false){
         ui->textEdit->thisUserChangePosition(1);
+        QColor col=ui->textEdit->textColor();
+        col.setAlpha(180);
+        ui->textEdit->setTextColor(col);
         //ui->textEdit->thisUserChangePosition(us.getSiteId());
      }
 }
@@ -1119,7 +1151,7 @@ void notepad::colorText(){
     }
 }
 void notepad::prova_colorText(){
-    std::vector<std::vector<std::pair<int,std::string>>> symbols(1);
+    std::vector<std::vector<std::pair<int,std::string>>> symbols(4);
     std::vector<std::pair<int,std::string>>interno(12);
     interno[0]={0,"C"};
     interno[1]={0,"I"};
@@ -1135,7 +1167,35 @@ void notepad::prova_colorText(){
     interno[11]={1,"I"};
 
     symbols[0]=interno;
-    int x=symbols[0].size();
+
+    std::vector<std::pair<int,std::string>>interno2(4);
+    interno2[0]={0,"C"};
+    interno2[1]={0,"O"};
+    interno2[2]={0,"M"};
+    interno2[3]={0,"E"};
+    symbols[1]=interno2;
+
+    std::vector<std::pair<int,std::string>>interno3(10);
+    interno3[0]={1,"S"};
+    interno3[1]={1,"T"};
+    interno3[2]={1,"A"};
+    interno3[3]={1,"I"};
+    interno3[4]={1,"?"};
+    interno3[5]={1,"I"};
+    interno3[6]={1,"O"};
+    interno3[7]={1," "};
+    interno3[8]={1,"O"};
+    interno3[9]={1,"K"};
+    symbols[2]=interno3;
+    std::vector<std::pair<int,std::string>>interno4(7);
+    interno4[0]={0,"M"};
+    interno4[1]={0,"A"};
+    interno4[2]={0,"R"};
+    interno4[3]={0,"T"};
+    interno4[4]={0,"I"};
+    interno4[5]={0,"N"};
+    interno4[6]={0,"A"};
+    symbols[3]=interno4;
     /*
     std::vector<std::string>interno2(4);
     interno2[0]="C";
@@ -1244,6 +1304,7 @@ void notepad::prova_colorText(){
 //------------------------------------------------------------------------------------------------------------------------------------------------
 void notepad::provaFill(){
     ui->textEdit->clear();
+    QColor qCol;
     insertOthCh=true;
     std::vector<std::vector<std::string>> symbols(100);
     std::vector<std::string>interno(12);
@@ -1304,9 +1365,9 @@ void notepad::provaFill(){
             font.setUnderline(false);
             font.setItalic(false);
             font.setPointSize(9);
-            Symposium::Color col(255,0,0);
+            Symposium::Color col(0,0,0);
             //conversion from Color to QColor
-            QColor qCol;
+
             qCol=static_cast<QColor>(col);
             chFormat.setFont(font); chFormat.setForeground(qCol);
             QTextBlockFormat f;
@@ -1324,6 +1385,10 @@ void notepad::provaFill(){
     }
 
     insertOthCh=false;
+    this->colorChanged(qCol);
+
+
+
 
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1334,7 +1399,9 @@ void notepad::on_actionhighlight_triggered()
     if(this->countActivated==0){
         this->highActivated=true;
         this->countActivated=1;
+        this->insertedChars=0;
          //this->colorText();
+        this->prova_colorText();
     }else{
         this->highActivated=false;
         this->countActivated=0;
