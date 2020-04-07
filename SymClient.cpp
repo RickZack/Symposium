@@ -170,7 +170,7 @@ void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::
     document* d = this->getActiveDocumentbyID(resourceId);
     std::pair<unsigned int, unsigned int> p = d->remoteRemove(siteId, rmSym);
     //notifica alla gui
-//  this->dispatcher->remoteRemove(resourceId, p);
+//  this->dispatcher->remoteRemove(resourceId, siteId, p);
 }
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
@@ -344,7 +344,7 @@ void SymClient::setClientDispatcher(clientdispatcher *cl){
 void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
     document* d = this->getActiveDocumentbyID(resourceId);
     //Il metodo in verifySymbol mi deve restituire il pair delle coordinate (già detto a Martina che farà la modifica)
-    //std::pair<unsigned int, unsigned int> p = d->verifySymbol(sym);
+    std::pair<unsigned int, unsigned int> p = d->verifySymbol(sym);
     //notifichiamo alla GUI
 //  this->dispatcher->verifySymbol(resourceId, sym, p);
 }
