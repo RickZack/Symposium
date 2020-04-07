@@ -96,7 +96,7 @@ namespace Symposium{
         activecounterlink* finestraActiveCounterLink;   //8
         activetimerlink* finestraActiveTimerLink;       //9
         activealwayslink* finestraActiveAlwaysLink;     //10
-        ::directory* finestraDirectory;                     //12
+        ::directory* finestraDirectory;                 //12
         onlineusers* finestraOnlineUser;                //13
         alluser* finestraAllUser;                       //14
         activenonlink* finestraActiveNonLink;           //15
@@ -157,7 +157,7 @@ namespace Symposium{
         void localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<int, int> &index);
         void localRemove(uint_positive_cnt::type resourceId, const std::pair<int, int> indexes);
         void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index);
-        void remoteRemove(uint_positive_cnt::type resourceId, std::pair<int, int> indexes);
+        void remoteRemove(uint_positive_cnt::type resourceId, uint_positive_cnt::type siteId, std::pair<int, int> indexes);
         void editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, uint_positive_cnt::type documentID);
         void shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
         void renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);

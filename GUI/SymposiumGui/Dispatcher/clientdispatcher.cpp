@@ -45,10 +45,10 @@ using namespace Symposium;
 clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), finestreDocumenti()
 {
     //connettiamo il socket all'indirizzo del server
-    this->socket.connectToHost(svAddress, svPort);
+    //this->socket.connectToHost(svAddress, svPort);
     //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
-    connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
-    qDebug() << "Connection Successful\n";
+    //connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
+    //qDebug() << "Connection Successful\n";
     this->client.setClientDispatcher(this);
 }
 
@@ -121,7 +121,7 @@ void clientdispatcher::readyRead(){
             this->finestraActiveAlwaysLink->unsuccessLink(mes->getErrDescr());
             break;
         }case 12:{
-            //this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
+            this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
         }case 13:{
             this->finestraOnlineUser->errorEditPrivilege(mes->getErrDescr());
             break;
@@ -252,7 +252,7 @@ void clientdispatcher::openSource(const std::string &path, const std::string &na
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -278,7 +278,7 @@ void clientdispatcher::createNewSource(const std::string &path, const std::strin
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -291,7 +291,7 @@ void clientdispatcher::createNewDir(const std::string &path, const std::string &
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -302,7 +302,7 @@ void clientdispatcher::localInsert(uint_positive_cnt::type resourceId, const sym
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -313,23 +313,23 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
 void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index){
     notepad* n = getCorrectNotepadbyResourceID(resourceId);
-    //n->remoteInsert(newSym, siteId, index);
+    n->remoteInsert(newSym, siteId, index);
 }
 
-void clientdispatcher::remoteRemove(uint_positive_cnt::type resourceId, std::pair<int, int> indexes){
+void clientdispatcher::remoteRemove(uint_positive_cnt::type resourceId, uint_positive_cnt::type siteId, std::pair<int, int> indexes){
     notepad* n = getCorrectNotepadbyResourceID(resourceId);
-    //n->remoteDelete(indexes);
+    n->remoteDelete(indexes,siteId);
 }
 
 void clientdispatcher::verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes){
     notepad* n = getCorrectNotepadbyResourceID(resId);
-    //n->verifySymbol(newSym, indexes);
+    n->verifySymbol(newSym, indexes);
 }
 
 Color clientdispatcher::getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID){
@@ -380,7 +380,7 @@ void clientdispatcher::renameResource(const std::string &resPath, const std::str
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -393,7 +393,7 @@ void clientdispatcher::removeResource(const std::string &resPath, const std::str
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -406,7 +406,7 @@ void clientdispatcher::closeSource(uint_positive_cnt::type resourceId) {
         this->deleteActiveDocument(resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -466,7 +466,7 @@ void clientdispatcher::moveMyCursor(uint_positive_cnt::type resId, int block, in
         sendMessage(mess, resId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        //this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
     }
 }
 
@@ -565,19 +565,19 @@ void clientdispatcher::successOpenSource(document &doc){
 }
 
 void clientdispatcher::successRemoveResource(){
-    //this->finestraDirectory->successRemove();
+    this->finestraDirectory->successRemove();
 }
 
 void clientdispatcher::successCreateNewDir(const std::string ID){
-    //this->finestraDirectory->successCreate(ID);
+    this->finestraDirectory->successCreate(ID);
 }
 
 void clientdispatcher::successCreateNewSource(const std::string ID){
-    //this->finestraDirectory->successNewSource(ID);
+    this->finestraDirectory->successNewSource(ID);
 }
 
 void clientdispatcher::successRenameResource(){
-    //this->finestraDirectory->successRename();
+    this->finestraDirectory->successRename();
 }
 
 void clientdispatcher::closeConnection(){
@@ -846,7 +846,7 @@ void clientdispatcher::TimerExpired(){
             this->finestraActiveAlwaysLink->errorConnectionLogout(TIMERSCADUTO);
             break;
         }case 12:{
-            //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
             break;
         }case 13:{
             this->finestraOnlineUser->errorConnectionLogout(TIMERSCADUTO);
@@ -863,6 +863,6 @@ void clientdispatcher::TimerExpired(){
         }
     }else{
         //il timer è scaduto su un messaggio di localinsert, localremove, closesource o movemycursor, notifichiamo l'errore sulla finestra directory
-        //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
+        this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
     }
 }
