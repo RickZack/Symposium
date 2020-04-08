@@ -8,6 +8,10 @@ sigin::sigin(QWidget *parent) :
     ui(new Ui::sigin)
 {
     ui->setupUi(this);
+    QPixmap pix2(":/icon/logo.png");
+    int w=ui->logo->width();
+    int h=ui->logo->height();
+    ui->logo->setPixmap(pix2.scaled(w, h, Qt::KeepAspectRatio));
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(show()));
     ui->haveto->hide();
@@ -18,6 +22,7 @@ sigin::sigin(QWidget *parent) :
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
 }
 
@@ -90,18 +95,23 @@ void sigin::on_signin_clicked()
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     if(username=="test" && password=="test")
     {
+        waiting();
         hide();
         homeWindow= new home(parentWidget(), pwd);
         homeWindow->show();
     }
     else {
-        ui->haveto->hide();
-        ui->waiting->hide();
-        ui->tryAgain->hide();
-        ui->gif->hide();
-        ui->signin->setDisabled(false);
-        ui->cancel->setDisabled(false);
-        ui->msg->setText("This credentials are not valid");
+        if(username=="" && password=="")
+            ui->haveto->show();
+        else
+        {
+            ui->haveto->hide();
+            ui->waiting->hide();
+            ui->tryAgain->show();
+            ui->gif->hide();
+            ui->signin->setDisabled(false);
+            ui->cancel->setDisabled(false);
+        }
     }
     //--------------------------------------------------
 
@@ -144,21 +154,9 @@ void sigin::closeEvent(QCloseEvent *event)
         else event->ignore();*/
 
 
-
-
-
-
-
-    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
-                                                                    tr("Are you sure to quit?\n"),
-                                                                     QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn != QMessageBox::Yes) {
-            event->ignore();
-        } else {
-            event->accept();
-            //cl->closeConnection();
-        }
+    event->ignore();
+    ex = new class exit(this, false);
+    ex->exec();
 
 }
 
@@ -169,4 +167,15 @@ void sigin::waiting()
     ui->signin->setDisabled(true);
     ui->cancel->setDisabled(true);
 
+}
+
+void sigin::showEvent(QShowEvent* event)
+{
+QDialog::showEvent(event);
+
+ QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
+      anim->setStartValue(0.0);
+      anim->setEndValue(1.0);
+      anim->setDuration(1000);
+ anim->start(QAbstractAnimation::DeleteWhenStopped);
 }

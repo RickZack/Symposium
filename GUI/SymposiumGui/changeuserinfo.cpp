@@ -54,7 +54,13 @@ changeUserInfo::~changeUserInfo()
 void changeUserInfo::on_iconButt_clicked()
 {
     iconWindow = new icon(this);
-    iconWindow->show();
+    iconWindow->exec();
+    img=iconWindow->msg;
+    QString msg2=QString::fromStdString(img);
+    QPixmap pix(msg2);
+    int w=ui->img->width();
+    int h=ui->img->height();
+    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 void changeUserInfo::chooseIcon()

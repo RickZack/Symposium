@@ -25,6 +25,7 @@ signup::signup(QWidget *parent) :
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 }
 
 void signup::errorConnection()
@@ -144,6 +145,12 @@ void signup::on_iconButt_clicked()
 {
     iconWindow = new icon(this);
     iconWindow->exec();
+    iconPath=iconWindow->msg;
+    QString msg2=QString::fromStdString(iconPath);
+    QPixmap pix(msg2);
+    int w=ui->img->width();
+    int h=ui->img->height();
+    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 bool signup::checkPassword(QString passwordToCheck)
@@ -177,9 +184,8 @@ bool signup::checkPassword(QString passwordToCheck)
 
 void signup::chooseIcon()
 {
-    std::string msg=iconWindow->msg;
-    iconPath=msg;
-    QString msg2=QString::fromStdString(msg);
+    iconPath=iconWindow->msg;
+    QString msg2=QString::fromStdString(iconPath);
     QPixmap pix(msg2);
     int w=ui->img->width();
     int h=ui->img->height();
