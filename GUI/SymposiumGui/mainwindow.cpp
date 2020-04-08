@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     int h=ui->label->height();
     ui->label->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 
+
 }
 
 MainWindow::~MainWindow()
@@ -68,7 +69,7 @@ void MainWindow::on_exit_clicked()
 
 void MainWindow::on_SignIn_clicked()
 {
-    signinWindow= new sigin(this);
+    signinWindow= new sigin();
     //cl->setSignIn(signinWindow);
 
     signinWindow->setClientDispatcher(cl);
@@ -80,7 +81,7 @@ void MainWindow::on_SignIn_clicked()
 
 void MainWindow::on_SignUp_clicked()
 {
-    signupWindow= new signup(this);
+    signupWindow= new signup();
     //cl->setSignUp(signupWindow);
     signupWindow->setClientDispatcher(cl);
     signupWindow->show();
@@ -131,6 +132,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
 }
+
 
 void MainWindow::showEvent(QShowEvent* event)
 {

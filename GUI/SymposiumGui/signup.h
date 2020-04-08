@@ -9,6 +9,8 @@
 #include "errorconnection.h"
 #include "notification.h"
 
+class MainWindow;
+
 
 namespace Symposium{
 class clientdispatcher;
@@ -63,11 +65,14 @@ private slots:
      */
     bool checkPassword(QString passwordToCheck);
 
+    void on_cancel_clicked();
+
 private:
     Ui::signup *ui;
     std::string pwd;
     home *homeWindow;
     icon *iconWindow;
+    MainWindow *mw;
     class exit *ex;
     notification *notWindow;
     errorconnection *errorWindow;

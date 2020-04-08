@@ -69,6 +69,7 @@ SOURCES += \
         qtexteditlabels.cpp \
         sigin.cpp \
         signup.cpp \
+        signupmw.cpp \
         textedit.cpp \
         Dispatcher/clientdispatcher.cpp \
         Dispatcher/serverdispatcher.cpp \
@@ -116,6 +117,7 @@ HEADERS += \
         qtexteditlabels.h \
         sigin.h \
         signup.h \
+        signupmw.h \
         textedit.h \
         Dispatcher/clientdispatcher.h \
         Dispatcher/serverdispatcher.h \
@@ -147,6 +149,7 @@ FORMS += \
         onlineusers.ui \
         sigin.ui \
         signup.ui \
+        signupmw.ui \
         unsuccessdeleteaccount.ui
 
 
@@ -170,6 +173,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
+RC_ICONS = logo1.ico
 
 DISTFILES += \
     ../../../../Desktop/Nuovo Documento di Microsoft Word.htm

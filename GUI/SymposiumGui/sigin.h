@@ -47,12 +47,15 @@ private slots:
      */
     void on_signin_clicked();
 
+    void on_cancel_clicked();
+
 private:
 
     Ui::sigin *ui;
     home *homeWindow;
     errorconnection *errorWindow;
     std::string pwd;
+    MainWindow *mw;
     Symposium::clientdispatcher *cl;
     class exit *ex;
     /**
