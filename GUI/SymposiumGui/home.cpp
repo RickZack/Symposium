@@ -17,6 +17,10 @@ home::home(QWidget *parent, std::string pwd) :
     int w=ui->logo->width();
     int h=ui->logo->height();
     ui->logo->setPixmap(pix2.scaled(w, h, Qt::KeepAspectRatio));
+    ButtonHoverWatcher * watcher = new ButtonHoverWatcher(this);
+    ui->logout->installEventFilter(watcher);
+    ui->logout->setToolTip("Logout");
+
 }
 
 home::~home()
@@ -71,9 +75,38 @@ void home::logout()
 
 void home::closeEvent(QCloseEvent *event)
 {
-    event->ignore();
-    ex = new class exit(this, true);
-    ex->exec();
+    QMessageBox msgBox;
+    msgBox.setText("<p align='center'>Are you sure to quit?</p>");
+    msgBox.setWindowTitle("Exit");
+    QPixmap pix(":/icon/logo1.png");
+    QIcon p(pix);
+    msgBox.setWindowIcon(p);
+    msgBox.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
+    msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
+    msgBox.button(QMessageBox::Yes)->setText("Quit");
+    msgBox.button(QMessageBox::No)->setObjectName("No");
+    msgBox.button(QMessageBox::No)->setText("Remain");
+    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
+                         "color: rgb(58, 80, 116);"
+                         "font: 14pt 'Baskerville Old Face';} "
+                         "QLabel{color: rgb(58, 80, 116);} "
+                         "QPushButton#Yes { "
+                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
+                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
+                         "color: white; font: 14pt 'Baskerville Old Face'; "
+                         "border-radius:15px; width: 100px; height: 30px;}"
+                         "QPushButton#No { "
+                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
+                         "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
+                         "color: white; font: 14pt 'Baskerville Old Face'; "
+                         "border-radius:15px; width: 100px; height: 30px;}");
+    msgBox.setIcon(QMessageBox::Question);
+    int ret=QMessageBox::No;
+    ret=msgBox.exec();
+    if (ret == QMessageBox::Yes)
+        event->accept();
+    else
+        event->ignore();
 
 }
 

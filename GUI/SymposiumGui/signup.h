@@ -5,9 +5,9 @@
 #include <QCloseEvent>
 #include "home.h"
 #include "icon.h"
-#include "exit.h"
 #include "errorconnection.h"
 #include "notification.h"
+#include "../../user.h"
 
 class MainWindow;
 
@@ -73,7 +73,6 @@ private:
     home *homeWindow;
     icon *iconWindow;
     MainWindow *mw;
-    class exit *ex;
     notification *notWindow;
     errorconnection *errorWindow;
     std::string iconPath="";

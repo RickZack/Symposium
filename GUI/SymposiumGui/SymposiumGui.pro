@@ -36,6 +36,7 @@ SOURCES += \
         activenonlink.cpp \
         activetimerlink.cpp \
         alluser.cpp \
+        buttonhoverwatcher.cpp \
         changeuserinfo.cpp \
         choosedir.cpp \
         choosepriv.cpp \
@@ -69,7 +70,6 @@ SOURCES += \
         qtexteditlabels.cpp \
         sigin.cpp \
         signup.cpp \
-        signupmw.cpp \
         textedit.cpp \
         Dispatcher/clientdispatcher.cpp \
         Dispatcher/serverdispatcher.cpp \
@@ -82,6 +82,7 @@ HEADERS += \
         activenonlink.h \
         activetimerlink.h \
         alluser.h \
+        buttonhoverwatcher.h \
         changeuserinfo.h \
         choosedir.h \
         choosepriv.h \
@@ -117,7 +118,6 @@ HEADERS += \
         qtexteditlabels.h \
         sigin.h \
         signup.h \
-        signupmw.h \
         textedit.h \
         Dispatcher/clientdispatcher.h \
         Dispatcher/serverdispatcher.h \
@@ -149,7 +149,6 @@ FORMS += \
         onlineusers.ui \
         sigin.ui \
         signup.ui \
-        signupmw.ui \
         unsuccessdeleteaccount.ui
 
 

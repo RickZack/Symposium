@@ -219,18 +219,10 @@ namespace Symposium {
          * @return the constructed copy
          */
         user makeCopyNoPwd() const;
-
-    private:
-        /**
-         * @brief generate random salt for password
-         * @return salt
-         */
-        static std::string saltGenerate();
-
         /**
          * @param pass the password to control
          * @return true if the @pass don't have any alphabetic character and false if it does
-         */
+          */
         static bool noCharPwd(const std::string &pass);
 
         /**
@@ -244,6 +236,14 @@ namespace Symposium {
          * @return true if the @pass don't have any special character and false if it does
          */
         static bool noSpecialCharPwd(const std::string &pass);
+    private:
+        /**
+         * @brief generate random salt for password
+         * @return salt
+         */
+        static std::string saltGenerate();
+
+
 
     };
 }

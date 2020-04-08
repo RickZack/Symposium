@@ -5,7 +5,6 @@
 #include <QCloseEvent>
 #include "home.h"
 #include "errorconnection.h"
-#include "exit.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -57,7 +56,6 @@ private:
     std::string pwd;
     MainWindow *mw;
     Symposium::clientdispatcher *cl;
-    class exit *ex;
     /**
      * @brief quit from application
      */

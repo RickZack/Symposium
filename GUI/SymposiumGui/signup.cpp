@@ -59,13 +59,30 @@ void signup::successSignUp()
     ui->signin->setDisabled(false);
     ui->cancel->setDisabled(false);
 
-    homeWindow= new home(parentWidget(), pwd);
+    homeWindow= new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(homeWindow);
     homeWindow->show();
-    parentWidget()->hide();
-    notWindow = new notification(parentWidget(), "The account was successfully created");
-    notWindow->exec();
+    QMessageBox msgBox(homeWindow);
+    msgBox.setText("<p align='center'>Your account has been successfully created</p>");
+    msgBox.setWindowTitle("Notification");
+    QPixmap pix(":/icon/logo1.png");
+    QIcon p(pix);
+    msgBox.setWindowIcon(p);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.button(QMessageBox::Ok)->setObjectName("ok");
+    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
+                         "color: rgb(58, 80, 116);"
+                         "font: 14pt 'Baskerville Old Face';} "
+                         "QLabel{color: rgb(58, 80, 116);} "
+                         "QPushButton#ok { "
+                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
+                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
+                         "color: white; font: 14pt 'Baskerville Old Face'; "
+                         "border-radius:15px; width: 150px; height: 30px; "
+                         "margin-left:50px; margin-right:50px;}");
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
 }
 
 
@@ -130,8 +147,20 @@ void signup::on_signin_clicked()
             hide();
             homeWindow= new home(nullptr, pwd);
             homeWindow->show();
-            notWindow = new notification(homeWindow, "Your account was successfully created");
-            notWindow->exec();
+            QMessageBox msgBox(homeWindow);
+            msgBox.setText("<p align='center'>Your account has been successfully created</p>");
+            msgBox.setWindowTitle("Notification");
+            QPixmap pix(":/icon/logo1.png");
+            QIcon p(pix);
+            msgBox.setWindowIcon(p);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
+                                 "color: rgb(58, 80, 116);"
+                                 "font: 14pt 'Baskerville Old Face';} "
+                                 "QLabel{color: rgb(58, 80, 116);} "
+                                 "QPushButton { background-color: red;}");
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.exec();
         }
     }
     else {
@@ -145,13 +174,7 @@ void signup::on_signin_clicked()
 void signup::on_iconButt_clicked()
 {
     iconWindow = new icon(this);
-    iconWindow->show();
-    /*iconPath=iconWindow->msg;
-    QString msg2=QString::fromStdString(iconPath);
-    QPixmap pix(msg2);
-    int w=ui->img->width();
-    int h=ui->img->height();
-    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));*/
+    iconWindow->exec();
 }
 
 bool signup::checkPassword(QString passwordToCheck)
@@ -161,25 +184,12 @@ bool signup::checkPassword(QString passwordToCheck)
             return false;
     else if(str.length()>=22)
             return false;
-    else
-    {
-        static constexpr char noChar[] ="1234567890?!$+-/.,@ˆ_ ";
-        std::size_t found = str.find_first_not_of(noChar);
-        if(found == std::string::npos)
-            return false;
-        else {
-            static constexpr char noNum[] ="abcdefghijklmnopqrstuvwxyz?!$+-/.,@ˆ_ ";
-            std::size_t found = str.find_first_not_of(noNum);
-            if(found == std::string::npos)
-                return false;
-            else {
-                static constexpr char noSpecialChar[] ="abcdefghijklmnopqrstuvwxyz1234567890 ";
-                std::size_t found = str.find_first_not_of(noSpecialChar);
-                if(found == std::string::npos)
-                    return false;
-            }
-        }
-    }
+    else if(Symposium::user::noCharPwd(str))
+        return false;
+    else if(Symposium::user::noNumPwd(str))
+        return false;
+    else if(Symposium::user::noSpecialCharPwd(str))
+        return false;
     return true;
 }
 
@@ -195,9 +205,38 @@ void signup::chooseIcon()
 
 void signup::closeEvent(QCloseEvent *event)
 {
-   event->ignore();
-   ex = new class exit(this, false);
-   ex->exec();
+    QMessageBox msgBox;
+    msgBox.setText("<p align='center'>Are you sure to quit?</p>");
+    msgBox.setWindowTitle("Exit");
+    QPixmap pix(":/icon/logo1.png");
+    QIcon p(pix);
+    msgBox.setWindowIcon(p);
+    msgBox.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
+    msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
+    msgBox.button(QMessageBox::Yes)->setText("Quit");
+    msgBox.button(QMessageBox::No)->setObjectName("No");
+    msgBox.button(QMessageBox::No)->setText("Remain");
+    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
+                         "color: rgb(58, 80, 116);"
+                         "font: 14pt 'Baskerville Old Face';} "
+                         "QLabel{color: rgb(58, 80, 116);} "
+                         "QPushButton#Yes { "
+                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
+                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
+                         "color: white; font: 14pt 'Baskerville Old Face'; "
+                         "border-radius:15px; width: 100px; height: 30px;}"
+                         "QPushButton#No { "
+                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
+                         "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
+                         "color: white; font: 14pt 'Baskerville Old Face'; "
+                         "border-radius:15px; width: 100px; height: 30px;}");
+    msgBox.setIcon(QMessageBox::Question);
+    int ret=QMessageBox::No;
+    ret=msgBox.exec();
+    if (ret == QMessageBox::Yes)
+        event->accept();
+    else
+        event->ignore();
 
 }
 

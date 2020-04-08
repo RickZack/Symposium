@@ -5,7 +5,6 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include "about.h"
-#include "exit.h"
 #include "sigin.h"
 #include "signup.h"
 
@@ -48,7 +47,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     about *aboutWindow;
-    class exit *ex;
     sigin *signinWindow;
     signup *signupWindow;
     Symposium::clientdispatcher *cl;

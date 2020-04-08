@@ -31,10 +31,8 @@ void MainWindow::on_about_clicked()
 
 void MainWindow::on_exit_clicked()
 {
-    ex = new class exit(this);
-    ex->exec();
-    /*QMessageBox msgBox;
-    msgBox.setText("    Are you sure to quit??");
+    QMessageBox msgBox;
+    msgBox.setText("<p align='center'>Are you sure to quit?</p>");
     msgBox.setWindowTitle("Exit");
     QPixmap pix(":/icon/logo1.png");
     QIcon p(pix);
@@ -61,9 +59,8 @@ void MainWindow::on_exit_clicked()
                          "margin-left:50px; margin-right:50px;}");
     msgBox.setIcon(QMessageBox::Question);
     int ret=msgBox.exec();
-
-        if (ret == QMessageBox::Yes)
-                qApp->quit();*/
+    if (ret == QMessageBox::Yes)
+          qApp->quit();
 
 }
 
@@ -73,7 +70,6 @@ void MainWindow::on_SignIn_clicked()
     //cl->setSignIn(signinWindow);
 
     signinWindow->setClientDispatcher(cl);
-
     signinWindow->show();
     hide();
 
@@ -91,19 +87,17 @@ void MainWindow::on_SignUp_clicked()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    event->ignore();
-    ex = new class exit(this);
-    ex->exec();
-    /*QMessageBox msgBox;
-    msgBox.setText("    Are you sure to quit??");
+    QMessageBox msgBox;
+    msgBox.setText("<p align='center'>Are you sure to quit?</p>");
     msgBox.setWindowTitle("Exit");
     QPixmap pix(":/icon/logo1.png");
     QIcon p(pix);
     msgBox.setWindowIcon(p);
     msgBox.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
     msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
+    msgBox.button(QMessageBox::Yes)->setText("Quit");
     msgBox.button(QMessageBox::No)->setObjectName("No");
-    msgBox.setBaseSize(QSize(390, 120));
+    msgBox.button(QMessageBox::No)->setText("Remain");
     msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
                          "color: rgb(58, 80, 116);"
                          "font: 14pt 'Baskerville Old Face';} "
@@ -112,20 +106,19 @@ void MainWindow::closeEvent(QCloseEvent *event)
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "margin-left:50px; margin-right:50px;}"
+                         "border-radius:15px; width: 100px; height: 30px;}"
                          "QPushButton#No { "
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "margin-left:50px; margin-right:50px;}");
+                         "border-radius:15px; width: 100px; height: 30px;}");
     msgBox.setIcon(QMessageBox::Question);
-    int ret=msgBox.exec();
-
-        if (ret == QMessageBox::Yes)
-                event->accept();
-        else event->ignore();*/
+    int ret=QMessageBox::No;
+    ret=msgBox.exec();
+    if (ret == QMessageBox::Yes)
+        event->accept();
+    else
+        event->ignore();
 
 }
 
@@ -136,11 +129,11 @@ void MainWindow::setClientDispatcher(Symposium::clientdispatcher *cl){
 
 void MainWindow::showEvent(QShowEvent* event)
 {
-QMainWindow::showEvent(event);
-
- QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-      anim->setStartValue(0.0);
-      anim->setEndValue(1.0);
-      anim->setDuration(1000);
- anim->start(QAbstractAnimation::DeleteWhenStopped);
+    QMainWindow::showEvent(event);
+    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
+    anim->setStartValue(0.0);
+    anim->setEndValue(1.0);
+    anim->setDuration(1000);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
+

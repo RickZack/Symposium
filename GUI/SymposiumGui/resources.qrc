@@ -78,5 +78,7 @@
         <file>icon/logo.png</file>
         <file>icon/logo1.png</file>
         <file>icon/ajax-loader.gif</file>
+        <file>icon/exit.png</file>
+        <file>icon/redexit.png</file>
     </qresource>
 </RCC>
