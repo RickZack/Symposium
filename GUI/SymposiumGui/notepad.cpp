@@ -48,7 +48,7 @@ const QString rsrcPath = ":/resources/images/win";
 
 notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentID, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,Symposium::document doc) :
     QMainWindow(parent),
-    documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)
+    documentId(documentID), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)
 {
     ui->setupUi(this);
     this->setCentralWidget(ui->textEdit);
@@ -615,8 +615,7 @@ void notepad::counterLink()
 
 
 void notepad::closeEvent(QCloseEvent *event){
-    ui->actionhighlight->setChecked(false);
-    ui->actionhighlight->setCheckable(false);
+
     cl->closeSource(this->documentId);
     event->ignore();
     this->notepad::hide();
