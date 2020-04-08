@@ -92,7 +92,7 @@ private slots:
 private:
     Ui::notepad *ui;
     QString mFilename;
-    int documentId;
+    Symposium::uint_positive_cnt::type documentId;
     Symposium::user us;
     Symposium::clientdispatcher *cl;
     Symposium::document doc;
@@ -109,10 +109,9 @@ private:
 
     bool insertOthCh=false;
     bool highActivated=false;
-    int countActivated=0;
     int insertedChars=0;
     int posBlock=0;
-    bool changedPos=false;
+    QColor colPos;
 
     void setupTextActions();
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
@@ -144,6 +143,7 @@ private:
     void changeCursorPos();
 
 
+    void colorText();
 
     QAction *actionTextBold;
     QAction *actionTextUnderline;
@@ -153,7 +153,6 @@ private:
     QAction *actionAlignCenter;
     QAction *actionAlignRight;
     QAction *actionAlignJustify;
-
     QAction *actionSelect;
 
     QComboBox *comboStyle;
@@ -161,7 +160,6 @@ private:
     QComboBox *comboSize;
 
     QTextEdit *textEdit;
-
 
     std::string idDoc;
 
@@ -174,12 +172,13 @@ private:
     void prova_remoteInsert();
     void verifySymbol2();
     void prova_remoteDelete();
-    void colorText();
+
     void provaFill();
     void prova_colorText();
     //------------------------------------------------------------------------------------------------------------------------------------------
-    void deselectAll();
 
+
+    QColor backCol;
 };
 
 #endif // NOTEPAD_H
