@@ -348,6 +348,8 @@
           * @return a pair containing the siteId of the user the message is to send to and the message itself
           */
          std::pair<const int, std::shared_ptr<serverMessage>> extractNextMessage();
+
+         uint_positive_cnt::type getSiteIdOfUser(const std::string& username) const;
          virtual ~SymServer() = default;
 
      protected:

@@ -481,6 +481,10 @@ bool SymServer::operator!=(const SymServer &rhs) const {
     return !(rhs == *this);
 }
 
+uint_positive_cnt::type SymServer::getSiteIdOfUser(const std::string &username) const {
+    return registered.at(username).getSiteId();
+}
+
 
 BOOST_CLASS_EXPORT(Symposium::SymServer)
 
