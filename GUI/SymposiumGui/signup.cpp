@@ -144,13 +144,13 @@ void signup::on_signin_clicked()
 void signup::on_iconButt_clicked()
 {
     iconWindow = new icon(this);
-    iconWindow->exec();
-    iconPath=iconWindow->msg;
+    iconWindow->show();
+    /*iconPath=iconWindow->msg;
     QString msg2=QString::fromStdString(iconPath);
     QPixmap pix(msg2);
     int w=ui->img->width();
     int h=ui->img->height();
-    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));*/
 }
 
 bool signup::checkPassword(QString passwordToCheck)
