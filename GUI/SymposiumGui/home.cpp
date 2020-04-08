@@ -13,6 +13,10 @@ home::home(QWidget *parent, std::string pwd) :
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
+    QPixmap pix2(":/icon/logo.png");
+    int w=ui->logo->width();
+    int h=ui->logo->height();
+    ui->logo->setPixmap(pix2.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 home::~home()

@@ -1,18 +1,19 @@
-#include "signup.h"
-#include "ui_signup.h"
-#include "Dispatcher/clientdispatcher.h"
+#include "signupmw.h"
+#include "ui_signupmw.h"
 #include "mainwindow.h"
 
-signup::signup(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::signup)
+signupmw::signupmw(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::signupmw)
 {
     ui->setupUi(this);
+    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
+
     QPixmap pix2(":/icon/logo.png");
     int w=ui->logo->width();
     int h=ui->logo->height();
     ui->logo->setPixmap(pix2.scaled(w, h, Qt::KeepAspectRatio));
-    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
+
     QPixmap pix(":/resources/avatar/beaver.png");
     iconPath=":/resources/avatar/beaver.png";
     ui->haveto->hide();
@@ -25,64 +26,29 @@ signup::signup(QWidget *parent) :
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 }
 
-void signup::errorConnection()
-{
-    ui->iconButt->setDisabled(false);
-    ui->signin->setDisabled(false);
-    ui->cancel->setDisabled(false);
-    ui->haveto->hide();
-    ui->errorMess->hide();
-    ui->msg->hide();
-    errorWindow = new errorconnection(this);
-    errorWindow->exec();
-}
-
-void signup::errorSignUp(std::string errorMess)
-{
-    ui->iconButt->setDisabled(false);
-    ui->signin->setDisabled(false);
-    ui->cancel->setDisabled(false);
-    ui->haveto->hide();
-    ui->msg->hide();
-    ui->errorMess->setText(QString::fromStdString(errorMess));
-    ui->errorMess->show();
-}
-
-
-void signup::successSignUp()
-{
-    hide();
-    ui->iconButt->setDisabled(false);
-    ui->signin->setDisabled(false);
-    ui->cancel->setDisabled(false);
-
-    homeWindow= new home(parentWidget(), pwd);
-    homeWindow->setClientDispatcher(cl);
-    //cl->setHome(homeWindow);
-    homeWindow->show();
-    parentWidget()->hide();
-    notWindow = new notification(parentWidget(), "The account was successfully created");
-    notWindow->exec();
-}
-
-
-void signup::setClientDispatcher( Symposium::clientdispatcher *cl){
-    this->cl = cl;
-}
-
-signup::~signup()
+signupmw::~signupmw()
 {
     delete ui;
 }
 
-void signup::on_signin_clicked()
+void signupmw::setClientDispatcher(Symposium::clientdispatcher *cl)
+{
+    this->cl=cl;
+}
+
+void signupmw::on_cancel_clicked()
+{
+    mw= new MainWindow();
+    mw->show();
+    hide();
+}
+
+void signupmw::on_ok_clicked()
 {
     ui->haveto->hide();
     ui->errorMess->hide();
-    ui->msg->hide();
     QString username= ui->username->text();
     QString password = ui->password->text();
     QString nickname =ui->nickname->text();
@@ -95,7 +61,7 @@ void signup::on_signin_clicked()
         {
             ui->errorMess->setText("The password does not meet the requirements");
             ui->errorMess->show();
-            ui->signin->setDisabled(false);
+            ui->ok->setDisabled(false);
             ui->cancel->setDisabled(false);
             ui->gif->hide();
             ui->waiting->hide();
@@ -120,7 +86,7 @@ void signup::on_signin_clicked()
         {
             ui->errorMess->setText("The password does not meet the requirements");
             ui->errorMess->show();
-            ui->signin->setDisabled(false);
+            ui->ok->setDisabled(false);
             ui->cancel->setDisabled(false);
             ui->gif->hide();
             ui->waiting->hide();
@@ -142,19 +108,23 @@ void signup::on_signin_clicked()
     //----------------------------------------
 }
 
-void signup::on_iconButt_clicked()
+void signupmw::chooseIcon()
 {
-    iconWindow = new icon(this);
-    iconWindow->show();
-    /*iconPath=iconWindow->msg;
+    iconPath=iconWindow->msg;
     QString msg2=QString::fromStdString(iconPath);
     QPixmap pix(msg2);
     int w=ui->img->width();
     int h=ui->img->height();
-    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));*/
+    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
-bool signup::checkPassword(QString passwordToCheck)
+void signupmw::on_iconButt_clicked()
+{
+    iconWindow = new icon(this);
+    iconWindow->show();
+}
+
+bool signupmw::checkPassword(QString passwordToCheck)
 {
     std::string str=passwordToCheck.toStdString();
     if(str.length()<=5)
@@ -183,47 +153,11 @@ bool signup::checkPassword(QString passwordToCheck)
     return true;
 }
 
-void signup::chooseIcon()
-{
-    iconPath=iconWindow->msg;
-    QString msg2=QString::fromStdString(iconPath);
-    QPixmap pix(msg2);
-    int w=ui->img->width();
-    int h=ui->img->height();
-    ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
-}
-
-void signup::closeEvent(QCloseEvent *event)
-{
-   event->ignore();
-   ex = new class exit(this, false);
-   ex->exec();
-
-}
-
-void signup::waiting()
+void signupmw::waiting()
 {
     ui->waiting->show();
     ui->gif->show();
     ui->iconButt->setDisabled(true);
-    ui->signin->setDisabled(true);
+    ui->ok->setDisabled(true);
     ui->cancel->setDisabled(true);
-}
-
-void signup::showEvent(QShowEvent* event)
-{
-QDialog::showEvent(event);
-
- QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-      anim->setStartValue(0.0);
-      anim->setEndValue(1.0);
-      anim->setDuration(1000);
- anim->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void signup::on_cancel_clicked()
-{
-    mw= new MainWindow();
-    mw->show();
-    hide();
 }

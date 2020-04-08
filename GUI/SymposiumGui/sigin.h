@@ -5,6 +5,7 @@
 #include <QCloseEvent>
 #include "home.h"
 #include "errorconnection.h"
+#include "exit.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -46,13 +47,17 @@ private slots:
      */
     void on_signin_clicked();
 
+    void on_cancel_clicked();
+
 private:
 
     Ui::sigin *ui;
     home *homeWindow;
     errorconnection *errorWindow;
     std::string pwd;
+    MainWindow *mw;
     Symposium::clientdispatcher *cl;
+    class exit *ex;
     /**
      * @brief quit from application
      */
@@ -61,6 +66,10 @@ private:
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
     void waiting();
+    /**
+     * @brief called when show() is invoked for this window and perform an animation
+     */
+    void showEvent(QShowEvent* event);
 };
 
 #endif // SIGIN_H

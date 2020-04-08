@@ -274,6 +274,13 @@ TEST_F(SymServerTestUserFunctionality, addUserGivesDifferentSiteId){
     EXPECT_NE(newUserComplete.getSiteId(), newDifferentUserComplete.getSiteId());
 }
 
+//Added in 8/04/2020, after check on the flow and noticing that adding in queue was missing
+TEST_F(SymServerTestUserFunctionality, addUserGenerateCorrectResponse){
+    auto userInserted=server.addUser(newUser);
+    loginMessage response(msgType::registration, msgOutcome::success, userInserted);
+    EXPECT_TRUE(server.thereIsMessageForUser(userInserted.getSiteId(), response).first);
+}
+
 TEST_F(SymServerTestUserFunctionality, loginOfRegisteredUserGenerateCorrectResponse){
     const SymServerUserMock& inserted= dynamic_cast<const SymServerUserMock&>(server.addUser(newUser));
     EXPECT_CALL(inserted, hasPwd(newUserPwd)).WillOnce(::testing::Return(true));
