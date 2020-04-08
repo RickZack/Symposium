@@ -2,6 +2,7 @@
 #include "ui_sigin.h"
 #include "mainwindow.h"
 #include "Dispatcher/clientdispatcher.h"
+#include "mainwindow.h"
 
 sigin::sigin(QWidget *parent) :
     QDialog(parent),
@@ -13,7 +14,6 @@ sigin::sigin(QWidget *parent) :
     int h=ui->logo->height();
     ui->logo->setPixmap(pix2.scaled(w, h, Qt::KeepAspectRatio));
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
-    connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(show()));
     ui->haveto->hide();
     ui->waiting->hide();
     ui->tryAgain->hide();
@@ -57,7 +57,7 @@ void sigin::errorSignIn()
 void sigin::successSignIn()
 {
     hide();
-    homeWindow = new home(parentWidget(), pwd);
+    homeWindow = new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(home *homeWindow);
     homeWindow->show();
@@ -97,7 +97,7 @@ void sigin::on_signin_clicked()
     {
         waiting();
         hide();
-        homeWindow= new home(parentWidget(), pwd);
+        homeWindow= new home(nullptr, pwd);
         homeWindow->show();
     }
     else {
@@ -120,7 +120,7 @@ void sigin::on_signin_clicked()
 
 void sigin::closeEvent(QCloseEvent *event)
 {
-    /*QMessageBox msgBox;
+    QMessageBox msgBox;
     msgBox.setText("    Are you sure to quit??");
     msgBox.setWindowTitle("Exit");
     QPixmap pix(":/icon/logo1.png");
@@ -151,12 +151,12 @@ void sigin::closeEvent(QCloseEvent *event)
     ret=msgBox.exec();
         if (ret == QMessageBox::Yes)
                 event->accept();
-        else event->ignore();*/
+        else event->ignore();
 
 
-    event->ignore();
+    /*event->ignore();
     ex = new class exit(this, false);
-    ex->exec();
+    ex->exec();*/
 
 }
 
@@ -178,4 +178,11 @@ QDialog::showEvent(event);
       anim->setEndValue(1.0);
       anim->setDuration(1000);
  anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void sigin::on_cancel_clicked()
+{
+    mw= new MainWindow();
+    mw->show();
+    hide();
 }

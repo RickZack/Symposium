@@ -54,7 +54,7 @@ changeUserInfo::~changeUserInfo()
 void changeUserInfo::on_iconButt_clicked()
 {
     iconWindow = new icon(this);
-    iconWindow->show();
+    iconWindow->exec();
     /*img=iconWindow->msg;
     QString msg2=QString::fromStdString(img);
     QPixmap pix(msg2);
