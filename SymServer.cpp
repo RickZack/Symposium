@@ -54,8 +54,13 @@ const user & SymServer::addUser(user &newUser) {
     auto userDir=rootDir->addDirectory(newUser.getUsername());
     newUser.setHome(userDir);
     newUser.setSiteId(idCounter++);
-    return registerUser(newUser);
+    auto& target=registerUser(newUser);
 
+    //response to client
+    auto response=std::make_shared<loginMessage>(msgType::registration, msgOutcome::success, target);
+    insertMessageForSiteIds({target.getSiteId()}, response);
+
+    return target;
 }
 
 const user SymServer::login(const std::string &username, const std::string &pwd) {
