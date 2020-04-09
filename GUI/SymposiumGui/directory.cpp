@@ -4,9 +4,9 @@
 #include <ostream>
 
 
-directory::directory(QWidget *parent) :
+directory::directory(QWidget *parent, std::string pwd) :
     QMainWindow(parent),
-    ui(new Ui::directory)
+    ui(new Ui::directory), pwd(pwd)
 {
     ui->setupUi(this);
     QPixmap pix_folder(":/resources/cartelle/new_folder");
@@ -182,14 +182,14 @@ int directory::number_elements(std::string& string)
 
 void directory::on_actionHome_triggered()
 {
-    home *homeWindow=new home(this);
+    home *homeWindow=new home(nullptr, pwd);
     homeWindow->show();
     this->hide();
 }
 
 void directory::on_actionUri_triggered()
 {
-    uriWindow=new inserturi(this);
+    uriWindow=new inserturi(nullptr, pwd, false);
     uriWindow->show();
     this->hide();
 }

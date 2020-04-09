@@ -77,6 +77,7 @@ private:
     errorconnection *errorWindow;
     std::string iconPath="";
     Symposium::clientdispatcher *cl;
+    bool pressed=false;
     /**
      * @brief quit from application
      */
@@ -89,6 +90,26 @@ private:
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
     void waiting();
+    /**
+     * @brief disable all buttons present so user cannot perform any operation
+     */
+    void disableButtons();
+    /**
+     * @brief enable all buttons present
+     */
+    void enableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
+    /**
+     * @brief hide the labels
+     */
+    void hideLabelsError();
 };
 
 #endif // SIGNUP_H

@@ -31,6 +31,7 @@ void MainWindow::on_about_clicked()
 
 void MainWindow::on_exit_clicked()
 {
+    disableStyleButtons();
     QMessageBox msgBox;
     msgBox.setText("<p align='center'>Are you sure to quit?</p>");
     msgBox.setWindowTitle("Exit");
@@ -39,7 +40,9 @@ void MainWindow::on_exit_clicked()
     msgBox.setWindowIcon(p);
     msgBox.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
     msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
+    msgBox.button(QMessageBox::Yes)->setText("Quit");
     msgBox.button(QMessageBox::No)->setObjectName("No");
+    msgBox.button(QMessageBox::No)->setText("Remain");
     msgBox.setBaseSize(QSize(390, 120));
     msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
                          "color: rgb(58, 80, 116);"
@@ -49,18 +52,20 @@ void MainWindow::on_exit_clicked()
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "margin-left:50px; margin-right:50px;}"
+                         "border-radius:15px; width: 100px; height: 30px; "
+                         "margin-right:50px;}"
                          "QPushButton#No { "
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
                          "border-radius:15px; width: 80px; height: 30px; "
-                         "margin-left:50px; margin-right:50px;}");
+                         "}");
     msgBox.setIcon(QMessageBox::Question);
     int ret=msgBox.exec();
     if (ret == QMessageBox::Yes)
           qApp->quit();
+    else
+        enableStyleButtons();
 
 }
 
@@ -87,6 +92,7 @@ void MainWindow::on_SignUp_clicked()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    disableStyleButtons();
     QMessageBox msgBox;
     msgBox.setText("<p align='center'>Are you sure to quit?</p>");
     msgBox.setWindowTitle("Exit");
@@ -98,6 +104,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     msgBox.button(QMessageBox::Yes)->setText("Quit");
     msgBox.button(QMessageBox::No)->setObjectName("No");
     msgBox.button(QMessageBox::No)->setText("Remain");
+    msgBox.setBaseSize(QSize(390, 120));
     msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
                          "color: rgb(58, 80, 116);"
                          "font: 14pt 'Baskerville Old Face';} "
@@ -106,19 +113,23 @@ void MainWindow::closeEvent(QCloseEvent *event)
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px;}"
+                         "border-radius:15px; width: 100px; height: 30px; "
+                         "margin-right:50px;}"
                          "QPushButton#No { "
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px;}");
+                         "border-radius:15px; width: 80px; height: 30px; "
+                         "}");
     msgBox.setIcon(QMessageBox::Question);
-    int ret=QMessageBox::No;
-    ret=msgBox.exec();
+    int ret=msgBox.exec();
     if (ret == QMessageBox::Yes)
         event->accept();
     else
+    {
+        enableStyleButtons();
         event->ignore();
+    }
 
 }
 
@@ -135,5 +146,22 @@ void MainWindow::showEvent(QShowEvent* event)
     anim->setEndValue(1.0);
     anim->setDuration(1000);
     anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void MainWindow::enableStyleButtons()
+{
+    ui->about->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->SignIn->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->SignUp->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->exit->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+
+}
+
+void MainWindow::disableStyleButtons()
+{
+    ui->about->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->SignIn->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->SignUp->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->exit->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 }
 

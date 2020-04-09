@@ -24,7 +24,7 @@ class directory : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit directory(QWidget *parent = nullptr);
+    explicit directory(QWidget *parent = nullptr, std::string pwd="");
     ~directory();
     void listGenerate(std::string str, int count);
 
@@ -139,6 +139,7 @@ private:
     errorconnection *errorWindow;
     errorlogout *errorLogoutWindow;
 
+    std::string pwd;
     std::string str;
     std::string old_str;
     int countDir;

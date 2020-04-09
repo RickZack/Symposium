@@ -15,13 +15,10 @@ signup::signup(QWidget *parent) :
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
     QPixmap pix(":/resources/avatar/beaver.png");
     iconPath=":/resources/avatar/beaver.png";
-    ui->haveto->hide();
-    ui->errorMess->hide();
+    hideLabelsError();
     w=ui->img->width();
     h=ui->img->height();
     ui->img->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
-    ui->waiting->hide();
-    ui->gif->hide();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
@@ -30,23 +27,20 @@ signup::signup(QWidget *parent) :
 
 void signup::errorConnection()
 {
-    ui->iconButt->setDisabled(false);
-    ui->signin->setDisabled(false);
-    ui->cancel->setDisabled(false);
-    ui->haveto->hide();
-    ui->errorMess->hide();
-    ui->msg->hide();
+    enableButtons();
+    enableStyleButtons();
+    hideLabelsError();
+    pressed=false;
     errorWindow = new errorconnection(this);
     errorWindow->exec();
 }
 
 void signup::errorSignUp(std::string errorMess)
 {
-    ui->iconButt->setDisabled(false);
-    ui->signin->setDisabled(false);
-    ui->cancel->setDisabled(false);
-    ui->haveto->hide();
-    ui->msg->hide();
+    enableButtons();
+    enableStyleButtons();
+    hideLabelsError();
+    pressed=false;
     ui->errorMess->setText(QString::fromStdString(errorMess));
     ui->errorMess->show();
 }
@@ -54,11 +48,10 @@ void signup::errorSignUp(std::string errorMess)
 
 void signup::successSignUp()
 {
+    enableButtons();
+    enableStyleButtons();
+    pressed=false;
     hide();
-    ui->iconButt->setDisabled(false);
-    ui->signin->setDisabled(false);
-    ui->cancel->setDisabled(false);
-
     homeWindow= new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(homeWindow);
@@ -97,9 +90,7 @@ signup::~signup()
 
 void signup::on_signin_clicked()
 {
-    ui->haveto->hide();
-    ui->errorMess->hide();
-    ui->msg->hide();
+    hideLabelsError();
     QString username= ui->username->text();
     QString password = ui->password->text();
     QString nickname =ui->nickname->text();
@@ -112,14 +103,13 @@ void signup::on_signin_clicked()
         {
             ui->errorMess->setText("The password does not meet the requirements");
             ui->errorMess->show();
-            ui->signin->setDisabled(false);
-            ui->cancel->setDisabled(false);
-            ui->gif->hide();
-            ui->waiting->hide();
         }
         else
         {
             waiting();
+            disableStyleButtons();
+            disableButtons();
+            pressed=true;
             this->cl->signUp(username.toStdString(), password.toStdString(), nickname.toStdString(), iconPath);
          }
     }
@@ -137,28 +127,39 @@ void signup::on_signin_clicked()
         {
             ui->errorMess->setText("The password does not meet the requirements");
             ui->errorMess->show();
-            ui->signin->setDisabled(false);
-            ui->cancel->setDisabled(false);
-            ui->gif->hide();
-            ui->waiting->hide();
+            enableButtons();
+            enableStyleButtons();
         }
         else
         {
             hide();
             homeWindow= new home(nullptr, pwd);
             homeWindow->show();
-            QMessageBox msgBox(homeWindow);
-            msgBox.setText("<p align='center'>Your account has been successfully created</p>");
+            QMessageBox msgBox;
+            msgBox.setText("<p align='center'>Your account has been successfully created!</p>");
             msgBox.setWindowTitle("Notification");
             QPixmap pix(":/icon/logo1.png");
             QIcon p(pix);
             msgBox.setWindowIcon(p);
-            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setStandardButtons(QMessageBox::Yes);
+            msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
+            msgBox.button(QMessageBox::Yes)->setText("Ok");
             msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
                                  "color: rgb(58, 80, 116);"
                                  "font: 14pt 'Baskerville Old Face';} "
                                  "QLabel{color: rgb(58, 80, 116);} "
-                                 "QPushButton { background-color: red;}");
+                                 "QPushButton#Yes { "
+                                 "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
+                                 "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
+                                 "color: white; font: 14pt 'Baskerville Old Face'; "
+                                 "border-radius:15px; width: 100px; height: 30px; "
+                                 "margin-right:185px;}"
+                                 "QPushButton#No { "
+                                 "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
+                                 "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
+                                 "color: white; font: 14pt 'Baskerville Old Face'; "
+                                 "border-radius:15px; width: 80px; height: 30px; "
+                                 "margin-left:20px;}");
             msgBox.setIcon(QMessageBox::Information);
             msgBox.exec();
         }
@@ -205,6 +206,8 @@ void signup::chooseIcon()
 
 void signup::closeEvent(QCloseEvent *event)
 {
+    disableStyleButtons();
+    disableButtons();
     QMessageBox msgBox;
     msgBox.setText("<p align='center'>Are you sure to quit?</p>");
     msgBox.setWindowTitle("Exit");
@@ -216,6 +219,7 @@ void signup::closeEvent(QCloseEvent *event)
     msgBox.button(QMessageBox::Yes)->setText("Quit");
     msgBox.button(QMessageBox::No)->setObjectName("No");
     msgBox.button(QMessageBox::No)->setText("Remain");
+    msgBox.setBaseSize(QSize(390, 120));
     msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
                          "color: rgb(58, 80, 116);"
                          "font: 14pt 'Baskerville Old Face';} "
@@ -224,19 +228,27 @@ void signup::closeEvent(QCloseEvent *event)
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px;}"
+                         "border-radius:15px; width: 100px; height: 30px; "
+                         "margin-right:50px;}"
                          "QPushButton#No { "
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px;}");
+                         "border-radius:15px; width: 80px; height: 30px; "
+                         "}");
     msgBox.setIcon(QMessageBox::Question);
-    int ret=QMessageBox::No;
-    ret=msgBox.exec();
+    int ret=msgBox.exec();
     if (ret == QMessageBox::Yes)
         event->accept();
     else
-        event->ignore();
+    {
+        if(!pressed)
+        {
+            event->ignore();
+            enableButtons();
+        }
+        enableStyleButtons();
+    }
 
 }
 
@@ -244,9 +256,43 @@ void signup::waiting()
 {
     ui->waiting->show();
     ui->gif->show();
+}
+
+void signup::disableButtons()
+{
     ui->iconButt->setDisabled(true);
     ui->signin->setDisabled(true);
     ui->cancel->setDisabled(true);
+}
+
+void signup::enableButtons()
+{
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->iconButt->setDisabled(false);
+    ui->signin->setDisabled(false);
+    ui->cancel->setDisabled(false);
+}
+
+void signup::enableStyleButtons()
+{
+    ui->signin->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancel->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+}
+
+void signup::disableStyleButtons()
+{
+    ui->signin->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancel->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+}
+
+void signup::hideLabelsError()
+{
+    ui->haveto->hide();
+    ui->errorMess->hide();
+    ui->msg->hide();
+    ui->waiting->hide();
+    ui->gif->hide();
 }
 
 void signup::showEvent(QShowEvent* event)

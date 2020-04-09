@@ -3,12 +3,12 @@
 
 #include <QDialog>
 #include <QMessageBox>
+#include <QMovie>
 #include "unsuccessdeleteaccount.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
 
-
-
+class MainWindow;
 
 namespace Symposium{
 class clientdispatcher;
@@ -57,10 +57,27 @@ private slots:
 
 private:
     Ui::deleteAccount *ui;
+    MainWindow *mw;
     unsuccessdeleteaccount *window;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
+    /**
+     * @brief disable all buttons present so user cannot perform any operation
+     */
+    void disableButtons();
+    /**
+     * @brief enable all buttons present
+     */
+    void enableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
 };
 
 #endif // DELETEACCOUNT_H

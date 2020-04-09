@@ -14,11 +14,8 @@ sigin::sigin(QWidget *parent) :
     int h=ui->logo->height();
     ui->logo->setPixmap(pix2.scaled(w, h, Qt::KeepAspectRatio));
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(hide()));
-    ui->haveto->hide();
-    ui->waiting->hide();
-    ui->tryAgain->hide();
+    hideLabelsError();
     ui->password->setEchoMode(QLineEdit::Password);
-    ui->gif->hide();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
@@ -33,30 +30,27 @@ sigin::~sigin()
 
 void sigin::errorConnection()
 {
-    ui->signin->setDisabled(false);
-    ui->cancel->setDisabled(false);
-    errorWindow = new errorconnection(this);
+    enableButtons();
+    enableStyleButtons();
+    hideLabelsError();
+    pressed=false;
+    errorWindow = new errorconnection();
     errorWindow->exec();
-    ui->haveto->hide();
-    ui->tryAgain->hide();
-    ui->waiting->hide();
-    ui->gif->hide();
 }
 
 void sigin::errorSignIn()
 {
-    ui->signin->setDisabled(false);
-    ui->cancel->setDisabled(false);
-    ui->haveto->hide();
+    enableButtons();
+    enableStyleButtons();
+    hideLabelsError();
+    pressed=false;
     ui->tryAgain->show();
-    ui->waiting->hide();
-    ui->gif->hide();
-
 }
 
 void sigin::successSignIn()
 {
     hide();
+    pressed=false;
     homeWindow = new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(home *homeWindow);
@@ -72,11 +66,7 @@ void sigin::setClientDispatcher(Symposium::clientdispatcher *cl){
 
 void sigin::on_signin_clicked()
 {
-    ui->haveto->hide();
-    ui->waiting->hide();
-    ui->tryAgain->hide();
-    ui->gif->hide();
-
+    hideLabelsError();
     QString username= ui->username->text();
     QString password = ui->password->text();
     pwd=password.toStdString();
@@ -85,6 +75,9 @@ void sigin::on_signin_clicked()
 
     /*if(username!="" && password!=""){
         waiting();
+        pressed=true;
+        disableButtons();
+        disableStyleButtons();
         this->cl->logIn(username.toStdString(), password.toStdString());
     }
     else {
@@ -95,22 +88,20 @@ void sigin::on_signin_clicked()
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     if(username=="test" && password=="test")
     {
-        waiting();
         hide();
+        enableButtons();
+        enableStyleButtons();
+        pressed=false;
         homeWindow= new home(nullptr, pwd);
         homeWindow->show();
     }
     else {
+        pressed=false;
         if(username=="" && password=="")
             ui->haveto->show();
         else
         {
-            ui->haveto->hide();
-            ui->waiting->hide();
             ui->tryAgain->show();
-            ui->gif->hide();
-            ui->signin->setDisabled(false);
-            ui->cancel->setDisabled(false);
         }
     }
     //--------------------------------------------------
@@ -120,6 +111,8 @@ void sigin::on_signin_clicked()
 
 void sigin::closeEvent(QCloseEvent *event)
 {
+    disableButtons();
+    disableStyleButtons();
     QMessageBox msgBox;
     msgBox.setText("<p align='center'>Are you sure to quit?</p>");
     msgBox.setWindowTitle("Exit");
@@ -131,6 +124,7 @@ void sigin::closeEvent(QCloseEvent *event)
     msgBox.button(QMessageBox::Yes)->setText("Quit");
     msgBox.button(QMessageBox::No)->setObjectName("No");
     msgBox.button(QMessageBox::No)->setText("Remain");
+    msgBox.setBaseSize(QSize(390, 120));
     msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
                          "color: rgb(58, 80, 116);"
                          "font: 14pt 'Baskerville Old Face';} "
@@ -139,19 +133,27 @@ void sigin::closeEvent(QCloseEvent *event)
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px;}"
+                         "border-radius:15px; width: 100px; height: 30px; "
+                         "margin-right:50px;}"
                          "QPushButton#No { "
                          "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
                          "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
                          "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px;}");
+                         "border-radius:15px; width: 80px; height: 30px; "
+                         "}");
     msgBox.setIcon(QMessageBox::Question);
-    int ret=QMessageBox::No;
-    ret=msgBox.exec();
+    int ret=msgBox.exec();
     if (ret == QMessageBox::Yes)
         event->accept();
     else
+    {
+        if(!pressed)
+        {
+            enableButtons();
+            enableStyleButtons();
+        }
         event->ignore();
+    }
 
 }
 
@@ -159,8 +161,6 @@ void sigin::waiting()
 {
     ui->waiting->show();
     ui->gif->show();
-    ui->signin->setDisabled(true);
-    ui->cancel->setDisabled(true);
 
 }
 
@@ -172,7 +172,41 @@ QDialog::showEvent(event);
       anim->setStartValue(0.0);
       anim->setEndValue(1.0);
       anim->setDuration(1000);
- anim->start(QAbstractAnimation::DeleteWhenStopped);
+      anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void sigin::disableButtons()
+{
+    ui->signin->setDisabled(true);
+    ui->cancel->setDisabled(true);
+}
+
+void sigin::enableButtons()
+{
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->signin->setDisabled(false);
+    ui->cancel->setDisabled(false);
+}
+
+void sigin::enableStyleButtons()
+{
+    ui->signin->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancel->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+}
+
+void sigin::disableStyleButtons()
+{
+    ui->signin->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancel->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+}
+
+void sigin::hideLabelsError()
+{
+    ui->haveto->hide();
+    ui->tryAgain->hide();
+    ui->waiting->hide();
+    ui->gif->hide();
 }
 
 void sigin::on_cancel_clicked()

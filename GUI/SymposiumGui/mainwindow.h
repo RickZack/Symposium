@@ -58,6 +58,14 @@ private:
      * @brief called when show() is invoked for this window and perform an animation
      */
     void showEvent(QShowEvent* event);
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
 };
 
 #endif // MAINWINDOW_H
