@@ -43,7 +43,7 @@
 using namespace Symposium;
 
 uint_positive_cnt SymServer::idCounter;
-const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", "./icons/1.png", -1, nullptr);
+const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", ":resources/avatar/unknown.png", -1, nullptr);
 
 const user & SymServer::addUser(user &newUser) {
     if(userIsRegistered(newUser.getUsername()))
@@ -351,7 +351,7 @@ bool SymServer::userIsRegistered(const std::string &toCheck) const noexcept {
 }
 
 bool SymServer::userIsValid(const user &toCheck) noexcept {
-    std::regex pathPattern{R"(\.(\/[a-zA-Z 0-9]*)*([a-zA-Z 0-9]*\.((jpg|png|ico|bmp))))"};
+    std::regex pathPattern{R"(\:\/resources/avatar\/([a-zA-Z 0-9]*)*([a-zA-Z 0-9]*\.((jpg|png|ico|bmp))))"};
     return !toCheck.getUsername().empty() && !toCheck.getNickname().empty()
             && std::regex_match(toCheck.getIconPath(), pathPattern);
 }
