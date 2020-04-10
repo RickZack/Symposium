@@ -7,7 +7,8 @@
 #include "errorconnection.h"
 #include "errorlogout.h"
 
-
+class home;
+class directory;
 
 namespace Symposium{
 class clientdispatcher;
@@ -23,7 +24,7 @@ class inserturi : public QDialog
     Q_OBJECT
 
 public:
-    explicit inserturi(QWidget *parent = nullptr);
+    explicit inserturi(QWidget *parent = nullptr, std::string pwd="", bool homeWindow=true);
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -71,6 +72,8 @@ private slots:
      */
     void on_add_clicked();
 
+    void on_cancel_clicked();
+
 public slots:
     /**
      * @brief set the selected folder
@@ -80,10 +83,6 @@ public slots:
      * @brief cancel the folder selected
      */
     void reset_text();
-    /**
-     * @brief quit from application
-     */
-    void closeEvent(QCloseEvent *event);
 
 private:
     Ui::inserturi *ui;
@@ -93,9 +92,46 @@ private:
     Symposium::privilege privilege;
     std::string showDir;
     std::string pathId;
+    bool pressed=false;
     Symposium::clientdispatcher *cl;
+    home *h;
+    directory *d;
+    std::string pwd;
+    bool homeWindow;
     errorconnection *errorWindow;
     errorlogout *errorLog;
+    /**
+     * @brief quit from application
+     */
+    void closeEvent(QCloseEvent *event);
+    /**
+     * @brief called when show() is invoked for this window and perform an animation
+     */
+    void showEvent(QShowEvent* event);
+    /**
+     * @brief disable all buttons present so user cannot perform any operation
+     */
+    void disableButtons();
+    /**
+     * @brief enable all buttons present
+     */
+    void enableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
+    /**
+     * @brief hide the labels
+     */
+    void hideLabelsError();
+    /**
+     * @brief waiting of the conclusion of the operation by clientdispatcher
+     */
+    void waiting();
 };
 
 #endif // INSERTURI_H

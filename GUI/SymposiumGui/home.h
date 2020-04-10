@@ -3,14 +3,15 @@
 
 #include <QMainWindow>
 #include <QCloseEvent>
+#include "buttonhoverwatcher.h"
 #include "deleteaccount.h"
 #include "inserturi.h"
 #include "changeuserinfo.h"
 #include "directory.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
-#include "exit.h"
 
+class MainWindow;
 
 namespace Symposium{
 class clientdispatcher;
@@ -75,14 +76,35 @@ private:
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
     directory *directoryWindow;
+    MainWindow *mw;
+    bool pressed=false;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
-    class exit *ex;
     /**
      * @brief quit from application
      */
     void closeEvent(QCloseEvent *event);
+    /**
+     * @brief disable all buttons present so user cannot perform any operation
+     */
+    void disableButtons();
+    /**
+     * @brief enable all buttons present
+     */
+    void enableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
+    /**
+     * @brief waiting of the conclusion of the operation by clientdispatcher
+     */
+    void waiting();
 };
 
 #endif // HOME_H

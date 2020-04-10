@@ -237,7 +237,7 @@ struct SymServerTestUserFunctionality : testing::Test {
     };
     ~SymServerTestUserFunctionality() = default;
 };
-const std::string SymServerTestUserFunctionality::validIconPath="./userIcons/test.jpg";
+const std::string SymServerTestUserFunctionality::validIconPath=":/resources/avatar/unknown.png";
 const std::string SymServerTestUserFunctionality::newUserUsername="mario";
 const std::string SymServerTestUserFunctionality::newUserPwd="a123@bty!!";
 const std::string SymServerTestUserFunctionality::wrongPwd="wrong";
@@ -398,8 +398,8 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     SymServerUserMock* justInserted;
 
     SymServerTestFilesystemFunctionality():
-            loggedUser(loggedUserUsername, loggedUserPwd, "m@ario", "./userIcons/test.jpg", 1, nullptr),
-            anotherUser(anotherUserUsername, anotherUserPwd, "lupoLucio", "./userIcons/test.jpg", 2, nullptr),
+            loggedUser(loggedUserUsername, loggedUserPwd, "m@ario", ":/resources/avatar/test.jpg", 1, nullptr),
+            anotherUser(anotherUserUsername, anotherUserPwd, "lupoLucio", ":/resources/avatar/test.jpg", 2, nullptr),
             server(),
             userDir(new ::testing::NiceMock<SymServerdirMock>("/")),
             fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")),

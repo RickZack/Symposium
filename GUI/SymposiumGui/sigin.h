@@ -5,7 +5,6 @@
 #include <QCloseEvent>
 #include "home.h"
 #include "errorconnection.h"
-#include "exit.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -57,7 +56,7 @@ private:
     std::string pwd;
     MainWindow *mw;
     Symposium::clientdispatcher *cl;
-    class exit *ex;
+    bool pressed=false;
     /**
      * @brief quit from application
      */
@@ -70,6 +69,26 @@ private:
      * @brief called when show() is invoked for this window and perform an animation
      */
     void showEvent(QShowEvent* event);
+    /**
+     * @brief disable all buttons present so user cannot perform any operation
+     */
+    void disableButtons();
+    /**
+     * @brief enable all buttons present
+     */
+    void enableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
+    /**
+     * @brief hide the labels
+     */
+    void hideLabelsError();
 };
 
 #endif // SIGIN_H

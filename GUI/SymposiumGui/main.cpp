@@ -7,11 +7,13 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
-    Symposium::clientdispatcher cl;
-    w.setClientDispatcher(&cl);
+    Symposium::clientdispatcher *cl= new Symposium::clientdispatcher();
+    w.setClientDispatcher(cl);
     w.show();
     //notepad *notepadWindow = new notepad(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "");
     //notepadWindow->show();
 
-    return a.exec();
+    int ret=a.exec();
+    delete cl;
+    return ret;
 }

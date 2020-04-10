@@ -64,6 +64,7 @@
         <file>cartelle/reader_icon.jpg</file>
         <file>cartelle/writer_icon.jpg</file>
         <file>cartelle/color_icon.png</file>
+        <file>avatar/unknown.png</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/file.png</file>
@@ -78,5 +79,8 @@
         <file>icon/logo.png</file>
         <file>icon/logo1.png</file>
         <file>icon/ajax-loader.gif</file>
+        <file>icon/exit.png</file>
+        <file>icon/redexit.png</file>
+        <file>icon/baskvil.TTF</file>
     </qresource>
 </RCC>

@@ -4,8 +4,8 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QCloseEvent>
+#include <QFontDatabase>
 #include "about.h"
-#include "exit.h"
 #include "sigin.h"
 #include "signup.h"
 
@@ -48,10 +48,11 @@ private slots:
 private:
     Ui::MainWindow *ui;
     about *aboutWindow;
-    class exit *ex;
     sigin *signinWindow;
     signup *signupWindow;
     Symposium::clientdispatcher *cl;
+    QFontDatabase database;
+    int fontEx;
     /**
      * @brief quit from application
      */
@@ -60,6 +61,14 @@ private:
      * @brief called when show() is invoked for this window and perform an animation
      */
     void showEvent(QShowEvent* event);
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
 };
 
 #endif // MAINWINDOW_H
