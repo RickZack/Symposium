@@ -35,7 +35,7 @@ class notepad : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit notepad(QWidget *parent = nullptr, Symposium::uint_positive_cnt::type documentID=0,Symposium::privilege priv=Symposium::privilege::none,Symposium::privilege privOpen=Symposium::privilege::none,std::string pathToFile=" ",Symposium::document doc=Symposium::document());
+    explicit notepad(QWidget *parent = nullptr, Symposium::uint_positive_cnt::type documentId=0,Symposium::privilege priv=Symposium::privilege::none,Symposium::privilege privOpen=Symposium::privilege::none,std::string pathToFile=" ",Symposium::document doc=Symposium::document());
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~notepad();
 
@@ -173,12 +173,9 @@ private:
     void verifySymbol2();
     void prova_remoteDelete();
 
-    void provaFill();
-    void prova_colorText();
-    //------------------------------------------------------------------------------------------------------------------------------------------
+    Symposium::document documentoProva;
+    static constexpr wchar_t  emptyChar='~';
 
-
-    QColor backCol;
 };
 
 #endif // NOTEPAD_H

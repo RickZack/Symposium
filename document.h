@@ -80,6 +80,7 @@ namespace Symposium {
         int numchar;                                                    /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
+        int level=0;
 
         static constexpr wchar_t  emptyChar='~';
         static const symbol emptySymbol;
@@ -191,6 +192,10 @@ namespace Symposium {
          */
         void checkIndex(unsigned int i0, unsigned int i1);
 
+        void setLevel(int value);
+
+        int getLevel() const;
+
     private:
         /**
          * @brief it determines the globally unique fractional index position of the new character.
@@ -258,6 +263,7 @@ namespace Symposium {
         generatePosBetween(std::vector<int> vector, std::vector<int> vector1, std::vector<int> vector2, int level,
                            int i,
                            int i1);
+
         /**
          * @brief finds the id of the symbol inserted in between two other onws
          * @param id1

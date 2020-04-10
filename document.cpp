@@ -41,6 +41,16 @@ uint_positive_cnt document::idCounter;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 
 //FIXME: valore di default di id ignorato, potenziale errore
+void document::setLevel(int level)
+{
+    this->level = level;
+}
+
+int document::getLevel() const
+{
+    return level;
+}
+
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)) {
     id=idCounter;
     idCounter++;
@@ -74,9 +84,11 @@ document & document::access(const user &newActive, privilege accessPriv) {
 void document::checkIndex(unsigned int i0, unsigned int i1) {
     float mul_fct=1.5; //just to avoid too many reallocations
     if(i0>=symbols.capacity())
-        symbols.resize((i0+1)*mul_fct);
+        //symbols.resize((i0+1)*mul_fct);
+        symbols.resize((i0+1));
     if(i1>=symbols[i0].capacity())
-        symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
+        //symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
+        symbols[i0].resize((i1 + 1), emptySymbol);
 }
 
 
@@ -87,14 +99,13 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     checkIndex(i0,i1);
 
     symbol newSymb= generatePosition(indexes,toInsert);
+    newSymb.setCharFormat(toInsert.getCharFormat());
     char sym=symbols[i0][i1].getCh();
 
     if(sym==emptyChar){
-        //symbols[i0][i1]=toInsert;
         symbols[i0][i1]=newSymb;
     }
     else {
-        //symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
         symbols[i0].insert(symbols[i0].begin() + i1, newSymb);
         }
 
@@ -121,7 +132,8 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
         posAfter.push_back(symA.getPos().front());
         siteIdA=symB.getSiteId();
     }
-    int level=0;
+
+    int level=this->getLevel();
     std::vector<int> inPos;
     std::vector<int> newPos= generatePosBetween(posBefore, posAfter, inPos, level, siteIdB, siteIdA);
 
@@ -145,8 +157,10 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> index
     }
         // SECOND LIMIT CASE: I have to change line
     else if(ch==0 && line!=0){
-        line=line-1;
-        ch=symbols[line].size();
+       line=line-1;
+       ch=symbols[line].size()-1;
+        //symbol sym=emptySymbol;
+        //return sym;
     }else{
         ch=ch-1;
     }
@@ -160,13 +174,13 @@ symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexe
 
     int numLines=symbols.size();
     int numChars=0;
-    for(int i=0;i<symbols[line].size();i++){
+    for(size_t i=0;i<symbols[line].size();i++){
         if (symbols[line][i]!=emptySymbol){
             numChars++;
         }
     }
 
-    // If I have lines after the considered one, but I'm at the end of the considered line
+    // no line after the considered one
     if(line==numLines-1 && ch==numChars){
         symbol sym=emptySymbol;
         return sym;
@@ -206,43 +220,53 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
 
     if(id2-id1>1){
         int newDigit= generateIdBetween(id1,id2,boundaryStrategy);
-        newPos.push_back(newDigit);
+        //newPos.push_back(newDigit);
+        auto it=newPos.begin();
+        newPos.insert(it,newDigit);
     }else if( id2-id1==1){
-        newPos.push_back(id1);
+        auto it=newPos.begin();
+        newPos.insert(it,id1);
         // pos1.slice(1) will remove from the posBefore the first element
-        std::vector<int> pos1=posBefore;
-        pos1.erase(pos1.begin());
+        //std::vector<int> pos1=posBefore;
+        //pos1.erase(pos1.begin());
         std::vector<int> pos2;
-        return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
+        return generatePosBetween(posBefore, pos2, newPos, level + 1, siteIdB, siteIdA);
 
     }else if(id1==id2){
         if(siteIdB<siteIdA){
-            newPos.push_back(id1);
+            auto it=newPos.begin();
+            newPos.insert(it,id1);
+
             //pos1.slice(1)
-            std::vector<int> pos1=posBefore;
-            pos1.erase(pos1.begin());
+            //std::vector<int> pos1=posBefore;
+            //pos1.erase(pos1.begin());
             std::vector<int> pos2;
-            return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
+            return generatePosBetween(posBefore, pos2, newPos, level + 1, siteIdB, siteIdA);
         }else{
-           newPos.push_back(id1);
+            auto it=newPos.begin();
+            newPos.insert(it,id1);
             //pos1.slice(1)
-            std::vector<int> pos1=posBefore;
-            pos1.erase(pos1.begin());
+            //std::vector<int> pos1=posBefore;
+            //pos1.erase(pos1.begin());
             //pos2.slice(1)
-            std::vector<int> pos2=posAfter;
-            pos2.erase(pos2.begin());
-            return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
+            //std::vector<int> pos2=posAfter;
+            //pos2.erase(pos2.begin());
+            return generatePosBetween(posBefore, posAfter, newPos, level + 1, siteIdB, siteIdA);
         }
     }
 
+    this->setLevel(level);
     return newPos;
+
 
 }
 
 
 char document::retrieveStrategy(const int level){
 
-   if(!strategyCache.empty()){
+   int sizeSC=strategyCache.size();
+   if(level<sizeSC){
+   //if(!strategyCache.empty()){
         return strategyCache[level];
     }
 
