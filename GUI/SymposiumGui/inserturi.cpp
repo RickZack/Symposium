@@ -243,11 +243,13 @@ void inserturi::on_cancel_clicked()
     if(homeWindow)
     {
         h=new home(nullptr, pwd);
+        h->setClientDispatcher(cl);
         h->show();
     }
     else
     {
         d=new directory();
+        d->setClientDispatcher(cl);
         d->show();
     }
 }

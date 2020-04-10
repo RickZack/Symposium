@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QCloseEvent>
+#include <QFontDatabase>
 #include "about.h"
 #include "sigin.h"
 #include "signup.h"
@@ -50,6 +51,8 @@ private:
     sigin *signinWindow;
     signup *signupWindow;
     Symposium::clientdispatcher *cl;
+    QFontDatabase database;
+    int fontEx;
     /**
      * @brief quit from application
      */

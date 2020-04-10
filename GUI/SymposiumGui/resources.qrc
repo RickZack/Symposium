@@ -81,5 +81,6 @@
         <file>icon/ajax-loader.gif</file>
         <file>icon/exit.png</file>
         <file>icon/redexit.png</file>
+        <file>icon/baskvil.TTF</file>
     </qresource>
 </RCC>

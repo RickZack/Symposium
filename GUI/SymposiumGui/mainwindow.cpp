@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "Dispatcher/clientdispatcher.h"
+#include "QDebug"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,6 +13,12 @@ MainWindow::MainWindow(QWidget *parent) :
     int w=ui->label->width();
     int h=ui->label->height();
     ui->label->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    fontEx = database.addApplicationFont(":/icon/baskvil.TTF");
+    if(fontEx<-1)
+        qDebug()<<"not installed";
+    else
+        qDebug()<<"install succ";
+
 
 
 }
