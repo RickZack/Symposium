@@ -212,6 +212,7 @@ void sigin::hideLabelsError()
 void sigin::on_cancel_clicked()
 {
     mw= new MainWindow();
+    mw->setClientDispatcher(cl);
     mw->show();
     hide();
 }

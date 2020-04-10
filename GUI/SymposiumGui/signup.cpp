@@ -309,6 +309,7 @@ QDialog::showEvent(event);
 void signup::on_cancel_clicked()
 {
     mw= new MainWindow();
+    mw->setClientDispatcher(cl);
     mw->show();
     hide();
 }

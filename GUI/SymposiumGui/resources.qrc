@@ -64,6 +64,7 @@
         <file>cartelle/reader_icon.jpg</file>
         <file>cartelle/writer_icon.jpg</file>
         <file>cartelle/color_icon.png</file>
+        <file>avatar/unknown.png</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/file.png</file>

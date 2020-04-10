@@ -3,9 +3,9 @@
 #include "directory.h"
 #include "home.h"
 
-inserturi::inserturi(QWidget *parent, std::string pwd, bool home) :
+inserturi::inserturi(QWidget *parent, std::string pwd, bool homeWindow) :
     QDialog(parent),
-    ui(new Ui::inserturi), pwd(pwd), home(home)
+    ui(new Ui::inserturi), pwd(pwd), homeWindow(homeWindow)
 {
     ui->setupUi(this);
     //showDir=cl->showDir(true);
@@ -240,9 +240,9 @@ void inserturi::successInsert()
 void inserturi::on_cancel_clicked()
 {
     this->hide();
-    if(home)
+    if(homeWindow)
     {
-        h=new class home(nullptr, pwd);
+        h=new home(nullptr, pwd);
         h->show();
     }
     else

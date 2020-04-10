@@ -24,7 +24,7 @@ class inserturi : public QDialog
     Q_OBJECT
 
 public:
-    explicit inserturi(QWidget *parent = nullptr, std::string pwd="", bool home=true);
+    explicit inserturi(QWidget *parent = nullptr, std::string pwd="", bool homeWindow=true);
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -97,7 +97,7 @@ private:
     home *h;
     directory *d;
     std::string pwd;
-    bool home;
+    bool homeWindow;
     errorconnection *errorWindow;
     errorlogout *errorLog;
     /**
