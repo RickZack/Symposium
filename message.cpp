@@ -356,7 +356,10 @@ const user &loginMessage::getLoggedUser() const {
 
 void loginMessage::invokeMethod(SymClient &client) {
     auto msg= client.retrieveRelatedMessage(*this);
-    client.logIn(loggedUser);
+    if(action==msgType::login)
+        client.logIn(loggedUser);
+    else
+        client.signUp(loggedUser);
 }
 
 bool loginMessage::operator==(const loginMessage &rhs) const {

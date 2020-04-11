@@ -92,7 +92,7 @@ namespace Symposium {
          * @brief assign to @e loggedUser the user returned by the server after having sent a @ref signUpMessage
          * @param logged the user sent back by the server in a @ref signUpMessage
          */
-        void signUp(const user& logged);
+        virtual void signUp(const user& logged);
 
         /**
          * @brief constructs a @ref clientMessage to send to the server to aks for authentication
@@ -106,7 +106,7 @@ namespace Symposium {
          * @brief assign to @e loggedUser the user returned by the server after having sent a @ref clientMessage
          * @param logged the user sent back by the server in a @ref signUpMessage
          */
-        void logIn(const user& logged);
+        virtual void logIn(const user& logged);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to open a document

@@ -515,7 +515,6 @@ TEST_F(clientMessageTest, updateDocMsgTestCallsCloseSource){
 
 class SymClientMock: public SymClient{
 public:
-    MOCK_METHOD1(setLoggedUser, void(const user&));
     MOCK_METHOD2(setUserColors, void(uint_positive_cnt::type, const std::map<uint_positive_cnt::type, user>&));
     MOCK_METHOD3(createNewSource, void(const std::string&, const std::string&, uint_positive_cnt::type));
     MOCK_METHOD3(createNewDir, void(const std::string&, const std::string&, uint_positive_cnt::type));
@@ -537,6 +536,8 @@ public:
     MOCK_METHOD1(removeUser, void(bool msgRcv));
 
     MOCK_METHOD4(updateCursorPos, void(uint_positive_cnt::type, uint_positive_cnt::type, unsigned int, unsigned int));
+    MOCK_METHOD1(signUp, void(const user&));
+    MOCK_METHOD1(logIn, void(const user&));
 };
 
 struct serverMessageTest: public testing::Test{
@@ -554,10 +555,21 @@ struct serverMessageTest: public testing::Test{
     }
 };
 
-TEST_F(serverMessageTest, loginMsgTestCallsSetLoggedUser){
+TEST_F(serverMessageTest, loginMsgTestCallsLogin){
     m=new loginMessage(msgType::login, msgOutcome::success, u);
-    EXPECT_CALL(client, setLoggedUser(u));
-    //Even if the retrieved message is not useful to call setLoggedUser(), it's necessary to
+    EXPECT_CALL(client, logIn(u));
+    //Even if the retrieved message is not useful to call logIn(), it's necessary to
+    //notify that the server answered and check if the asked action has been completed successfully
+    EXPECT_CALL(client, retrieveRelatedMessage(*m));
+
+    m->invokeMethod(client);
+}
+
+//Added on 11/04/2020 after having found bug on signUp flow implementation
+TEST_F(serverMessageTest, loginMsgTestCallsSignUpOnClient){
+    m=new loginMessage(msgType::registration, msgOutcome::success, u);
+    EXPECT_CALL(client, signUp(u));
+    //Even if the retrieved message is not useful to call signUp(), it's necessary to
     //notify that the server answered and check if the asked action has been completed successfully
     EXPECT_CALL(client, retrieveRelatedMessage(*m));
 
