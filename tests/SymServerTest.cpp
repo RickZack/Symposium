@@ -111,7 +111,7 @@ struct SymServerAccesser: public SymServer{
     }
 
 public:
-    SymServerAccesser() {
+    SymServerAccesser() : SymServer(false, false){
         d1=new document(10);
         d2=new document(20);
     }
@@ -1013,6 +1013,8 @@ TEST_F(SymServerTestFilesystemFunctionality, updateCursorOnDocumentNotOpened){
 struct SymServerSerialization: ::testing::Test{
     SymServer toStore, toLoad;
     std::stringstream stream;
+
+    SymServerSerialization() :toStore(false, false), toLoad(false, false){};
 
     void store(const SymServer& u){
         boost::archive::text_oarchive oa(stream);

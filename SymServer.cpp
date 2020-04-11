@@ -27,23 +27,25 @@
  *
  * Created on 20 Giugno 2019, 21.30
  */
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/export.hpp>
+#include <fstream>
+
 #include "SymServer.h"
 #include "message.h"
 #include "filesystem.h"
 #include <regex>
 #include "SymposiumException.h"
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/serialization/shared_ptr.hpp>
+
 
 using namespace Symposium;
 
 uint_positive_cnt SymServer::idCounter;
-const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", ":/resources/avatar/unknown.png", -1, nullptr);
+const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", ":/resources/avatar/unknown.png", 0, nullptr);
 
 const user & SymServer::addUser(user &newUser) {
     if(userIsRegistered(newUser.getUsername()))
@@ -356,8 +358,12 @@ bool SymServer::userIsValid(const user &toCheck) noexcept {
             && std::regex_match(toCheck.getIconPath(), pathPattern);
 }
 
-SymServer::SymServer() {
-rootDir=directory::getRoot();
+SymServer::SymServer(bool loading, bool storing) : loadData(loading), storeData(storing){
+    bool loaded=false;
+    if(loadData)
+        loaded=load();
+    if(!loaded)
+        rootDir=directory::getRoot();
 }
 
 template<class Archive>
@@ -458,7 +464,7 @@ std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessa
     std::pair<int, std::shared_ptr<serverMessage>> result(-1, nullptr);
     if(siteIdToMex.empty())
         return result;
-    for(std::pair<const int, std::queue<std::shared_ptr<serverMessage>>> mexForSiteId:siteIdToMex)
+    for(std::pair<const int, std::queue<std::shared_ptr<serverMessage>>>& mexForSiteId:siteIdToMex)
         if(!mexForSiteId.second.empty()){
             result.first=mexForSiteId.first;
             result.second=mexForSiteId.second.front();
@@ -485,8 +491,43 @@ uint_positive_cnt::type SymServer::getSiteIdOfUser(const std::string &username) 
     return registered.at(username).getSiteId();
 }
 
+void SymServer::store() const {
+    std::ofstream out{storeFile};
+    if(out.good()) {
+        try {
+            boost::archive::text_oarchive oa(out);
+            oa << *this;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Unable to store data on disk: " << e.what() << std::endl;
+            remove(storeFile);
+        }
 
-BOOST_CLASS_EXPORT(Symposium::SymServer)
+    } else
+        std::cerr<<"Error opening output file"<<std::endl;
+}
+
+bool SymServer::load() {
+    std::ifstream input{storeFile, std::ios::in};
+    if(input.good()){
+        try {
+            SymServer temp(false, false);
+            boost::archive::text_iarchive ia(input);
+            ia>>temp;
+            *this=std::move(temp);
+            return true;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Unable to load data from disk: " << e.what() << std::endl;
+        }
+    }
+    return false;
+}
+
+SymServer::~SymServer() {
+    if(storeData)
+        store();
+}
 
 
 

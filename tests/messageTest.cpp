@@ -384,6 +384,7 @@ INSTANTIATE_TEST_CASE_P(updateCursorPos, cursorMsgLegalActions, testing::Values(
 
 class SymServerMock: public SymServer{
 public:
+    SymServerMock() : SymServer(false, false){}
     MOCK_METHOD2(login, const user(const std::string&, const std::string&));
     MOCK_METHOD1(logout, void(const std::string&));
     MOCK_METHOD2(removeUser, void(const std::string&, const std::string&));

@@ -36,17 +36,12 @@
 #include <forward_list>
 #include <queue>
 #include <map>
-
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/serialization/unordered_map.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/assume_abstract.hpp>
 #include <boost/serialization/access.hpp>
-#include <boost/serialization/export.hpp>
 
 
-#include "Symposium.h"
+
+
+//#include "Symposium.h"
 #include "user.h"
 #include "message.h"
 
@@ -72,15 +67,18 @@
          std::unordered_map<std::string, const user *> active;                                             /**< active users, indexed by username */
          std::unordered_map<std::string, std::forward_list<document *>> workingDoc;                        /**< list of document each user is working on */
          std::unordered_map<int, std::queue<std::shared_ptr<serverMessage>>> siteIdToMex;                  /**< messages queues associated with every user by means of @e siteId */
-         std::unordered_map<int, std::forward_list<uint_positive_cnt::type>> resIdToSiteId;                                    /**< list of users involved in a document, by means of @e siteIds and @e resIds */
+         std::unordered_map<int, std::forward_list<uint_positive_cnt::type>> resIdToSiteId;                /**< list of users involved in a document, by means of @e siteIds and @e resIds */
          static uint_positive_cnt idCounter;                                                               /**< siteId to be assigned to the next registered user */
          std::shared_ptr<directory> rootDir;                                                               /**< virtual filesystem of the Symposium server */
 
      public:
          static const user unknownUser;
+         static constexpr char storeFile[]="./serverData.dat";                                              /**< path of the file the server data is stored onto and loaded from */
+         bool loadData, storeData;                                                                          /**< flags to indicate whether the server data is to be stored and loaded */
 
          //Some methods are virtual in order to use the mocks in tests
-         SymServer();
+         SymServer(bool loading=true, bool storing=true);
+         SymServer& operator=(SymServer&& other)=default;
 
          bool operator==(const SymServer &rhs) const;
 
@@ -350,7 +348,14 @@
          std::pair<const int, std::shared_ptr<serverMessage>> extractNextMessage();
 
          uint_positive_cnt::type getSiteIdOfUser(const std::string& username) const;
-         virtual ~SymServer() = default;
+
+         /**
+          * @brief store the server data onto the disk
+          */
+         void store() const;
+
+         bool load();
+         virtual ~SymServer();
 
      protected:
          /*
