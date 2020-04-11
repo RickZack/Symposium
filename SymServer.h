@@ -98,7 +98,7 @@
           * Note that the @e siteId of the user is assigned by the server, as the user's @e home directory structure and the
           * @e hashSalt (that mustn't be sent to the client inside the @ref loginMessage), so the user filled client side is always incomplete.
           */
-         virtual const user &addUser(user &newUser);
+         virtual const user &addUser(user &newUser, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief log in an already registered user, adding it to @e active
@@ -113,7 +113,8 @@
           * @e password corresponds to a user contained in @e registered, then sends the retrieved user object to
           * the client, after having darken the @e password and the @e hashSalt, via a @ref loginMessage
           */
-         virtual const user login(const std::string &username, const std::string &pwd);
+         virtual const user
+         login(const std::string &username, const std::string &pwd, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief access a document that is already in the user's filesystem
@@ -131,7 +132,8 @@
           * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
           */
          virtual std::shared_ptr<file>
-         openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv);
+         openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
+                    uint_positive_cnt::type respMsgId);
 
          /**
           * @brief access a user's document via uri to the filesystem of the another user
@@ -153,7 +155,7 @@
           */
          virtual std::shared_ptr<file>
          openNewSource(const std::string &opener, const std::string &resourceId, const std::string &destPath,
-                       const std::string &destName, privilege reqPriv);
+                       const std::string &destName, privilege reqPriv, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief creates a new file with an empty document inside
@@ -167,7 +169,9 @@
           * When a client asks for a new directory, the server tries to do it and send back to the client a @ref sendResMessage
           * containing the resource just added to @e path.
           */
-         virtual const document &createNewSource(const std::string &opener, const std::string &path, const std::string &name);
+         virtual const document &
+         createNewSource(const std::string &opener, const std::string &path, const std::string &name,
+                         uint_positive_cnt::type respMsgId);
 
          /**
           * @brief creates a new directory in the user's filesystem
@@ -182,7 +186,8 @@
           * containing the directory just added to @e path.
           */
          virtual std::shared_ptr<directory>
-         createNewDir(const std::string &opener, const std::string &path, const std::string &name);
+         createNewDir(const std::string &opener, const std::string &path, const std::string &name,
+                      uint_positive_cnt::type respMsgId);
 
          /**
           * @brief update a document with a new symbol from a client
@@ -238,8 +243,9 @@
           * then calls @ref user::editPrivilege on @e actionUser
           * At the end send a @ref serverMessage with the action outcome
           */
-         virtual privilege editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
-                                         const std::string &resName, privilege newPrivilege);
+         virtual privilege
+         editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
+                       const std::string &resName, privilege newPrivilege, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief set new sharing preferences for a resource
@@ -255,7 +261,8 @@
           * At the end send a @ref serverMessage with the action outcome
           */
          virtual std::shared_ptr<filesystem>
-         shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName, const uri &newPrefs);
+         shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName,
+                       const uri &newPrefs, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief renames a resource from @e remover 's @e home directory
@@ -273,7 +280,7 @@
           */
          virtual std::shared_ptr<filesystem>
          renameResource(const std::string &renamer, const std::string &resPath, const std::string &resName,
-                        const std::string &newName);
+                        const std::string &newName, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief removes a resource from @e remover 's @e home directory
@@ -286,7 +293,8 @@
           * The server checks that @e actionUser is in @e registered and in @e active, then calls @ref user::renameResource on @e remover.
           */
          virtual std::shared_ptr<filesystem>
-         removeResource(const std::string &remover, const std::string &resPath, const std::string &resName);
+         removeResource(const std::string &remover, const std::string &resPath, const std::string &resName,
+                        uint_positive_cnt::type respMsgId);
 
          /**
          * @brief close a @ref document for a user
@@ -296,7 +304,8 @@
          * This method is invoked by receiving a @ref updateDocMessage and has the effect of calling
          * @ref document::close and the removal of @e actionUser from @e workingDoc for @e toClose
          */
-         virtual void closeSource(const std::string &actionUser, uint_positive_cnt::type resIdtoClose);
+         virtual void closeSource(const std::string &actionUser, uint_positive_cnt::type resIdtoClose,
+                                  uint_positive_cnt::type respMsgId);
 
          /**
           * @brief changes user's data
@@ -309,7 +318,8 @@
           * The server must send a @ref userDataMessage to the users in @e active that share some files with the user
           * identified by @e username if the user changed the nickname or the icon
           */
-         virtual const user &editUser(const std::string &username, user &newUserData);
+         virtual const user &
+         editUser(const std::string &username, user &newUserData, uint_positive_cnt::type respMsgId);
 
          /**
          * @brief removes an user to the set of users registered to the system
@@ -317,14 +327,15 @@
          * @param pwd the user's password
          * @return the user just removed
           */
-         virtual void removeUser(const std::string &username, const std::string &pwd);
+         virtual void
+         removeUser(const std::string &username, const std::string &pwd, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief performs a log out, removing the user from @e active
           * @param username the username of the user who is performing the log out
           * @return the logged out user
           */
-         virtual void logout(const std::string &username);
+         virtual void logout(const std::string &username, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief maps siteIds to users to allow a client to identify the owner of each change in a document
@@ -338,7 +349,9 @@
           * the map with users in @e registered.
           * Sends to the client a @ref mapMessage
           */
-         virtual std::map<uint_positive_cnt::type, user> mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::type resourceId);
+         virtual std::map<uint_positive_cnt::type, user>
+         mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::type resourceId,
+                         uint_positive_cnt::type respMsgId);
          //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
          /**
@@ -460,7 +473,8 @@
          * @param loggedOut the user that just logged out
          * @param listOfDocs the user of docs the user was working on
          */
-         void closeAllDocsAndPropagateMex(const user &loggedOut, const std::forward_list<document*>& listOfDocs);
+        void closeAllDocsAndPropagateMex(const user &loggedOut, const std::forward_list<document *> &listOfDocs,
+                                         uint_positive_cnt::type respMsgId);
 
          /**
           * @brief Removes the siteId of the user that just logged out from the list
@@ -474,7 +488,7 @@
           * @param recvSiteId the siteId of the client to send the confirm to
           * @param action the msgType of the received clientMessage
           */
-         void generateSimpleResponse(unsigned int recvSiteId, msgType action);
+         void generateSimpleResponse(unsigned int recvSiteId, msgType action, uint_positive_cnt::type respMsgId);
      };
  }
 
