@@ -460,11 +460,11 @@ void SymServer::handleLeavingUser(const user &loggedOut) {
     siteIdToMex.erase(loggedOut.getSiteId());
 }
 
-std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessage() {
-    std::pair<int, std::shared_ptr<serverMessage>> result(-1, nullptr);
+std::pair<const uint_positive_cnt::type, std::shared_ptr<serverMessage>> SymServer::extractNextMessage() {
+    std::pair<uint_positive_cnt::type, std::shared_ptr<serverMessage>> result(0, nullptr);
     if(siteIdToMex.empty())
         return result;
-    for(std::pair<const int, std::queue<std::shared_ptr<serverMessage>>>& mexForSiteId:siteIdToMex)
+    for(std::pair<const uint_positive_cnt::type, std::queue<std::shared_ptr<serverMessage>>>& mexForSiteId:siteIdToMex)
         if(!mexForSiteId.second.empty()){
             result.first=mexForSiteId.first;
             result.second=mexForSiteId.second.front();

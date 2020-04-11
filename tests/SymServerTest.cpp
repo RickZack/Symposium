@@ -1008,6 +1008,18 @@ TEST_F(SymServerTestFilesystemFunctionality, updateCursorOnDocumentNotOpened){
      */
 }
 
+TEST_F(SymServerTestFilesystemFunctionality, extractNextMessagePopsMessageFromQueue){
+    /*
+     * In the fixture constructor, login is called on server, so there must be two messages in the queue (registration and login)
+     */
+    auto m1=server.extractNextMessage();
+    ASSERT_TRUE(m1.first!=0);
+    auto m2=server.extractNextMessage();
+    ASSERT_TRUE(m2.first!=0);
+    auto m3=server.extractNextMessage();
+    EXPECT_TRUE(m3.first==0);
+}
+
 
 
 struct SymServerSerialization: ::testing::Test{

@@ -63,18 +63,18 @@
          void serialize(Archive &ar, const unsigned int version);
 
      protected:
-         std::unordered_map<std::string, user> registered;                                                 /**< registered users, indexed by username */
-         std::unordered_map<std::string, const user *> active;                                             /**< active users, indexed by username */
-         std::unordered_map<std::string, std::forward_list<document *>> workingDoc;                        /**< list of document each user is working on */
-         std::unordered_map<int, std::queue<std::shared_ptr<serverMessage>>> siteIdToMex;                  /**< messages queues associated with every user by means of @e siteId */
-         std::unordered_map<int, std::forward_list<uint_positive_cnt::type>> resIdToSiteId;                /**< list of users involved in a document, by means of @e siteIds and @e resIds */
-         static uint_positive_cnt idCounter;                                                               /**< siteId to be assigned to the next registered user */
-         std::shared_ptr<directory> rootDir;                                                               /**< virtual filesystem of the Symposium server */
+         std::unordered_map<std::string, user> registered;                                                        /**< registered users, indexed by username */
+         std::unordered_map<std::string, const user *> active;                                                    /**< active users, indexed by username */
+         std::unordered_map<std::string, std::forward_list<document *>> workingDoc;                               /**< list of document each user is working on */
+         std::unordered_map<uint_positive_cnt::type, std::queue<std::shared_ptr<serverMessage>>> siteIdToMex;     /**< messages queues associated with every user by means of @e siteId */
+         std::unordered_map<uint_positive_cnt::type, std::forward_list<uint_positive_cnt::type>> resIdToSiteId;   /**< list of users involved in a document, by means of @e siteIds and @e resIds */
+         static uint_positive_cnt idCounter;                                                                      /**< siteId to be assigned to the next registered user */
+         std::shared_ptr<directory> rootDir;                                                                      /**< virtual filesystem of the Symposium server */
 
      public:
          static const user unknownUser;
-         static constexpr char storeFile[]="./serverData.dat";                                              /**< path of the file the server data is stored onto and loaded from */
-         bool loadData, storeData;                                                                          /**< flags to indicate whether the server data is to be stored and loaded */
+         static constexpr char storeFile[]="./serverData.dat";                                                    /**< path of the file the server data is stored onto and loaded from */
+         bool loadData, storeData;                                                                                /**< flags to indicate whether the server data is to be stored and loaded */
 
          //Some methods are virtual in order to use the mocks in tests
          SymServer(bool loading=true, bool storing=true);
@@ -345,7 +345,7 @@
           * @brief extract a message from the message queue associated with an user
           * @return a pair containing the siteId of the user the message is to send to and the message itself
           */
-         std::pair<const int, std::shared_ptr<serverMessage>> extractNextMessage();
+         std::pair<const uint_positive_cnt::type , std::shared_ptr<serverMessage>> extractNextMessage();
 
          uint_positive_cnt::type getSiteIdOfUser(const std::string& username) const;
 
