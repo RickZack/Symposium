@@ -384,24 +384,25 @@ INSTANTIATE_TEST_CASE_P(updateCursorPos, cursorMsgLegalActions, testing::Values(
 
 class SymServerMock: public SymServer{
 public:
-    MOCK_METHOD2(login, const user(const std::string&, const std::string&));
-    MOCK_METHOD1(logout, void(const std::string&));
-    MOCK_METHOD2(removeUser, void(const std::string&, const std::string&));
-    MOCK_METHOD1(addUser, const user&(user&));
-    MOCK_METHOD3(createNewSource, const document&(const std::string&, const std::string&, const std::string&));
-    MOCK_METHOD4(openSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, privilege));
-    MOCK_METHOD5(openNewSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, const std::string&, privilege));
-    MOCK_METHOD4(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, const std::string&));
-    MOCK_METHOD3(createNewDir, std::shared_ptr<directory>(const std::string&, const std::string&, const std::string&));
-    MOCK_METHOD3(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&));
-    MOCK_METHOD2(mapSiteIdToUser, std::map<uint_positive_cnt::type, user>(const std::string&, uint_positive_cnt::type));
+    SymServerMock() : SymServer(false, false){}
+    MOCK_METHOD3(login, const user(const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD2(logout, void(const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD3(removeUser, void(const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD2(addUser, const user&(user&, uint_positive_cnt::type));
+    MOCK_METHOD4(createNewSource, const document&(const std::string&, const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD5(openSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, privilege, uint_positive_cnt::type));
+    MOCK_METHOD6(openNewSource, std::shared_ptr<file>(const std::string&, const std::string&, const std::string&, const std::string&, privilege, uint_positive_cnt::type));
+    MOCK_METHOD5(renameResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD4(createNewDir, std::shared_ptr<directory>(const std::string&, const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD4(removeResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD3(mapSiteIdToUser, std::map<uint_positive_cnt::type, user>(const std::string&, uint_positive_cnt::type, uint_positive_cnt::type));
 
-    MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, const std::string&, privilege));
+    MOCK_METHOD6(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, const std::string&, privilege, uint_positive_cnt::type));
     MOCK_METHOD3(remoteInsert, void(const std::string&, uint_positive_cnt::type resourceId, symbolMessage&));
     MOCK_METHOD3(remoteRemove, void(const std::string&, uint_positive_cnt::type, symbolMessage& rmMsg));
-    MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string& actionUser, const std::string&, const std::string&, const uri&));
-    MOCK_METHOD2(editUser, const user&(const std::string&, user&));
-    MOCK_METHOD2(closeSource, void(const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD5(shareResource, std::shared_ptr<filesystem>(const std::string& actionUser, const std::string&, const std::string&, const uri&, uint_positive_cnt::type));
+    MOCK_METHOD3(editUser, const user&(const std::string&, user&, uint_positive_cnt::type));
+    MOCK_METHOD3(closeSource, void(const std::string&, uint_positive_cnt::type, uint_positive_cnt::type));
     MOCK_METHOD3(updateCursorPos, void(const std::string&, uint_positive_cnt::type, cursorMessage&));
 };
 
@@ -431,51 +432,51 @@ const int clientMessageTest::resourceId=10;
 
 TEST_F(clientMessageTest, clientMessageTestCallsLoginOnServer){
     m=new clientMessage(msgType::login, {username, pwd});
-    EXPECT_CALL(server, login(m->getActionOwner().first, m->getActionOwner().second)).WillOnce(::testing::Return(u));
+    EXPECT_CALL(server, login(m->getActionOwner().first, m->getActionOwner().second, m->getMsgId())).WillOnce(::testing::Return(u));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, clientMessageTestCallsLogoutOnServer){
     m=new clientMessage(msgType::logout, {username, ""});
-    EXPECT_CALL(server, logout(m->getActionOwner().first));
+    EXPECT_CALL(server, logout(m->getActionOwner().first, m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, clientMessageTestCallsRemoveUserOnServer){
     m=new clientMessage(msgType::removeUser, {username, pwd});
-    EXPECT_CALL(server, removeUser(m->getActionOwner().first, m->getActionOwner().second));
+    EXPECT_CALL(server, removeUser(m->getActionOwner().first, m->getActionOwner().second, m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, signUpMsgTestCallsAddUserOnServer){
     m=new signUpMessage(msgType::registration, {username, ""}, u);
-    EXPECT_CALL(server, addUser(u)).WillOnce(::testing::ReturnRef(u));
+    EXPECT_CALL(server, addUser(u, m->getMsgId())).WillOnce(::testing::ReturnRef(u));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewSource){
     document d;
     m= new askResMessage(msgType::createRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, createNewSource(m->getActionOwner().first, path, name)).WillOnce(::testing::ReturnRef(d));
+    EXPECT_CALL(server, createNewSource(m->getActionOwner().first, path, name, m->getMsgId())).WillOnce(::testing::ReturnRef(d));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsOpenSource){
     m= new askResMessage(msgType::openRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, openSource(m->getActionOwner().first, path, name, uri::getDefaultPrivilege()));
+    EXPECT_CALL(server, openSource(m->getActionOwner().first, path, name, uri::getDefaultPrivilege(), m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsOpenNewSource){
     m= new askResMessage(msgType::openNewRes, {username, ""}, path, name, resId, uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, openNewSource(username, resId, path, name, uri::getDefaultPrivilege()));
+    EXPECT_CALL(server, openNewSource(username, resId, path, name, uri::getDefaultPrivilege(), m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsRenameResource){
     //If @e action is "changeResName" then @e resourceId is the new file name. See def. of askResMessage in message.h
     m= new askResMessage(msgType::changeResName, {username, ""}, path, name, resId, uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, renameResource(username, path, name, resId)).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
+    EXPECT_CALL(server, renameResource(username, path, name, resId, m->getMsgId())).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
 
     //resID non è un nuovo nome della risorsa, sistemare!
     m->invokeMethod(server);
@@ -483,25 +484,25 @@ TEST_F(clientMessageTest, askResMsgTestCallsRenameResource){
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewDir){
     m= new askResMessage(msgType::createNewDir, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, createNewDir(username, path, name));
+    EXPECT_CALL(server, createNewDir(username, path, name, m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsRemoveResource){
     m= new askResMessage(msgType::removeRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, removeResource(username, path, name)).WillOnce(::testing::Return(std::shared_ptr<directory>()));
+    EXPECT_CALL(server, removeResource(username, path, name, m->getMsgId())).WillOnce(::testing::Return(std::shared_ptr<directory>()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, updateDocMsgTestCallsMapSiteIdToUser){
     m=new updateDocMessage(msgType::mapChangesToUser, {username,""},resourceId);
-    EXPECT_CALL(server, mapSiteIdToUser(username, resourceId));
+    EXPECT_CALL(server, mapSiteIdToUser(username, resourceId, m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, updateDocMsgTestCallsCloseSource){
     m=new updateDocMessage(msgType::closeRes, {username,""},resourceId);
-    EXPECT_CALL(server, closeSource(username, resourceId));
+    EXPECT_CALL(server, closeSource(username, resourceId, m->getMsgId()));
     m->invokeMethod(server);
 }
 
@@ -731,7 +732,7 @@ const int DoubleEndMessageTest::resourceId=10;
 
 TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilege){
     fromClient=new privMessage(msgType::changePrivileges,{username, {}}, msgOutcome::success, resId, anotherUsername, uri::getDefaultPrivilege());
-    EXPECT_CALL(server, editPrivilege(username, anotherUsername, path, name, uri::getDefaultPrivilege())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
+    EXPECT_CALL(server, editPrivilege(username, anotherUsername, path, name, uri::getDefaultPrivilege(), fromClient->getMsgId())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::changePrivileges, msgOutcome::success, fromClient->getMsgId());
@@ -860,7 +861,7 @@ TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemove){
     fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path, name,
                                dummyUri);
     uriMessage* fc= static_cast<uriMessage*>(fromClient);
-    EXPECT_CALL(server, shareResource(username, path, name, dummyUri));
+    EXPECT_CALL(server, shareResource(username, path, name, dummyUri, fromClient->getMsgId()));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::shareRes, msgOutcome::success, fromClient->getMsgId());
@@ -888,7 +889,7 @@ TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemoveOnOtherClient){
 TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUser){
     fromClient=new userDataMessage(msgType::changeUserData, {username, {}}, msgOutcome::success, u);
 
-    EXPECT_CALL(server, editUser(username, u)).WillOnce(::testing::ReturnRef(u));
+    EXPECT_CALL(server, editUser(username, u, fromClient->getMsgId())).WillOnce(::testing::ReturnRef(u));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::changeUserData, msgOutcome::success, fromClient->getMsgId());
@@ -1076,7 +1077,7 @@ TEST_F(messageSerialization, userDataMessage){
 
 TEST_F(messageSerialization, cursorMessage){
     toStore=std::unique_ptr<cursorMessage>(new cursorMessage(msgType::updateCursor, {"",""},msgOutcome ::success, 0, 0, 0, 0, 10));
-    toLoad=std::unique_ptr<cursorMessage>(new cursorMessage(msgType::updateCursor, {"",""},msgOutcome ::success, 0, 0, 0, 0, 10));
+    toLoad=std::unique_ptr<cursorMessage>(new cursorMessage(msgType::updateCursor, {"",""},msgOutcome ::success, 0, 0, 0, 10, 10));
     ASSERT_NE(*dynamic_cast<cursorMessage*>(toStore.get()), *dynamic_cast<cursorMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);

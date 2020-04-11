@@ -111,15 +111,15 @@ void clientMessage::invokeMethod(SymServer &server) {
     switch(action)
     {
         case msgType::login:{
-            user us=server.login(actionOwner.first, actionOwner.second);
+            user us= server.login(actionOwner.first, actionOwner.second, msgId);
             break;
         }
         case msgType::removeUser:{
-            server.removeUser(actionOwner.first, actionOwner.second);
+            server.removeUser(actionOwner.first, actionOwner.second, msgId);
             break;
         }
         case msgType::logout:{
-            server.logout(actionOwner.first);
+            server.logout(actionOwner.first, msgId);
             break;
         }
         default:
@@ -181,27 +181,27 @@ void askResMessage::invokeMethod(SymServer &server) {
     switch(action)
     {
         case msgType::createRes:{
-          server.createNewSource(getActionOwner().first,path,name);
+            server.createNewSource(getActionOwner().first, path, name, msgId);
           break;
         }
         case msgType::openRes:{
-            server.openSource(getActionOwner().first,path,name,accessMode);
+            server.openSource(getActionOwner().first, path, name, accessMode, msgId);
             break;
         }
         case msgType::openNewRes:{
-            server.openNewSource(getActionOwner().first,resourceId,path,name,accessMode);
+            server.openNewSource(getActionOwner().first, resourceId, path, name, accessMode, msgId);
             break;
         }
         case msgType::changeResName:{
-            server.renameResource(getActionOwner().first,path, name, resourceId);
+            server.renameResource(getActionOwner().first, path, name, resourceId, msgId);
             break;
         }
         case msgType::createNewDir:{
-            server.createNewDir(getActionOwner().first,path,name);
+            server.createNewDir(getActionOwner().first, path, name, msgId);
             break;
         }
         case msgType::removeRes:{
-            server.removeResource(getActionOwner().first,path,name);
+            server.removeResource(getActionOwner().first, path, name, msgId);
             break;
         }
         default:
@@ -270,7 +270,7 @@ void signUpMessage::serialize(Archive &ar, const unsigned int version)
 }
 
 void signUpMessage::invokeMethod(SymServer &ss) {
-    ss.addUser(newUser);
+    ss.addUser(newUser, msgId);
 }
 
 const user &signUpMessage::getNewUser() const {
@@ -510,7 +510,7 @@ void privMessage::invokeMethod(SymServer &server) {
     std::string pathRes="./";
     pathRes.append(path2);
 
-    server.editPrivilege(getActionOwner().first,targetUser,pathRes,nameRes,newPrivilege);
+    server.editPrivilege(getActionOwner().first, targetUser, pathRes, nameRes, newPrivilege, msgId);
 
 
 }
@@ -691,7 +691,7 @@ const uri &uriMessage::getSharingPrefs() const {
 }
 
 void uriMessage::invokeMethod(SymServer &server) {
-    server.shareResource(getActionOwner().first,path,name,sharingPrefs);
+    server.shareResource(getActionOwner().first, path, name, sharingPrefs, msgId);
 
 }
 
@@ -807,11 +807,11 @@ void updateDocMessage::invokeMethod(SymServer &server) {
     switch(action)
     {
         case msgType::closeRes:{
-            server.closeSource(getActionOwner().first,resourceId);
+            server.closeSource(getActionOwner().first, resourceId, msgId);
             break;
         }
         case msgType::mapChangesToUser:{
-            server.mapSiteIdToUser(getActionOwner().first,resourceId);
+            server.mapSiteIdToUser(getActionOwner().first, resourceId, msgId);
             break;
         }
         default:
@@ -849,7 +849,7 @@ void userDataMessage::serialize(Archive &ar, const unsigned int version)
 }
 
 void userDataMessage::invokeMethod(SymServer &server) {
-        server.editUser(getActionOwner().first,newUserData);
+    server.editUser(getActionOwner().first, newUserData, msgId);
 }
 
 void userDataMessage::invokeMethod(SymClient &client) {
@@ -875,7 +875,7 @@ BOOST_CLASS_EXPORT(Symposium::userDataMessage)
 
 cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                              uint_positive_cnt::type siteId,
-                             uint_positive_cnt::type resourceId, int row, int col, uint_positive_cnt::type msgId) : clientMessage(actionOwner, msgId),
+                             uint_positive_cnt::type resourceId, int row, int col, uint_positive_cnt::type msgId) : message(msgId), clientMessage(actionOwner, msgId),
                                                                             serverMessage(result, msgId), siteId(siteId),
                                                                             resourceId(resourceId), row(row), col(col){
     if(action!=msgType::updateCursor)

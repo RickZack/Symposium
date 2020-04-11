@@ -95,6 +95,7 @@ const std::string &user::getIconPath() const {
 }
 
 void user::setPwd(const std::string &pwd) {
+    hashSalt=saltGenerate();
     pwdHash=sha256(pwd+hashSalt);
 }
 

@@ -27,25 +27,27 @@
  *
  * Created on 20 Giugno 2019, 21.30
  */
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/export.hpp>
+#include <fstream>
+
 #include "SymServer.h"
 #include "message.h"
 #include "filesystem.h"
 #include <regex>
 #include "SymposiumException.h"
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/serialization/shared_ptr.hpp>
+
 
 using namespace Symposium;
 
 uint_positive_cnt SymServer::idCounter;
-const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", ":resources/avatar/unknown.png", -1, nullptr);
+const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", ":/resources/avatar/unknown.png", 0, nullptr);
 
-const user & SymServer::addUser(user &newUser) {
+const user & SymServer::addUser(user &newUser, uint_positive_cnt::type respMsgId) {
     if(userIsRegistered(newUser.getUsername()))
         throw SymServerException(SymServerException::userAlreadyExist, UnpackFileLineFunction());
     if(!userIsValid(newUser)){
@@ -57,13 +59,13 @@ const user & SymServer::addUser(user &newUser) {
     auto& target=registerUser(newUser);
 
     //response to client
-    auto response=std::make_shared<loginMessage>(msgType::registration, msgOutcome::success, target);
+    auto response=std::make_shared<loginMessage>(msgType::registration, msgOutcome::success, target, respMsgId);
     insertMessageForSiteIds({target.getSiteId()}, response);
 
     return target;
 }
 
-const user SymServer::login(const std::string &username, const std::string &pwd) {
+const user SymServer::login(const std::string &username, const std::string &pwd, uint_positive_cnt::type respMsgId) {
     SymServerException::SymServerExceptionCodes exCode=SymServerException::userNotLogged;
     if(!userIsRegistered(username))
         throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
@@ -77,7 +79,7 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
     if(exCode!=SymServerException::userNotLogged)
         throw SymServerException(exCode, UnpackFileLineFunction());
 
-    auto response=std::make_shared<loginMessage>(msgType::login, msgOutcome::success, target);
+    auto response=std::make_shared<loginMessage>(msgType::login, msgOutcome::success, target, respMsgId);
     insertMessageForSiteIds({target.getSiteId()}, response);
 
     active[username]=&target;
@@ -85,7 +87,8 @@ const user SymServer::login(const std::string &username, const std::string &pwd)
 }
 
 std::shared_ptr<file>
-SymServer::openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv) {
+SymServer::openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
+                      uint_positive_cnt::type respMsgId) {
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
@@ -96,19 +99,19 @@ SymServer::openSource(const std::string &opener, const std::string &path, const 
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
 
     //Propagation to other clients
-    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner);
+    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner, respMsgId);
     auto siteIdToSend= siteIdsFor(docReq.getId(), target.getSiteId());
     insertMessageForSiteIds(siteIdToSend, toSend);
 
     //response to client
-    auto response=std::make_shared<sendResMessage>(msgType::openRes, msgOutcome::success, fileReq);
+    auto response=std::make_shared<sendResMessage>(msgType::openRes, msgOutcome::success, fileReq, 0, respMsgId);
     insertMessageForSiteIds({target.getSiteId()}, response);
     return fileReq;
 }
 
 std::shared_ptr<file>
 SymServer::openNewSource(const std::string &opener, const std::string &resourceId, const std::string &destPath,
-                         const std::string &destName, privilege reqPriv) {
+                         const std::string &destName, privilege reqPriv, uint_positive_cnt::type respMsgId) {
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
@@ -120,17 +123,18 @@ SymServer::openNewSource(const std::string &opener, const std::string &resourceI
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
 
     //Propagation to other clients
-    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner);
+    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner, respMsgId);
     auto siteIdToSend= siteIdsFor(docReq.getId(), target.getSiteId());
     insertMessageForSiteIds(siteIdToSend, toSend);
 
     //response to client
-    auto response=std::make_shared<sendResMessage>(msgType::openNewRes, msgOutcome::success, fileReq.second, fileReq.first);
+    auto response=std::make_shared<sendResMessage>(msgType::openNewRes, msgOutcome::success, fileReq.second, fileReq.first, respMsgId);
     insertMessageForSiteIds({target.getSiteId()}, response);
     return fileReq.second;
 }
 
-const document & SymServer::createNewSource(const std::string &opener, const std::string &path, const std::string &name) {
+const document & SymServer::createNewSource(const std::string &opener, const std::string &path, const std::string &name,
+                                            uint_positive_cnt::type respMsgId) {
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& target=getRegistered(opener);
@@ -138,14 +142,25 @@ const document & SymServer::createNewSource(const std::string &opener, const std
     document& docReq=fileCreated->access(target, privilege::owner);
     workingDoc[opener].push_front(&docReq);
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
+
+    //response to client
+    auto response=std::make_shared<sendResMessage>(msgType::createRes, msgOutcome::success, fileCreated, 0, respMsgId);
+    insertMessageForSiteIds({target.getSiteId()}, response);
     return docReq;
 }
 
-std::shared_ptr<directory> SymServer::createNewDir(const std::string &opener, const std::string &path, const std::string &name) {
+std::shared_ptr<directory>
+SymServer::createNewDir(const std::string &opener, const std::string &path, const std::string &name,
+                        uint_positive_cnt::type respMsgId) {
     if(!userIsActive(opener))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& target=getRegistered(opener);
-    return target.newDirectory(name, path);
+    auto d=target.newDirectory(name, path);
+
+    //response to client
+    auto response=std::make_shared<sendResMessage>(msgType::createNewDir, msgOutcome::success, d, 0, respMsgId);
+    insertMessageForSiteIds({target.getSiteId()}, response);
+    return d;
 }
 
 void SymServer::remoteInsert(const std::string &inserter, uint_positive_cnt::type resourceId, symbolMessage &symMsg) {
@@ -157,7 +172,7 @@ void SymServer::remoteInsert(const std::string &inserter, uint_positive_cnt::typ
     symMsg.clearAuthParam();
     docRetrieved.second->remoteInsert(symMsg.getSiteId(), symMsg.verifySym().getSym());
     insertMessageForSiteIds(siteIdsFor(resourceId, getRegistered(inserter).getSiteId()), std::shared_ptr<serverMessage>(new symbolMessage(symMsg)));
-    generateSimpleResponse(getRegistered(inserter).getSiteId(), msgType::insertSymbol);
+    generateSimpleResponse(getRegistered(inserter).getSiteId(), msgType::insertSymbol, symMsg.getMsgId());
 }
 
 void SymServer::remoteRemove(const std::string &remover, uint_positive_cnt::type resourceId, symbolMessage &rmMsg) {
@@ -171,7 +186,7 @@ void SymServer::remoteRemove(const std::string &remover, uint_positive_cnt::type
     docRetrieved.second->remoteRemove(0, rmMsg.verifySym().getSym());
     insertMessageForSiteIds(siteIdsFor(resourceId, actionU.getSiteId()), std::shared_ptr<serverMessage>(new symbolMessage(rmMsg)));
 
-    generateSimpleResponse(actionU.getSiteId(), msgType::removeSymbol);
+    generateSimpleResponse(actionU.getSiteId(), msgType::removeSymbol, rmMsg.getMsgId());
 }
 
 void SymServer::updateCursorPos(const std::string &targetUser, uint_positive_cnt::type resourceId, cursorMessage &crMsg) {
@@ -185,11 +200,12 @@ void SymServer::updateCursorPos(const std::string &targetUser, uint_positive_cnt
     docRetrieved.second->updateCursorPos(actionU.getSiteId(), crMsg.getRow(), crMsg.getCol());
     insertMessageForSiteIds(siteIdsFor(resourceId, actionU.getSiteId()), std::shared_ptr<serverMessage>(new cursorMessage(crMsg)));
 
-    generateSimpleResponse(actionU.getSiteId(), msgType::updateCursor);
+    generateSimpleResponse(actionU.getSiteId(), msgType::updateCursor, crMsg.getMsgId());
 }
 
-privilege SymServer::editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
-                                   const std::string &resName, privilege newPrivilege) {
+privilege
+SymServer::editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
+                         const std::string &resName, privilege newPrivilege, uint_positive_cnt::type respMsgId) {
     if(!userIsActive(actionUser) || !userIsRegistered(targetUser))
         throw SymServerException(SymServerException::actionUserNotLoggedOrTargetUserNotRegistered, UnpackFileLineFunction());
     std::string pathFromUserHome="./"+resPath.substr(strlen("./")+strlen(actionUser.c_str())+strlen("/"));
@@ -200,10 +216,10 @@ privilege SymServer::editPrivilege(const std::string &actionUser, const std::str
 
     std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(actionUser), actionU.getSiteId());
 
-    auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, std::to_string(docId), targetUser, privilege::readOnly);
+    auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, std::to_string(docId), targetUser, privilege::readOnly, respMsgId);
     insertMessageForSiteIds(setSiteIds, toSend);
 
-    generateSimpleResponse(actionU.getSiteId(), msgType::changePrivileges);
+    generateSimpleResponse(actionU.getSiteId(), msgType::changePrivileges, respMsgId);
     return oldPriv;
 }
 
@@ -230,47 +246,50 @@ void SymServer::handleUserState(const std::string &targetUser, int docId, bool w
 
 }
 
-std::shared_ptr<filesystem> SymServer::shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName,
-                                                     const uri &newPrefs) {
+std::shared_ptr<filesystem>
+SymServer::shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName,
+                         const uri &newPrefs, uint_positive_cnt::type respMsgId) {
     if(!userIsActive(actionUser))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& actionU=getRegistered(actionUser);
     auto res= actionU.shareResource(resPath, resName, newPrefs);
 
-    auto toSend=std::make_shared<uriMessage>(msgType::shareRes, make_pair(actionUser, ""), msgOutcome ::success, resPath, resName, newPrefs);
+    auto toSend=std::make_shared<uriMessage>(msgType::shareRes, make_pair(actionUser, ""), msgOutcome ::success, resPath, resName, newPrefs, respMsgId);
     int docId= std::dynamic_pointer_cast<file>(res)->getDoc().getId();
 
     std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdsFor(docId, actionU.getSiteId());
     insertMessageForSiteIds(setSiteIds, toSend);
 
-    generateSimpleResponse(actionU.getSiteId(), msgType::shareRes);
+    generateSimpleResponse(actionU.getSiteId(), msgType::shareRes, respMsgId);
     return res;
 }
 
 std::shared_ptr<filesystem>
 SymServer::renameResource(const std::string &renamer, const std::string &resPath, const std::string &resName,
-                          const std::string &newName) {
+                          const std::string &newName, uint_positive_cnt::type respMsgId) {
     if(!userIsActive(renamer))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& actionU=getRegistered(renamer);
     auto res=actionU.renameResource(resPath, resName, newName);
 
-    generateSimpleResponse(actionU.getSiteId(), msgType::changeResName);
+    generateSimpleResponse(actionU.getSiteId(), msgType::changeResName, respMsgId);
     return res;
 }
 
 std::shared_ptr<filesystem>
-SymServer::removeResource(const std::string &remover, const std::string &resPath, const std::string &resName) {
+SymServer::removeResource(const std::string &remover, const std::string &resPath, const std::string &resName,
+                          uint_positive_cnt::type respMsgId) {
     if(!userIsActive(remover))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& actionU=getRegistered(remover);
     auto res=actionU.removeResource(resPath, resName);
 
-    generateSimpleResponse(actionU.getSiteId(), msgType::removeRes);
+    generateSimpleResponse(actionU.getSiteId(), msgType::removeRes, respMsgId);
     return res;
 }
 
-void SymServer::closeSource(const std::string &actionUser, uint_positive_cnt::type resIdtoClose) {
+void SymServer::closeSource(const std::string &actionUser, uint_positive_cnt::type resIdtoClose,
+                            uint_positive_cnt::type respMsgId) {
     std::pair<bool, document*> toClose=userIsWorkingOnDocument(actionUser, resIdtoClose);
     if(!toClose.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
@@ -279,52 +298,54 @@ void SymServer::closeSource(const std::string &actionUser, uint_positive_cnt::ty
     workingDoc[actionUser].remove_if([resIdtoClose](document* doc){return resIdtoClose== doc->getId();});
     resIdToSiteId[resIdtoClose].remove(actionU.getSiteId());
 
-    auto toSend= std::make_shared<updateActiveMessage>(msgType::removeActiveUser, msgOutcome::success, getRegistered(actionUser).makeCopyNoPwd(), resIdtoClose);
+    auto toSend= std::make_shared<updateActiveMessage>(msgType::removeActiveUser, msgOutcome::success, getRegistered(actionUser).makeCopyNoPwd(), resIdtoClose, privilege::readOnly, respMsgId);
     insertMessageForSiteIds(siteIdsFor(resIdtoClose, actionU.getSiteId()), toSend);
 
-    generateSimpleResponse(actionU.getSiteId(), msgType::closeRes);
+    generateSimpleResponse(actionU.getSiteId(), msgType::closeRes, respMsgId);
 }
 
-const user & SymServer::editUser(const std::string &username, user &newUserData) {
+const user & SymServer::editUser(const std::string &username, user &newUserData, uint_positive_cnt::type respMsgId) {
     if(!userIsActive(username))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& toEdit=getRegistered(username);
     toEdit.setNewData(newUserData);
 
-    auto toSend= std::make_shared<userDataMessage>(msgType::changeUserData, std::make_pair(username, ""), msgOutcome::success, toEdit.makeCopyNoPwd());
+    auto toSend= std::make_shared<userDataMessage>(msgType::changeUserData, std::make_pair(username, ""), msgOutcome::success, toEdit.makeCopyNoPwd(), respMsgId);
 
     //notification to other clients interested in changes on this user
     std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(username), toEdit.getSiteId());
     insertMessageForSiteIds(setSiteIds, toSend);
 
-    generateSimpleResponse(toEdit.getSiteId(), msgType::changeUserData);
+    generateSimpleResponse(toEdit.getSiteId(), msgType::changeUserData, respMsgId);
     return toEdit;
 }
 
-void SymServer::removeUser(const std::string &username, const std::string &pwd) {
+void SymServer::removeUser(const std::string &username, const std::string &pwd, uint_positive_cnt::type respMsgId) {
     if (!userIsRegistered(username))
         throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
     user& toRemove=getRegistered(username);
     if(!toRemove.hasPwd(pwd))
         throw SymServerException(SymServerException::userWrongPwd, UnpackFileLineFunction());
-    closeAllDocsAndPropagateMex(toRemove, workingDoc[username]);
+    closeAllDocsAndPropagateMex(toRemove, workingDoc[username], respMsgId);
     active.erase(username);
     removeRegistered(username);
 
-    generateSimpleResponse(toRemove.getSiteId(), msgType::removeUser);
+    generateSimpleResponse(toRemove.getSiteId(), msgType::removeUser, respMsgId);
 }
 
-void SymServer::logout(const std::string &username) {
+void SymServer::logout(const std::string &username, uint_positive_cnt::type respMsgId) {
     if(!userIsActive(username))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& toLogOut=getRegistered(username);
-    closeAllDocsAndPropagateMex(toLogOut, workingDoc[username]);
+    closeAllDocsAndPropagateMex(toLogOut, workingDoc[username], respMsgId);
     active.erase(username);
 
-    generateSimpleResponse(toLogOut.getSiteId(), msgType::logout);
+    generateSimpleResponse(toLogOut.getSiteId(), msgType::logout, respMsgId);
 }
 
-std::map<uint_positive_cnt::type, user> SymServer::mapSiteIdToUser(const std::string& actionUser, uint_positive_cnt::type resourceId) {
+std::map<uint_positive_cnt::type, user>
+SymServer::mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::type resourceId,
+                           uint_positive_cnt::type respMsgId) {
     std::pair<bool, document*> retrieved=userIsWorkingOnDocument(actionUser, resourceId);
     if(!retrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
@@ -340,7 +361,7 @@ std::map<uint_positive_cnt::type, user> SymServer::mapSiteIdToUser(const std::st
     }
 
     //response to client
-    auto response=std::make_shared<mapMessage>(msgType::mapChangesToUser, msgOutcome::success, result);
+    auto response=std::make_shared<mapMessage>(msgType::mapChangesToUser, msgOutcome::success, result, respMsgId);
     insertMessageForSiteIds({getRegistered(actionUser).getSiteId()}, response);
 
     return result;
@@ -351,13 +372,17 @@ bool SymServer::userIsRegistered(const std::string &toCheck) const noexcept {
 }
 
 bool SymServer::userIsValid(const user &toCheck) noexcept {
-    std::regex pathPattern{R"(\:\/resources/avatar\/([a-zA-Z 0-9]*)*([a-zA-Z 0-9]*\.((jpg|png|ico|bmp))))"};
+    std::regex pathPattern{R"(\:\/resources\/avatar\/([a-zA-Z 0-9]*)*([a-zA-Z 0-9]*\.((jpg|png|ico|bmp))))"};
     return !toCheck.getUsername().empty() && !toCheck.getNickname().empty()
             && std::regex_match(toCheck.getIconPath(), pathPattern);
 }
 
-SymServer::SymServer() {
-rootDir=directory::getRoot();
+SymServer::SymServer(bool loading, bool storing) : loadData(loading), storeData(storing){
+    bool loaded=false;
+    if(loadData)
+        loaded=load();
+    if(!loaded)
+        rootDir=directory::getRoot();
 }
 
 template<class Archive>
@@ -436,10 +461,11 @@ SymServer::siteIdOfUserOfDoc(const std::forward_list<uint_positive_cnt::type> &r
     return std::forward_list<uint_positive_cnt::type>(siteIds.begin(), siteIds.end());
 }
 
-void SymServer::closeAllDocsAndPropagateMex(const user &loggedOut, const std::forward_list<document*>& listOfDocs) {
+void SymServer::closeAllDocsAndPropagateMex(const user &loggedOut, const std::forward_list<document *> &listOfDocs,
+                                            uint_positive_cnt::type respMsgId) {
     for(document* doc: listOfDocs) {
         doc->close(loggedOut);
-        auto toSend=std::make_shared<updateActiveMessage>(msgType::removeActiveUser, msgOutcome::success, loggedOut.makeCopyNoPwd(), doc->getId());
+        auto toSend=std::make_shared<updateActiveMessage>(msgType::removeActiveUser, msgOutcome::success, loggedOut.makeCopyNoPwd(), doc->getId(), privilege::readOnly, respMsgId);
         insertMessageForSiteIds(siteIdsFor(doc->getId(), loggedOut.getSiteId()), toSend);
     }
     handleLeavingUser(loggedOut);
@@ -454,11 +480,11 @@ void SymServer::handleLeavingUser(const user &loggedOut) {
     siteIdToMex.erase(loggedOut.getSiteId());
 }
 
-std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessage() {
-    std::pair<int, std::shared_ptr<serverMessage>> result(-1, nullptr);
+std::pair<const uint_positive_cnt::type, std::shared_ptr<serverMessage>> SymServer::extractNextMessage() {
+    std::pair<uint_positive_cnt::type, std::shared_ptr<serverMessage>> result(0, nullptr);
     if(siteIdToMex.empty())
         return result;
-    for(std::pair<const int, std::queue<std::shared_ptr<serverMessage>>> mexForSiteId:siteIdToMex)
+    for(std::pair<const uint_positive_cnt::type, std::queue<std::shared_ptr<serverMessage>>>& mexForSiteId:siteIdToMex)
         if(!mexForSiteId.second.empty()){
             result.first=mexForSiteId.first;
             result.second=mexForSiteId.second.front();
@@ -468,8 +494,8 @@ std::pair<const int, std::shared_ptr<serverMessage>> SymServer::extractNextMessa
     return result;
 }
 
-void SymServer::generateSimpleResponse(unsigned int recvSiteId, msgType action) {
-    auto response=std::make_shared<serverMessage>(action, msgOutcome::success);
+void SymServer::generateSimpleResponse(unsigned int recvSiteId, msgType action, uint_positive_cnt::type respMsgId) {
+    auto response=std::make_shared<serverMessage>(action, msgOutcome::success, respMsgId);
     insertMessageForSiteIds({recvSiteId}, response);
 }
 
@@ -485,8 +511,43 @@ uint_positive_cnt::type SymServer::getSiteIdOfUser(const std::string &username) 
     return registered.at(username).getSiteId();
 }
 
+void SymServer::store() const {
+    std::ofstream out{storeFile};
+    if(out.good()) {
+        try {
+            boost::archive::text_oarchive oa(out);
+            oa << *this;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Unable to store data on disk: " << e.what() << std::endl;
+            remove(storeFile);
+        }
 
-BOOST_CLASS_EXPORT(Symposium::SymServer)
+    } else
+        std::cerr<<"Error opening output file"<<std::endl;
+}
+
+bool SymServer::load() {
+    std::ifstream input{storeFile, std::ios::in};
+    if(input.good()){
+        try {
+            SymServer temp(false, false);
+            boost::archive::text_iarchive ia(input);
+            ia>>temp;
+            *this=std::move(temp);
+            return true;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Unable to load data from disk: " << e.what() << std::endl;
+        }
+    }
+    return false;
+}
+
+SymServer::~SymServer() {
+    if(storeData)
+        store();
+}
 
 
 
