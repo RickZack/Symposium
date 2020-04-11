@@ -33,6 +33,7 @@
 #include "symbol.h"
 #include "user.h"
 #include <cmath>
+#include <QDebug>
 
 
 
@@ -94,7 +95,7 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
     //TODO: take into account new position of cursor
-    int i0=indexes.first;
+     int i0=indexes.first;
     int i1=indexes.second;
     checkIndex(i0,i1);
 
@@ -108,7 +109,6 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, newSymb);
         }
-
     return newSymb;
 }
 
@@ -119,7 +119,7 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
     if(symB==emptySymbol){
         siteIdB=-1;
     }else{
-        posBefore.push_back(symB.getPos().front());
+        posBefore=symB.getPos();
         siteIdB=symB.getSiteId();
     }
 
@@ -129,18 +129,18 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
     if(symA==emptySymbol){
         siteIdA=-1;
     }else{
-        posAfter.push_back(symA.getPos().front());
+        posAfter=symA.getPos();
         siteIdA=symB.getSiteId();
     }
 
-    int level=this->getLevel();
+    //int level=this->getLevel();
+    int level=0;
     std::vector<int> inPos;
     std::vector<int> newPos= generatePosBetween(posBefore, posAfter, inPos, level, siteIdB, siteIdA);
 
     symbol newSymbol(toInsert.getCh(),toInsert.getSiteId(),toInsert.getCounter(),newPos,false);
     return newSymbol;
 }
-
 
 
 
@@ -196,6 +196,7 @@ symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexe
 }
 
 
+
 std::vector<int>
 document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAfter, std::vector<int> newPos, int level,
                              int siteIdB,int siteIdA) {
@@ -219,45 +220,44 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
     }
 
     if(id2-id1>1){
-        int newDigit= generateIdBetween(id1,id2,boundaryStrategy);
-        //newPos.push_back(newDigit);
-        auto it=newPos.begin();
-        newPos.insert(it,newDigit);
-    }else if( id2-id1==1){
-        auto it=newPos.begin();
-        newPos.insert(it,id1);
+        unsigned newDigit= generateIdBetween(id1,id2,boundaryStrategy);
+        newPos.push_back(newDigit);
+        return newPos;
+        qDebug()<<"OK"<<newDigit;
+    }else if(id2-id1==1){
+        newPos.push_back(id1);
         // pos1.slice(1) will remove from the posBefore the first element
-        //std::vector<int> pos1=posBefore;
-        //pos1.erase(pos1.begin());
+        std::vector<int> pos1=posBefore;
+        pos1.erase(pos1.begin());
         std::vector<int> pos2;
-        return generatePosBetween(posBefore, pos2, newPos, level + 1, siteIdB, siteIdA);
+        return generatePosBetween(pos1, pos2, newPos, level+1 , siteIdB, siteIdA);
 
     }else if(id1==id2){
         if(siteIdB<siteIdA){
-            auto it=newPos.begin();
-            newPos.insert(it,id1);
-
+            newPos.push_back(id1);
             //pos1.slice(1)
-            //std::vector<int> pos1=posBefore;
-            //pos1.erase(pos1.begin());
+            std::vector<int> pos1=posBefore;
+            pos1.erase(pos1.begin());
             std::vector<int> pos2;
-            return generatePosBetween(posBefore, pos2, newPos, level + 1, siteIdB, siteIdA);
-        }else{
-            auto it=newPos.begin();
-            newPos.insert(it,id1);
+            return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
+
+        }else if(siteIdB==siteIdA){
+            newPos.push_back(id1);
             //pos1.slice(1)
-            //std::vector<int> pos1=posBefore;
-            //pos1.erase(pos1.begin());
+            std::vector<int> pos1=posBefore;
+            pos1.erase(pos1.begin());
             //pos2.slice(1)
-            //std::vector<int> pos2=posAfter;
-            //pos2.erase(pos2.begin());
-            return generatePosBetween(posBefore, posAfter, newPos, level + 1, siteIdB, siteIdA);
+            std::vector<int> pos2=posAfter;
+            pos2.erase(pos2.begin());
+            return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
+        }
+        else{
+            qDebug()<<"Fix Position Sorting"<<1;
         }
     }
 
-    this->setLevel(level);
-    return newPos;
-
+    //this->setLevel(level);
+    //return newPos;
 
 }
 
@@ -295,7 +295,9 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
             id2=id1+boundary;
         }
     }
+
     return floor(rand()%(id2-id1))+id1;
+
 }
 
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes) {
