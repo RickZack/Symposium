@@ -196,6 +196,7 @@ namespace Symposium {
 
         int getLevel() const;
 
+
     private:
         /**
          * @brief it determines the globally unique fractional index position of the new character.

@@ -162,6 +162,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             documentoProva.localInsert(in9,sn9);
 
 
+
     this->fillTextEdit();
 
   //---------------------------------------------------------------------------------------------------------
@@ -660,15 +661,13 @@ void notepad::fillTextEdit(){
             curs.insertBlock();
     }
     insertOthCh=false;
-    //this->colorChanged(qCol);
-    //this->currentCharFormatChanged(chFormat);
 
+    QColor black=Qt::black;
 
     //set a lighter color
-   // QColor lightCol=qCol;
-   // lightCol.setAlpha(180);
-   // this->colPos=lightCol;
-
+    QColor lightCol=black;
+    lightCol.setAlpha(180);
+    this->colPos=lightCol;
 }
 
 
