@@ -363,8 +363,8 @@ void document::close(const user &noLongerActive) {
 
 
 void document::store() const {
-    std::string storePath=basePath+std::to_string(id);
-    std::ofstream out{storePath};
+    std::string storePath=basePath+std::to_string(id)+".dat";
+    std::ofstream out{storePath, std::ios::out | std::ios::trunc};
     if(out.good()) {
         try {
             boost::archive::text_oarchive oa(out);
@@ -380,7 +380,7 @@ void document::store() const {
 }
 
 bool document::load() {
-    std::ifstream input{basePath+std::to_string(id), std::ios::in};
+    std::ifstream input{basePath+std::to_string(id)+".dat", std::ios::in};
     if(input.good()){
         try {
             boost::archive::text_iarchive ia(input);
@@ -618,10 +618,11 @@ unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<S
 }
 
 void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol) {
-   for(auto i: activeUsers){
+   for(auto& i: activeUsers){
        if(i.first->getSiteId()==targetSiteId){
            i.second.row=newRow;
            i.second.col=newCol;
+           break;
        }
    }
 }

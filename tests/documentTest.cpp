@@ -119,7 +119,7 @@ TEST_F(documentTest, verifySymbol){
 
     ASSERT_TRUE(d.getSymbols().size()>0 && d.getSymbols()[0].size()>=3);
 
-    auto coord=d.verifySymbol(s2);
+    auto coord=d.verifySymbol(d.getSymbols()[0][1]);
     ASSERT_TRUE(coord.first==0 && coord.second==1);
     EXPECT_TRUE(d.getSymbols()[coord.first][coord.second].isVerified());
 }
@@ -190,9 +190,11 @@ TEST_P(docRemoteInsertUpdateCursor, InsertionUpdatePosition){
 
     sessionData u1=std::find_if(d.getActiveUsers().begin(), d.getActiveUsers().end(), [](auto el){return el.first->getSiteId()==0;})->second;
     sessionData u2=std::find_if(d.getActiveUsers().begin(), d.getActiveUsers().end(), [](auto el){return el.first->getSiteId()==1;})->second;
+    std::pair<unsigned, unsigned> u1index={u1.row, u1.col};
+    std::pair<unsigned, unsigned> u2index={u2.row, u2.col};
 
-    EXPECT_TRUE(u1.row==input.newIndex1.first && u1.col==input.newIndex1.second);
-    EXPECT_TRUE(u1.row==input.newIndex2.first && u1.col==input.newIndex2.second);
+    EXPECT_EQ(input.newIndex1, u1index);
+    EXPECT_EQ(input.newIndex2, u2index);
 }
 updatePos updates[]={
         updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,1}, {0,2}},
