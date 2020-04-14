@@ -16,7 +16,7 @@
  * along with Symposium.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   userTest.cpp
  * Project: Symposium
  * Authors:
@@ -71,7 +71,7 @@ struct uriMock: public uri{
 struct fileMock: public file{
     uriMock policyMocked;
 
-    fileMock(): file("dummy", "./somedir", 0), policyMocked(uri::getDefaultPrivilege()) {};
+    fileMock(): file("dummy", 0), policyMocked(uri::getDefaultPrivilege()) {};
     MOCK_METHOD2(setUserPrivilege, privilege(const std::string&, privilege));
     MOCK_METHOD2(setSharingPolicy, uri(const std::string&, const uri& newSharingPrefs));
     MOCK_CONST_METHOD1(getUserPrivilege, privilege(const std::string&));
@@ -143,7 +143,7 @@ TEST(userTest, makeNewFileMock){
     dirMock *dir=new dirMock();
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
-    file *created= new file("ciao", "./somedir", 0);
+    file *created= new file("ciao", 0);
     EXPECT_CALL(*dir, addFile(".", "ciao",0)).WillOnce(::testing::Return(std::shared_ptr<file>(created)));
     u1.newFile("ciao");
 }
@@ -364,6 +364,13 @@ TEST_F(UserTestRobust, setNewDataDoesntChangeWithEmptyStrings){
     user modified(*u);
     modified.setNewData(newData);
     EXPECT_PRED_FORMAT3(newDataChangesUserParameters, modified, *u, newData);
+}
+
+//Added on 12/04/2020 to prove correctness after bug found in logIn flow
+TEST_F(UserTestRobust, hasPwdReturnCorrectResult){
+    u=new user("username", goodPwd, "nickname", "", 0, nullptr);
+    EXPECT_TRUE(u->hasPwd(goodPwd));
+    EXPECT_FALSE(u->hasPwd(goodPwd+"something"));
 }
 
 /*

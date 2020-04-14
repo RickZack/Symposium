@@ -83,7 +83,7 @@ struct directoryAccesser: public directory{ //only to access the protected membe
 };
 
 struct fileAccesser: public file{ //only to access the protected members of directory from tests
-    fileAccesser(const std::string &name) : file(name, "./somedir") {};
+    fileAccesser(const std::string &name) : file(name, 0) {};
     /*
      * Used in tests when we want to set expectations on the strategy object, that normally
      * is an internal detail of file
@@ -158,17 +158,17 @@ TEST_F(FileSystemTestRobust, returnCorrectResourceType){
 TEST_F(FileSystemTestRobust, differentFilesystemObjectHaveDifferentId){
     EXPECT_NE(dir.getId(), f.getId());
 }
-
+/*
 TEST_F(FileSystemTestRobust, FileThrowsOnMalformedRealPath){
     file *f;
     std::string someWrongFormats[]={"../", "..", ".", "./", "path", "./dir/file.jpg"};
     for (auto& path:someWrongFormats)
-        EXPECT_THROW(f= new file("fileName", path), filesystemException);
+        EXPECT_THROW(f= new file("fileName", 0), filesystemException);
 }
-
+*/
 TEST_F(FileSystemTestRobust, FileAcceptsWellFormedRealPath) {
     std::string aGoodPath{"./dir1/dir2/dir3"};
-    file f("fileName", "./dir1/dir2/dir3");
+    file f("fileName", 0);
 }
 
 struct FileSystemTestSharing: ::testing::Test{
@@ -624,7 +624,7 @@ struct FileSystemTestT: ::testing::Test{
     FileSystemTestT(){
         document=new ::testing::NiceMock<documentMock>();
         rmo=new ::testing::NiceMock<RMOAccessMock>();
-        f= new file("f", "./somedir");
+        f= new file("f", 0);
     }
     ~FileSystemTestT() override{
         delete f;
@@ -690,7 +690,7 @@ TEST(FileSystemTest, DISABLED_printFileTest)
 {
     std::string u="username";
     user aUser(u, "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    file f("file", "./somedir");
+    file f("file", 0);
     f.setUserPrivilege(u, privilege::owner);
     EXPECT_EQ("file owner", f.print(u));
     f.setUserPrivilege(u, privilege::none);
@@ -769,8 +769,8 @@ struct filesystemSerialization: ::testing::Test{
 };
 
 TEST_F(filesystemSerialization, file){
-    toStore=std::shared_ptr<file>(new file("filename", "./path"));
-    toLoad=std::shared_ptr<file>(new file("filename", "./anotherPath"));
+    toStore=std::shared_ptr<file>(new file("filename", 0));
+    toLoad=std::shared_ptr<file>(new file("filename", 0));
     ASSERT_NE(*dynamic_cast<file*>(toStore.get()), *dynamic_cast<file*>(toLoad.get()));
     storeFilesystemObj(toStore);
     loadFilesystemObj(toLoad);

@@ -81,6 +81,8 @@ namespace Symposium {
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
         int level=0;
+        bool loaded;
+        static const std::string basePath;
 
         static constexpr wchar_t  emptyChar='~';
         static const symbol emptySymbol;
@@ -91,6 +93,7 @@ namespace Symposium {
             ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
         };
     public:
+        static bool serializeFull;
         document(uint_positive_cnt::type id = document::idCounter);
 
         uint_positive_cnt::type getId() const;
@@ -175,9 +178,16 @@ namespace Symposium {
          */
         virtual void close(const user &noLongerActive);
 
-        void store(const std::string &storePath);
+        /**
+         * @brief Store permanently the content of the document onto the disk
+         */
+        void store() const;
 
-        void load(const std::string &loadPath);
+        /**
+         * @brief Load the content of the document from disk
+         * @return a bool indicating success of failure on loading
+         */
+        bool load();
 
         /**
          * @brief retrieves the set of siteId in the current document

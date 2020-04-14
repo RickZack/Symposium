@@ -200,7 +200,7 @@ INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, mapMsgForbiddenActions, testing::
 
 struct sendResMsgForbiddenActions: simpleMsgTypeTest {
     std::shared_ptr<filesystem> f;
-    sendResMsgForbiddenActions(): f(new file("name", "./somedir", 0)){};
+    sendResMsgForbiddenActions(): f(new file("name", 0)){};
     ~sendResMsgForbiddenActions()=default;
 };
 TEST_P(sendResMsgForbiddenActions, sendResThrowExceptionInConstruction) {
@@ -319,7 +319,7 @@ INSTANTIATE_TEST_CASE_P(MapChangesAndCloseRes, updateDocMsgLegalActions, testing
 
 struct sendResMsgLegalActions: simpleMsgTypeTest {
     std::shared_ptr<filesystem> f;
-    sendResMsgLegalActions(): f(new file("name", "./somedir", 0)){};
+    sendResMsgLegalActions(): f(new file("name", 0)){};
     ~sendResMsgLegalActions()=default;
 };
 TEST_P(sendResMsgLegalActions, sendResNoThrowExceptionInConstruction) {
@@ -589,7 +589,7 @@ TEST_F(serverMessageTest, mapMsgTestCallsSetUserColors){
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
-    std::shared_ptr<file> dummyFile(new file("file", "./somedir", 5));
+    std::shared_ptr<file> dummyFile(new file("file", 5));
     //data to call createNewSource() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
     cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
@@ -613,7 +613,7 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
 }
 
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
-    std::shared_ptr<file> dummyFile(new file("file", "./somedir", 1));
+    std::shared_ptr<file> dummyFile(new file("file", 1));
     dummyFile->setUserPrivilege(clientMessageTest::username, uri::getDefaultPrivilege());
     cm= new askResMessage(msgType::openRes, {clientMessageTest::username, {}}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
     m=new sendResMessage(msgType::openRes, msgOutcome::success, dummyFile);
@@ -627,7 +627,7 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
     //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
     cm= new askResMessage(msgType::openNewRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, clientMessageTest::resId, uri::getDefaultPrivilege(), 0);
-    std::shared_ptr<filesystem> dummyFile(new file("file", "./somedir", 1));
+    std::shared_ptr<filesystem> dummyFile(new file("file", 1));
     dummyFile->setUserPrivilege(clientMessageTest::username, uri::getDefaultPrivilege());
     m=new sendResMessage(msgType::openNewRes, msgOutcome::success, dummyFile);
     EXPECT_CALL(client, openNewSource(clientMessageTest::resId, uri::getDefaultPrivilege(), clientMessageTest::path, clientMessageTest::name, dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));

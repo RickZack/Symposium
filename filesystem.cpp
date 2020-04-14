@@ -36,6 +36,7 @@
 #include <boost/serialization/base_object.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <fstream>
 
 #include "filesystem.h"
 #include "symbol.h"
@@ -59,7 +60,7 @@ void filesystem::serialize(Archive &ar, const unsigned int version){
 template<class Archive>
 void file::serialize(Archive &ar, const unsigned int version){
     ar & boost::serialization::base_object<Symposium::filesystem>(*this);
-    ar & realPath & doc;
+    ar & doc;
 };
 
 template<class Archive>
@@ -161,9 +162,7 @@ bool filesystem::operator!=(const filesystem &rhs) const {
 }
 
 
-file::file(const std::string &name, const std::string &realPath, uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), realPath(realPath), doc(0){
-    if(!(pathIsValid2(realPath)))
-        throw filesystemException(filesystemException::pathNvalid, UnpackFileLineFunction());
+file::file(const std::string &name, uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), doc(0){
     strategy=std::make_unique<RMOAccess>();
 }
 
@@ -209,16 +208,8 @@ document & file::access(const user &targetUser, privilege accessMode) {
     return doc.access(targetUser, accessMode);
 }
 
-void file::store(const std::string &storePath) const {
-    //TODO: implement
-}
-
-void file::load(const std::string &loadPath) {
-    //TODO: implement
-}
-
-void file::send() const {
-    //TODO: implement
+void file::storeContent() const {
+    doc.store();
 }
 
 
@@ -259,7 +250,6 @@ void file::replacement(const std::shared_ptr<file> replace){
 
 bool file::operator==(const file &rhs) const {
     return static_cast<const Symposium::filesystem &>(*this) == static_cast<const Symposium::filesystem &>(rhs) &&
-           realPath == rhs.realPath &&
            doc == rhs.doc;
 }
 
@@ -404,7 +394,7 @@ std::shared_ptr<file> directory::addFile(const std::string &path, const std::str
     std::shared_ptr<directory> save=getDir(pathAdd, idAdd);
     if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
-    std::shared_ptr<file> newFile(new file(name, path, idToAssign));
+    std::shared_ptr<file> newFile(new file(name, idToAssign));
     save->contained.push_back(newFile);
     return newFile;
 }
@@ -487,17 +477,11 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
 }
 
 
-void directory::store(const std::string &storePath) const {
-    //TODO: implement
+void directory::storeContent() const {
+    for(const auto& el:contained)
+        el->storeContent();
 }
 
-void directory::load(const std::string &loadPath) {
-    //TODO: implement
-}
-
-void directory::send() const {
-    //TODO: implement
-}
 std::string directory::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
     std::string result;
     if(indent==0)
@@ -541,18 +525,6 @@ resourceType Symposium::symlink::resType() const {
 document& Symposium::symlink::access(const user &targetUser, privilege accessMode) {
     std::shared_ptr<file> f=directory::getRoot()->getFile(pathToFile, fileName);
     return f->access(targetUser, accessMode);
-}
-
-void Symposium::symlink::store(const std::string &storePath) const {
-    //TODO: implement
-}
-
-void Symposium::symlink::load(const std::string &loadPath) {
-    //TODO: implement
-}
-
-void Symposium::symlink::send() const {
-    //TODO: implement
 }
 
 std::string Symposium::symlink::getPath() {

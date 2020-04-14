@@ -33,10 +33,14 @@
 #include "symbol.h"
 #include "user.h"
 #include <cmath>
+#include <fstream>
+#include <boost/archive/text_iarchive.hpp>
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
+const std::string document::basePath="./docs/";
+bool document::serializeFull=true;
 
 
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)) {
@@ -62,6 +66,7 @@ int document::getNumchar() const {
 }
 
 document & document::access(const user &newActive, privilege accessPriv) {
+    if(!loaded) loaded=load();
     if(std::find_if(activeUsers.begin(), activeUsers.end(), [&](auto p){return p.first->getSiteId()==newActive.getSiteId();})==activeUsers.end()) {
         std::pair<const user *, sessionData> p{&newActive, accessPriv};
         activeUsers.push_front(p);
@@ -346,19 +351,47 @@ void document::close(const user &noLongerActive) {
         user old_User = *p.first;
         if (old_User == noLongerActive) {
             activeUsers.remove(p);
-            return;
+            break;
         }
+    }
+    if(activeUsers.empty()){
+        store();
+        std::vector<std::vector<symbol>>().swap(symbols); //free the content of the symbol matrix
+        loaded=false;
     }
 }
 
 
-void document::store(const std::string &storePath) {
-    //TODO:implement
+void document::store() const {
+    std::string storePath=basePath+std::to_string(id);
+    std::ofstream out{storePath};
+    if(out.good()) {
+        try {
+            boost::archive::text_oarchive oa(out);
+            oa << *this;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Unable to store data on disk: " << e.what() << std::endl;
+            remove(storePath.c_str());
+        }
 
+    } else
+        std::cerr<<"Error opening output file"<<std::endl;
 }
 
-void document::load(const std::string &loadPath) {
-    //TODO:implement
+bool document::load() {
+    std::ifstream input{basePath+std::to_string(id), std::ios::in};
+    if(input.good()){
+        try {
+            boost::archive::text_iarchive ia(input);
+            ia>>*this;
+            return true;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Unable to load data from disk: " << e.what() << std::endl;
+        }
+    }
+    return false;
 }
 
 std::set<uint_positive_cnt::type> document::retrieveSiteIds() const{
