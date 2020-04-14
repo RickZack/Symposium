@@ -54,7 +54,7 @@ void sigin::successSignIn()
     pressed=false;
     homeWindow = new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
-    //cl->setHome(home *homeWindow);
+    cl->setHome(homeWindow);
     homeWindow->show();
 }
 
@@ -135,13 +135,13 @@ void sigin::waiting()
 
 void sigin::showEvent(QShowEvent* event)
 {
-QDialog::showEvent(event);
+    QDialog::showEvent(event);
 
- QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-      anim->setStartValue(0.0);
-      anim->setEndValue(1.0);
-      anim->setDuration(1000);
-      anim->start(QAbstractAnimation::DeleteWhenStopped);
+    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
+    anim->setStartValue(0.0);
+    anim->setEndValue(1.0);
+    anim->setDuration(1000);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void sigin::disableButtons()

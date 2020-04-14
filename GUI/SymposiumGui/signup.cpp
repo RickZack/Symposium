@@ -55,7 +55,7 @@ void signup::successSignUp()
     hide();
     homeWindow= new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
-    //cl->setHome(homeWindow);
+    cl->setHome(homeWindow);
     homeWindow->disableStyleButtons();
     notWindow = new notification(homeWindow, "Your account has been successfully created");
     homeWindow->show();
@@ -124,14 +124,15 @@ void signup::on_signin_clicked()
         }
         else
         {
-            hide();
+            /*hide();
             homeWindow= new home(nullptr, pwd);
             homeWindow->show();
             homeWindow->disableStyleButtons();
             notWindow = new notification(homeWindow, "Your account has been successfully created");
             int ret=notWindow->exec();
             if(ret==0)
-                homeWindow->enableButtonsAfter();
+                homeWindow->enableButtonsAfter();*/
+            successSignUp();
         }
     }
     else {
