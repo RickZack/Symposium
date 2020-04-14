@@ -26,8 +26,8 @@ include_directories(SymposiumTest lib/googletest-master/googletest/include)
 include_directories(SymposiumTest lib/googletest-master/googlemock/include)
 
 # Path of header files to include in SymposiumGUI target
-include_directories(SymposiumGUI GUI/SymposiumGui)
-include_directories(SymposiumGUI GUI/SymposiumGui/Dispatcher)
+include_directories(SymposiumGUI SymposiumServer GUI/SymposiumGui)
+include_directories(SymposiumGUI SymposiumServer GUI/SymposiumGui/Dispatcher)
 
 #Packages required by SymposiumGUI
 find_package(Qt5Widgets REQUIRED)
@@ -58,6 +58,9 @@ FILE(GLOB SHA256_LIB ${CMAKE_SOURCE_DIR}/lib/hash/*.cpp ${CMAKE_SOURCE_DIR}/lib/
 
 # List of sources and headers for clientDispatcher
 FILE(GLOB CLIENT_FILES ${CMAKE_SOURCE_DIR}/GUI/SymposiumGui/Dispatcher/client*.cpp ${CMAKE_SOURCE_DIR}/GUI/SymposiumGui/Dispatcher/client*.h)
+
+# List of sources and headers for clientDispatcher
+FILE(GLOB SERVER_FILES ${CMAKE_SOURCE_DIR}/GUI/SymposiumGui/Dispatcher/server*.cpp ${CMAKE_SOURCE_DIR}/GUI/SymposiumGui/Dispatcher/server*.h)
 
 # Files and headers for SymposiumTest target: this is the executable that will run the tests for Symposium
 add_executable(SymposiumTest main.cpp ${CORE_FILES} ${SHA256_LIB} ${TEST_FILES})
@@ -94,8 +97,13 @@ add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SHA256_LIB} ${CORE_FILES
         GUI/SymposiumGui/textedit.cpp GUI/SymposiumGui/textedit.h
         GUI/SymposiumGui/unsuccessdeleteaccount.cpp GUI/SymposiumGui/unsuccessdeleteaccount.h GUI/SymposiumGui/unsuccessdeleteaccount.ui
         )
+
+# Files and headers for SymposiumServer target: this is the executable that will run the server
+add_executable(SymposiumServer GUI/SymposiumGui/Dispatcher/mainServer.cpp ${SHA256_LIB} ${CORE_FILES} ${SERVER_FILES})
+
 # Linking Google Test libraries for SymposiumTest target
 target_link_libraries(SymposiumTest gtest gtest_main gmock gmock_main)
 
-# Linking Qt5 libraries for SymposiumGUI
+# Linking Qt5 libraries for SymposiumGUI and SymposiumServer
 target_link_libraries(SymposiumGUI Qt5::Widgets Qt5::Network Qt5::Core Qt5::PrintSupport pthread)
+target_link_libraries(SymposiumServer Qt5::Widgets Qt5::Network Qt5::Core Qt5::PrintSupport pthread)
