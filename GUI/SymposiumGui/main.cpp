@@ -6,6 +6,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QFontDatabase database;
+    database.addApplicationFont(":/resources/font/baskvil.TTF");
     MainWindow w;
     Symposium::clientdispatcher *cl= new Symposium::clientdispatcher();
     w.setClientDispatcher(cl);

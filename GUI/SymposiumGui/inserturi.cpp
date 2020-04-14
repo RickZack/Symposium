@@ -8,6 +8,8 @@ inserturi::inserturi(QWidget *parent, std::string pwd, bool homeWindow) :
     ui(new Ui::inserturi), pwd(pwd), homeWindow(homeWindow)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     //showDir=cl->showDir(true);
     ui->writer->click();
     QPixmap pix2(":/icon/logo.png");
@@ -27,10 +29,12 @@ inserturi::~inserturi()
 
 void inserturi::on_dir_clicked()
 {
-    dirWindow=new choosedir(this);
-    dirWindow->pathDir=showDir;
-    dirWindow->exec();
+    disableStyleButtons();
+    dirWindow=new choosedir(this, showDir);
+    int ret=dirWindow->exec();
     pathId=dirWindow->pathId;
+    if(ret==0)
+        enableStyleButtons();
 }
 
 void inserturi::change_text()
@@ -50,50 +54,12 @@ void inserturi::reset_text()
 
 void inserturi::closeEvent(QCloseEvent *event)
 {
-    disableButtons();
     disableStyleButtons();
-    QMessageBox msgBox;
-    msgBox.setText("<p align='center'>Are you sure to quit?</p>");
-    msgBox.setWindowTitle("Exit");
-    QPixmap pix(":/icon/logo1.png");
-    QIcon p(pix);
-    msgBox.setWindowIcon(p);
-    msgBox.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
-    msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
-    msgBox.button(QMessageBox::Yes)->setText("Quit");
-    msgBox.button(QMessageBox::No)->setObjectName("No");
-    msgBox.button(QMessageBox::No)->setText("Remain");
-    msgBox.setBaseSize(QSize(390, 120));
-    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                         "color: rgb(58, 80, 116);"
-                         "font: 14pt 'Baskerville Old Face';} "
-                         "QLabel{color: rgb(58, 80, 116);} "
-                         "QPushButton#Yes { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px; "
-                         "margin-right:50px;}"
-                         "QPushButton#No { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "}");
-    msgBox.setIcon(QMessageBox::Question);
-    int ret=msgBox.exec();
-    if (ret == QMessageBox::Yes)
-        event->accept();
-    else
-    {
-        if(!pressed)
-        {
-            enableButtons();
-            enableStyleButtons();
-        }
-        event->ignore();
-    }
-
+    event->ignore();
+    ex=new class exit(this);
+    int ret=ex->exec();
+    if(ret==0 && !pressed)
+        enableStyleButtons();
 }
 
 void inserturi::showEvent(QShowEvent *event)
@@ -108,12 +74,16 @@ void inserturi::showEvent(QShowEvent *event)
 
 void inserturi::disableButtons()
 {
+    ui->lineEdit->setReadOnly(true);
+    ui->name->setReadOnly(true);
     ui->add->setDisabled(true);
     ui->cancel->setDisabled(true);
 }
 
 void inserturi::enableButtons()
 {
+    ui->lineEdit->setReadOnly(false);
+    ui->name->setReadOnly(false);
     ui->add->setDisabled(false);
     ui->cancel->setDisabled(false);
 }
@@ -212,10 +182,12 @@ void inserturi::on_add_clicked()
 void inserturi::errorConnection()
 {
     hideLabelsError();
-    enableStyleButtons();
     enableButtons();
+    pressed=false;
     errorWindow = new errorconnection(this);
-    errorWindow->exec();
+    int ret=errorWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
 }
 
 void inserturi::errorConnectionLogout(std::string str)
@@ -223,7 +195,9 @@ void inserturi::errorConnectionLogout(std::string str)
     hideLabelsError();
     enableStyleButtons();
     enableButtons();
+    pressed=false;
     errorLog = new errorlogout(this, QString::fromStdString(str));
+    errorLog->setClientDispatcher(cl);
     this->hide();
     errorLog->show();
 }
@@ -231,10 +205,14 @@ void inserturi::errorConnectionLogout(std::string str)
 void inserturi::successInsert()
 {
     hideLabelsError();
-    enableStyleButtons();
     enableButtons();
-    QMessageBox::information(parentWidget(),
-                             tr("Insert Link"), tr("The operation was successfully done!"), QMessageBox::Ok);
+    ui->lineEdit->setText("");
+    ui->name->setText("");
+    pressed=false;
+    notWindow = new notification(this, "Link has been successfully created!");
+    int ret=notWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
 }
 
 void inserturi::on_cancel_clicked()
@@ -252,6 +230,12 @@ void inserturi::on_cancel_clicked()
         d->setClientDispatcher(cl);
         d->show();
     }
+}
+
+void inserturi::enableButtonsAfter()
+{
+    if(!pressed)
+        enableStyleButtons();
 }
 
 

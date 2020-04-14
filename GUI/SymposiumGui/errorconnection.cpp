@@ -6,6 +6,7 @@ errorconnection::errorconnection(QWidget *parent) :
     ui(new Ui::errorconnection)
 {
     ui->setupUi(this);
+    connect(ui->pushButton, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
 }
 
 errorconnection::~errorconnection()

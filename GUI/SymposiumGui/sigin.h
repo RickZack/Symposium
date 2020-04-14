@@ -5,6 +5,7 @@
 #include <QCloseEvent>
 #include "home.h"
 #include "errorconnection.h"
+#include "exit.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -39,13 +40,20 @@ public:
      */
     void setClientDispatcher(Symposium::clientdispatcher *cl);
 
+public slots:
+    /**
+     * @brief restore the style of buttons;
+     */
+    void enableButtonsAfter();
 
 private slots:
     /**
      * @brief invoke logIn on clientdispatcher
      */
     void on_signin_clicked();
-
+    /**
+     * @brief go back to main window
+     */
     void on_cancel_clicked();
 
 private:
@@ -56,6 +64,7 @@ private:
     std::string pwd;
     MainWindow *mw;
     Symposium::clientdispatcher *cl;
+    class exit *ex;
     bool pressed=false;
     /**
      * @brief quit from application

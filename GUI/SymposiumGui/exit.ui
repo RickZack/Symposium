@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Exit</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icon/logo1.png</normaloff>:/icon/logo1.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(249, 247, 241); 
 </string>
@@ -73,6 +77,8 @@ font: 14pt &quot;Baskerville Old Face&quot;;</string>
    </property>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

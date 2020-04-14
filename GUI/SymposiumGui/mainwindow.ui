@@ -79,7 +79,7 @@ border-radius:15px;</string>
      <string>About</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="exit">
+   <widget class="QPushButton" name="exitBut">
     <property name="geometry">
      <rect>
       <x>390</x>

@@ -6,8 +6,11 @@ notification::notification(QWidget *parent, QString str) :
     ui(new Ui::notification), str(str)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     ui->text->setText(str);
     connect(ui->ok, SIGNAL(clicked()), this, SLOT(hide()));
+    connect(ui->ok, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
 }
 
 notification::~notification()

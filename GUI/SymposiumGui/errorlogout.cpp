@@ -1,6 +1,7 @@
 #include "errorlogout.h"
 #include "ui_errorlogout.h"
 #include "mainwindow.h"
+#include "Dispatcher/clientdispatcher.h"
 
 
 errorlogout::errorlogout(QWidget *parent, QString str) :
@@ -16,9 +17,15 @@ errorlogout::~errorlogout()
     delete ui;
 }
 
+void errorlogout::setClientDispatcher(Symposium::clientdispatcher *cl)
+{
+    this->cl=cl;
+}
+
 void errorlogout::on_pushButton_clicked()
 {
     this->close();
     w=new MainWindow();
+    w->setClientDispatcher(cl);
     w->show();
 }

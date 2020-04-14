@@ -31,11 +31,12 @@ sigin::~sigin()
 void sigin::errorConnection()
 {
     enableButtons();
-    enableStyleButtons();
     hideLabelsError();
     pressed=false;
-    errorWindow = new errorconnection();
-    errorWindow->exec();
+    errorWindow = new errorconnection(this);
+    int ret=errorWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
 }
 
 void sigin::errorSignIn()
@@ -62,6 +63,12 @@ void sigin::successSignIn()
 
 void sigin::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
+}
+
+void sigin::enableButtonsAfter()
+{
+    if(!pressed)
+        enableStyleButtons();
 }
 
 void sigin::on_signin_clicked()
@@ -111,50 +118,12 @@ void sigin::on_signin_clicked()
 
 void sigin::closeEvent(QCloseEvent *event)
 {
-    disableButtons();
     disableStyleButtons();
-    QMessageBox msgBox;
-    msgBox.setText("<p align='center'>Are you sure to quit?</p>");
-    msgBox.setWindowTitle("Exit");
-    QPixmap pix(":/icon/logo1.png");
-    QIcon p(pix);
-    msgBox.setWindowIcon(p);
-    msgBox.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
-    msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
-    msgBox.button(QMessageBox::Yes)->setText("Quit");
-    msgBox.button(QMessageBox::No)->setObjectName("No");
-    msgBox.button(QMessageBox::No)->setText("Remain");
-    msgBox.setBaseSize(QSize(390, 120));
-    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                         "color: rgb(58, 80, 116);"
-                         "font: 14pt 'Baskerville Old Face';} "
-                         "QLabel{color: rgb(58, 80, 116);} "
-                         "QPushButton#Yes { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px; "
-                         "margin-right:50px;}"
-                         "QPushButton#No { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "}");
-    msgBox.setIcon(QMessageBox::Question);
-    int ret=msgBox.exec();
-    if (ret == QMessageBox::Yes)
-        event->accept();
-    else
-    {
-        if(!pressed)
-        {
-            enableButtons();
-            enableStyleButtons();
-        }
-        event->ignore();
-    }
-
+    event->ignore();
+    ex=new class exit(this);
+    int ret=ex->exec();
+    if(ret==0 && !pressed)
+        enableStyleButtons();
 }
 
 void sigin::waiting()
@@ -177,12 +146,16 @@ QDialog::showEvent(event);
 
 void sigin::disableButtons()
 {
+    ui->password->setReadOnly(true);
+    ui->username->setReadOnly(true);
     ui->signin->setDisabled(true);
     ui->cancel->setDisabled(true);
 }
 
 void sigin::enableButtons()
 {
+    ui->password->setReadOnly(false);
+    ui->username->setReadOnly(false);
     ui->waiting->hide();
     ui->gif->hide();
     ui->signin->setDisabled(false);

@@ -65,6 +65,75 @@
         <file>cartelle/writer_icon.jpg</file>
         <file>cartelle/color_icon.png</file>
         <file>avatar/unknown.png</file>
+        <file>Dispatcher/TestClient/mainClient.cpp</file>
+        <file>Dispatcher/TestServer/mainServer.cpp</file>
+        <file>Dispatcher/clientdispatcher.cpp</file>
+        <file>Dispatcher/clientdispatcher.h</file>
+        <file>Dispatcher/mainClient.cpp</file>
+        <file>Dispatcher/mainServer.cpp</file>
+        <file>Dispatcher/serverdispatcher.cpp</file>
+        <file>Dispatcher/serverdispatcher.h</file>
+        <file>font/baskvil.TTF</file>
+        <file>about.cpp</file>
+        <file>about.h</file>
+        <file>activealwayslink.cpp</file>
+        <file>activealwayslink.h</file>
+        <file>activecounterlink.cpp</file>
+        <file>activecounterlink.h</file>
+        <file>activenonlink.cpp</file>
+        <file>activenonlink.h</file>
+        <file>activetimerlink.cpp</file>
+        <file>activetimerlink.h</file>
+        <file>alluser.cpp</file>
+        <file>alluser.h</file>
+        <file>buttonhoverwatcher.cpp</file>
+        <file>buttonhoverwatcher.h</file>
+        <file>changeuserinfo.cpp</file>
+        <file>changeuserinfo.h</file>
+        <file>choosedir.cpp</file>
+        <file>choosedir.h</file>
+        <file>choosepriv.cpp</file>
+        <file>choosepriv.h</file>
+        <file>deleteaccount.cpp</file>
+        <file>deleteaccount.h</file>
+        <file>directory.cpp</file>
+        <file>directory.h</file>
+        <file>errorconnection.cpp</file>
+        <file>errorconnection.h</file>
+        <file>errorlogout.cpp</file>
+        <file>errorlogout.h</file>
+        <file>exit.cpp</file>
+        <file>exit.h</file>
+        <file>folder1.cpp</file>
+        <file>folder1.h</file>
+        <file>home.cpp</file>
+        <file>home.h</file>
+        <file>icon.cpp</file>
+        <file>icon.h</file>
+        <file>inserturi.cpp</file>
+        <file>inserturi.h</file>
+        <file>main.cpp</file>
+        <file>mainwindow.cpp</file>
+        <file>mainwindow.h</file>
+        <file>newdocument.cpp</file>
+        <file>newfolderwindow.cpp</file>
+        <file>newfolderwindow.h</file>
+        <file>notepad.cpp</file>
+        <file>notepad.h</file>
+        <file>notification.cpp</file>
+        <file>notification.h</file>
+        <file>onlineusers.cpp</file>
+        <file>onlineusers.h</file>
+        <file>qtexteditlabels.cpp</file>
+        <file>qtexteditlabels.h</file>
+        <file>sigin.cpp</file>
+        <file>sigin.h</file>
+        <file>signup.cpp</file>
+        <file>signup.h</file>
+        <file>textedit.cpp</file>
+        <file>textedit.h</file>
+        <file>unsuccessdeleteaccount.cpp</file>
+        <file>unsuccessdeleteaccount.h</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/file.png</file>
@@ -81,6 +150,5 @@
         <file>icon/ajax-loader.gif</file>
         <file>icon/exit.png</file>
         <file>icon/redexit.png</file>
-        <file>icon/baskvil.TTF</file>
     </qresource>
 </RCC>

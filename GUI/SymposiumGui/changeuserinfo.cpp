@@ -5,7 +5,7 @@
 
 changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd) :
     QDialog(parent),
-    ui(new Ui::changeUserInfo), pwd(pwd)
+    pwd(pwd), ui(new Ui::changeUserInfo)
 {
     ui->setupUi(this);
     ui->error->setText("");
@@ -110,7 +110,7 @@ void changeUserInfo::errorConnection()
     errorWindow->show();
 }
 
-void changeUserInfo::errorConnectionLogout(std::string str)
+void changeUserInfo::errorConnectionLogout(const std::string str)
 {
     ui->waiting->hide();
     ui->gif->hide();
@@ -122,7 +122,7 @@ void changeUserInfo::errorConnectionLogout(std::string str)
     errorLog->show();
 }
 
-void changeUserInfo::errorEditUser(std::string errorMess)
+void changeUserInfo::errorEditUser(const std::string errorMess)
 {
     ui->waiting->hide();
     ui->gif->hide();

@@ -8,6 +8,7 @@
 #include "about.h"
 #include "sigin.h"
 #include "signup.h"
+#include "exit.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -26,15 +27,17 @@ public:
     ~MainWindow();
     void setClientDispatcher(Symposium::clientdispatcher *cl);
 
+public slots:
+    /**
+     * @brief restore the style of buttons;
+     */
+    void enableButtonsAfter();
+
 private slots:
     /**
      * @brief show window about
      */
     void on_about_clicked();
-    /**
-     * @brief quit
-     */
-    void on_exit_clicked();
     /**
      * @brief show window to sign in
      */
@@ -43,7 +46,10 @@ private slots:
      * @brief show window to sign up
      */
     void on_SignUp_clicked();
-
+    /**
+     * @brief quit
+     */
+    void on_exitBut_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -51,8 +57,7 @@ private:
     sigin *signinWindow;
     signup *signupWindow;
     Symposium::clientdispatcher *cl;
-    QFontDatabase database;
-    int fontEx;
+    class exit *ex;
     /**
      * @brief quit from application
      */

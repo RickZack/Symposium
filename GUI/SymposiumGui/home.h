@@ -10,6 +10,7 @@
 #include "directory.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include "exit.h"
 
 class MainWindow;
 
@@ -26,7 +27,7 @@ class home : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit home(QWidget *parent = nullptr, std::string pwd="");
+    explicit home(QWidget *parent = nullptr, const std::string pwd="");
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -44,8 +45,19 @@ public:
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user
      */
-    void errorConnectionLogout(std::string str);
+    void errorConnectionLogout(const std::string str);
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
     ~home();
+
+public slots:
+    /**
+     * @brief restore the style of buttons;
+     */
+    void enableButtonsAfter();
+
 
 private slots:
     /**
@@ -77,6 +89,7 @@ private:
     changeUserInfo *changeWindow;
     directory *directoryWindow;
     MainWindow *mw;
+    class exit *ex;
     bool pressed=false;
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
@@ -97,10 +110,6 @@ private:
      * @brief enable the style of buttons
      */
     void enableStyleButtons();
-    /**
-     * @brief disable the style of buttons
-     */
-    void disableStyleButtons();
     /**
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */

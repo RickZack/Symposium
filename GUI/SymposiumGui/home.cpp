@@ -3,7 +3,7 @@
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
 
-home::home(QWidget *parent, std::string pwd) :
+home::home(QWidget *parent,const std::string pwd) :
     QMainWindow(parent),
     ui(new Ui::home), pwd(pwd)
 {
@@ -29,18 +29,27 @@ home::~home()
     delete ui;
 }
 
+void home::enableButtonsAfter()
+{
+    if(!pressed)
+        enableStyleButtons();
+}
+
 void home::on_delete_2_clicked()
 {
+    disableStyleButtons();
     deleteAccountWindow = new deleteAccount(this);
     deleteAccountWindow->setClientDispatcher(cl);
     //cl->setDeleteAccount(deleteAccountWindow);
-    deleteAccountWindow->exec();
+    int ret=deleteAccountWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
 }
 
 void home::on_InsertUri_clicked()
 {
     inserturiWindow = new inserturi(nullptr, pwd);
-    //inserturiWindow->setClientDispatcher(cl);
+    inserturiWindow->setClientDispatcher(cl);
     //cl->setInsertUri(inserturiWindow);
     inserturiWindow->show();
     this->hide();
@@ -74,49 +83,12 @@ void home::logout()
 
 void home::closeEvent(QCloseEvent *event)
 {
-    disableButtons();
     disableStyleButtons();
-    QMessageBox msgBox;
-    msgBox.setText("<p align='center'>Are you sure to quit?</p>");
-    msgBox.setWindowTitle("Exit");
-    QPixmap pix(":/icon/logo1.png");
-    QIcon p(pix);
-    msgBox.setWindowIcon(p);
-    msgBox.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
-    msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
-    msgBox.button(QMessageBox::Yes)->setText("Quit");
-    msgBox.button(QMessageBox::No)->setObjectName("No");
-    msgBox.button(QMessageBox::No)->setText("Remain");
-    msgBox.setBaseSize(QSize(390, 120));
-    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                         "color: rgb(58, 80, 116);"
-                         "font: 14pt 'Baskerville Old Face';} "
-                         "QLabel{color: rgb(58, 80, 116);} "
-                         "QPushButton#Yes { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px; "
-                         "margin-right:50px;}"
-                         "QPushButton#No { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "}");
-    msgBox.setIcon(QMessageBox::Question);
-    int ret=msgBox.exec();
-    if (ret == QMessageBox::Yes)
-        event->accept();
-    else
-    {
-        if(!pressed)
-        {
-            enableButtons();
-            enableStyleButtons();
-        }
-        event->ignore();
-    }
+    event->ignore();
+    ex=new class exit(this);
+    int ret=ex->exec();
+    if(ret==0 && !pressed)
+        enableStyleButtons();
 }
 
 void home::disableButtons()
@@ -171,6 +143,7 @@ void home::successLogout()
     enableStyleButtons();
     this->hide();
     mw=new MainWindow();
+    mw->setClientDispatcher(cl);
     mw->show();
 }
 
@@ -179,14 +152,17 @@ void home::errorConnection()
     enableButtons();
     enableStyleButtons();
     errorWindow = new errorconnection();
-    errorWindow->exec();
+    int ret=errorWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
 }
 
-void home::errorConnectionLogout(std::string str)
+void home::errorConnectionLogout(const std::string str)
 {
     enableButtons();
     enableStyleButtons();
     errorLog = new errorlogout(nullptr, QString::fromStdString(str));
+    errorLog->setClientDispatcher(cl);
     this->hide();
     errorLog->show();
 }

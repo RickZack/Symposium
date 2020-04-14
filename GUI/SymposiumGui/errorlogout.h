@@ -5,6 +5,11 @@
 
 class MainWindow;
 
+namespace Symposium{
+class clientdispatcher;
+}
+
+
 namespace Ui {
 class errorlogout;
 }
@@ -16,6 +21,11 @@ class errorlogout : public QDialog
 public:
     explicit errorlogout(QWidget *parent = nullptr, QString str="");
     ~errorlogout();
+    /**
+     * @brief setting of clientdispatcher
+     * @param cl clientdispatcher for reference
+     */
+    void setClientDispatcher(Symposium::clientdispatcher *cl);
 
 private slots:
     /**
@@ -27,6 +37,7 @@ private:
     QString str;
     Ui::errorlogout *ui;
     MainWindow *w;
+    Symposium::clientdispatcher *cl;
 };
 
 #endif // ERRORLOGOUT_H

@@ -1,5 +1,6 @@
 #include "exit.h"
 #include "ui_exit.h"
+#include "Dispatcher/clientdispatcher.h"
 
 
 exit::exit(QWidget *parent, bool logout) :
@@ -7,9 +8,14 @@ exit::exit(QWidget *parent, bool logout) :
     ui(new Ui::exit), logout(logout)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     connect(ui->ok, SIGNAL(clicked()), this, SLOT(doLogout()));
+    connect(ui->ok, SIGNAL(clicked()), parentWidget(), SLOT(hide()));
     connect(ui->ok, SIGNAL(clicked()), qApp, SLOT(quit()));
+
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
 }
 
 void exit::setClientDispatcher(Symposium::clientdispatcher *cl)
@@ -26,8 +32,9 @@ void exit::doLogout()
 {
     if(logout)
     {
-        //cl->closeConnection();
+        cl->closeConnection();
     }
 }
+
 
 

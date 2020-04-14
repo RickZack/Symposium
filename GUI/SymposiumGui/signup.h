@@ -7,6 +7,7 @@
 #include "icon.h"
 #include "errorconnection.h"
 #include "notification.h"
+#include "exit.h"
 #include "../../user.h"
 
 class MainWindow;
@@ -39,7 +40,7 @@ public:
      * @brief called by clientdispatcher when there is some error to signUp
      * @param errorMess the messagge to show
      */
-    void errorSignUp(std::string errorMess);
+    void errorSignUp(const std::string errorMess);
     /**
      * @brief called by clientdispatcher when the signup was successfully done
      */
@@ -48,6 +49,10 @@ public:
     ~signup();
 
 private slots:
+    /**
+     * @brief restore the style of buttons;
+     */
+    void enableButtonsAfter();
     /**
      * @brief invoke signUp on clientdispatcher
      */
@@ -63,8 +68,10 @@ private slots:
     /**
      * @brief check the correctness of the password
      */
-    bool checkPassword(QString passwordToCheck);
-
+    bool checkPassword(const QString passwordToCheck);
+    /**
+     * @brief go back to mainwindow
+     */
     void on_cancel_clicked();
 
 private:
@@ -77,6 +84,7 @@ private:
     errorconnection *errorWindow;
     std::string iconPath="";
     Symposium::clientdispatcher *cl;
+    class exit *ex;
     bool pressed=false;
     /**
      * @brief quit from application

@@ -34,6 +34,9 @@ private slots:
      */
     void doLogout();
 
+signals:
+    void closeSig();
+
 private:
     Ui::exit *ui;
     bool logout;

@@ -28,14 +28,15 @@ signup::signup(QWidget *parent) :
 void signup::errorConnection()
 {
     enableButtons();
-    enableStyleButtons();
     hideLabelsError();
     pressed=false;
     errorWindow = new errorconnection(this);
-    errorWindow->exec();
+    int ret=errorWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
 }
 
-void signup::errorSignUp(std::string errorMess)
+void signup::errorSignUp(const std::string errorMess)
 {
     enableButtons();
     enableStyleButtons();
@@ -55,27 +56,12 @@ void signup::successSignUp()
     homeWindow= new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
     //cl->setHome(homeWindow);
+    homeWindow->disableStyleButtons();
+    notWindow = new notification(homeWindow, "Your account has been successfully created");
     homeWindow->show();
-    QMessageBox msgBox(homeWindow);
-    msgBox.setText("<p align='center'>Your account has been successfully created</p>");
-    msgBox.setWindowTitle("Notification");
-    QPixmap pix(":/icon/logo1.png");
-    QIcon p(pix);
-    msgBox.setWindowIcon(p);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.button(QMessageBox::Ok)->setObjectName("ok");
-    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                         "color: rgb(58, 80, 116);"
-                         "font: 14pt 'Baskerville Old Face';} "
-                         "QLabel{color: rgb(58, 80, 116);} "
-                         "QPushButton#ok { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 150px; height: 30px; "
-                         "margin-left:50px; margin-right:50px;}");
-    msgBox.setIcon(QMessageBox::Information);
-    msgBox.exec();
+    int ret=notWindow->exec();
+    if(ret==0)
+        homeWindow->enableButtonsAfter();
 }
 
 
@@ -86,6 +72,12 @@ void signup::setClientDispatcher( Symposium::clientdispatcher *cl){
 signup::~signup()
 {
     delete ui;
+}
+
+void signup::enableButtonsAfter()
+{
+    if(!pressed)
+        enableStyleButtons();
 }
 
 void signup::on_signin_clicked()
@@ -135,33 +127,11 @@ void signup::on_signin_clicked()
             hide();
             homeWindow= new home(nullptr, pwd);
             homeWindow->show();
-            QMessageBox msgBox;
-            msgBox.setText("<p align='center'>Your account has been successfully created!</p>");
-            msgBox.setWindowTitle("Notification");
-            QPixmap pix(":/icon/logo1.png");
-            QIcon p(pix);
-            msgBox.setWindowIcon(p);
-            msgBox.setStandardButtons(QMessageBox::Yes);
-            msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
-            msgBox.button(QMessageBox::Yes)->setText("Ok");
-            msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                                 "color: rgb(58, 80, 116);"
-                                 "font: 14pt 'Baskerville Old Face';} "
-                                 "QLabel{color: rgb(58, 80, 116);} "
-                                 "QPushButton#Yes { "
-                                 "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                                 "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                                 "color: white; font: 14pt 'Baskerville Old Face'; "
-                                 "border-radius:15px; width: 100px; height: 30px; "
-                                 "margin-right:185px;}"
-                                 "QPushButton#No { "
-                                 "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                                 "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
-                                 "color: white; font: 14pt 'Baskerville Old Face'; "
-                                 "border-radius:15px; width: 80px; height: 30px; "
-                                 "margin-left:20px;}");
-            msgBox.setIcon(QMessageBox::Information);
-            msgBox.exec();
+            homeWindow->disableStyleButtons();
+            notWindow = new notification(homeWindow, "Your account has been successfully created");
+            int ret=notWindow->exec();
+            if(ret==0)
+                homeWindow->enableButtonsAfter();
         }
     }
     else {
@@ -174,11 +144,14 @@ void signup::on_signin_clicked()
 
 void signup::on_iconButt_clicked()
 {
+    disableStyleButtons();
     iconWindow = new icon(this);
-    iconWindow->exec();
+    int ret=iconWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
 }
 
-bool signup::checkPassword(QString passwordToCheck)
+bool signup::checkPassword(const QString passwordToCheck)
 {
     std::string str=passwordToCheck.toStdString();
     if(str.length()<=5)
@@ -207,48 +180,11 @@ void signup::chooseIcon()
 void signup::closeEvent(QCloseEvent *event)
 {
     disableStyleButtons();
-    disableButtons();
-    QMessageBox msgBox;
-    msgBox.setText("<p align='center'>Are you sure to quit?</p>");
-    msgBox.setWindowTitle("Exit");
-    QPixmap pix(":/icon/logo1.png");
-    QIcon p(pix);
-    msgBox.setWindowIcon(p);
-    msgBox.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
-    msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
-    msgBox.button(QMessageBox::Yes)->setText("Quit");
-    msgBox.button(QMessageBox::No)->setObjectName("No");
-    msgBox.button(QMessageBox::No)->setText("Remain");
-    msgBox.setBaseSize(QSize(390, 120));
-    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                         "color: rgb(58, 80, 116);"
-                         "font: 14pt 'Baskerville Old Face';} "
-                         "QLabel{color: rgb(58, 80, 116);} "
-                         "QPushButton#Yes { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px; "
-                         "margin-right:50px;}"
-                         "QPushButton#No { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "}");
-    msgBox.setIcon(QMessageBox::Question);
-    int ret=msgBox.exec();
-    if (ret == QMessageBox::Yes)
-        event->accept();
-    else
-    {
-        if(!pressed)
-        {
-            event->ignore();
-            enableButtons();
-        }
+    event->ignore();
+    ex=new class exit(this);
+    int ret=ex->exec();
+    if(ret==0 && !pressed)
         enableStyleButtons();
-    }
 
 }
 
@@ -260,6 +196,9 @@ void signup::waiting()
 
 void signup::disableButtons()
 {
+    ui->nickname->setReadOnly(true);
+    ui->password->setReadOnly(true);
+    ui->username->setReadOnly(true);
     ui->iconButt->setDisabled(true);
     ui->signin->setDisabled(true);
     ui->cancel->setDisabled(true);
@@ -267,6 +206,9 @@ void signup::disableButtons()
 
 void signup::enableButtons()
 {
+    ui->nickname->setReadOnly(false);
+    ui->password->setReadOnly(false);
+    ui->username->setReadOnly(false);
     ui->waiting->hide();
     ui->gif->hide();
     ui->iconButt->setDisabled(false);
@@ -297,13 +239,13 @@ void signup::hideLabelsError()
 
 void signup::showEvent(QShowEvent* event)
 {
-QDialog::showEvent(event);
+    QDialog::showEvent(event);
 
- QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-      anim->setStartValue(0.0);
-      anim->setEndValue(1.0);
-      anim->setDuration(1000);
- anim->start(QAbstractAnimation::DeleteWhenStopped);
+    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
+    anim->setStartValue(0.0);
+    anim->setEndValue(1.0);
+    anim->setDuration(1000);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void signup::on_cancel_clicked()

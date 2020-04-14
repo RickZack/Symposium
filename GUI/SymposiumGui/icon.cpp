@@ -7,6 +7,8 @@ icon::icon(QWidget *parent) :
     ui(new Ui::icon)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     msg=":/resources/avatar/beaver.png";
 
     QPixmap pix(":/resources/avatar/beaver.png");
@@ -47,6 +49,7 @@ icon::icon(QWidget *parent) :
 
     connect(ui->pushButton, SIGNAL(clicked()), parent, SLOT(chooseIcon()));
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect(this, SIGNAL(close()), parentWidget(), SLOT(enableButtonsAfter()));
 }
 
 icon::~icon()

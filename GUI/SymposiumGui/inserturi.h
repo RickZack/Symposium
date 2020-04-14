@@ -6,6 +6,8 @@
 #include "../../privilege.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include "notification.h"
+#include "exit.h"
 
 class home;
 class directory;
@@ -76,6 +78,10 @@ private slots:
 
 public slots:
     /**
+     * @brief restore the style of buttons;
+     */
+    void enableButtonsAfter();
+    /**
      * @brief set the selected folder
      */
     void change_text();
@@ -96,8 +102,10 @@ private:
     Symposium::clientdispatcher *cl;
     home *h;
     directory *d;
+    notification *notWindow;
     std::string pwd;
     bool homeWindow;
+    class exit *ex;
     errorconnection *errorWindow;
     errorlogout *errorLog;
     /**

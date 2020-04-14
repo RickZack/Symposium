@@ -9,6 +9,7 @@ deleteAccount::deleteAccount(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(delete_click()));
     enableButtons();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");

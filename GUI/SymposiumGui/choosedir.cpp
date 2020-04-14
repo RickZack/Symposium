@@ -3,11 +3,12 @@
 
 
 
-choosedir::choosedir(QWidget *parent) :
+choosedir::choosedir(QWidget *parent, std::string pathDir) :
     QDialog(parent),
-    ui(new Ui::choosedir)
+    pathDir(pathDir), ui(new Ui::choosedir)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     
     //---------------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     std::string str="directory 1 directory1\n directory 2  directory2\n symlink 10   link10 owner\n directory 3   directory3\n file 9    file9 owner\n directory 4  directory4\n directory 5 directory5\n directory 6  directory6\n directory 7   directory7\n directory 8 directory8\n";
@@ -18,7 +19,7 @@ choosedir::choosedir(QWidget *parent) :
     int count=number_elements(str);
 
     ui->tree->setColumnCount(3);
-    ui->tree->headerItem()->setText(0, "name of folder:");
+    ui->tree->headerItem()->setText(0, "folder:");
     ui->tree->header()->setVisible(true);
     ui->tree->setColumnHidden(1, true);
     ui->tree->setColumnHidden(2, true);
@@ -26,7 +27,9 @@ choosedir::choosedir(QWidget *parent) :
     treeGenerate(str, count);
 
     connect(ui->choose, SIGNAL(clicked()), parent, SLOT(change_text()));
+    connect(ui->choose, SIGNAL(clicked()), parent, SLOT(enableButtonsAfter()));
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(reset_text()));
+    connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(enableButtonsAfter()));
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
 }
 
@@ -149,8 +152,11 @@ void choosedir::treeGenerate(std::string str, int count)
 
 void choosedir::on_tree_itemClicked(QTreeWidgetItem *item, int column)
 {
-
-    QString pathUser=item->text(2);
+    QString pathUser;
+    if(column==2)
+        pathUser=item->text(column);
+    else
+        pathUser=item->text(2);
     nameOfDir=pathUser.toStdString();
     pathId=(item->text(1)).toStdString();
     ui->nameDir->setText(pathUser);

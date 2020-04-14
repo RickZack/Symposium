@@ -39,12 +39,12 @@ public:
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user
      */
-    void errorConnectionLogout(std::string str);
+    void errorConnectionLogout(const std::string str);
     /**
      * @brief called by clientdispatcher when there is some error to edit the information of the current user
      * @param errorMess the messagge to show
      */
-    void errorEditUser(std::string errorMess);
+    void errorEditUser(const std::string errorMess);
     /**
      * @brief called by clientdispatcher when the edit of the information of the current user was successfully done
      */

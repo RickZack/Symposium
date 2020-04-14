@@ -23,7 +23,7 @@ public:
     std::string pathId;
     std::string nameOfDir;
     std::string pathDir;
-    explicit choosedir(QWidget *parent = nullptr);
+    explicit choosedir(QWidget *parent = nullptr, std::string pathDir="");
     ~choosedir();
 
     void treeGenerate(std::string str, int count);
