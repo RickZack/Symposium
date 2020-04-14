@@ -192,11 +192,6 @@ namespace Symposium {
          */
         void checkIndex(unsigned int i0, unsigned int i1);
 
-        void setLevel(int value);
-
-        int getLevel() const;
-
-
     private:
         /**
          * @brief it determines the globally unique fractional index position of the new character.

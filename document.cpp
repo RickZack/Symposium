@@ -33,24 +33,11 @@
 #include "symbol.h"
 #include "user.h"
 #include <cmath>
-#include <QDebug>
-
-
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 
-//FIXME: valore di default di id ignorato, potenziale errore
-void document::setLevel(int level)
-{
-    this->level = level;
-}
-
-int document::getLevel() const
-{
-    return level;
-}
 
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)) {
     id=idCounter;
@@ -83,20 +70,17 @@ document & document::access(const user &newActive, privilege accessPriv) {
 }
 
 void document::checkIndex(unsigned int i0, unsigned int i1) {
-    float mul_fct=1.5; //just to avoid too many reallocations
     if(i0>=symbols.capacity())
-        //symbols.resize((i0+1)*mul_fct);
         symbols.resize((i0+1));
     if(i1>=symbols[i0].capacity())
-        //symbols[i0].resize((i1 + 1) * mul_fct, emptySymbol);
         symbols[i0].resize((i1 + 1), emptySymbol);
 }
 
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
-    //TODO: take into account new position of cursor
-     int i0=indexes.first;
+    int i0=indexes.first;
     int i1=indexes.second;
+    this->updateCursorPos(toInsert.getSiteId(),i0,i1);
     checkIndex(i0,i1);
 
     symbol newSymb= generatePosition(indexes,toInsert);
@@ -109,6 +93,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, newSymb);
         }
+    //qDebug()<<"help"<<newSymb.getPos();
     return newSymb;
 }
 
@@ -133,7 +118,6 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
         siteIdA=symB.getSiteId();
     }
 
-    //int level=this->getLevel();
     int level=0;
     std::vector<int> inPos;
     std::vector<int> newPos= generatePosBetween(posBefore, posAfter, inPos, level, siteIdB, siteIdA);
@@ -159,8 +143,6 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> index
     else if(ch==0 && line!=0){
        line=line-1;
        ch=symbols[line].size()-1;
-        //symbol sym=emptySymbol;
-        //return sym;
     }else{
         ch=ch-1;
     }
@@ -203,17 +185,16 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
 
     // change 2 to any other number to change base multiplication
     int base=pow(2,level)*32;
+    //qDebug()<<"base"<<base;
     char boundaryStrategy= retrieveStrategy(level);
     int id1,id2;
 
     if(posBefore.empty()){
-        //id1=indexes.first;
         id1=0;
     }else{
         id1=posBefore[0];
     }
-    if(posAfter.empty()){
-        //id1=indexes.second;
+     if(posAfter.empty()){
         id2=base;
     }else{
         id2=posAfter[0];
@@ -223,7 +204,6 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
         unsigned newDigit= generateIdBetween(id1,id2,boundaryStrategy);
         newPos.push_back(newDigit);
         return newPos;
-        qDebug()<<"OK"<<newDigit;
     }else if(id2-id1==1){
         newPos.push_back(id1);
         // pos1.slice(1) will remove from the posBefore the first element
@@ -252,13 +232,9 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
             return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
         }
         else{
-            qDebug()<<"Fix Position Sorting"<<1;
+            throw "Fix position sorting";
         }
     }
-
-    //this->setLevel(level);
-    //return newPos;
-
 }
 
 
@@ -266,7 +242,6 @@ char document::retrieveStrategy(const int level){
 
    int sizeSC=strategyCache.size();
    if(level<sizeSC){
-   //if(!strategyCache.empty()){
         return strategyCache[level];
     }
 
@@ -301,21 +276,23 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
 }
 
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes) {
-    //TODO: take into account new position of cursor
     int i0=indexes.first;
     int i1=indexes.second;
     checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
+    //taking into account the position of the cursor.
+    // TO DO
     symbols[i0].erase(symbols[i0].begin()+i1);
 
     return sym;
 }
 
 std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
-    //TODO: take into account new position of cursor
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
+    // taking into account the position of the cursor.
+    this->updateCursorPos(siteId,i0,i1);
     checkIndex(i0,i1);
     char sym=symbols[i0][i1].getCh();
 
@@ -324,8 +301,8 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
     }
-    //FIXME: dummy return, fix
-    return std::pair<unsigned int, unsigned int>();
+
+    return indexes;
 }
 
 
@@ -334,6 +311,7 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
+    this->updateCursorPos(siteId,i0,i1);
     if(i0==-1 || i1==-1){
         //FIXME: dummy return, fix
         return std::pair<unsigned int, unsigned int>();
@@ -351,9 +329,8 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
 std::wstring document::toText() const {
     std::wstring str;
     std::wostringstream str1;
-    int i=0;
-    for (int i=0;i<symbols.size();i++) {
-        for (int j = 0; j < symbols[i].size(); j++) {
+    for (size_t i=0;i<symbols.size();i++) {
+        for (size_t j = 0; j < symbols[i].size(); j++) {
             wchar_t value = symbols[i][j].getCh();
             if (value != emptyChar)
                 str1.put(value);
@@ -387,8 +364,8 @@ void document::load(const std::string &loadPath) {
 std::set<uint_positive_cnt::type> document::retrieveSiteIds() const{
     std::set<uint_positive_cnt::type> siteIds;
     std::set<uint_positive_cnt::type>::iterator it=siteIds.begin();
-    for(int i=0;i<symbols.size();i++){
-        for(int j=0;j<symbols[i].size();j++){
+    for(size_t i=0;i<symbols.size();i++){
+        for(size_t j=0;j<symbols[i].size();j++){
             siteIds.insert(it,symbols[i][j].getSiteId());
             it++;
         }
@@ -530,14 +507,16 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 
     //if the struct is empty or char is less than first char
     if(symbols.empty()||symbol.getCh()<symbols[0][0].getCh()){
-        i0=-1; i1=-1; ind={i0,i1}; return ind;
+        //i0=-1; i1=-1; ind={i0,i1}; return ind;
+        i0=0; i1=0; ind={i0,i1};return ind;
     }
 
     auto lastChar=lastLine[lastLine.size()-1];
 
     //char is greater than all existing chars(insert at end)
     if(symbol.getCh()>lastChar.getCh()){
-        i0=-1; i1=-1; ind={i0,i1}; return ind;
+       // i0=-1; i1=-1; ind={i0,i1}; return ind;
+        return this->findEndPosition(lastChar,lastLine,totalLines);
     }
 
     // binary search
@@ -606,12 +585,25 @@ unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<S
 }
 
 void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol) {
-    //TODO:implement
+   for(auto i: activeUsers){
+       if(i.first->getSiteId()==targetSiteId){
+           i.second.row=newRow;
+           i.second.col=newCol;
+       }
+   }
 }
 
 std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVerify) {
-    //TODO: implement
-    return std::pair<unsigned int, unsigned int>();
+    std::pair<unsigned int,unsigned int> indexes;
+    for(size_t i=0;i<symbols.size();i++){
+        for(size_t j=0;j<symbols[i].size();j++){
+            if(symbols[i][j]==toVerify){
+                symbols[i][j].setVerified();
+                indexes={i,j};
+            }
+        }
+    }
+    return indexes;
 }
 
 

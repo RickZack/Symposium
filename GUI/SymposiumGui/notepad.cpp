@@ -55,6 +55,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
     //---------------------------------------------------------------------------------------------------------------------------
 
+
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2},i4={0,3},i5={1,0},i6={1,1},i7={1,2},i8={1,3},i9={1,4},i10={1,5},i11={1,6},i12={1,7},i13={1,8};
         Symposium::symbol s1('C', 1, 0, std::vector<int>(), false),
                           s2('i', 1, 1, std::vector<int>(), false),
@@ -163,7 +164,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
 
 
-    this->fillTextEdit();
 
   //---------------------------------------------------------------------------------------------------------
 
@@ -205,6 +205,8 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
     ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));
     ui->actionhighlight->setCheckable(true);
+
+    this->fillTextEdit();
 
     //------------------------------------------------------PARTE DA DECOMMENTARE
 
@@ -442,21 +444,24 @@ void notepad::textBold()
 {
     QTextCharFormat fmt;
     fmt.setFontWeight(actionTextBold->isChecked() ? QFont::Bold : QFont::Normal);
-    mergeFormatOnWordOrSelection(fmt);
+    ui->textEdit->mergeCurrentCharFormat(fmt);
+    //mergeFormatOnWordOrSelection(fmt);
 }
 
 void notepad::textUnderline()
 {
     QTextCharFormat fmt;
     fmt.setFontUnderline(actionTextUnderline->isChecked());
-    mergeFormatOnWordOrSelection(fmt);
+    ui->textEdit->mergeCurrentCharFormat(fmt);
+   // mergeFormatOnWordOrSelection(fmt);
 }
 
 void notepad::textItalic()
 {
     QTextCharFormat fmt;
     fmt.setFontItalic(actionTextItalic->isChecked());
-    mergeFormatOnWordOrSelection(fmt);
+    ui->textEdit->mergeCurrentCharFormat(fmt);
+    //mergeFormatOnWordOrSelection(fmt);
 }
 
 void notepad::textStyle(int styleIndex)
@@ -528,11 +533,13 @@ void notepad::textStyle(int styleIndex)
 
 void notepad::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
 {
+
     QTextCursor cursor = ui->textEdit->textCursor();
     if (!cursor.hasSelection())
         cursor.select(QTextCursor::WordUnderCursor);
     cursor.mergeCharFormat(format);
     ui->textEdit->mergeCurrentCharFormat(format);
+
 }
 
 
@@ -558,7 +565,8 @@ void notepad::textFamily(const QString &f)
 {
     QTextCharFormat fmt;
     fmt.setFontFamily(f);
-    mergeFormatOnWordOrSelection(fmt);
+    //mergeFormatOnWordOrSelection(fmt);
+    ui->textEdit->mergeCurrentCharFormat(fmt);
 }
 
 void notepad::textSize(const QString &p)
@@ -567,7 +575,8 @@ void notepad::textSize(const QString &p)
     if (p.toFloat() > 0) {
         QTextCharFormat fmt;
         fmt.setFontPointSize(pointSize);
-        mergeFormatOnWordOrSelection(fmt);
+        //mergeFormatOnWordOrSelection(fmt);
+         ui->textEdit->mergeCurrentCharFormat(fmt);
     }
 }
 
@@ -610,8 +619,8 @@ void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 
 void notepad::fillTextEdit(){
     insertOthCh=true;
-    QColor qCol;
     QTextCharFormat chFormat;
+    QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
     QString ch;
     // save in symbols all the symbols contained in the document
@@ -625,6 +634,7 @@ void notepad::fillTextEdit(){
             //estract the character
             ch[0]=sym.getCh();
             if(ch[0]!=emptyChar){
+            QTextCharFormat chFormat;
             Symposium::format format=sym.getCharFormat();
             //estract the information about the font/color
             QFont font;
@@ -641,33 +651,24 @@ void notepad::fillTextEdit(){
                 qCol.setAlpha(160);
             }
             chFormat.setFont(font); chFormat.setForeground(qCol);
-            // check if the highlight button is activated;
-            // if yes-> highlight the inserted character with the color of the user
-            if(this->highActivated){
-                Symposium::Color colHigh=cl->getColor(this->documentId,sym.getSiteId());
-                QColor colUser;
-                colUser=static_cast<QColor>(colHigh);
-                chFormat.setBackground(colUser);
-            }
-
             // go to the position of the character
             ui->textEdit->changePosition(i,column);
             curs.insertText(ch,chFormat);
-
-
      }
+
     }
+        if(i!=symbols.size()-1){
             // to insert another Line
             curs.insertBlock();
+        }
     }
+    QColor qColStand=chFormat.foreground().color();
+    qColStand.setAlpha(160);
+    this->colPos=qColStand;
+    ui->textEdit->setCurrentCharFormat(chFormat);
+    this->supportColumn=curs.positionInBlock();
     insertOthCh=false;
 
-    QColor black=Qt::black;
-
-    //set a lighter color
-    QColor lightCol=black;
-    lightCol.setAlpha(180);
-    this->colPos=lightCol;
 }
 
 
@@ -748,6 +749,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         int row= cursor.blockNumber();
         const std::pair<int, int> indexes={row,column};
         //cl->localRemouve(this->documentId,&indexes);
+        this->documentoProva.localRemove(indexes);
 
     }else if(event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
              ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||
@@ -757,74 +759,81 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
              event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
              event->key()==Qt::Key_Tab || event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
              event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
-             event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier & event->text()!="\u0016"){
+             event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier& event->text()!="\u0016"){
         return;
     }else if(event->text()=="\u0016"){ // Control_V action
         this->contV_action(pos);
 
+    }else if(event->text()=="\r"){
+        int row=cursor.blockNumber()-1;
+        int column=this->supportColumn;
+        QString testo=event->text();
+        QTextCharFormat format = cursor.charFormat();
+        this->sendSymbolToInsert(row,column,testo,format);
+
+
     }else{
 
         // is the first time that the user enters the document and writes it
-        if(insertedChars==0){
+
+/*
+        if(insertedChars==0 && highActivated){
             QTextCharFormat ch=ui->textEdit->currentCharFormat();
-            QColor newCol=ch.foreground().color();
+            QColor newCol=this->colPos;
             QString charact=event->text();
             newCol.setAlpha(180);
             ch.setForeground(newCol);
+            ch.setBackground(myC);
             cursor.deletePreviousChar();
-
-            if(this->highActivated){
-               ch.setBackground(myC);
-            }
-
-             cursor.insertText(charact,ch);
-        }
+            cursor.insertText(charact,ch);
+    }
 
         // there is a number of chars>0 (don't care how many)
         insertedChars=1;
 
+*/
 
         QString testo=event->text();
 
         int column=cursor.positionInBlock();
-        column= column-1;
+        column= column-1; this->supportColumn=column+1;
         int row= cursor.blockNumber();
-
-        std::string str=testo.toStdString();
-        wchar_t ch=str[0];
-        const std::pair<int, int> indexes={row,column};
-
         QTextCharFormat format = cursor.charFormat();
-        QColor col=format.foreground().color();
-
-        QFont font= format.font();
-        bool isBold= font.bold();
-        bool isUnderlined=font.underline();
-        bool isItalic=font.italic();
-        unsigned size=font.pointSize();
-        std::string fontFamily=font.family().toStdString();
-        QColor colC=format.foreground().color();
-        int blue=col.blue();
-        int red=col.red();
-        int green=col.green();
-        Symposium::Color myCol(red,blue,green);
-        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
-        std::vector<int> pos;
-        // SISTEMARE IL SITEID E IL COUNTER IN SYMBOL
-        //Symposium::symbol sym(ch,0,0,pos,false);
-        //sym.setCharFormat(charFormat);
-        // cl->localInsert(this->documentId, Symposium::symbol &sym, &indexes)
-
-       // Symposium::symbol sym(ch,0,0,pos,false);
-        //this->documentoProva.localInsert(indexes,sym);
-
-        // useful to understand if the user changes row (block) by using the mouse
-        this->posBlock=cursor.blockNumber();
+        this->sendSymbolToInsert(row,column,testo,format);
     }
-
 }
 
+void notepad::sendSymbolToInsert(int row, int column,QString text,QTextCharFormat format){
 
+    std::string str=text.toStdString();
+    wchar_t ch=str[0];
+    const std::pair<int, int> indexes={row,column};
+    QColor col=format.foreground().color();
+
+    QFont font= format.font();
+    bool isBold= font.bold();
+    bool isUnderlined=font.underline();
+    bool isItalic=font.italic();
+    unsigned size=font.pointSize();
+    std::string fontFamily=font.family().toStdString();
+    QColor colC=format.foreground().color();
+    int blue=col.blue();
+    int red=col.red();
+    int green=col.green();
+    Symposium::Color myCol(red,blue,green);
+    struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
+    std::vector<int> pos;
+
+    // per test adesso, il mio siteid è 1 e anche il mio counter
+    Symposium::symbol sym(ch,1,1,pos,false);
+    sym.setCharFormat(charFormat);
+    this->documentoProva.localInsert(indexes,sym);
+
+    //cl->localInsert(this->documentId,sym,indexes);
+
+    this->posBlock=ui->textEdit->textCursor().positionInBlock();
+    this->colPos=colC;
+}
 
 void notepad::contV_action(int pos){
     QTextCursor curs= ui->textEdit->textCursor();
@@ -1189,24 +1198,53 @@ void notepad::on_textEdit_cursorPositionChanged()
 {
 
     QTextCursor cc=ui->textEdit->textCursor();
-    ui->textEdit->thisUserChangePosition(1);
-    //ui->textEdit->thisUserChangePosition(us.getSiteId())
+     if(insertOthCh==false){
+        ui->textEdit->thisUserChangePosition(1);
+        //ui->textEdit->thisUserChangePosition(us.getSiteId())
+     }
+     if(!cc.hasSelection()){
+        QTextCharFormat ch=ui->textEdit->currentCharFormat();
+        QColor newCol=ch.foreground().color();
+        newCol.setAlpha(255);
+        fontChanged(ch.font());
+        colorChanged(newCol);
+        this->currentCharFormatChanged(ch);
+}
+
+    QColor myC=Qt::yellow;
+    myC.setAlpha(160);
+
+
+
+    /*
 
     if(insertOthCh==false){
        QColor col=ui->textEdit->textColor();
        col.setAlpha(180);
        ui->textEdit->setTextColor(col);
-
+*/
        // The user changes the block by using the mouse
-        if(cc.blockNumber()!=this->posBlock) {
-            ui->textEdit->setTextColor(this->colPos);
-    }
+       // if(cc.blockNumber()!=this->posBlock) {
+            //this->insertedChars=0;
+          //  QTextCharFormat ch=ui->textEdit->currentCharFormat();
+          //  this->currentCharFormatChanged(ch);
+            //ui->textEdit->setTextColor(this->colPos);
+    //}
+     //   else if(!cc.hasSelection()){
+               // QColor col=ui->textEdit->textColor();
+               //col.setAlpha(180);
+             //  QTextCharFormat fmt=ui->textEdit->currentCharFormat();
+            //   fmt.setForeground(this->colPos);
+            //   ui->textEdit->mergeCurrentCharFormat(fmt);
+           //    ui->textEdit->setTextColor(this->colPos);
+        //}
 
-        if(this->highActivated && cc.blockNumber()!=this->posBlock){
-            this->insertedChars=0;
-            ui->textEdit->setTextColor(this->colPos);
+        //if(this->highActivated && cc.blockNumber()!=this->posBlock){
+         //   this->insertedChars=0;
+            //ui->textEdit->setTextColor(this->colPos);
+    if(this->highActivated){ui->textEdit->setTextBackgroundColor(myC);
 }
-     }
+
 }
 
 void notepad::colorText(){
@@ -1277,13 +1315,16 @@ void notepad::on_actionhighlight_triggered()
         this->insertedChars=0;
         ui->actionhighlight->setChecked(true);
         this->colorText();
+        QTextCursor c=ui->textEdit->textCursor();
+
 
     }
     else{
         this->highActivated=false;
         ui->actionhighlight->setChecked(false);
         this->insertedChars=0;
-        //this->fillTextEdit();
+        ui->textEdit->clear();
+        this->fillTextEdit();
 
     }
 }

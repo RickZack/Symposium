@@ -89,6 +89,7 @@ private slots:
     void on_textEdit_cursorPositionChanged();
     void on_actionhighlight_triggered();
 
+
 private:
     Ui::notepad *ui;
     QString mFilename;
@@ -112,6 +113,7 @@ private:
     int insertedChars=0;
     int posBlock=0;
     QColor colPos;
+    int supportColumn;
 
     void setupTextActions();
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
@@ -176,6 +178,7 @@ private:
     Symposium::document documentoProva;
     static constexpr wchar_t  emptyChar='~';
 
+    void sendSymbolToInsert(int row, int column, QString text, QTextCharFormat format);
 };
 
 #endif // NOTEPAD_H
