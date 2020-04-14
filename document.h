@@ -132,7 +132,8 @@ namespace Symposium {
          * @brief remove a symbol in the document as consequence of an user's action on the GUI
          * @param indexes symbol to remove
          */
-        virtual symbol localRemove(const std::pair<unsigned int, unsigned int> &indexes);
+        virtual symbol
+        localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId);
 
         /**
          * @brief insert a symbol in the document as consequence of a remote user's action

@@ -93,7 +93,7 @@ TEST_F(documentTest, localRemovingSymbolsFromBottom){
     d.localInsert(i1, s1);
     d.localInsert(i2, s2);
     d.localInsert(i3, s3);
-    d.localRemove(i3);
+    d.localRemove(i3, 0);
     EXPECT_EQ(L"ab", d.toText());
 }
 
@@ -105,7 +105,7 @@ TEST_F(documentTest, localRemovingSymbolsFromMiddle){
     d.localInsert(i1, s1);
     d.localInsert(i2, s2);
     d.localInsert(i3, s3);
-    d.localRemove(i2);
+    d.localRemove(i2, 0);
     EXPECT_EQ(L"ac", d.toText());
 }
 TEST_F(documentTest, verifySymbol){

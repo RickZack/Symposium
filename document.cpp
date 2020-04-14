@@ -280,7 +280,7 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
 
 }
 
-symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes) {
+symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId) {
     int i0=indexes.first;
     int i1=indexes.second;
     checkIndex(i0,i1);

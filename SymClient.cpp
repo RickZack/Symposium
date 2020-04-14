@@ -153,7 +153,7 @@ symbolMessage SymClient::localInsert(uint_positive_cnt::type resourceId, const s
 
 symbolMessage SymClient::localRemove(uint_positive_cnt::type resourceId, const std::pair<unsigned int, unsigned int> indexes) {
     document* d = this->getActiveDocumentbyID(resourceId);
-    symbol s = d->localRemove(indexes);
+    symbol s = d->localRemove(indexes, getLoggedUser().getSiteId());
     std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), resourceId, s));
     this->unanswered.push_front(mess);
     return *mess;
