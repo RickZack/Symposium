@@ -11,7 +11,7 @@ inserturi::inserturi(QWidget *parent, std::string pwd, bool homeWindow) :
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    showDir=cl->showDir(true);
+    //showDir=cl->showDir(true);
     ui->writer->click();
     QPixmap pix2(":/icon/logo.png");
     int w=ui->logo->width();
@@ -172,7 +172,7 @@ void inserturi::on_add_clicked()
                 waiting();
                 disableButtons();
                 disableStyleButtons();
-                cl->openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
+                //cl->openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
             }
         }
 
@@ -223,14 +223,14 @@ void inserturi::on_cancel_clicked()
     {
         h=new home(nullptr, pwd);
         h->setClientDispatcher(cl);
-        cl->setHome(h);
+        //cl->setHome(h);
         h->show();
     }
     else
     {
         d=new directory(nullptr, pwd);
         d->setClientDispatcher(cl);
-        cl->setDirectory(d);
+        //cl->setDirectory(d);
         d->show();
     }
 }

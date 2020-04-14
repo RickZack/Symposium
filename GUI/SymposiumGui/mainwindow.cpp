@@ -36,7 +36,7 @@ void MainWindow::on_about_clicked()
 void MainWindow::on_SignIn_clicked()
 {
     signinWindow= new sigin();
-    cl->setSignIn(signinWindow);
+    //cl->setSignIn(signinWindow);
 
     signinWindow->setClientDispatcher(cl);
     signinWindow->show();
@@ -47,7 +47,7 @@ void MainWindow::on_SignIn_clicked()
 void MainWindow::on_SignUp_clicked()
 {
     signupWindow= new signup();
-    cl->setSignUp(signupWindow);
+    //cl->setSignUp(signupWindow);
     signupWindow->setClientDispatcher(cl);
     signupWindow->show();
     hide();
