@@ -40,7 +40,9 @@ void home::on_delete_2_clicked()
     disableStyleButtons();
     deleteAccountWindow = new deleteAccount(this);
     deleteAccountWindow->setClientDispatcher(cl);
+    //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->setDeleteAccount(deleteAccountWindow);
+    //------------------------------------------------------------------
     int ret=deleteAccountWindow->exec();
     if(ret==0)
         enableStyleButtons();
@@ -50,7 +52,9 @@ void home::on_InsertUri_clicked()
 {
     inserturiWindow = new inserturi(nullptr, pwd);
     inserturiWindow->setClientDispatcher(cl);
+    //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->setInsertUri(inserturiWindow);
+    //------------------------------------------------------------------
     inserturiWindow->show();
     this->hide();
 }
@@ -59,7 +63,9 @@ void home::on_modify_clicked()
 {
     changeWindow = new changeUserInfo(nullptr, pwd);
     changeWindow->setClientDispatcher(cl);
+    //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->setChangeUserInfo(changeWindow);
+    //------------------------------------------------------------------
     changeWindow->show();
     this->hide();
 }
@@ -68,13 +74,17 @@ void home::on_directory_clicked()
 {
     directoryWindow=new directory(nullptr, pwd);
     directoryWindow->show();
+    //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->setDirectory(directoryWindow);
+    //------------------------------------------------------------------
     this->hide();
 }
 
 void home::logout()
 {
+    //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->logout();
+    //------------------------------------------------------------------
     pressed=true;
     waiting();
     disableButtons();

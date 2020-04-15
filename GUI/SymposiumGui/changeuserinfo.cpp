@@ -92,9 +92,11 @@ void changeUserInfo::confirm_click()
     disableStyleButtons();
     waiting();
     pressed=true;
-    //QString imagine = QString::fromStdString(img);
-    //Symposium::user usNew(username.toStdString(), pwd, nickname.toStdString(), img, us.getSiteId(), us.getHome());
-    //cl->editUser(usNew);
+    //------------------------------------------------------------------PARTE DA DECOMMENTARE
+    /*QString imagine = QString::fromStdString(img);
+    Symposium::user usNew(username.toStdString(), pwd, nickname.toStdString(), img, us.getSiteId(), us.getHome());
+    cl->editUser(usNew);*/
+    //------------------------------------------------------------------
 
     //------------------------------------------------------------------PARTE DA CANCELLARE
     QString stringa="Your information has been successfully modified";
@@ -167,7 +169,6 @@ void changeUserInfo::disableStyleButtons()
     if(!passwordView)
     {
         ui->confirm->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-        //ui->changepwd->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         ui->cancel->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 
     }
@@ -216,10 +217,12 @@ void changeUserInfo::on_confirm2_clicked()
         disableButtons();
         disableStyleButtons();
         pressed=true;
-        //QString imagine = QString::fromStdString(img);
-        //Symposium::user usNew(us.getUsername(), newp1.toStdString(), us.getNickname(), img, us.getSiteId(), us.getHome());
-        //cl->editUser(usNew);
-        //pressed=true;
+        //------------------------------------------------------------------PARTE DA DECOMENTARE
+        /*QString imagine = QString::fromStdString(img);
+        Symposium::user usNew(us.getUsername(), newp1.toStdString(), us.getNickname(), img, us.getSiteId(), us.getHome());
+        cl->editUser(usNew);
+        pressed=true;*/
+        //------------------------------------------------------------------
 
         //------------------------------------------------------------------PARTE DA CANCELLARE
 
@@ -399,7 +402,6 @@ void changeUserInfo::enableStyleButtons()
     if(!passwordView)
     {
         ui->confirm->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-        //ui->changepwd->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         ui->cancel->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 
     }
@@ -481,7 +483,9 @@ void changeUserInfo::on_cancel_clicked()
 {
     h=new home(nullptr, pwd);
     h->setClientDispatcher(cl);
+    //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->setHome(h);
+    //------------------------------------------------------------------
     this->hide();
     h->show();
 }

@@ -77,9 +77,6 @@ private slots:
      */
     void confirm_click();
 
-
-    //void on_username_textEdited(const QString &arg1);
-
     void on_confirm2_clicked();
 
     void on_cancel2_clicked();

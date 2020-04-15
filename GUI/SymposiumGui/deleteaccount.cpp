@@ -100,7 +100,9 @@ void deleteAccount::delete_click()
 {
     disableButtons();
     disableStyleButtons();
+    //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->removeUser();
+    //------------------------------------------------------------------
 }
 
 void deleteAccount::disableButtons()
