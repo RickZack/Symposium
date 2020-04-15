@@ -82,6 +82,7 @@ namespace Symposium {
         static uint_positive_cnt idCounter;  /**< id to be assigned to the next created filesystem object */
         uint_positive_cnt::type id;          /**< unique identifier for the filesystem object, used also for identifying objects along a path */
     protected:
+        static const std::string realPath;
         std::string name;                    /**< resource name */
         uri sharingPolicy;                   /**< sharing policy applied to the resource */
         std::unique_ptr<AccessStrategy> strategy;
@@ -94,12 +95,18 @@ namespace Symposium {
         //Needed by boost::serialization
         filesystem() = default;
 
+
     public:
         filesystem(const std::string &name, const uint_positive_cnt::type idToAssign = 0);
 
         uint_positive_cnt::type getId() const;
 
         const std::string &getName() const;
+
+        /**
+         * @brief Store the content handled by the filesystem object (if any)
+         */
+        virtual void storeContent() const{}
 
         /**
          * @brief retrieve the privilege of a user on the current filesystem object
@@ -163,12 +170,6 @@ namespace Symposium {
          */
         virtual uri setSharingPolicy(const std::string &actionUser, const uri &newSharingPrefs);
 
-        virtual void store(const std::string &storePath) const = 0;
-
-        virtual void load(const std::string &loadPath) = 0;
-
-        virtual void send() const = 0; //not clear how to set this
-
         virtual std::string
         print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const = 0;
 
@@ -205,7 +206,6 @@ namespace Symposium {
      * @brief class used to model a file in the filesystem
      */
     class file : public filesystem {
-        std::string realPath;      /**< file's path internal to the actual working directory of the system */
         document doc;              /**< document to handle */
 
 
@@ -216,7 +216,7 @@ namespace Symposium {
         //Needed by boost::serialization
         file()=default;
     public:
-        file(const std::string &name, const std::string &realPath, uint_positive_cnt::type idToAssign=0);
+        file(const std::string &name, uint_positive_cnt::type idToAssign = 0);
 
         const document &getDoc() const;
 
@@ -271,11 +271,10 @@ namespace Symposium {
          */
         virtual document &access(const user &targetUser, privilege accessMode);
 
-        void store(const std::string &storePath) const override;
-
-        void load(const std::string &loadPath) override;
-
-        void send() const override; //TODO: check connectivity requirements
+        /**
+         * @brief Store the contained document in a proper file
+         */
+        void storeContent() const override;
 
         /**
          * @brief give a textual representation of the file
@@ -359,12 +358,6 @@ namespace Symposium {
          * system design and pointers to symlink are meaningless.
          */
         document& access(const user &targetUser, privilege accessMode);
-
-        void store(const std::string &storePath) const override;
-
-        void load(const std::string &loadPath) override;
-
-        void send() const override;
 
         /**
          * @brief give a textual representation of the symlink
@@ -453,11 +446,11 @@ namespace Symposium {
         virtual std::shared_ptr<filesystem>
         remove(const user &targetUser, const std::string &path, const std::string &resName);
 
-        void store(const std::string &storePath) const override;
+        /**
+         * @brief Call storeContent() on contained filesystem objects
+         */
+        void storeContent() const override;
 
-        void load(const std::string &loadPath) override;
-
-        void send() const override; //not clear how to set this
 
         /**
          * @brief give a textual representation of the content of the current directory

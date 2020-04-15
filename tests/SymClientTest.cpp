@@ -110,7 +110,7 @@ struct SymClientAccesser: public SymClient{
 };
 
 struct SymClientFileMock: public file{
-    SymClientFileMock(const std::string &name, const std::string &realPath) : file(name, realPath, 0) {};
+    SymClientFileMock(const std::string &name, const std::string &realPath) : file(name, 0) {};
     MOCK_CONST_METHOD0(getDoc, document&());
     MOCK_METHOD2(access, document&(const user& u, privilege requested));
 };
@@ -127,7 +127,7 @@ struct SymClientDocMock: public document{
     MOCK_METHOD1(close, void(const user& noLongerActive));
     MOCK_METHOD2(access, document&(const user&, privilege));
     MOCK_METHOD2(localInsert, symbol(const std::pair<unsigned, unsigned>& index, symbol &toInsert));
-    MOCK_METHOD1(localRemove, symbol(const std::pair<unsigned, unsigned>& index));
+    MOCK_METHOD2(localRemove, symbol(const std::pair<unsigned, unsigned>& index, uint_positive_cnt::type siteId));
     MOCK_METHOD3(updateCursorPos, void(unsigned int, unsigned int, unsigned int));
     MOCK_METHOD1(verifySymbol, std::pair<unsigned int, unsigned int>(const symbol &sym));
 };
@@ -414,7 +414,7 @@ TEST_F(SymClientTest, localInsertConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, localRemoveConstructsGoodMessageAndInsertInUnanswered){
     setStageForOpenedDoc();
     symbol removed('a', userReceived.getSiteId(), 0, {1}, false);
-    EXPECT_CALL(docSentByServer, localRemove(indexes)).WillOnce(::testing::Return(removed));
+    EXPECT_CALL(docSentByServer, localRemove(indexes, userReceived.getSiteId())).WillOnce(::testing::Return(removed));
     auto mex=client.localRemove(docSentByServer.getId(), indexes);
 
     messageHasCorrectOwner(mex);

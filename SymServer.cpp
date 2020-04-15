@@ -545,8 +545,12 @@ bool SymServer::load() {
 }
 
 SymServer::~SymServer() {
-    if(storeData)
+    if(storeData) {
+        document::serializeFull=false;
         store();
+        document::serializeFull=true;
+        rootDir->storeContent();
+    }
 }
 
 

@@ -65,7 +65,7 @@ struct SymServerUserMock: public user{
 };
 
 struct SymServerFileMock: public file{
-    SymServerFileMock() : file("test", "./aPath", 0) {}
+    SymServerFileMock() : file("test", 0) {}
     MOCK_METHOD2(access, document&(const user &targetUser, privilege accessMode));
 };
 
