@@ -8,6 +8,8 @@ deleteAccount::deleteAccount(QWidget *parent) :
     ui(new Ui::deleteAccount)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(delete_click()));
@@ -24,34 +26,13 @@ void deleteAccount::successDeleteAccount()
     this->close();
     parentWidget()->hide();
     mw=new MainWindow();
+    mw->disableStyleButtons();
     mw->show();
-    QMessageBox msgBox;
-    msgBox.setText("<p align='center'>Your account has been successfully deleted!</p>");
-    msgBox.setWindowTitle("Notification");
-    QPixmap pix(":/icon/logo1.png");
-    QIcon p(pix);
-    msgBox.setWindowIcon(p);
-    msgBox.setStandardButtons(QMessageBox::Yes);
-    msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
-    msgBox.button(QMessageBox::Yes)->setText("Ok");
-    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                         "color: rgb(58, 80, 116);"
-                         "font: 14pt 'Baskerville Old Face';} "
-                         "QLabel{color: rgb(58, 80, 116);} "
-                         "QPushButton#Yes { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px; "
-                         "margin-right:185px;}"
-                         "QPushButton#No { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "margin-left:20px;}");
-    msgBox.setIcon(QMessageBox::Information);
-    msgBox.exec();
+    QString str="Your account has been successfully deleted!";
+    notWindow = new notification(mw, str);
+    int ret=notWindow->exec();
+    if(ret==0)
+        mw->enableButtonsAfter();
 }
 
 void deleteAccount::errorDeleteUser(std::string errorMess)
@@ -59,33 +40,9 @@ void deleteAccount::errorDeleteUser(std::string errorMess)
     enableButtons();
     enableStyleButtons();
     this->close();
-    QMessageBox msgBox;
-    msgBox.setText("<p align='center'>ERROR: "+QString::fromStdString(errorMess)+"</p>");
-    msgBox.setWindowTitle("Notification");
-    QPixmap pix(":/icon/logo1.png");
-    QIcon p(pix);
-    msgBox.setWindowIcon(p);
-    msgBox.setStandardButtons(QMessageBox::Yes);
-    msgBox.button(QMessageBox::Yes)->setObjectName("Yes");
-    msgBox.button(QMessageBox::Yes)->setText("Ok");
-    msgBox.setStyleSheet("QMessageBox { background-color:rgb(249, 247, 241); "
-                         "color: rgb(58, 80, 116);"
-                         "font: 14pt 'Baskerville Old Face';} "
-                         "QLabel{color: rgb(58, 80, 116);} "
-                         "QPushButton#Yes { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116)); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 100px; height: 30px; "
-                         "}"
-                         "QPushButton#No { "
-                         "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
-                         "stop: 0 rgb(95, 167, 175), stop: 1 grey); "
-                         "color: white; font: 14pt 'Baskerville Old Face'; "
-                         "border-radius:15px; width: 80px; height: 30px; "
-                         "margin-left:20px;}");
-    msgBox.setIcon(QMessageBox::Information);
-    msgBox.exec();
+    QString str="ERROR:"+QString::fromStdString(errorMess);
+    notWindow = new notification(nullptr, str);
+    notWindow->exec();
 }
 
 
@@ -98,7 +55,9 @@ void deleteAccount::delete_click()
 {
     disableButtons();
     disableStyleButtons();
+    //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->removeUser();
+    //------------------------------------------------------------------
 }
 
 void deleteAccount::disableButtons()

@@ -10,7 +10,8 @@ notification::notification(QWidget *parent, QString str) :
 
     ui->text->setText(str);
     connect(ui->ok, SIGNAL(clicked()), this, SLOT(hide()));
-    connect(ui->ok, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
+    if(parent!=nullptr)
+        connect(ui->ok, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
 }
 
 notification::~notification()

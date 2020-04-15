@@ -26,6 +26,10 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void setClientDispatcher(Symposium::clientdispatcher *cl);
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
 
 public slots:
     /**
@@ -70,10 +74,6 @@ private:
      * @brief enable the style of buttons
      */
     void enableStyleButtons();
-    /**
-     * @brief disable the style of buttons
-     */
-    void disableStyleButtons();
 };
 
 #endif // MAINWINDOW_H

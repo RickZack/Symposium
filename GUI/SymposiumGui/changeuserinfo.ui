@@ -6,21 +6,38 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>795</width>
-    <height>629</height>
+    <width>670</width>
+    <height>780</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Information</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icon/logo1.png</normaloff>:/icon/logo1.png</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:rgb(249, 247, 241);</string>
   </property>
   <widget class="QLineEdit" name="username">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>110</y>
+     <x>300</x>
+     <y>230</y>
      <width>181</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 11pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); 
+</string>
    </property>
    <property name="text">
     <string/>
@@ -29,10 +46,10 @@
   <widget class="QLabel" name="img">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>230</y>
+     <x>340</x>
+     <y>330</y>
      <width>101</width>
-     <height>91</height>
+     <height>101</height>
     </rect>
    </property>
    <property name="text">
@@ -42,61 +59,76 @@
   <widget class="QPushButton" name="confirm">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>560</y>
-     <width>93</width>
-     <height>28</height>
+     <x>153</x>
+     <y>600</y>
+     <width>105</width>
+     <height>35</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+   </property>
    <property name="text">
-    <string>confirm</string>
+    <string>Change</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>110</y>
+     <x>189</x>
+     <y>230</y>
      <width>101</width>
      <height>31</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string>username:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>170</y>
+     <x>189</x>
+     <y>280</y>
      <width>101</width>
      <height>31</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string>nickname:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="iconButt">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>340</y>
+     <x>310</x>
+     <y>440</y>
      <width>191</width>
      <height>41</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 8pt &quot;MS Shell Dlg 2&quot;;
+    <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); 
 text-decoration: underline;
-text-align: left;</string>
+text-align: center;</string>
    </property>
    <property name="text">
     <string>choose another icon...</string>
@@ -108,27 +140,40 @@ text-align: left;</string>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>30</y>
-     <width>381</width>
+     <x>165</x>
+     <y>150</y>
+     <width>340</width>
      <height>41</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 16pt &quot;MS Shell Dlg 2&quot;;</string>
+    <string notr="true">font: 18pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
-    <string>Change Information about you</string>
+    <string>Change your information</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QLineEdit" name="nickname">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>170</y>
+     <x>300</x>
+     <y>280</y>
      <width>181</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 11pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string/>
@@ -137,14 +182,15 @@ text-align: left;</string>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>270</y>
-     <width>101</width>
+     <x>189</x>
+     <y>365</y>
+     <width>81</width>
      <height>31</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string>icon:</string>
@@ -153,23 +199,29 @@ text-align: left;</string>
   <widget class="QPushButton" name="cancel">
    <property name="geometry">
     <rect>
-     <x>340</x>
-     <y>560</y>
-     <width>93</width>
-     <height>28</height>
+     <x>412</x>
+     <y>600</y>
+     <width>105</width>
+     <height>35</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+   </property>
    <property name="text">
-    <string>Cancel</string>
+    <string>Go back</string>
    </property>
   </widget>
   <widget class="QLabel" name="gif">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>380</y>
-     <width>55</width>
-     <height>51</height>
+     <x>230</x>
+     <y>500</y>
+     <width>61</width>
+     <height>61</height>
     </rect>
    </property>
    <property name="text">
@@ -179,144 +231,226 @@ text-align: left;</string>
   <widget class="QLabel" name="waiting">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>410</y>
-     <width>191</width>
-     <height>16</height>
+     <x>320</x>
+     <y>530</y>
+     <width>81</width>
+     <height>21</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116);</string>
+   </property>
    <property name="text">
-    <string>Waiting</string>
+    <string>Waiting...</string>
    </property>
   </widget>
   <widget class="QLabel" name="error">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>40</x>
      <y>530</y>
-     <width>691</width>
-     <height>20</height>
+     <width>600</width>
+     <height>60</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+color: red; 
+text-align:center;</string>
    </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="changepwd">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>470</y>
+     <x>153</x>
+     <y>700</y>
      <width>161</width>
-     <height>31</height>
+     <height>35</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); 
+text-decoration: underline;
+text-align: left;
+border: none;</string>
    </property>
    <property name="text">
     <string>change password</string>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QLineEdit" name="oldpwd">
    <property name="geometry">
     <rect>
-     <x>530</x>
-     <y>110</y>
-     <width>191</width>
+     <x>346</x>
+     <y>230</y>
+     <width>181</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 11pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
    </property>
   </widget>
   <widget class="QLineEdit" name="newpwd1">
    <property name="geometry">
     <rect>
-     <x>532</x>
-     <y>161</y>
-     <width>191</width>
+     <x>346</x>
+     <y>280</y>
+     <width>181</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 11pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
    </property>
   </widget>
   <widget class="QLineEdit" name="newpwd2">
    <property name="geometry">
     <rect>
-     <x>532</x>
-     <y>220</y>
-     <width>191</width>
+     <x>346</x>
+     <y>430</y>
+     <width>181</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 11pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
    </property>
   </widget>
   <widget class="QLabel" name="labelpwd1">
    <property name="geometry">
     <rect>
-     <x>414</x>
-     <y>120</y>
-     <width>91</width>
-     <height>20</height>
+     <x>143</x>
+     <y>230</y>
+     <width>192</width>
+     <height>31</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+   </property>
    <property name="text">
-    <string>old password</string>
+    <string>old password:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="labelpwd2">
    <property name="geometry">
     <rect>
-     <x>404</x>
-     <y>170</y>
-     <width>91</width>
-     <height>20</height>
+     <x>143</x>
+     <y>280</y>
+     <width>192</width>
+     <height>31</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+   </property>
    <property name="text">
-    <string>new password</string>
+    <string>new password:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="labelpwd3">
    <property name="geometry">
     <rect>
-     <x>370</x>
-     <y>220</y>
-     <width>131</width>
-     <height>20</height>
+     <x>134</x>
+     <y>430</y>
+     <width>201</width>
+     <height>31</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+   </property>
    <property name="text">
-    <string>repeat new password</string>
+    <string>repeat new password:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="confirm2">
    <property name="geometry">
     <rect>
-     <x>392</x>
-     <y>340</y>
-     <width>121</width>
-     <height>28</height>
+     <x>153</x>
+     <y>600</y>
+     <width>105</width>
+     <height>35</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+   </property>
    <property name="text">
-    <string>confirm pwd</string>
+    <string>Change</string>
    </property>
   </widget>
   <widget class="QPushButton" name="cancel2">
    <property name="geometry">
     <rect>
-     <x>572</x>
-     <y>340</y>
-     <width>141</width>
-     <height>28</height>
+     <x>412</x>
+     <y>600</y>
+     <width>105</width>
+     <height>35</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+   </property>
    <property name="text">
-    <string>cancel</string>
+    <string>Go back</string>
    </property>
   </widget>
   <widget class="QLabel" name="veroldpwd">
    <property name="geometry">
     <rect>
-     <x>730</x>
-     <y>115</y>
-     <width>21</width>
-     <height>21</height>
+     <x>550</x>
+     <y>230</y>
+     <width>31</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -326,10 +460,81 @@ text-align: left;</string>
   <widget class="QLabel" name="vernewpwd">
    <property name="geometry">
     <rect>
-     <x>740</x>
-     <y>230</y>
-     <width>21</width>
-     <height>21</height>
+     <x>550</x>
+     <y>430</y>
+     <width>31</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="logo">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>20</y>
+     <width>381</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(58, 80, 116);
+font: 18pt &quot;Lucida Calligraphy&quot;;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>340</y>
+     <width>431</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 9pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+   </property>
+   <property name="text">
+    <string>- minimum 5 and maximum 22 characters
+- at least one number
+- at least one special character between: 
+      ? &quot; £ % &amp; ( ) = '  ! $ + - / . , @ ˆ _
+- at least one alphabetic character</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>320</y>
+     <width>201</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 9pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+   </property>
+   <property name="text">
+    <string>Your password has to contain:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="vernewpwd2">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>280</y>
+     <width>31</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -337,6 +542,8 @@ text-align: left;</string>
    </property>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

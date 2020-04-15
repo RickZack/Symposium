@@ -54,7 +54,7 @@ void sigin::successSignIn()
     pressed=false;
     homeWindow = new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
-    cl->setHome(homeWindow);
+    //cl->setHome(homeWindow);
     homeWindow->show();
 }
 
