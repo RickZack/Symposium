@@ -80,7 +80,8 @@ namespace Symposium {
         int numchar;                                                    /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
-        int level=0;
+        int numLines=1;
+        int inIndex=0;
 
         static constexpr wchar_t  emptyChar='~';
         static const symbol emptySymbol;
@@ -277,6 +278,7 @@ namespace Symposium {
          */
         char retrieveStrategy(const int level);
 
+        int countCharsInLine(int line) const;
     };
 }
 

@@ -33,6 +33,7 @@
 #include "symbol.h"
 #include "user.h"
 #include <cmath>
+#include "QDebug"
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
@@ -70,14 +71,19 @@ document & document::access(const user &newActive, privilege accessPriv) {
 }
 
 void document::checkIndex(unsigned int i0, unsigned int i1) {
-    if(i0>=symbols.capacity())
-        symbols.resize((i0+1));
+
+    if(i0>=symbols.capacity()){
+        symbols.resize((i0+1)*1.5);
+
+}
     if(i1>=symbols[i0].capacity())
-        symbols[i0].resize((i1 + 1), emptySymbol);
+        symbols[i0].resize((i1 + 1)*1.5, emptySymbol);
+
 }
 
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
+
     int i0=indexes.first;
     int i1=indexes.second;
     this->updateCursorPos(toInsert.getSiteId(),i0,i1);
@@ -93,7 +99,6 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, newSymb);
         }
-    //qDebug()<<"help"<<newSymb.getPos();
     return newSymb;
 }
 
@@ -129,7 +134,6 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
 
 
 symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> indexes) const {
-
     int line=indexes.first;
     int ch=indexes.second;
 
@@ -142,37 +146,47 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> index
         // SECOND LIMIT CASE: I have to change line
     else if(ch==0 && line!=0){
        line=line-1;
-       ch=symbols[line].size()-1;
+       ch=countCharsInLine(line)-1;
+
     }else{
         ch=ch-1;
+
     }
     symbol sym=symbols[line][ch];
     return sym;
 }
 
-symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexes) const {
-    int line=indexes.first;
-    int ch=indexes.second;
-
-    int numLines=symbols.size();
-    int numChars=0;
+int document::countCharsInLine(int line)const {
+    int ch=0;
     for(size_t i=0;i<symbols[line].size();i++){
-        if (symbols[line][i]!=emptySymbol){
-            numChars++;
-        }
+        if(symbols[line][i]!=emptySymbol)
+            ch++;
     }
+    return ch;
+}
 
-    // no line after the considered one
-    if(line==numLines-1 && ch==numChars){
-        symbol sym=emptySymbol;
+
+
+symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexes) const {
+    unsigned line=indexes.first;
+    unsigned ch=indexes.second;
+
+    unsigned numChars=countCharsInLine(line);
+
+    if(ch<numChars-1){
+        symbol sym=symbols[line][ch];
         return sym;
-    }else if(line<numLines-1 && ch==numChars){
+    }else if(symbols[line][ch].getCh()=='\r' && line+1<symbols.size() && !symbols[line+1].empty()){
         line=line+1;
         ch=0;
-    }else if(line>numLines-1&& ch==0){
+    }else if(ch==numChars && line+1<symbols.size() && !symbols[line+1].empty()){
+        line=line+1;
+        ch=0;
+    }else{
         symbol sym=emptySymbol;
         return sym;
     }
+
     symbol sym=symbols[line][ch];
     return sym;
 }
@@ -278,7 +292,6 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes) {
     int i0=indexes.first;
     int i1=indexes.second;
-    checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
     //taking into account the position of the cursor.
     // TO DO
