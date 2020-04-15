@@ -294,10 +294,11 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId) {
     int i0=indexes.first;
     int i1=indexes.second;
-    checkIndex(i0,i1);
+    //checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
     //taking into account the position of the cursor.
     // TO DO
+    this->updateCursorPos(siteId,i0,i1);
     symbols[i0].erase(symbols[i0].begin()+i1);
 
     return sym;
