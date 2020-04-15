@@ -7,6 +7,7 @@
 #include "unsuccessdeleteaccount.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include "notification.h"
 
 class MainWindow;
 
@@ -62,6 +63,7 @@ private:
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
+    notification *notWindow;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */
