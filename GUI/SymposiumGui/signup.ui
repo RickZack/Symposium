@@ -175,7 +175,7 @@ color: rgb(58, 80, 116); </string>
    <property name="geometry">
     <rect>
      <x>189</x>
-     <y>420</y>
+     <y>425</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -192,7 +192,7 @@ color: rgb(58, 80, 116); </string>
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>420</y>
+     <y>425</y>
      <width>181</width>
      <height>33</height>
     </rect>
@@ -325,7 +325,7 @@ text-align:center;</string>
      <x>320</x>
      <y>640</y>
      <width>81</width>
-     <height>16</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -376,7 +376,7 @@ color: rgb(58, 80, 116); </string>
      <x>220</x>
      <y>340</y>
      <width>361</width>
-     <height>71</height>
+     <height>81</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -386,7 +386,8 @@ color: rgb(58, 80, 116); </string>
    <property name="text">
     <string>- minimum 5 and maximum 22 characters
 - at least one number
-- at least one special character between ? ! $ + - / . , @ ˆ _
+- at least one special character between: 
+      ? &quot; £ % &amp; ( ) = '  ! $ + - / . , @ ˆ _
 - at least one alphabetic character</string>
    </property>
   </widget>

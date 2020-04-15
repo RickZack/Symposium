@@ -57,11 +57,11 @@ void home::on_InsertUri_clicked()
 
 void home::on_modify_clicked()
 {
-    changeWindow = new changeUserInfo(this, pwd);
+    changeWindow = new changeUserInfo(nullptr, pwd);
     changeWindow->setClientDispatcher(cl);
     //cl->setChangeUserInfo(changeWindow);
-    changeWindow->exec();
-    pwd=changeWindow->pwd;
+    changeWindow->show();
+    this->hide();
 }
 
 void home::on_directory_clicked()

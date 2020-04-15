@@ -8,6 +8,8 @@ deleteAccount::deleteAccount(QWidget *parent) :
     ui(new Ui::deleteAccount)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(delete_click()));

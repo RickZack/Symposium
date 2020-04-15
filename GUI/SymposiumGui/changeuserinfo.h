@@ -7,8 +7,12 @@
 #include "../../user.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include "exit.h"
+#include "notification.h"
 
 
+
+class home;
 
 namespace Symposium{
 class clientdispatcher;
@@ -49,9 +53,17 @@ public:
      * @brief called by clientdispatcher when the edit of the information of the current user was successfully done
      */
     void successEditUser();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
     ~changeUserInfo();
 
 private slots:
+    /**
+     * @brief restore the style of buttons;
+     */
+    void enableButtonsAfter();
     /**
      * @brief show the icon the user choose
      */
@@ -78,6 +90,10 @@ private slots:
 
     void on_newpwd2_textChanged(const QString &arg1);
 
+    void on_cancel_clicked();
+
+    void on_newpwd1_textChanged(const QString &arg1);
+
 private:
     Ui::changeUserInfo *ui;
     icon *iconWindow;
@@ -87,11 +103,48 @@ private:
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
+    notification *notWindow;
+    bool pressed=false;
+    bool passwordView=false;
+    home *h;
+    class exit *ex;
 
     void hiddeninformation();
     void showinformation();
     void hiddenpwd();
     void showpwd();
+    /**
+     * @brief quit from application
+     */
+    void closeEvent(QCloseEvent *event);
+    /**
+     * @brief called when show() is invoked for this window and perform an animation
+     */
+    void showEvent(QShowEvent* event);
+    /**
+     * @brief disable all buttons present so user cannot perform any operation
+     */
+    void disableButtons();
+    /**
+     * @brief enable all buttons present
+     */
+    void enableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief waiting of the conclusion of the operation by clientdispatcher
+     */
+    void waiting();
+    /**
+     * @brief hide the labels
+     */
+    void hideLabelsError();
+    /**
+     * @brief check the correctness of the password
+     */
+    bool checkPassword(const QString passwordToCheck);
 };
 
 #endif // CHANGEUSERINFO_H

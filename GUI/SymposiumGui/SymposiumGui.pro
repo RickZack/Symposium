@@ -175,6 +175,3 @@ RESOURCES += \
 
 RC_ICONS = logo1.ico
 
-DISTFILES += \
-    ../../../../Desktop/Nuovo Documento di Microsoft Word.htm \
-    font/baskvil.TTF
