@@ -398,7 +398,7 @@ bool SymServer::userIsActive(const std::string &username) const{
 std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string &username, int resourceId) const {
     std::pair<bool, document*> result(false, nullptr);
     if(workingDoc.count(username)==0) return result;
-    for(auto doc:workingDoc.at(username))
+    for(const auto& doc:workingDoc.at(username))
         if (doc->getId()==resourceId){
             result.first=true; result.second=doc;
             break;
@@ -550,6 +550,16 @@ SymServer::~SymServer() {
         store();
         document::serializeFull=true;
         rootDir->storeContent();
+    }
+}
+
+void SymServer::hardLogout(uint_positive_cnt::type siteId) {
+    const auto& userInActive=std::find_if(active.cbegin(), active.cend(), [siteId](const auto& el){return el.second->getSiteId()==siteId;});
+    if(userInActive!=active.end()){
+        const std::string& username=userInActive->second->getUsername();
+        user& toLogOut=getRegistered(username);
+        closeAllDocsAndPropagateMex(toLogOut, workingDoc[username], 1);
+        active.erase(username);
     }
 }
 

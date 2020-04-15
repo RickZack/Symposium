@@ -547,6 +547,24 @@ TEST_F(SymServerTestFilesystemFunctionality, logoutClosesOpenedDocumentsAndPropa
     ASSERT_NO_FATAL_FAILURE(messageAssociatedWithRightUsers({anotherUser.getSiteId()}, toSend, {loggedUser.getSiteId()}));
 }
 
+// Added on 15/04/2020 after introduction of hardLogout() method
+TEST_F(SymServerTestFilesystemFunctionality, hardLogoutClosesOpenedDocumentsAndPropagateChanges){
+    server.forceSiteIdForResId(&doc, anotherUser);
+    SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
+    EXPECT_CALL(target, openFile(filePath, fileName, defaultPrivilege)).WillOnce(::testing::Return(fileToReturn));
+    EXPECT_CALL(*fileToReturn, access(loggedUser, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
+    auto f= server.openSource(loggedUserUsername, filePath, fileName, defaultPrivilege, 0);
+    ASSERT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+
+    updateActiveMessage toSend(msgType::removeActiveUser, msgOutcome::success, loggedUser.makeCopyNoPwd(), doc.getId(), privilege::readOnly, 1);
+    serverMessage response(msgType::logout, msgOutcome::success, 1);
+
+    server.hardLogout(loggedUser.getSiteId());
+    EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
+    EXPECT_FALSE(server.thereIsMessageForUser(loggedUser.getSiteId(), response).first);
+    ASSERT_NO_FATAL_FAILURE(messageAssociatedWithRightUsers({anotherUser.getSiteId()}, toSend, {loggedUser.getSiteId()}));
+}
+
 TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
     server.forceSiteIdForResId(&doc, anotherUser);
     SymServerUserMock& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));

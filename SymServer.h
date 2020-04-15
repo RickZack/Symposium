@@ -338,6 +338,12 @@
          virtual void logout(const std::string &username, uint_positive_cnt::type respMsgId);
 
          /**
+          * @brief performs a logout as a result of unexpected detach of a client
+          * @param siteId the siteId of the detached user
+          */
+         virtual void hardLogout(uint_positive_cnt::type siteId);
+
+         /**
           * @brief maps siteIds to users to allow a client to identify the owner of each change in a document
           * @param actionUser the user who is asking for the mapping
           * @param resourceId the id of the  document for which the client asked for the mapping
