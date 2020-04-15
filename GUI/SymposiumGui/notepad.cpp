@@ -754,7 +754,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         int row= cursor.blockNumber();
         const std::pair<int, int> indexes={row,column};
         //cl->localRemouve(this->documentId,&indexes);
-        this->documentoProva.localRemove(indexes, 0);
+        this->documentoProva.localRemove(indexes, 1);
 
     }else if(event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
              ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||

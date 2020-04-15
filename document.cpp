@@ -16,10 +16,10 @@
  * along with Symposium.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   document.cpp
  * Project: Symposium
- * Authors: 
+ * Authors:
  *          Riccardo Zaccone <riccardo.zaccone at studenti.polito.it>
  *          Ksenia Del Conte Akimova <s256669 at studenti.polito.it>
  *          Alice Morano <s259158 at studenti.polito.it>
@@ -33,11 +33,14 @@
 #include "symbol.h"
 #include "user.h"
 #include <cmath>
-#include "QDebug"
+#include <fstream>
+#include <boost/archive/text_iarchive.hpp>
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
+const std::string document::basePath="./docs/";
+bool document::serializeFull=true;
 
 
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)) {
@@ -63,6 +66,7 @@ int document::getNumchar() const {
 }
 
 document & document::access(const user &newActive, privilege accessPriv) {
+    if(!loaded) loaded=load();
     if(std::find_if(activeUsers.begin(), activeUsers.end(), [&](auto p){return p.first->getSiteId()==newActive.getSiteId();})==activeUsers.end()) {
         std::pair<const user *, sessionData> p{&newActive, accessPriv};
         activeUsers.push_front(p);
@@ -71,19 +75,18 @@ document & document::access(const user &newActive, privilege accessPriv) {
 }
 
 void document::checkIndex(unsigned int i0, unsigned int i1) {
-
+    double mult_fac=1.5;
     if(i0>=symbols.capacity()){
-        symbols.resize((i0+1)*1.5);
+        symbols.resize((i0+1)*mult_fac);
 
 }
     if(i1>=symbols[i0].capacity())
-        symbols[i0].resize((i1 + 1)*1.5, emptySymbol);
+        symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
 
 }
 
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
-
     int i0=indexes.first;
     int i1=indexes.second;
     this->updateCursorPos(toInsert.getSiteId(),i0,i1);
@@ -156,6 +159,7 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> index
     return sym;
 }
 
+
 int document::countCharsInLine(int line)const {
     int ch=0;
     for(size_t i=0;i<symbols[line].size();i++){
@@ -166,30 +170,29 @@ int document::countCharsInLine(int line)const {
 }
 
 
-
 symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexes) const {
     unsigned line=indexes.first;
     unsigned ch=indexes.second;
-
     unsigned numChars=countCharsInLine(line);
 
     if(ch<numChars-1){
-        symbol sym=symbols[line][ch];
-        return sym;
+       symbol sym=symbols[line][ch];
+       return sym;
     }else if(symbols[line][ch].getCh()=='\r' && line+1<symbols.size() && !symbols[line+1].empty()){
         line=line+1;
         ch=0;
     }else if(ch==numChars && line+1<symbols.size() && !symbols[line+1].empty()){
-        line=line+1;
-        ch=0;
-    }else{
-        symbol sym=emptySymbol;
-        return sym;
+         line=line+1;
+         ch=0;
+     }else{
+         symbol sym=emptySymbol;
+         return sym;
+     }
+
+         symbol sym=symbols[line][ch];
+         return sym;
     }
 
-    symbol sym=symbols[line][ch];
-    return sym;
-}
 
 
 
@@ -199,7 +202,6 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
 
     // change 2 to any other number to change base multiplication
     int base=pow(2,level)*32;
-    //qDebug()<<"base"<<base;
     char boundaryStrategy= retrieveStrategy(level);
     int id1,id2;
 
@@ -289,9 +291,10 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
 
 }
 
-symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes) {
+symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId) {
     int i0=indexes.first;
     int i1=indexes.second;
+    checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
     //taking into account the position of the cursor.
     // TO DO
@@ -359,19 +362,47 @@ void document::close(const user &noLongerActive) {
         user old_User = *p.first;
         if (old_User == noLongerActive) {
             activeUsers.remove(p);
-            return;
+            break;
         }
+    }
+    if(activeUsers.empty()){
+        store();
+        std::vector<std::vector<symbol>>().swap(symbols); //free the content of the symbol matrix
+        loaded=false;
     }
 }
 
 
-void document::store(const std::string &storePath) {
-    //TODO:implement
+void document::store() const {
+    std::string storePath=basePath+std::to_string(id)+".dat";
+    std::ofstream out{storePath, std::ios::out | std::ios::trunc};
+    if(out.good()) {
+        try {
+            boost::archive::text_oarchive oa(out);
+            oa << *this;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Unable to store data on disk: " << e.what() << std::endl;
+            remove(storePath.c_str());
+        }
 
+    } else
+        std::cerr<<"Error opening output file"<<std::endl;
 }
 
-void document::load(const std::string &loadPath) {
-    //TODO:implement
+bool document::load() {
+    std::ifstream input{basePath+std::to_string(id)+".dat", std::ios::in};
+    if(input.good()){
+        try {
+            boost::archive::text_iarchive ia(input);
+            ia>>*this;
+            return true;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Unable to load data from disk: " << e.what() << std::endl;
+        }
+    }
+    return false;
 }
 
 std::set<uint_positive_cnt::type> document::retrieveSiteIds() const{
@@ -598,10 +629,11 @@ unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<S
 }
 
 void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol) {
-   for(auto i: activeUsers){
+   for(auto& i: activeUsers){
        if(i.first->getSiteId()==targetSiteId){
            i.second.row=newRow;
            i.second.col=newCol;
+           break;
        }
    }
 }

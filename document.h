@@ -16,10 +16,10 @@
  * along with Symposium.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
+/*
  * File:   document.h
  * Project: Symposium
- * Authors: 
+ * Authors:
  *          Riccardo Zaccone <riccardo.zaccone at studenti.polito.it>
  *          Ksenia Del Conte Akimova <s256669 at studenti.polito.it>
  *          Alice Morano <s259158 at studenti.polito.it>
@@ -80,8 +80,9 @@ namespace Symposium {
         int numchar;                                                    /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
-        int numLines=1;
-        int inIndex=0;
+        int level=0;
+        bool loaded;
+        static const std::string basePath;
 
         static constexpr wchar_t  emptyChar='~';
         static const symbol emptySymbol;
@@ -92,6 +93,7 @@ namespace Symposium {
             ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
         };
     public:
+        static bool serializeFull;
         document(uint_positive_cnt::type id = document::idCounter);
 
         uint_positive_cnt::type getId() const;
@@ -130,7 +132,8 @@ namespace Symposium {
          * @brief remove a symbol in the document as consequence of an user's action on the GUI
          * @param indexes symbol to remove
          */
-        virtual symbol localRemove(const std::pair<unsigned int, unsigned int> &indexes);
+        virtual symbol
+        localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId);
 
         /**
          * @brief insert a symbol in the document as consequence of a remote user's action
@@ -176,9 +179,16 @@ namespace Symposium {
          */
         virtual void close(const user &noLongerActive);
 
-        void store(const std::string &storePath);
+        /**
+         * @brief Store permanently the content of the document onto the disk
+         */
+        void store() const;
 
-        void load(const std::string &loadPath);
+        /**
+         * @brief Load the content of the document from disk
+         * @return a bool indicating success of failure on loading
+         */
+        bool load();
 
         /**
          * @brief retrieves the set of siteId in the current document
