@@ -17,8 +17,8 @@ class qtexteditlabels : public QTextEdit
 public:
     qtexteditlabels(QWidget* a):QTextEdit(a)
     {
-        /*
-        this->append("Hello, World!\nAnotherLine. Hello, World! Hello, World! Hello, "
+
+        /*this->append("Hello, World!\nAnotherLine. Hello, World! Hello, World! Hello, "
                      "World! Helloooo, World! Hello, World! Hello, World! Hello, World! "
                      "Hello, World! Hello, World! Hello, World! Hello, World!");
         this->append("Hello, World!\nAnotherLine.");
@@ -28,27 +28,8 @@ public:
         this->append("Hello, World!\nAnotherLine.");
         this->append("Hello, World!\nAnotherLine.");
         this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine. Hello, World! Hello, World! Hello, "
-                     "World! Helloooo, World! Hello, World! Hello, World! Hello, World! "
-                     "Hello, World! Hello, World! Hello, World! Hello, World!");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        this->append("Hello, World!\nAnotherLine.");
-        */
+        this->append("Hello, World!\nAnotherLine.");*/
+
     }
 
     /**
@@ -128,14 +109,15 @@ public:
     void setThisUserPrivilege(Symposium::privilege priv);
 
 private:
-    std::map<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>> labels;
-    std::map<Symposium::uint_positive_cnt::type, QTextCursor> cursors;
+
     int j=0;
     int i=0;
-    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users;
-    Symposium::clientdispatcher *cl;
     Symposium::uint_positive_cnt::type thisUserSiteId=1;
     Symposium::uint_positive_cnt::type documentId;
+    std::map<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>> labels;
+    std::map<Symposium::uint_positive_cnt::type, QTextCursor> cursors;
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users;
+    Symposium::clientdispatcher *cl;
     Symposium::privilege priv;
 };
 
