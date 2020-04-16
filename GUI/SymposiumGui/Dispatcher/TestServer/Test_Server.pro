@@ -1,13 +1,15 @@
+QT -= gui
+
 QT += core gui
 
 QT += network widgets
 
+CONFIG += c++11 console
+CONFIG -= app_bundle
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 requires(qtConfig(filedialog))
 qtHaveModule(printsupport): QT += printsupport
-
-TARGET = SymposiumGui
-TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -30,40 +32,15 @@ SOURCES += \
         ../../../../document.cpp \
         ../../../../filesystem.cpp \
         ../../../../lib/hash/sha256.cpp \
+        ../clientdispatcher.cpp \
         mainServer.cpp \
         ../serverdispatcher.cpp \
-        ../clientdispatcher.cpp \
         ../../../../message.cpp \
         ../../../../resourceType.cpp \
         ../../../../symbol.cpp \
         ../../../../user.cpp \
         ../../../../uri.cpp \
-        ../../../../privilege.cpp \
-        ../../about.cpp \
-        ../../activealwayslink.cpp \
-        ../../activecounterlink.cpp \
-        ../../activenonlink.cpp \
-        ../../activetimerlink.cpp \
-        ../../alluser.cpp \
-        ../../changeuserinfo.cpp \
-        ../../choosedir.cpp \
-        ../../choosepriv.cpp \
-        ../../deleteaccount.cpp \
-        ../../directory.cpp \
-        ../../errorconnection.cpp \
-        ../../errorlogout.cpp \
-        ../../exit.cpp \
-        ../../home.cpp \
-        ../../icon.cpp \
-        ../../inserturi.cpp \
-        ../../mainwindow.cpp \
-        ../../notepad.cpp \
-        ../../onlineusers.cpp \
-        ../../qtexteditlabels.cpp \
-        ../../sigin.cpp \
-        ../../signup.cpp \
-        ../../textedit.cpp \
-        ../../unsuccessdeleteaccount.cpp
+        ../../../../privilege.cpp
 
 HEADERS += \
         ../../../../AccessStrategy.h \
@@ -81,71 +58,17 @@ HEADERS += \
         ../../../../Symposium.h \
         ../../../../privilege.h \
         ../../../../user.h \
-        ../../../../counter.h \
-        ../../../../messageData.h \
-        ../serverdispatcher.h \
         ../clientdispatcher.h \
-        ../../about.h \
-        ../../activealwayslink.h \
-        ../../activecounterlink.h \
-        ../../activenonlink.h \
-        ../../activetimerlink.h \
-        ../../alluser.h \
-        ../../changeuserinfo.h \
-        ../../choosedir.h \
-        ../../choosepriv.h \
-        ../../deleteaccount.h \
-        ../../directory.h \
-        ../../errorconnection.h \
-        ../../errorlogout.h \
-        ../../exit.h \
-        ../../home.h \
-        ../../icon.h \
-        ../../inserturi.h \
-        ../../mainwindow.h \
-        ../../notepad.h \
-        ../../onlineusers.h \
-        ../../qtexteditlabels.h \
-        ../../sigin.h \
-        ../../signup.h \
-        ../../textedit.h \
-        ../../unsuccessdeleteaccount.h
-
-FORMS += \
-        ../../about.ui \
-        ../../activealwayslink.ui \
-        ../../activecounterlink.ui \
-        ../../activenonlink.ui \
-        ../../activetimerlink.ui \
-        ../../alluser.ui \
-        ../../changeuserinfo.ui \
-        ../../choosedir.ui \
-        ../../choosepriv.ui \
-        ../../deleteaccount.ui \
-        ../../directory.ui \
-        ../../errorconnection.ui \
-        ../../errorlogout.ui \
-        ../../exit.ui \
-        ../../folder1.ui \
-        ../../home.ui \
-        ../../icon.ui \
-        ../../inserturi.ui \
-        ../../mainwindow.ui \
-        ../../newfolderwindow.ui \
-        ../../notepad.ui \
-        ../../onlineusers.ui \
-        ../../sigin.ui \
-        ../../signup.ui \
-        ../../unsuccessdeleteaccount.ui
+        ../serverdispatcher.h
 
 DEFINES = BOOST_ALL_NO_LIB
 Boost_USE_STATIC_LIBS = ON
-win32 {
-    DEFINES = BOOST_ALL_NO_LIB
-    BOOSTHOME = C:/MinGW
-    INCLUDEPATH += C:/MinGW/include
-    LIBS += -LC:/MinGW/lib
-}
+
+
+BOOSTHOME = C:/MinGW
+INCLUDEPATH += C:/MinGW/include
+LIBS += -LC:/MinGW/lib
+
 
 
  LIBS += -lboost_serialization \
@@ -156,6 +79,3 @@ win32 {
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-RESOURCES += \
-    ../../resources.qrc

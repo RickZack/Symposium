@@ -11,7 +11,7 @@ if(WIN32)
     if (CMAKE_COMPILER_IS_MINGW)
         add_compile_options(-Wa,-mbig-obj)   # Note: new - fixes "file too big"
     endif (CMAKE_COMPILER_IS_MINGW)
-    #set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/minGW73_64/lib/cmake")
+    set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/minGW73_64/lib/cmake")
     #set(CMAKE_PREFIX_PATH "D:/akimo/app/Qt/5.12.2/mingw73_64/lib/cmake")
     #set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/mingw73_64/lib/cmake")
 else()

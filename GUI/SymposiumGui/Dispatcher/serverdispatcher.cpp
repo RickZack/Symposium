@@ -34,7 +34,9 @@
 using namespace Symposium;
 
 
-ServerDispatcher::ServerDispatcher() : temp(msgType::login,{"a","a"}){
+ServerDispatcher::ServerDispatcher(){
+    //settiamo i booleani entrambe a false per non effettuare il salvataggio degli utente e il loro recupero
+    this->server = SymServer(false,false);
 }
 
 void ServerDispatcher::startServer()
@@ -53,15 +55,12 @@ void ServerDispatcher::startServer()
 
 void ServerDispatcher::incomingConnection(qintptr socketDescriptor){
     //abbiamo una nuova connessione
-    qDebug() << socketDescriptor << " New Connection";
+    //qDebug() << socketDescriptor << " New Connection";
 
     //creiamo il socket per la nuova connessione
     QTcpSocket* temp = new QTcpSocket();
 
     //impostiamo il keep_alive
-
-    //DA RIVEDERE
-
     temp->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
     //attacchiamo il socketdescriptor
@@ -73,66 +72,173 @@ void ServerDispatcher::incomingConnection(qintptr socketDescriptor){
     //quando un socket connesso ad un client riceve dei dati, mi emette il segnale di readyRead, che mi chiama lo slot readyRead()
     connect(Connected_Clients.value(socketDescriptor), SIGNAL(readyRead()), this, SLOT(readyRead()));
 
-    this->tmp = temp;
+    //quando il socket si sconnette, chiamiamo il metodo clientDisconnected()
+    connect(Connected_Clients.value(socketDescriptor), SIGNAL(disconnected()), this, SLOT(clientDisconnected()));
+
+    //settiamo il nome del socket con il socketdescriptor
+    Connected_Clients.value(socketDescriptor)->setObjectName(QString::number(socketDescriptor) + "-0" );
+
+    //notifichiamo
+    qDebug() << "New connection insert into Connected_Clients. SocketDescriptor: " << socketDescriptor;
 }
 
 void ServerDispatcher::readyRead(){
     //questa funzione viene chiamata quando un qualche client ha inviato qualcosa
     //stream di stringa che conterrà i dati che abbiamo ricevuto, prima di essere de-serializzati
     std::stringstream accumulo;
-    //boost::archive::text_iarchive ia(accumulo);
-    //creiamo la variabile che conterrà il messaggio che abbiamo ricevuto dal client
-    std::shared_ptr<clientMessage> mes;
-    //clientMessage testmes = new clientMessage();
+    //creiamo il QByteArray che conterrà ciò che riceviamo dal socket
+    QByteArray byteArray;
+    //creiamo la variabile che conterra il puntatore al messaggio ricevuto dal socket
+    std::shared_ptr<clientMessage> da;
     //otteniamo il socket che ha ricevuto i dati
     QTcpSocket* readSocket = qobject_cast<QTcpSocket*>(sender());
-    //associamo il textstream al socket ha ricevuto dei dati
-    QTextStream stream(readSocket);
-    //leggiamo la prima linea di dati ricevuti
-    QString line = stream.readLine();
-    //la salviamo nello stream
-    accumulo << line.toLocal8Bit().constData();
-    //leggiamo tutti i dati ricevuti e ricostruiamo lo stream che è stato inviato dal client
-    do{
-        qDebug() << "socketdescriptor - " << readSocket->socketDescriptor() << ": " << line;
-        line = stream.readLine();
-        if(!line.isNull())
-            accumulo << "\n" << line.toLocal8Bit().constData();
-    }while(!line.isNull());
-    //nella variabile accumulo abbiamo lo stream inviato dal client
-    qDebug() << "\n" << "ricevuto: " << QString::fromStdString(accumulo.str());
+    //associamo il datastream al socket che ha ricevuto dei dati
+    QDataStream in(readSocket);
+    //facciamo partire la transazione
+    in.startTransaction();
+    //leggiamo i dati ricevuti
+    in >> byteArray;
+    //controlliamo se ci sono stati errori
+    if (!in.commitTransaction()){
+        //errore di ricezione
+    }
+    //eseguiamo la conversione in stringa
+    std::string ricevuto(byteArray.constData(), byteArray.length());
+    //inseriamo quanto ricevuto nel stringstream
+    accumulo << ricevuto;
+    //deserializziamo il messaggio ricevuto
     boost::archive::text_iarchive ia(accumulo);
-    ia >> mes;
+    ia >> da;
     try {
-         mes->invokeMethod(this->server);
+        da->invokeMethod(this->server);
+        if((da->getAction()==msgType::login) || (da->getAction()==msgType::registration)){
+            Connected_SymUser.insert(this->server.getSiteIdOfUser(da->getActionOwner().first), readSocket->socketDescriptor());
+            qDebug() << "User inserted in Connected_SymUser. Users in queue: " << Connected_SymUser.size();
+            //aggiungiamo al nome del socket il siteID dell'utente
+            readSocket->setObjectName(QString::number(readSocket->socketDescriptor()) + "-" + QString::number(this->server.getSiteIdOfUser(da->getActionOwner().first)));
+        }
+        controlMessageQueue();
     } catch (SymServerException& e) {
+        qDebug() << "Action from socketdescriptor " <<  readSocket->socketDescriptor() << " FAILED. Send notification error.";
+        //costruiamo il messaggio di fallimento
+        std::shared_ptr<serverMessage> er(new serverMessage(da->getAction(), msgOutcome::failure, da->getMsgId()));
+        er->setErrDescr(e.getErrorCodeMsg());
+        //inviamo il messaggio
+        try {
+            sendMessage(er,readSocket);
+            qDebug() << "Message error sended to socketdescriptor: " << readSocket->socketDescriptor() ;
+        } catch (sendFailure) {
+            //impossibile inviare
 
+            // COSA FACCIAMO??
+        }
     }
 
 }
 
-void ServerDispatcher::sendMessage(const std::shared_ptr<serverMessage> MessageToSend, int siteID){
+void ServerDispatcher::clientDisconnected(){
+    qDebug() << "--- METODO CLIENTDISCONNECTED ---";
+    QString nome_socket;
+    QStringList ls;
+    int sok_desc, stID;
+    //otteniamo il socket che si è disconnesso
+    QTcpSocket* readSocket = qobject_cast<QTcpSocket*>(sender());
+    //preleviamo il suo nome
+    nome_socket = readSocket->objectName();
+    qDebug() << "socketdescriptor " << nome_socket<< " disconnected!";
+    //eseguiamo lo split
+    ls = nome_socket.split("-");
+    //separiamo il socketdescriptor
+    sok_desc = ls[0].toUInt();
+    //ed il siteID dell'utente associato al socket
+    stID = ls[1].toUInt();
+    //dobbiamo controllare se era loggato oppure no
+    if(stID != 0){
+        //utente loggato, quindi eseguiamo l'hard logout
+        this->server.hardLogout(stID);
+        //eliminiamo l'utente dalla mappa Connected_SymUser
+        this->Connected_SymUser.remove(stID);
+        qDebug() << "Logged User DELETED from Symposium online users";
+    }
+    //eliminiamo l'utente dalla mappa Connected_Clients
+    this->Connected_Clients.remove(sok_desc);
+
+    qDebug() << "Socket DELETED from connected clients";
+    qDebug() << "Symposium users online: " << this->Connected_SymUser.size();
+    qDebug() << "Connected clients: " << this->Connected_Clients.size();
+    qDebug() << "--- FINE METODO CLIENTDISCONNECTED ---";
+}
+
+void ServerDispatcher::logoutUser(uint_positive_cnt::type siteID){
+    qDebug() << "--- METODO LOGOUTUSER ---";
+    QMap<uint_positive_cnt::type, int>::iterator it = this->Connected_SymUser.find(siteID);
+    int socdsc = it.value();
+    this->Connected_SymUser.remove(siteID);
+    qDebug() << "Logged User DELETED from Symposium online users";
+    QMap<int, QTcpSocket*>::iterator cu = this->Connected_Clients.find(socdsc);
+    cu.value()->setObjectName(QString::number(cu.value()->socketDescriptor()) + "-0");
+    qDebug() << "Symposium users online: " << this->Connected_SymUser.size();
+    qDebug() << "Connected clients: " << this->Connected_Clients.size();
+    qDebug() << "--- FINE METODO LOGOUTUSER ---";
+}
+
+void ServerDispatcher::sendMessage(const std::shared_ptr<serverMessage> MessageToSend, uint_positive_cnt::type siteID){
     std::stringstream ofs;
     boost::archive::text_oarchive oa(ofs);
-    QTextStream out(this->tmp);
-    serverMessage msg = *MessageToSend;
-    serverMessage des(Symposium::msgType::login,Symposium::msgOutcome::success);
-    oa << msg;
-    qDebug() << "inviato: "<< QString::fromStdString(ofs.str());
-    out << QString::fromStdString(ofs.str());
-    boost::archive::text_iarchive ia(ofs);
-    ia >> des;
-    if (out.status() != QTextStream::Ok){
-        throw sendFailure();
+    QMap<int, QTcpSocket*>::iterator cu;
+    QMap<uint_positive_cnt::type, int>::iterator it;
+    //recuperiamo il socketdescriptor associato al siteID
+    it = Connected_SymUser.find(siteID);
+    if(it != this->Connected_SymUser.end()){
+        //recuperiamo il QTcpSocket associato al socketdescriptor
+        cu = Connected_Clients.find(it.value());
     }else{
-        /*if((msg.getAction()==Symposium::msgType::login) || (msg.getAction()==Symposium::msgType::registration) || (msg.getAction()==Symposium::msgType::removeUser) ||
-               (msg.getAction()==Symposium::msgType::changeUserData) || (msg.getAction()==Symposium::msgType::openNewRes) || (msg.getAction()==Symposium::msgType::changePrivileges)){
-            //messaggio per cui dobbiamo ricevere risposta dal server
-            this->timer.start(TEMPOATTESA);
-            this->message = MessageToSend;
-        }else if(msg.getAction()==Symposium::msgType::logout){
-            this->socket.close();
-            this->client.logout();
-        }*/
+        //utente non collegato
+
+        //CHE FACCIAMO????
+    }
+    QDataStream uscita(cu.value());
+    //serializziamo il messaggio
+    oa << MessageToSend;
+    //eseguiamo la conversione in QByteArray
+    QByteArray byteArray(ofs.str().c_str(), ofs.str().length());
+    //inviamo il messaggio
+    uscita << byteArray;
+    if (uscita.status() != QDataStream::Ok){
+        throw sendFailure();
+    }
+    qDebug() << "Sended to socketdescriptor " << cu.value()->socketDescriptor() << ": " << QString::fromStdString(ofs.str());
+
+    //se il messaggio inviato è una conferma di logout oppure una conferma eliminazione utente, dobbiamo togliere l'utente dalla lista degli utenti connessi
+    if((MessageToSend->getAction()==msgType::logout) || ((MessageToSend->getAction()==msgType::removeUser) & (MessageToSend->getResult()==msgOutcome::success))){
+        qDebug() << "Logout Logged user...";
+        logoutUser(siteID);
+    }
+
+}
+
+void ServerDispatcher::sendMessage(const std::shared_ptr<serverMessage> MessageToSend, QTcpSocket* socket){
+    std::stringstream ofs;
+    boost::archive::text_oarchive oa(ofs);
+    QDataStream uscita(socket);
+    //serializziamo il messaggio
+    oa << MessageToSend;
+    //eseguiamo la conversione in QByteArray
+    QByteArray byteArray(ofs.str().c_str(), ofs.str().length());
+    //inviamo il messaggio
+    uscita << byteArray;
+    if (uscita.status() != QDataStream::Ok){
+        throw sendFailure();
+    }
+    qDebug() << "Sended to socketdescriptor " << socket->socketDescriptor() << ": " << QString::fromStdString(ofs.str());
+}
+
+void ServerDispatcher::controlMessageQueue(){
+    qDebug() << "Control message to send...";
+    std::pair<int, std::shared_ptr<serverMessage>> mes = this->server.extractNextMessage();
+    while(mes.first!=0){
+        sendMessage(mes.second,mes.first);
+        qDebug() << "Message to send to user with siteID: " << mes.first;
+        mes = this->server.extractNextMessage();
     }
 }

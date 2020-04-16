@@ -86,6 +86,7 @@ namespace Symposium{
         QTimer timer;
         std::queue<std::pair<std::chrono::milliseconds, uint_positive_cnt::type>> attese;
         uint_positive_cnt::type ResIDofWaitingMessage;
+        std::string userpwd;
         sigin* finestraLogin;                           //1
         signup* finestraSignup;                         //2
         inserturi* finestraInsertUri;                   //3
@@ -132,6 +133,10 @@ namespace Symposium{
          * @param pwd the password of the user to login
          */
         void logIn(const std::string &username, const std::string &pwd);
+
+        void autologIn(const std::string &username);
+
+        bool isAutoLogin();
 
 
         void openSource(const std::string &path, const std::string &name, privilege reqPriv);
@@ -184,7 +189,7 @@ namespace Symposium{
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
          */
-        void removeUser();
+        void removeUser(const std::string &pwd);
 
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
@@ -207,6 +212,8 @@ namespace Symposium{
 
 
         void successLogin();
+
+        void successLogout();
 
         void successSignUp();
 
@@ -239,7 +246,7 @@ namespace Symposium{
          * @brief this method assign to @ref finestraLogin the pointer to the sigin window
          * @param a pointer to the sigin window
          */
-        void setSignIn(sigin *si);
+        void setSignIn(sigin* si);
 
         /**
          * @brief this method insert into @ref finestreDocumenti the pair composed of the respurceID of the document and the pointer to the notepad window

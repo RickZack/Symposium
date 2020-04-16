@@ -44,52 +44,48 @@ using namespace Symposium;
 
 clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), finestreDocumenti()
 {
-    //connettiamo il socket all'indirizzo del server
-    //this->socket.connectToHost(svAddress, svPort);
-    //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
-    //connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
-    //qDebug() << "Connection Successful\n";
     this->client.setClientDispatcher(this);
+    this->userpwd = "";
 }
 
 void clientdispatcher::openConnection(){
     if (this->socket.state()==QAbstractSocket::UnconnectedState){
+        qDebug() << "Connecting the socket to the server...";
+        //impostiamo il keep_alive
+        this->socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
         //connettiamo il socket all'indirizzo del server
         this->socket.connectToHost(svAddress, svPort);
         //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
         connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
-        qDebug() << "Connection Successful\n";
+        qDebug() << "Connection Successful";
     }
 }
 
 void clientdispatcher::readyRead(){
-    qDebug() << "Ricevuto qualcosa";
     //questa funzione viene chiamata quando il server ci ha inviato qualcosa
     //stream di stringa che conterrà i dati che abbiamo ricevuto, prima di essere de-serializzati
     std::stringstream accumulo;
+    //creiamo la variabile che conterra il puntatore al messaggio ricevuto dal socket
     std::shared_ptr<serverMessage> mes;
-    serverMessage des(Symposium::msgType::login,Symposium::msgOutcome::success);
-    //associamo il textstream al socket
-    QTextStream stream(&(this->socket));
-    //leggiamo la prima linea di dati ricevuti
-    qDebug() << "Leggiamo prima riga";
-    QString line = stream.readLine();
-    //la salviamo nello stream
-    accumulo << line.toLocal8Bit().constData();
-    //leggiamo tutti i dati ricevuti e ricostruiamo lo stream che è stato inviato dal client
-    do{
-        qDebug() << "socketdescriptor - " << this->socket.socketDescriptor() << ": " << line;
-        line = stream.readLine();
-        if(!line.isNull())
-            accumulo << "\n" << line.toLocal8Bit().constData();
-    }while(!line.isNull());
-    //nella variabile accumulo abbiamo lo stream inviato dal server
-    qDebug() << "\n" << "ricevuto: " << QString::fromStdString(accumulo.str());
+    //creiamo il QByteArray che conterrà ciò che riceviamo dal socket
+    QByteArray byteArray;
+    //associamo il datastream al socket
+    QDataStream in(&(this->socket));
+    //facciamo partire la transazione
+    in.startTransaction();
+    //leggiamo i dati ricevuti
+    in >> byteArray;
+    //controlliamo se ci sono stati errori
+    if (!in.commitTransaction()){
+        //errore di ricezione
+    }
+    //eseguiamo la conversione in stringa
+    std::string ricevuto(byteArray.constData(), byteArray.length());
+    //inseriamo quanto ricevuto nel stringstream
+    accumulo << ricevuto;
+    //deserializziamo il messaggio ricevuto
     boost::archive::text_iarchive ia(accumulo);
-    ia >> des;
-    qDebug() << "server dice: " << QString::fromStdString("ok");
-    qDebug() << "id messaggio ricevuto: " << des.getMsgId();
-    mes = std::make_shared<serverMessage>(des);
+    ia >> mes;
     try {
         mes->invokeMethod(this->client);
     } catch (messageException& e) {
@@ -134,7 +130,6 @@ void clientdispatcher::readyRead(){
         }
         }
 
-        //qDebug() << QString::fromStdString(mes->getErrDescr());
     } catch (SymClientException& e){
         //eccezione di relatedMessage non trovato
 
@@ -145,7 +140,7 @@ void clientdispatcher::readyRead(){
             this->finestraLogin->errorSignIn();
             break;
         }case 2:{
-            //this->finestraSignup->errorSignUp();
+            this->finestraSignup->errorSignUp("eccezione");
             break;
         }case 3:{
             //this->finestraInsertUri->unsuccessInsert();
@@ -185,16 +180,19 @@ void clientdispatcher::readyRead(){
 void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageToSend, uint_positive_cnt::type resourceId){
     std::stringstream ofs;
     boost::archive::text_oarchive oa(ofs);
-    QTextStream out(&(this->socket));
-    clientMessage msg = *MessageToSend;
-    oa << msg;
-    //qDebug() << QString::fromStdString(ofs.str());
-    out << QString::fromStdString(ofs.str());
-    if (out.status() != QTextStream::Ok){
+    QDataStream uscita(&(this->socket));
+    //serializziamo il messaggio
+    oa << MessageToSend;
+    //eseguiamo la conversione in QByteArray
+    QByteArray byteArray(ofs.str().c_str(), ofs.str().length());
+    //inviamo il messaggio
+    uscita << byteArray;
+    if (uscita.status() != QDataStream::Ok){
         throw sendFailure();
     }else{
         std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         TimerStart(tempo, resourceId);
+        qDebug() << "Sended to server: " << QString::fromStdString(ofs.str());
     }
 }
 
@@ -212,6 +210,7 @@ void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend, uint_pos
 }
 
 void clientdispatcher::signUp(const std::string &username, const std::string &pwd, const std::string &nickname, const std::string &iconPath){
+    this->userpwd = pwd;
     std::shared_ptr<signUpMessage> mess = std::make_shared<signUpMessage>(this->client.signUp(username,pwd,nickname,iconPath));
     //Colleghiamo il client al server
     this->openConnection();
@@ -240,6 +239,19 @@ void clientdispatcher::logIn(const std::string &username, const std::string &pwd
         this->closeConnection();
         //dobbiamo notificare alla GUI
         this->finestraLogin->errorConnection();
+    }
+}
+
+void clientdispatcher::autologIn(const std::string &username){
+    logIn(username, this->userpwd);
+}
+
+bool clientdispatcher::isAutoLogin(){
+    if(this->userpwd==""){
+        return false;
+    }else{
+        this->userpwd="";
+        return true;
     }
 }
 
@@ -423,8 +435,8 @@ void clientdispatcher::editUser(user &newUserData) {
     }
 }
 
-void clientdispatcher::removeUser() {
-    std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.removeUser());
+void clientdispatcher::removeUser(const std::string &pwd) {
+    std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.removeUser(pwd));
     try {
         //inviamo il messaggio
         sendMessage(mess);
@@ -510,8 +522,11 @@ void clientdispatcher::deleteActiveDocument(uint_positive_cnt::type resourceID){
 }
 
 void clientdispatcher::stopTimer(){
+    qDebug() << "entrato in stopTimer";
     this->timer.stop();
+    qDebug() << "Timer stoppato";
     if(!this->attese.empty()){
+        qDebug() << "Coda attese non vuota, timer reinserito";
         std::pair<std::chrono::milliseconds, uint_positive_cnt::type> coppia = this->attese.front();
         std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - coppia.first;
         this->timer.start(TEMPOATTESA - tempo.count());
@@ -524,7 +539,12 @@ void clientdispatcher::successLogin(){
     this->finestraLogin->successSignIn();
 }
 
+void clientdispatcher::successLogout(){
+    this->finestraHome->successLogout();
+}
+
 void clientdispatcher::successSignUp(){
+    qDebug() << "entrato in successSignUp";
     this->finestraSignup->successSignUp();
 }
 
@@ -604,9 +624,12 @@ std::string clientdispatcher::showDir(bool recursive){
     return this->client.showDir(recursive);
 }
 
-void clientdispatcher::setSignIn(sigin *si){
+void clientdispatcher::setSignIn(sigin* si){
+    qDebug() << "metodo setSignIn";
     this->finestraLogin = si;
+    qDebug() << "metodo setSignIn dopo assegnazione nuovo puntatore";
     this->currentWindow = 1;
+    qDebug() << "metodo setSignIn dopo assegnazione a currentWindow";
 }
 
 void clientdispatcher::setTextEdit(uint_positive_cnt::type resourceID, notepad *te){
