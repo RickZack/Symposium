@@ -323,7 +323,7 @@ const user & SymServer::editUser(const std::string &username, user &newUserData,
 void SymServer::removeUser(const std::string &username, const std::string &pwd, uint_positive_cnt::type respMsgId) {
     if (!userIsRegistered(username))
         throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
-    user& toRemove=getRegistered(username);
+    user toRemove=getRegistered(username);
     if(!toRemove.hasPwd(pwd))
         throw SymServerException(SymServerException::userWrongPwd, UnpackFileLineFunction());
     closeAllDocsAndPropagateMex(toRemove, workingDoc[username], respMsgId);
