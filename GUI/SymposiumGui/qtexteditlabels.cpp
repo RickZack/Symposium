@@ -67,7 +67,7 @@ void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, 
     //QString str=QString::fromStdString(c.rgb_hex_string());
     QString str="#ff0000";
     QLabel *labelCursor=new QLabel("|", this);
-    labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num*1.5))+"px;");
+    labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num*2))+"px;");
     QLabel *labelHide=labels.find(siteId)->second.first;
     labelHide->deleteLater();
     labels.find(siteId)->second.first=labelCursor;
@@ -89,8 +89,8 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
         {
             QTextCursor cursor = this->textCursor();
             cursor.movePosition(QTextCursor::Start);
-            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, it.second.row);
-            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, it.second.col);
+            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, static_cast<int>(it.second.row));
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, static_cast<int>(it.second.col));
             this->setTextCursor(cursor);
 
             QString nameLabel=QString::fromStdString(it.first->getUsername());
@@ -99,7 +99,7 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             //Color c=cl->getColor(documentId,it.first->getSiteId());
             //QString str=QString::fromStdString(c.rgb_hex_string());
             QString str="#ff0000";
-            labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num))+"px;");
+            labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num*2))+"px;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
             std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
@@ -124,21 +124,22 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
     {
         if(it.first->getSiteId()==siteId && it.second.p!=Symposium::privilege::readOnly)
         {
+            QTextCursor cursor = this->textCursor();
+            cursor.movePosition(QTextCursor::Start);
+            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, static_cast<int>(it.second.row));
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, static_cast<int>(it.second.col));
             QString nameLabel=QString::fromStdString(it.first->getUsername());
             QLabel *labelCursor=new QLabel("|", this);
+            qreal num=this->fontPointSize();
             //Color c=cl->getColor(documentId,it.first->getSiteId());
             //QString str=QString::fromStdString(c.rgb_hex_string());
             QString str="#ff0000";
-            labelCursor->setStyleSheet("color:  "+str+ "; font-weight: bold;");
+            labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num*2))+"px;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
             std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
             labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
 
-            QTextCursor cursor = this->textCursor();
-            cursor.movePosition(QTextCursor::Start);
-            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, it.second.row);
-            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, it.second.col);
             this->setTextCursor(cursor);
             showLabel(labelCursor, newLabel);
             cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
@@ -153,39 +154,47 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
 void qtexteditlabels::showLabel(QLabel *labelCursor, QLabel *labelName)
 {
     const QRect qRect = this->cursorRect();
+    qreal num=this->fontPointSize();
+    int sizeCurs=static_cast<int>(num*2);
+    int s=qRect.height();
+    int y;
+    if(s-sizeCurs>1)
+       y=qRect.bottomLeft().y()-6-sizeCurs;
+    else
+       y=qRect.y()-6;
     labelName->show();
     labelCursor->show();
 
     if(qRect.left()<=this->width()-labelName->rect().width()-25)
     {
-        labelCursor->move(qRect.left(), qRect.top());
-        labelName->move(qRect.left()+4, qRect.top()-4);
+        labelCursor->move(qRect.bottomLeft().x()-1, y);
+        labelName->move(qRect.bottomLeft().x()+4, y);
     }
     else
     {
-        labelCursor->move(qRect.left(), qRect.top());
-        labelName->move(qRect.left()-labelName->rect().width(), qRect.top()-4);
+        labelCursor->move(qRect.topLeft().x()-1, y);
+        labelName->move(qRect.topLeft().x()-labelName->rect().width(), y);
     }
 }
 
 void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::string name)
 {
     j=0;
+    QTextCursor cursor = this->textCursor();
+    changePosition(0,0);
+    cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(siteId, this->textCursor()));
     QString nameLabel=QString::fromStdString(name);
     QLabel *labelCursor=new QLabel("|", this);
     qreal num=this->fontPointSize();
     //Color c=cl->getColor(documentId,it.first->getSiteId());
     //QString str=QString::fromStdString(c.rgb_hex_string());
     QString str="#ff0000";
-    labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num))+"px;");
+    labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num*2))+"px;");
     QLabel *newLabel=new QLabel(nameLabel, this);
     newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
     std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
     labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(siteId, pairs));
 
-    QTextCursor cursor = this->textCursor();
-    changePosition(0,0);
-    cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(siteId, this->textCursor()));
     i=0;
     showLabel(labelCursor, newLabel);
 
@@ -217,7 +226,7 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
             //QString str=QString::fromStdString(c.rgb_hex_string());
             QString str="#ff0000";
             QLabel *labelCursor=new QLabel("|", this);
-            labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num*1.5))+"px;");
+            labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num*2))+"px;");
             QLabel *labelName=labels.find(siteId)->second.second;
             QLabel *labelHide=labels.find(siteId)->second.first;
             labelHide->deleteLater();
@@ -226,8 +235,8 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
             cursors.find(siteId)->second=this->textCursor();
             showLabel(labelCursor, labelName);
             QTextCursor cursor= this->textCursor();
-            int column=cursor.positionInBlock();
-            int block= cursor.blockNumber();
+            //int column=cursor.positionInBlock();
+            //int block= cursor.blockNumber();
             //cl->moveMyCursor(int documentId, int block, int column);
         }
     }

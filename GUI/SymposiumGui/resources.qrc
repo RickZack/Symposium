@@ -136,9 +136,6 @@
         <file>unsuccessdeleteaccount.h</file>
     </qresource>
     <qresource prefix="/">
-        <file>icon/file.png</file>
-        <file>icon/folder.png</file>
-        <file>icon/link.png</file>
         <file>Information.txt</file>
         <file>Document1.txt</file>
         <file>Document2.txt</file>
@@ -150,5 +147,8 @@
         <file>icon/ajax-loader.gif</file>
         <file>icon/exit.png</file>
         <file>icon/redexit.png</file>
+        <file>icon/file.png</file>
+        <file>icon/folder.png</file>
+        <file>icon/link.png</file>
     </qresource>
 </RCC>
