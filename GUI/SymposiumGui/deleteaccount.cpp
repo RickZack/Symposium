@@ -39,10 +39,8 @@ void deleteAccount::errorDeleteUser(std::string errorMess)
 {
     enableButtons();
     enableStyleButtons();
-    this->close();
-    QString str="ERROR:"+QString::fromStdString(errorMess);
-    notWindow = new notification(nullptr, str);
-    notWindow->exec();
+    ui->haveto->setText(QString::fromStdString(errorMess));
+    ui->haveto->show();
 }
 
 
@@ -53,11 +51,21 @@ deleteAccount::~deleteAccount()
 
 void deleteAccount::delete_click()
 {
-    disableButtons();
-    disableStyleButtons();
-    //------------------------------------------------------------------PARTE DA DECOMENTARE
-    //cl->removeUser();
-    //------------------------------------------------------------------
+    ui->haveto->hide();
+    std::string password = (ui->password->text()).toStdString();
+    if(password!="")
+    {
+        disableButtons();
+        disableStyleButtons();
+        //------------------------------------------------------------------PARTE DA DECOMENTARE
+        //cl->removeUser(password);
+        //------------------------------------------------------------------
+    }
+    else
+    {
+        ui->haveto->setText("You have to digit your password");
+        ui->haveto->show();
+    }
 }
 
 void deleteAccount::disableButtons()

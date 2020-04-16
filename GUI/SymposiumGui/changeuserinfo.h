@@ -28,7 +28,7 @@ class changeUserInfo : public QDialog
     Q_OBJECT
 
 public:
-    explicit changeUserInfo(QWidget *parent = nullptr, std::string pwd="");
+    explicit changeUserInfo(QWidget *parent = nullptr, std::string pwd="", Symposium::clientdispatcher *cl=nullptr);
     std::string pwd;
     /**
      * @brief setting of clientdispatcher

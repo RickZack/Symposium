@@ -4,9 +4,9 @@
 #include "home.h"
 #include <QMovie>
 
-changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd) :
+changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, Symposium::clientdispatcher *cl) :
     QDialog(parent),
-    pwd(pwd), ui(new Ui::changeUserInfo)
+    pwd(pwd), ui(new Ui::changeUserInfo), cl(cl)
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -21,7 +21,7 @@ changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd) :
     //-----------------------------------------------------PARTE DA DECOMENTARE
 
     /*
-     us=cl->getUser();
+    us=cl->getUser();
     ui->username->setText(QString::fromStdString(us.getUsername()));
     ui->nickname->setText(QString::fromStdString(us.getNickname()));
     img=us.getIconPath();
