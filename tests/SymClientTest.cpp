@@ -540,9 +540,9 @@ TEST_F(SymClientTest, showDirCallsShowDirOnUserNotRecursive){
 
 TEST_F(SymClientTest, removeUserConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.removeUser();
-    messageHasCorrectOwner(mex);
-    clientMessage expected(msgType::removeUser, {username, ""});
+    auto mex= client.removeUser(pwd);
+    messageHasCorrectOwnerforLogin(mex);
+    clientMessage expected(msgType::removeUser, {username, pwd});
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }

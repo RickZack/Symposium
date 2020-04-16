@@ -257,8 +257,8 @@ const user SymClient::editUser(user &newUserData, bool msgRcv) {
     return this->getLoggedUser();
 }
 
-clientMessage SymClient::removeUser() {
-    std::shared_ptr<clientMessage> mess (new clientMessage(msgType::removeUser, {SymClient::getLoggedUser().getUsername(), ""}));
+clientMessage SymClient::removeUser(const std::string &pwd) {
+    std::shared_ptr<clientMessage> mess (new clientMessage(msgType::removeUser, {SymClient::getLoggedUser().getUsername(), pwd}));
     this->unanswered.push_front(mess);
     return *mess;
 }
