@@ -478,18 +478,18 @@ void SymServer::handleLeavingUser(const user &loggedOut) {
         resIdToSiteId[resId].remove(loggedOut.getSiteId());
     }
     workingDoc.erase(loggedOut.getUsername());
-    siteIdToMex.erase(loggedOut.getSiteId());
 }
 
 std::pair<const uint_positive_cnt::type, std::shared_ptr<serverMessage>> SymServer::extractNextMessage() {
     std::pair<uint_positive_cnt::type, std::shared_ptr<serverMessage>> result(0, nullptr);
-    if(siteIdToMex.empty())
-        return result;
     for(std::pair<const uint_positive_cnt::type, std::queue<std::shared_ptr<serverMessage>>>& mexForSiteId:siteIdToMex)
         if(!mexForSiteId.second.empty()){
             result.first=mexForSiteId.first;
             result.second=mexForSiteId.second.front();
             mexForSiteId.second.pop();
+            msgType typeOfMex=result.second->getAction();
+            if(typeOfMex==msgType::logout || typeOfMex==msgType::removeUser)
+                siteIdToMex.erase(result.first);
             break;
         }
     return result;
