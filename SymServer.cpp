@@ -329,7 +329,7 @@ void SymServer::removeUser(const std::string &username, const std::string &pwd, 
         throw SymServerException(SymServerException::userWrongPwd, UnpackFileLineFunction());
     closeAllDocsAndPropagateMex(toRemove, workingDoc[username], respMsgId);
     active.erase(username);
-    rootDir->remove(toRemove, "./", username);
+    rootDir->remove(toRemove, "./", std::to_string(toRemove.getHome()->getId()));
     removeRegistered(username);
 
     generateSimpleResponse(userSiteId, msgType::removeUser, respMsgId);
