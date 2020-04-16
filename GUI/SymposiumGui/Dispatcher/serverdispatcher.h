@@ -55,10 +55,8 @@
 
         private:
             SymServer server;
-            QMap<int, QTcpSocket*> Connected_Clients;   //QMap<SocketDescriptor, QTcpSocket>
-            QMap<int, int> Connected_SymUser;           //QMap<SiteID, SocketDescriptor>
-            clientMessage temp;
-            QTcpSocket* tmp;
+            QMap<int, QTcpSocket*> Connected_Clients;                       //QMap<SocketDescriptor, QTcpSocket>
+            QMap<uint_positive_cnt::type, int> Connected_SymUser;           //QMap<SiteID, SocketDescriptor>
 
 
         public:
@@ -68,7 +66,7 @@
              * @brief constructs a server to receive connections request
              */
             void startServer();
-            void sendMessage(const std::shared_ptr<serverMessage> MessageToSend, int siteID);
+            void sendMessage(const std::shared_ptr<serverMessage> MessageToSend, uint_positive_cnt::type siteID);
 
         protected:
             void incomingConnection(qintptr socketDescriptor) override;
@@ -77,8 +75,13 @@
             //classe per eccezione
             class sendFailure{};
 
+            void sendMessage(const std::shared_ptr<serverMessage> MessageToSend, QTcpSocket* socket);
+            void logoutUser(uint_positive_cnt::type siteID);
+
         public slots:
             void readyRead();
+            void clientDisconnected();
+            void controlMessageQueue();
 
         };
  }

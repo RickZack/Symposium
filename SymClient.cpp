@@ -33,7 +33,7 @@
 #include "message.h"
 #include "filesystem.h"
 #include "SymposiumException.h"
-//#include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
+#include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
 
 using namespace Symposium;
 
@@ -53,8 +53,8 @@ signUpMessage SymClient::signUp(const std::string &username, const std::string &
 
 void SymClient::signUp(const user &logged) {
     setLoggedUser(logged);
-    //notifichiamo alla gui il successo
-//    this->dispatcher->successSignUp();
+    //facciamo partire il flusso del login
+    this->dispatcher->autologIn(logged.getUsername());
 }
 
 clientMessage SymClient::logIn(const std::string &username, const std::string &pwd) {
@@ -66,7 +66,10 @@ clientMessage SymClient::logIn(const std::string &username, const std::string &p
 void SymClient::logIn(const user &logged) {
     setLoggedUser(logged);
     //notifichiamo alla gui il successo
-//    this->dispatcher->successLogin();
+    if(this->dispatcher->isAutoLogin())
+        this->dispatcher->successSignUp();
+    else
+        this->dispatcher->successLogin();
 }
 
 askResMessage SymClient::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
@@ -86,7 +89,7 @@ void SymClient::openSource(const std::string &path, const std::string &name, con
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
- //   this->dispatcher->successOpenSource(doc);
+    this->dispatcher->successOpenSource(doc);
 }
 
 askResMessage
@@ -109,7 +112,7 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
                                     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
 	//notifichiamo alla gui il successo
-//    this->dispatcher->successInsertUri();
+    this->dispatcher->successInsertUri();
 }
 
 askResMessage SymClient::createNewSource(const std::string &path, const std::string &name) {
@@ -127,7 +130,7 @@ void SymClient::createNewSource(const std::string &path, const std::string &name
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
                                     (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
-//    this->dispatcher->successCreateNewSource(std::to_string(idToAssign));
+    this->dispatcher->successCreateNewSource(std::to_string(idToAssign));
 }
 
 askResMessage SymClient::createNewDir(const std::string &path, const std::string &name) {
@@ -139,7 +142,7 @@ askResMessage SymClient::createNewDir(const std::string &path, const std::string
 void SymClient::createNewDir(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
     this->getLoggedUser().newDirectory(name,path,idToAssign);
     //notifichiamo alla gui il successo
-//    this->dispatcher->successCreateNewDir(std::to_string(idToAssign));
+    this->dispatcher->successCreateNewDir(std::to_string(idToAssign));
 }
 
 
@@ -163,14 +166,14 @@ void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::
     document* d = this->getActiveDocumentbyID(resourceId);
     std::pair<unsigned int, unsigned int> p = d->remoteInsert(siteId, newSym);
     //notifica alla gui
-//  this->dispatcher->remoteInsert(resourceId,newSym, p);
+    this->dispatcher->remoteInsert(resourceId,newSym, siteId, p);
 }
 
 void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &rmSym) {
     document* d = this->getActiveDocumentbyID(resourceId);
     std::pair<unsigned int, unsigned int> p = d->remoteRemove(siteId, rmSym);
     //notifica alla gui
-//  this->dispatcher->remoteRemove(resourceId, siteId, p);
+    this->dispatcher->remoteRemove(resourceId, siteId, p);
 }
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
@@ -184,7 +187,7 @@ privilege SymClient::editPrivilege(const std::string &targetUser, const std::str
                                    privilege newPrivilege, bool msgRcv) {
     privilege* p = new privilege(this->getLoggedUser().editPrivilege(targetUser, resPath, resName, newPrivilege));
     //notifichiamo alla gui il successo
-//    this->dispatcher->successEditPrivilege();
+    this->dispatcher->successEditPrivilege();
     return *p;
 }
 
@@ -196,7 +199,7 @@ uriMessage SymClient::shareResource(const std::string &resPath, const std::strin
 std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv) {    //TODO: modified this method, return the file: FATTO
     std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resName, newPrefs));
     //notifichiamo alla gui il successo
-//    this->dispatcher->successShareResource("/" + resPath);
+    this->dispatcher->successShareResource("/" + resPath);
     return fil;
 }
 
@@ -212,7 +215,7 @@ SymClient::renameResource(const std::string &resPath, const std::string &resName
                           bool msgRcv) {
     std::shared_ptr<filesystem> f (getLoggedUser().renameResource(resPath, resName, newName));
     //notifichiamo alla gui il successo
-//    this->dispatcher->successRenameResource();
+    this->dispatcher->successRenameResource();
     return f;
 }
 
@@ -226,7 +229,7 @@ std::shared_ptr<filesystem>
 SymClient::removeResource(const std::string &resPath, const std::string &resName, bool msgRcv) {
     std::shared_ptr<filesystem> f = this->getLoggedUser().removeResource(resPath,resName);
     //notifichiamo alla gui il successo
-//    this->dispatcher->successRemoveResource();
+    this->dispatcher->successRemoveResource();
     return f;
 }
 
@@ -253,7 +256,7 @@ userDataMessage SymClient::editUser(user &newUserData) {
 const user SymClient::editUser(user &newUserData, bool msgRcv) {
     (const_cast<user&>(this->getLoggedUser())).setNewData(newUserData);
     //notifichiamo alla gui il successo
-//    this->dispatcher->successEditUser();
+    this->dispatcher->successEditUser();
     return this->getLoggedUser();
 }
 
@@ -273,6 +276,8 @@ void SymClient::logout(bool msgRcv){
     std::shared_ptr<user> u(new user());
     this->setLoggedUser(*u);
     this->userColors.clear();
+    //notifichiamo alla GUI il successo
+    this->dispatcher->successLogout();
 }
 
 updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
@@ -311,14 +316,14 @@ void SymClient::addActiveUser(uint_positive_cnt::type resourceId, user &targetUs
                                     (std::make_pair(targetUser.getSiteId(),resourceId),std::make_pair(targetUser,*col)));
     //dobbiamo aggiungiamo il cursore alla GUI, se necessario
     if(Priv!=privilege::readOnly){
-//        this->dispatcher->addUserCursor(targetUser.getSiteId(),targetUser.getUsername(),resourceId);
+        this->dispatcher->addUserCursor(targetUser.getSiteId(),targetUser.getUsername(),resourceId);
     }
 }
 
 void SymClient::removeActiveUser(uint_positive_cnt::type resourceId, user &targetUser) {
     getActiveDocumentbyID(resourceId)->close(targetUser);
     //dobbiamo rimuovere il cursore dalla GUI, se il cursore non era presente, la GUI non fa niente
-//    this->dispatcher->removeUserCursor(targetUser.getSiteId(),resourceId);
+    this->dispatcher->removeUserCursor(targetUser.getSiteId(),resourceId);
 }
 
 const user& SymClient::getLoggedUser() const{
@@ -330,7 +335,7 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
         if(smex.isRelatedTo(*it)){
             unanswered.remove(it);
 			//fermiamo il timer di attesa nel dispatcher
-//            this->dispatcher->stopTimer();
+            this->dispatcher->stopTimer();
             return it;
         }
     }
@@ -338,7 +343,7 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
 }
 
 void SymClient::setClientDispatcher(clientdispatcher *cl){
-//    this->dispatcher = cl;
+    this->dispatcher = cl;
 }
 
 void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym) {
@@ -346,7 +351,7 @@ void SymClient::verifySymbol(uint_positive_cnt::type resourceId, const symbol &s
     //Il metodo in verifySymbol mi deve restituire il pair delle coordinate (già detto a Martina che farà la modifica)
     std::pair<unsigned int, unsigned int> p = d->verifySymbol(sym);
     //notifichiamo alla GUI
-//  this->dispatcher->verifySymbol(resourceId, sym, p);
+  this->dispatcher->verifySymbol(resourceId, sym, p);
 }
 
 filterShared::filterShared(const user &currentUser): currentUser{currentUser} {
@@ -398,7 +403,12 @@ colorGen SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
 }
 
 const user SymClient::userData(){
-    return this->loggedUser;
+    return this->getLoggedUser();
+}
+
+user SymClient::dammiUser(){
+    user pr = loggedUser;
+    return pr;
 }
 
 cursorMessage SymClient::updateCursorPos(uint_positive_cnt::type resourceId, unsigned int row, unsigned int col) {
@@ -410,7 +420,7 @@ cursorMessage SymClient::updateCursorPos(uint_positive_cnt::type resourceId, uns
 void SymClient::updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type resourceId, unsigned int row, unsigned int col){
     document* d = getActiveDocumentbyID(resourceId);
     d->updateCursorPos(userSiteId,row,col);
-//    this->dispatcher->moveUserCursor(resourceId,row,col,userSiteId);
+    this->dispatcher->moveUserCursor(resourceId,row,col,userSiteId);
 }
 
 std::string SymClient::directoryContent(std::string &ID_Cartella, std::string &path){
@@ -421,7 +431,7 @@ void SymClient::removeUser(bool msgRcv) {
     std::shared_ptr<user> u(new user());
     this->setLoggedUser(*u);
     this->userColors.clear();
-//	this->dispatcher->successDeleteAccount();
+    this->dispatcher->successDeleteAccount();
 }
 
 Color SymClient::colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::type siteId) {
