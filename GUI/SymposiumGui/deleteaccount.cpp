@@ -27,6 +27,7 @@ void deleteAccount::successDeleteAccount()
     parentWidget()->hide();
     mw=new MainWindow();
     mw->disableStyleButtons();
+    mw->setClientDispatcher(cl);
     mw->show();
     QString str="Your account has been successfully deleted!";
     notWindow = new notification(mw, str);

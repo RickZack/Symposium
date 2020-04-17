@@ -61,7 +61,7 @@ void home::on_InsertUri_clicked()
 
 void home::on_modify_clicked()
 {
-    changeWindow = new changeUserInfo(nullptr, pwd);
+    changeWindow = new changeUserInfo(nullptr, pwd, cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     //cl->setChangeUserInfo(changeWindow);
     //------------------------------------------------------------------
