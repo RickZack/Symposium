@@ -35,12 +35,39 @@
 #include <cmath>
 #include <fstream>
 #include <boost/archive/text_iarchive.hpp>
+#include "QDebug"
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 const std::string document::basePath="./docs/";
 bool document::serializeFull=true;
+
+#define UnpackFileLineFunction()  __FILE__, __LINE__, __PRETTY_FUNCTION__
+
+void assertIndexes(bool(*predicate)(unsigned toCheck, unsigned reference),
+                   unsigned toCheck,unsigned reference,
+                   const char* file, int line, const char* func){
+    if(!predicate(toCheck, reference)){
+        //std::stringstream err;
+        std::cout<<"toCheck is: "<<toCheck;
+        std::cout<< "reference is: " << reference;
+        std::cout<<file<<", line "<<line<<" "<<func;
+        //throw std::out_of_range(err.str());
+    }
+}
+
+/**
+ * @brief check if one pair of indexes is included in another
+ * @param toCheck the pair to be tested
+ * @param reference the other pair @ref toCheck is to be compared to
+ * @return result of check
+ */
+bool included(unsigned ind0, unsigned ind){
+    return ind0<ind;
+}
+
+
 
 
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)) {
@@ -74,35 +101,53 @@ document & document::access(const user &newActive, privilege accessPriv) {
     return *this;
 }
 
+
 void document::checkIndex(unsigned int i0, unsigned int i1) {
-    double mult_fac=1.5;
-    if(i0>=symbols.capacity()){
-        symbols.resize((i0+1)*mult_fac);
+    int mult_fac=2;
+
+    if(i0>=symbols.size()){
+         //symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
+        symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
 
 }
-    if(i1>=symbols[i0].capacity())
-        symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
+    assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
+    if(i1>=symbols[i0].size()){
+       symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
+
 
 }
-
+}
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
+
     int i0=indexes.first;
     int i1=indexes.second;
-    this->updateCursorPos(toInsert.getSiteId(),i0,i1);
+    qDebug()<<"I0"<<i0;
+    qDebug()<<"i1"<<i1;
     checkIndex(i0,i1);
+    this->updateCursorPos(toInsert.getSiteId(),i0,i1);
+    //symbol newSymb= generatePosition(indexes,toInsert);
+    //newSymb.setCharFormat(toInsert.getCharFormat());
 
-    symbol newSymb= generatePosition(indexes,toInsert);
-    newSymb.setCharFormat(toInsert.getCharFormat());
-    char sym=symbols[i0][i1].getCh();
-
+    assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
+    assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
+   // wchar_t sym=symbols[i0][i1].getCh();
+    symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
+    symbol s1=findPosBefore(indexes);
+    symbol s2=findPosAfter(indexes);
+    /*
     if(sym==emptyChar){
-        symbols[i0][i1]=newSymb;
+        //symbols[i0][i1]=newSymb;
+        //symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
+        //symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     }
     else {
         symbols[i0].insert(symbols[i0].begin() + i1, newSymb);
         }
-    return newSymb;
+*/
+    return toInsert;
+
+
 }
 
 symbol document::generatePosition(const std::pair<unsigned int, unsigned int> indexes, const symbol &toInsert){
@@ -139,6 +184,8 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
 symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> indexes) const {
     int line=indexes.first;
     int ch=indexes.second;
+    assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
+    assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
 
     // I don't have position before the considered one
     // FIRST LIMIT CASE
@@ -148,13 +195,19 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> index
     }
         // SECOND LIMIT CASE: I have to change line
     else if(ch==0 && line!=0){
-       line=line-1;
+        line=line-1;
+        assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
+
        ch=countCharsInLine(line)-1;
+       std::cout<<"Ch"<<ch;
+        assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
 
     }else{
         ch=ch-1;
 
     }
+
+
     symbol sym=symbols[line][ch];
     return sym;
 }
@@ -171,26 +224,24 @@ int document::countCharsInLine(int line)const {
 
 
 symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexes) const {
-    unsigned line=indexes.first;
-    unsigned ch=indexes.second;
-    unsigned numChars=countCharsInLine(line);
+    int line=indexes.first;
+    int ch=indexes.second;
+    int numChars=countCharsInLine(line);
+    symbol sym=emptySymbol;
+
 
     if(ch<numChars-1){
-       symbol sym=symbols[line][ch];
-       return sym;
-    }else if(symbols[line][ch].getCh()=='\r' && line+1<symbols.size() && !symbols[line+1].empty()){
-        line=line+1;
-        ch=0;
-    }else if(ch==numChars && line+1<symbols.size() && !symbols[line+1].empty()){
-         line=line+1;
-         ch=0;
-     }else{
-         symbol sym=emptySymbol;
-         return sym;
-     }
+        assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
+        assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
+       sym=symbols[line][ch];
 
-         symbol sym=symbols[line][ch];
-         return sym;
+
+    }else if(ch+1<(int)symbols[line].size() && symbols[line][ch+1]==emptySymbol){
+        assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
+        assertIndexes(included,ch+1,symbols[line].size(),UnpackFileLineFunction());
+         sym=symbols[line][ch];
+    }
+        return sym;
     }
 
 
@@ -248,7 +299,9 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
             return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
         }
         else{
-            throw "Fix position sorting";
+            //throw "Fix position sorting";
+            std::cout<<"Sono entrato qui";
+
         }
     }
 }
@@ -257,6 +310,7 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
 char document::retrieveStrategy(const int level){
 
    int sizeSC=strategyCache.size();
+    assertIndexes(included,level,strategyCache.size(),UnpackFileLineFunction());
    if(level<sizeSC){
         return strategyCache[level];
     }
@@ -292,6 +346,7 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
 }
 
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId) {
+    /*
     int i0=indexes.first;
     int i1=indexes.second;
     //checkIndex(i0,i1);
@@ -302,9 +357,11 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     symbols[i0].erase(symbols[i0].begin()+i1);
 
     return sym;
+     */
 }
 
 std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
+    /*
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
@@ -320,10 +377,12 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     }
 
     return indexes;
+     */
 }
 
 
 std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
+    /*
     //TODO: take into account new position of cursor
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
@@ -341,6 +400,7 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     else {
         symbols[i0].erase(symbols[i0].begin()+i1);
     }
+     */
 }
 
 std::wstring document::toText() const {

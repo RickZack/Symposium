@@ -1,3 +1,5 @@
+//#define DISPATCHER_ON
+
 #include "deleteaccount.h"
 #include "ui_deleteaccount.h"
 #include "Dispatcher/clientdispatcher.h"
@@ -27,6 +29,7 @@ void deleteAccount::successDeleteAccount()
     parentWidget()->hide();
     mw=new MainWindow();
     mw->disableStyleButtons();
+    mw->setClientDispatcher(cl);
     mw->show();
     QString str="Your account has been successfully deleted!";
     notWindow = new notification(mw, str);
@@ -58,7 +61,9 @@ void deleteAccount::delete_click()
         disableButtons();
         disableStyleButtons();
         //------------------------------------------------------------------PARTE DA DECOMENTARE
-        //cl->removeUser(password);
+        #ifdef DISPATCHER_ON
+        cl->removeUser(password);
+        #endif
         //------------------------------------------------------------------
     }
     else

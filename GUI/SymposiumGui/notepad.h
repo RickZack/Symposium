@@ -71,7 +71,6 @@ public:
      */
     void closeEvent(QCloseEvent *event);
 
-
 private slots:
     void on_actionPaste_triggered();
     void on_Export_PDF_triggered();
@@ -179,6 +178,8 @@ private:
     static constexpr wchar_t  emptyChar='~';
 
     void sendSymbolToInsert(int row, int column, QString text, QTextCharFormat format);
+    int charsInLine=0;
+    int columnForReturn=0;
 };
 
 #endif // NOTEPAD_H

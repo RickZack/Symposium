@@ -118,7 +118,7 @@ void ServerDispatcher::readyRead(){
             readSocket->setObjectName(QString::number(readSocket->socketDescriptor()) + "-" + QString::number(this->server.getSiteIdOfUser(da->getActionOwner().first)));
         }
         controlMessageQueue();
-    } catch (SymServerException& e) {
+    } catch (SymposiumException& e) {
         qDebug() << "Action from socketdescriptor " <<  readSocket->socketDescriptor() << " FAILED. Send notification error.";
         //costruiamo il messaggio di fallimento
         std::shared_ptr<serverMessage> er(new serverMessage(da->getAction(), msgOutcome::failure, da->getMsgId()));

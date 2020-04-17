@@ -1,3 +1,5 @@
+//#define DISPATCHER_ON
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "Dispatcher/clientdispatcher.h"
@@ -36,7 +38,9 @@ void MainWindow::on_about_clicked()
 void MainWindow::on_SignIn_clicked()
 {
     signinWindow= new sigin();
-    //cl->setSignIn(signinWindow);
+    #ifdef DISPATCHER_ON
+    cl->setSignIn(signinWindow);
+    #endif
 
     signinWindow->setClientDispatcher(cl);
     signinWindow->show();
@@ -47,7 +51,9 @@ void MainWindow::on_SignIn_clicked()
 void MainWindow::on_SignUp_clicked()
 {
     signupWindow= new signup();
-    //cl->setSignUp(signupWindow);
+    #ifdef DISPATCHER_ON
+    cl->setSignUp(signupWindow);
+    #endif
     signupWindow->setClientDispatcher(cl);
     signupWindow->show();
     hide();
