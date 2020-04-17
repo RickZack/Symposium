@@ -561,8 +561,6 @@ namespace Symposium {
         const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &
         getUserColors() const;
 
-        user dammiUser();
-
     private:
         /**
          * @brief get the document with specified ID
