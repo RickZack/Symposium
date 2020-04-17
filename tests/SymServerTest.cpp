@@ -41,6 +41,7 @@ struct SymServerdirMock : public directory{
     MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, uint_positive_cnt::type idToAssign));
     MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
+    MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &targetUser, const std::string &path, const std::string &resName));
 };
 
 struct SymServerUserMock: public user{
@@ -339,9 +340,11 @@ TEST_F(SymServerTestUserFunctionality, logoutRemovesUserFromActiveAndGenerateCor
 }
 
 TEST_F(SymServerTestUserFunctionality, removeUserRemovesUserFromRegistered){
+    EXPECT_CALL(*fakeDir, addDirectory(newUserUsername, 0)).WillOnce(::testing::Return(userDir));
     const SymServerUserMock& inserted= dynamic_cast<const SymServerUserMock&>(server.addUser(newUser, 0));
     ASSERT_TRUE(server.userAlreadyRegistered(newUser));
     EXPECT_CALL(inserted, hasPwd(newUserPwd)).WillOnce(::testing::Return(true));
+    EXPECT_CALL(*fakeDir, remove(inserted, "./", std::to_string(userDir->getId())));
     server.removeUser(newUserUsername, newUserPwd, msId);
     EXPECT_FALSE(server.userAlreadyRegistered(newUser));
 
@@ -408,6 +411,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
             fakeDir(new ::testing::NiceMock<SymServerdirMock>("/")),
             fileToReturn(new ::testing::NiceMock<SymServerFileMock>()){
         server.setRoot(fakeDir);
+        EXPECT_CALL(*fakeDir, addDirectory(loggedUserUsername, 0)).WillOnce(::testing::Return(userDir));
         inserted= &dynamic_cast<const SymServerUserMock&>(server.addUser(loggedUser, 0));
         EXPECT_CALL(*inserted, hasPwd(loggedUserPwd)).WillOnce(::testing::Return(true));
         server.login("mario", "a123@bty!!", 0);
@@ -427,6 +431,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         justInserted=&target;
     }
     void setAnotherUserActive(){
+        EXPECT_CALL(*fakeDir, addDirectory(anotherUserUsername, 0)).WillOnce(::testing::Return(userDir));
         inserted= &dynamic_cast<const SymServerUserMock&>(server.addUser(anotherUser, 0));
         EXPECT_CALL(*inserted, hasPwd(anotherUserPwd)).WillOnce(::testing::Return(true));
         server.login(anotherUserUsername, anotherUserPwd, 0);
@@ -575,6 +580,7 @@ TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
 
     updateActiveMessage toSend(msgType::removeActiveUser, msgOutcome::success, loggedUser.makeCopyNoPwd(), doc.getId(), privilege::readOnly, msId);
     EXPECT_CALL(target, hasPwd(loggedUserPwd)).WillOnce(::testing::Return(true));
+    EXPECT_CALL(*fakeDir, remove(target, "./", std::to_string(userDir->getId())));
     server.removeUser(loggedUserUsername, loggedUserPwd, msId);
     EXPECT_FALSE(server.userAlreadyRegistered(loggedUser));
     EXPECT_FALSE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
