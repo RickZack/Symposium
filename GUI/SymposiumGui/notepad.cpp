@@ -55,7 +55,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
     //---------------------------------------------------------------------------------------------------------------------------
 
-
+/*
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2},i4={0,3},iacapo={0,4},i5={1,0},i6={1,1},i7={1,2},i8={1,3},i9={1,4},i10={1,5},i11={1,6},i12={1,7},i13={1,8},iacapo2={1,9};
         Symposium::symbol s1('C', 1, 0, std::vector<int>(), false),
                           s2('i', 1, 1, std::vector<int>(), false),
@@ -170,7 +170,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
 
 
-
+*/
   //---------------------------------------------------------------------------------------------------------
 
     priv=Symposium::privilege::owner;
@@ -671,7 +671,7 @@ void notepad::fillTextEdit(){
         }
     }
 
-    this->supportColumn=curs.positionInBlock();
+    //this->supportColumn=curs.positionInBlock();
     insertOthCh=false;
 
 }
@@ -748,13 +748,14 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
 
     QTextCursor cursor= ui->textEdit->textCursor();
 
+
     int pos=cursor.position();
     if (event->key()==Qt::Key_Backspace){
         int column=cursor.positionInBlock();
         int row= cursor.blockNumber();
         const std::pair<int, int> indexes={row,column};
         //cl->localRemouve(this->documentId,&indexes);
-        this->documentoProva.localRemove(indexes, 1);
+        //this->documentoProva.localRemove(indexes, 1);
 
     }else if(event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
              ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||
@@ -770,38 +771,22 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
         this->contV_action(pos);
 
     }else if(event->text()=="\r"){
-        int row=cursor.blockNumber()-1;
-        int column=this->supportColumn;
+
+        unsigned int row=cursor.blockNumber()-1;
+        unsigned column=this->charsInLine;
+        this->charsInLine=0;
         QString testo=event->text();
         QTextCharFormat format = cursor.charFormat();
         this->sendSymbolToInsert(row,column,testo,format);
-
-
-    }else{
-
-        // is the first time that the user enters the document and writes it
-
-/*
-        if(insertedChars==0 && highActivated){
-            QTextCharFormat ch=ui->textEdit->currentCharFormat();
-            QColor newCol=this->colPos;
-            QString charact=event->text();
-            newCol.setAlpha(180);
-            ch.setForeground(newCol);
-            ch.setBackground(myC);
-            cursor.deletePreviousChar();
-            cursor.insertText(charact,ch);
     }
-
-        // there is a number of chars>0 (don't care how many)
-        insertedChars=1;
-
-*/
+    else{
 
         QString testo=event->text();
+        int column=this->charsInLine;
+        charsInLine++;
+        //int column=cursor.positionInBlock();
 
-        int column=cursor.positionInBlock();
-        column= column-1; this->supportColumn=column+1;
+        //column= column-1;
         int row= cursor.blockNumber();
         QTextCharFormat format = cursor.charFormat();
         this->sendSymbolToInsert(row,column,testo,format);
@@ -809,6 +794,7 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
 }
 
 void notepad::sendSymbolToInsert(int row, int column,QString text,QTextCharFormat format){
+
 
     std::wstring str=text.toStdWString();
     wchar_t ch=str[0];
@@ -1305,7 +1291,7 @@ void notepad::colorText(){
         }
     }
 
-    this->supportColumn=curs.positionInBlock();
+    //this->supportColumn=curs.positionInBlock();
     insertOthCh=false;
  }
 

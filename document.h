@@ -75,7 +75,7 @@ namespace Symposium {
     class document {
         static uint_positive_cnt idCounter;                                           /**< id to be assigned to the next created document */
         uint_positive_cnt::type id;                                                         /**< unique identifier for the document */
-        std::vector<std::vector<symbol> > symbols;                      /**< container of characters and metadata for CRDT*/
+        std::vector<std::vector<symbol>> symbols;                      /**< container of characters and metadata for CRDT*/
         std::forward_list<std::pair<const user *, sessionData>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
         int numchar;                                                    /**< number of printable characters */
         std::vector<char> strategyCache ;
