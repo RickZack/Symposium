@@ -1,12 +1,14 @@
+//#define DISPATCHER_ON
+
 #include "changeuserinfo.h"
 #include "ui_changeuserinfo.h"
 #include "Dispatcher/clientdispatcher.h"
 #include "home.h"
 #include <QMovie>
 
-changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd) :
+changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, Symposium::clientdispatcher *cl) :
     QDialog(parent),
-    pwd(pwd), ui(new Ui::changeUserInfo)
+    pwd(pwd), ui(new Ui::changeUserInfo), cl(cl)
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -20,19 +22,20 @@ changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd) :
 
     //-----------------------------------------------------PARTE DA DECOMENTARE
 
-    /*
-     us=cl->getUser();
+    #ifdef DISPATCHER_ON
+    us=cl->getUser();
     ui->username->setText(QString::fromStdString(us.getUsername()));
     ui->nickname->setText(QString::fromStdString(us.getNickname()));
     img=us.getIconPath();
-     */
+    #endif
 
 
     //-----------------------------------------------------PARTE DA CANCELLARE
+    #ifndef DISPATCHER_ON
     ui->username->setText("Mario");
     ui->nickname->setText("Rossi");
     img=":/resources/avatar/beaver.png";
-
+    #endif
 
     //---------------------------------------------------------------------------
 
@@ -93,12 +96,15 @@ void changeUserInfo::confirm_click()
     waiting();
     pressed=true;
     //------------------------------------------------------------------PARTE DA DECOMMENTARE
-    /*QString imagine = QString::fromStdString(img);
+    #ifdef DISPATCHER_ON
+    QString imagine = QString::fromStdString(img);
     Symposium::user usNew(username.toStdString(), pwd, nickname.toStdString(), img, us.getSiteId(), us.getHome());
-    cl->editUser(usNew);*/
+    cl->editUser(usNew);
+    #endif
     //------------------------------------------------------------------
 
     //------------------------------------------------------------------PARTE DA CANCELLARE
+    #ifndef DISPATCHER_ON
     QString stringa="Your information has been successfully modified";
     hideLabelsError();
     enableButtons();
@@ -107,6 +113,7 @@ void changeUserInfo::confirm_click()
     if(ret==0)
         enableStyleButtons();
     pressed=false;
+    #endif
     //--------------------------------------------------------------------------
 }
 
@@ -218,14 +225,16 @@ void changeUserInfo::on_confirm2_clicked()
         disableStyleButtons();
         pressed=true;
         //------------------------------------------------------------------PARTE DA DECOMENTARE
-        /*QString imagine = QString::fromStdString(img);
+        #ifdef DISPATCHER_ON
+        QString imagine = QString::fromStdString(img);
         Symposium::user usNew(us.getUsername(), newp1.toStdString(), us.getNickname(), img, us.getSiteId(), us.getHome());
         cl->editUser(usNew);
-        pressed=true;*/
+        pressed=true;
+        #endif
         //------------------------------------------------------------------
 
         //------------------------------------------------------------------PARTE DA CANCELLARE
-
+        #ifndef DISPATCHER_ON
         hideLabelsError();
         enableButtons();
         QString stringa="Your information has been successfully modified";
@@ -235,6 +244,7 @@ void changeUserInfo::on_confirm2_clicked()
             enableStyleButtons();
         pwd=newp1.toStdString();
         pressed=false;
+        #endif
         //--------------------------------------------------------------------------
     }
     else
@@ -484,7 +494,9 @@ void changeUserInfo::on_cancel_clicked()
     h=new home(nullptr, pwd);
     h->setClientDispatcher(cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
-    //cl->setHome(h);
+    #ifdef DISPATCHER_ON
+    cl->setHome(h);
+    #endif
     //------------------------------------------------------------------
     this->hide();
     h->show();

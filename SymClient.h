@@ -64,7 +64,7 @@ namespace Symposium {
         std::forward_list<std::shared_ptr<file>> activeFile;                      /**< list of active documents */
         std::forward_list<std::pair<document *, colorGen> > activeDoc;            /**< list of files the active documents are related to */
         std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> userColors;       /**< map {siteId, documentId}->{user, color}  */
-//        clientdispatcher* dispatcher;                                             /**< pointer to client dispatcher */
+        clientdispatcher* dispatcher;                                             /**< pointer to client dispatcher */
         std::forward_list<std::shared_ptr<clientMessage>> unanswered;             /**< messages sent by client that have not been received an answer */
 
         /*
@@ -97,7 +97,7 @@ namespace Symposium {
         /**
          * @brief constructs a @ref clientMessage to send to the server to aks for authentication
          * @param username the username of the user to login
-         * @param pwd he password the user chase
+         * @param pwd the password the user chase
          * @return a properly constructed @ref clientMessage to send to the server
          */
         clientMessage logIn(const std::string &username, const std::string &pwd);
@@ -443,9 +443,10 @@ namespace Symposium {
 
         /**
          * @brief delete a user from the system
+         * @param pwd the password the user chase
          * @return a properly constructed @ref clientMessage to send to the server
          */
-        clientMessage removeUser();
+        clientMessage removeUser(const std::string &pwd);
 
         /**
          * @brief confirm deletion of user

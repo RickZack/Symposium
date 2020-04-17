@@ -1,3 +1,5 @@
+//#define DISPATCHER_ON
+
 #include "sigin.h"
 #include "ui_sigin.h"
 #include "mainwindow.h"
@@ -54,7 +56,9 @@ void sigin::successSignIn()
     pressed=false;
     homeWindow = new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
-    //cl->setHome(homeWindow);
+    #ifdef DISPATCHER_ON
+    cl->setHome(homeWindow);
+    #endif
     homeWindow->show();
 }
 
@@ -79,8 +83,8 @@ void sigin::on_signin_clicked()
     pwd=password.toStdString();
 
     //---------------------------------------------PARTE DA DECOMENTARE
-
-    /*if(username!="" && password!=""){
+    #ifdef DISPATCHER_ON
+    if(username!="" && password!=""){
         waiting();
         pressed=true;
         disableButtons();
@@ -89,10 +93,12 @@ void sigin::on_signin_clicked()
     }
     else {
         ui->haveto->show();
-    }*/
+    }
+    #endif
 
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
+    #ifndef DISPATCHER_ON
     if(username=="test" && password=="test")
     {
         hide();
@@ -111,6 +117,7 @@ void sigin::on_signin_clicked()
             ui->tryAgain->show();
         }
     }
+    #endif
     //--------------------------------------------------
 
 

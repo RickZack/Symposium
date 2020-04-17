@@ -1,3 +1,5 @@
+//#define DISPATCHER_ON
+
 #include "deleteaccount.h"
 #include "ui_deleteaccount.h"
 #include "Dispatcher/clientdispatcher.h"
@@ -27,6 +29,7 @@ void deleteAccount::successDeleteAccount()
     parentWidget()->hide();
     mw=new MainWindow();
     mw->disableStyleButtons();
+    mw->setClientDispatcher(cl);
     mw->show();
     QString str="Your account has been successfully deleted!";
     notWindow = new notification(mw, str);
@@ -39,10 +42,8 @@ void deleteAccount::errorDeleteUser(std::string errorMess)
 {
     enableButtons();
     enableStyleButtons();
-    this->close();
-    QString str="ERROR:"+QString::fromStdString(errorMess);
-    notWindow = new notification(nullptr, str);
-    notWindow->exec();
+    ui->haveto->setText(QString::fromStdString(errorMess));
+    ui->haveto->show();
 }
 
 
@@ -53,11 +54,23 @@ deleteAccount::~deleteAccount()
 
 void deleteAccount::delete_click()
 {
-    disableButtons();
-    disableStyleButtons();
-    //------------------------------------------------------------------PARTE DA DECOMENTARE
-    //cl->removeUser();
-    //------------------------------------------------------------------
+    ui->haveto->hide();
+    std::string password = (ui->password->text()).toStdString();
+    if(password!="")
+    {
+        disableButtons();
+        disableStyleButtons();
+        //------------------------------------------------------------------PARTE DA DECOMENTARE
+        #ifdef DISPATCHER_ON
+        cl->removeUser(password);
+        #endif
+        //------------------------------------------------------------------
+    }
+    else
+    {
+        ui->haveto->setText("You have to digit your password");
+        ui->haveto->show();
+    }
 }
 
 void deleteAccount::disableButtons()

@@ -1,5 +1,6 @@
 #include "qtexteditlabels.h"
 #include "Dispatcher/clientdispatcher.h"
+#include <QDebug>
 
 
 void qtexteditlabels::scrollContentsBy(int dx, int dy)
@@ -157,18 +158,45 @@ void qtexteditlabels::showLabel(QLabel *labelCursor, QLabel *labelName)
     qreal num=this->fontPointSize();
     int sizeCurs=static_cast<int>(num*2);
     int s=qRect.height();
+    qDebug()<<s-sizeCurs<<"diff sizeCurs";
+    qDebug()<<sizeCurs<<"size";
     int y;
-    if(s-sizeCurs>1)
-       y=qRect.bottomLeft().y()-6-sizeCurs;
-    else
-       y=qRect.y()-6;
+    if(s-sizeCurs==0)
+        y=qRect.y()-4;
+    if(s-sizeCurs<=1)
+    {
+        if(s>80)
+            y=qRect.y()-20;
+        else
+            y=qRect.y()-4;
+    }
+    else if(s-sizeCurs<=5)
+       y=qRect.bottomLeft().y()-4-sizeCurs;
+    else if(s-sizeCurs<10)
+       y=qRect.bottomLeft().y()-5-sizeCurs;
+    else if(s-sizeCurs<=18)
+       y=qRect.bottomLeft().y()-7-sizeCurs;
+    else if(s-sizeCurs<=25)
+       y=qRect.bottomLeft().y()-8-sizeCurs;
+    else if(s-sizeCurs<=36)
+       y=qRect.bottomLeft().y()-9-sizeCurs;
+    else if(s-sizeCurs<=45)
+       y=qRect.bottomLeft().y()-11-sizeCurs;
+    else if(s-sizeCurs<=65)
+       y=qRect.bottomLeft().y()-12-sizeCurs;
+    else if(s-sizeCurs<=75)
+       y=qRect.bottomLeft().y()-22-sizeCurs;
+    else if(s-sizeCurs<=85)
+       y=qRect.bottomLeft().y()-90-sizeCurs;
+    else if(s-sizeCurs<=140)
+       y=qRect.bottomLeft().y()-100-sizeCurs;
     labelName->show();
     labelCursor->show();
 
     if(qRect.left()<=this->width()-labelName->rect().width()-25)
     {
-        labelCursor->move(qRect.bottomLeft().x()-1, y);
-        labelName->move(qRect.bottomLeft().x()+4, y);
+        labelCursor->move(qRect.topLeft().x()-1, y);
+        labelName->move(qRect.topLeft().x()+5, y);
     }
     else
     {

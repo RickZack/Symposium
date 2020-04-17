@@ -324,13 +324,15 @@ void SymServer::removeUser(const std::string &username, const std::string &pwd, 
     if (!userIsRegistered(username))
         throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
     user& toRemove=getRegistered(username);
+    uint_positive_cnt::type userSiteId=toRemove.getSiteId();
     if(!toRemove.hasPwd(pwd))
         throw SymServerException(SymServerException::userWrongPwd, UnpackFileLineFunction());
     closeAllDocsAndPropagateMex(toRemove, workingDoc[username], respMsgId);
     active.erase(username);
+    rootDir->remove(toRemove, "./", std::to_string(toRemove.getHome()->getId()));
     removeRegistered(username);
 
-    generateSimpleResponse(toRemove.getSiteId(), msgType::removeUser, respMsgId);
+    generateSimpleResponse(userSiteId, msgType::removeUser, respMsgId);
 }
 
 void SymServer::logout(const std::string &username, uint_positive_cnt::type respMsgId) {
@@ -477,18 +479,18 @@ void SymServer::handleLeavingUser(const user &loggedOut) {
         resIdToSiteId[resId].remove(loggedOut.getSiteId());
     }
     workingDoc.erase(loggedOut.getUsername());
-    siteIdToMex.erase(loggedOut.getSiteId());
 }
 
 std::pair<const uint_positive_cnt::type, std::shared_ptr<serverMessage>> SymServer::extractNextMessage() {
     std::pair<uint_positive_cnt::type, std::shared_ptr<serverMessage>> result(0, nullptr);
-    if(siteIdToMex.empty())
-        return result;
     for(std::pair<const uint_positive_cnt::type, std::queue<std::shared_ptr<serverMessage>>>& mexForSiteId:siteIdToMex)
         if(!mexForSiteId.second.empty()){
             result.first=mexForSiteId.first;
             result.second=mexForSiteId.second.front();
             mexForSiteId.second.pop();
+            msgType typeOfMex=result.second->getAction();
+            if(typeOfMex==msgType::logout || typeOfMex==msgType::removeUser)
+                siteIdToMex.erase(result.first);
             break;
         }
     return result;
