@@ -1,3 +1,5 @@
+//#define DISPATCHER_ON
+
 #include "deleteaccount.h"
 #include "ui_deleteaccount.h"
 #include "Dispatcher/clientdispatcher.h"
@@ -59,7 +61,9 @@ void deleteAccount::delete_click()
         disableButtons();
         disableStyleButtons();
         //------------------------------------------------------------------PARTE DA DECOMENTARE
-        //cl->removeUser(password);
+        #ifdef DISPATCHER_ON
+        cl->removeUser(password);
+        #endif
         //------------------------------------------------------------------
     }
     else

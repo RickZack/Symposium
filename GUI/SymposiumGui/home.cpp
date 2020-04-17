@@ -1,3 +1,5 @@
+//#define DISPATCHER_ON
+
 #include "home.h"
 #include "ui_home.h"
 #include "Dispatcher/clientdispatcher.h"
@@ -41,7 +43,9 @@ void home::on_delete_2_clicked()
     deleteAccountWindow = new deleteAccount(this);
     deleteAccountWindow->setClientDispatcher(cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
-    //cl->setDeleteAccount(deleteAccountWindow);
+    #ifdef DISPATCHER_ON
+    cl->setDeleteAccount(deleteAccountWindow);
+    #endif
     //------------------------------------------------------------------
     int ret=deleteAccountWindow->exec();
     if(ret==0)
@@ -53,7 +57,9 @@ void home::on_InsertUri_clicked()
     inserturiWindow = new inserturi(nullptr, pwd);
     inserturiWindow->setClientDispatcher(cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
-    //cl->setInsertUri(inserturiWindow);
+    #ifdef DISPATCHER_ON
+    cl->setInsertUri(inserturiWindow);
+    #endif
     //------------------------------------------------------------------
     inserturiWindow->show();
     this->hide();
@@ -63,7 +69,9 @@ void home::on_modify_clicked()
 {
     changeWindow = new changeUserInfo(nullptr, pwd, cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
-    //cl->setChangeUserInfo(changeWindow);
+    #ifdef DISPATCHER_ON
+    cl->setChangeUserInfo(changeWindow);
+    #endif
     //------------------------------------------------------------------
     changeWindow->show();
     this->hide();
@@ -74,7 +82,9 @@ void home::on_directory_clicked()
     directoryWindow=new directory(nullptr, pwd);
     directoryWindow->show();
     //------------------------------------------------------------------PARTE DA DECOMENTARE
-    //cl->setDirectory(directoryWindow);
+    #ifdef DISPATCHER_ON
+    cl->setDirectory(directoryWindow);
+    #endif
     //------------------------------------------------------------------
     this->hide();
 }
@@ -82,7 +92,9 @@ void home::on_directory_clicked()
 void home::logout()
 {
     //------------------------------------------------------------------PARTE DA DECOMENTARE
-    //cl->logout();
+    #ifdef DISPATCHER_ON
+    cl->logout();
+    #endif
     //------------------------------------------------------------------
     pressed=true;
     waiting();

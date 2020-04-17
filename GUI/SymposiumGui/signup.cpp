@@ -1,3 +1,5 @@
+//#define DISPATCHER_ON
+
 #include "signup.h"
 #include "ui_signup.h"
 #include "Dispatcher/clientdispatcher.h"
@@ -55,7 +57,9 @@ void signup::successSignUp()
     hide();
     homeWindow= new home(nullptr, pwd);
     homeWindow->setClientDispatcher(cl);
-    //cl->setHome(homeWindow);
+    #ifdef DISPATCHER_ON
+    cl->setHome(homeWindow);
+    #endif
     homeWindow->disableStyleButtons();
     notWindow = new notification(homeWindow, "Your account has been successfully created");
     homeWindow->show();
@@ -89,9 +93,9 @@ void signup::on_signin_clicked()
     pwd=password.toStdString();
 
     //--------------------------------------------------------------PARTE DA DECOMENTARE
-
-    /*if(username!="" && password!="" && nickname!=""){
-     * if(!checkPassword(password))
+    #ifdef DISPATCHER_ON
+    if(username!="" && password!="" && nickname!=""){
+      if(!checkPassword(password))
         {
             ui->errorMess->setText("The password does not meet the requirements");
             ui->errorMess->show();
@@ -107,11 +111,12 @@ void signup::on_signin_clicked()
     }
     else {
         ui->haveto->show();
-    }*/
+    }
+    #endif
 
 
     //--------------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-
+    #ifndef DISPATCHER_ON
     if(username!="" && password!="" && nickname!="")
     {
         waiting();
@@ -138,7 +143,7 @@ void signup::on_signin_clicked()
 
         ui->haveto->show();
     }
-
+    #endif
     //----------------------------------------
 }
 
