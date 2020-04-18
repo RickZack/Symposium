@@ -791,8 +791,18 @@ void notepad::handleDeleteKey(){
     row=cursor.blockNumber();
     col=cursor.positionInBlock()-1;
     qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
-    if(col>=0)
-        documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
+    if(col<0 && row>0){ // handle remove of '\r' in preceding line
+        row=cursor.blockNumber()-1;
+        cursor.movePosition(QTextCursor::PreviousBlock);
+        cursor.movePosition(QTextCursor::EndOfWord);
+        col=cursor.positionInBlock();
+        //Now restore the cursor position
+        cursor.movePosition(QTextCursor::NextBlock);
+        cursor.movePosition(QTextCursor::StartOfBlock);
+    }
+    else if(row==0) //deleting from an empty document, discard the action
+        return;
+    documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
 }
 
 void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharFormat format){
