@@ -1,4 +1,4 @@
-#define DISPATCHER_ON
+//#define DISPATCHER_ON
 
 #include "changeuserinfo.h"
 #include "ui_changeuserinfo.h"
