@@ -1,4 +1,4 @@
-//#define DISPATCHER_ON
+#define DISPATCHER_ON
 
 #include "changeuserinfo.h"
 #include "ui_changeuserinfo.h"
@@ -159,7 +159,7 @@ void changeUserInfo::errorEditUser(const std::string errorMess)
 void changeUserInfo::successEditUser()
 {
     pwd=newpass;
-    this->close();
+    this->hide();
     hideLabelsError();
     pressed=false;
     enableButtons();
@@ -168,7 +168,9 @@ void changeUserInfo::successEditUser()
     int ret=notWindow->exec();
     if(ret==0)
         enableStyleButtons();
-
+    h=new home(nullptr, pwd);
+    h->setClientDispatcher(cl);
+    h->show();
 }
 
 void changeUserInfo::disableStyleButtons()
