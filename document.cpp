@@ -346,7 +346,6 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
 }
 
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId) {
-    /*
     int i0=indexes.first;
     int i1=indexes.second;
     //checkIndex(i0,i1);
@@ -357,7 +356,6 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     symbols[i0].erase(symbols[i0].begin()+i1);
 
     return sym;
-     */
 }
 
 std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {

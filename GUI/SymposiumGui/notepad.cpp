@@ -52,6 +52,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 {
     ui->setupUi(this);
     this->setCentralWidget(ui->textEdit);
+    qApp->installEventFilter(this);
 
     //---------------------------------------------------------------------------------------------------------------------------
 
@@ -739,12 +740,6 @@ void notepad::closeEvent(QCloseEvent *event){
 
 }
 
-void notepad::restoreCursorPos(){
-    QTextCursor cursor=ui->textEdit->textCursor();
-    cursor.movePosition(QTextCursor::NextBlock);
-    cursor.movePosition(QTextCursor::StartOfBlock);
-}
-
 bool notepad::isAKeyToIgnore(QKeyEvent* event){
     return event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
             ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||
@@ -756,21 +751,7 @@ bool notepad::isAKeyToIgnore(QKeyEvent* event){
             event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
             event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier& event->text()!="\u0016";
 }
-
-void notepad::handleDeleteKey(){
-    int row, col;
-    QTextCursor cursor= ui->textEdit->textCursor();
-    row=cursor.blockNumber();
-    col=cursor.positionInBlock(); //for Qt block ends before '\r', we want to delete the '\r'
-    qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
-    std::pair<unsigned, unsigned> indexes{row, col};
-    qDebug()<<"AZIONE NON IMPLEMENTATA";
-    //documentoProva.localRemove(indexes, 1 /*dummy site id*/);
-}
-
-
-void notepad::keyReleaseEvent(QKeyEvent *event)
-{
+void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCursor cursor= ui->textEdit->textCursor();
     QTextCharFormat format = cursor.charFormat();
     QString testo=event->text();
@@ -780,26 +761,41 @@ void notepad::keyReleaseEvent(QKeyEvent *event)
     if(isAKeyToIgnore(event))
         return;
     else if(event->key()==Qt::Key_Backspace)
-        return /*handleDeleteKey()*/;
-    else if(event->text()=="\u0016"){ // Control_V action
+        return handleDeleteKey();
+    else if(event->text()=="\u0016") // Control_V action
         return this->contV_action(pos);
-    }else if(event->text()=="\r"){ // "a capo"
-        row=cursor.blockNumber()-1;
-        cursor.movePosition(QTextCursor::PreviousBlock);
-        cursor.movePosition(QTextCursor::EndOfBlock);
-        column=cursor.positionInBlock(); //it takes into account the \r, the cursor will be before \r
-        restoreCursorPos();
-    }
     else{ //carattere alfabetico
         row=cursor.blockNumber();
-        column=cursor.positionInBlock()-1;
+        column=cursor.positionInBlock();
     }
 
      this->sendSymbolToInsert(row,column,testo,format);
-
 }
 
-void notepad::sendSymbolToInsert(int row, int column,QString text,QTextCharFormat format){
+bool notepad::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+           qDebug() << "key " << keyEvent->key() << "from" << obj;
+           if(obj->objectName()=="textEdit"){
+               handleTextEditKeyPress(keyEvent);
+           }
+    }
+    return QObject::eventFilter(obj, event);
+}
+
+void notepad::handleDeleteKey(){
+    int row, col;
+    QTextCursor cursor= ui->textEdit->textCursor();
+    row=cursor.blockNumber();
+    col=cursor.positionInBlock()-1;
+    qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
+    if(col>=0)
+        documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
+}
+
+void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharFormat format){
 
 
     std::wstring str=text.toStdWString();
@@ -818,7 +814,7 @@ void notepad::sendSymbolToInsert(int row, int column,QString text,QTextCharForma
     int red=col.red();
     int green=col.green();
     Symposium::Color myCol(red,blue,green);
-    struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
+    Symposium::format charFormat;//{fontFamily,isBold,isUnderlined,isItalic,size,myCol};
     std::vector<int> pos;
 
     // per test adesso, il mio siteid è 1 e anche il mio counter

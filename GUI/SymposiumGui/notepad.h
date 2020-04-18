@@ -71,6 +71,9 @@ public:
      */
     void closeEvent(QCloseEvent *event);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+
 private slots:
     void on_actionPaste_triggered();
     void on_Export_PDF_triggered();
@@ -128,13 +131,8 @@ private:
     void counterLink();
     void restoreCursorPos();
     bool isAKeyToIgnore(QKeyEvent* event);
+    void handleTextEditKeyPress(QKeyEvent* event);
     void handleDeleteKey();
-
-    /**
-     * @brief keyReleaseEvent to handle with the keyboard actions
-     * @param e
-     */
-    void keyReleaseEvent(QKeyEvent *e);
 
     /**
      * @brief contV_action to handle with the CONTROL-C CONTROL-V actions
