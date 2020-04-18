@@ -126,6 +126,9 @@ private:
     void activeAlwaysLink();
     void timerLink();
     void counterLink();
+    void restoreCursorPos();
+    bool isAKeyToIgnore(QKeyEvent* event);
+    void handleDeleteKey();
 
     /**
      * @brief keyReleaseEvent to handle with the keyboard actions

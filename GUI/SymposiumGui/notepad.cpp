@@ -739,58 +739,64 @@ void notepad::closeEvent(QCloseEvent *event){
 
 }
 
+void notepad::restoreCursorPos(){
+    QTextCursor cursor=ui->textEdit->textCursor();
+    cursor.movePosition(QTextCursor::NextBlock);
+    cursor.movePosition(QTextCursor::StartOfBlock);
+}
+
+bool notepad::isAKeyToIgnore(QKeyEvent* event){
+    return event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
+            ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||
+            event->key()==Qt::Key_F3 ||event->key()==Qt::Key_F4 ||event->key()==Qt::Key_F5 ||event->key()==Qt::Key_F6 ||
+            event->key()==Qt::Key_F7 ||event->key()==Qt::Key_F8 ||event->key()==Qt::Key_F9 ||event->key()==Qt::Key_F10 ||
+            event->key()==Qt::Key_F11 || event->key()==Qt::Key_F12 || event->key()==Qt::Key_Menu ||
+            event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
+            event->key()==Qt::Key_Tab || event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
+            event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
+            event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier& event->text()!="\u0016";
+}
+
+void notepad::handleDeleteKey(){
+    int row, col;
+    QTextCursor cursor= ui->textEdit->textCursor();
+    row=cursor.blockNumber();
+    col=cursor.positionInBlock(); //for Qt block ends before '\r', we want to delete the '\r'
+    qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
+    std::pair<unsigned, unsigned> indexes{row, col};
+    qDebug()<<"AZIONE NON IMPLEMENTATA";
+    //documentoProva.localRemove(indexes, 1 /*dummy site id*/);
+}
+
 
 void notepad::keyReleaseEvent(QKeyEvent *event)
 {
-
-    QColor myC=Qt::yellow;
-    myC.setAlpha(160);
-
     QTextCursor cursor= ui->textEdit->textCursor();
-
-
+    QTextCharFormat format = cursor.charFormat();
+    QString testo=event->text();
+    int row, column;
     int pos=cursor.position();
-    if (event->key()==Qt::Key_Backspace){
-        int column=cursor.positionInBlock();
-        int row= cursor.blockNumber();
-        const std::pair<int, int> indexes={row,column};
-        //cl->localRemouve(this->documentId,&indexes);
-        //this->documentoProva.localRemove(indexes, 1);
 
-    }else if(event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
-             ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||
-             event->key()==Qt::Key_F3 ||event->key()==Qt::Key_F4 ||event->key()==Qt::Key_F5 ||event->key()==Qt::Key_F6 ||
-             event->key()==Qt::Key_F7 ||event->key()==Qt::Key_F8 ||event->key()==Qt::Key_F9 ||event->key()==Qt::Key_F10 ||
-             event->key()==Qt::Key_F11 || event->key()==Qt::Key_F12 || event->key()==Qt::Key_Menu ||
-             event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
-             event->key()==Qt::Key_Tab || event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
-             event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
-             event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier& event->text()!="\u0016"){
+    if(isAKeyToIgnore(event))
         return;
-    }else if(event->text()=="\u0016"){ // Control_V action
-        this->contV_action(pos);
-
-    }else if(event->text()=="\r"){
-
-        unsigned int row=cursor.blockNumber()-1;
-        unsigned column=this->charsInLine;
-        this->charsInLine=0;
-        QString testo=event->text();
-        QTextCharFormat format = cursor.charFormat();
-        this->sendSymbolToInsert(row,column,testo,format);
+    else if(event->key()==Qt::Key_Backspace)
+        return /*handleDeleteKey()*/;
+    else if(event->text()=="\u0016"){ // Control_V action
+        return this->contV_action(pos);
+    }else if(event->text()=="\r"){ // "a capo"
+        row=cursor.blockNumber()-1;
+        cursor.movePosition(QTextCursor::PreviousBlock);
+        cursor.movePosition(QTextCursor::EndOfBlock);
+        column=cursor.positionInBlock(); //it takes into account the \r, the cursor will be before \r
+        restoreCursorPos();
     }
-    else{
-
-        QString testo=event->text();
-        int column=this->charsInLine;
-        charsInLine++;
-        //int column=cursor.positionInBlock();
-
-        //column= column-1;
-        int row= cursor.blockNumber();
-        QTextCharFormat format = cursor.charFormat();
-        this->sendSymbolToInsert(row,column,testo,format);
+    else{ //carattere alfabetico
+        row=cursor.blockNumber();
+        column=cursor.positionInBlock()-1;
     }
+
+     this->sendSymbolToInsert(row,column,testo,format);
+
 }
 
 void notepad::sendSymbolToInsert(int row, int column,QString text,QTextCharFormat format){
