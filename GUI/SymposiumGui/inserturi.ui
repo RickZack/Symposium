@@ -351,6 +351,16 @@ color: rgb(58, 80, 116); </string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>reader</tabstop>
+  <tabstop>writer</tabstop>
+  <tabstop>owner</tabstop>
+  <tabstop>dir</tabstop>
+  <tabstop>name</tabstop>
+  <tabstop>add</tabstop>
+  <tabstop>cancel</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

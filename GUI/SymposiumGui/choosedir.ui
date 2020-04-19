@@ -113,7 +113,7 @@ border-color: rgb(58, 80, 116);</string>
     <number>3</number>
    </property>
    <attribute name="headerVisible">
-    <bool>true</bool>
+    <bool>false</bool>
    </attribute>
    <attribute name="headerCascadingSectionResizes">
     <bool>true</bool>
@@ -167,6 +167,12 @@ color: rgb(58, 80, 116); </string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>choose</tabstop>
+  <tabstop>cancel</tabstop>
+  <tabstop>nameDir</tabstop>
+  <tabstop>tree</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
