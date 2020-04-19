@@ -180,6 +180,13 @@ font: 18pt &quot;Lucida Calligraphy&quot;;</string>
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>directory</tabstop>
+  <tabstop>InsertUri</tabstop>
+  <tabstop>modify</tabstop>
+  <tabstop>delete_2</tabstop>
+  <tabstop>logout</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

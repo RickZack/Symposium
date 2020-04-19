@@ -392,6 +392,14 @@ color: rgb(58, 80, 116); </string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>username</tabstop>
+  <tabstop>password</tabstop>
+  <tabstop>nickname</tabstop>
+  <tabstop>signin</tabstop>
+  <tabstop>cancel</tabstop>
+  <tabstop>iconButt</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>
