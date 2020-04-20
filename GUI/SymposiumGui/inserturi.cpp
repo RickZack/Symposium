@@ -4,9 +4,9 @@
 #include "home.h"
 #include "Dispatcher/clientdispatcher.h"
 
-inserturi::inserturi(QWidget *parent, std::string pwd, bool homeWindow) :
+inserturi::inserturi(QWidget *parent, std::string pwd, bool homeWindow, Symposium::clientdispatcher *cl) :
     QDialog(parent),
-    ui(new Ui::inserturi), pwd(pwd), homeWindow(homeWindow)
+    ui(new Ui::inserturi), cl(cl), pwd(pwd), homeWindow(homeWindow)
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
