@@ -126,26 +126,17 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     qDebug()<<"i1"<<i1;
     checkIndex(i0,i1);
     this->updateCursorPos(toInsert.getSiteId(),i0,i1);
-    //symbol newSymb= generatePosition(indexes,toInsert);
-    //newSymb.setCharFormat(toInsert.getCharFormat());
+    symbol newSymb= generatePosition(indexes,toInsert);
+    newSymb.setCharFormat(toInsert.getCharFormat());
 
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
-   // wchar_t sym=symbols[i0][i1].getCh();
-    symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
-    symbol s1=findPosBefore(indexes);
-    symbol s2=findPosAfter(indexes);
-    /*
-    if(sym==emptyChar){
-        //symbols[i0][i1]=newSymb;
-        //symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
-        //symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
+    if(toInsert.getCh()=='\r'){
+        symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
     }
-    else {
-        symbols[i0].insert(symbols[i0].begin() + i1, newSymb);
-        }
-*/
-    return toInsert;
+    symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
+
+    return newSymb;
 
 
 }

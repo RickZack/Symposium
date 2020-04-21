@@ -38,6 +38,7 @@ directory::directory(QWidget *parent, std::string pwd) :
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
 
 
+
 }
 
 directory::~directory()
@@ -507,7 +508,7 @@ void directory::on_myListWidget_itemDoubleClicked(QListWidgetItem *item)
         // str1=cl->getStr(this->id, this->path);
         std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
         str=str1;
-
+        ui->pathLabel->setText(ui->pathLabel->text()+QString::fromStdString(nameSource)+'/');
         this->openWindow(str);
 
     }
@@ -525,13 +526,12 @@ void directory::on_myListWidget_itemDoubleClicked(QListWidgetItem *item)
     }
     else
     {
-        // it is a SymLink
-        // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
-        // path e nome che ce li ho.
-
-
-
-
+        std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
+        std::string id=idPriv.first;
+        std::string initialPriv=idPriv.second;
+        // I have to open the choosepriv first
+        chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
+        chooseprivWindow->show();
     }
 }
 
