@@ -7,39 +7,38 @@ activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_c
     ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     ui->writer->click();
     privilegeToGrant=Symposium::privilege::modify;
     numCounter=0;
-    ui->waiting->hide();
-    ui->gif->hide();
+    enableButtons();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
+
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
+    this->pathFile="/1/2/3/4/5";
+    //---------------------------------------------------------------------------------------------------------------
 }
 
 void activecounterlink::unsuccessLink(std::string errorMess)
 {
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->cancel->setDisabled(false);
-    ui->ok->setDisabled(false);
-    this->close();
+    enableButtons();
+    enableStyleButtons();
+    this->hide();
     QString error=QString::fromStdString(errorMess);
-    QMessageBox::information(parentWidget(),
-                             tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
+    ui->errorMess->setText(error);
+    ui->errorMess->show();
 }
 
 void activecounterlink::successLink(std::string path)
 {
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->cancel->setDisabled(false);
-    ui->ok->setDisabled(false);
-    this->close();
-    QMessageBox::information(parentWidget(),
-                                    tr("Links"), "All links are active now for a limit of another "
-                                 +QString::number(numCounter)+" shares.\n This is the link: "
-                                 +QString::fromStdString(path), QMessageBox::Ok);
+    enableButtons();
+    enableStyleButtons();
+    this->hide();
+    link = new successlinks(parentWidget(), 2, QString::fromStdString(path), QString::number(numCounter));
+    link->exec();
 }
 
 void activecounterlink::setClientDispatcher(Symposium::clientdispatcher *cl)
@@ -49,24 +48,22 @@ void activecounterlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void activecounterlink::errorConnection()
 {
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->cancel->setDisabled(false);
-    ui->ok->setDisabled(false);
-    errorWindow = new errorconnection(this);
-    errorWindow->show();
+    enableButtons();
+    enableStyleButtons();
+    this->hide();
+    errorWindow = new errorconnection();
+    errorWindow->exec();
 }
 
 void activecounterlink::errorConnectionLogout(std::string str)
 {
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->cancel->setDisabled(false);
-    ui->ok->setDisabled(false);
-    errorLog = new errorlogout(this, QString::fromStdString(str));
-    this->close();
-    parentWidget()->close();
-    parentWidget()->parentWidget()->close();
+    enableButtons();
+    enableStyleButtons();
+    this->hide();
+    errorLog = new errorlogout(nullptr, QString::fromStdString(str));
+    parentWidget()->hide();
+    parentWidget()->parentWidget()->hide();
+    errorLog->setClientDispatcher(cl);
     errorLog->show();
 }
 
@@ -76,25 +73,28 @@ activecounterlink::~activecounterlink()
     delete ui;
 }
 
+void activecounterlink::enableButtonsAfter()
+{
+    enableStyleButtons();
+}
+
 void activecounterlink::on_ok_clicked()
 {
-    numCounter=ui->counter->value();
+    numCounter=static_cast<unsigned int>(ui->counter->value());
     if(numCounter!=0)
     {
         u.activateCount(numCounter, privilegeToGrant);
         //cl->shareResource(pathFile, documentId, u);
-        ui->waiting->show();
-        ui->gif->show();
-        ui->cancel->setDisabled(true);
-        ui->ok->setDisabled(true);
+        waiting();
+        disableButtons();
+        disableStyleButtons();
     }
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-    this->close();
-    QMessageBox::information(parentWidget(),
-                                    tr("Links"), "All links are active now for a limit of another "
-                                 +QString::number(numCounter)+" shares.\n This is the link: "
-                                 +QString::fromStdString(pathFile), QMessageBox::Ok);
+    this->hide();
+    enableButtons();
+    link = new successlinks(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter));
+    link->exec();
 
     //----------------------------------------------------------------------------------
 
@@ -118,4 +118,48 @@ void activecounterlink::on_reader_clicked()
 void activecounterlink::on_cancel_clicked()
 {
     this->close();
+}
+
+void activecounterlink::showEvent(QShowEvent *event)
+{
+    QDialog::showEvent(event);
+    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
+    anim->setStartValue(0.0);
+    anim->setEndValue(1.0);
+    anim->setDuration(1000);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void activecounterlink::disableButtons()
+{
+    ui->cancel->setDisabled(true);
+    ui->ok->setDisabled(true);
+}
+
+void activecounterlink::enableButtons()
+{
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
+    ui->errorMess->hide();
+}
+
+void activecounterlink::enableStyleButtons()
+{
+    ui->ok->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancel->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+}
+
+void activecounterlink::disableStyleButtons()
+{
+    ui->ok->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancel->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+}
+
+void activecounterlink::waiting()
+{
+    ui->gif->show();
+    ui->waiting->show();
+    ui->errorMess->hide();
 }
