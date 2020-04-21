@@ -56,7 +56,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
     //---------------------------------------------------------------------------------------------------------------------------
 
-/*
+
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2},i4={0,3},iacapo={0,4},i5={1,0},i6={1,1},i7={1,2},i8={1,3},i9={1,4},i10={1,5},i11={1,6},i12={1,7},i13={1,8},iacapo2={1,9};
         Symposium::symbol s1('C', 1, 0, std::vector<int>(), false),
                           s2('i', 1, 1, std::vector<int>(), false),
@@ -169,9 +169,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             documentoProva.localInsert(in8,sn8);
             documentoProva.localInsert(in9,sn9);
 
-
-
-*/
   //---------------------------------------------------------------------------------------------------------
 
     priv=Symposium::privilege::owner;
@@ -331,11 +328,6 @@ void notepad::setupTextActions()
     actionTextBold->setFont(bold);
     tb->addAction(actionTextBold);
     actionTextBold->setCheckable(true);
-
-    //const QIcon colorsIcon(":/resources/cartelle/color_icon");
-    //actionSelect= menu->addAction(colorsIcon,tr("Select"),this,&notepad::colorText);
-
-
 
     const QIcon italicIcon = QIcon::fromTheme("format-text-italic", QIcon(rsrcPath + "/textitalic.png"));
     actionTextItalic = menu->addAction(italicIcon, tr("&Italic"), this, &notepad::textItalic);
@@ -800,13 +792,12 @@ void notepad::handleDeleteKey(){
         cursor.movePosition(QTextCursor::NextBlock);
         cursor.movePosition(QTextCursor::StartOfBlock);
     }
-    else if(row==0) //deleting from an empty document, discard the action
+    else if(col==0) //deleting from an empty document, discard the action
         return;
     documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
 }
 
 void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharFormat format){
-
 
     std::wstring str=text.toStdWString();
     wchar_t ch=str[0];
@@ -823,15 +814,14 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     int blue=col.blue();
     int red=col.red();
     int green=col.green();
-    Symposium::Color myCol(red,blue,green);
-    Symposium::format charFormat;//{fontFamily,isBold,isUnderlined,isItalic,size,myCol};
+    Symposium::Color myCol(red,green,blue);
+    Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
     std::vector<int> pos;
 
     // per test adesso, il mio siteid è 1 e anche il mio counter
     Symposium::symbol sym(ch,1,1,pos,false);
     sym.setCharFormat(charFormat);
     this->documentoProva.localInsert(indexes,sym);
-
     //cl->localInsert(this->documentId,sym,indexes);
 
     this->posBlock=ui->textEdit->textCursor().positionInBlock();
@@ -867,16 +857,18 @@ void notepad::contV_action(int pos){
         int blue=col.blue();
         int red=col.red();
         int green=col.green();
-        Symposium::Color myCol(red,blue,green);
+        Symposium::Color myCol(red,green,blue);
         struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
         std::vector<int> pos;
         // SISTEMARE IL SITEID E IL COUNTER IN SYMBOL
-        Symposium::symbol sym(ch,0,0,pos,false);
+        Symposium::symbol sym(ch,1,0,pos,false);
         sym.setCharFormat(charFormat);
+        this->documentoProva.localInsert(indexes,sym);
         //cl->localInsert(this->documentId, symbol &sym, &indexes)
         count++;posTmp++;
 
     }
+
 
 }
 
@@ -1217,34 +1209,6 @@ void notepad::on_textEdit_cursorPositionChanged()
     QColor myC=Qt::yellow;
     myC.setAlpha(160);
 
-
-
-    /*
-
-    if(insertOthCh==false){
-       QColor col=ui->textEdit->textColor();
-       col.setAlpha(180);
-       ui->textEdit->setTextColor(col);
-*/
-       // The user changes the block by using the mouse
-       // if(cc.blockNumber()!=this->posBlock) {
-            //this->insertedChars=0;
-          //  QTextCharFormat ch=ui->textEdit->currentCharFormat();
-          //  this->currentCharFormatChanged(ch);
-            //ui->textEdit->setTextColor(this->colPos);
-    //}
-     //   else if(!cc.hasSelection()){
-               // QColor col=ui->textEdit->textColor();
-               //col.setAlpha(180);
-             //  QTextCharFormat fmt=ui->textEdit->currentCharFormat();
-            //   fmt.setForeground(this->colPos);
-            //   ui->textEdit->mergeCurrentCharFormat(fmt);
-           //    ui->textEdit->setTextColor(this->colPos);
-        //}
-
-        //if(this->highActivated && cc.blockNumber()!=this->posBlock){
-         //   this->insertedChars=0;
-            //ui->textEdit->setTextColor(this->colPos);
     if(this->highActivated){ui->textEdit->setTextBackgroundColor(myC);
 }
 
@@ -1284,6 +1248,7 @@ void notepad::colorText(){
                 Symposium::Color col=format.col;
                 //conversion from Color to QColor
                 qCol=static_cast<QColor>(col);
+
                 if(!sym.isVerified())
                   {
                     qCol.setAlpha(160);
@@ -1303,7 +1268,6 @@ void notepad::colorText(){
         }
     }
 
-    //this->supportColumn=curs.positionInBlock();
     insertOthCh=false;
  }
 
@@ -1319,9 +1283,6 @@ void notepad::on_actionhighlight_triggered()
         ui->actionhighlight->setChecked(true);
         ui->textEdit->clear();
         this->colorText();
-        QTextCursor c=ui->textEdit->textCursor();
-
-
     }
     else{
         this->highActivated=false;

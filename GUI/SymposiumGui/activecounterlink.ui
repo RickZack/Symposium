@@ -6,60 +6,69 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>439</height>
+    <width>670</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Counter link</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icon/logo1.png</normaloff>:/icon/logo1.png</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(249, 247, 241); </string>
   </property>
   <widget class="QSpinBox" name="counter">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>50</x>
      <y>110</y>
      <width>111</width>
-     <height>51</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>60</y>
-     <width>351</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Choose for how many shares you want your file is available:</string>
+    <string notr="true">font: 17pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116);
+border-color: rgb(58, 80, 116);
+background-color: white;</string>
    </property>
   </widget>
   <widget class="QPushButton" name="ok">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>320</y>
-     <width>101</width>
-     <height>31</height>
+     <x>50</x>
+     <y>410</y>
+     <width>140</width>
+     <height>35</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+   </property>
    <property name="text">
-    <string>Activate link</string>
+    <string>Generate link</string>
    </property>
   </widget>
   <widget class="QPushButton" name="cancel">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>320</y>
-     <width>111</width>
-     <height>31</height>
+     <x>480</x>
+     <y>410</y>
+     <width>140</width>
+     <height>35</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
    </property>
    <property name="text">
     <string>Cancel</string>
@@ -68,22 +77,30 @@
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>180</y>
-     <width>264</width>
-     <height>121</height>
+     <x>50</x>
+     <y>170</y>
+     <width>241</width>
+     <height>141</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QLabel" name="label_2">
+      <property name="styleSheet">
+       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116);</string>
+      </property>
       <property name="text">
-       <string>Choose privilege to grant for a future user(s):</string>
+       <string>Choose the privilege to grant:</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QRadioButton" name="owner">
+      <property name="styleSheet">
+       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+      </property>
       <property name="text">
        <string>owner</string>
       </property>
@@ -91,6 +108,10 @@
     </item>
     <item>
      <widget class="QRadioButton" name="writer">
+      <property name="styleSheet">
+       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+      </property>
       <property name="text">
        <string>writer (default)</string>
       </property>
@@ -98,6 +119,10 @@
     </item>
     <item>
      <widget class="QRadioButton" name="reader">
+      <property name="styleSheet">
+       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+      </property>
       <property name="text">
        <string>reader</string>
       </property>
@@ -108,10 +133,10 @@
   <widget class="QLabel" name="gif">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>370</y>
-     <width>55</width>
-     <height>51</height>
+     <x>230</x>
+     <y>320</y>
+     <width>61</width>
+     <height>61</height>
     </rect>
    </property>
    <property name="text">
@@ -121,17 +146,68 @@
   <widget class="QLabel" name="waiting">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>390</y>
-     <width>151</width>
-     <height>16</height>
+     <x>320</x>
+     <y>350</y>
+     <width>91</width>
+     <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116);</string>
    </property>
    <property name="text">
     <string>Waiting...</string>
    </property>
   </widget>
+  <widget class="QTextBrowser" name="textBrowser">
+   <property name="geometry">
+    <rect>
+     <x>49</x>
+     <y>20</y>
+     <width>572</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: none;
+text-align: center;
+font: &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); 
+</string>
+   </property>
+   <property name="html">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Choose for how many another shares you want your file will be available:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="errorMess">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>350</y>
+     <width>590</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+color: red; 
+text-align:center;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

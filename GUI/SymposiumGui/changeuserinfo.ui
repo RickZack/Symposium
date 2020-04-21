@@ -546,14 +546,14 @@ color: rgb(58, 80, 116); </string>
   <tabstop>username</tabstop>
   <tabstop>nickname</tabstop>
   <tabstop>iconButt</tabstop>
+  <tabstop>confirm</tabstop>
   <tabstop>cancel</tabstop>
   <tabstop>changepwd</tabstop>
   <tabstop>oldpwd</tabstop>
   <tabstop>newpwd1</tabstop>
   <tabstop>newpwd2</tabstop>
-  <tabstop>cancel2</tabstop>
   <tabstop>confirm2</tabstop>
-  <tabstop>confirm</tabstop>
+  <tabstop>cancel2</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

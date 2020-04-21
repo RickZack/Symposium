@@ -54,8 +54,7 @@ void home::on_delete_2_clicked()
 
 void home::on_InsertUri_clicked()
 {
-    inserturiWindow = new inserturi(nullptr, pwd);
-    inserturiWindow->setClientDispatcher(cl);
+    inserturiWindow = new inserturi(nullptr, pwd, cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     cl->setInsertUri(inserturiWindow);

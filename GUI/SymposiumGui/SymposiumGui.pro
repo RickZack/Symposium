@@ -70,6 +70,7 @@ SOURCES += \
         qtexteditlabels.cpp \
         sigin.cpp \
         signup.cpp \
+        successlinks.cpp \
         textedit.cpp \
         Dispatcher/clientdispatcher.cpp \
         Dispatcher/serverdispatcher.cpp \
@@ -118,6 +119,7 @@ HEADERS += \
         qtexteditlabels.h \
         sigin.h \
         signup.h \
+        successlinks.h \
         textedit.h \
         Dispatcher/clientdispatcher.h \
         Dispatcher/serverdispatcher.h \
@@ -149,6 +151,7 @@ FORMS += \
         onlineusers.ui \
         sigin.ui \
         signup.ui \
+        successlinks.ui \
         unsuccessdeleteaccount.ui
 
 
