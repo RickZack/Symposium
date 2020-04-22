@@ -28,10 +28,23 @@ public:
     ~directory();
     void listGenerate(std::string str, int count);
 
-    // this variable is used to say that a window has been opened and to enable the button BACK.
-    int aperto=0;
-    QList<std::string> values;
+    /**
+     * @brief aperto this variable is used to say that a window has been opened and to enable/disable the BACK button
+     */
+    int openFolders=-1;
+
+    /**
+     * @brief path is the path that shows all the folders visited
+     */
     std::string path;
+    /**
+     * @brief previousId is the id referred to the folder before the one opened. Useful to handle the BACK button
+     */
+    std::string previousId;
+    /**
+     * @brief actualId is the id referred to the opened window. Useful to build the path.
+     */
+    std::string actualId;
 
 
     /**
@@ -124,7 +137,7 @@ private slots:
      */
     void on_okButton_clicked();
 
-    void on_myListWidget_itemDoubleClicked(QListWidgetItem *item);
+    void on_myListWidget_itemDoubleClicked();
 
 
 

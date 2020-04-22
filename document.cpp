@@ -350,6 +350,7 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
 }
 
 std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
+
     /*
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;

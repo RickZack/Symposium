@@ -19,7 +19,6 @@ directory::directory(QWidget *parent, std::string pwd) :
     str="directory 1 Folder1\n file 9 Folder1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
     int count=number_elements(str);
     listGenerate(str, count);
-    values.push_back(str);
 
     ui->back_button->setDisabled(true);
     ui->back_button->hide();
@@ -200,7 +199,6 @@ void directory::openWindow(std::string str1){
     ui->myListWidget->clear();
     int counter=number_elements(str1);
     listGenerate(str1,counter);
-    values.push_back(str1);
     ui->back_button->setDisabled(false);
     ui->back_button->show();
     this->show();
@@ -399,26 +397,28 @@ void directory::successNewSource(std::string id){
 
 void directory::on_back_button_clicked()
 {
-    if(aperto!=0)
-    {
-        ui->myListWidget->clear();
-        int dim=values.size();
-        if(dim!=1)
-            values.removeLast();
-        // prelevo la stringa relativa alla finestra precedente a quella aperta
-        std::string new_str= values.last();
+    if(this->openFolders!=0)
+   {
 
-        //two times because I have to remouve id/n
-        path.pop_back();
-        path.pop_back();
-
-        dim=values.size();
-        int count=number_elements(new_str);
-        listGenerate(new_str,count);
-        aperto--;
+        std::string pathLabel=ui->pathLabel->text().toStdString();
+        pathLabel.erase(pathLabel.end()-1);
+        std::size_t found=pathLabel.find_last_of("/");
+        pathLabel.erase(found+1,pathLabel.size());
+        ui->pathLabel->setText(QString::fromStdString(pathLabel));
+        //std::string new_str=cl->getStr(this->previousId);
+        //ui->myListWidget->clear();
+       //int count=number_elements(new_str);
+       //listGenerate(new_str,count);
+        this->openFolders--;
     }
-    if(aperto==0)
-    {
+
+
+    else
+   {
+        this->openFolders=-1;
+        std::string pathLabel=ui->pathLabel->text().toStdString();
+        pathLabel.erase(5,pathLabel.size());
+        ui->pathLabel->setText(QString::fromStdString(pathLabel));
         ui->back_button->setDisabled(true);
         ui->back_button->hide();
     }
@@ -492,48 +492,11 @@ void directory::errorConnectionLogout(std::string str){
 }
 
 
-void directory::on_myListWidget_itemDoubleClicked(QListWidgetItem *item)
+void directory::on_myListWidget_itemDoubleClicked()
 {
-
-    QString value= item->whatsThis();
-    std::string nameSource=item->text().toStdString();
-    // dermine the path of the folders in which I enter.
-    if(value=="directory")
-    {
-        std::string id=searchForId(nameSource,str,count);
-        path+=id+'/'; // ok lo crea in modo corretto
-        std::string pth=path; //solo per visualizzare che lo crea in modo corretto. Dopo si può cancellare
-        aperto++;
-        // open the folder Window
-        // str1=cl->getStr(this->id, this->path);
-        std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
-        str=str1;
-        ui->pathLabel->setText(ui->pathLabel->text()+QString::fromStdString(nameSource)+'/');
-        this->openWindow(str);
-
-    }
-
-    else if(value=="file")
-
-        // id and path e privilegio con cui apre
-    {
-        std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
-        std::string id=idPriv.first;
-        std::string initialPriv=idPriv.second;
-        // I have to open the choosepriv first
-        chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
-        chooseprivWindow->show();
-    }
-    else
-    {
-        std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
-        std::string id=idPriv.first;
-        std::string initialPriv=idPriv.second;
-        // I have to open the choosepriv first
-        chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
-        chooseprivWindow->show();
-    }
+    this->openSelectedSource();
 }
+
 
 void directory::openSelectedSource(){
     // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
@@ -544,15 +507,16 @@ void directory::openSelectedSource(){
          // dermine the path of the folders in which I enter.
          if(value=="directory")
          {
-             std::string id=searchForId(nameSource,str,count);
-             path+=id+'/'; // ok lo crea in modo corretto
-             std::string pth=path; //solo per visualizzare che lo crea in modo corretto. Dopo si può cancellare
-             aperto++;
+
+             this->previousId=this->actualId;
+             this->actualId=searchForId(nameSource,str,count);
+             path+=actualId+'/'; // ok lo crea in modo corretto
+             this->openFolders++;
              // open the folder Window
              // str1=cl->getStr(this->id, this->path);
              std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
              str=str1;
-
+             ui->pathLabel->setText(ui->pathLabel->text()+QString::fromStdString(nameSource)+'/');
              this->openWindow(str);
 
          }
@@ -575,8 +539,13 @@ void directory::openSelectedSource(){
              // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
              // path e nome che ce li ho.
 
-
-
+             std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
+             std::string id=idPriv.first;
+             std::string initialPriv=idPriv.second;
+             // I have to open the choosepriv first
+             chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
+             //cl->setchoosepriv(chooseprivWindow)
+             chooseprivWindow->show();
 
          }
 
