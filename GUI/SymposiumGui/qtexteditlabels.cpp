@@ -154,35 +154,56 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
 
 void qtexteditlabels::showLabel(QLabel *labelCursor, QLabel *labelName)
 {
-    static double minsize=1000;
-    // Obtain size of original cursor
-    const QRect qRect = this->cursorRect();
-    int x=qRect.height();
+    // Obtain rectangle of 'real' cursor
+    // and the biggest font that can be contained
+    const QRect curRect = this->cursorRect();
+    QFontMetrics thisFontMetrics=this->fontMetrics();
+    QFont bigFont=this->font();
+    bigFont.setPixelSize(curRect.height());
+    QFontMetrics bigFontInfo(bigFont);
 
     // Obtain size of current font
-    QFont font=this->font();
-    font.setPointSize(this->fontPointSize());
-    QFontMetrics fm(font);
-    int y=fm.height();
+    QFont thisFont=this->font();
+    thisFont.setPointSize(this->fontPointSize());
+    QFontMetrics thisFontInfo(thisFont);
+    int thisFontHeight=thisFontInfo.height();
 
-    //Correction for small characters
-    minsize= y<minsize? y:minsize;
+    // Obtain a rectangle that encloses the char, aligned to
+    // the bottom of the 'real' cursor rectangle
+    QRect thisRect=thisFontInfo.boundingRect(curRect, Qt::AlignBottom, "I");
 
-    //Top edge where to start drawing the cursor
-    int ty=qRect.top()+(x-y)/1.18-minsize/7.0;
+    // Calculate where is the baseline of the current char
+    // with respect to the one of the biggest char
+    int biggerBaseline=curRect.bottom()-bigFontInfo.descent();
+    int thisBaseline=thisRect.bottom()-thisFontInfo.descent();
+    int baseLineDiff=abs(thisBaseline-biggerBaseline);
+
+    // Reference font
+    QFont ref("Purisa");
+    ref.setPointSize(this->fontPointSize());
+    QFontMetrics refM(ref);
+    QRect refRect=refM.boundingRect(curRect, Qt::AlignBottom, "I");
+
+
+    int correction=0;
+    int ty=thisRect.bottom()-thisFontInfo.descent()-thisFontHeight*0.85-baseLineDiff-correction;
+
+
+
+
 
     labelName->show();
     labelCursor->show();
 
-    if(qRect.left()<=this->width()-labelName->rect().width()-25)
+    if(curRect.left()<=this->width()-labelName->rect().width()-25)
     {
-        labelCursor->move(qRect.topLeft().x()-1, ty);
-        labelName->move(qRect.topLeft().x()+5, ty);
+        labelCursor->move(curRect.topLeft().x()-1, ty);
+        labelName->move(curRect.topLeft().x()+5, ty);
     }
     else
     {
-        labelCursor->move(qRect.topLeft().x()-1, ty);
-        labelName->move(qRect.topLeft().x()-labelName->rect().width(), ty);
+        labelCursor->move(curRect.topLeft().x()-1, ty);
+        labelName->move(curRect.topLeft().x()-labelName->rect().width(), ty);
     }
 }
 

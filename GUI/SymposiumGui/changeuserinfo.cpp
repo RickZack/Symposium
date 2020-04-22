@@ -18,6 +18,7 @@ changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, Symposium::clie
     int h=ui->logo->height();
     ui->logo->setPixmap(pix2.scaled(w, h, Qt::KeepAspectRatio));
     hideLabelsError();
+    ui->username->setReadOnly(true);
     hiddenpwd();
 
     //-----------------------------------------------------PARTE DA DECOMENTARE
@@ -382,7 +383,6 @@ void changeUserInfo::disableButtons()
        ui->changepwd->setDisabled(true);
        ui->iconButt->setDisabled(true);
        ui->nickname->setReadOnly(true);
-       ui->username->setReadOnly(true);
    }
    else
    {
@@ -400,7 +400,6 @@ void changeUserInfo::enableButtons()
         ui->changepwd->setDisabled(false);
         ui->iconButt->setDisabled(false);
         ui->nickname->setReadOnly(false);
-        ui->username->setReadOnly(false);
     }
     else
     {

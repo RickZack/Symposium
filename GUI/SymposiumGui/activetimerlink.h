@@ -7,11 +7,13 @@
 #include <locale>
 #include <iomanip>
 #include <QMessageBox>
+#include <QPropertyAnimation>
 #include "../../privilege.h"
 #include "../../uri.h"
 #include "../../Symposium.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include "successlinks.h"
 #include <QMovie>
 
 namespace Symposium{
@@ -76,6 +78,12 @@ private slots:
      */
     void on_cancel_clicked();
 
+public slots:
+    /**
+     * @brief restore the style of buttons;
+     */
+    void enableButtonsAfter();
+
 private:
     Ui::activetimerlink *ui;
     std::string pathFile;
@@ -86,6 +94,33 @@ private:
     errorlogout *errorLog;
     std::string time;
     Symposium::uint_positive_cnt::type documentId;
+    successlinks *link;
+
+
+    /**
+     * @brief called when show() is invoked for this window and perform an animation
+     */
+    void showEvent(QShowEvent* event);
+    /**
+     * @brief disable all buttons present so user cannot perform any operation
+     */
+    void disableButtons();
+    /**
+     * @brief enable all buttons present
+     */
+    void enableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableStyleButtons();
+    /**
+     * @brief waiting of the conclusion of the operation by clientdispatcher
+     */
+    void waiting();
 
 };
 

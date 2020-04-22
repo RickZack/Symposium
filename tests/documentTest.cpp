@@ -198,7 +198,8 @@ TEST_P(docRemoteInsertUpdateCursor, InsertionUpdatePosition){
 }
 updatePos updates[]={
         updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,1}, {0,2}},
-        updatePos{symbol('a', 1, 1, {1}, true), symbol('b', 0, 1, {1}, true), {0,2}, {0,1}}
+        updatePos{symbol('a', 1, 1, {1}, true), symbol('b', 0, 1, {1}, true), {0,2}, {0,1}},
+        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 0, 2, {2}, true), {0,2}, {0,2}}
 };
 INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertUpdateCursor, testing::ValuesIn(updates));
 

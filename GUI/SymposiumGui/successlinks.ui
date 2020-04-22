@@ -150,6 +150,66 @@ color: rgb(58, 80, 116);</string>
     <string>shares.</string>
    </property>
   </widget>
+  <widget class="QLabel" name="share4">
+   <property name="geometry">
+    <rect>
+     <x>157</x>
+     <y>60</y>
+     <width>356</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116);</string>
+   </property>
+   <property name="text">
+    <string>All links have been disabled</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="timer1">
+   <property name="geometry">
+    <rect>
+     <x>104</x>
+     <y>30</y>
+     <width>231</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116);</string>
+   </property>
+   <property name="text">
+    <string>All links are active now until:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="timer2">
+   <property name="geometry">
+    <rect>
+     <x>335</x>
+     <y>30</y>
+     <width>231</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
  </widget>
  <resources>
   <include location="resources.qrc"/>

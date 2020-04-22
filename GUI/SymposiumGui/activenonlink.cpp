@@ -6,8 +6,10 @@ activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type
     ui(new Ui::activenonlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
-    ui->waiting->hide();
-    ui->gif->hide();
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+    enableButtons();
+
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
@@ -15,26 +17,21 @@ activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type
 
 void activenonlink::unsuccessLink(std::string errorMess)
 {
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->cancel->setDisabled(false);
-    ui->ok->setDisabled(false);
-    this->close();
+    enableButtons();
+    enableStyleButtons();
     QString error=QString::fromStdString(errorMess);
-    QMessageBox::information(parentWidget(),
-                             tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
+    ui->errorMess->setText(error);
+    ui->errorMess->show();
 
 }
 
 void activenonlink::successLink(std::string path)
 {
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->cancel->setDisabled(false);
-    ui->ok->setDisabled(false);
+    enableButtons();
+    enableStyleButtons();
     this->close();
-    QMessageBox::information(parentWidget(),
-                                    tr("Links"), "All links have been deactivate now.\n", QMessageBox::Ok);
+    link = new successlinks(parentWidget(), 3, QString::fromStdString(path));
+    link->exec();
 }
 
 void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
@@ -44,24 +41,19 @@ void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 
 void activenonlink::errorConnection()
 {
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->cancel->setDisabled(false);
-    ui->ok->setDisabled(false);
+    enableButtons();
     errorWindow = new errorconnection(this);
     errorWindow->show();
 }
 
 void activenonlink::errorConnectionLogout(std::string str)
 {
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->cancel->setDisabled(false);
-    ui->ok->setDisabled(false);
-    errorLog = new errorlogout(this, QString::fromStdString(str));
+    enableButtons();
+    errorLog = new errorlogout(nullptr, QString::fromStdString(str));
+    errorLog->setClientDispatcher(cl);
     this->close();
     parentWidget()->close();
-    parentWidget()->parentWidget()->close();
+    parentWidget()->parentWidget()->hide();
     errorLog->show();
 }
 
@@ -70,12 +62,16 @@ activenonlink::~activenonlink()
     delete ui;
 }
 
+void activenonlink::enableButtonsAfter()
+{
+    enableStyleButtons();
+}
+
 void activenonlink::on_ok_clicked()
 {
-    ui->waiting->show();
-    ui->gif->show();
-    ui->cancel->setDisabled(true);
-    ui->ok->setDisabled(true);
+    waiting();
+    disableButtons();
+    disableStyleButtons();
     u.deactivate();
     //cl->shareResource(pathFile, documentId, u);
 }
@@ -83,4 +79,48 @@ void activenonlink::on_ok_clicked()
 void activenonlink::on_cancel_clicked()
 {
     this->close();
+}
+
+void activenonlink::showEvent(QShowEvent *event)
+{
+    QDialog::showEvent(event);
+    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
+    anim->setStartValue(0.0);
+    anim->setEndValue(1.0);
+    anim->setDuration(1000);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void activenonlink::disableButtons()
+{
+    ui->cancel->setDisabled(true);
+    ui->ok->setDisabled(true);
+}
+
+void activenonlink::enableButtons()
+{
+    ui->waiting->hide();
+    ui->gif->hide();
+    ui->errorMess->hide();
+    ui->cancel->setDisabled(false);
+    ui->ok->setDisabled(false);
+}
+
+void activenonlink::enableStyleButtons()
+{
+    ui->ok->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancel->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+}
+
+void activenonlink::disableStyleButtons()
+{
+    ui->ok->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancel->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+}
+
+void activenonlink::waiting()
+{
+    ui->waiting->show();
+    ui->gif->show();
+    ui->errorMess->hide();
 }
