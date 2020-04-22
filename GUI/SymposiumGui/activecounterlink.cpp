@@ -37,7 +37,7 @@ void activecounterlink::successLink(std::string path)
     enableButtons();
     enableStyleButtons();
     this->hide();
-    link = new successlinks(parentWidget(), 2, QString::fromStdString(path), QString::number(numCounter));
+    link = new successlinks(parentWidget(), 2, QString::fromStdString(path), QString::number(numCounter), "");
     link->exec();
 }
 

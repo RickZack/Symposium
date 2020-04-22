@@ -12,7 +12,7 @@ class successlinks : public QDialog
     Q_OBJECT
 
 public:
-    explicit successlinks(QWidget *parent = nullptr, int caseLink=0, QString str="", QString numShares="");
+    explicit successlinks(QWidget *parent = nullptr, int caseLink=0, QString str="", QString numShares="", QString time="");
     ~successlinks();
 
 private slots:
@@ -23,10 +23,13 @@ private:
     int caseLink;
     QString str;
     QString numShares;
+    QString time;
 
     void hideAll();
 
-    void share(QString num);
+    void share();
+    void noshare();
+    void timeshare();
 };
 
 #endif // SUCCESSLINKS_H
