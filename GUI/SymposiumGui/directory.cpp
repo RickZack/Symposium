@@ -9,10 +9,6 @@ directory::directory(QWidget *parent, std::string pwd) :
     ui(new Ui::directory), pwd(pwd)
 {
     ui->setupUi(this);
-    QPixmap pix_folder(":/resources/cartelle/new_folder");
-    ui->label_3->setPixmap(pix_folder);
-    QPixmap pix_document(":/resources/cartelle/Document-Add-icon");
-    ui->label_4->setPixmap(pix_document);
 
     // METODO DISPATCHER CHE RESTITUISCE LA STRINGA
     // str=showHome(); === getStr()=Ksenia
@@ -29,11 +25,7 @@ directory::directory(QWidget *parent, std::string pwd) :
     ui->okButton_2->hide();
 
 
-    ui->actionHome->setIcon(QIcon(":/resources/cartelle/home_icon"));
-    ui->actionUri->setIcon(QIcon(":/resources/cartelle/link_icon"));
-
-    ui->pushButton_3->setIcon(QIcon(":/resources/cartelle/create_icon"));
-    ui->pushButton_4->setIcon(QIcon(":/resources/cartelle/create_icon"));
+    ui->actionHome->setIcon(QIcon(":/icon/home.png"));
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
 
 
@@ -60,7 +52,7 @@ void directory::listGenerate(std::string str_first, int count)
         if(word=="directory")
         {
             word=separate_word(str);
-            QListWidgetItem *item=new QListWidgetItem(QIcon(":/resources/cartelle/folder_icon"), QString::fromStdString(word));
+            QListWidgetItem *item=new QListWidgetItem(QIcon(":/icon/folder.png"), QString::fromStdString(word));
             countDir++;
             v.setValue(countDir);
             item->setData(Qt::UserRole,v);
@@ -74,7 +66,7 @@ void directory::listGenerate(std::string str_first, int count)
         else if(word=="file")
         {
             word=separate_word(str);
-            QListWidgetItem *item=new QListWidgetItem(QIcon(":/resources/cartelle/document_image"), QString::fromStdString(word));
+            QListWidgetItem *item=new QListWidgetItem(QIcon(":/icon/file.png"), QString::fromStdString(word));
             v.setValue(-1);
             item->setData(Qt::UserRole,v);
             item->setWhatsThis("file");
@@ -84,7 +76,7 @@ void directory::listGenerate(std::string str_first, int count)
         else
         {
             word=separate_word(str);
-            QListWidgetItem *item=new QListWidgetItem(QIcon("://icon/link.png"), QString::fromStdString(word));
+            QListWidgetItem *item=new QListWidgetItem(QIcon(":/icon/link.png"), QString::fromStdString(word));
             v.setValue(-1);
             item->setData(Qt::UserRole,v);
             item->setWhatsThis("symlink");

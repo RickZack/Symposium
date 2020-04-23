@@ -150,5 +150,10 @@
         <file>icon/file.png</file>
         <file>icon/folder.png</file>
         <file>icon/link.png</file>
+        <file>icon/home.png</file>
+        <file>icon/addlink.png</file>
+        <file>icon/addfile.png</file>
+        <file>icon/addfolder.png</file>
+        <file>icon/oie_transparent.png</file>
     </qresource>
 </RCC>

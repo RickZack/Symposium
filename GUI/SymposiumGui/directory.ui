@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1079</width>
-    <height>647</height>
+    <width>1137</width>
+    <height>812</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:rgb(249, 247, 241);</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="minimumSize">
@@ -24,30 +27,49 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>150</y>
-      <width>1061</width>
-      <height>401</height>
+      <y>170</y>
+      <width>361</width>
+      <height>561</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); 
+background-color:white;
+border-color: rgb(58, 80, 116);</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="name">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>80</y>
+      <x>670</x>
+      <y>240</y>
       <width>151</width>
-      <height>21</height>
+      <height>31</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 11pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>60</y>
-      <width>91</width>
+      <x>610</x>
+      <y>190</y>
+      <width>181</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NEW FOLDER&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -56,23 +78,27 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>80</y>
-      <width>181</width>
-      <height>21</height>
+      <x>440</x>
+      <y>240</y>
+      <width>221</width>
+      <height>31</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Insert the name of your folder:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the name for new folder:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>80</y>
-      <width>81</width>
-      <height>21</height>
+      <x>870</x>
+      <y>250</y>
+      <width>105</width>
+      <height>35</height>
      </rect>
     </property>
     <property name="minimumSize">
@@ -81,53 +107,21 @@
       <height>0</height>
      </size>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+    </property>
     <property name="text">
-     <string>CREATE</string>
+     <string>Create</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>60</y>
-      <width>41</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap>cartelle/new_folder.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_4">
-    <property name="geometry">
-     <rect>
-      <x>960</x>
-      <y>80</y>
-      <width>81</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>61</width>
-      <height>0</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>CREATE</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>50</y>
+      <x>560</x>
+      <y>170</y>
       <width>51</width>
       <height>51</height>
      </rect>
@@ -136,7 +130,51 @@
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>cartelle/Document-Add-icon.png</pixmap>
+     <pixmap resource="resources.qrc">:/icon/addfolder.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>380</y>
+      <width>105</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>61</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+    </property>
+    <property name="text">
+     <string>Create</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>320</y>
+      <width>51</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="resources.qrc">:/icon/addfile.png</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -145,27 +183,34 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>60</y>
-      <width>111</width>
-      <height>21</height>
+      <x>640</x>
+      <y>340</y>
+      <width>211</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <weight>75</weight>
-      <bold>true</bold>
+      <family>Baskerville Old Face</family>
+      <pointsize>14</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
      </font>
     </property>
+    <property name="styleSheet">
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
     <property name="text">
-     <string>NEW DOCUMENT</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NEW DOCUMENT&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QPushButton" name="back_button">
     <property name="geometry">
      <rect>
-      <x>1030</x>
-      <y>110</y>
+      <x>20</x>
+      <y>120</y>
       <width>31</width>
       <height>31</height>
      </rect>
@@ -177,56 +222,82 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>590</x>
-      <y>80</y>
-      <width>211</width>
+      <x>450</x>
+      <y>380</y>
+      <width>241</width>
       <height>21</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Insert the name of your document:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the name for new document:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="name_2">
     <property name="geometry">
      <rect>
-      <x>800</x>
-      <y>80</y>
+      <x>710</x>
+      <y>380</y>
       <width>151</width>
-      <height>21</height>
+      <height>31</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 11pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
     </property>
    </widget>
    <widget class="QLineEdit" name="renameLabel">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>120</y>
+      <x>640</x>
+      <y>500</y>
       <width>151</width>
-      <height>21</height>
+      <height>31</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 11pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
     </property>
    </widget>
    <widget class="QLabel" name="renameName">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>120</y>
-      <width>131</width>
-      <height>16</height>
+      <x>460</x>
+      <y>510</y>
+      <width>151</width>
+      <height>20</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Insert the new name:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the new name:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QPushButton" name="okButton">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>120</y>
-      <width>81</width>
-      <height>21</height>
+      <x>520</x>
+      <y>560</y>
+      <width>105</width>
+      <height>35</height>
      </rect>
     </property>
     <property name="minimumSize">
@@ -235,17 +306,23 @@
       <height>0</height>
      </size>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+    </property>
     <property name="text">
-     <string>OK</string>
+     <string>Rename</string>
     </property>
    </widget>
    <widget class="QPushButton" name="okButton_2">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>120</y>
-      <width>81</width>
-      <height>21</height>
+      <x>700</x>
+      <y>560</y>
+      <width>105</width>
+      <height>35</height>
      </rect>
     </property>
     <property name="minimumSize">
@@ -254,16 +331,22 @@
       <height>0</height>
      </size>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+    </property>
     <property name="text">
-     <string>CANCEL</string>
+     <string>Cancel</string>
     </property>
    </widget>
    <widget class="QLabel" name="pathLabel">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>10</y>
-      <width>1001</width>
+      <x>20</x>
+      <y>60</y>
+      <width>971</width>
       <height>31</height>
      </rect>
     </property>
@@ -277,13 +360,47 @@
      <string>Path:</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>420</y>
+      <width>381</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Attention: document will be create in the current folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>290</y>
+      <width>421</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Attention: folder will be create in the current folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1079</width>
+     <width>1137</width>
      <height>26</height>
     </rect>
    </property>
@@ -299,34 +416,62 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionHome"/>
+   <addaction name="separator"/>
+   <addaction name="actionaddFolder"/>
+   <addaction name="separator"/>
    <addaction name="actionUri"/>
+   <addaction name="separator"/>
+   <addaction name="actionaddfile"/>
    <addaction name="separator"/>
   </widget>
   <action name="actionHome">
    <property name="icon">
     <iconset>
-     <normaloff>cartelle/home_icon.png</normaloff>cartelle/home_icon.png</iconset>
+     <normaloff>icon/home.png</normaloff>icon/home.png</iconset>
    </property>
    <property name="text">
     <string>Home</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Home&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Home&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="actionUri">
    <property name="icon">
-    <iconset>
-     <normaloff>cartelle/link_icon.png</normaloff>cartelle/link_icon.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/oie_transparent.png</normaloff>:/icon/oie_transparent.png</iconset>
    </property>
    <property name="text">
-    <string>Add Link</string>
+    <string>New Link</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Add Link&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add Link&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="actionaddFolder">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/addfolder.png</normaloff>:/icon/addfolder.png</iconset>
+   </property>
+   <property name="text">
+    <string>New folder</string>
+   </property>
+   <property name="toolTip">
+    <string>New folder</string>
+   </property>
+  </action>
+  <action name="actionaddfile">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/addfile.png</normaloff>:/icon/addfile.png</iconset>
+   </property>
+   <property name="text">
+    <string>New file</string>
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
