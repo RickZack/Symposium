@@ -106,7 +106,6 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
     int mult_fac=2;
 
     if(i0>=symbols.size()){
-         //symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
         symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
 
 }
@@ -351,23 +350,16 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
 
 std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
 
-    /*
+
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
     // taking into account the position of the cursor.
     this->updateCursorPos(siteId,i0,i1);
     checkIndex(i0,i1);
-    char sym=symbols[i0][i1].getCh();
-
-    if(sym==emptyChar){ symbols[i0][i1]=toInsert;}
-
-    else {
-        symbols[i0].insert(symbols[i0].begin() + i1, toInsert);
-    }
-
+    symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
-     */
+
 }
 
 
@@ -477,15 +469,30 @@ bool document::operator!=(const document &rhs) const {
     return !(rhs == *this);
 }
 
+int document::countsNumLines() const{
+    int numLines=0;
+    for(size_t i=0;i<symbols.size();i++){
+        if(symbols[i][0]!=emptySymbol)
+            numLines++;
+        else
+            i=symbols.size();
+    }
+    return numLines;
+}
+
 
 
 std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &symbol) const {
     std::pair<int,int> ind;
+    std::vector<Symposium::symbol> lastLine;
+    int maxLine;
     int i0=0; int i1=0;
     int minLine=0;
-    int totalLines=symbols.size();
-    int maxLine= totalLines-1;
-    std::vector<Symposium::symbol> lastLine= symbols[maxLine];
+    int totalLines=countsNumLines();
+    if(totalLines!=0){
+        maxLine= totalLines-1;
+        lastLine= symbols[maxLine];
+    }
 
     int midLine=0;int charIdx=0;
     std::vector<Symposium::symbol> maxCurrentLine;
@@ -494,25 +501,27 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 
 
     // check if struct is empty or char is less than first char
-    if (symbols.empty()||symbol.getCh()<symbols[0][0].getCh()) {ind={i0,i1};return ind;}
+    if (totalLines==0||symbol.getCh()<symbols[0][0].getCh()) {ind={i0,i1};return ind;}
 
-    auto lastSymbol=lastLine[lastLine.size() - 1];
+    int numCharsInLine=countCharsInLine(maxLine);
+    auto lastSymbol=lastLine[numCharsInLine-1];
 
     //char is greater than all existing chars (insert and end)
 
     if(symbol>lastSymbol){
-        ind= findEndPosition(lastSymbol,lastLine,totalLines);
+        ind= findEndPosition(lastSymbol,totalLines);
         return ind;
     }
 
     //binary search
     while(minLine+1<maxLine){
-        midLine=minLine+(maxLine-minLine)/2;
+        midLine=floor(minLine+(maxLine-minLine)/2);
         currentLine=symbols[midLine];
-        lastSymbol=currentLine[currentLine.size()-1];
+        int numCharsInLine=countCharsInLine(midLine);
+        lastSymbol=currentLine[numCharsInLine-1];
 
         if(symbol==lastSymbol){
-            i0=midLine; i1=currentLine.size()-1;
+            i0=midLine; i1=countCharsInLine(midLine)-1;
         } else if(symbol<lastSymbol){
             maxLine=midLine;
         } else{
@@ -522,18 +531,18 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 
     //check between min and max line
     minCurrentLine=symbols[minLine];
-    auto minLastSymbol=minCurrentLine[minCurrentLine.size()-1];
+    auto minLastSymbol=minCurrentLine[countCharsInLine(minLine)-1];
     maxCurrentLine=symbols[maxLine];
-    auto maxLastSymbol=maxCurrentLine[maxCurrentLine.size()-1];
+    auto maxLastSymbol=maxCurrentLine[countCharsInLine(maxLine)-1];
 
     if(symbol<=minLastSymbol){
-        charIdx=findInsertInLine(symbol,minCurrentLine);
+        charIdx=findInsertInLine(symbol,minCurrentLine,minLine);
         i0=minLine; i1=charIdx;
         ind={i0,i1};
         return ind;
 
     } else{
-        charIdx=findInsertInLine(symbol,maxCurrentLine);
+        charIdx=findInsertInLine(symbol,maxCurrentLine,maxLine);
         i0=maxLine; i1=charIdx;
         ind={i0,i1};
         return ind;
@@ -542,33 +551,34 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 }
 
 std::pair<unsigned int, unsigned int>
-document::findEndPosition(const symbol aChar, const std::vector<Symposium::symbol> vector, int lines) const {
+document::findEndPosition(const symbol aChar,int lines) const {
     std::pair<int,int> ind;
-    if(aChar== emptySymbol){
+    if(aChar.getCh()== '\r'){
         ind={lines,0}; return ind;
     } else{
-        ind={lines-1,vector.size()};
+        int numCharsinLine=countCharsInLine(lines-1);
+        ind={lines-1,numCharsinLine-1};
     }
     return ind;
-
 }
 
-int document::findInsertInLine(const symbol ch, const std::vector<Symposium::symbol> vector) const {
+
+int document::findInsertInLine(const symbol ch, const std::vector<Symposium::symbol> vector,int line) const {
     int ind=0;
     int left=0;
-    int right= vector.size()-1;
+    int right= countCharsInLine(line)-1;
     int mid;
 
-    if(vector.size()==0 ||ch>vector[left]){
+    if(ch>vector[left]){
         ind=left;
         return ind;
     } else if(ch>vector[right]){
-        ind=vector.size();
+        ind=countsNumLines();
         return ind;
     }
 
     while(left+1<right){
-        mid=left-(right-left)/2;
+        mid=floor(left-(right-left)/2);
 
         if(ch==vector[mid]){
             ind=mid; return ind;
@@ -611,7 +621,7 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     //char is greater than all existing chars(insert at end)
     if(symbol.getCh()>lastChar.getCh()){
        // i0=-1; i1=-1; ind={i0,i1}; return ind;
-        return this->findEndPosition(lastChar,lastLine,totalLines);
+        return this->findEndPosition(lastChar,totalLines);
     }
 
     // binary search

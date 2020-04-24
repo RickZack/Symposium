@@ -226,7 +226,7 @@ namespace Symposium {
          * @return the position
          */
         std::pair<unsigned int, unsigned int>
-        findEndPosition(const symbol aChar, const std::vector<Symposium::symbol> vector, int lines) const;
+        findEndPosition(const symbol aChar, int lines) const;
 
         /**
          * @brief it searches for the symbol that is inserted in the middle of the line
@@ -234,7 +234,7 @@ namespace Symposium {
          * @param vector line in which the symbol is searched
          * @return
          */
-        int findInsertInLine(const symbol ch, const std::vector<Symposium::symbol> vector) const;
+        int findInsertInLine(const symbol ch, const std::vector<Symposium::symbol> vector, int line) const;
 
         /**
          * @brief it searches for the position of a symbol in order to find it and eliminate it
@@ -288,7 +288,19 @@ namespace Symposium {
          */
         char retrieveStrategy(const int level);
 
+
+        /**
+         * @brief countCharsInLine counts the number of chars that are present in the @e line
+         * @param line
+         * @return
+         */
         int countCharsInLine(int line) const;
+
+        /**
+         * @brief countsNumLines counts the number of line effectively present in the symbols vector
+         * @return number of lines
+         */
+        int countsNumLines() const;
     };
 }
 
