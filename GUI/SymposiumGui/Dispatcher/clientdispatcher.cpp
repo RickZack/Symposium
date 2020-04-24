@@ -97,6 +97,7 @@ void clientdispatcher::readyRead(){
             break;
         }case 2:{
             this->finestraSignup->errorSignUp(mes->getErrDescr());
+            this->userpwd="";
             break;
         }case 3:{
             this->finestraInsertUri->unsuccessInsert(mes->getErrDescr());
@@ -118,6 +119,7 @@ void clientdispatcher::readyRead(){
             break;
         }case 12:{
             this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
+            break;
         }case 13:{
             this->finestraOnlineUser->errorEditPrivilege(mes->getErrDescr());
             break;

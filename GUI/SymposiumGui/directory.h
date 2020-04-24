@@ -19,12 +19,16 @@ namespace Ui {
 class directory;
 }
 
+namespace Symposium{
+class clientdispatcher;
+}
+
 class directory : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit directory(QWidget *parent = nullptr, std::string pwd="");
+    explicit directory(QWidget *parent = nullptr, std::string pwd="", Symposium::clientdispatcher *cl=nullptr);
     ~directory();
     void listGenerate(std::string str, int count);
 
@@ -208,6 +212,8 @@ private:
 
 
     void contextMenuEvent(QContextMenuEvent *event) override;
+
+    std::string manipulationHome(std::string& s);
 };
 
 

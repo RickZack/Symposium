@@ -1,18 +1,27 @@
+//#define DISPATCHER_ON
+
 #include "directory.h"
 #include "ui_directory.h"
 #include "home.h"
+#include "Dispatcher/clientdispatcher.h"
 #include <ostream>
 
 
-directory::directory(QWidget *parent, std::string pwd) :
+directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatcher *cl) :
     QMainWindow(parent),
-    ui(new Ui::directory), pwd(pwd)
+    ui(new Ui::directory), cl(cl), pwd(pwd)
 {
     ui->setupUi(this);
 
     // METODO DISPATCHER CHE RESTITUISCE LA STRINGA
-    // str=showHome(); === getStr()=Ksenia
+    #ifdef DISPATCHER_ON
+    str=cl->showHome();
+    path = "./";
+    //qDebug() << "prima della manipolazione str: " << QString::fromStdString(str);
+    str = manipulationHome(str);
+    #else
     str="directory 1 Folder1\n file 9 Folder1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
+    #endif
     int count=number_elements(str);
     listGenerate(str, count);
 
@@ -30,6 +39,32 @@ directory::directory(QWidget *parent, std::string pwd) :
 
 
 
+}
+
+std::string directory::manipulationHome(std::string& s){
+    std::string result;
+    std::size_t found;
+    std::size_t foundn = 0;
+    std::size_t dim_s = s.size();
+    //delete first username and space
+    found = s.find_first_of(" ");
+    s.erase(0, found+1);
+    dim_s = s.size();
+    //check if there is no directory
+    if(dim_s == 0)
+        return s;
+    //add space between directory
+    while(dim_s != 0){
+        foundn = s.find_first_of("\n");
+        result = result + s.substr(0,foundn+1) + " ";
+        s.erase(0,foundn+1);
+        dim_s = s.size();
+    }
+    //delete final space
+    found = result.find_last_of(" ");
+    dim_s = result.size();
+    result.erase(found, dim_s);
+    return result;
 }
 
 directory::~directory()
@@ -175,6 +210,10 @@ int directory::number_elements(std::string& string)
 void directory::on_actionHome_triggered()
 {
     home *homeWindow=new home(nullptr, pwd);
+    homeWindow->setClientDispatcher(cl);
+    #ifdef DISPATCHER_ON
+    cl->setHome(homeWindow);
+    #endif
     homeWindow->show();
     this->hide();
 }
@@ -223,11 +262,13 @@ void directory::deleteSource()
            std::pair<std::string,std::string> idPriv=searchForPriv(nameSource,str,count);
            id=idPriv.first;
        }
-       //cl->remouveResource(path,id);
+       #ifdef DISPATCHER_ON
+       cl->removeResource(path,id);
+       #endif
 
        //-------------------------------------------------------------------
        //DA RIMUOVERE
-
+       #ifndef DISPATCHER_ON
        bool msg=true;
        if(msg)
        {
@@ -251,7 +292,7 @@ void directory::deleteSource()
        {
            QMessageBox::warning(this, "Error Message","It is no possible to delete the selected folder");
        }
-
+       #endif
    }//foreach
    //----------------------------------------------------------------------------------------------------
 }
@@ -287,6 +328,9 @@ void directory::on_pushButton_3_clicked()
 
     QString name= ui->name->text();
     std::string nameFolder=name.toStdString();
+    #ifdef DISPATCHER_ON
+    cl->createNewDir(path,nameFolder);
+    #else
     // anche questo da eliminare
     ui->name->setText(" ");
     // std::string id=createNewDir(path,nameFolder);
@@ -311,14 +355,17 @@ void directory::on_pushButton_3_clicked()
 
     }
     //-----------------------------------------------------------------------------------------
-
+    #endif
 }
 
 void directory::successCreate(std::string id){
     QString name= ui->name->text();
-    ui->name->setText(" ");
+    ui->name->clear();
     count++;
-    std::string new_str=" directory "+id+' '+name.toStdString()+'\n';
+    std::string new_str;
+    if(str.empty()){new_str="directory "+id+' '+name.toStdString()+'\n';}
+            else{new_str=" directory "+id+' '+name.toStdString()+'\n';}
+    //qDebug() << "new_str: " << QString::fromStdString(new_str) << " name: " << name << " " << QString::fromStdString(str);
     str=str+new_str;
     ui->myListWidget->clear();
     int count=number_elements(str);

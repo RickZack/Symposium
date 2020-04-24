@@ -1,4 +1,4 @@
-//#define DISPATCHER_ON
+#define DISPATCHER_ON
 
 #include "home.h"
 #include "ui_home.h"
@@ -78,7 +78,7 @@ void home::on_modify_clicked()
 
 void home::on_directory_clicked()
 {
-    directoryWindow=new directory(nullptr, pwd);
+    directoryWindow=new directory(nullptr, pwd, cl);
     directoryWindow->show();
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
