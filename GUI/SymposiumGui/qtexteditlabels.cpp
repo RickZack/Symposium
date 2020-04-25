@@ -23,11 +23,11 @@ void qtexteditlabels::scrollContentsBy(int dx, int dy)
     else{
         for(auto it:labels)
         {
-            QLabel *labelCursor=it.second.first;
+            QLabel *labelNameReverse=it.second.first;
             QLabel *labelName=it.second.second;
-            QPoint pointCurs=labelCursor->pos();
+            QPoint pointNaemReverse=labelNameReverse->pos();
             QPoint pointName=labelName->pos();
-            labelCursor->move(pointCurs.x()+dx, pointCurs.y()+dy);
+            labelNameReverse->move(pointNaemReverse.x()+dx, pointNaemReverse.y()+dy);
             labelName->move(pointName.x()+dx, pointName.y()+dy);
         }
     }
@@ -41,9 +41,9 @@ void qtexteditlabels::scroll()
             QTextCursor cursorUser=it.second;
             this->setTextCursor(cursorUser);
             Symposium::uint_positive_cnt::type siteId=it.first;
-            QLabel *labelCursor=labels.find(siteId)->second.first;
+            QLabel *labelNameReverse=labels.find(siteId)->second.first;
             QLabel *labelName=labels.find(siteId)->second.second;
-            showLabel(labelCursor, labelName);
+            showLabel(labelNameReverse, labelName);
         }
     j=1;
 }
@@ -63,17 +63,9 @@ void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, 
     QTextCursor cursor = this->textCursor();
     changePosition(block, collumn);
     i=0;
-    qreal num=this->fontPointSize();
-    //Color c=cl->getColor(documentId,it.first->getSiteId());
-    //QString str=QString::fromStdString(c.rgb_hex_string());
-    QString str="#ff0000";
-    QLabel *labelCursor=new QLabel("|", this);
-    labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num+num/5.0))+"px;");
-    QLabel *labelHide=labels.find(siteId)->second.first;
-    labelHide->deleteLater();
-    labels.find(siteId)->second.first=labelCursor;
+    QLabel *labelReverseName=labels.find(siteId)->second.first;
     QLabel *labelName=labels.find(siteId)->second.second;
-    showLabel(labelCursor, labelName);
+    showLabel(labelReverseName, labelName);
     cursors.find(siteId)->second=this->textCursor();
     this->setTextCursor(cursor);
     j=1;
@@ -95,19 +87,19 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             this->setTextCursor(cursor);
 
             QString nameLabel=QString::fromStdString(it.first->getUsername());
-            QLabel *labelCursor=new QLabel("|", this);
-            qreal num=this->fontPointSize();
+            QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
+            QLabel *labelReverse=new QLabel(nameLabelReverse, this);
             //Color c=cl->getColor(documentId,it.first->getSiteId());
             //QString str=QString::fromStdString(c.rgb_hex_string());
             QString str="#ff0000";
-            labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num+num/5.0))+"px;");
+            labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
-            std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
+            std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelReverse, newLabel);
             labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
 
 
-            showLabel(labelCursor, newLabel);
+            showLabel(labelReverse, newLabel);
             cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
         }
     }
@@ -129,20 +121,20 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             cursor.movePosition(QTextCursor::Start);
             cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, static_cast<int>(it.second.row));
             cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, static_cast<int>(it.second.col));
-            QString nameLabel=QString::fromStdString(it.first->getUsername());
-            QLabel *labelCursor=new QLabel("|", this);
-            qreal num=this->fontPointSize();
+            QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
+            QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
+            QLabel *labelReverse=new QLabel(nameLabelReverse, this);
             //Color c=cl->getColor(documentId,it.first->getSiteId());
             //QString str=QString::fromStdString(c.rgb_hex_string());
             QString str="#ff0000";
-            labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num+num/5.0))+"px;");
+            labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
-            std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
+            std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelReverse, newLabel);
             labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
 
             this->setTextCursor(cursor);
-            showLabel(labelCursor, newLabel);
+            showLabel(labelReverse, newLabel);
             cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
         }
     }
@@ -152,58 +144,22 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
     j=1;
 }
 
-void qtexteditlabels::showLabel(QLabel *labelCursor, QLabel *labelName)
+void qtexteditlabels::showLabel(QLabel *labelNameReverse, QLabel *labelName)
 {
-    // Obtain rectangle of 'real' cursor
-    // and the biggest font that can be contained
     const QRect curRect = this->cursorRect();
-    QFontMetrics thisFontMetrics=this->fontMetrics();
-    QFont bigFont=this->font();
-    bigFont.setPixelSize(curRect.height());
-    QFontMetrics bigFontInfo(bigFont);
-
-    // Obtain size of current font
-    QFont thisFont=this->font();
-    thisFont.setPointSize(this->fontPointSize());
-    QFontMetrics thisFontInfo(thisFont);
-    int thisFontHeight=thisFontInfo.height();
-
-    // Obtain a rectangle that encloses the char, aligned to
-    // the bottom of the 'real' cursor rectangle
-    QRect thisRect=thisFontInfo.boundingRect(curRect, Qt::AlignBottom, "I");
-
-    // Calculate where is the baseline of the current char
-    // with respect to the one of the biggest char
-    int biggerBaseline=curRect.bottom()-bigFontInfo.descent();
-    int thisBaseline=thisRect.bottom()-thisFontInfo.descent();
-    int baseLineDiff=abs(thisBaseline-biggerBaseline);
-
-    // Reference font
-    QFont ref("Purisa");
-    ref.setPointSize(this->fontPointSize());
-    QFontMetrics refM(ref);
-    QRect refRect=refM.boundingRect(curRect, Qt::AlignBottom, "I");
-
-
-    int correction=0;
-    int ty=thisRect.bottom()-thisFontInfo.descent()-thisFontHeight*0.85-baseLineDiff-correction;
-
-
-
-
-
-    labelName->show();
-    labelCursor->show();
+    int ty=curRect.y();
+    labelName->hide();
+    labelNameReverse->hide();
 
     if(curRect.left()<=this->width()-labelName->rect().width()-25)
     {
-        labelCursor->move(curRect.topLeft().x()-1, ty);
-        labelName->move(curRect.topLeft().x()+5, ty);
+        labelName->move(curRect.topLeft().x()-3, ty);
+        labelName->show();
     }
     else
     {
-        labelCursor->move(curRect.topLeft().x()-1, ty);
-        labelName->move(curRect.topLeft().x()-labelName->rect().width(), ty);
+        labelNameReverse->move(curRect.topLeft().x()-labelName->rect().width()+3, ty);
+        labelNameReverse->show();
     }
 }
 
@@ -214,19 +170,18 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     changePosition(0,0);
     cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(siteId, this->textCursor()));
     QString nameLabel=QString::fromStdString(name);
-    QLabel *labelCursor=new QLabel("|", this);
-    qreal num=this->fontPointSize();
+    QLabel *labelNameReverse=new QLabel("\u25BC", this);
     //Color c=cl->getColor(documentId,it.first->getSiteId());
     //QString str=QString::fromStdString(c.rgb_hex_string());
     QString str="#ff0000";
-    labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num+num/5.0))+"px;");
+    labelNameReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
     QLabel *newLabel=new QLabel(nameLabel, this);
     newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
-    std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelCursor, newLabel);
+    std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelNameReverse, newLabel);
     labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(siteId, pairs));
 
     i=0;
-    showLabel(labelCursor, newLabel);
+    showLabel(labelNameReverse, newLabel);
 
     this->setTextCursor(cursor);
     j=1;
@@ -251,19 +206,11 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
     {
         if(priv!=Symposium::privilege::readOnly)
         {
-            qreal num=this->fontPointSize();
-            //Color c=cl->getColor(documentId,it.first->getSiteId());
-            //QString str=QString::fromStdString(c.rgb_hex_string());
-            QString str="#ff0000";
-            QLabel *labelCursor=new QLabel("|", this);
-            labelCursor->setStyleSheet("color:  "+str+ "; font-size: "+QString::number(static_cast<int>(num+num/5.0))+"px;");
             QLabel *labelName=labels.find(siteId)->second.second;
-            QLabel *labelHide=labels.find(siteId)->second.first;
-            labelHide->deleteLater();
-            labels.find(siteId)->second.first=labelCursor;
+            QLabel *labelReverseName=labels.find(siteId)->second.first;
             QTextCursor newCursor=this->textCursor();
             cursors.find(siteId)->second=this->textCursor();
-            showLabel(labelCursor, labelName);
+            showLabel(labelReverseName, labelName);
             QTextCursor cursor= this->textCursor();
             //int column=cursor.positionInBlock();
             //int block= cursor.blockNumber();

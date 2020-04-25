@@ -70,7 +70,7 @@ public:
      * @param labelname the label of name
      * @param labelCursor the label of cursor
      */
-    void showLabel(QLabel *labelCursor, QLabel *labelName);
+    void showLabel(QLabel *labelNameReverse, QLabel *labelName);
     /**
      * @brief called by notepad when there is a new user who open this document
      * @param siteId siteId of the user

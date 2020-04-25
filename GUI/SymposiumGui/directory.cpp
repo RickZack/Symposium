@@ -39,6 +39,7 @@ directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatch
 
     ui->actionHome->setIcon(QIcon(":/icon/home.png"));
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
+    //hideAll();
 }
 
 std::string directory::manipulationHome(std::string& s){
@@ -223,6 +224,16 @@ void directory::on_actionUri_triggered()
     uriWindow=new inserturi(nullptr, pwd, false);
     uriWindow->show();
     this->hide();
+}
+
+void directory::on_actionaddFolder_triggered()
+{
+    showNewDirectory();
+}
+
+void directory::on_actionaddfile_triggered()
+{
+    showNewFile();
 }
 
 
@@ -417,7 +428,72 @@ void directory::waiting()
 
 void directory::hideAll()
 {
+    //New folder hide
+    ui->label->hide();
+    ui->label_3->hide();
+    ui->label_2->hide();
+    ui->name->hide();
+    ui->name->setReadOnly(true);
+    ui->pushButton_3->hide();
+    ui->pushButton_3->setDisabled(true);
+    ui->label_8->hide();
 
+    //New document hide
+    ui->label_4->hide();
+    ui->label_5->hide();
+    ui->label_6->hide();
+    ui->name_2->hide();
+    ui->name_2->setReadOnly(true);
+    ui->pushButton_4->setDisabled(true);
+    ui->pushButton_4->hide();
+    ui->label_7->hide();
+
+    //Rename hide
+    ui->renameName->hide();
+    ui->renameLabel->setReadOnly(true);
+    ui->renameLabel->hide();
+    ui->okButton->hide();
+    ui->okButton->setDisabled(true);
+    ui->okButton_2->hide();
+    ui->okButton_2->setDisabled(true);
+
+    //Resize directory view window
+    ui->myListWidget->setFixedWidth(500);
+
+}
+
+void directory::showNewDirectory()
+{
+    ui->label->show();
+    ui->label_3->show();
+    ui->label_2->show();
+    ui->name->show();
+    ui->name->setReadOnly(false);
+    ui->pushButton_3->setDisabled(false);
+    ui->label_8->show();
+}
+
+void directory::showNewFile()
+{
+    ui->label_4->show();
+    ui->label_5->show();
+    ui->label_6->show();
+    ui->name_2->show();
+    ui->name_2->setReadOnly(false);
+    ui->pushButton_4->setDisabled(false);
+    ui->pushButton_4->show();
+    ui->label_7->show();
+}
+
+void directory::showRename()
+{
+    ui->renameName->show();
+    ui->renameLabel->setReadOnly(false);
+    ui->renameLabel->show();
+    ui->okButton->show();
+    ui->okButton->setDisabled(false);
+    ui->okButton_2->show();
+    ui->okButton_2->setDisabled(false);
 }
 
 // creates a new file

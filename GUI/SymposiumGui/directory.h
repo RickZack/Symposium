@@ -95,6 +95,14 @@ private slots:
     void on_actionUri_triggered();
 
     /**
+     * @brief show add folder labels and buttons
+     */
+    void on_actionaddFolder_triggered();
+    /**
+     * @brief show add file labels and buttons
+     */
+    void on_actionaddfile_triggered();
+    /**
      * @brief directory::deleteSource acts when the user chooses to delete a selected source
      */
     void deleteSource();
@@ -244,6 +252,18 @@ private:
      * @brief hide all label and buttons and diasable the buttons
      */
     void hideAll();
+    /**
+     * @brief hide all label and buttons and diasable the buttons
+     */
+    void showNewDirectory();
+    /**
+     * @brief hide all label and buttons and diasable the buttons
+     */
+    void showNewFile();
+    /**
+     * @brief hide all label and buttons and diasable the buttons
+     */
+    void showRename();
 };
 
 
