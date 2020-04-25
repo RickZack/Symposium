@@ -391,6 +391,36 @@ void directory::closeEvent(QCloseEvent *event)
 
 }
 
+void directory::disableButtons()
+{
+
+}
+
+void directory::enableButtons()
+{
+
+}
+
+void directory::enableStyleButtons()
+{
+
+}
+
+void directory::disableStyleButtons()
+{
+
+}
+
+void directory::waiting()
+{
+
+}
+
+void directory::hideAll()
+{
+
+}
+
 // creates a new file
 void directory::on_pushButton_4_clicked()
 {

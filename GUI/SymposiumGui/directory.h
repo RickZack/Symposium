@@ -163,7 +163,6 @@ private:
     std::string old_str;
     int countDir;
     std::string id;
-    void closeEvent(QCloseEvent *event);
     // this variable is used to count the number of elements created
     int count;
     std::string separate_word(std::string& string);
@@ -216,6 +215,35 @@ private:
     void contextMenuEvent(QContextMenuEvent *event) override;
 
     std::string manipulationHome(std::string& s);
+
+    /**
+     * @brief quit from application
+     */
+    void closeEvent(QCloseEvent *event);
+    /**
+     * @brief disable all buttons present so user cannot perform any operation
+     */
+    void disableButtons();
+    /**
+     * @brief enable all buttons present
+     */
+    void enableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableStyleButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void disableStyleButtons();
+    /**
+     * @brief waiting of the conclusion of the operation by clientdispatcher
+     */
+    void waiting();
+    /**
+     * @brief hide all label and buttons and diasable the buttons
+     */
+    void hideAll();
 };
 
 
