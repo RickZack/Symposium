@@ -169,6 +169,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             documentoProva.localInsert(in8,sn8);
             documentoProva.localInsert(in9,sn9);
 
+
   //---------------------------------------------------------------------------------------------------------
 
     priv=Symposium::privilege::owner;
@@ -618,7 +619,6 @@ void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 
 void notepad::fillTextEdit(){
     insertOthCh=true;
-    bool acapo=false;
     QTextCharFormat chFormat;
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
@@ -633,7 +633,7 @@ void notepad::fillTextEdit(){
             Symposium::symbol sym=symbols[i][j];
             //estract the character
             ch[0]=sym.getCh();
-            if(ch[0]!=emptyChar){
+           if(ch[0]!=emptyChar){
                 QTextCharFormat chFormat;
                 Symposium::format format=sym.getCharFormat();
                 //estract the information about the font/color
@@ -654,18 +654,13 @@ void notepad::fillTextEdit(){
                 // go to the position of the character
                 ui->textEdit->changePosition(i,column);
                 curs.insertText(ch,chFormat);
-            }
-            if(ch[0]=='\r') acapo=true;
-
-    }
-        if(!acapo && i!=symbols.size()-1){
-            // to insert another Line
-            curs.insertBlock();
-        }
     }
 
-    //this->supportColumn=curs.positionInBlock();
+}
+    }
     insertOthCh=false;
+    //this->fontChanged(chFormat.font());
+
 
 }
 
@@ -771,6 +766,7 @@ bool notepad::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
            qDebug() << "key " << keyEvent->key() << "from" << obj;
            if(obj->objectName()=="textEdit"){
+               ui->textEdit->setTextColor(ui->textEdit->textColor());
                handleTextEditKeyPress(keyEvent);
            }
     }
@@ -1197,10 +1193,13 @@ void notepad::on_textEdit_cursorPositionChanged()
         ui->textEdit->thisUserChangePosition(1);
         //ui->textEdit->thisUserChangePosition(us.getSiteId())
      }
+
      if(!cc.hasSelection()){
         QTextCharFormat ch=ui->textEdit->currentCharFormat();
         QColor newCol=ch.foreground().color();
+        qDebug()<<"Colore prima del set"<<newCol;
         newCol.setAlpha(255);
+        qDebug()<<"Colore dopo del set"<<newCol;
         fontChanged(ch.font());
         colorChanged(newCol);
         this->currentCharFormatChanged(ch);
@@ -1248,6 +1247,7 @@ void notepad::colorText(){
                 Symposium::Color col=format.col;
                 //conversion from Color to QColor
                 qCol=static_cast<QColor>(col);
+                colorChanged(qCol);
 
                 if(!sym.isVerified())
                   {
@@ -1258,14 +1258,10 @@ void notepad::colorText(){
                 // go to the position of the character
                 ui->textEdit->changePosition(i,column);
                 curs.insertText(ch,chFormat);
-            }
-            if(ch[0]=='\r') acapo=true;
 
+            }  
     }
-        if(!acapo && i!=symbols.size()-1){
-            // to insert another Line
-            curs.insertBlock();
-        }
+
     }
 
     insertOthCh=false;
