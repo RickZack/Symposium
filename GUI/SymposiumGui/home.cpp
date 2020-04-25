@@ -1,4 +1,4 @@
-#define DISPATCHER_ON
+//#define DISPATCHER_ON
 
 #include "home.h"
 #include "ui_home.h"

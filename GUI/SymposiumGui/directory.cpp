@@ -17,12 +17,13 @@ directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatch
     #ifdef DISPATCHER_ON
     str=cl->showHome();
     path = "./";
-    //qDebug() << "prima della manipolazione str: " << QString::fromStdString(str);
+    qDebug() << "prima della manipolazione str: " << QString::fromStdString(str);
     str = manipulationHome(str);
     #else
     str="directory 1 Folder1\n file 9 Folder1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
     #endif
-    int count=number_elements(str);
+    this->count=number_elements(str);
+    qDebug() << "Numero elementi: " << QString::fromStdString(str);
     listGenerate(str, count);
 
     ui->back_button->setDisabled(true);

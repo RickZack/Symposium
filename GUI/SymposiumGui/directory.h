@@ -32,23 +32,7 @@ public:
     ~directory();
     void listGenerate(std::string str, int count);
 
-    /**
-     * @brief aperto this variable is used to say that a window has been opened and to enable/disable the BACK button
-     */
-    int openFolders=-1;
 
-    /**
-     * @brief path is the path that shows all the folders visited
-     */
-    std::string path;
-    /**
-     * @brief previousId is the id referred to the folder before the one opened. Useful to handle the BACK button
-     */
-    std::string previousId;
-    /**
-     * @brief actualId is the id referred to the opened window. Useful to build the path.
-     */
-    std::string actualId;
 
 
     /**
@@ -156,6 +140,24 @@ private:
     errorconnection *errorWindow;
     errorlogout *errorLogoutWindow;
 
+    /**
+     * @brief openFolders this variable is used to say that a window has been opened and to enable/disable the BACK button
+     */
+    int openFolders=-1;
+
+    /**
+     * @brief path is the path that shows all the folders visited
+     */
+    std::string path;
+    /**
+     * @brief previousId is the id referred to the folder before the one opened. Useful to handle the BACK button
+     */
+    std::string previousId;
+    /**
+     * @brief actualId is the id referred to the opened window. Useful to build the path.
+     */
+    std::string actualId;
+
     std::string pwd;
     std::string str;
     std::string old_str;
@@ -163,7 +165,7 @@ private:
     std::string id;
     void closeEvent(QCloseEvent *event);
     // this variable is used to count the number of elements created
-    int count=10;
+    int count;
     std::string separate_word(std::string& string);
 
 
