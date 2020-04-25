@@ -499,9 +499,8 @@ void clientdispatcher::removeUserCursor(uint_positive_cnt::type siteID, uint_pos
     finestra->removeUserCursor(siteID);
 }
 
-std::string clientdispatcher::getStr(uint_positive_cnt::type ID_Cartella, std::string path){
-    std::string s = std::to_string(ID_Cartella);
-    return this->client.directoryContent(s,path);
+std::string clientdispatcher::getStr(std::string ID_Cartella, std::string path){
+    return this->client.directoryContent(ID_Cartella,path);
 }
 
 

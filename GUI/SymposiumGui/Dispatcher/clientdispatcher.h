@@ -239,7 +239,7 @@ namespace Symposium{
 
         void closeConnection();
 
-        std::string getStr(uint_positive_cnt::type ID_Cartella, std::string path);
+        std::string getStr(std::string ID_Cartella, std::string path);
 
 
         /**
