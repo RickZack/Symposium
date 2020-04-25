@@ -1,4 +1,4 @@
-#define DISPATCHER_ON
+//#define DISPATCHER_ON
 
 #include "directory.h"
 #include "ui_directory.h"
