@@ -12,7 +12,9 @@ directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatch
     ui(new Ui::directory), cl(cl), pwd(pwd)
 {
     ui->setupUi(this);
-
+    this->actualId = "0";
+    this->previousId = "0";
+    this->openFolders = 0;
     // METODO DISPATCHER CHE RESTITUISCE LA STRINGA
     #ifdef DISPATCHER_ON
     str=cl->showHome();
@@ -37,9 +39,6 @@ directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatch
 
     ui->actionHome->setIcon(QIcon(":/icon/home.png"));
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
-
-
-
 }
 
 std::string directory::manipulationHome(std::string& s){
@@ -391,6 +390,36 @@ void directory::closeEvent(QCloseEvent *event)
 
 }
 
+void directory::disableButtons()
+{
+
+}
+
+void directory::enableButtons()
+{
+
+}
+
+void directory::enableStyleButtons()
+{
+
+}
+
+void directory::disableStyleButtons()
+{
+
+}
+
+void directory::waiting()
+{
+
+}
+
+void directory::hideAll()
+{
+
+}
+
 // creates a new file
 void directory::on_pushButton_4_clicked()
 {
@@ -437,32 +466,57 @@ void directory::successNewSource(std::string id){
 
 void directory::on_back_button_clicked()
 {
-    if(this->openFolders!=0)
-   {
+    std::string temp;
+    std::string new_str;
 
+    if(this->openFolders!=0){
         std::string pathLabel=ui->pathLabel->text().toStdString();
         pathLabel.erase(pathLabel.end()-1);
         std::size_t found=pathLabel.find_last_of("/");
         pathLabel.erase(found+1,pathLabel.size());
         ui->pathLabel->setText(QString::fromStdString(pathLabel));
-        //std::string new_str=cl->getStr(this->previousId);
-        //ui->myListWidget->clear();
-       //int count=number_elements(new_str);
-       //listGenerate(new_str,count);
+
+        #ifdef DISPATCHER_ON
+        //aggiorniamo il path
+        //togliamo l'ultimo "/"
+        path.erase(path.end()-1);
+        //troviamo la posizione dell'ultimo "/"
+        found=path.find_last_of("/");
+        //aggiorniamo il path
+        path.erase(found+1,path.size());
         this->openFolders--;
-    }
-
-
-    else
-   {
-        this->openFolders=-1;
+        if(this->openFolders==0){
+            actualId = "0";
+            previousId = "0";
+            new_str=cl->showHome();
+            new_str = manipulationHome(new_str);
+        }else{
+            actualId = previousId;
+            temp = path;
+            temp.erase(temp.end()-1);
+            found=temp.find_last_of("/");
+            temp.erase(found,temp.size());
+            if(temp.size()==1){
+                previousId = "0";
+            }else{
+                found=temp.find_last_of("/");
+                previousId = temp.substr(found+1,temp.size());
+            }
+            temp = temp + "/";
+            new_str=cl->getStr(this->actualId, temp);
+        }
+        ui->myListWidget->clear();
+        int count=number_elements(new_str);
+        listGenerate(new_str,count);
+        #endif
+    }else{
+        //this->openFolders=-1;
         std::string pathLabel=ui->pathLabel->text().toStdString();
         pathLabel.erase(5,pathLabel.size());
         ui->pathLabel->setText(QString::fromStdString(pathLabel));
         ui->back_button->setDisabled(true);
         ui->back_button->hide();
     }
-
     this->show();
 }
 
@@ -550,11 +604,15 @@ void directory::openSelectedSource(){
 
              this->previousId=this->actualId;
              this->actualId=searchForId(nameSource,str,count);
-             path+=actualId+'/'; // ok lo crea in modo corretto
+             //path+=actualId+'/'; // ok lo crea in modo corretto
              this->openFolders++;
              // open the folder Window
-             // str1=cl->getStr(this->id, this->path);
+             #ifdef DISPATCHER_ON
+             std::string str1=cl->getStr(this->actualId, this->path);
+             path+=actualId+'/';
+             #else
              std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
+             #endif
              str=str1;
              ui->pathLabel->setText(ui->pathLabel->text()+QString::fromStdString(nameSource)+'/');
              this->openWindow(str);
