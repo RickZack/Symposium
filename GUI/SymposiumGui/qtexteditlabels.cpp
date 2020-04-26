@@ -86,41 +86,7 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, static_cast<int>(it.second.col));
             this->setTextCursor(cursor);
 
-            QString nameLabel=QString::fromStdString(it.first->getUsername());
-            QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
-            QLabel *labelReverse=new QLabel(nameLabelReverse, this);
-            //Color c=cl->getColor(documentId,it.first->getSiteId());
-            //QString str=QString::fromStdString(c.rgb_hex_string());
-            QString str="#ff0000";
-            labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
-            QLabel *newLabel=new QLabel(nameLabel, this);
-            newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
-            std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelReverse, newLabel);
-            labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
 
-
-            showLabel(labelReverse, newLabel);
-            cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
-        }
-    }
-    QTextCursor cursor = this->textCursor();
-    cursor.movePosition(QTextCursor::End);
-    this->setTextCursor(cursor);
-    scroll();
-    j=1;
-}
-
-void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId)
-{
-    j=0;
-    for(auto it:users)
-    {
-        if(it.first->getSiteId()==siteId && it.second.p!=Symposium::privilege::readOnly)
-        {
-            QTextCursor cursor = this->textCursor();
-            cursor.movePosition(QTextCursor::Start);
-            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, static_cast<int>(it.second.row));
-            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, static_cast<int>(it.second.col));
             QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
@@ -132,8 +98,9 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
             std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelReverse, newLabel);
             labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
+            labelReverse->setAttribute(Qt::WA_TranslucentBackground);
+            newLabel->setAttribute(Qt::WA_TranslucentBackground);
 
-            this->setTextCursor(cursor);
             showLabel(labelReverse, newLabel);
             cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
         }
@@ -144,10 +111,55 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
     j=1;
 }
 
+void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId)
+{
+    j=0;
+    int block=0;
+    int column=0;
+    for(auto it:users)
+    {
+        if(it.first->getSiteId()==siteId && it.second.p!=Symposium::privilege::readOnly)
+        {
+            QTextCursor cursor = this->textCursor();
+            block=static_cast<int>(it.second.row);
+            column=static_cast<int>(it.second.col);
+            cursor.movePosition(QTextCursor::Start);
+            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, block);
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+            this->setTextCursor(cursor);
+
+
+            QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
+            QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
+            QLabel *labelReverse=new QLabel(nameLabelReverse, this);
+            //Color c=cl->getColor(documentId,it.first->getSiteId());
+            //QString str=QString::fromStdString(c.rgb_hex_string());
+            QString str="#ff0000";
+            labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
+            QLabel *newLabel=new QLabel(nameLabel, this);
+            newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
+            std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelReverse, newLabel);
+            labelReverse->setAttribute(Qt::WA_TranslucentBackground);
+            newLabel->setAttribute(Qt::WA_TranslucentBackground);
+            labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
+
+            showLabel(labelReverse, newLabel);
+            cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
+        }
+    }
+    QTextCursor cursor = this->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    this->setTextCursor(cursor);
+
+    cursor.movePosition(QTextCursor::Start);
+    this->setTextCursor(cursor);
+    j=1;
+}
+
 void qtexteditlabels::showLabel(QLabel *labelNameReverse, QLabel *labelName)
 {
-    const QRect curRect = this->cursorRect();
-    int ty=curRect.y();
+    const QRect curRect = this->cursorRect(this->textCursor());
+    int ty=curRect.y()-2;
     labelName->hide();
     labelNameReverse->hide();
 
@@ -169,8 +181,9 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     QTextCursor cursor = this->textCursor();
     changePosition(0,0);
     cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(siteId, this->textCursor()));
-    QString nameLabel=QString::fromStdString(name);
-    QLabel *labelNameReverse=new QLabel("\u25BC", this);
+    QString nameLabel="\u25BC"+QString::fromStdString(name);
+    QString nameLabelReverse=QString::fromStdString(name)+"\u25BC";
+    QLabel *labelNameReverse=new QLabel(nameLabelReverse, this);
     //Color c=cl->getColor(documentId,it.first->getSiteId());
     //QString str=QString::fromStdString(c.rgb_hex_string());
     QString str="#ff0000";
@@ -180,6 +193,8 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     std::pair<QLabel*, QLabel*> pairs=std::make_pair(labelNameReverse, newLabel);
     labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(siteId, pairs));
 
+    labelNameReverse->setAttribute(Qt::WA_TranslucentBackground);
+    newLabel->setAttribute(Qt::WA_TranslucentBackground);
     i=0;
     showLabel(labelNameReverse, newLabel);
 
@@ -195,6 +210,7 @@ void qtexteditlabels::removeUser(Symposium::uint_positive_cnt::type siteId)
         labelHide->hide();
         labelHide=labels.find(siteId)->second.second;
         labelHide->hide();
+        labelHide->deleteLater();
         labels.erase(siteId);
         cursors.erase(siteId);
     }

@@ -71,6 +71,8 @@ public:
      */
     void closeEvent(QCloseEvent *event);
 
+    void showLabels();
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 

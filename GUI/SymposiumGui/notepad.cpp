@@ -54,9 +54,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     this->setCentralWidget(ui->textEdit);
     qApp->installEventFilter(this);
 
-    //---------------------------------------------------------------------------------------------------------------------------
-
-
+    //----------------------------------------------------------------------------------------------------------------------------
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2},i4={0,3},iacapo={0,4},i5={1,0},i6={1,1},i7={1,2},i8={1,3},i9={1,4},i10={1,5},i11={1,6},i12={1,7},i13={1,8},iacapo2={1,9};
         Symposium::symbol s1('C', 1, 0, std::vector<int>(), false),
                           s2('i', 1, 1, std::vector<int>(), false),
@@ -224,18 +222,18 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     //----------------------------------------------------------------------------
 
     //-------------------------------------------------PARTE DA CANCELLARE
-    Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
+    /*Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
     Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
-    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 1, 3)};
-    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 1, 2)};
-    std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 2, 0)};
+    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 0, 3)};
+    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 2, 2)};
+    std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 0, 0)};
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     onlineUsers.push_front(p1);
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);
     ui->textEdit->constractLabelsCursors(onlineUsers, u1->getSiteId());
-    ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());
+    ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());*/
 
 
     //---------------------------------------------------------------------
@@ -725,6 +723,34 @@ void notepad::closeEvent(QCloseEvent *event){
     this->notepad::hide();
     //cl->closeSource(this->documentId);
 
+}
+
+void notepad::showLabels()
+{
+    //------------------------------------------------------PARTE DA DECOMMENTARE
+
+    /*ui->textEdit->setDocumentId(documentId);
+    ui->textEdit->setClientDispatcher(cl);
+    ui->textEdit->setThisUserSiteId(us.getSiteId());
+    const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users=cl->onlineUser(int documentID)
+    ui->textEdit->constractLabelsCursors(users, us.getSiteId());
+    */
+    //----------------------------------------------------------------------------
+
+    //-------------------------------------------------PARTE DA CANCELLARE
+    Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
+    Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
+    Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
+    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 0, 0)};
+    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 2, 2)};
+    std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 0, 0)};
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
+    onlineUsers.push_front(p1);
+    onlineUsers.push_front(p2);
+    onlineUsers.push_front(p3);
+    ui->textEdit->constractLabelsCursors(onlineUsers, u1->getSiteId());
+    ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());
+    //---------------------------------------------------------------------
 }
 
 bool notepad::isAKeyToIgnore(QKeyEvent* event){

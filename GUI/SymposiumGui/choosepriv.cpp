@@ -56,6 +56,7 @@ void choosepriv::on_pushButton_clicked()
     notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
     this->hide();
     notepadWindow->show();
+    notepadWindow->showLabels();
 }
 
 void choosepriv::on_pushButton_2_clicked()
