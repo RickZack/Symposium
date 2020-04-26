@@ -90,9 +90,15 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
-            //Color c=cl->getColor(documentId,it.first->getSiteId());
-            //QString str=QString::fromStdString(c.rgb_hex_string());
+
+            //-----------------------------------------------------------------------------PARTE DA DECOMMENTARE
+            /*Color c=cl->getColor(documentId,it.first->getSiteId());
+            QString str=QString::fromStdString(c.rgb_hex_string());*/
+            //---------------------------------------------------------------------------------
+
+            //---------------------------------------------------------------------------PARTE DA CANCELLARE
             QString str="#ff0000";
+            //---------------------------------------------------------------------------
             labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -106,10 +112,13 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
         }
     }
     QTextCursor cursor = this->textCursor();
-    cursor.movePosition(QTextCursor::End);
+    cursor.movePosition(QTextCursor::Start);
     this->setTextCursor(cursor);
     j=1;
 }
+
+//--------------------------------------------------------------------------------------PARTE DA CANCELLARE PER ELIMINARE IL CURSORE DELL'UTENTE CORRENTE ALLA FINE
+
 
 void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId)
 {
@@ -132,9 +141,15 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
-            //Color c=cl->getColor(documentId,it.first->getSiteId());
-            //QString str=QString::fromStdString(c.rgb_hex_string());
+
+            //-----------------------------------------------------------------------------PARTE DA DECOMMENTARE
+            /*Color c=cl->getColor(documentId,it.first->getSiteId());
+            QString str=QString::fromStdString(c.rgb_hex_string());*/
+            //----------------------------------------------------------------------------------------------------
+
+            //-----------------------------------------------------------------------------PARTE DA CANCELLARE
             QString str="#ff0000";
+            //-------------------------------------------------------------------------------------------------
             labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -147,14 +162,10 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
         }
     }
-    QTextCursor cursor = this->textCursor();
-    cursor.movePosition(QTextCursor::End);
-    this->setTextCursor(cursor);
-
-    cursor.movePosition(QTextCursor::Start);
-    this->setTextCursor(cursor);
     j=1;
 }
+
+//-----------------------------------------------------------------------------------------------------------
 
 void qtexteditlabels::showLabel(QLabel *labelNameReverse, QLabel *labelName)
 {
@@ -184,9 +195,15 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     QString nameLabel="\u25BC"+QString::fromStdString(name);
     QString nameLabelReverse=QString::fromStdString(name)+"\u25BC";
     QLabel *labelNameReverse=new QLabel(nameLabelReverse, this);
-    //Color c=cl->getColor(documentId,it.first->getSiteId());
-    //QString str=QString::fromStdString(c.rgb_hex_string());
+
+    //-----------------------------------------------------------------------------PARTE DA DECOMMENTARE
+    /*Color c=cl->getColor(documentId,it.first->getSiteId());
+    QString str=QString::fromStdString(c.rgb_hex_string());*/
+    //-----------------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------PARTE DA CANCELLARE
     QString str="#ff0000";
+    //--------------------------------------------------------------------------------------------
     labelNameReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
     QLabel *newLabel=new QLabel(nameLabel, this);
     newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -222,15 +239,20 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
     {
         if(priv!=Symposium::privilege::readOnly)
         {
+            //-----------------------------------------------------------------------------PARTE DA CANCELLARE
             QLabel *labelName=labels.find(siteId)->second.second;
             QLabel *labelReverseName=labels.find(siteId)->second.first;
             QTextCursor newCursor=this->textCursor();
             cursors.find(siteId)->second=this->textCursor();
             showLabel(labelReverseName, labelName);
+            //--------------------------------------------------------------------------------------------------------------
             QTextCursor cursor= this->textCursor();
-            //int column=cursor.positionInBlock();
-            //int block= cursor.blockNumber();
-            //cl->moveMyCursor(int documentId, int block, int column);
+
+            //-----------------------------------------------------------------------------PARTE DA DECOMMENTARE
+            /*int column=cursor.positionInBlock();
+            int block= cursor.blockNumber();
+            cl->moveMyCursor(int documentId, int block, int column);*/
+            //------------------------------------------------------------------------------------------------
         }
     }
 

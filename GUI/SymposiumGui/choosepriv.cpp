@@ -75,6 +75,7 @@ notepad* choosepriv::successOpen(Symposium::document &doc){
     // cl->setNotepad(notepadWindow)
     this->hide();
     notepadWindow->show();
+    notepadWindow->showLabels();
     return notepadWindow;
 
 

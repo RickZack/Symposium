@@ -17,7 +17,6 @@ class qtexteditlabels : public QTextEdit
 public:
     qtexteditlabels(QWidget* a):QTextEdit(a)
     {
-
     }
 
     /**
