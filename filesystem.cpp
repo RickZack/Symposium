@@ -390,8 +390,14 @@ std::shared_ptr<directory> directory::addDirectory(const std::string &name, uint
 std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
     std::string pathAdd;
     std::string idAdd;
-    tie(pathAdd, idAdd)= separate(path);
-    std::shared_ptr<directory> save=getDir(pathAdd, idAdd);
+    std::shared_ptr<directory> save;
+    if(path!="./")
+        {
+        tie(pathAdd, idAdd)= separate(path);
+        save=getDir(pathAdd, idAdd);
+        }
+    else
+        save=self.lock();
     if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
     std::shared_ptr<file> newFile(new file(name, idToAssign));
@@ -405,8 +411,14 @@ directory::addLink(const std::string &path, const std::string &name, const std::
 {
     std::string pathAdd;
     std::string idAdd;
-    tie(pathAdd, idAdd)= separate(path);
-    std::shared_ptr<directory> save=getDir(pathAdd, idAdd);
+    std::shared_ptr<directory> save;
+    if(path!="./")
+    {
+        tie(pathAdd, idAdd)= separate(path);
+        save=getDir(pathAdd, idAdd);
+    }
+    else
+        save=self.lock();
     if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
     std::shared_ptr<symlink> newSym(new symlink(name, filePath, fileName, idToAssign));

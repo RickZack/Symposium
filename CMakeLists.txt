@@ -67,7 +67,8 @@ add_executable(SymposiumTest main.cpp ${CORE_FILES} ${SHA256_LIB} ${TEST_FILES})
 
 # Files and headers for SymposiumGUI target: this is the executable that will run the client with the GUI
 add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SHA256_LIB} ${CORE_FILES} ${CLIENT_FILES}
-        GUI/SymposiumGui/about.cpp GUI/SymposiumGui/about.h GUI/SymposiumGui/about.ui
+        GUI/SymposiumGui/about.cpp GUI/SymposiumGui/successlinks.cpp GUI/SymposiumGui/successlinks.h GUI/SymposiumGui/successlinks.ui
+        GUI/SymposiumGui/about.h GUI/SymposiumGui/about.ui
         GUI/SymposiumGui/activealwayslink.cpp GUI/SymposiumGui/activealwayslink.h GUI/SymposiumGui/activealwayslink.ui
         GUI/SymposiumGui/activecounterlink.cpp GUI/SymposiumGui/activecounterlink.h GUI/SymposiumGui/activecounterlink.ui
         GUI/SymposiumGui/activenonlink.cpp GUI/SymposiumGui/activenonlink.h GUI/SymposiumGui/activenonlink.ui
