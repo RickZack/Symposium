@@ -95,6 +95,12 @@ public:
      */
     void setThisUserPrivilege(Symposium::privilege priv);
 
+    /**
+     * @brief translate labels so they remain anchor to the logical position
+     * @param users forward_list of users who used now this document
+     */
+    void translateCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users);
+
 private:
 
     int j=0;
@@ -102,7 +108,7 @@ private:
     Symposium::uint_positive_cnt::type thisUserSiteId=1;
     Symposium::uint_positive_cnt::type documentId;
     std::map<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>> labels;
-    std::map<Symposium::uint_positive_cnt::type, QTextCursor> cursors;
+    std::map<Symposium::uint_positive_cnt::type, std::pair<int, int>> cursors;
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users;
     Symposium::clientdispatcher *cl;
     Symposium::privilege priv;

@@ -6,45 +6,31 @@
 void qtexteditlabels::scrollContentsBy(int dx, int dy)
 {
     QTextEdit::scrollContentsBy(dx,dy);
-    if(i==0)
+    for(auto it:labels)
     {
-        i=1;
-        scroll();
-        for(auto it:cursors)
-        {
-            if(it.first==thisUserSiteId)
-            {
-                QTextCursor cursorUser=it.second;
-                this->setTextCursor(cursorUser);
-            }
-        }
-     }
-
-    else{
-        for(auto it:labels)
-        {
-            QLabel *labelNameReverse=it.second.first;
-            QLabel *labelName=it.second.second;
-            QPoint pointNaemReverse=labelNameReverse->pos();
-            QPoint pointName=labelName->pos();
-            labelNameReverse->move(pointNaemReverse.x()+dx, pointNaemReverse.y()+dy);
-            labelName->move(pointName.x()+dx, pointName.y()+dy);
-        }
+        QLabel *labelNameReverse=it.second.first;
+        QLabel *labelName=it.second.second;
+        QPoint pointNaemReverse=labelNameReverse->pos();
+        QPoint pointName=labelName->pos();
+        labelNameReverse->move(pointNaemReverse.x()+dx, pointNaemReverse.y()+dy);
+        labelName->move(pointName.x()+dx, pointName.y()+dy);
     }
 }
 
 void qtexteditlabels::scroll()
 {
     j=0;
+    int block=this->textCursor().blockNumber();
+    int column=this->textCursor().positionInBlock();
     for(auto it:cursors)
         {
-            QTextCursor cursorUser=it.second;
-            this->setTextCursor(cursorUser);
+            changePosition(it.second.first, it.second.second);
             Symposium::uint_positive_cnt::type siteId=it.first;
             QLabel *labelNameReverse=labels.find(siteId)->second.first;
             QLabel *labelName=labels.find(siteId)->second.second;
             showLabel(labelNameReverse, labelName);
         }
+    changePosition(block, column);
     j=1;
 }
 
@@ -60,14 +46,16 @@ void qtexteditlabels::changePosition(int block, int collumn)
 void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, int block, int collumn)
 {
     j=0;
-    QTextCursor cursor = this->textCursor();
+    int blockThisUser=this->textCursor().blockNumber();
+    int columnThisUser=this->textCursor().positionInBlock();
     changePosition(block, collumn);
     i=0;
     QLabel *labelReverseName=labels.find(siteId)->second.first;
     QLabel *labelName=labels.find(siteId)->second.second;
     showLabel(labelReverseName, labelName);
-    cursors.find(siteId)->second=this->textCursor();
-    this->setTextCursor(cursor);
+    cursors.find(siteId)->second.first=block;
+    cursors.find(siteId)->second.second=collumn;
+    changePosition(blockThisUser, columnThisUser);
     j=1;
 }
 
@@ -108,7 +96,9 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             newLabel->setAttribute(Qt::WA_TranslucentBackground);
 
             showLabel(labelReverse, newLabel);
-            cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
+            cursors.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<int, int>>
+                           (it.first->getSiteId(), std::pair<int, int>(static_cast<int>(it.second.row),
+                                                                       static_cast<int>(it.second.col))));
         }
     }
     QTextCursor cursor = this->textCursor();
@@ -117,27 +107,18 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
     j=1;
 }
 
-//--------------------------------------------------------------------------------------PARTE DA CANCELLARE PER ELIMINARE IL CURSORE DELL'UTENTE CORRENTE ALLA FINE
-
 
 void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId)
 {
     j=0;
     int block=0;
     int column=0;
+    thisUserSiteId=siteId;
+    //-----------------------------------------------------------------------------------------------------------------PARTE DA CANCELLARE PER ELIMINARE IL CURSORE VISIBILE CON LA LABEL
     for(auto it:users)
     {
         if(it.first->getSiteId()==siteId && it.second.p!=Symposium::privilege::readOnly)
         {
-            QTextCursor cursor = this->textCursor();
-            block=static_cast<int>(it.second.row);
-            column=static_cast<int>(it.second.col);
-            cursor.movePosition(QTextCursor::Start);
-            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, block);
-            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
-            this->setTextCursor(cursor);
-
-
             QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
@@ -159,13 +140,16 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
 
             showLabel(labelReverse, newLabel);
-            cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(it.first->getSiteId(), cursor));
         }
+
     }
+    //----------------------------------------------------------------------------------------------------------------------------
+    moveCursor(QTextCursor::Start);
+    cursors.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<int, int>>
+                   (thisUserSiteId, std::pair<int, int>(block,column)));
     j=1;
 }
 
-//-----------------------------------------------------------------------------------------------------------
 
 void qtexteditlabels::showLabel(QLabel *labelNameReverse, QLabel *labelName)
 {
@@ -189,9 +173,10 @@ void qtexteditlabels::showLabel(QLabel *labelNameReverse, QLabel *labelName)
 void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::string name)
 {
     j=0;
-    QTextCursor cursor = this->textCursor();
+    int blockThisUser=this->textCursor().blockNumber();
+    int columnThisUser=this->textCursor().positionInBlock();
     changePosition(0,0);
-    cursors.insert(std::pair<Symposium::uint_positive_cnt::type, QTextCursor>(siteId, this->textCursor()));
+    cursors.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<int, int>>(siteId, std::pair<int, int>(0,0)));
     QString nameLabel="\u25BC"+QString::fromStdString(name);
     QString nameLabelReverse=QString::fromStdString(name)+"\u25BC";
     QLabel *labelNameReverse=new QLabel(nameLabelReverse, this);
@@ -215,7 +200,7 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     i=0;
     showLabel(labelNameReverse, newLabel);
 
-    this->setTextCursor(cursor);
+    changePosition(blockThisUser, columnThisUser);
     j=1;
 }
 
@@ -243,7 +228,10 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
             QLabel *labelName=labels.find(siteId)->second.second;
             QLabel *labelReverseName=labels.find(siteId)->second.first;
             QTextCursor newCursor=this->textCursor();
-            cursors.find(siteId)->second=this->textCursor();
+            int newBlock=newCursor.blockNumber();
+            int newColumn=newCursor.positionInBlock();
+            cursors.find(siteId)->second.first=newBlock;
+            cursors.find(siteId)->second.first=newColumn;
             showLabel(labelReverseName, labelName);
             //--------------------------------------------------------------------------------------------------------------
             QTextCursor cursor= this->textCursor();
@@ -276,4 +264,27 @@ void qtexteditlabels::setThisUserSiteId(Symposium::uint_positive_cnt::type id)
 void qtexteditlabels::setThisUserPrivilege(Symposium::privilege priv)
 {
     this->priv=priv;
+}
+
+void qtexteditlabels::translateCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users)
+{
+    bool scrollNeeded=false;
+    for(auto it:users)
+    {
+        if(it.second.p!=Symposium::privilege::readOnly)
+        {
+            int oldBlock=cursors.find(it.first->getSiteId())->second.first;
+            int oldColumn=cursors.find(it.first->getSiteId())->second.second;
+            int newBlock=static_cast<int>(it.second.row);
+            int newColumn=static_cast<int>(it.second.col);
+            if(oldBlock!=newBlock || oldColumn!=newColumn)
+            {
+                cursors.find(it.first->getSiteId())->second.first=newBlock;
+                cursors.find(it.first->getSiteId())->second.second=newColumn;
+                scrollNeeded=true;
+            }
+        }
+    }
+    if(scrollNeeded)
+        scroll();
 }
