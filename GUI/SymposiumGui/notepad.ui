@@ -68,7 +68,37 @@ border: none;
 QComboBox::down-arrow {
 padding: 0px 4px 0px 4px;
 image: url(&quot;:/icon/down-arrow.png&quot;);
- }</string>
+ }
+QComboBox QAbstractItemView {
+    selection-background-color: rgb(58, 80, 116);
+	background-color: white;
+	color:  rgb(58, 80, 116);
+}
+QScrollBar:vertical {              
+    border: 1px solid rgb(58, 80, 116);
+    background:white;
+    width:10px;    
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:vertical {
+   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+   stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116), stop:1 rgb(58, 80, 116));
+   min-height: 0px;
+}
+QScrollBar::add-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1 rgb(58, 80, 116));
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0  rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1rgb(58, 80, 116));
+    height: 0 px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}</string>
        </property>
        <property name="editable">
         <bool>false</bool>
@@ -108,7 +138,37 @@ border: none;
 QComboBox::down-arrow {
 padding: 0px 4px 0px 4px;
 image: url(&quot;:/icon/down-arrow.png&quot;);
- }</string>
+ }
+QComboBox QAbstractItemView {
+    selection-background-color: rgb(58, 80, 116);
+	background-color: white;
+	color:  rgb(58, 80, 116);
+}
+QScrollBar:vertical {              
+    border: 1px solid rgb(58, 80, 116);
+    background:white;
+    width:10px;    
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:vertical {
+   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+   stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116), stop:1 rgb(58, 80, 116));
+   min-height: 0px;
+}
+QScrollBar::add-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1 rgb(58, 80, 116));
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0  rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1rgb(58, 80, 116));
+    height: 0 px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}</string>
        </property>
        <property name="currentFont">
         <font>
@@ -144,7 +204,37 @@ border: none;
 QComboBox::down-arrow {
 padding: 0px 4px 0px 4px;
 image: url(&quot;:/icon/down-arrow.png&quot;);
- }</string>
+ }
+QComboBox QAbstractItemView {
+    selection-background-color: rgb(58, 80, 116);
+	background-color: white;
+	color:  rgb(58, 80, 116);
+}
+QScrollBar:vertical {              
+    border: 1px solid rgb(58, 80, 116);
+    background:white;
+    width:10px;    
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:vertical {
+   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+   stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116), stop:1 rgb(58, 80, 116));
+   min-height: 0px;
+}
+QScrollBar::add-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1 rgb(58, 80, 116));
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0  rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1rgb(58, 80, 116));
+    height: 0 px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}</string>
        </property>
        <property name="editable">
         <bool>true</bool>

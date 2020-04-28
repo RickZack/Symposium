@@ -23,9 +23,9 @@
   <widget class="QDateTimeEdit" name="time">
    <property name="geometry">
     <rect>
-     <x>255</x>
+     <x>240</x>
      <y>90</y>
-     <width>160</width>
+     <width>190</width>
      <height>31</height>
     </rect>
    </property>
@@ -37,15 +37,34 @@ border-color: rgb(58, 80, 116);
 color: rgb(58, 80, 116);
 }
 QDateTimeEdit::drop-down {
-border: 1px solid;
+border: none;
 background-color:white;
-border-color: rgb(58, 80, 116);
 color: rgb(58, 80, 116);
  }
 QDateTimeEdit::down-arrow {
 padding: 0px 4px 0px 4px;
 image: url(&quot;:/icon/down-arrow.png&quot;);
- }</string>
+ }
+QCalendarWidget  QAbstractItemView{
+color: rgb(58, 80, 116);
+font-size: 14px;
+background-color: white;
+}
+QCalendarWidget QMenu {
+background-color: white;
+}
+QCalendarWidget QToolButton {
+color: rgb(58, 80, 116);
+font-size: 14px;
+background-color:white;
+}
+QCalendarWidget QSpinBox {
+font-size:14px;
+color: rgb(58, 80, 116);
+background-color: white;
+selection-background-color: rgb(58, 80, 116);
+selection-color: white;
+}</string>
    </property>
    <property name="calendarPopup">
     <bool>true</bool>
