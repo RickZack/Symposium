@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1137</width>
-    <height>812</height>
+    <height>942</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -392,6 +392,88 @@ color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Attention: folder will be create in the current folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="ownerButton">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>650</y>
+      <width>97</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Owner</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="readerButton">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>670</y>
+      <width>97</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reader</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="writerButton">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>690</y>
+      <width>97</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Writer</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="privilegeLine">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>620</y>
+      <width>611</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the privilege you want for opening the selected document&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="OkPriv">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>720</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>OK</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="cancPriv">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>720</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CANCEL</string>
     </property>
    </widget>
   </widget>

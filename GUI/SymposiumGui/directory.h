@@ -14,6 +14,7 @@
 #include "choosepriv.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
+#include "notepad.h"
 
 namespace Ui {
 class directory;
@@ -81,6 +82,12 @@ public:
 
     void openSelectedSource();
 
+    /**
+     * @brief successOpen open the document showing all the symbols inside.
+     * @param doc
+     * @return
+     */
+    notepad *successOpen(Symposium::document &doc);
 private slots:
 
     /**
@@ -139,6 +146,13 @@ private slots:
 
     void on_okButton_2_clicked();
 
+    /**
+     * @brief on_OkPriv_clicked acts when the button OK is clicked
+     */
+    void on_OkPriv_clicked();
+
+    void on_cancPriv_clicked();
+
 private:
     Ui::directory *ui;
     inserturi *uriWindow;
@@ -147,6 +161,7 @@ private:
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLogoutWindow;
+    notepad *notepadWindow;
 
     /**
      * @brief openFolders this variable is used to say that a window has been opened and to enable/disable the BACK button
@@ -174,6 +189,9 @@ private:
     // this variable is used to count the number of elements created
     int count;
     std::string separate_word(std::string& string);
+    Symposium::privilege priv=Symposium::privilege::none;
+    Symposium::privilege privOpen=Symposium::privilege::none;
+    std::string initialPriv;
 
 
     /**
@@ -264,6 +282,14 @@ private:
      * @brief hide all label and buttons and diasable the buttons
      */
     void showRename();
+    /**
+     * @brief showsPrivilegeButtons handle the buttons referring the privilege
+     */
+    void showPrivilegeButtons();
+    /**
+     * @brief hidePrivilegeButtons hide the buttons referring the privilege
+     */
+    void hidePrivilegeButtons();
 };
 
 

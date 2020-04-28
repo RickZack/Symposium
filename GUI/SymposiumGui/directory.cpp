@@ -36,6 +36,10 @@ directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatch
     ui->renameName->hide();
     ui->okButton_2->hide();
 
+    // set the buttons for the privilege disabled
+    // they will appear when I choose to open a document
+    this->hidePrivilegeButtons();
+
 
     ui->actionHome->setIcon(QIcon(":/icon/home.png"));
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
@@ -732,13 +736,27 @@ void directory::openSelectedSource(){
          {
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
              std::string id=idPriv.first;
-             std::string initialPriv=idPriv.second;
+             this->initialPriv=idPriv.second;
+             // The user has to choose the privilege:
+             this->showPrivilegeButtons();
+             // set the old Privilege
+             if (this->initialPriv=="modify"){
+                 privOpen= Symposium::privilege::modify;
+             }
+             else if(this->initialPriv=="readOnly"){
+                 privOpen= Symposium::privilege::readOnly;
+             }
+             else{
+                 privOpen= Symposium::privilege::owner;
+             }
+
+
              // I have to open the choosepriv first
-             chooseprivWindow = new choosepriv(this, this->path, id, initialPriv, this->cl);
+             //chooseprivWindow = new choosepriv(this, this->path, id, initialPriv, this->cl);
              #ifdef DISPATCHER_ON
-             cl->setchoosepriv(chooseprivWindow);
+             //cl->setchoosepriv(chooseprivWindow);
              #endif
-             chooseprivWindow->show();
+             //chooseprivWindow->show();
          }else{
              // it is a SymLink
              // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
@@ -758,7 +776,15 @@ void directory::openSelectedSource(){
 
 }
 
+void directory::showPrivilegeButtons(){
+    ui->OkPriv->show();
+    ui->cancPriv->show();
+    ui->privilegeLine->show();
+    ui->writerButton->show();
+    ui->readerButton->show();
+    ui->ownerButton->show();
 
+}
 void directory::on_okButton_2_clicked()
 {
      ui->renameLabel->hide();
@@ -766,4 +792,46 @@ void directory::on_okButton_2_clicked()
      ui->okButton->hide();
      ui->okButton_2->hide();
 
+}
+
+void directory::on_OkPriv_clicked()
+{
+    if(ui->writerButton->isEnabled())
+        priv= Symposium::privilege::modify;
+    else if(ui->readerButton->isEnabled())
+        priv= Symposium::privilege::readOnly;
+    else
+        priv= Symposium::privilege::owner;
+
+    #ifdef DISPATCHER_ON
+    cl->openSource(this->path,this->id,this->priv);
+    #else
+    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path);
+    notepadWindow->show();
+    notepadWindow->showLabels();
+    #endif
+
+    this->hidePrivilegeButtons();
+}
+
+notepad* directory::successOpen(Symposium::document &doc){
+    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,doc);
+    this->hide();
+    notepadWindow->show();
+    notepadWindow->showLabels();
+    return notepadWindow;
+}
+
+void directory::on_cancPriv_clicked()
+{
+    this->hidePrivilegeButtons();
+}
+
+void directory::hidePrivilegeButtons(){
+    ui->privilegeLine->hide();
+    ui->writerButton->hide();
+    ui->readerButton->hide();
+    ui->ownerButton->hide();
+    ui->OkPriv->hide();
+    ui->cancPriv->hide();
 }
