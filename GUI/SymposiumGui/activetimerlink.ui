@@ -30,13 +30,22 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: white;
-color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
-border-width: 1px; 
-border-style: solid;
-border-color: rgb(58, 80, 116); 
-</string>
+    <string notr="true">QDateTimeEdit {
+border: 1px solid;
+background-color:white;
+border-color: rgb(58, 80, 116);
+color: rgb(58, 80, 116);
+}
+QDateTimeEdit::drop-down {
+border: 1px solid;
+background-color:white;
+border-color: rgb(58, 80, 116);
+color: rgb(58, 80, 116);
+ }
+QDateTimeEdit::down-arrow {
+padding: 0px 4px 0px 4px;
+image: url(&quot;:/icon/down-arrow.png&quot;);
+ }</string>
    </property>
    <property name="calendarPopup">
     <bool>true</bool>

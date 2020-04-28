@@ -51,8 +51,20 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)
 {
     ui->setupUi(this);
-    this->setCentralWidget(ui->textEdit);
+
     qApp->installEventFilter(this);
+
+    QActionGroup *alignGroup= new QActionGroup(this);
+    alignGroup->addAction(ui->actionAlignCenter);
+    alignGroup->addAction(ui->actionAlignTextLeft);
+    alignGroup->addAction(ui->actionAlignTextRight);
+    alignGroup->addAction(ui->actionAlignTextJustify);
+
+    ui->actionAlignTextLeft->setChecked(true);
+    addStyleFormat();
+
+    connect(ui->fontComboBox, QOverload<const QString &>::of(&QComboBox::activated), this, &notepad::textFamily);
+    ui->fontComboBox->activated("Times New Roman");
 
     //----------------------------------------------------------------------------------------------------------------------------
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2},i4={0,3},iacapo={0,4},i5={1,0},i6={1,1},i7={1,2},i8={1,3},i9={1,4},i10={1,5},i11={1,6},i12={1,7},i13={1,8},iacapo2={1,9};
@@ -79,10 +91,10 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
         Symposium::Color nero(0,0,0);
         Symposium::Color rosso(255,0,0);
-        const std::string ft="Modern 2";
+        const std::string ft="Times New Roman";
         unsigned size=9;
         Symposium::format f(ft,false,false,false,size,nero);
-         Symposium::format f1("Modern 2",true,true,false,9,rosso);
+         Symposium::format f1("Times New Roman",true,true,false,9,rosso);
          //Ciao
         s1.setCharFormat(f1);
         s2.setCharFormat(f1);
@@ -144,7 +156,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
                               sn9('!', 2, 8, std::vector<int>(), false);
 
             Symposium::Color colore(200,30,0);
-            const std::string ft1="Comics Sams Ms";
+            const std::string ft1="Lucida Handwriting";
             unsigned size2=9;
             Symposium::format fn1(ft1,false,false,true,size2,colore);
             sn1.setCharFormat(fn1);
@@ -173,8 +185,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     priv=Symposium::privilege::owner;
     privOpen=Symposium::privilege::owner;
     //this->setToolButtonStyle(Qt::ToolButtonFollowStyle);
-    if(privOpen!=Symposium::privilege::readOnly)
-        setupTextActions();
     ui->textEdit->setThisUserPrivilege(privOpen);
     pathToFile="/1/2/3/4/5/6/7";
     //us=cl->getUser();
@@ -214,8 +224,13 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     ui->textEdit->setCursorWidth(3);
 
     if(privOpen==Symposium::privilege::readOnly)
-         ui->textEdit->setReadOnly(true);
-
+    {
+        ui->textEdit->setReadOnly(true);
+        ui->formatText->hide();
+        ui->fontComboBox->hide();
+        ui->sizeBox->hide();
+        ui->styleBox->hide();
+    }
 }
 
 notepad::~notepad()
@@ -285,155 +300,86 @@ void notepad::on_actionPaste_triggered()
     ui->textEdit->paste();
 }
 
-
-void notepad::setupTextActions()
+void notepad::addStyleFormat()
 {
-    QToolBar *tb = addToolBar(tr("Format Actions"));
-    QMenu *menu = menuBar()->addMenu(tr("F&ormat"));
+    ui->styleBox->addItem("Standard");
+    ui->styleBox->addItem("Bullet List (Disc)");
+    ui->styleBox->addItem("Bullet List (Circle)");
+    ui->styleBox->addItem("Bullet List (Square)");
+    ui->styleBox->addItem("Ordered List (Decimal)");
+    ui->styleBox->addItem("Ordered List (Alpha lower)");
+    ui->styleBox->addItem("Ordered List (Alpha upper)");
+    ui->styleBox->addItem("Ordered List (Roman lower)");
+    ui->styleBox->addItem("Ordered List (Roman upper)");
+    ui->styleBox->addItem("Heading 1");
+    ui->styleBox->addItem("Heading 2");
+    ui->styleBox->addItem("Heading 3");
+    ui->styleBox->addItem("Heading 4");
+    ui->styleBox->addItem("Heading 5");
+    ui->styleBox->addItem("Heading 6");
 
-    const QIcon boldIcon = QIcon::fromTheme("format-text-bold", QIcon(rsrcPath + "/textbold.png"));
-    actionTextBold = menu->addAction(boldIcon, tr("&Bold"), this, &notepad::textBold);
-    actionTextBold->setShortcut(Qt::CTRL + Qt::Key_B);
-    actionTextBold->setPriority(QAction::LowPriority);
-    QFont bold;
-    bold.setBold(true);
-    actionTextBold->setFont(bold);
-    tb->addAction(actionTextBold);
-    actionTextBold->setCheckable(true);
-
-    const QIcon italicIcon = QIcon::fromTheme("format-text-italic", QIcon(rsrcPath + "/textitalic.png"));
-    actionTextItalic = menu->addAction(italicIcon, tr("&Italic"), this, &notepad::textItalic);
-    actionTextItalic->setPriority(QAction::LowPriority);
-    actionTextItalic->setShortcut(Qt::CTRL + Qt::Key_I);
-    QFont italic;
-    italic.setItalic(true);
-    actionTextItalic->setFont(italic);
-    tb->addAction(actionTextItalic);
-    actionTextItalic->setCheckable(true);
-
-    const QIcon underlineIcon = QIcon::fromTheme("format-text-underline", QIcon(rsrcPath + "/textunder.png"));
-    actionTextUnderline = menu->addAction(underlineIcon, tr("&Underline"), this, &notepad::textUnderline);
-    actionTextUnderline->setShortcut(Qt::CTRL + Qt::Key_U);
-    actionTextUnderline->setPriority(QAction::LowPriority);
-    QFont underline;
-    underline.setUnderline(true);
-    actionTextUnderline->setFont(underline);
-    tb->addAction(actionTextUnderline);
-    actionTextUnderline->setCheckable(true);
-
-    menu->addSeparator();
-
-    const QIcon leftIcon = QIcon::fromTheme("format-justify-left", QIcon(rsrcPath + "/textleft.png"));
-    actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
-    actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
-    actionAlignLeft->setCheckable(true);
-    actionAlignLeft->setPriority(QAction::LowPriority);
-    const QIcon centerIcon = QIcon::fromTheme("format-justify-center", QIcon(rsrcPath + "/textcenter.png"));
-    actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
-    actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
-    actionAlignCenter->setCheckable(true);
-    actionAlignCenter->setPriority(QAction::LowPriority);
-    const QIcon rightIcon = QIcon::fromTheme("format-justify-right", QIcon(rsrcPath + "/textright.png"));
-    actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
-    actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
-    actionAlignRight->setCheckable(true);
-    actionAlignRight->setPriority(QAction::LowPriority);
-    const QIcon fillIcon = QIcon::fromTheme("format-justify-fill", QIcon(rsrcPath + "/textjustify.png"));
-    actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
-    actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
-    actionAlignJustify->setCheckable(true);
-    actionAlignJustify->setPriority(QAction::LowPriority);
-
-    // Make sure the alignLeft  is always left of the alignRight
-    QActionGroup *alignGroup = new QActionGroup(this);
-    connect(alignGroup, &QActionGroup::triggered, this, &notepad::textAlign);
-
-    if (QApplication::isLeftToRight()) {
-        alignGroup->addAction(actionAlignLeft);
-        alignGroup->addAction(actionAlignCenter);
-        alignGroup->addAction(actionAlignRight);
-    } else {
-        alignGroup->addAction(actionAlignRight);
-        alignGroup->addAction(actionAlignCenter);
-        alignGroup->addAction(actionAlignLeft);
-    }
-    alignGroup->addAction(actionAlignJustify);
-
-    tb->addActions(alignGroup->actions());
-    menu->addActions(alignGroup->actions());
-
-    menu->addSeparator();
-
-    QPixmap pix(16, 16);
-    pix.fill(Qt::black);
-    actionTextColor = menu->addAction(pix, tr("&Color..."), this, &notepad::textColor);
-    tb->addAction(actionTextColor);
-
-    tb = addToolBar(tr("Format Actions"));
-    tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-    addToolBarBreak(Qt::TopToolBarArea);
-    addToolBar(tb);
-
-    comboStyle = new QComboBox(tb);
-    tb->addWidget(comboStyle);
-    comboStyle->addItem("Standard");
-    comboStyle->addItem("Bullet List (Disc)");
-    comboStyle->addItem("Bullet List (Circle)");
-    comboStyle->addItem("Bullet List (Square)");
-    comboStyle->addItem("Ordered List (Decimal)");
-    comboStyle->addItem("Ordered List (Alpha lower)");
-    comboStyle->addItem("Ordered List (Alpha upper)");
-    comboStyle->addItem("Ordered List (Roman lower)");
-    comboStyle->addItem("Ordered List (Roman upper)");
-    comboStyle->addItem("Heading 1");
-    comboStyle->addItem("Heading 2");
-    comboStyle->addItem("Heading 3");
-    comboStyle->addItem("Heading 4");
-    comboStyle->addItem("Heading 5");
-    comboStyle->addItem("Heading 6");
-
-    connect(comboStyle, QOverload<int>::of(&QComboBox::activated), this, &notepad::textStyle);
-
-    comboFont = new QFontComboBox(tb);
-    tb->addWidget(comboFont);
-    connect(comboFont, QOverload<const QString &>::of(&QComboBox::activated), this, &notepad::textFamily);
-
-    comboSize = new QComboBox(tb);
-    comboSize->setObjectName("comboSize");
-    tb->addWidget(comboSize);
-    comboSize->setEditable(true);
+    connect(ui->styleBox, QOverload<int>::of(&QComboBox::activated), this, &notepad::textStyle);
 
     const QList<int> standardSizes = QFontDatabase::standardSizes();
     foreach (int size, standardSizes)
-        comboSize->addItem(QString::number(size));
-    comboSize->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
+        ui->sizeBox->addItem(QString::number(size));
+    ui->sizeBox->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
 
-    connect(comboSize, QOverload<const QString &>::of(&QComboBox::activated), this, &notepad::textSize);
+    connect(ui->sizeBox, QOverload<const QString &>::of(&QComboBox::activated), this, &notepad::textSize);
 }
 
-void notepad::textBold()
+
+void notepad::on_actionColorText_triggered()
+{
+  textColor();
+}
+
+
+void notepad::on_actionAlignTextLeft_triggered()
+{
+    textAlign(ui->actionAlignTextLeft);
+}
+
+void notepad::on_actionAlignCenter_triggered()
+{
+    textAlign(ui->actionAlignCenter);
+}
+
+
+void notepad::on_actionAlignTextRight_triggered()
+{
+   textAlign(ui->actionAlignTextRight);
+}
+
+void notepad::on_actionAlignTextJustify_triggered()
+{
+    textAlign(ui->actionAlignTextJustify);
+}
+
+void notepad::on_actionBoldFont_triggered()
 {
     QTextCharFormat fmt;
-    fmt.setFontWeight(actionTextBold->isChecked() ? QFont::Bold : QFont::Normal);
+    fmt.setFontWeight(ui->actionBoldFont->isChecked() ? QFont::Bold : QFont::Normal);
     ui->textEdit->mergeCurrentCharFormat(fmt);
     //mergeFormatOnWordOrSelection(fmt);
 }
 
-void notepad::textUnderline()
+void notepad::on_actionItalicFont_triggered()
 {
     QTextCharFormat fmt;
-    fmt.setFontUnderline(actionTextUnderline->isChecked());
+    fmt.setFontItalic(ui->actionItalicFont->isChecked());
+    ui->textEdit->mergeCurrentCharFormat(fmt);
+    //mergeFormatOnWordOrSelection(fmt);
+}
+
+void notepad::on_actionUnderlineFont_triggered()
+{
+    QTextCharFormat fmt;
+    fmt.setFontUnderline(ui->actionUnderlineFont->isChecked());
     ui->textEdit->mergeCurrentCharFormat(fmt);
    // mergeFormatOnWordOrSelection(fmt);
 }
 
-void notepad::textItalic()
-{
-    QTextCharFormat fmt;
-    fmt.setFontItalic(actionTextItalic->isChecked());
-    ui->textEdit->mergeCurrentCharFormat(fmt);
-    //mergeFormatOnWordOrSelection(fmt);
-}
 
 void notepad::textStyle(int styleIndex)
 {
@@ -553,32 +499,32 @@ void notepad::textSize(const QString &p)
 
 void notepad::textAlign(QAction *a)
 {
-    if (a == actionAlignLeft)
+    if (a == ui->actionAlignTextLeft)
         ui->textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
-    else if (a == actionAlignCenter)
+    else if (a == ui->actionAlignCenter)
         ui->textEdit->setAlignment(Qt::AlignHCenter);
-    else if (a == actionAlignRight)
+    else if (a == ui->actionAlignTextRight)
         ui->textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
-    else if (a == actionAlignJustify)
+    else if (a == ui->actionAlignTextJustify)
         ui->textEdit->setAlignment(Qt::AlignJustify);
 }
 
 void notepad::colorChanged(const QColor &c)
 {
-    QPixmap pix(16, 16);
+    QPixmap pix(64, 64);
     pix.fill(c);
-    actionTextColor->setIcon(pix);
+    ui->actionColorText->setIcon(pix);
     ui->textEdit->setTextColor(c);
 
 }
 
 void notepad::fontChanged(const QFont &f)
 {
-    comboFont->setCurrentIndex(comboFont->findText(QFontInfo(f).family()));
-    comboSize->setCurrentIndex(comboSize->findText(QString::number(f.pointSize())));
-    actionTextBold->setChecked(f.bold());
-    actionTextItalic->setChecked(f.italic());
-    actionTextUnderline->setChecked(f.underline());
+    ui->fontComboBox->setCurrentIndex(ui->fontComboBox->findText(QFontInfo(f).family()));
+    ui->sizeBox->setCurrentIndex(ui->sizeBox->findText(QString::number(f.pointSize())));
+    ui->actionBoldFont->setChecked(f.bold());
+    ui->actionItalicFont->setChecked(f.italic());
+    ui->actionUnderlineFont->setChecked(f.underline());
 }
 
 void notepad::currentCharFormatChanged(const QTextCharFormat &format)
@@ -1264,7 +1210,8 @@ void notepad::colorText(){
     }
 
     insertOthCh=false;
- }
+}
+
 
 
 
@@ -1288,6 +1235,4 @@ void notepad::on_actionhighlight_triggered()
 
     }
 }
-
-
 

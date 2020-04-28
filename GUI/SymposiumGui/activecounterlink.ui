@@ -30,10 +30,21 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 17pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">QSpinBox {
+border: 1px solid;
+font: 17pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116);
 border-color: rgb(58, 80, 116);
-background-color: white;</string>
+background-color: white;
+}
+QSpinBox::down-arrow {
+padding: 0px 4px 0px 4px;
+image: url(&quot;:/icon/down-arrow.png&quot;);
+ }
+QSpinBox::up-arrow {
+padding: 0px 4px 0px 4px;
+image: url(&quot;:/icon/up-arrow.png&quot;);
+ }</string>
    </property>
   </widget>
   <widget class="QPushButton" name="ok">

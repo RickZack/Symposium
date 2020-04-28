@@ -155,5 +155,19 @@
         <file>icon/addfile.png</file>
         <file>icon/addfolder.png</file>
         <file>icon/oie_transparent.png</file>
+        <file>icon/underline.png</file>
+        <file>icon/bold.png</file>
+        <file>icon/italic.png</file>
+        <file>icon/centered.png</file>
+        <file>icon/lefted.png</file>
+        <file>icon/lines.png</file>
+        <file>icon/righted.png</file>
+        <file>icon/square.png</file>
+        <file>icon/pdf.png</file>
+        <file>icon/copy.png</file>
+        <file>icon/paste.png</file>
+        <file>icon/scissors.png</file>
+        <file>icon/down-arrow.png</file>
+        <file>icon/up-arrow.png</file>
     </qresource>
 </RCC>

@@ -81,9 +81,6 @@ private slots:
     void on_Export_PDF_triggered();
     void on_actionCopy_triggered();
     void on_actionCut_triggered();
-    void textBold();
-    void textUnderline();
-    void textItalic();
     void textFamily(const QString &f);
     void textSize(const QString &p);
     void textStyle(int styleIndex);
@@ -93,6 +90,25 @@ private slots:
     void on_textEdit_cursorPositionChanged();
     void on_actionhighlight_triggered();
 
+    void on_actionBoldFont_triggered();
+    void on_actionItalicFont_triggered();
+
+
+    void on_actionUnderlineFont_triggered();
+
+    void on_actionAlignTextLeft_triggered();
+
+    void on_actionAlignCenter_triggered();
+
+    void on_actionAlignTextRight_triggered();
+
+    void on_actionAlignTextJustify_triggered();
+
+    void on_actionColorText_triggered();
+
+    //void on_comboBox_activated(int index);
+
+    //void on_fontComboBox_activated(const QString &arg1);
 
 private:
     Ui::notepad *ui;
@@ -119,7 +135,6 @@ private:
     QColor colPos;
     int supportColumn;
 
-    void setupTextActions();
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void colorChanged(const QColor &c);
     void fontChanged(const QFont &f);
@@ -148,6 +163,7 @@ private:
 
 
     void colorText();
+    void addStyleFormat();
 
     QAction *actionTextBold;
     QAction *actionTextUnderline;

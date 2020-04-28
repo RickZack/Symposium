@@ -13,16 +13,145 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:rgb(249, 247, 241);</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="qtexteditlabels" name="textEdit">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>100</y>
-      <width>351</width>
-      <height>291</height>
+      <x>10</x>
+      <y>70</y>
+      <width>781</width>
+      <height>431</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:white;
+border-color: rgb(58, 80, 116);</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>541</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="LayoutStyleText">
+     <property name="spacing">
+      <number>15</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetNoConstraint</enum>
+     </property>
+     <item>
+      <widget class="QComboBox" name="styleBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QComboBox {
+border: 1px solid;
+background-color:white;
+border-color: rgb(58, 80, 116);
+color: rgb(58, 80, 116);
+}
+QComboBox::drop-down {
+border: none;
+ }
+QComboBox::down-arrow {
+padding: 0px 4px 0px 4px;
+image: url(&quot;:/icon/down-arrow.png&quot;);
+ }</string>
+       </property>
+       <property name="editable">
+        <bool>false</bool>
+       </property>
+       <property name="currentIndex">
+        <number>-1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFontComboBox" name="fontComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Font&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QComboBox {
+border: 1px solid;
+background-color:white;
+border-color: rgb(58, 80, 116);
+color: rgb(58, 80, 116);
+}
+QComboBox::drop-down {
+border: none;
+ }
+QComboBox::down-arrow {
+padding: 0px 4px 0px 4px;
+image: url(&quot;:/icon/down-arrow.png&quot;);
+ }</string>
+       </property>
+       <property name="currentFont">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="sizeBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>74</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QComboBox {
+border: 1px solid;
+background-color:white;
+border-color: rgb(58, 80, 116);
+color: rgb(58, 80, 116);
+} 
+QComboBox::drop-down {
+border: none;
+ }
+QComboBox::down-arrow {
+padding: 0px 4px 0px 4px;
+image: url(&quot;:/icon/down-arrow.png&quot;);
+ }</string>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -43,7 +172,23 @@
     <addaction name="actionPaste"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuFormat">
+    <property name="title">
+     <string>Format</string>
+    </property>
+    <addaction name="actionBoldFont"/>
+    <addaction name="actionItalicFont"/>
+    <addaction name="actionUnderlineFont"/>
+    <addaction name="separator"/>
+    <addaction name="actionAlignTextLeft"/>
+    <addaction name="actionAlignCenter"/>
+    <addaction name="actionAlignTextRight"/>
+    <addaction name="actionAlignTextJustify"/>
+    <addaction name="separator"/>
+    <addaction name="actionColorText"/>
+   </widget>
    <addaction name="menuEdit"/>
+   <addaction name="menuFormat"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -62,13 +207,33 @@
    <addaction name="actionCut"/>
    <addaction name="actionPaste"/>
    <addaction name="separator"/>
-   <addaction name="separator"/>
    <addaction name="actionhighlight"/>
+  </widget>
+  <widget class="QToolBar" name="formatText">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionBoldFont"/>
+   <addaction name="actionItalicFont"/>
+   <addaction name="actionUnderlineFont"/>
+   <addaction name="separator"/>
+   <addaction name="actionAlignTextLeft"/>
+   <addaction name="actionAlignCenter"/>
+   <addaction name="actionAlignTextRight"/>
+   <addaction name="actionAlignTextJustify"/>
+   <addaction name="separator"/>
+   <addaction name="actionColorText"/>
   </widget>
   <action name="Export_PDF">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/resources/images/win/exportpdf.png</normaloff>:/resources/images/win/exportpdf.png</iconset>
+     <normaloff>:/icon/pdf.png</normaloff>:/icon/pdf.png</iconset>
    </property>
    <property name="text">
     <string>Export PDF</string>
@@ -77,7 +242,7 @@
   <action name="actionCopy">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/resources/images/win/editcopy.png</normaloff>:/resources/images/win/editcopy.png</iconset>
+     <normaloff>:/icon/copy.png</normaloff>:/icon/copy.png</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -86,7 +251,7 @@
   <action name="actionCut">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/resources/images/win/editcut.png</normaloff>:/resources/images/win/editcut.png</iconset>
+     <normaloff>:/icon/scissors.png</normaloff>:/icon/scissors.png</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -95,50 +260,10 @@
   <action name="actionPaste">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/resources/images/win/editpaste.png</normaloff>:/resources/images/win/editpaste.png</iconset>
+     <normaloff>:/icon/paste.png</normaloff>:/icon/paste.png</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
-   </property>
-  </action>
-  <action name="actionBold">
-   <property name="text">
-    <string>Bold</string>
-   </property>
-  </action>
-  <action name="actionItalic">
-   <property name="text">
-    <string>Italic</string>
-   </property>
-  </action>
-  <action name="actionUnderline">
-   <property name="text">
-    <string>Underline</string>
-   </property>
-  </action>
-  <action name="actionLeft">
-   <property name="text">
-    <string>Left</string>
-   </property>
-  </action>
-  <action name="actionCenter">
-   <property name="text">
-    <string>Center</string>
-   </property>
-  </action>
-  <action name="actionRight">
-   <property name="text">
-    <string>Right</string>
-   </property>
-  </action>
-  <action name="actionJustify">
-   <property name="text">
-    <string>Justify</string>
-   </property>
-  </action>
-  <action name="actionColor">
-   <property name="text">
-    <string>Color</string>
    </property>
   </action>
   <action name="actionhighlight">
@@ -151,6 +276,199 @@
    </property>
    <property name="toolTip">
     <string>highlight</string>
+   </property>
+  </action>
+  <action name="actionBoldFont">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/bold.png</normaloff>:/icon/bold.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bold</string>
+   </property>
+   <property name="toolTip">
+    <string>Bold</string>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+   <property name="priority">
+    <enum>QAction::LowPriority</enum>
+   </property>
+  </action>
+  <action name="actionItalicFont">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/italic.png</normaloff>:/icon/italic.png</iconset>
+   </property>
+   <property name="text">
+    <string>Italic </string>
+   </property>
+   <property name="toolTip">
+    <string>Italic</string>
+   </property>
+   <property name="font">
+    <font>
+     <italic>true</italic>
+    </font>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionUnderlineFont">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/underline.png</normaloff>:/icon/underline.png</iconset>
+   </property>
+   <property name="text">
+    <string>Underline</string>
+   </property>
+   <property name="toolTip">
+    <string>Underline</string>
+   </property>
+   <property name="font">
+    <font>
+     <underline>true</underline>
+    </font>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+   <property name="priority">
+    <enum>QAction::LowPriority</enum>
+   </property>
+  </action>
+  <action name="actionAlignTextLeft">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/lefted.png</normaloff>:/icon/lefted.png</iconset>
+   </property>
+   <property name="text">
+    <string>Align left</string>
+   </property>
+   <property name="toolTip">
+    <string>Align Left</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+   <property name="priority">
+    <enum>QAction::LowPriority</enum>
+   </property>
+  </action>
+  <action name="actionAlignCenter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/centered.png</normaloff>:/icon/centered.png</iconset>
+   </property>
+   <property name="text">
+    <string>AlignCenter</string>
+   </property>
+   <property name="toolTip">
+    <string>Align Center</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+   <property name="priority">
+    <enum>QAction::LowPriority</enum>
+   </property>
+  </action>
+  <action name="actionAlignTextRight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/righted.png</normaloff>:/icon/righted.png</iconset>
+   </property>
+   <property name="text">
+    <string>Align Right</string>
+   </property>
+   <property name="toolTip">
+    <string>Align right</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+   <property name="priority">
+    <enum>QAction::LowPriority</enum>
+   </property>
+  </action>
+  <action name="actionAlignTextJustify">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/lines.png</normaloff>:/icon/lines.png</iconset>
+   </property>
+   <property name="text">
+    <string>Align justify</string>
+   </property>
+   <property name="toolTip">
+    <string>Align justify</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+J</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+   <property name="priority">
+    <enum>QAction::LowPriority</enum>
+   </property>
+  </action>
+  <action name="actionColorText">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icon/square.png</normaloff>:/icon/square.png</iconset>
+   </property>
+   <property name="text">
+    <string>Color</string>
+   </property>
+   <property name="toolTip">
+    <string>Color</string>
    </property>
   </action>
  </widget>

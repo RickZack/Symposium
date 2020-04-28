@@ -268,7 +268,6 @@ void qtexteditlabels::setThisUserPrivilege(Symposium::privilege priv)
 
 void qtexteditlabels::translateCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users)
 {
-    bool scrollNeeded=false;
     for(auto it:users)
     {
         if(it.second.p!=Symposium::privilege::readOnly)
@@ -281,10 +280,8 @@ void qtexteditlabels::translateCursors(std::forward_list<std::pair<const Symposi
             {
                 cursors.find(it.first->getSiteId())->second.first=newBlock;
                 cursors.find(it.first->getSiteId())->second.second=newColumn;
-                scrollNeeded=true;
             }
         }
     }
-    if(scrollNeeded)
-        scroll();
+    scroll();
 }
