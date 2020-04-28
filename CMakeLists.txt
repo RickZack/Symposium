@@ -97,6 +97,8 @@ add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SHA256_LIB} ${CORE_FILES
         GUI/SymposiumGui/signup.cpp GUI/SymposiumGui/signup.h GUI/SymposiumGui/signup.ui
         GUI/SymposiumGui/textedit.cpp GUI/SymposiumGui/textedit.h
         GUI/SymposiumGui/unsuccessdeleteaccount.cpp GUI/SymposiumGui/unsuccessdeleteaccount.h GUI/SymposiumGui/unsuccessdeleteaccount.ui
+        GUI/SymposiumGui/winmanager.cpp GUI/SymposiumGui/winmanager.h
+        GUI/SymposiumGui/symwininterface.h GUI/SymposiumGui/symwininterface.cpp
         )
 
 # Files and headers for SymposiumServer target: this is the executable that will run the server

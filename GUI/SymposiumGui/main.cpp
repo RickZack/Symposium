@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
     Symposium::clientdispatcher *cl= new Symposium::clientdispatcher();
     w.setClientDispatcher(cl);
     w.show();
-    notepad *notepadWindow = new notepad(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "");
-    notepadWindow->show();
-    notepadWindow->showLabels();
+    notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "");
+    notepadWindow.show();
+    notepadWindow.showLabels();
 
     int ret=a.exec();
     delete cl;
