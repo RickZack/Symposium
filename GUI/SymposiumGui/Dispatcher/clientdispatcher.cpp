@@ -129,6 +129,9 @@ void clientdispatcher::readyRead(){
         }case 15:{
             this->finestraActiveNonLink->unsuccessLink(mes->getErrDescr());
             break;
+        }case 16:{
+            this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
+            break;
         }
         }
 
@@ -593,8 +596,8 @@ void clientdispatcher::successCreateNewDir(const std::string ID){
     this->finestraDirectory->successCreate(ID);
 }
 
-void clientdispatcher::successCreateNewSource(const std::string ID){
-    this->finestraDirectory->successNewSource(ID);
+void clientdispatcher::successCreateNewSource(const std::string ID, document &doc){
+    this->setTextEdit(doc.getId(),this->finestraDirectory->successNewSource(ID, doc));
 }
 
 void clientdispatcher::successRenameResource(){
@@ -706,6 +709,11 @@ void clientdispatcher::setAllUser(alluser *au){
 void clientdispatcher::setActiveNonLink(activenonlink *anl){
     this->finestraActiveNonLink = anl;
     this->currentWindow = 15;
+}
+
+void clientdispatcher::setchoosepriv(choosepriv *pr){
+    this->finestraChoosePriv = pr;
+    this->currentWindow = 16;
 }
 
 /*void clientdispatcher::signupExpired(){

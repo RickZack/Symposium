@@ -44,12 +44,17 @@ directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatch
 
 std::string directory::manipulationHome(std::string& s){
     std::string result;
+    std::string estratta;
     std::size_t found;
     std::size_t foundn = 0;
     std::size_t dim_s = s.size();
     //delete first username and space
     found = s.find_first_of(" ");
     s.erase(0, found+1);
+    //check the first character is space yet
+    while(s.substr(0,1) == " "){
+        s.erase(0,1);
+    }
     dim_s = s.size();
     //check if there is no directory
     if(dim_s == 0)
@@ -57,7 +62,16 @@ std::string directory::manipulationHome(std::string& s){
     //add space between directory
     while(dim_s != 0){
         foundn = s.find_first_of("\n");
-        result = result + s.substr(0,foundn+1) + " ";
+        estratta = s.substr(0,foundn+1);
+        //delete start space
+        while(estratta.substr(0,1) == " "){
+            estratta.erase(0,1);
+        }
+        //delete final space
+        while(estratta.substr(estratta.size()-1,1) == " "){
+            estratta.erase(estratta.size()-1,1);
+        }
+        result = result +  estratta + " ";
         s.erase(0,foundn+1);
         dim_s = s.size();
     }
@@ -172,7 +186,7 @@ std::pair<std::string,std::string> directory::searchForPriv(std::string word,std
            }
        }
 
-    idPriv={id_to_return,priv_to_return};
+    idPriv=std::make_pair(id_to_return, priv_to_return);
     return idPriv;
 }
 
@@ -503,9 +517,10 @@ void directory::on_pushButton_4_clicked()
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
 
-    ui->name_2->setText(" "); // da rimuovere
-    //cl->createNewSource(path,nameDocument);
-    //----------------------------------------------------------------------
+    //ui->name_2->setText(" "); // da rimuovere
+    #ifdef DISPATCHER_ON
+    cl->createNewSource(this->path,nameDocument);
+    #else
     // DA RIMUOVERE
     std::string id="1"; //PER ESEMPIO
 
@@ -523,35 +538,45 @@ void directory::on_pushButton_4_clicked()
     {
       QMessageBox::warning(this, "Error Message","It is no possible to open the selected Document");
     }
-    //-----------------------------------------------------------------------------------------------
+    #endif
 }
 
-void directory::successNewSource(std::string id){
-
+notepad* directory::successNewSource(std::string id, Symposium::document &doc){
     QString name= ui->name_2->text();
-    std::string nameDocument=name.toStdString();
-    ui->name_2->setText(" ");
+    ui->name_2->clear();
     count++;
-    std::string new_str=" file "+id+' '+name.toStdString()+' '+"owner"+'\n';
-    str=str+new_str;
+    if(str.empty()){
+        str = "file "+id+' '+name.toStdString()+' '+"owner"+'\n';
+    }else{
+        str = str + " file "+id+' '+name.toStdString()+' '+"owner"+'\n';
+    }
     ui->myListWidget->clear();
     int count=number_elements(str);
     listGenerate(str,count);
+    //open the newly created document
+    notepad* nw= new notepad(this,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,doc);
+    nw->show();
+    nw->showLabels();
+    return nw;
 }
 
 
 void directory::on_back_button_clicked()
 {
     std::string temp;
-    std::string new_str;
+    std::size_t found;
 
     if(this->openFolders!=0){
-        std::string pathLabel=ui->pathLabel->text().toStdString();
-        pathLabel.erase(pathLabel.end()-1);
-        std::size_t found=pathLabel.find_last_of("/");
-        pathLabel.erase(found+1,pathLabel.size());
-        ui->pathLabel->setText(QString::fromStdString(pathLabel));
 
+        if(this->openFolders == 1){
+            ui->pathLabel->setText(QString::fromStdString("Path:"));
+        }else{
+            std::string pathLabel=ui->pathLabel->text().toStdString();
+            pathLabel.erase(pathLabel.end()-1);
+            found=pathLabel.find_last_of("/");
+            pathLabel.erase(found+1,pathLabel.size());
+            ui->pathLabel->setText(QString::fromStdString(pathLabel));
+        }
         #ifdef DISPATCHER_ON
         //aggiorniamo il path
         //togliamo l'ultimo "/"
@@ -564,8 +589,9 @@ void directory::on_back_button_clicked()
         if(this->openFolders==0){
             actualId = "0";
             previousId = "0";
-            new_str=cl->showHome();
-            new_str = manipulationHome(new_str);
+            str=cl->showHome();
+            str = manipulationHome(str);
+            ui->back_button->hide();
         }else{
             actualId = previousId;
             temp = path;
@@ -579,14 +605,14 @@ void directory::on_back_button_clicked()
                 previousId = temp.substr(found+1,temp.size());
             }
             temp = temp + "/";
-            new_str=cl->getStr(this->actualId, temp);
+            str=cl->getStr(this->actualId, temp);
+            str = manipulationHome(str);
         }
         ui->myListWidget->clear();
-        int count=number_elements(new_str);
-        listGenerate(new_str,count);
+        int count=number_elements(str);
+        listGenerate(str,count);
         #endif
     }else{
-        //this->openFolders=-1;
         std::string pathLabel=ui->pathLabel->text().toStdString();
         pathLabel.erase(5,pathLabel.size());
         ui->pathLabel->setText(QString::fromStdString(pathLabel));
@@ -611,35 +637,44 @@ void directory::on_okButton_clicked()
     foreach(QListWidgetItem *items, selectedItem){
          std::string oldName=items->text().toStdString();
          std::string id=searchForId(oldName,str,count);
-         //cl->renameResource(this->path,id, newName);
-         //------------------------------------------------------
-         // QUESTE RIGHE VANNO LASCIATE SOLO NEL SUCCESS RENAME
-         items->setText(" ");
+         #ifdef DISPATCHER_ON
+         cl->renameResource(this->path,id, newName.toStdString());
+         #else
          items->setText(newName);
          ui->myListWidget->currentItem()->setSelected(false);
-         ui->renameLabel->setText(" ");
+         ui->renameLabel->clear();
          ui->okButton->hide();
          ui->renameLabel->hide();
          ui->renameName->hide();
          ui->okButton_2->hide();
-         //-------------------------------------------------------
+         #endif
     }
 
 }
 
 void directory::successRename(){
-    QString newName=ui->renameName->text();
-    ui->renameName->setText(" ");
+    QString newName=ui->renameLabel->text();
+    ui->renameLabel->clear();
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
-        items->setText(" ");
         items->setText(newName);
         ui->myListWidget->currentItem()->setSelected(false);
-        ui->renameLabel->setText(" ");
+        ui->renameLabel->clear();
         ui->okButton->hide();
         ui->renameLabel->hide();
         ui->renameName->hide();
         ui->okButton_2->hide();
+    }
+    //aggiorniamo la stringa del contenuto in modo che ci sia il nuovo nome della directory
+    if(this->actualId=="0"){
+        str = cl->showHome();
+        str = manipulationHome(str);
+    }else{
+        std::string temp = path;
+        temp.erase(temp.end()-1);
+        temp.erase(temp.find_last_of("/")+1,temp.size());
+        str=cl->getStr(this->actualId, temp);
+        str = manipulationHome(str);
     }
 }
 
@@ -677,25 +712,21 @@ void directory::openSelectedSource(){
          // dermine the path of the folders in which I enter.
          if(value=="directory")
          {
-
              this->previousId=this->actualId;
              this->actualId=searchForId(nameSource,str,count);
-             //path+=actualId+'/'; // ok lo crea in modo corretto
              this->openFolders++;
              // open the folder Window
              #ifdef DISPATCHER_ON
-             std::string str1=cl->getStr(this->actualId, this->path);
+             str=cl->getStr(this->actualId, this->path);
+             str = manipulationHome(str);
              path+=actualId+'/';
              #else
              std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
              #endif
-             str=str1;
              ui->pathLabel->setText(ui->pathLabel->text()+QString::fromStdString(nameSource)+'/');
              this->openWindow(str);
 
-         }
-
-         else if(value=="file")
+         }else if(value=="file")
 
              // id and path e privilegio con cui apre
          {
@@ -703,12 +734,12 @@ void directory::openSelectedSource(){
              std::string id=idPriv.first;
              std::string initialPriv=idPriv.second;
              // I have to open the choosepriv first
-             chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
-             //cl->setchoosepriv(chooseprivWindow)
+             chooseprivWindow = new choosepriv(this, this->path, id, initialPriv, this->cl);
+             #ifdef DISPATCHER_ON
+             cl->setchoosepriv(chooseprivWindow);
+             #endif
              chooseprivWindow->show();
-         }
-         else
-         {
+         }else{
              // it is a SymLink
              // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
              // path e nome che ce li ho.
@@ -722,7 +753,7 @@ void directory::openSelectedSource(){
              chooseprivWindow->show();
 
          }
-
+    qDebug() << "str: " << QString::fromStdString(str) << " path: " << QString::fromStdString(path);
  }// foreach
 
 }

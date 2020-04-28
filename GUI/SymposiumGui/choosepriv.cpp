@@ -1,9 +1,11 @@
+//#define DISPATCHER_ON
 #include "choosepriv.h"
+#include "Dispatcher/clientdispatcher.h"
 #include "ui_choosepriv.h"
 
-choosepriv::choosepriv(QWidget *parent,std::string path, std::string idSource, std::string oldPriv) :
+choosepriv::choosepriv(QWidget *parent,std::string path, std::string idSource, std::string oldPriv, Symposium::clientdispatcher *cl) :
     QMainWindow(parent),
-    path(path),idSource(idSource),oldPriv(oldPriv),ui(new Ui::choosepriv)
+    path(path), idSource(idSource), oldPriv(oldPriv), ui(new Ui::choosepriv), cl(cl)
 {
     ui->setupUi(this);
     QPixmap pix_writer(":/resources/cartelle/writer_icon");
@@ -34,10 +36,7 @@ choosepriv::~choosepriv()
     delete ui;
 }
 
-void choosepriv::on_pushButton_clicked()
-{
-
-
+void choosepriv::on_pushButton_clicked(){
     if(ui->writer->isEnabled())
         //privilege="writer";
         priv= Symposium::privilege::modify;
@@ -48,21 +47,19 @@ void choosepriv::on_pushButton_clicked()
         //privilege="owner";
         priv= Symposium::privilege::owner;
 
-
     // qui chiamo il metodo in cui gli passo il path e il privilege
-     //cl->openSource(this->path,priv,idSource);
-
-    // QUESTO ANDRA' TOLTO DA QUI E LASCIATO SOLTANTO NEL successOpen()
+    #ifdef DISPATCHER_ON
+    cl->openSource(this->path,this->idSource,this->priv);
+    #else
     notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
-    this->hide();
     notepadWindow->show();
     notepadWindow->showLabels();
+    #endif
+    this->hide();
 }
 
 void choosepriv::on_pushButton_2_clicked()
 {
-    //directory *dirWindow=new directory(this);
-    //dirWindow->show();
     this->hide();
 }
 
@@ -70,16 +67,11 @@ void choosepriv::on_pushButton_2_clicked()
 // il successOpen riceve un documento, e stampa tutti i simboli che sono in esso presenti
 
 notepad* choosepriv::successOpen(Symposium::document &doc){
-
     notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path,doc);
-    // cl->setNotepad(notepadWindow)
     this->hide();
     notepadWindow->show();
     notepadWindow->showLabels();
     return notepadWindow;
-
-
-
 }
 
 // DA CANCELLARE!

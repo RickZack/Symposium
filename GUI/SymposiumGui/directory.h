@@ -65,7 +65,7 @@ public:
      * @param id  of the file
      * @param priv of the file
      */
-    void successNewSource(std::string id);
+    notepad* successNewSource(std::string id, Symposium::document &doc);
 
 
     /**

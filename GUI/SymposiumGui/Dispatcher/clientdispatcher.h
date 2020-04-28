@@ -233,7 +233,7 @@ namespace Symposium{
 
         void successCreateNewDir(const std::string ID);
 
-        void successCreateNewSource(const std::string ID);
+        void successCreateNewSource(const std::string ID, document &doc);
 
         void successRenameResource();
 
@@ -320,6 +320,8 @@ namespace Symposium{
         void setAllUser(alluser *au);
 
         void setActiveNonLink(activenonlink *anl);
+
+        void setchoosepriv(choosepriv *pr);
 
         void stopTimer();
 

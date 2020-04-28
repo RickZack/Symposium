@@ -143,7 +143,7 @@ void SymClient::createNewSource(const std::string &path, const std::string &name
                                     (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successCreateNewSource(std::to_string(idToAssign));
+    this->dispatcher->successCreateNewSource(std::to_string(idToAssign), docReq);
     #endif
 }
 
@@ -463,7 +463,7 @@ void SymClient::updateCursorPos(uint_positive_cnt::type userSiteId, uint_positiv
 }
 
 std::string SymClient::directoryContent(std::string &ID_Cartella, std::string &path){
-    return this->getLoggedUser().getHome()->getDir(path,ID_Cartella)->print(std::to_string(this->getLoggedUser().getSiteId()),false);
+    return this->getLoggedUser().getHome()->getDir(path,ID_Cartella)->print(this->getLoggedUser().getUsername(),false);
 }
 
 void SymClient::removeUser(bool msgRcv) {

@@ -8,12 +8,16 @@ namespace Ui {
 class choosepriv;
 }
 
+namespace Symposium{
+class clientdispatcher;
+}
+
 class choosepriv : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit choosepriv(QWidget *parent = nullptr,std::string path=" ", std::string idSource=" ", std::string oldPriv=" ");
+    explicit choosepriv(QWidget *parent = nullptr,std::string path="", std::string idSource="", std::string oldPriv="", Symposium::clientdispatcher *cl=nullptr);
     ~choosepriv();
     notepad* successOpen(Symposium::document &doc);
     void failureOpen();
@@ -35,6 +39,7 @@ private:
     Ui::choosepriv *ui;
     notepad *notepadWindow;
     std::string privilege;
+    Symposium::clientdispatcher *cl;
 };
 
 #endif // CHOOSEPRIV_H

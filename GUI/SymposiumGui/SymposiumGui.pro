@@ -74,7 +74,9 @@ SOURCES += \
         textedit.cpp \
         Dispatcher/clientdispatcher.cpp \
         Dispatcher/serverdispatcher.cpp \
-        unsuccessdeleteaccount.cpp
+        unsuccessdeleteaccount.cpp \
+        symwininterface.cpp \
+        winmanager.cpp
 
 HEADERS += \
         about.h \
@@ -123,7 +125,9 @@ HEADERS += \
         textedit.h \
         Dispatcher/clientdispatcher.h \
         Dispatcher/serverdispatcher.h \
-        unsuccessdeleteaccount.h
+        unsuccessdeleteaccount.h \
+        symwininterface.h \
+        winmanager.h
 
 FORMS += \
         about.ui \
