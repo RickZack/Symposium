@@ -69,9 +69,9 @@ class SymWinInterface{
     friend struct SymMainWinInterface;
     friend struct SymNotepadWinInterface;
 protected:
-    SymWinManager& handler;                 /**< a reference to the windows handler, used to inform when this window is opening another one */
     clientDispatcher& cl;                /**< a reference to the @ref clientDispatcher to whom actions are to be requested */
 private:
+    SymWinManager& handler;              /**< a reference to the windows handler, used to inform when this window is opening another one */
     bool forceQuit;                      /**< indicates whether the window is closed by the code (true) or explicitly by the user. False by default */
     SymWinInterface* s_parent;           /**< the window that opened this window*/
 
@@ -158,7 +158,7 @@ struct SymNotepadWinInterface: public SymChildWinInterface{
     virtual void failedInsert(const Symposium::symbol& sym)=0;
     virtual void failedRemove(const Symposium::symbol& sym)=0;
     /**
-     * @brief forceClose used by the SymWinManager to close all this SymNotepadWinInterface window forcefully
+     * @brief forceClose used by the SymWinManager to close this SymNotepadWinInterface window forcefully
      */
     void forceClose();
 protected:
@@ -182,6 +182,11 @@ protected:
      * It is to be called when user closes the current window
      */
     void closeNotepad();
+    /**
+     * @brief backToMainWin notifies the SymWinManager to close all the other notepads, then
+     * close itself and call SymChildWinInterface::backToMainWin() to return to the main window
+     */
+    void backToMainWin();
 };
 
 #endif // SCREENINTERFACE_H

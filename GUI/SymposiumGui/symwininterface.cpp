@@ -38,7 +38,7 @@ SymWinInterface::SymWinInterface(SymWinManager &m, clientDispatcher &p): handler
 
 bool SymWinInterface::closedByUser() const
 {
-    return forceQuit==false;
+    return !forceQuit;
 }
 
 SymWinInterface::operator QWidget*()
@@ -123,6 +123,13 @@ void SymNotepadWinInterface::obtainFocus() {
 void SymNotepadWinInterface::closeNotepad()
 {
     handler.removeNotepad(getId());
+}
+
+void SymNotepadWinInterface::backToMainWin()
+{
+    handler.removeNotepad(getId());
+    handler.closeAllNotepads();
+    SymChildWinInterface::backToMainWin();
 }
 
 void SymNotepadWinInterface::forceClose()
