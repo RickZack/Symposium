@@ -45,18 +45,18 @@ void SymWinManager::setActive(SymWinInterface &newScreen){
     qDebug()<<"Now active"<<dynamic_cast<QWidget*>(current)->metaObject()->className();
 }
 
-void SymWinManager::addNotepad(int id, SymNotepadWinInterface &tx) {
+void SymWinManager::addNotepad(uint_positive_cnt::type id, SymNotepadWinInterface &tx) {
     editors.push_front({id, &tx});
 }
 
-SymNotepadWinInterface &SymWinManager::getNotepad(int id) {
+SymNotepadWinInterface &SymWinManager::getNotepad(uint_positive_cnt::type id) {
     for(auto& ed: editors)
         if (ed.first==id)
             return *ed.second;
     throw std::exception();
 }
 
-void SymWinManager::removeNotepad(int id)
+void SymWinManager::removeNotepad(uint_positive_cnt::type id)
 {
     for(auto& ed: editors)
         if (ed.first==id)

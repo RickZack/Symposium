@@ -51,6 +51,7 @@ SymWinInterface::operator QWidget*()
 
 void SymChildWinInterface::backToParent()
 {
+    handler.closeAllNotepads();
     goToWindow(*s_parent);
     this->forceQuit=true;
     this->operator QWidget *()->close();
@@ -58,6 +59,7 @@ void SymChildWinInterface::backToParent()
 
 void SymChildWinInterface::backToMainWin()
 {
+    handler.closeAllNotepads();
     SymWinInterface* p=this;
     for(; p->s_parent!=nullptr; p=p->s_parent){
         p->forceQuit=true;
@@ -128,7 +130,6 @@ void SymNotepadWinInterface::closeNotepad()
 void SymNotepadWinInterface::backToMainWin()
 {
     handler.removeNotepad(getId());
-    handler.closeAllNotepads();
     SymChildWinInterface::backToMainWin();
 }
 
