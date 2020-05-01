@@ -31,6 +31,8 @@
 #define SCREENINTERFACE_H
 #include<QString>
 #include<QWidget>
+#include <counter.h>
+#include "../Symposium.h"
 class clientDispatcher;
 
 class SymWinManager;
@@ -153,7 +155,7 @@ struct SymMainWinInterface: public SymWinInterface{
 
 struct SymNotepadWinInterface: public SymChildWinInterface{
     SymNotepadWinInterface(SymWinInterface& parentScreen, isQWidget::QWidgetType arg);
-    virtual int getId()=0;
+    virtual uint_positive_cnt::type getId()=0;
     virtual void successfullInsert(const Symposium::symbol& sym)=0;
     virtual void failedInsert(const Symposium::symbol& sym)=0;
     virtual void failedRemove(const Symposium::symbol& sym)=0;
