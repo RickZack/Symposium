@@ -73,7 +73,6 @@ bool included(unsigned ind0, unsigned ind){
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)) {
     id=idCounter;
     idCounter++;
-
 }
 
 uint_positive_cnt::type document::getId() const {
@@ -137,7 +136,6 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
 
     return newSymb;
 
-
 }
 
 symbol document::generatePosition(const std::pair<unsigned int, unsigned int> indexes, const symbol &toInsert){
@@ -145,7 +143,8 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
     int siteIdB;
     symbol symB=findPosBefore(indexes);
     if(symB==emptySymbol){
-        siteIdB=-1;
+        //siteIdB=-1;
+        siteIdB;
     }else{
         posBefore=symB.getPos();
         siteIdB=symB.getSiteId();
@@ -155,7 +154,8 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
     int siteIdA;
     symbol symA=findPosAfter(indexes);
     if(symA==emptySymbol){
-        siteIdA=-1;
+        //siteIdA=-1;
+        siteIdA;
     }else{
         posAfter=symA.getPos();
         siteIdA=symB.getSiteId();
@@ -258,27 +258,38 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
     }
 
     if(id2-id1>1){
+        qDebug()<<"Id2-id1>1"<<id2<<id1;
         unsigned newDigit= generateIdBetween(id1,id2,boundaryStrategy);
+        qDebug()<<"NewDigit"<<newDigit;
         newPos.push_back(newDigit);
         return newPos;
     }else if(id2-id1==1){
+        qDebug()<<"Id2-id1==1"<<id2<<id1;
         newPos.push_back(id1);
         // pos1.slice(1) will remove from the posBefore the first element
         std::vector<int> pos1=posBefore;
-        pos1.erase(pos1.begin());
+        qDebug()<<"PosB"<<posBefore;
+        if(!pos1.empty()){
+            pos1.erase(pos1.begin());
+        }
+        qDebug()<<"Pos1"<<pos1;
         std::vector<int> pos2;
         return generatePosBetween(pos1, pos2, newPos, level+1 , siteIdB, siteIdA);
 
     }else if(id1==id2){
         if(siteIdB<siteIdA){
+            qDebug()<<"Id2-id1==1"<<id2<<id1<<"SiteIdB<SiteIdA"<<siteIdB<<siteIdA;
             newPos.push_back(id1);
             //pos1.slice(1)
             std::vector<int> pos1=posBefore;
             pos1.erase(pos1.begin());
             std::vector<int> pos2;
+             qDebug()<<"Pos1"<<pos1;
+              qDebug()<<"Pos2"<<pos2;
             return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
 
         }else if(siteIdB==siteIdA){
+            qDebug()<<"Id2-id1==1"<<id2<<id1<<"SiteIdB==SiteIdA"<<siteIdB<<siteIdA;
             newPos.push_back(id1);
             //pos1.slice(1)
             std::vector<int> pos1=posBefore;
@@ -286,11 +297,16 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
             //pos2.slice(1)
             std::vector<int> pos2=posAfter;
             pos2.erase(pos2.begin());
+            qDebug()<<"Pos1"<<pos1;
+             qDebug()<<"Pos2"<<pos2;
             return generatePosBetween(pos1, pos2, newPos, level + 1, siteIdB, siteIdA);
         }
         else{
             //throw "Fix position sorting";
-            std::cout<<"Sono entrato qui";
+            qDebug()<<"Id1"<<id1<<"Id2"<<id2;
+            qDebug()<<"siteIdB"<<siteIdB;
+            qDebug()<<"SiteIda"<<siteIdA;
+            std::cout<<"SONO ENTRATO NELL'ECCEZIONE";
 
         }
     }
@@ -300,7 +316,6 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
 char document::retrieveStrategy(const int level){
 
    int sizeSC=strategyCache.size();
-    assertIndexes(included,level,strategyCache.size(),UnpackFileLineFunction());
    if(level<sizeSC){
         return strategyCache[level];
     }
@@ -331,7 +346,9 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
         }
     }
 
+    qDebug()<<"Id1"<<id1<<"Id2"<<id2<<"New one"<<floor(rand()%(id2-id1))+id1;
     return floor(rand()%(id2-id1))+id1;
+
 
 }
 
@@ -344,9 +361,11 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     // TO DO
     this->updateCursorPos(siteId,i0,i1);
     symbols[i0].erase(symbols[i0].begin()+i1);
-
     return sym;
+
 }
+
+
 
 std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
 
