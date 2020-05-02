@@ -5,15 +5,16 @@
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
 
-deleteAccount::deleteAccount(QWidget *parent) :
+deleteAccount::deleteAccount(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),
+    SymChildWinInterface (si, isQWidget::isQwidgetType(*this)),
     ui(new Ui::deleteAccount)
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
+    //connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
+    //connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(delete_click()));
     enableButtons();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
@@ -21,28 +22,44 @@ deleteAccount::deleteAccount(QWidget *parent) :
     movie->start();
 }
 
+void deleteAccount::success(){
+    this->disc = false;
+    this->successDeleteAccount();
+}
+
+void deleteAccount::failure(const QString& toPrint){
+    if(toPrint=="-1"){
+        this->disc = false;
+        this->errorConnection();
+    }else{
+        this->disc = true;
+        this->errorDeleteUser(toPrint);
+    }
+}
+
 void deleteAccount::successDeleteAccount()
 {
-    /*enableButtons();
+    enableButtons();
     enableStyleButtons();
-    this->close();
-    parentWidget()->hide();
-    mw=new MainWindow();
+    //this->close();
+    //parentWidget()->hide();
+    backToMainWin();
+    /*mw=new MainWindow();
     mw->disableStyleButtons();
     mw->setClientDispatcher(cl);
-    mw->show();
+    mw->show();*/
     QString str="Your account has been successfully deleted!";
     notWindow = new notification(mw, str);
     int ret=notWindow->exec();
     if(ret==0)
-        mw->enableButtonsAfter();*/
+        mw->enableButtonsAfter();
 }
 
-void deleteAccount::errorDeleteUser(std::string errorMess)
+void deleteAccount::errorDeleteUser(const QString& errorMess)
 {
     enableButtons();
     enableStyleButtons();
-    ui->haveto->setText(QString::fromStdString(errorMess));
+    ui->haveto->setText(errorMess);
     ui->haveto->show();
 }
 
@@ -50,6 +67,12 @@ void deleteAccount::errorDeleteUser(std::string errorMess)
 deleteAccount::~deleteAccount()
 {
     delete ui;
+}
+
+void deleteAccount::closeEvent(QCloseEvent *event){
+    if (this->disc==true){
+        backToParent();
+    }
 }
 
 void deleteAccount::delete_click()
@@ -62,7 +85,7 @@ void deleteAccount::delete_click()
         disableStyleButtons();
         //------------------------------------------------------------------PARTE DA DECOMENTARE
         #ifdef DISPATCHER_ON
-        cl->removeUser(password);
+        cl.removeUser(password);
         #endif
         //------------------------------------------------------------------
     }
@@ -101,16 +124,16 @@ void deleteAccount::disableStyleButtons()
     ui->cancel->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 }
 
-void deleteAccount::setClientDispatcher(Symposium::clientdispatcher *cl){
+/*void deleteAccount::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
-}
+}*/
 
 void deleteAccount::errorConnection()
 {
     enableButtons();
     enableStyleButtons();
-    /*errorWindow = new errorconnection(this);
-    errorWindow->exec();*/
+    errorWindow = new errorconnection(this);
+    errorWindow->exec();
 }
 
 void deleteAccount::errorConnectionLogout(std::string str)
@@ -118,9 +141,13 @@ void deleteAccount::errorConnectionLogout(std::string str)
     enableButtons();
     enableStyleButtons();
     errorLog = new errorlogout(nullptr, QString::fromStdString(str));
-    this->close();
-    parentWidget()->close();
+    //this->close();
+    //parentWidget()->close();
     errorLog->exec();
+}
+
+void deleteAccount::on_cancel_clicked(){
+    this->close();
 }
 
 

@@ -228,7 +228,7 @@ namespace Symposium{
 
         //void successSignUp();
 
-        void successDeleteAccount();
+        //void successDeleteAccount();
 
         //void successEditUser();
 

@@ -472,7 +472,7 @@ void SymClient::removeUser(bool msgRcv) {
     this->setLoggedUser(*u);
     this->userColors.clear();
     #ifdef DISPATCHER_ON
-    this->dispatcher->successDeleteAccount();
+    this->dispatcher->successAction();
     #endif
 }
 

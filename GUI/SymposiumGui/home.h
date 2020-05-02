@@ -90,7 +90,7 @@ private slots:
 
 private:
     Ui::home *ui;
-    deleteAccount *deleteAccountWindow;
+    //deleteAccount *deleteAccountWindow;
     std::string pwd;
     inserturi *inserturiWindow;
     //changeUserInfo *changeWindow;

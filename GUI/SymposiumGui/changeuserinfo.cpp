@@ -67,10 +67,11 @@ void changeUserInfo::success(){
 }
 
 void changeUserInfo::failure(const QString& toPrint){
-    this->esc = false;
     if(toPrint=="-1"){
+        this->esc = false;
         this->errorConnection();
     }else{
+        this->esc = true;
         this->errorEditUser(toPrint);
     }
 }

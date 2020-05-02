@@ -53,6 +53,9 @@ void home::on_delete_2_clicked()
     //disableStyleButtons();
     //deleteAccountWindow = new deleteAccount(this);
     //deleteAccountWindow->setClientDispatcher(cl);
+    this->disc = false;
+    deleteAccount* del = new deleteAccount(nullptr, *this);
+    goToWindow(*del);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     //cl->setDeleteAccount(deleteAccountWindow);
@@ -177,7 +180,6 @@ void home::successLogout()
     enableButtons();
     enableStyleButtons();
     //this->hide();
-    this->disc=1;
     backToMainWin();
     /*mw=new MainWindow();
     mw->setClientDispatcher(cl);

@@ -122,7 +122,7 @@ void clientdispatcher::readyRead(){
             this->finestraInsertUri->unsuccessInsert(mes->getErrDescr());
             break;
         }case 5:{
-            this->finestraEliminaAccount->errorDeleteUser(mes->getErrDescr());
+            //this->finestraEliminaAccount->errorDeleteUser(mes->getErrDescr());
             break;
         }case 7:{
             //this->finestraModificaUser->errorEditUser(mes->getErrDescr());
@@ -575,13 +575,13 @@ void clientdispatcher::successLogout(){
 
 void clientdispatcher::successSignUp(){
     this->winmanager.activeWindow().success();
-}*/
+}
 
 void clientdispatcher::successDeleteAccount(){
     this->finestraEliminaAccount->successDeleteAccount();
 }
 
-/*void clientdispatcher::successEditUser(){
+void clientdispatcher::successEditUser(){
     this->finestraModificaUser->successEditUser();
 }*/
 
