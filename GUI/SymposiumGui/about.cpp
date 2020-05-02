@@ -1,14 +1,16 @@
 #include "about.h"
 #include "ui_about.h"
 
-about::about(QWidget *parent) :
+about::about(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),
+    SymChildWinInterface (si, isQWidget::isQwidgetType(*this)),
     ui(new Ui::about)
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    connect(ui->ok, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
+    //connect(ui->ok, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
+    setAttribute( Qt::WA_DeleteOnClose );
 }
 
 about::~about()
@@ -30,4 +32,8 @@ void about::showEvent(QShowEvent* event)
     anim->setEndValue(1.0);
     anim->setDuration(1000);
     anim->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void about::closeEvent(QCloseEvent *event){
+    backToParent();
 }

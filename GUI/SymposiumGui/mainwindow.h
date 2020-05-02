@@ -9,6 +9,7 @@
 #include "sigin.h"
 #include "signup.h"
 #include "exit.h"
+#include "symwininterface.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -18,12 +19,16 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public SymMainWinInterface
 {
     Q_OBJECT
 
+    //Not useful on this window
+    void success() override{}
+    void failure(const QString&) override{}
+
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent, SymWinManager& m, Symposium::clientdispatcher& p);
     ~MainWindow();
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     /**
@@ -57,19 +62,19 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    about *aboutWindow;
-    sigin *signinWindow;
-    signup *signupWindow;
+    //about *aboutWindow;
+    //sigin *signinWindow;
+    //signup *signupWindow;
     Symposium::clientdispatcher *cl;
     class exit *ex;
     /**
      * @brief quit from application
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     /**
      * @brief called when show() is invoked for this window and perform an animation
      */
-    void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent* event) override;
     /**
      * @brief enable the style of buttons
      */

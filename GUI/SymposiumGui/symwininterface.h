@@ -31,19 +31,23 @@
 #define SCREENINTERFACE_H
 #include<QString>
 #include<QWidget>
-#include <counter.h>
-#include "../Symposium.h"
-class clientDispatcher;
+//#include "../../counter.h"
+#include "../../Symposium.h"
+
+
+namespace Symposium{
+class clientdispatcher;
+}
 
 class SymWinManager;
 
 struct SymNotepadWinInterface;
 
-namespace Symposium {
+/*namespace Symposium {
     struct symbol{
         void dummyMethod() const{}
     };
-}
+}*/
 
 
 struct isQWidget{
@@ -71,7 +75,7 @@ class SymWinInterface{
     friend struct SymMainWinInterface;
     friend struct SymNotepadWinInterface;
 protected:
-    clientDispatcher& cl;                /**< a reference to the @ref clientDispatcher to whom actions are to be requested */
+    Symposium::clientdispatcher& cl;                /**< a reference to the @ref clientDispatcher to whom actions are to be requested */
 private:
     SymWinManager& handler;              /**< a reference to the windows handler, used to inform when this window is opening another one */
     bool forceQuit;                      /**< indicates whether the window is closed by the code (true) or explicitly by the user. False by default */
@@ -82,7 +86,7 @@ private:
      * @param m reference to the @ref winManager the window will use
      * @param p reference to the @ref clientDispatcher the window will use
      */
-    SymWinInterface(SymWinManager& m, clientDispatcher& p);
+    SymWinInterface(SymWinManager& m, Symposium::clientdispatcher& p);
 
     /**
      * @brief operator QWidget * used to show, close or hide a Qt window.
@@ -150,12 +154,12 @@ protected:
  * @brief base class used forSymposiumGUI windows that haven't to have a parent screen
  */
 struct SymMainWinInterface: public SymWinInterface{
-    SymMainWinInterface(SymWinManager& m, clientDispatcher& p, isQWidget::QWidgetType);
+    SymMainWinInterface(SymWinManager& m, Symposium::clientdispatcher& p, isQWidget::QWidgetType);
 };
 
 struct SymNotepadWinInterface: public SymChildWinInterface{
     SymNotepadWinInterface(SymWinInterface& parentScreen, isQWidget::QWidgetType arg);
-    virtual uint_positive_cnt::type getId()=0;
+    virtual Symposium::uint_positive_cnt::type getId()=0;
     virtual void successfullInsert(const Symposium::symbol& sym)=0;
     virtual void failedInsert(const Symposium::symbol& sym)=0;
     virtual void failedRemove(const Symposium::symbol& sym)=0;

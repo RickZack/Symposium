@@ -221,10 +221,10 @@ void inserturi::on_cancel_clicked()
     this->hide();
     if(homeWindow)
     {
-        h=new home(nullptr, pwd);
-        h->setClientDispatcher(cl);
+        //h=new home(nullptr, pwd);
+        //h->setClientDispatcher(cl);
         //cl->setHome(h);
-        h->show();
+        //h->show();
     }
     else
     {

@@ -109,10 +109,10 @@ void changeUserInfo::confirm_click()
     QString stringa="Your information has been successfully modified";
     hideLabelsError();
     enableButtons();
-    notWindow = new notification(this, stringa);
-    int ret=notWindow->exec();
-    if(ret==0)
-        enableStyleButtons();
+    //notWindow = new notification(this, stringa);
+    //int ret=notWindow->exec();
+    /*if(ret==0)
+        enableStyleButtons();*/
     pressed=false;
     #endif
     //--------------------------------------------------------------------------
@@ -129,8 +129,8 @@ void changeUserInfo::errorConnection()
     pressed=false;
     enableButtons();
     enableStyleButtons();
-    errorWindow = new errorconnection(this);
-    errorWindow->show();
+    /*errorWindow = new errorconnection(this);
+    errorWindow->show();*/
 }
 
 void changeUserInfo::errorConnectionLogout(const std::string str)
@@ -165,13 +165,13 @@ void changeUserInfo::successEditUser()
     pressed=false;
     enableButtons();
     QString stringa="Your information has been successfully modified";
-    notWindow = new notification(this, stringa);
-    int ret=notWindow->exec();
-    if(ret==0)
-        enableStyleButtons();
-    h=new home(nullptr, pwd);
-    h->setClientDispatcher(cl);
-    h->show();
+    //notWindow = new notification(this, stringa);
+    //int ret=notWindow->exec();
+    /*if(ret==0)
+        enableStyleButtons();*/
+    //h=new home(nullptr, pwd);
+    //h->setClientDispatcher(cl);
+    //h->show();
 }
 
 void changeUserInfo::disableStyleButtons()
@@ -241,7 +241,7 @@ void changeUserInfo::on_confirm2_clicked()
         hideLabelsError();
         enableButtons();
         QString stringa="Your information has been successfully modified";
-        notWindow = new notification(this, stringa);
+        //notWindow = new notification(this, stringa);
         int ret=notWindow->exec();
         if(ret==0)
             enableStyleButtons();
@@ -358,10 +358,10 @@ void changeUserInfo::closeEvent(QCloseEvent *event)
 {
     disableStyleButtons();
     event->ignore();
-    ex=new class exit(this);
+    /*ex=new class exit(this);
     int ret=ex->exec();
     if(ret==0 && !pressed)
-        enableStyleButtons();
+        enableStyleButtons();*/
 }
 
 void changeUserInfo::showEvent(QShowEvent *event)
@@ -492,8 +492,8 @@ void changeUserInfo::on_newpwd2_textChanged(const QString &arg1)
 
 void changeUserInfo::on_cancel_clicked()
 {
-    h=new home(nullptr, pwd);
-    h->setClientDispatcher(cl);
+    //h=new home(nullptr, pwd);
+    //h->setClientDispatcher(cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     cl->setHome(h);

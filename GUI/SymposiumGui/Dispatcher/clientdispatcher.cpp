@@ -29,6 +29,7 @@
  */
 
 #include <chrono>
+#include <QApplication>
 #include "../sigin.h"
 #include "../signup.h"
 #include "../deleteaccount.h"
@@ -38,7 +39,9 @@
 #include "../alluser.h"
 #include "../../../filesystem.h"
 #include "../directory.h"
+#include "../mainwindow.h"
 #include "clientdispatcher.h"
+
 
 using namespace Symposium;
 
@@ -46,6 +49,19 @@ clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), finestreD
 {
     this->client.setClientDispatcher(this);
     this->userpwd = "";
+}
+
+int clientdispatcher::run(int argc, char **argv){
+    QApplication a(argc, argv);
+    QFontDatabase database;
+    database.addApplicationFont(":/resources/font/baskvil.TTF");
+    MainWindow w(nullptr, this->winmanager, *this);
+    (this->winmanager).setActive(w);
+    w.show();
+    notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "");
+    notepadWindow.show();
+    notepadWindow.showLabels();
+    return a.exec();
 }
 
 void clientdispatcher::openConnection(){
@@ -91,13 +107,16 @@ void clientdispatcher::readyRead(){
     } catch (messageException& e) {
         //eccezione di insuccesso dell'operazione
 
+        this->winmanager.activeWindow().failure(QString::fromStdString(mes->getErrDescr()));
+        this->userpwd="";
+
         switch(currentWindow){
         case 1:{
-            this->finestraLogin->errorSignIn();
+            //this->finestraLogin->errorSignIn();
             break;
         }case 2:{
-            this->finestraSignup->errorSignUp(mes->getErrDescr());
-            this->userpwd="";
+            //this->finestraSignup->errorSignUp(mes->getErrDescr());
+            //this->userpwd="";
             break;
         }case 3:{
             this->finestraInsertUri->unsuccessInsert(mes->getErrDescr());
@@ -216,6 +235,7 @@ void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend, uint_pos
 
 void clientdispatcher::signUp(const std::string &username, const std::string &pwd, const std::string &nickname, const std::string &iconPath){
     this->userpwd = pwd;
+    this->username = username;
     std::shared_ptr<signUpMessage> mess = std::make_shared<signUpMessage>(this->client.signUp(username,pwd,nickname,iconPath));
     //Colleghiamo il client al server
     this->openConnection();
@@ -243,22 +263,23 @@ void clientdispatcher::logIn(const std::string &username, const std::string &pwd
         //chiudiamo la connessione
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraLogin->errorConnection();
+        this->winmanager.activeWindow().failure("-1");
+        //this->finestraLogin->errorConnection();
     }
 }
 
-void clientdispatcher::autologIn(const std::string &username){
-    logIn(username, this->userpwd);
+void clientdispatcher::autologIn(){
+    logIn(this->username, this->userpwd);
 }
 
-bool clientdispatcher::isAutoLogin(){
+/*bool clientdispatcher::isAutoLogin(){
     if(this->userpwd==""){
         return false;
     }else{
         this->userpwd="";
         return true;
     }
-}
+}*/
 
 void clientdispatcher::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.openSource(path,name,reqPriv));
@@ -539,18 +560,22 @@ void clientdispatcher::stopTimer(){
     }
 }
 
-void clientdispatcher::successLogin(){
-    this->finestraLogin->successSignIn();
+void clientdispatcher::successAction(){
+    this->winmanager.activeWindow().success();
+    this->userpwd = "";
+}
+
+/*void clientdispatcher::successLogin(){
+    this->winmanager.activeWindow().success();
 }
 
 void clientdispatcher::successLogout(){
-    this->finestraHome->successLogout();
+    this->winmanager.activeWindow().success();
 }
 
 void clientdispatcher::successSignUp(){
-    qDebug() << "entrato in successSignUp";
-    this->finestraSignup->successSignUp();
-}
+    this->winmanager.activeWindow().success();
+}*/
 
 void clientdispatcher::successDeleteAccount(){
     this->finestraEliminaAccount->successDeleteAccount();

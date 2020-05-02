@@ -4,10 +4,10 @@
 #include "ui_sigin.h"
 #include "mainwindow.h"
 #include "Dispatcher/clientdispatcher.h"
-#include "mainwindow.h"
 
-sigin::sigin(QWidget *parent) :
+sigin::sigin(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),
+    SymChildWinInterface (si, isQWidget::isQwidgetType(*this)),
     ui(new Ui::sigin)
 {
     ui->setupUi(this);
@@ -22,12 +22,24 @@ sigin::sigin(QWidget *parent) :
     ui->gif->setMovie(movie);
     movie->start();
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-
+    setAttribute( Qt::WA_DeleteOnClose );
 }
 
 sigin::~sigin()
 {
     delete ui;
+}
+
+void sigin::success(){
+    this->successSignIn();
+}
+
+void sigin::failure(const QString& toPrint){
+    if(toPrint=="-1"){
+        this->errorConnection();
+    }else{
+        this->errorSignIn();
+    }
 }
 
 void sigin::errorConnection()
@@ -52,22 +64,20 @@ void sigin::errorSignIn()
 
 void sigin::successSignIn()
 {
-    hide();
+    //hide();
     pressed=false;
-    homeWindow = new home(nullptr, pwd);
-    homeWindow->setClientDispatcher(cl);
+    home* homeWindow = new home(nullptr, pwd, *this);
+    goToWindow(*homeWindow);
+    //homeWindow->setClientDispatcher(cl);
     #ifdef DISPATCHER_ON
-    cl->setHome(homeWindow);
+    //cl->setHome(homeWindow);
     #endif
-    homeWindow->show();
+    //homeWindow->show();
 }
 
-
-
-
-void sigin::setClientDispatcher(Symposium::clientdispatcher *cl){
+/*void sigin::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
-}
+}*/
 
 void sigin::enableButtonsAfter()
 {
@@ -89,7 +99,7 @@ void sigin::on_signin_clicked()
         pressed=true;
         disableButtons();
         disableStyleButtons();
-        this->cl->logIn(username.toStdString(), password.toStdString());
+        cl.logIn(username.toStdString(), password.toStdString());
     }
     else {
         ui->haveto->show();
@@ -101,12 +111,13 @@ void sigin::on_signin_clicked()
     #ifndef DISPATCHER_ON
     if(username=="test" && password=="test")
     {
-        hide();
+        //hide();
         enableButtons();
         enableStyleButtons();
         pressed=false;
-        homeWindow= new home(nullptr, pwd);
-        homeWindow->show();
+        home* homeWindow= new home(nullptr, pwd, *this);
+        goToWindow(*homeWindow);
+        //homeWindow->show();
     }
     else {
         pressed=false;
@@ -125,12 +136,14 @@ void sigin::on_signin_clicked()
 
 void sigin::closeEvent(QCloseEvent *event)
 {
-    disableStyleButtons();
-    event->ignore();
-    ex=new class exit(this);
-    int ret=ex->exec();
+    backToParent();
+    //disableStyleButtons();
+    //event->ignore();
+    //class exit* ex=new class exit(nullptr, *this);
+    //goToWindow(*ex);
+    /*int ret=ex->exec();
     if(ret==0 && !pressed)
-        enableStyleButtons();
+        enableStyleButtons();*/
 }
 
 void sigin::waiting()
@@ -191,8 +204,5 @@ void sigin::hideLabelsError()
 
 void sigin::on_cancel_clicked()
 {
-    mw= new MainWindow();
-    mw->setClientDispatcher(cl);
-    mw->show();
-    hide();
+    this->close();
 }

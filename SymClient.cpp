@@ -28,7 +28,7 @@
  * Created on 24 Giugno 2019, 19.25
  */
 
-//#define DISPATCHER_ON
+#define DISPATCHER_ON
 
 #include "SymClient.h"
 #include "uri.h"
@@ -59,7 +59,7 @@ void SymClient::signUp(const user &logged) {
     setLoggedUser(logged);
     //facciamo partire il flusso del login
     #ifdef DISPATCHER_ON
-    this->dispatcher->autologIn(logged.getUsername());
+    this->dispatcher->autologIn();
     #endif
 }
 
@@ -73,10 +73,11 @@ void SymClient::logIn(const user &logged) {
     setLoggedUser(logged);
     #ifdef DISPATCHER_ON
     //notifichiamo alla gui il successo
-    if(this->dispatcher->isAutoLogin())
+    this->dispatcher->successAction();
+    /*if(this->dispatcher->isAutoLogin())
         this->dispatcher->successSignUp();
     else
-        this->dispatcher->successLogin();
+        this->dispatcher->successLogin();*/
     #endif
 }
 
@@ -308,7 +309,7 @@ void SymClient::logout(bool msgRcv){
     this->userColors.clear();
     //notifichiamo alla GUI il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successLogout();
+    this->dispatcher->successAction();
     #endif
 }
 

@@ -23,7 +23,7 @@ deleteAccount::deleteAccount(QWidget *parent) :
 
 void deleteAccount::successDeleteAccount()
 {
-    enableButtons();
+    /*enableButtons();
     enableStyleButtons();
     this->close();
     parentWidget()->hide();
@@ -35,7 +35,7 @@ void deleteAccount::successDeleteAccount()
     notWindow = new notification(mw, str);
     int ret=notWindow->exec();
     if(ret==0)
-        mw->enableButtonsAfter();
+        mw->enableButtonsAfter();*/
 }
 
 void deleteAccount::errorDeleteUser(std::string errorMess)
@@ -109,8 +109,8 @@ void deleteAccount::errorConnection()
 {
     enableButtons();
     enableStyleButtons();
-    errorWindow = new errorconnection(this);
-    errorWindow->exec();
+    /*errorWindow = new errorconnection(this);
+    errorWindow->exec();*/
 }
 
 void deleteAccount::errorConnectionLogout(std::string str)

@@ -44,6 +44,7 @@
 #include "../../../document.h"
 #include "../../../message.h"
 #include "../../../SymClient.h"
+#include "../winmanager.h"
 
 class sigin;
 class notepad;
@@ -84,9 +85,14 @@ namespace Symposium{
         quint16 svPort = 1234;
         int currentWindow = 0;                          //variabile che dice qual è la finestra attiva
         QTimer timer;
+        SymWinManager winmanager;                       //gestore finestre
         std::queue<std::pair<std::chrono::milliseconds, uint_positive_cnt::type>> attese;
         uint_positive_cnt::type ResIDofWaitingMessage;
         std::string userpwd;
+        std::string username;
+
+        // ELENCO DEI PUNTATORI A FINESTRA CHE SARRANNO POI DA ELIMINARE
+
         sigin* finestraLogin;                           //1
         signup* finestraSignup;                         //2
         inserturi* finestraInsertUri;                   //3
@@ -102,11 +108,16 @@ namespace Symposium{
         alluser* finestraAllUser;                       //14
         activenonlink* finestraActiveNonLink;           //15
         choosepriv* finestraChoosePriv;                 //16
+
+        // FINE ELENCO PUNTATORI ALLE FINESTRE
+
         std::vector<std::pair<uint_positive_cnt::type,notepad*>> finestreDocumenti;         //coppia resourceID-Puntatore a finestra
         //std::shared_ptr<clientMessage> message;      //Contiene il messaggio che abbiamo inviato e di cui attendiamo risposta dal server
 
     public:
         clientdispatcher(QObject *parent = nullptr);
+
+        int run(int argc, char **argv);
 
         void TimerStart(std::chrono::milliseconds timeToSend, uint_positive_cnt::type resourceId);
 
@@ -134,9 +145,9 @@ namespace Symposium{
          */
         void logIn(const std::string &username, const std::string &pwd);
 
-        void autologIn(const std::string &username);
+        void autologIn();
 
-        bool isAutoLogin();
+        //bool isAutoLogin();
 
 
         void openSource(const std::string &path, const std::string &name, privilege reqPriv);
@@ -211,11 +222,11 @@ namespace Symposium{
         std::string showDir(bool recursive);
 
 
-        void successLogin();
+        //void successLogin();
 
-        void successLogout();
+        //void successLogout();
 
-        void successSignUp();
+        //void successSignUp();
 
         void successDeleteAccount();
 
@@ -238,6 +249,8 @@ namespace Symposium{
         void successRenameResource();
 
         void closeConnection();
+
+        void successAction();
 
         std::string getStr(std::string ID_Cartella, std::string path);
 

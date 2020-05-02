@@ -5,8 +5,9 @@
 #include "Dispatcher/clientdispatcher.h"
 #include "QDebug"
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent, SymWinManager& m, Symposium::clientdispatcher& p) :
     QMainWindow(parent),
+    SymMainWinInterface(m, p, isQWidget::isQwidgetType(*this)),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -26,37 +27,36 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_about_clicked()
 {
-    disableStyleButtons();
-    aboutWindow =new about(this);
-    int ret=aboutWindow->exec();
-    if(ret==0)
-        enableStyleButtons();
+    about* aboutWindow = new about(nullptr, *this);
+    goToWindow(*aboutWindow);
 }
 
 
 
 void MainWindow::on_SignIn_clicked()
 {
-    signinWindow= new sigin();
+    sigin* signinWindow= new sigin(nullptr, *this);
+    goToWindow(*signinWindow);
     #ifdef DISPATCHER_ON
-    cl->setSignIn(signinWindow);
+    //cl->setSignIn(signinWindow);
     #endif
 
-    signinWindow->setClientDispatcher(cl);
-    signinWindow->show();
-    hide();
+    //signinWindow->setClientDispatcher(cl);
+    //signinWindow->show();
+    //hide();
 
 }
 
 void MainWindow::on_SignUp_clicked()
 {
-    signupWindow= new signup();
+    signup* signupWindow= new signup(nullptr, *this);
+    goToWindow(*signupWindow);
     #ifdef DISPATCHER_ON
-    cl->setSignUp(signupWindow);
+    //cl->setSignUp(signupWindow);
     #endif
-    signupWindow->setClientDispatcher(cl);
-    signupWindow->show();
-    hide();
+    //signupWindow->setClientDispatcher(cl);
+    //signupWindow->show();
+    //hide();
 
 }
 

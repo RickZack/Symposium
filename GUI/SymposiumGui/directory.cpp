@@ -228,12 +228,12 @@ int directory::number_elements(std::string& string)
 
 void directory::on_actionHome_triggered()
 {
-    home *homeWindow=new home(nullptr, pwd);
-    homeWindow->setClientDispatcher(cl);
+    //home *homeWindow=new home(nullptr, pwd);
+    //homeWindow->setClientDispatcher(cl);
     #ifdef DISPATCHER_ON
     cl->setHome(homeWindow);
     #endif
-    homeWindow->show();
+    //homeWindow->show();
     this->hide();
 }
 
@@ -684,8 +684,8 @@ void directory::successRename(){
 
 
 void directory::errorConnection(){
-    errorWindow = new errorconnection(this);
-    errorWindow->show();
+    /*errorWindow = new errorconnection(this);
+    errorWindow->show();*/
 }
 
 void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
