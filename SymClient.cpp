@@ -28,7 +28,7 @@
  * Created on 24 Giugno 2019, 19.25
  */
 
-#define DISPATCHER_ON
+//#define DISPATCHER_ON
 
 #include "SymClient.h"
 #include "uri.h"
