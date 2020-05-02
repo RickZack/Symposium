@@ -32,12 +32,12 @@
 #define SCREENMANAGER_H
 
 #include "symwininterface.h"
-#include "../Symposium.h"
+#include "../../Symposium.h"
 #include<forward_list>
 
 class SymWinManager{
     SymWinInterface* current;
-    std::forward_list<std::pair<uint_positive_cnt::type, SymNotepadWinInterface*>> editors;
+    std::forward_list<std::pair<Symposium::uint_positive_cnt::type, SymNotepadWinInterface*>> editors;
 public:
     SymWinManager();
     /**
@@ -56,18 +56,18 @@ public:
      * @param id the identifier of the SymNotepadWinInterface window to register
      * @param tx the reference of the SymNotepadWinInterface window to register
      */
-    void addNotepad(uint_positive_cnt::type id, SymNotepadWinInterface &tx);
+    void addNotepad(Symposium::uint_positive_cnt::type id, SymNotepadWinInterface &tx);
     /**
      * @brief getNotepad retrieves a SymNotepadWinInterface window given its id
      * @param id the identifier of the SymNotepadWinInterface window to be retrieved
      * @return the reference to the SymNotepadWinInterface window to be retrieved
      */
-    SymNotepadWinInterface& getNotepad(uint_positive_cnt::type id);
+    SymNotepadWinInterface& getNotepad(Symposium::uint_positive_cnt::type id);
     /**
      * @brief removeNotepad unregisters a SymNotepadWinInterface window from the opened ones
      * @param id the identifier of the SymNotepadWinInterface window to unregister
      */
-    void removeNotepad(uint_positive_cnt::type id);
+    void removeNotepad(Symposium::uint_positive_cnt::type id);
     /**
      * @brief closeAllNotepads unregisters all of the registered SymNotepadWinInterface
      * windows and close them.

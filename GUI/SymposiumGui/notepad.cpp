@@ -118,6 +118,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         a3.setCharFormat(f);
         a4.setCharFormat(f);
 
+
         // Ciao
         documentoProva.localInsert(i1,s1);
         documentoProva.localInsert(i2,s2);
@@ -156,7 +157,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
                               sn9('!', 2, 8, std::vector<int>(), false);
 
             Symposium::Color colore(200,30,0);
-            const std::string ft1="Lucida Handwriting";
+            const std::string ft1="Lucida Console";
             unsigned size2=9;
             Symposium::format fn1(ft1,false,false,true,size2,colore);
             sn1.setCharFormat(fn1);
@@ -178,7 +179,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             documentoProva.localInsert(in7,sn7);
             documentoProva.localInsert(in8,sn8);
             documentoProva.localInsert(in9,sn9);
-
 
   //---------------------------------------------------------------------------------------------------------
 
@@ -525,12 +525,14 @@ void notepad::fontChanged(const QFont &f)
     ui->actionBoldFont->setChecked(f.bold());
     ui->actionItalicFont->setChecked(f.italic());
     ui->actionUnderlineFont->setChecked(f.underline());
+
 }
 
 void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 {
     fontChanged(format.font());
     colorChanged(format.foreground().color());
+
 
 }
 
@@ -543,43 +545,50 @@ void notepad::fillTextEdit(){
     // save in symbols all the symbols contained in the document
     //std::vector<std::vector<Symposium::symbol>> symbols= this->doc.getSymbols();
     std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
+    if(symbols[0][0].getCh()==emptyChar){
+        QColor black=Qt::black;
+        black.setAlpha(160);
+        ui->textEdit->setTextColor(black);
+        ui->textEdit->setText("");
+        return;
+    }
+    else{
     for(size_t i=0;i<symbols.size();i++){
         for(size_t j=0;j<symbols[i].size();j++){
             int column=j;
             //extract the symbol
             Symposium::symbol sym=symbols[i][j];
+            ch=sym.getCh();
+            if(ch!=emptyChar){
             //estract the character
-            ch[0]=sym.getCh();
-           if(ch[0]!=emptyChar){
-                QTextCharFormat chFormat;
-                Symposium::format format=sym.getCharFormat();
-                //estract the information about the font/color
-                QFont font;
-                font.setFamily(QString::fromStdString(format.familyType));
-                font.setBold(format.isBold);
-                font.setUnderline(format.isUnderlined);
-                font.setItalic(format.isItalic);
-                font.setPointSize(format.size);
-                Symposium::Color col=format.col;
-                //conversion from Color to QColor
-                qCol=static_cast<QColor>(col);
-                if(!sym.isVerified())
-                  {
-                    qCol.setAlpha(160);
-                  }
-                chFormat.setFont(font); chFormat.setForeground(qCol);
-                // go to the position of the character
-                ui->textEdit->changePosition(i,column);
-                curs.insertText(ch,chFormat);
-    }
-
-}
-    }
+            QTextCharFormat chFormat;
+            Symposium::format format=sym.getCharFormat();
+             //estract the information about the font/color
+            QFont font;
+            font.setFamily(QString::fromStdString(format.familyType));
+            font.setBold(format.isBold);
+            font.setUnderline(format.isUnderlined);
+            font.setItalic(format.isItalic);
+            font.setPointSize(format.size);
+            Symposium::Color col=format.col;
+            //conversion from Color to QColor
+            qCol=static_cast<QColor>(col);
+            if(!sym.isVerified())
+               {
+                 qCol.setAlpha(160);
+                }
+             chFormat.setFont(font); chFormat.setForeground(qCol);
+             // go to the position of the character
+             ui->textEdit->changePosition(i,column);
+             curs.insertText(ch,chFormat);
+             this->currentCharFormatChanged(chFormat);
+            }
+         }
+       }
+     }
     insertOthCh=false;
-    //this->fontChanged(chFormat.font());
-
-
 }
+
 
 
 void notepad::visualizeUsers()
@@ -721,6 +730,42 @@ bool notepad::eventFilter(QObject *obj, QEvent *event)
 void notepad::handleDeleteKey(){
     int row, col;
     QTextCursor cursor= ui->textEdit->textCursor();
+    if(cursor.hasSelection()){
+       int start,end,row_start,row_end,dim,numLines,selectedLines;
+        start=cursor.selectionStart();
+        end=cursor.selectionEnd();
+        cursor.setPosition(start,QTextCursor::MoveAnchor);
+        row_start=cursor.blockNumber();
+        col=cursor.positionInBlock();
+        cursor.setPosition(end,QTextCursor::MoveAnchor);
+        row_end=cursor.blockNumber();
+        dim=end-start;
+        qDebug()<<"Start"<<row_start;
+        qDebug()<<"end"<<row_end;
+        qDebug()<<"Dimensione"<<end-start;
+
+        /* I'm on the same line*/
+        if(row_start==row_end){
+            while(dim>0){
+                this->documentoProva.localRemove({row_start,col},1);
+                dim--;
+            }
+
+        }else{
+            /*I'm deleting multiple lines*/
+            numLines=documentoProva.countsNumLines();
+            qDebug()<<"NumLines"<<numLines;
+            dim=row_end-row_start;
+            /*I'm deleting also the last line: I have to delete also the enter character*/
+            if(row_end==numLines-1){
+                deleteMultipleLines(row_start,row_end,col,dim+1,true);
+            }else{/*I'm not deleting the last line: in the previous line we have to maintain the enter character*/
+                deleteMultipleLines(row_start,row_end,col,dim+1,false);
+            }
+        }
+        qDebug()<<"Caratteri"<<this->documentoProva.toText();
+        return;
+ }
     row=cursor.blockNumber();
     col=cursor.positionInBlock()-1;
     qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
@@ -736,6 +781,30 @@ void notepad::handleDeleteKey(){
     else if(col<0) //deleting from an empty document, discard the action
         return;
     documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
+}
+
+void notepad::deleteMultipleLines(int sR,int eR,int c,int sL,bool lines){
+    QTextCursor cursor;
+    int length;
+    qDebug()<<"start Row"<<sR;
+    qDebug()<<"endRow"<<eR;
+    qDebug()<<"SelectedLines"<<sL;
+    while(sR<=eR){
+        cursor.setPosition(sR,QTextCursor::MoveAnchor);
+      if(lines==true){
+        length=countCharsInLine(sR)-c;
+      }else{
+          if(sL==1){
+             length=countCharsInLine(sR)-c;
+          }else{
+          length=countCharsInLine(sR)-1-c;}
+      }
+        while(length>0){
+            this->documentoProva.localRemove({sR,c},1);
+            length--;
+        }
+        sR++;c=0;sL--;
+    }
 }
 
 void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharFormat format){
@@ -1134,17 +1203,16 @@ void notepad::on_textEdit_cursorPositionChanged()
 {
 
     QTextCursor cc=ui->textEdit->textCursor();
+    QTextCharFormat ch=ui->textEdit->currentCharFormat();
      if(insertOthCh==false){
         ui->textEdit->thisUserChangePosition(1);
         //ui->textEdit->thisUserChangePosition(us.getSiteId())
      }
 
      if(!cc.hasSelection()){
-        QTextCharFormat ch=ui->textEdit->currentCharFormat();
+
         QColor newCol=ch.foreground().color();
-        qDebug()<<"Colore prima del set"<<newCol;
         newCol.setAlpha(255);
-        qDebug()<<"Colore dopo del set"<<newCol;
         fontChanged(ch.font());
         colorChanged(newCol);
         this->currentCharFormatChanged(ch);
@@ -1160,7 +1228,6 @@ void notepad::on_textEdit_cursorPositionChanged()
 
 void notepad::colorText(){
     insertOthCh=true;
-    bool acapo=false;
     QTextCharFormat chFormat;
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
@@ -1168,6 +1235,13 @@ void notepad::colorText(){
     // save in symbols all the symbols contained in the document
     //std::vector<std::vector<Symposium::symbol>> symbols= this->doc.getSymbols();
     std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
+    if(symbols[0][0].getCh()==emptyChar){
+        QColor black=Qt::black;
+        black.setAlpha(160);
+        ui->textEdit->setTextColor(black);
+        ui->textEdit->setText("");
+        return;
+    }
     for(size_t i=0;i<symbols.size();i++){
         for(size_t j=0;j<symbols[i].size();j++){
             int column=j;
@@ -1202,15 +1276,17 @@ void notepad::colorText(){
                 chFormat.setFont(font); chFormat.setForeground(qCol);chFormat.setBackground(userCol);
                 // go to the position of the character
                 ui->textEdit->changePosition(i,column);
+                this->currentCharFormatChanged(chFormat);
                 curs.insertText(ch,chFormat);
 
-            }  
+            }
     }
 
     }
 
     insertOthCh=false;
-}
+ }
+
 
 
 
@@ -1236,3 +1312,12 @@ void notepad::on_actionhighlight_triggered()
     }
 }
 
+int notepad::countCharsInLine(int line)const {
+    std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
+    int ch=0;
+    for(size_t i=0;i<symbols[line].size();i++){
+        if(symbols[line][i].getCh()!=emptyChar)
+            ch++;
+    }
+    return ch;
+}

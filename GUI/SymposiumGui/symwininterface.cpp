@@ -32,7 +32,7 @@
 #include<QWidget>
 
 
-SymWinInterface::SymWinInterface(SymWinManager &m, clientDispatcher &p): handler(m), cl(p), forceQuit(false)
+SymWinInterface::SymWinInterface(SymWinManager &m, Symposium::clientdispatcher &p): handler(m), cl(p), forceQuit(false)
 {
 }
 
@@ -87,7 +87,7 @@ void SymWinInterface::goToWindow(SymNotepadWinInterface& notepad)
 }
 
 
-SymMainWinInterface::SymMainWinInterface(SymWinManager &m, clientDispatcher& p, isQWidget::QWidgetType): SymWinInterface(m,p)
+SymMainWinInterface::SymMainWinInterface(SymWinManager &m, Symposium::clientdispatcher& p, isQWidget::QWidgetType): SymWinInterface(m,p)
 {
     s_parent=nullptr;
 }

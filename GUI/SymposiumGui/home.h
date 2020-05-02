@@ -11,6 +11,7 @@
 #include "errorconnection.h"
 #include "errorlogout.h"
 #include "exit.h"
+#include "symwininterface.h"
 
 class MainWindow;
 
@@ -22,12 +23,18 @@ namespace Ui {
 class home;
 }
 
-class home : public QMainWindow
+class home : public QMainWindow, public SymChildWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit home(QWidget *parent = nullptr, const std::string pwd="");
+    explicit home(QWidget *parent, const std::string pwd, SymWinInterface& si);
+
+
+    void success() override;
+
+    void failure(const QString&) override;
+
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -88,12 +95,13 @@ private:
     inserturi *inserturiWindow;
     changeUserInfo *changeWindow;
     directory *directoryWindow;
-    MainWindow *mw;
+    //MainWindow *mw;
     class exit *ex;
     bool pressed=false;
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
+    int disc;
     /**
      * @brief quit from application
      */

@@ -9,6 +9,7 @@
 #include "notification.h"
 #include "exit.h"
 #include "../../user.h"
+#include"symwininterface.h"
 
 class MainWindow;
 
@@ -21,12 +22,16 @@ namespace Ui {
 class signup;
 }
 
-class signup : public QDialog
+class signup : public QDialog, public SymChildWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit signup(QWidget *parent = nullptr);
+    explicit signup(QWidget *parent, SymWinInterface& si);
+
+    void success() override;
+    void failure(const QString& toPrint) override;
+
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -40,7 +45,7 @@ public:
      * @brief called by clientdispatcher when there is some error to signUp
      * @param errorMess the messagge to show
      */
-    void errorSignUp(const std::string errorMess);
+    void errorSignUp(const QString& errorMess);
     /**
      * @brief called by clientdispatcher when the signup was successfully done
      */
@@ -79,11 +84,11 @@ private:
     std::string pwd;
     home *homeWindow;
     icon *iconWindow;
-    MainWindow *mw;
+    //MainWindow *mw;
     notification *notWindow;
     errorconnection *errorWindow;
     std::string iconPath="";
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     class exit *ex;
     bool pressed=false;
     /**

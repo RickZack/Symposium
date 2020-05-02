@@ -5,8 +5,9 @@
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
 
-signup::signup(QWidget *parent) :
+signup::signup(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),
+    SymChildWinInterface (si, isQWidget::isQwidgetType(*this)),
     ui(new Ui::signup)
 {
     ui->setupUi(this);
@@ -25,6 +26,19 @@ signup::signup(QWidget *parent) :
     ui->gif->setMovie(movie);
     movie->start();
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setAttribute( Qt::WA_DeleteOnClose );
+}
+
+void signup::success(){
+    this->successSignUp();
+}
+
+void signup::failure(const QString& toPrint){
+    if(toPrint=="-1"){
+        this->errorConnection();
+    }else{
+        this->errorSignUp(toPrint);
+    }
 }
 
 void signup::errorConnection()
@@ -38,13 +52,13 @@ void signup::errorConnection()
         enableStyleButtons();
 }
 
-void signup::errorSignUp(const std::string errorMess)
+void signup::errorSignUp(const QString& errorMess)
 {
     enableButtons();
     enableStyleButtons();
     hideLabelsError();
     pressed=false;
-    ui->errorMess->setText(QString::fromStdString(errorMess));
+    ui->errorMess->setText(errorMess);
     ui->errorMess->show();
 }
 
@@ -54,24 +68,25 @@ void signup::successSignUp()
     enableButtons();
     enableStyleButtons();
     pressed=false;
-    hide();
-    homeWindow= new home(nullptr, pwd);
-    homeWindow->setClientDispatcher(cl);
+    //hide();
+    home* homeWindow= new home(nullptr, pwd, *this);
+    goToWindow(*homeWindow);
+    //homeWindow->setClientDispatcher(cl);
     #ifdef DISPATCHER_ON
-    cl->setHome(homeWindow);
+    //cl->setHome(homeWindow);
     #endif
     homeWindow->disableStyleButtons();
-    notWindow = new notification(homeWindow, "Your account has been successfully created");
-    homeWindow->show();
+    notification* notWindow = new notification(nullptr, "Your account has been successfully created");
+    //homeWindow->show();
     int ret=notWindow->exec();
     if(ret==0)
         homeWindow->enableButtonsAfter();
 }
 
 
-void signup::setClientDispatcher( Symposium::clientdispatcher *cl){
+/*void signup::setClientDispatcher( Symposium::clientdispatcher *cl){
     this->cl = cl;
-}
+}*/
 
 signup::~signup()
 {
@@ -106,7 +121,7 @@ void signup::on_signin_clicked()
             disableStyleButtons();
             disableButtons();
             pressed=true;
-            this->cl->signUp(username.toStdString(), password.toStdString(), nickname.toStdString(), iconPath);
+            cl.signUp(username.toStdString(), password.toStdString(), nickname.toStdString(), iconPath);
          }
     }
     else {
@@ -129,11 +144,12 @@ void signup::on_signin_clicked()
         }
         else
         {
-            hide();
-            homeWindow= new home(nullptr, pwd);
-            homeWindow->show();
-            homeWindow->disableStyleButtons();
-            notWindow = new notification(homeWindow, "Your account has been successfully created");
+            //hide();
+            home* homeWindow= new home(nullptr, pwd, *this);
+            goToWindow(*homeWindow);
+            //homeWindow->show();
+            //homeWindow->disableStyleButtons();
+            notWindow = new notification(nullptr, "Your account has been successfully created");
             int ret=notWindow->exec();
             if(ret==0)
                 homeWindow->enableButtonsAfter();
@@ -184,12 +200,14 @@ void signup::chooseIcon()
 
 void signup::closeEvent(QCloseEvent *event)
 {
-    disableStyleButtons();
-    event->ignore();
-    ex=new class exit(this);
-    int ret=ex->exec();
+    backToParent();
+    //disableStyleButtons();
+    //event->ignore();
+    //class exit* ex=new class exit(nullptr, *this);
+    //goToWindow(*ex);
+    /*int ret=ex->exec();
     if(ret==0 && !pressed)
-        enableStyleButtons();
+        enableStyleButtons();*/
 
 }
 
@@ -255,8 +273,5 @@ void signup::showEvent(QShowEvent* event)
 
 void signup::on_cancel_clicked()
 {
-    mw= new MainWindow();
-    mw->setClientDispatcher(cl);
-    mw->show();
-    hide();
+    this->close();
 }

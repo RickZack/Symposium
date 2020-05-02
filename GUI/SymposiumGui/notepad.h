@@ -199,6 +199,8 @@ private:
     void sendSymbolToInsert(int row, int column, QString text, QTextCharFormat format);
     int charsInLine=0;
     int columnForReturn=0;
+    void deleteMultipleLines(int sR, int eR, int c, int sL, bool lines);
+    int countCharsInLine(int line) const;
 };
 
 #endif // NOTEPAD_H

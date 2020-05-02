@@ -104,6 +104,20 @@ namespace Symposium {
 
         int getNumchar() const;
 
+        /**
+         * @brief countsNumLines counts the number of line effectively present in the symbols vector
+         * @return number of lines
+         */
+        int countsNumLines() const;
+
+        /**
+         * @brief countCharsInLine counts the number of chars that are present in the @e line
+         * @param line
+         * @return
+         */
+        int countCharsInLine(int line) const;
+
+
 
 
         bool operator==(const document &rhs) const;
@@ -203,6 +217,9 @@ namespace Symposium {
          */
         void checkIndex(unsigned int i0, unsigned int i1);
 
+
+        void checkVector();
+
     private:
         /**
          * @brief it determines the globally unique fractional index position of the new character.
@@ -289,18 +306,9 @@ namespace Symposium {
         char retrieveStrategy(const int level);
 
 
-        /**
-         * @brief countCharsInLine counts the number of chars that are present in the @e line
-         * @param line
-         * @return
-         */
-        int countCharsInLine(int line) const;
 
-        /**
-         * @brief countsNumLines counts the number of line effectively present in the symbols vector
-         * @return number of lines
-         */
-        int countsNumLines() const;
+
+
     };
 }
 

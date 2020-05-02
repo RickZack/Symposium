@@ -25,7 +25,7 @@ void errorlogout::setClientDispatcher(Symposium::clientdispatcher *cl)
 void errorlogout::on_pushButton_clicked()
 {
     this->close();
-    w=new MainWindow();
+    /*w=new MainWindow();
     w->setClientDispatcher(cl);
-    w->show();
+    w->show();*/
 }

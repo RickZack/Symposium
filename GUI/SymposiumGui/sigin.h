@@ -6,22 +6,23 @@
 #include "home.h"
 #include "errorconnection.h"
 #include "exit.h"
-
-namespace Symposium{
-class clientdispatcher;
-}
+#include "symwininterface.h"
 
 namespace Ui {
 class sigin;
 }
 
-class sigin : public QDialog
+class sigin : public QDialog, public SymChildWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit sigin(QWidget *parent = nullptr);
+    explicit sigin(QWidget *parent, SymWinInterface& si);
     ~sigin();
+
+    void success() override;
+    void failure(const QString& toPrint) override;
+
     /**
      * @brief called by clientdispatcher when there is some error with connection
      */
@@ -59,11 +60,11 @@ private slots:
 private:
 
     Ui::sigin *ui;
-    home *homeWindow;
+    //home *homeWindow;
     errorconnection *errorWindow;
     std::string pwd;
-    MainWindow *mw;
-    Symposium::clientdispatcher *cl;
+    //MainWindow *mw;
+    //Symposium::clientdispatcher *cl;
     class exit *ex;
     bool pressed=false;
     /**

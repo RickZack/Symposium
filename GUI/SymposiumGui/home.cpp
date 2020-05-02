@@ -5,8 +5,9 @@
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
 
-home::home(QWidget *parent,const std::string pwd) :
+home::home(QWidget *parent,const std::string pwd, SymWinInterface& si) :
     QMainWindow(parent),
+    SymChildWinInterface (si, isQWidget::isQwidgetType(*this)),
     ui(new Ui::home), pwd(pwd)
 {
     ui->setupUi(this);
@@ -23,12 +24,21 @@ home::home(QWidget *parent,const std::string pwd) :
     ButtonHoverWatcher * watcher = new ButtonHoverWatcher(this);
     ui->logout->installEventFilter(watcher);
     ui->logout->setToolTip("Logout");
-
+    setAttribute( Qt::WA_DeleteOnClose );
+    this->disc = 0;
 }
 
 home::~home()
 {
     delete ui;
+}
+
+void home::success(){
+    this->successLogout();
+}
+
+void home::failure(const QString&){
+    this->errorConnection();
 }
 
 void home::enableButtonsAfter()
@@ -39,25 +49,25 @@ void home::enableButtonsAfter()
 
 void home::on_delete_2_clicked()
 {
-    disableStyleButtons();
-    deleteAccountWindow = new deleteAccount(this);
-    deleteAccountWindow->setClientDispatcher(cl);
+    //disableStyleButtons();
+    //deleteAccountWindow = new deleteAccount(this);
+    //deleteAccountWindow->setClientDispatcher(cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
-    cl->setDeleteAccount(deleteAccountWindow);
+    //cl->setDeleteAccount(deleteAccountWindow);
     #endif
     //------------------------------------------------------------------
-    int ret=deleteAccountWindow->exec();
+    /*int ret=deleteAccountWindow->exec();
     if(ret==0)
-        enableStyleButtons();
+        enableStyleButtons();*/
 }
 
 void home::on_InsertUri_clicked()
 {
-    inserturiWindow = new inserturi(nullptr, pwd, cl);
+    //inserturiWindow = new inserturi(nullptr, pwd, cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
-    cl->setInsertUri(inserturiWindow);
+    //cl.setInsertUri(inserturiWindow);
     #endif
     //------------------------------------------------------------------
     inserturiWindow->show();
@@ -66,10 +76,10 @@ void home::on_InsertUri_clicked()
 
 void home::on_modify_clicked()
 {
-    changeWindow = new changeUserInfo(nullptr, pwd, cl);
+    //changeWindow = new changeUserInfo(nullptr, pwd, cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
-    cl->setChangeUserInfo(changeWindow);
+    //cl->setChangeUserInfo(changeWindow);
     #endif
     //------------------------------------------------------------------
     changeWindow->show();
@@ -78,11 +88,11 @@ void home::on_modify_clicked()
 
 void home::on_directory_clicked()
 {
-    directoryWindow=new directory(nullptr, pwd, cl);
-    directoryWindow->show();
+    //directoryWindow=new directory(nullptr, pwd, cl);
+    //directoryWindow->show();
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
-    cl->setDirectory(directoryWindow);
+    //cl.setDirectory(directoryWindow);
     #endif
     //------------------------------------------------------------------
     this->hide();
@@ -92,7 +102,7 @@ void home::logout()
 {
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
-    cl->logout();
+    cl.logout();
     #endif
     //------------------------------------------------------------------
     pressed=true;
@@ -103,12 +113,14 @@ void home::logout()
 
 void home::closeEvent(QCloseEvent *event)
 {
-    disableStyleButtons();
-    event->ignore();
-    ex=new class exit(this);
-    int ret=ex->exec();
-    if(ret==0 && !pressed)
-        enableStyleButtons();
+    if (this->disc==0){
+        disableStyleButtons();
+        event->ignore();
+        ex=new class exit(this);
+        int ret=ex->exec();
+        if(ret==0 && !pressed)
+            enableStyleButtons();
+    }
 }
 
 void home::disableButtons()
@@ -154,17 +166,19 @@ void home::waiting()
 }
 
 void home::setClientDispatcher(Symposium::clientdispatcher *cl){
-    this->cl = cl;
+    //this->cl = cl;
 }
 
 void home::successLogout()
 {
     enableButtons();
     enableStyleButtons();
-    this->hide();
-    mw=new MainWindow();
+    //this->hide();
+    this->disc=1;
+    backToMainWin();
+    /*mw=new MainWindow();
     mw->setClientDispatcher(cl);
-    mw->show();
+    mw->show();*/
 }
 
 void home::errorConnection()
@@ -182,7 +196,7 @@ void home::errorConnectionLogout(const std::string str)
     enableButtons();
     enableStyleButtons();
     errorLog = new errorlogout(nullptr, QString::fromStdString(str));
-    errorLog->setClientDispatcher(cl);
+    //errorLog->setClientDispatcher(cl);
     this->hide();
     errorLog->show();
 }
