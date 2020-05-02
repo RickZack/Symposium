@@ -286,7 +286,7 @@ const user SymClient::editUser(user &newUserData, bool msgRcv) {
     (const_cast<user&>(this->getLoggedUser())).setNewData(newUserData);
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successEditUser();
+    this->dispatcher->successAction();
     #endif
     return this->getLoggedUser();
 }

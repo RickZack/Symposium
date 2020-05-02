@@ -93,7 +93,7 @@ private:
     deleteAccount *deleteAccountWindow;
     std::string pwd;
     inserturi *inserturiWindow;
-    changeUserInfo *changeWindow;
+    //changeUserInfo *changeWindow;
     directory *directoryWindow;
     //MainWindow *mw;
     class exit *ex;
@@ -101,7 +101,7 @@ private:
     //Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
-    int disc;
+    bool disc = true;
     /**
      * @brief quit from application
      */

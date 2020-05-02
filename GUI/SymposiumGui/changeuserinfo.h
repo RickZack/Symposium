@@ -9,6 +9,7 @@
 #include "errorlogout.h"
 #include "exit.h"
 #include "notification.h"
+#include "symwininterface.h"
 
 
 
@@ -23,12 +24,17 @@ namespace Ui {
 class changeUserInfo;
 }
 
-class changeUserInfo : public QDialog
+class changeUserInfo : public QDialog, public SymChildWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit changeUserInfo(QWidget *parent = nullptr, std::string pwd="", Symposium::clientdispatcher *cl=nullptr);
+    explicit changeUserInfo(QWidget *parent, std::string pwd, SymWinInterface& si);
+
+    void success() override;
+
+    void failure(const QString& toPrint) override;
+
     std::string pwd;
     /**
      * @brief setting of clientdispatcher
@@ -48,7 +54,7 @@ public:
      * @brief called by clientdispatcher when there is some error to edit the information of the current user
      * @param errorMess the messagge to show
      */
-    void errorEditUser(const std::string errorMess);
+    void errorEditUser(const QString& errorMess);
     /**
      * @brief called by clientdispatcher when the edit of the information of the current user was successfully done
      */
@@ -97,14 +103,15 @@ private:
     std::string img;
     std::string newpass;
     Symposium::user us;
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
     notification *notWindow;
     bool pressed=false;
     bool passwordView=false;
-    home *h;
+    //home *h;
     class exit *ex;
+    bool esc=true;
 
     void hiddeninformation();
     void showinformation();

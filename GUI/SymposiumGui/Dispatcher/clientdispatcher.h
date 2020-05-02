@@ -230,7 +230,7 @@ namespace Symposium{
 
         void successDeleteAccount();
 
-        void successEditUser();
+        //void successEditUser();
 
         void successInsertUri();
 

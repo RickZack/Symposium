@@ -125,7 +125,7 @@ void clientdispatcher::readyRead(){
             this->finestraEliminaAccount->errorDeleteUser(mes->getErrDescr());
             break;
         }case 7:{
-            this->finestraModificaUser->errorEditUser(mes->getErrDescr());
+            //this->finestraModificaUser->errorEditUser(mes->getErrDescr());
             break;
         }case 8:{
             this->finestraActiveCounterLink->unsuccessLink(mes->getErrDescr());
@@ -581,9 +581,9 @@ void clientdispatcher::successDeleteAccount(){
     this->finestraEliminaAccount->successDeleteAccount();
 }
 
-void clientdispatcher::successEditUser(){
+/*void clientdispatcher::successEditUser(){
     this->finestraModificaUser->successEditUser();
-}
+}*/
 
 void clientdispatcher::successInsertUri(){
     this->finestraInsertUri->successInsert();
