@@ -42,13 +42,13 @@ class clientdispatcher;
 class SymWinManager;
 
 struct SymNotepadWinInterface;
+struct SymModalWinInterface;
 
 /*namespace Symposium {
     struct symbol{
         void dummyMethod() const{}
     };
 }*/
-
 
 struct isQWidget{
     class QWidgetType{
@@ -59,6 +59,18 @@ struct isQWidget{
     static QWidgetType isQwidgetType(const T&){
         static_assert (std::is_base_of<QWidget, T>::value, "Error: not a QWidget");
         return QWidgetType();
+    }
+};
+
+struct isQDialog{
+    class QDialogType{
+        QDialogType(){}
+        friend struct isQDialog;
+    };
+    template<class T>
+    static QDialogType isQDialogType(const T&){
+        static_assert (std::is_base_of<QDialog, T>::value, "Error: not a QDialog");
+        return QDialogType();
     }
 };
 
@@ -74,6 +86,7 @@ class SymWinInterface{
     friend struct SymChildWinInterface;
     friend struct SymMainWinInterface;
     friend struct SymNotepadWinInterface;
+    friend struct SymModalWinInterface;
 protected:
     Symposium::clientdispatcher& cl;                /**< a reference to the @ref clientDispatcher to whom actions are to be requested */
 private:
@@ -128,6 +141,13 @@ protected:
      */
     void goToWindow(SymNotepadWinInterface& notepad);
 
+    /**
+     * @brief goToWindow this is an overloaded version for @ref SymModalWinInterface windows.
+     * As @ref goToWindow(SymWinInterface&), but does not hide the parent
+     * @param nextWin the modal window to be shown
+     */
+    void goToWindow(SymModalWinInterface& nextWin);
+
 
     virtual ~SymWinInterface()= default;
 };
@@ -158,7 +178,7 @@ struct SymMainWinInterface: public SymWinInterface{
 };
 
 struct SymNotepadWinInterface: public SymChildWinInterface{
-    SymNotepadWinInterface(SymWinInterface& parentScreen, isQWidget::QWidgetType arg);
+    SymNotepadWinInterface(SymWinInterface& parentScreen, isQWidget::QWidgetType, bool parentIsTransient);
     virtual Symposium::uint_positive_cnt::type getId()=0;
     virtual void successfullInsert(const Symposium::symbol& sym)=0;
     virtual void failedInsert(const Symposium::symbol& sym)=0;
@@ -193,6 +213,22 @@ protected:
      * close itself and call SymChildWinInterface::backToMainWin() to return to the main window
      */
     void backToMainWin();
+};
+    /**
+     * @brief base class used forSymposiumGUI windows that are modal, i.e do not allow interaction
+     * with previously opened and currently shown windows
+     */
+struct SymModalWinInterface: public SymWinInterface{
+        SymModalWinInterface(SymWinInterface& parentScreen, isQDialog::QDialogType);
+        friend class SymWinInterface;
+    private:
+        operator QDialog*();
+    protected:
+        /**
+         * @brief backToParent sets the parent window as active, shows it and closes the current window
+         * This version of the function does not close the notepads
+         */
+        void backToParent();
 };
 
 #endif // SCREENINTERFACE_H

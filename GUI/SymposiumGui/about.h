@@ -20,7 +20,7 @@ class about : public QDialog, public SymChildWinInterface
 public:
     explicit about(QWidget *parent, SymWinInterface& si);
     void showEvent(QShowEvent* event) override;
-    ~about();
+    ~about() override;
 
 private slots:
     /**
