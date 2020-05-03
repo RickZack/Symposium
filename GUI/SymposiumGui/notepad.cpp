@@ -298,6 +298,7 @@ void notepad::on_actionCut_triggered()
 void notepad::on_actionPaste_triggered()
 {
     ui->textEdit->paste();
+    this->contV_action(this->pos);
 }
 
 void notepad::addStyleFormat()
@@ -697,14 +698,17 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCharFormat format = cursor.charFormat();
     QString testo=event->text();
     int row, column;
-    int pos=cursor.position();
+    this->pos=cursor.position();
 
-    if(isAKeyToIgnore(event))
-        return;
-    else if(event->key()==Qt::Key_Backspace)
+    if(event->key()==Qt::Key_Backspace)
         return handleDeleteKey();
-    else if(event->text()=="\u0016") // Control_V action
-        return this->contV_action(pos);
+    else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+V")) // Control_V action
+        return //this->on_actionPaste_triggered();
+                this->contV_action(pos);
+    else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+C")) // Control_C action
+        return this->on_actionCopy_triggered();
+    else if(isAKeyToIgnore(event))
+        return;
     else{ //carattere alfabetico
         row=cursor.blockNumber();
         column=cursor.positionInBlock();
@@ -871,7 +875,7 @@ void notepad::contV_action(int pos){
         struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
         std::vector<int> pos;
         // SISTEMARE IL SITEID E IL COUNTER IN SYMBOL
-        Symposium::symbol sym(ch,1,0,pos,false);
+        Symposium::symbol sym(ch,1,1,pos,false);
         sym.setCharFormat(charFormat);
         this->documentoProva.localInsert(indexes,sym);
         //cl->localInsert(this->documentId, symbol &sym, &indexes)

@@ -133,7 +133,7 @@ private:
     int insertedChars=0;
     int posBlock=0;
     QColor colPos;
-    int supportColumn;
+    int pos;
 
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void colorChanged(const QColor &c);

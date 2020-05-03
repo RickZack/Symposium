@@ -283,10 +283,14 @@ namespace Symposium {
          * @param vector1 the posAfter
          * @return the searched position
          */
+        //std::vector<int>
+        //generatePosBetween(std::vector<int> vector, std::vector<int> vector1, std::vector<int> vector2, int level,
+                           //int i,
+                           //int i1);
         std::vector<int>
         generatePosBetween(std::vector<int> vector, std::vector<int> vector1, std::vector<int> vector2, int level,
-                           int i,
-                           int i1);
+                           symbol b,
+                           symbol a);
 
         /**
          * @brief finds the id of the symbol inserted in between two other onws
