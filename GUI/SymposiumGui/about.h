@@ -3,23 +3,17 @@
 
 #include <QDialog>
 #include <QPropertyAnimation>
-#include "symwininterface.h"
 
 namespace Ui {
 class about;
 }
 
-class about : public QDialog, public SymChildWinInterface
+class about : public QDialog
 {
     Q_OBJECT
 
-    //Not useful on this window
-    void success() override{}
-    void failure(const QString&) override{}
-
 public:
-    explicit about(QWidget *parent, SymWinInterface& si);
-    void showEvent(QShowEvent* event) override;
+    explicit about(QWidget *parent);
     ~about() override;
 
 private slots:
@@ -30,11 +24,6 @@ private slots:
 
 private:
     Ui::about *ui;
-
-    /**
-     * @brief quit from application
-     */
-    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // ABOUT_H

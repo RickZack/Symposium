@@ -57,7 +57,7 @@ public:
      * @brief disable the style of buttons
      */
     void disableStyleButtons();
-    ~home();
+    ~home() override;
 
 public slots:
     /**
@@ -105,7 +105,7 @@ private:
     /**
      * @brief quit from application
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

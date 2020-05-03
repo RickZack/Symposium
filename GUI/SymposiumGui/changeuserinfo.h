@@ -63,7 +63,7 @@ public:
      * @brief disable the style of buttons
      */
     void disableStyleButtons();
-    ~changeUserInfo();
+    ~changeUserInfo() override;
 
 private slots:
     /**
@@ -120,11 +120,11 @@ private:
     /**
      * @brief quit from application
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     /**
      * @brief called when show() is invoked for this window and perform an animation
      */
-    void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent* event) override;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */
