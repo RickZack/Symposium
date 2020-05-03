@@ -28,7 +28,7 @@
  * Created on 24 Giugno 2019, 19.25
  */
 
-#define DISPATCHER_ON
+//#define DISPATCHER_ON
 
 #include "SymClient.h"
 #include "uri.h"
@@ -286,7 +286,7 @@ const user SymClient::editUser(user &newUserData, bool msgRcv) {
     (const_cast<user&>(this->getLoggedUser())).setNewData(newUserData);
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successEditUser();
+    this->dispatcher->successAction();
     #endif
     return this->getLoggedUser();
 }
@@ -472,7 +472,7 @@ void SymClient::removeUser(bool msgRcv) {
     this->setLoggedUser(*u);
     this->userColors.clear();
     #ifdef DISPATCHER_ON
-    this->dispatcher->successDeleteAccount();
+    this->dispatcher->successAction();
     #endif
 }
 

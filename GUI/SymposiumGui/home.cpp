@@ -25,7 +25,6 @@ home::home(QWidget *parent,const std::string pwd, SymWinInterface& si) :
     ui->logout->installEventFilter(watcher);
     ui->logout->setToolTip("Logout");
     setAttribute( Qt::WA_DeleteOnClose );
-    this->disc = 0;
 }
 
 home::~home()
@@ -34,10 +33,12 @@ home::~home()
 }
 
 void home::success(){
+    this->disc = false;
     this->successLogout();
 }
 
 void home::failure(const QString&){
+    this->disc = false;
     this->errorConnection();
 }
 
@@ -52,6 +53,9 @@ void home::on_delete_2_clicked()
     //disableStyleButtons();
     //deleteAccountWindow = new deleteAccount(this);
     //deleteAccountWindow->setClientDispatcher(cl);
+    this->disc = false;
+    deleteAccount* del = new deleteAccount(nullptr, *this);
+    goToWindow(*del);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     //cl->setDeleteAccount(deleteAccountWindow);
@@ -77,13 +81,15 @@ void home::on_InsertUri_clicked()
 void home::on_modify_clicked()
 {
     //changeWindow = new changeUserInfo(nullptr, pwd, cl);
+    changeUserInfo* changeWindow = new changeUserInfo(nullptr, pwd, *this);
+    goToWindow(*changeWindow);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
-    //cl->setChangeUserInfo(changeWindow);
+    //cl.setChangeUserInfo(changeWindow);
     #endif
     //------------------------------------------------------------------
-    changeWindow->show();
-    this->hide();
+    //changeWindow->show();
+    //this->hide();
 }
 
 void home::on_directory_clicked()
@@ -113,7 +119,7 @@ void home::logout()
 
 void home::closeEvent(QCloseEvent *event)
 {
-    if (this->disc==0){
+    if (this->disc==true){
         disableStyleButtons();
         event->ignore();
         ex=new class exit(this);
@@ -174,7 +180,6 @@ void home::successLogout()
     enableButtons();
     enableStyleButtons();
     //this->hide();
-    this->disc=1;
     backToMainWin();
     /*mw=new MainWindow();
     mw->setClientDispatcher(cl);

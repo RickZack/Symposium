@@ -27,8 +27,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_about_clicked()
 {
-    about* aboutWindow = new about(nullptr, *this);
-    goToWindow(*aboutWindow);
+    about aboutWindow(this);
+    aboutWindow.exec();
 }
 
 
@@ -71,25 +71,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 }
 
-void MainWindow::setClientDispatcher(Symposium::clientdispatcher *cl){
-    this->cl = cl;
-}
 
 void MainWindow::enableButtonsAfter()
 {
     enableStyleButtons();
 }
 
-
-void MainWindow::showEvent(QShowEvent* event)
-{
-    QMainWindow::showEvent(event);
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
-}
 
 void MainWindow::enableStyleButtons()
 {

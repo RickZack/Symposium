@@ -8,6 +8,7 @@
 #include "errorconnection.h"
 #include "errorlogout.h"
 #include "notification.h"
+#include "symwininterface.h"
 
 class MainWindow;
 
@@ -19,17 +20,22 @@ namespace Ui {
 class deleteAccount;
 }
 
-class deleteAccount : public QDialog
+class deleteAccount : public QDialog, public SymChildWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit deleteAccount(QWidget *parent = nullptr);
+    explicit deleteAccount(QWidget *parent, SymWinInterface& si);
+
+    void success() override;
+
+    void failure(const QString& toPrint) override;
+
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
      */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
+    //void setClientDispatcher(Symposium::clientdispatcher *cl);
     /**
      * @brief called by clientdispatcher when there is some error with connection
      */
@@ -47,7 +53,7 @@ public:
      * @brief called by clientdispatcher when there is some error during the operation
      * @param errorMess the messagge to show
      */
-    void errorDeleteUser(std::string errorMess);
+    void errorDeleteUser(const QString& errorMess);
     ~deleteAccount();
 
 private slots:
@@ -56,14 +62,17 @@ private slots:
      */
     void delete_click();
 
+    void on_cancel_clicked();
+
 private:
     Ui::deleteAccount *ui;
     MainWindow *mw;
     unsuccessdeleteaccount *window;
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
     notification *notWindow;
+    bool disc = true;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */
@@ -80,6 +89,8 @@ private:
      * @brief disable the style of buttons
      */
     void disableStyleButtons();
+
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // DELETEACCOUNT_H

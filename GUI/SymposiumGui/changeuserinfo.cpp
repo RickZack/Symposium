@@ -6,9 +6,10 @@
 #include "home.h"
 #include <QMovie>
 
-changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, Symposium::clientdispatcher *cl) :
+changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, SymWinInterface& si) :
     QDialog(parent),
-    pwd(pwd), ui(new Ui::changeUserInfo), cl(cl)
+    SymChildWinInterface (si, isQWidget::isQwidgetType(*this)),
+    pwd(pwd), ui(new Ui::changeUserInfo)
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -24,7 +25,7 @@ changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, Symposium::clie
     //-----------------------------------------------------PARTE DA DECOMENTARE
 
     #ifdef DISPATCHER_ON
-    us=cl->getUser();
+    us=cl.getUser();
     ui->username->setText(QString::fromStdString(us.getUsername()));
     ui->nickname->setText(QString::fromStdString(us.getNickname()));
     img=us.getIconPath();
@@ -52,12 +53,27 @@ changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, Symposium::clie
     movie->start();
 
     connect(ui->confirm, SIGNAL(clicked()), this, SLOT(confirm_click()));
-
+    setAttribute( Qt::WA_DeleteOnClose );
 }
 
 changeUserInfo::~changeUserInfo()
 {
     delete ui;
+}
+
+void changeUserInfo::success(){
+    this->esc = false;
+    this->successEditUser();
+}
+
+void changeUserInfo::failure(const QString& toPrint){
+    if(toPrint=="-1"){
+        this->esc = false;
+        this->errorConnection();
+    }else{
+        this->esc = true;
+        this->errorEditUser(toPrint);
+    }
 }
 
 void changeUserInfo::enableButtonsAfter()
@@ -100,7 +116,7 @@ void changeUserInfo::confirm_click()
     #ifdef DISPATCHER_ON
     QString imagine = QString::fromStdString(img);
     Symposium::user usNew(username.toStdString(), pwd, nickname.toStdString(), img, us.getSiteId(), us.getHome());
-    cl->editUser(usNew);
+    cl.editUser(usNew);
     #endif
     //------------------------------------------------------------------
 
@@ -109,19 +125,19 @@ void changeUserInfo::confirm_click()
     QString stringa="Your information has been successfully modified";
     hideLabelsError();
     enableButtons();
-    //notWindow = new notification(this, stringa);
-    //int ret=notWindow->exec();
-    /*if(ret==0)
-        enableStyleButtons();*/
+    notWindow = new notification(this, stringa);
+    int ret=notWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
     pressed=false;
     #endif
     //--------------------------------------------------------------------------
 }
 
 
-void changeUserInfo::setClientDispatcher(Symposium::clientdispatcher *cl){
+/*void changeUserInfo::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
-}
+}*/
 
 void changeUserInfo::errorConnection()
 {
@@ -129,8 +145,8 @@ void changeUserInfo::errorConnection()
     pressed=false;
     enableButtons();
     enableStyleButtons();
-    /*errorWindow = new errorconnection(this);
-    errorWindow->show();*/
+    errorWindow = new errorconnection(this);
+    errorWindow->show();
 }
 
 void changeUserInfo::errorConnectionLogout(const std::string str)
@@ -140,18 +156,18 @@ void changeUserInfo::errorConnectionLogout(const std::string str)
     enableButtons();
     enableStyleButtons();
     errorLog = new errorlogout(this, QString::fromStdString(str));
-    errorLog->setClientDispatcher(cl);
+    //errorLog->setClientDispatcher(cl);
     this->close();
     errorLog->show();
 }
 
-void changeUserInfo::errorEditUser(const std::string errorMess)
+void changeUserInfo::errorEditUser(const QString& errorMess)
 {
     hideLabelsError();
     pressed=false;
     enableButtons();
     enableStyleButtons();
-    ui->error->setText(QString::fromStdString(errorMess));
+    ui->error->setText(errorMess);
     ui->error->show();
 }
 
@@ -160,15 +176,18 @@ void changeUserInfo::errorEditUser(const std::string errorMess)
 void changeUserInfo::successEditUser()
 {
     pwd=newpass;
-    this->hide();
-    hideLabelsError();
+
+    //this->hide();
+    //hideLabelsError();
     pressed=false;
     enableButtons();
     QString stringa="Your information has been successfully modified";
-    //notWindow = new notification(this, stringa);
-    //int ret=notWindow->exec();
-    /*if(ret==0)
-        enableStyleButtons();*/
+    notWindow = new notification(this, stringa);
+    int ret=notWindow->exec();
+    if(ret==0)
+        enableStyleButtons();
+    home* h = new home(nullptr, pwd, *this);
+    goToWindow(*h);
     //h=new home(nullptr, pwd);
     //h->setClientDispatcher(cl);
     //h->show();
@@ -231,7 +250,7 @@ void changeUserInfo::on_confirm2_clicked()
         #ifdef DISPATCHER_ON
         QString imagine = QString::fromStdString(img);
         Symposium::user usNew(us.getUsername(), newp1.toStdString(), us.getNickname(), img, us.getSiteId(), us.getHome());
-        cl->editUser(usNew);
+        cl.editUser(usNew);
         pressed=true;
         #endif
         //------------------------------------------------------------------
@@ -241,7 +260,7 @@ void changeUserInfo::on_confirm2_clicked()
         hideLabelsError();
         enableButtons();
         QString stringa="Your information has been successfully modified";
-        //notWindow = new notification(this, stringa);
+        notWindow = new notification(this, stringa);
         int ret=notWindow->exec();
         if(ret==0)
             enableStyleButtons();
@@ -356,12 +375,14 @@ void changeUserInfo::showpwd()
 
 void changeUserInfo::closeEvent(QCloseEvent *event)
 {
-    disableStyleButtons();
-    event->ignore();
-    /*ex=new class exit(this);
-    int ret=ex->exec();
-    if(ret==0 && !pressed)
-        enableStyleButtons();*/
+    if(this->esc == true){
+        disableStyleButtons();
+        event->ignore();
+        ex=new class exit(this);
+        int ret=ex->exec();
+        if(ret==0 && !pressed)
+            enableStyleButtons();
+    }
 }
 
 void changeUserInfo::showEvent(QShowEvent *event)
@@ -492,15 +513,17 @@ void changeUserInfo::on_newpwd2_textChanged(const QString &arg1)
 
 void changeUserInfo::on_cancel_clicked()
 {
+    this->esc = false;
+    backToParent();
     //h=new home(nullptr, pwd);
     //h->setClientDispatcher(cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
-    cl->setHome(h);
+    //cl->setHome(h);
     #endif
     //------------------------------------------------------------------
-    this->hide();
-    h->show();
+    //this->hide();
+    //h->show();
 }
 
 void changeUserInfo::on_newpwd1_textChanged(const QString &arg1)

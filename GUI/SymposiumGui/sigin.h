@@ -18,7 +18,7 @@ class sigin : public QDialog, public SymChildWinInterface
 
 public:
     explicit sigin(QWidget *parent, SymWinInterface& si);
-    ~sigin();
+    ~sigin() override;
 
     void success() override;
     void failure(const QString& toPrint) override;
@@ -70,7 +70,7 @@ private:
     /**
      * @brief quit from application
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     /**
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
@@ -78,7 +78,7 @@ private:
     /**
      * @brief called when show() is invoked for this window and perform an animation
      */
-    void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent* event) override;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
     //QApplication a(argc, argv);
     Symposium::clientdispatcher cl;
-    cl.run(argc,argv);
+    return cl.run(argc,argv);
 
     //MainWindow w;
     //w.setClientDispatcher(cl);

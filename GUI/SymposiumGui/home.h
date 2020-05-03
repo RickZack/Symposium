@@ -57,7 +57,7 @@ public:
      * @brief disable the style of buttons
      */
     void disableStyleButtons();
-    ~home();
+    ~home() override;
 
 public slots:
     /**
@@ -90,10 +90,10 @@ private slots:
 
 private:
     Ui::home *ui;
-    deleteAccount *deleteAccountWindow;
+    //deleteAccount *deleteAccountWindow;
     std::string pwd;
     inserturi *inserturiWindow;
-    changeUserInfo *changeWindow;
+    //changeUserInfo *changeWindow;
     directory *directoryWindow;
     //MainWindow *mw;
     class exit *ex;
@@ -101,11 +101,11 @@ private:
     //Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
-    int disc;
+    bool disc = true;
     /**
      * @brief quit from application
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

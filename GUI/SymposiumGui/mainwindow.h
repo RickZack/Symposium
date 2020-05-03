@@ -62,19 +62,13 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    //about *aboutWindow;
     //sigin *signinWindow;
     //signup *signupWindow;
-    Symposium::clientdispatcher *cl;
     class exit *ex;
     /**
      * @brief quit from application
      */
     void closeEvent(QCloseEvent *event) override;
-    /**
-     * @brief called when show() is invoked for this window and perform an animation
-     */
-    void showEvent(QShowEvent* event) override;
     /**
      * @brief enable the style of buttons
      */
