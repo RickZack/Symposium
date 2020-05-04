@@ -8,6 +8,9 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uin
     privelege(privelege), us(user), pathFile(pathFile),  documentID(documentID),  ui(new Ui::alluser)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     listusers();
     insertusers();
     ui->tree->setColumnCount(2);

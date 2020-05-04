@@ -12,6 +12,8 @@ deleteAccount::deleteAccount(QWidget *parent, SymWinInterface& si) :
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
     //connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
     //connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));

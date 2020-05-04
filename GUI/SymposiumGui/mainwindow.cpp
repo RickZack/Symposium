@@ -11,6 +11,8 @@ MainWindow::MainWindow(QWidget *parent, SymWinManager& m, Symposium::clientdispa
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setFixedSize(size());
+    setWindowFlags(Qt::Window| Qt::MSWindowsFixedSizeDialogHint);
 
     QPixmap pix(":/icon/logo.png");
     int w=ui->label->width();

@@ -8,6 +8,8 @@ successlinks::successlinks(QWidget *parent, int caseLink, QString str, QString n
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
     hideAll();
     if(caseLink==1)
