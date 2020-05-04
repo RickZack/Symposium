@@ -51,7 +51,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)
 {
     ui->setupUi(this);
-    //setMinimumSize(800, 600);
+    setMinimumSize(800, 600);
 
     qApp->installEventFilter(this);
 
@@ -662,7 +662,7 @@ void notepad::resizeEvent(QResizeEvent *event)
     w=w-19;
     h=h-159;
     ui->textEdit->resize(w, h);
-    ui->textEdit->translateCursors(onlineUsers);
+    ui->textEdit->scroll();
 
 }
 
