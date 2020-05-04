@@ -724,7 +724,6 @@ bool notepad::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
            qDebug() << "key " << keyEvent->key() << "from" << obj;
            if(obj->objectName()=="textEdit"){
-               ui->textEdit->setTextColor(ui->textEdit->textColor());
                handleTextEditKeyPress(keyEvent);
            }
     }
