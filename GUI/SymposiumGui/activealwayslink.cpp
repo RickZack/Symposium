@@ -9,6 +9,8 @@ activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
     ui->writer->click();
     privilegeToGrant=Symposium::privilege::modify;

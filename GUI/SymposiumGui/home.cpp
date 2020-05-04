@@ -11,6 +11,10 @@ home::home(QWidget *parent,const std::string pwd, SymWinInterface& si) :
     ui(new Ui::home), pwd(pwd)
 {
     ui->setupUi(this);
+    setFixedSize(size());
+    setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);
+    setAttribute( Qt::WA_DeleteOnClose );
+
     connect(ui->logout, SIGNAL(clicked()), this, SLOT(logout()));
     ui->waiting->hide();
     ui->gif->hide();
@@ -24,7 +28,7 @@ home::home(QWidget *parent,const std::string pwd, SymWinInterface& si) :
     ButtonHoverWatcher * watcher = new ButtonHoverWatcher(this);
     ui->logout->installEventFilter(watcher);
     ui->logout->setToolTip("Logout");
-    setAttribute( Qt::WA_DeleteOnClose );
+
 }
 
 home::~home()

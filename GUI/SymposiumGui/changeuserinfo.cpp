@@ -13,6 +13,8 @@ changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, SymWinInterface
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
     QPixmap pix2(":/icon/logo.png");
     int w=ui->logo->width();

@@ -10,6 +10,8 @@ inserturi::inserturi(QWidget *parent, std::string pwd, bool homeWindow, Symposiu
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
     //showDir=cl->showDir(true);
     ui->writer->click();

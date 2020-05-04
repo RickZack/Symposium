@@ -11,6 +11,11 @@ sigin::sigin(QWidget *parent, SymWinInterface& si) :
     ui(new Ui::sigin)
 {
     ui->setupUi(this);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setAttribute( Qt::WA_DeleteOnClose );
+
     QPixmap pix2(":/icon/logo.png");
     int w=ui->logo->width();
     int h=ui->logo->height();
@@ -21,8 +26,7 @@ sigin::sigin(QWidget *parent, SymWinInterface& si) :
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setAttribute( Qt::WA_DeleteOnClose );
+
 }
 
 sigin::~sigin()

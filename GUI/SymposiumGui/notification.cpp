@@ -7,6 +7,8 @@ notification::notification(QWidget *parent, QString str) :
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
     ui->text->setText(str);
     connect(ui->ok, SIGNAL(clicked()), this, SLOT(hide()));

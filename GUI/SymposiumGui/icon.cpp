@@ -8,6 +8,8 @@ icon::icon(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
     msg=":/resources/avatar/beaver.png";
 
