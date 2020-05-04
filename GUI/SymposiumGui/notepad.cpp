@@ -51,6 +51,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)
 {
     ui->setupUi(this);
+    //setMinimumSize(800, 600);
 
     qApp->installEventFilter(this);
 
@@ -654,6 +655,17 @@ void notepad::closeEvent(QCloseEvent *event){
 
 }
 
+void notepad::resizeEvent(QResizeEvent *event)
+{
+    int w=event->size().width();
+    int h=event->size().height();
+    w=w-19;
+    h=h-159;
+    ui->textEdit->resize(w, h);
+    ui->textEdit->translateCursors(onlineUsers);
+
+}
+
 void notepad::showLabels()
 {
     //------------------------------------------------------PARTE DA DECOMMENTARE
@@ -673,7 +685,7 @@ void notepad::showLabels()
     std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 0, 0)};
     std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 2, 2)};
     std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 0, 0)};
-    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
+
     onlineUsers.push_front(p1);
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);

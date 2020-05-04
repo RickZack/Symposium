@@ -231,7 +231,7 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
             int newBlock=newCursor.blockNumber();
             int newColumn=newCursor.positionInBlock();
             cursors.find(siteId)->second.first=newBlock;
-            cursors.find(siteId)->second.first=newColumn;
+            cursors.find(siteId)->second.second=newColumn;
             showLabel(labelReverseName, labelName);
             //--------------------------------------------------------------------------------------------------------------
             QTextCursor cursor= this->textCursor();

@@ -6,6 +6,7 @@
 #include  <QtGui>
 #include <QTextEdit>
 #include <QCloseEvent>
+#include <QResizeEvent>
 
 
 #include "onlineusers.h"
@@ -71,6 +72,8 @@ public:
      */
     void closeEvent(QCloseEvent *event);
 
+    void resizeEvent(QResizeEvent *event);
+
     void showLabels();
 
 protected:
@@ -117,6 +120,9 @@ private:
     Symposium::user us;
     Symposium::clientdispatcher *cl;
     Symposium::document doc;
+    //-----------------------------------------------------------------------------PARTE DA CANCELLARE
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
+    //-------------------------------------------------------------------
 
     onlineusers *onlineuser;
     alluser *alluserWindow;
