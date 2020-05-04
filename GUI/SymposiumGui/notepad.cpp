@@ -734,8 +734,9 @@ bool notepad::eventFilter(QObject *obj, QEvent *event)
 void notepad::handleDeleteKey(){
     int row, col;
     QTextCursor cursor= ui->textEdit->textCursor();
+    /* handle the delete of a selected text*/
     if(cursor.hasSelection()){
-       int start,end,row_start,row_end,dim,numLines,selectedLines;
+       int start,end,row_start,row_end,dim,numLines;
         start=cursor.selectionStart();
         end=cursor.selectionEnd();
         cursor.setPosition(start,QTextCursor::MoveAnchor);
@@ -769,7 +770,7 @@ void notepad::handleDeleteKey(){
         }
         qDebug()<<"Caratteri"<<this->documentoProva.toText();
         return;
- }
+ }else{
     row=cursor.blockNumber();
     col=cursor.positionInBlock()-1;
     qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
@@ -785,6 +786,13 @@ void notepad::handleDeleteKey(){
     else if(col<0) //deleting from an empty document, discard the action
         return;
     documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
+    if(row==0 && col==0){
+        QColor black=Qt::black;
+        black.setAlpha(160);
+        ui->textEdit->setTextColor(black);
+        ui->textEdit->setText("");
+     }
+    }
 }
 
 void notepad::deleteMultipleLines(int sR,int eR,int c,int sL,bool lines){
@@ -880,10 +888,7 @@ void notepad::contV_action(int pos){
         this->documentoProva.localInsert(indexes,sym);
         //cl->localInsert(this->documentId, symbol &sym, &indexes)
         count++;posTmp++;
-
     }
-
-
 }
 
 void notepad::addCursor()
