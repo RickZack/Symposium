@@ -3,21 +3,22 @@
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
 
-alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile) :
+alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile,
+                 std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers,
+                 std::unordered_map<std::string, Symposium::privilege> users) :
     QDialog(parent),
-    privelege(privelege), us(user), pathFile(pathFile),  documentID(documentID),  ui(new Ui::alluser)
+    privelege(privelege), us(user), pathFile(pathFile),  documentID(documentID),  ui(new Ui::alluser), onlineUsers(onlineUsers), users(users)
 {
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
-    listusers();
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     insertusers();
     ui->tree->setColumnCount(2);
     ui->tree->headerItem()->setText(0, "user:");
     ui->tree->headerItem()->setText(1, "privilege:");
-    ui->tree->setColumnWidth(0, 200);
-    this->us=Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
+    ui->tree->setColumnWidth(0, 300);
     privelege=Symposium::privilege::owner;
     if(privelege!=Symposium::privilege::owner)
     {
@@ -98,33 +99,44 @@ alluser::~alluser()
     delete ui;
 }
 
-void alluser::listusers()
-{
-    std::pair p=std::make_pair<std::string, Symposium::privilege>("Carlo", Symposium::privilege::modify);
-    std::pair p1=std::make_pair<std::string, Symposium::privilege>("Vincenzo", Symposium::privilege::readOnly);
-    std::pair p2=std::make_pair<std::string, Symposium::privilege>("Matteo", Symposium::privilege::owner);
-    std::pair p3=std::make_pair<std::string, Symposium::privilege>("Claudio", Symposium::privilege::modify);
-    users.insert(p);
-    users.insert(p1);
-    users.insert(p2);
-    users.insert(p3);
-}
 
 void alluser::insertusers()
 {
+    for(auto it:onlineUsers)
+    {
+        QTreeWidgetItem *item=new QTreeWidgetItem();
+        item->setIcon(0, QIcon(QString::fromStdString(it.first->getIconPath())));
+        qDebug()<<QString::fromStdString(us.getUsername());
+        if(us.getUsername()==it.first->getUsername())
+            item->setText(0, "(you)");
+        else
+            item->setText(0, QString::fromStdString(it.first->getUsername()));
+        std::ostringstream priv;
+        priv<<it.second.p;
+        item->setText(1, QString::fromStdString(priv.str()));
+        ui->tree->addTopLevelItem(item);
+    }
+
     for(auto it:users)
     {
-        if(it.second!=Symposium::privilege::none)
+        bool online=false;
+        for(auto it2:onlineUsers)
         {
-            QTreeWidgetItem *item=new QTreeWidgetItem();
-            if(it.first!=us.getUsername())
-                item->setText(0, QString::fromStdString(it.first));
-            else
-                item->setText(0,"(you)");
-            std::ostringstream priv;
-            priv<<it.second;
-            item->setText(1, QString::fromStdString(priv.str()));
-            ui->tree->addTopLevelItem(item);
+            if(it.first==it2.first->getUsername())
+                online=true;
+        }
+        if(!online)
+        {
+            if(it.second!=Symposium::privilege::none)
+            {
+                QTreeWidgetItem *item=new QTreeWidgetItem();
+                item->setIcon(0, QIcon(":/icon/offline.png"));
+                item->setText(0, QString::fromStdString(it.first)+" (offline)");
+                std::ostringstream priv;
+                priv<<it.second;
+                item->setText(1, QString::fromStdString(priv.str()));
+                ui->tree->addTopLevelItem(item);
+            }
         }
     }
 }
@@ -155,18 +167,9 @@ void alluser::on_button_clicked()
             break;
 
         }
-        QString text="You are sure you want to change privilege in "+priv+" to "+QString::fromStdString(username)+"?\n";
-        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Change privilege",
-                                                                    text,
-                                                                    QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn == QMessageBox::Yes)
-        {
-            ui->waiting->show();
-            ui->gif->show();
-            ui->button->setDisabled(true);
-            //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
-        }
+       ui->waiting->show();
+       ui->gif->show();
+       ui->button->setDisabled(true);
     }
 }
 
@@ -188,4 +191,9 @@ void alluser::on_reader_clicked()
 void alluser::on_none_clicked()
 {
     newPrivelege=Symposium::privilege::none;
+}
+
+void alluser::on_button_2_clicked()
+{
+    close();
 }

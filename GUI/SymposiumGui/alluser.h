@@ -6,6 +6,9 @@
 #include <unordered_map>
 #include <QMessageBox>
 #include <QDebug>
+#include <forward_list>
+
+#include "../../document.h"
 #include "../../privilege.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
@@ -26,13 +29,15 @@ class alluser : public QDialog
     Q_OBJECT
 
 public:
+    explicit alluser(QWidget *parent, Symposium::privilege privelege,
+                        Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile,
+                     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers,
+                     std::unordered_map<std::string, Symposium::privilege> users);
     Symposium::privilege privelege;
     Symposium::user us;
     std::string pathFile;
-    std::unordered_map<std::string, Symposium::privilege> users;
     Symposium::uint_positive_cnt::type documentID;
-    explicit alluser(QWidget *parent = nullptr, Symposium::privilege privelege=Symposium::privilege::readOnly,
-                     Symposium::uint_positive_cnt::type documentID=0, Symposium::user user=Symposium::user(), std::string pathFile="");
+
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -85,6 +90,8 @@ private slots:
     void on_none_clicked();
 
 
+    void on_button_2_clicked();
+
 private:
     Ui::alluser *ui;
     Symposium::privilege newPrivelege;
@@ -92,7 +99,9 @@ private:
     Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
-    void listusers();
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
+    std::unordered_map<std::string, Symposium::privilege> users;
+
     /**
      * @brief insert users in the tree
      */

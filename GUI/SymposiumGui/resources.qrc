@@ -169,5 +169,6 @@
         <file>icon/paste.png</file>
         <file>icon/scissors.png</file>
         <file>icon/pdf.png</file>
+        <file>icon/offline.png</file>
     </qresource>
 </RCC>

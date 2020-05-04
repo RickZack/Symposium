@@ -604,9 +604,24 @@ void notepad::visualizeUsers()
 
 void notepad::visualizeAllUsers()
 {
-    alluserWindow = new alluser(this,  priv, documentId, us, pathToFile);
+    //----------------------------------------------------PARTE DA CANCELLARE
+    std::unordered_map<std::string, Symposium::privilege> users;
+    std::pair p=std::make_pair<std::string, Symposium::privilege>("Carlo", Symposium::privilege::modify);
+    std::pair p1=std::make_pair<std::string, Symposium::privilege>("Vincenzo", Symposium::privilege::readOnly);
+    std::pair p2=std::make_pair<std::string, Symposium::privilege>("Matteo", Symposium::privilege::owner);
+    std::pair p3=std::make_pair<std::string, Symposium::privilege>("Claudio", Symposium::privilege::modify);
+    std::pair p4=std::make_pair<std::string, Symposium::privilege>("Mario", Symposium::privilege::owner);
+    std::pair p5=std::make_pair<std::string, Symposium::privilege>("Federico", Symposium::privilege::modify);
+    users.insert(p);
+    users.insert(p1);
+    users.insert(p2);
+    users.insert(p3);
+    Symposium::user thisUs=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
+    //---------------------------------------------------------------------------------------------------
+    //std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
+    //std::unordered_map<std::string, Symposium::privilege> users=cl->allUser(documentID);
+    alluserWindow = new alluser(this,  priv, documentId, thisUs, pathToFile, onlineUsers, users);
     alluserWindow->setClientDispatcher(cl);
-    //alluserWindow->users=cl->allUser(documentID);
     //cl->setAllUser(alluserWindow);
     alluserWindow->exec();
 }
