@@ -130,10 +130,14 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
     if(toInsert.getCh()=='\r'){
+        symbol checkSym=symbols[i0][i1];
+        if(checkSym.getCh()=='\r'){
+            return newSymb;
+    }else{
         symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end());
         symbols.push_back(std::vector<symbol>(1,emptySymbol));
-
+        }
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     qDebug()<<"Simboli"<<toText();
@@ -399,14 +403,11 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
 
 
 std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
-    /*
-    //TODO: take into account new position of cursor
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
     this->updateCursorPos(siteId,i0,i1);
     if(i0==-1 || i1==-1){
-        //FIXME: dummy return, fix
         return std::pair<unsigned int, unsigned int>();
     }
     //FIXME: se lo lasci come ultima opzione, puoi evitare di scrivere questo codice
@@ -417,7 +418,7 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     else {
         symbols[i0].erase(symbols[i0].begin()+i1);
     }
-     */
+    return pos;
 }
 
 std::wstring document::toText() const {
@@ -636,7 +637,7 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     std::pair<int,int> ind;
     int i0=0; int i1=0;
     int minLine=0;
-    int totalLines=symbols.size();
+    int totalLines=this->countsNumLines();
     int maxLine= totalLines-1;
     std::vector<Symposium::symbol> lastLine= symbols[maxLine];
 
@@ -647,26 +648,28 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 
     //if the struct is empty or char is less than first char
     if(symbols.empty()||symbol.getCh()<symbols[0][0].getCh()){
-        //i0=-1; i1=-1; ind={i0,i1}; return ind;
-        i0=0; i1=0; ind={i0,i1};return ind;
+        i0=-1; i1=-1; ind={i0,i1}; return ind;
+
     }
 
-    auto lastChar=lastLine[lastLine.size()-1];
+    // counts the number of chars in the last line
+    int chars=this->countCharsInLine(maxLine);
+    auto lastChar=lastLine[chars-1];
 
     //char is greater than all existing chars(insert at end)
     if(symbol.getCh()>lastChar.getCh()){
-       // i0=-1; i1=-1; ind={i0,i1}; return ind;
-        return this->findEndPosition(lastChar,totalLines);
+       i0=-1; i1=-1; ind={i0,i1}; return ind;
     }
 
     // binary search
     while(minLine+1<maxLine){
-        midLine=minLine+(maxLine-minLine)/2;
+        midLine=floor(minLine+(maxLine-minLine)/2);
         currentLine=symbols[midLine];
-        lastChar=currentLine[currentLine.size()-1];
+        int charsInLine=this->countCharsInLine(midLine);
+        lastChar=currentLine[charsInLine-1];
 
         if(symbol==lastChar){
-            ind={midLine,currentLine.size()-1}; return ind;
+            ind={midLine,charsInLine-1}; return ind;
         } else if(symbol<lastChar){
             maxLine=midLine;
         } else{
@@ -676,34 +679,36 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 
     // Check between min and max line
     minCurrentLine=symbols[minLine];
-    auto minLastSymbol=minCurrentLine[minCurrentLine.size()-1];
+    int min_charsInLine=this->countCharsInLine(minLine);
+    auto minLastSymbol=minCurrentLine[min_charsInLine-1];
     maxCurrentLine=symbols[maxLine];
-    auto maxLastSymbol=maxCurrentLine[maxCurrentLine.size()-1];
+    int max_charsInLine=this->countCharsInLine(maxLine);
+    auto maxLastSymbol=maxCurrentLine[max_charsInLine-1];
 
     if(symbol<=minLastSymbol){
-        charIdx=findIndexInLine(symbol,minCurrentLine);
+        charIdx=findIndexInLine(symbol,minCurrentLine,min_charsInLine);
         ind={minLine,charIdx};
         return ind;
     } else{
-        charIdx=findIndexInLine(symbol,maxCurrentLine);
+        charIdx=findIndexInLine(symbol,maxCurrentLine,max_charsInLine);
         ind={maxLine,charIdx};
         return ind;
     }
 
 }
 
-unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector) const {
+unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector,int dimLine) const {
     int left=0;
-    int right=vector.size()-1;
+    int right=dimLine-1;
     int mid;
 
-    if(vector.size()==0||symbol<vector[left]){
+    if(vector[0]==emptySymbol||symbol<vector[left]){
         return left;
     } else if(symbol>vector[right]){
-        return symbols.size();
+        return this->countsNumLines();
     }
     while(left+1<right){
-        mid=left+(right-left)/2;
+        mid=floor(left+(right-left)/2);
 
         if(symbol==vector[left]){
             return mid;

@@ -261,7 +261,7 @@ namespace Symposium {
         std::pair<unsigned int, unsigned int> findPosition(const symbol &symbol) const;
 
 
-        unsigned int findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector) const;
+        unsigned int findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector,int charsInLine) const;
 
         /**
          * @brief searches the position before the one of the considered value
