@@ -72,7 +72,7 @@ void home::on_delete_2_clicked()
 
 void home::on_InsertUri_clicked()
 {
-    //inserturiWindow = new inserturi(nullptr, pwd, cl);
+    inserturiWindow = new inserturi(nullptr, pwd);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     //cl.setInsertUri(inserturiWindow);
@@ -100,12 +100,14 @@ void home::on_directory_clicked()
 {
     //directoryWindow=new directory(nullptr, pwd, cl);
     //directoryWindow->show();
+    directory* dir = new directory(nullptr, pwd, *this);
+    goToWindow(*dir);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     //cl.setDirectory(directoryWindow);
     #endif
     //------------------------------------------------------------------
-    this->hide();
+    //this->hide();
 }
 
 void home::logout()

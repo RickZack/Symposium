@@ -45,7 +45,7 @@
 
 using namespace Symposium;
 
-clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), finestreDocumenti()
+clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), requestDoc(tp),finestreDocumenti()
 {
     this->client.setClientDispatcher(this);
     this->userpwd = "";
@@ -110,7 +110,7 @@ void clientdispatcher::readyRead(){
         this->winmanager.activeWindow().failure(QString::fromStdString(mes->getErrDescr()));
         this->userpwd="";
 
-        switch(currentWindow){
+        /*switch(currentWindow){
         case 1:{
             //this->finestraLogin->errorSignIn();
             break;
@@ -137,7 +137,7 @@ void clientdispatcher::readyRead(){
             this->finestraActiveAlwaysLink->unsuccessLink(mes->getErrDescr());
             break;
         }case 12:{
-            this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
+            //this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
             break;
         }case 13:{
             this->finestraOnlineUser->errorEditPrivilege(mes->getErrDescr());
@@ -152,7 +152,7 @@ void clientdispatcher::readyRead(){
             this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
             break;
         }
-        }
+        }*/
 
     } catch (SymClientException& e){
         //eccezione di relatedMessage non trovato
@@ -610,24 +610,31 @@ void clientdispatcher::successShareResource(std::string path){
 }
 
 void clientdispatcher::successOpenSource(document &doc){
-    this->setTextEdit(doc.getId(),this->finestraChoosePriv->successOpen(doc));
+    this->requestDoc = doc;
+    this->successAction();
 }
 
-void clientdispatcher::successRemoveResource(){
+const document& clientdispatcher::getOpenDocument(){
+    return this->requestDoc;
+}
+
+/*void clientdispatcher::successRemoveResource(){
     this->finestraDirectory->successRemove();
+}*/
+
+/*void clientdispatcher::successCreateNewDir(const std::string ID){
+    this->finestraDirectory->successCreate();
+}*/
+
+void clientdispatcher::successCreateNewSource(const document &doc){
+    this->requestDoc = doc;
+    this->successAction();
+    //this->setTextEdit(doc.getId(),this->finestraDirectory->successNewSource(ID, doc));
 }
 
-void clientdispatcher::successCreateNewDir(const std::string ID){
-    this->finestraDirectory->successCreate(ID);
-}
-
-void clientdispatcher::successCreateNewSource(const std::string ID, document &doc){
-    this->setTextEdit(doc.getId(),this->finestraDirectory->successNewSource(ID, doc));
-}
-
-void clientdispatcher::successRenameResource(){
+/*void clientdispatcher::successRenameResource(){
     this->finestraDirectory->successRename();
-}
+}*/
 
 void clientdispatcher::closeConnection(){
     this->socket.close();

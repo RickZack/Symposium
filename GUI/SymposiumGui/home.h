@@ -94,7 +94,7 @@ private:
     std::string pwd;
     inserturi *inserturiWindow;
     //changeUserInfo *changeWindow;
-    directory *directoryWindow;
+    //directory *directoryWindow;
     //MainWindow *mw;
     class exit *ex;
     bool pressed=false;

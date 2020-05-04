@@ -90,7 +90,8 @@ namespace Symposium{
         uint_positive_cnt::type ResIDofWaitingMessage;
         std::string userpwd;
         std::string username;
-
+        document tp;
+        document& requestDoc;
         // ELENCO DEI PUNTATORI A FINESTRA CHE SARRANNO POI DA ELIMINARE
 
         sigin* finestraLogin;                           //1
@@ -240,19 +241,21 @@ namespace Symposium{
 
         void successOpenSource(document &doc);
 
-        void successRemoveResource();
+        //void successRemoveResource();
 
-        void successCreateNewDir(const std::string ID);
+        //void successCreateNewDir(const std::string ID);
 
-        void successCreateNewSource(const std::string ID, document &doc);
+        void successCreateNewSource(const document &doc);
 
-        void successRenameResource();
+        //void successRenameResource();
 
         void closeConnection();
 
         void successAction();
 
         std::string getStr(std::string ID_Cartella, std::string path);
+
+        const document& getOpenDocument();
 
 
         /**

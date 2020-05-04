@@ -230,10 +230,10 @@ void inserturi::on_cancel_clicked()
     }
     else
     {
-        d=new directory(nullptr, pwd);
+        /*d=new directory(nullptr, pwd);
         d->setClientDispatcher(cl);
         //cl->setDirectory(d);
-        d->show();
+        d->show();*/
     }
 }
 

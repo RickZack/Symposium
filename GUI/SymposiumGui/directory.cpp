@@ -7,9 +7,10 @@
 #include <ostream>
 
 
-directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatcher *cl) :
+directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     QMainWindow(parent),
-    ui(new Ui::directory), cl(cl), pwd(pwd)
+    SymChildWinInterface (si, isQWidget::isQwidgetType(*this)),
+    ui(new Ui::directory), pwd(pwd)
 {
     ui->setupUi(this);
     this->actualId = "0";
@@ -17,7 +18,7 @@ directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatch
     this->openFolders = 0;
     // METODO DISPATCHER CHE RESTITUISCE LA STRINGA
     #ifdef DISPATCHER_ON
-    str=cl->showHome();
+    str=cl.showHome();
     path = "./";
     qDebug() << "prima della manipolazione str: " << QString::fromStdString(str);
     str = manipulationHome(str);
@@ -44,6 +45,7 @@ directory::directory(QWidget *parent, std::string pwd, Symposium::clientdispatch
     ui->actionHome->setIcon(QIcon(":/icon/home.png"));
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
     //hideAll();
+    setAttribute( Qt::WA_DeleteOnClose );
 }
 
 std::string directory::manipulationHome(std::string& s){
@@ -89,6 +91,35 @@ std::string directory::manipulationHome(std::string& s){
 directory::~directory()
 {
     delete ui;
+}
+
+void directory::success(){
+    switch (this->lastChoice) {
+    case createFolder:{
+        this->successCreate();
+        break;
+    }case remove:{
+        this->successRemove();
+        break;
+    }case rename:{
+        this->successRename();
+        break;
+    }case createNewSource:{
+        this->successNewSource();
+        break;
+    }case openSource:{
+        this->successOpen();
+        break;
+    }
+    }
+}
+
+void directory::failure(const QString& toPrint){
+    if(toPrint=="-1"){
+        this->errorConnection();
+    }else{
+        this->failureActionDirectory(toPrint);
+    }
 }
 
 
@@ -228,13 +259,15 @@ int directory::number_elements(std::string& string)
 
 void directory::on_actionHome_triggered()
 {
+    this->esc = false;
+    backToParent();
     //home *homeWindow=new home(nullptr, pwd);
     //homeWindow->setClientDispatcher(cl);
     #ifdef DISPATCHER_ON
-    cl->setHome(homeWindow);
+    //cl->setHome(homeWindow);
     #endif
     //homeWindow->show();
-    this->hide();
+    //this->hide();
 }
 
 void directory::on_actionUri_triggered()
@@ -292,7 +325,8 @@ void directory::deleteSource()
            id=idPriv.first;
        }
        #ifdef DISPATCHER_ON
-       cl->removeResource(path,id);
+       this->lastChoice = remove;
+       cl.removeResource(path,id);
        #endif
 
        //-------------------------------------------------------------------
@@ -347,8 +381,8 @@ void directory::successRemove(){
     }
 }
 
-void directory::failureActionDirectory(std::string msg){
-    QMessageBox::warning(this,"Warning Message",QString::fromStdString(msg));
+void directory::failureActionDirectory(const QString& msg){
+    QMessageBox::warning(this, "Warning Message", msg);
 }
 
 // this method creates a new folder
@@ -357,8 +391,10 @@ void directory::on_pushButton_3_clicked()
 
     QString name= ui->name->text();
     std::string nameFolder=name.toStdString();
+    this->lastChoice = createFolder;
     #ifdef DISPATCHER_ON
-    cl->createNewDir(path,nameFolder);
+    this->lastChoice = createFolder;
+    cl.createNewDir(path,nameFolder);
     #else
     // anche questo da eliminare
     ui->name->setText(" ");
@@ -387,15 +423,28 @@ void directory::on_pushButton_3_clicked()
     #endif
 }
 
-void directory::successCreate(std::string id){
+void directory::successCreate(){
+    std::string temp;
+    std::size_t found;
+
     QString name= ui->name->text();
     ui->name->clear();
     count++;
-    std::string new_str;
-    if(str.empty()){new_str="directory "+id+' '+name.toStdString()+'\n';}
-            else{new_str=" directory "+id+' '+name.toStdString()+'\n';}
+    if(this->openFolders == 0){
+        this->str = cl.showHome();
+    }else{
+        temp = this->path;
+        temp.erase(temp.end()-1);
+        found=temp.find_last_of("/");
+        temp.erase(found+1,temp.size());
+        this->str = cl.getStr(this->actualId, temp);
+    }
+    this->str = manipulationHome(this->str);
+    //std::string new_str;
+    //if(str.empty()){new_str="directory "+id+' '+name.toStdString()+'\n';}
+    //        else{new_str=" directory "+id+' '+name.toStdString()+'\n';}
     //qDebug() << "new_str: " << QString::fromStdString(new_str) << " name: " << name << " " << QString::fromStdString(str);
-    str=str+new_str;
+    //str=str+new_str;
     ui->myListWidget->clear();
     int count=number_elements(str);
     listGenerate(str,count);
@@ -406,7 +455,15 @@ void directory::successCreate(std::string id){
 //this method closes the window directory
 void directory::closeEvent(QCloseEvent *event)
 {
-    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
+    if(this->esc == true){
+        disableStyleButtons();
+        event->ignore();
+        ex=new class exit(this);
+        int ret=ex->exec();
+        if(ret==0)
+            enableStyleButtons();
+    }
+    /*QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
                                                                     tr("Are you sure to quit?\n"),
                                                                      QMessageBox::No | QMessageBox::Yes,
                                                                     QMessageBox::Yes);
@@ -415,7 +472,7 @@ void directory::closeEvent(QCloseEvent *event)
         } else {
 
             event->accept();
-        }
+        }*/
 
 }
 
@@ -523,7 +580,8 @@ void directory::on_pushButton_4_clicked()
 
     //ui->name_2->setText(" "); // da rimuovere
     #ifdef DISPATCHER_ON
-    cl->createNewSource(this->path,nameDocument);
+    this->lastChoice = createNewSource;
+    cl.createNewSource(this->path,nameDocument);
     #else
     // DA RIMUOVERE
     std::string id="1"; //PER ESEMPIO
@@ -545,20 +603,26 @@ void directory::on_pushButton_4_clicked()
     #endif
 }
 
-notepad* directory::successNewSource(std::string id, Symposium::document &doc){
+notepad* directory::successNewSource(){
+    std::string temp;
+    std::size_t found;
     QString name= ui->name_2->text();
     ui->name_2->clear();
-    count++;
-    if(str.empty()){
-        str = "file "+id+' '+name.toStdString()+' '+"owner"+'\n';
+    if(this->openFolders == 0){
+        this->str = cl.showHome();
     }else{
-        str = str + " file "+id+' '+name.toStdString()+' '+"owner"+'\n';
+        temp = this->path;
+        temp.erase(temp.end()-1);
+        found=temp.find_last_of("/");
+        temp.erase(found+1,temp.size());
+        this->str = cl.getStr(this->actualId, temp);
     }
+    this->str = manipulationHome(this->str);
     ui->myListWidget->clear();
     int count=number_elements(str);
     listGenerate(str,count);
     //open the newly created document
-    notepad* nw= new notepad(this,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,doc);
+    notepad* nw= new notepad(this,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument());
     nw->show();
     nw->showLabels();
     return nw;
@@ -593,7 +657,7 @@ void directory::on_back_button_clicked()
         if(this->openFolders==0){
             actualId = "0";
             previousId = "0";
-            str=cl->showHome();
+            str=cl.showHome();
             str = manipulationHome(str);
             ui->back_button->hide();
         }else{
@@ -609,7 +673,7 @@ void directory::on_back_button_clicked()
                 previousId = temp.substr(found+1,temp.size());
             }
             temp = temp + "/";
-            str=cl->getStr(this->actualId, temp);
+            str=cl.getStr(this->actualId, temp);
             str = manipulationHome(str);
         }
         ui->myListWidget->clear();
@@ -642,7 +706,8 @@ void directory::on_okButton_clicked()
          std::string oldName=items->text().toStdString();
          std::string id=searchForId(oldName,str,count);
          #ifdef DISPATCHER_ON
-         cl->renameResource(this->path,id, newName.toStdString());
+         this->lastChoice = rename;
+         cl.renameResource(this->path,id, newName.toStdString());
          #else
          items->setText(newName);
          ui->myListWidget->currentItem()->setSelected(false);
@@ -671,27 +736,27 @@ void directory::successRename(){
     }
     //aggiorniamo la stringa del contenuto in modo che ci sia il nuovo nome della directory
     if(this->actualId=="0"){
-        str = cl->showHome();
+        str = cl.showHome();
         str = manipulationHome(str);
     }else{
         std::string temp = path;
         temp.erase(temp.end()-1);
         temp.erase(temp.find_last_of("/")+1,temp.size());
-        str=cl->getStr(this->actualId, temp);
+        str=cl.getStr(this->actualId, temp);
         str = manipulationHome(str);
     }
 }
 
 
 void directory::errorConnection(){
-    /*errorWindow = new errorconnection(this);
-    errorWindow->show();*/
+    errorWindow = new errorconnection(this);
+    errorWindow->show();
 }
 
-void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
+/*void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
-}
+}*/
 
 void directory::errorConnectionLogout(std::string str){
     errorLogoutWindow= new errorlogout(this, QString::fromStdString(str));
@@ -721,7 +786,7 @@ void directory::openSelectedSource(){
              this->openFolders++;
              // open the folder Window
              #ifdef DISPATCHER_ON
-             str=cl->getStr(this->actualId, this->path);
+             str=cl.getStr(this->actualId, this->path);
              str = manipulationHome(str);
              path+=actualId+'/';
              #else
@@ -766,9 +831,9 @@ void directory::openSelectedSource(){
              std::string id=idPriv.first;
              std::string initialPriv=idPriv.second;
              // I have to open the choosepriv first
-             chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
+             //chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
              //cl->setchoosepriv(chooseprivWindow)
-             chooseprivWindow->show();
+             //chooseprivWindow->show();
 
          }
     qDebug() << "str: " << QString::fromStdString(str) << " path: " << QString::fromStdString(path);
@@ -804,7 +869,8 @@ void directory::on_OkPriv_clicked()
         priv= Symposium::privilege::owner;
 
     #ifdef DISPATCHER_ON
-    cl->openSource(this->path,this->id,this->priv);
+    this->lastChoice = openSource;
+    cl.openSource(this->path,this->id,this->priv);
     #else
     notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path);
     notepadWindow->show();
@@ -814,9 +880,9 @@ void directory::on_OkPriv_clicked()
     this->hidePrivilegeButtons();
 }
 
-notepad* directory::successOpen(Symposium::document &doc){
-    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,doc);
-    this->hide();
+notepad* directory::successOpen(){
+    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument());
+    //this->hide();
     notepadWindow->show();
     notepadWindow->showLabels();
     return notepadWindow;

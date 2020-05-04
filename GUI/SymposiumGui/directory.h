@@ -15,6 +15,7 @@
 #include "errorconnection.h"
 #include "errorlogout.h"
 #include "notepad.h"
+#include "symwininterface.h"
 
 namespace Ui {
 class directory;
@@ -24,12 +25,25 @@ namespace Symposium{
 class clientdispatcher;
 }
 
-class directory : public QMainWindow
+class directory : public QMainWindow, public SymChildWinInterface
 {
     Q_OBJECT
 
+    enum action{
+        createFolder,
+        remove,
+        rename,
+        createNewSource,
+        openSource
+    };
+
 public:
-    explicit directory(QWidget *parent = nullptr, std::string pwd="", Symposium::clientdispatcher *cl=nullptr);
+    explicit directory(QWidget *parent, std::string pwd, SymWinInterface& si);
+
+    void success() override;
+
+    void failure(const QString& toPrint) override;
+
     ~directory();
     void listGenerate(std::string str, int count);
 
@@ -54,26 +68,23 @@ public:
     void successRemove();
 
     /**
-     * @brief successCreate create a new folder and updates the string str adding its info
-     * @param id the id of the new created folder
+     * @brief successCreate create a new folder and updates the string str
      */
-    void successCreate(std::string id);
+    void successCreate();
 
     void setClientDispatcher(Symposium::clientdispatcher *cl);
 
     /**
-     * @brief successNewSource creates a new file and it adds its info in the generale string
-     * @param id  of the file
-     * @param priv of the file
+     * @brief successNewSource creates a new file and updates the string str
      */
-    notepad* successNewSource(std::string id, Symposium::document &doc);
+    notepad* successNewSource();
 
 
     /**
      * @brief failureActionDirectory shows an error message in case of the server doesn't answer
      * @param msg
      */
-    void failureActionDirectory(std::string msg);
+    void failureActionDirectory(const QString& msg);
 
     /**
      * @brief errorLogout shows an error message and closes the window
@@ -87,7 +98,7 @@ public:
      * @param doc
      * @return
      */
-    notepad *successOpen(Symposium::document &doc);
+    notepad *successOpen();
 private slots:
 
     /**
@@ -157,11 +168,14 @@ private:
     Ui::directory *ui;
     inserturi *uriWindow;
     QListWidgetItem *item1;
-    choosepriv *chooseprivWindow;
-    Symposium::clientdispatcher *cl;
+    //choosepriv *chooseprivWindow;
+    //Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLogoutWindow;
     notepad *notepadWindow;
+    action lastChoice;
+    class exit* ex;
+    bool esc=true;
 
     /**
      * @brief openFolders this variable is used to say that a window has been opened and to enable/disable the BACK button

@@ -162,7 +162,7 @@ bool filesystem::operator!=(const filesystem &rhs) const {
 }
 
 
-file::file(const std::string &name, uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), doc(0){
+file::file(const std::string &name, uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), doc(){
     strategy=std::make_unique<RMOAccess>();
 }
 
