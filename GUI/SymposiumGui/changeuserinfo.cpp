@@ -12,9 +12,9 @@ changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, SymWinInterface
     pwd(pwd), ui(new Ui::changeUserInfo)
 {
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     QPixmap pix2(":/icon/logo.png");
     int w=ui->logo->width();
@@ -64,16 +64,15 @@ changeUserInfo::~changeUserInfo()
 }
 
 void changeUserInfo::success(){
-    this->esc = false;
+    pressed = false;
     this->successEditUser();
 }
 
 void changeUserInfo::failure(const QString& toPrint){
+    pressed=false;
     if(toPrint=="-1"){
-        this->esc = false;
         this->errorConnection();
     }else{
-        this->esc = true;
         this->errorEditUser(toPrint);
     }
 }
@@ -137,9 +136,6 @@ void changeUserInfo::confirm_click()
 }
 
 
-/*void changeUserInfo::setClientDispatcher(Symposium::clientdispatcher *cl){
-    this->cl = cl;
-}*/
 
 void changeUserInfo::errorConnection()
 {
@@ -377,7 +373,7 @@ void changeUserInfo::showpwd()
 
 void changeUserInfo::closeEvent(QCloseEvent *event)
 {
-    if(this->esc == true){
+    if(closedByUser()){
         disableStyleButtons();
         event->ignore();
         ex=new class exit(this);
@@ -385,17 +381,10 @@ void changeUserInfo::closeEvent(QCloseEvent *event)
         if(ret==0 && !pressed)
             enableStyleButtons();
     }
+    else
+        event->accept();
 }
 
-void changeUserInfo::showEvent(QShowEvent *event)
-{
-    QDialog::showEvent(event);
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
-}
 
 void changeUserInfo::disableButtons()
 {
@@ -515,7 +504,6 @@ void changeUserInfo::on_newpwd2_textChanged(const QString &arg1)
 
 void changeUserInfo::on_cancel_clicked()
 {
-    this->esc = false;
     backToParent();
     //h=new home(nullptr, pwd);
     //h->setClientDispatcher(cl);

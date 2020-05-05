@@ -8,9 +8,9 @@ exit::exit(QWidget *parent, bool logout) :
     ui(new Ui::exit), logout(logout)
 {
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     connect(ui->ok, SIGNAL(clicked()), this, SLOT(doLogout()));
     connect(ui->ok, SIGNAL(clicked()), qApp, SLOT(quit()));

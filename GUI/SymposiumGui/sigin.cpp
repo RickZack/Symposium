@@ -79,9 +79,6 @@ void sigin::successSignIn()
     //homeWindow->show();
 }
 
-/*void sigin::setClientDispatcher(Symposium::clientdispatcher *cl){
-    this->cl = cl;
-}*/
 
 void sigin::enableButtonsAfter()
 {
@@ -140,14 +137,18 @@ void sigin::on_signin_clicked()
 
 void sigin::closeEvent(QCloseEvent *event)
 {
-    backToParent();
-    //disableStyleButtons();
-    //event->ignore();
-    //class exit* ex=new class exit(nullptr, *this);
-    //goToWindow(*ex);
-    /*int ret=ex->exec();
-    if(ret==0 && !pressed)
-        enableStyleButtons();*/
+    event->ignore();
+    if(closedByUser())
+    {
+        disableStyleButtons();
+        event->ignore();
+        class exit* ex=new class exit(this);
+        int ret=ex->exec();
+        if(ret==0 && !pressed)
+            enableStyleButtons();
+    }
+    else
+        event->accept();
 }
 
 void sigin::waiting()
@@ -155,17 +156,6 @@ void sigin::waiting()
     ui->waiting->show();
     ui->gif->show();
 
-}
-
-void sigin::showEvent(QShowEvent* event)
-{
-    QDialog::showEvent(event);
-
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void sigin::disableButtons()
@@ -208,5 +198,5 @@ void sigin::hideLabelsError()
 
 void sigin::on_cancel_clicked()
 {
-    this->close();
+    backToParent();
 }

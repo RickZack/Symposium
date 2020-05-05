@@ -88,10 +88,6 @@ void signup::successSignUp()
 }
 
 
-/*void signup::setClientDispatcher( Symposium::clientdispatcher *cl){
-    this->cl = cl;
-}*/
-
 signup::~signup()
 {
     delete ui;
@@ -204,14 +200,18 @@ void signup::chooseIcon()
 
 void signup::closeEvent(QCloseEvent *event)
 {
-    backToParent();
-    //disableStyleButtons();
-    //event->ignore();
-    //class exit* ex=new class exit(nullptr, *this);
-    //goToWindow(*ex);
-    /*int ret=ex->exec();
-    if(ret==0 && !pressed)
-        enableStyleButtons();*/
+    event->ignore();
+    if(closedByUser())
+    {
+        disableStyleButtons();
+        event->ignore();
+        class exit* ex=new class exit(this);
+        int ret=ex->exec();
+        if(ret==0 && !pressed)
+            enableStyleButtons();
+    }
+    else
+        event->accept();
 
 }
 
@@ -264,18 +264,7 @@ void signup::hideLabelsError()
     ui->gif->hide();
 }
 
-void signup::showEvent(QShowEvent* event)
-{
-    QDialog::showEvent(event);
-
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
 void signup::on_cancel_clicked()
 {
-    this->close();
+    backToParent();
 }

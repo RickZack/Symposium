@@ -29,8 +29,7 @@ class MainWindow : public QMainWindow, public SymMainWinInterface
 
 public:
     explicit MainWindow(QWidget *parent, SymWinManager& m, Symposium::clientdispatcher& p);
-    ~MainWindow();
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
+    ~MainWindow() override;
     /**
      * @brief disable the style of buttons
      */

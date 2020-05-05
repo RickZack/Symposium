@@ -11,9 +11,9 @@ onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, Sympos
     pathFile(pathFile), user(user),  ui(new Ui::onlineusers),  documentID(documentID), privelege(privelege)
 {
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     ui->tree->setColumnCount(2);
     ui->tree->headerItem()->setText(0, "user:");

@@ -37,11 +37,6 @@ public:
 
     std::string pwd;
     /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
-    /**
      * @brief called by clientdispatcher when there is some error with connection
      */
     void errorConnection();
@@ -111,7 +106,6 @@ private:
     bool passwordView=false;
     //home *h;
     class exit *ex;
-    bool esc=true;
 
     void hiddeninformation();
     void showinformation();
@@ -121,10 +115,6 @@ private:
      * @brief quit from application
      */
     void closeEvent(QCloseEvent *event) override;
-    /**
-     * @brief called when show() is invoked for this window and perform an animation
-     */
-    void showEvent(QShowEvent* event) override;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

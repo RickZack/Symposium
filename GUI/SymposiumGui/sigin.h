@@ -35,11 +35,6 @@ public:
      * @brief called by clientdispatcher when the log-in was successfully done
      */
     void successSignIn();
-    /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
 
 public slots:
     /**
@@ -75,10 +70,6 @@ private:
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
     void waiting();
-    /**
-     * @brief called when show() is invoked for this window and perform an animation
-     */
-    void showEvent(QShowEvent* event) override;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

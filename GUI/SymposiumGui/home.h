@@ -34,12 +34,6 @@ public:
     void success() override;
 
     void failure(const QString&) override;
-
-    /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
     /**
      * @brief called by clientdispatcher when the logout was successfully done
      */
@@ -101,7 +95,6 @@ private:
     //Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLog;
-    bool disc = true;
     /**
      * @brief quit from application
      */

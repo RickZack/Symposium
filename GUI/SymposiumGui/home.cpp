@@ -37,12 +37,12 @@ home::~home()
 }
 
 void home::success(){
-    this->disc = false;
+    pressed = false;
     this->successLogout();
 }
 
 void home::failure(const QString&){
-    this->disc = false;
+    pressed = false;
     this->errorConnection();
 }
 
@@ -57,17 +57,15 @@ void home::on_delete_2_clicked()
     //disableStyleButtons();
     //deleteAccountWindow = new deleteAccount(this);
     //deleteAccountWindow->setClientDispatcher(cl);
-    this->disc = false;
-    deleteAccount* del = new deleteAccount(nullptr, *this);
-    goToWindow(*del);
+    deleteAccount* del = new deleteAccount(this);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     //cl->setDeleteAccount(deleteAccountWindow);
     #endif
     //------------------------------------------------------------------
-    /*int ret=deleteAccountWindow->exec();
+    int ret=del->exec();
     if(ret==0)
-        enableStyleButtons();*/
+        enableStyleButtons();
 }
 
 void home::on_InsertUri_clicked()
@@ -125,7 +123,7 @@ void home::logout()
 
 void home::closeEvent(QCloseEvent *event)
 {
-    if (this->disc==true){
+    if (closedByUser()){
         disableStyleButtons();
         event->ignore();
         ex=new class exit(this);
@@ -133,6 +131,8 @@ void home::closeEvent(QCloseEvent *event)
         if(ret==0 && !pressed)
             enableStyleButtons();
     }
+    else
+        event->accept();
 }
 
 void home::disableButtons()
@@ -175,10 +175,6 @@ void home::waiting()
 {
     ui->waiting->show();
     ui->gif->show();
-}
-
-void home::setClientDispatcher(Symposium::clientdispatcher *cl){
-    //this->cl = cl;
 }
 
 void home::successLogout()

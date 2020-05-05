@@ -6,9 +6,9 @@ activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::
     ui(new Ui::activetimerlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     ui->time->setDateTime(QDateTime::currentDateTime());
     ui->writer->click();

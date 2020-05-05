@@ -6,9 +6,9 @@ activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type
     ui(new Ui::activenonlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     enableButtons();
 

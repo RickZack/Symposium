@@ -83,7 +83,8 @@ border-radius:15px;</string>
     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); 
 background-color:white;
-border-color: rgb(58, 80, 116);</string>
+border-color: rgb(58, 80, 116);
+</string>
    </property>
    <property name="horizontalScrollBarPolicy">
     <enum>Qt::ScrollBarAsNeeded</enum>
@@ -107,7 +108,7 @@ border-color: rgb(58, 80, 116);</string>
     <bool>true</bool>
    </property>
    <property name="headerHidden">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="columnCount">
     <number>3</number>

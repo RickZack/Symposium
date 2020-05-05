@@ -9,9 +9,9 @@ errorlogout::errorlogout(QWidget *parent, QString str) :
     str(str), ui(new Ui::errorlogout)
 {
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     ui->label->setText(str);
 }
 

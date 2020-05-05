@@ -7,9 +7,9 @@ activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_c
     ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     ui->writer->click();
     privilegeToGrant=Symposium::privilege::modify;
