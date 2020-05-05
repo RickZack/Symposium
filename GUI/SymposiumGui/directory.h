@@ -164,6 +164,10 @@ private slots:
 
     void on_cancPriv_clicked();
 
+    void on_okButton_3_clicked();
+
+    void on_okButton_4_clicked();
+
 private:
     Ui::directory *ui;
     inserturi *uriWindow;
@@ -259,15 +263,7 @@ private:
     /**
      * @brief quit from application
      */
-    void closeEvent(QCloseEvent *event);
-    /**
-     * @brief disable all buttons present so user cannot perform any operation
-     */
-    void disableButtons();
-    /**
-     * @brief enable all buttons present
-     */
-    void enableButtons();
+    void closeEvent(QCloseEvent *event) override;
     /**
      * @brief enable the style of buttons
      */

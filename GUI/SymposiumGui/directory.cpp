@@ -37,14 +37,11 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     ui->renameName->hide();
     ui->okButton_2->hide();
 
-    // set the buttons for the privilege disabled
-    // they will appear when I choose to open a document
-    this->hidePrivilegeButtons();
 
 
     ui->actionHome->setIcon(QIcon(":/icon/home.png"));
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
-    //hideAll();
+    hideAll();
     setAttribute( Qt::WA_DeleteOnClose );
 }
 
@@ -94,7 +91,7 @@ directory::~directory()
 }
 
 void directory::success(){
-    switch (this->lastChoice) {
+    switch (lastChoice) {
     case createFolder:{
         this->successCreate();
         break;
@@ -261,33 +258,33 @@ void directory::on_actionHome_triggered()
 {
     this->esc = false;
     backToParent();
-    //home *homeWindow=new home(nullptr, pwd);
-    //homeWindow->setClientDispatcher(cl);
     #ifdef DISPATCHER_ON
     //cl->setHome(homeWindow);
     #endif
-    //homeWindow->show();
-    //this->hide();
 }
 
 void directory::on_actionUri_triggered()
 {
+    hideAll();
     uriWindow=new inserturi(nullptr, pwd);
     uriWindow->exec();
 }
 
 void directory::on_actionaddFolder_triggered()
 {
+    hideAll();
     showNewDirectory();
 }
 
 void directory::on_actionaddfile_triggered()
 {
+    hideAll();
     showNewFile();
 }
 
 
 void directory::openWindow(std::string str1){
+    hideAll();
     ui->myListWidget->clear();
     int counter=number_elements(str1);
     listGenerate(str1,counter);
@@ -475,25 +472,58 @@ void directory::closeEvent(QCloseEvent *event)
 
 }
 
-void directory::disableButtons()
-{
-
-}
-
-void directory::enableButtons()
-{
-
-}
-
 void directory::enableStyleButtons()
 {
-
+    switch (lastChoice) {
+    case createFolder:{
+        //directory buttons
+        ui->pushButton_3->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->okButton_3->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;}
+    case createNewSource:{
+        //file buttons
+        ui->pushButton_4->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->okButton_4->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;}
+    case rename:{
+        //rename buttons
+        ui->okButton->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->okButton_2->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;}
+    case openSource:{
+    //open buttons
+    ui->OkPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    break;}
+    }
 }
 
 void directory::disableStyleButtons()
 {
-
+    switch (lastChoice) {
+    case createFolder:{
+    //directory buttons
+    ui->pushButton_3->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->okButton_3->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    break;}
+    case createNewSource:{
+    //file buttons
+    ui->pushButton_4->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->okButton_4->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    break;}
+    case rename:{
+    //rename buttons
+    ui->okButton->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->okButton_2->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    break;}
+    case openSource:{
+    //open buttons
+    ui->OkPriv->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->cancPriv->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    break;}
+    }
 }
+
 
 void directory::waiting()
 {
@@ -510,6 +540,8 @@ void directory::hideAll()
     ui->name->setReadOnly(true);
     ui->pushButton_3->hide();
     ui->pushButton_3->setDisabled(true);
+    ui->okButton_3->hide();
+    ui->okButton_3->setDisabled(true);
     ui->label_8->hide();
 
     //New document hide
@@ -520,6 +552,8 @@ void directory::hideAll()
     ui->name_2->setReadOnly(true);
     ui->pushButton_4->setDisabled(true);
     ui->pushButton_4->hide();
+    ui->okButton_4->setDisabled(true);
+    ui->okButton_4->hide();
     ui->label_7->hide();
 
     //Rename hide
@@ -534,6 +568,9 @@ void directory::hideAll()
     //Resize directory view window
     ui->myListWidget->setFixedWidth(500);
 
+    //The privilege buttons
+    hidePrivilegeButtons();
+
 }
 
 void directory::showNewDirectory()
@@ -544,7 +581,13 @@ void directory::showNewDirectory()
     ui->name->show();
     ui->name->setReadOnly(false);
     ui->pushButton_3->setDisabled(false);
+    ui->pushButton_3->show();
+    ui->okButton_3->show();
+    ui->okButton_3->setDisabled(false);
     ui->label_8->show();
+
+    //Resize directory view window
+    ui->myListWidget->setFixedWidth(360);
 }
 
 void directory::showNewFile()
@@ -555,8 +598,13 @@ void directory::showNewFile()
     ui->name_2->show();
     ui->name_2->setReadOnly(false);
     ui->pushButton_4->setDisabled(false);
+    ui->okButton_4->show();
+    ui->okButton_4->setDisabled(false);
     ui->pushButton_4->show();
     ui->label_7->show();
+
+    //Resize directory view window
+    ui->myListWidget->setFixedWidth(360);
 }
 
 void directory::showRename()
@@ -568,6 +616,9 @@ void directory::showRename()
     ui->okButton->setDisabled(false);
     ui->okButton_2->show();
     ui->okButton_2->setDisabled(false);
+
+    //Resize directory view window
+    ui->myListWidget->setFixedWidth(360);
 }
 
 // creates a new file
@@ -691,10 +742,8 @@ void directory::on_back_button_clicked()
 
 void directory::renameSource()
 {
-    ui->renameName->show();
-    ui->renameLabel->show();
-    ui->okButton->show();
-    ui->okButton_2->show();
+    hideAll();
+    showRename();
 }
 
 void directory::on_okButton_clicked()
@@ -851,10 +900,7 @@ void directory::showPrivilegeButtons(){
 }
 void directory::on_okButton_2_clicked()
 {
-     ui->renameLabel->hide();
-     ui->renameName->hide();
-     ui->okButton->hide();
-     ui->okButton_2->hide();
+     hideAll();
 
 }
 
@@ -899,4 +945,14 @@ void directory::hidePrivilegeButtons(){
     ui->ownerButton->hide();
     ui->OkPriv->hide();
     ui->cancPriv->hide();
+}
+
+void directory::on_okButton_3_clicked()
+{
+    hideAll();
+}
+
+void directory::on_okButton_4_clicked()
+{
+    hideAll();
 }
