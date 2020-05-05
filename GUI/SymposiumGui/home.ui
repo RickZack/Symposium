@@ -51,32 +51,13 @@ color: rgb(58, 80, 116);</string>
      <string>Waiting...</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="InsertUri">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>329</y>
-      <width>123</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
-color: rgb(249, 247, 241); 
-font: 14pt &quot;Baskerville Old Face&quot;;
-border-radius:15px;</string>
-    </property>
-    <property name="text">
-     <string>Add link</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="directory">
     <property name="geometry">
      <rect>
-      <x>144</x>
-      <y>329</y>
-      <width>123</width>
-      <height>91</height>
+      <x>214</x>
+      <y>290</y>
+      <width>242</width>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -86,17 +67,16 @@ font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;</string>
     </property>
     <property name="text">
-     <string>Go to
-directory</string>
+     <string>Go to directory</string>
     </property>
    </widget>
    <widget class="QPushButton" name="modify">
     <property name="geometry">
      <rect>
-      <x>144</x>
-      <y>470</y>
-      <width>123</width>
-      <height>91</height>
+      <x>214</x>
+      <y>410</y>
+      <width>242</width>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -106,17 +86,16 @@ font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;</string>
     </property>
     <property name="text">
-     <string>Modify your
-information</string>
+     <string>Modify your information</string>
     </property>
    </widget>
    <widget class="QPushButton" name="delete_2">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>470</y>
-      <width>123</width>
-      <height>91</height>
+      <x>214</x>
+      <y>530</y>
+      <width>242</width>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -126,8 +105,7 @@ font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;</string>
     </property>
     <property name="text">
-     <string>Delete your
-account</string>
+     <string>Delete your account</string>
     </property>
    </widget>
    <widget class="QPushButton" name="logout">
@@ -182,7 +160,6 @@ font: 18pt &quot;Lucida Calligraphy&quot;;</string>
  </widget>
  <tabstops>
   <tabstop>directory</tabstop>
-  <tabstop>InsertUri</tabstop>
   <tabstop>modify</tabstop>
   <tabstop>delete_2</tabstop>
   <tabstop>logout</tabstop>

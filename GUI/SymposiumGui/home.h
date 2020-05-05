@@ -66,10 +66,6 @@ private slots:
      */
     void on_delete_2_clicked();
     /**
-     * @brief show inserturi window
-     */
-    void on_InsertUri_clicked();
-    /**
      * @brief show changeuserinfo window
      */
     void on_modify_clicked();

@@ -26,7 +26,7 @@ class inserturi : public QDialog
     Q_OBJECT
 
 public:
-    explicit inserturi(QWidget *parent = nullptr, std::string pwd="", bool homeWindow=true, Symposium::clientdispatcher *cl=nullptr);
+    explicit inserturi(QWidget *parent = nullptr, std::string pwd="", Symposium::clientdispatcher *cl=nullptr);
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -97,18 +97,11 @@ private:
     Symposium::privilege privilege;
     std::string showDir;
     std::string pathId;
-    bool pressed=false;
     Symposium::clientdispatcher *cl;
-    home *h;
-    directory *d;
     std::string pwd;
-    bool homeWindow;
     class exit *ex;
     choosedir *dirWindow;
-    /**
-     * @brief quit from application
-     */
-    void closeEvent(QCloseEvent *event);
+
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

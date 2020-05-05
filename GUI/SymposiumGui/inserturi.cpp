@@ -4,9 +4,9 @@
 #include "home.h"
 #include "Dispatcher/clientdispatcher.h"
 
-inserturi::inserturi(QWidget *parent, std::string pwd, bool homeWindow, Symposium::clientdispatcher *cl) :
+inserturi::inserturi(QWidget *parent, std::string pwd, Symposium::clientdispatcher *cl) :
     QDialog(parent),
-    ui(new Ui::inserturi), cl(cl), pwd(pwd), homeWindow(homeWindow)
+    ui(new Ui::inserturi), cl(cl), pwd(pwd)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -53,16 +53,6 @@ void inserturi::reset_text()
     path="";
     nameDir="";
     ui->dir->setText("choose the directory...");
-}
-
-void inserturi::closeEvent(QCloseEvent *event)
-{
-    disableStyleButtons();
-    event->ignore();
-    ex=new class exit(this);
-    int ret=ex->exec();
-    if(ret==0 && !pressed)
-        enableStyleButtons();
 }
 
 void inserturi::disableButtons()
@@ -133,7 +123,6 @@ void inserturi::unsuccessInsert(std::string errorMess)
     hideLabelsError();
     enableStyleButtons();
     enableButtons();
-    pressed=false;
     ui->linkError->setText(QString::fromStdString(errorMess));
     ui->linkError->show();
 }
@@ -161,7 +150,6 @@ void inserturi::on_add_clicked()
                 ui->formatError->show();
             else
             {
-                pressed=true;
                 waiting();
                 disableButtons();
                 disableStyleButtons();
@@ -177,7 +165,6 @@ void inserturi::errorConnection()
 {
     hideLabelsError();
     enableButtons();
-    pressed=false;
     errorconnection errorWindow(this);
     int ret=errorWindow.exec();
     if(ret==0)
@@ -189,7 +176,6 @@ void inserturi::errorConnectionLogout(std::string str)
     hideLabelsError();
     enableStyleButtons();
     enableButtons();
-    pressed=false;
     errorlogout errorLog(this, QString::fromStdString(str));
     errorLog.setClientDispatcher(cl);
     this->hide();
@@ -202,7 +188,6 @@ void inserturi::successInsert()
     enableButtons();
     ui->lineEdit->setText("");
     ui->name->setText("");
-    pressed=false;
     notification notWindow(this, "Link has been successfully created!");
     int ret=notWindow.exec();
     if(ret==0)
@@ -211,27 +196,12 @@ void inserturi::successInsert()
 
 void inserturi::on_cancel_clicked()
 {
-    this->hide();
-    if(homeWindow)
-    {
-        //h=new home(nullptr, pwd);
-        //h->setClientDispatcher(cl);
-        //cl->setHome(h);
-        //h->show();
-    }
-    else
-    {
-        /*d=new directory(nullptr, pwd);
-        d->setClientDispatcher(cl);
-        //cl->setDirectory(d);
-        d->show();*/
-    }
+    this->close();
 }
 
 void inserturi::enableButtonsAfter()
 {
-    if(!pressed)
-        enableStyleButtons();
+    enableStyleButtons();
 }
 
 

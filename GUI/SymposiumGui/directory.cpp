@@ -272,9 +272,8 @@ void directory::on_actionHome_triggered()
 
 void directory::on_actionUri_triggered()
 {
-    uriWindow=new inserturi(nullptr, pwd, false);
-    uriWindow->show();
-    this->hide();
+    uriWindow=new inserturi(nullptr, pwd);
+    uriWindow->exec();
 }
 
 void directory::on_actionaddFolder_triggered()

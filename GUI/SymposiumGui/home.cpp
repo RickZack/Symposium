@@ -66,17 +66,6 @@ void home::on_delete_2_clicked()
         enableStyleButtons();
 }
 
-void home::on_InsertUri_clicked()
-{
-    inserturiWindow = new inserturi(nullptr, pwd);
-    //------------------------------------------------------------------PARTE DA DECOMENTARE
-    #ifdef DISPATCHER_ON
-    //cl.setInsertUri(inserturiWindow);
-    #endif
-    //------------------------------------------------------------------
-    inserturiWindow->show();
-    this->hide();
-}
 
 void home::on_modify_clicked()
 {
@@ -132,7 +121,6 @@ void home::disableButtons()
 {
     ui->directory->setDisabled(true);
     ui->modify->setDisabled(true);
-    ui->InsertUri->setDisabled(true);
     ui->delete_2->setDisabled(true);
     ui->logout->setDisabled(true);
 }
@@ -143,7 +131,6 @@ void home::enableButtons()
     ui->gif->hide();
     ui->directory->setDisabled(false);
     ui->modify->setDisabled(false);
-    ui->InsertUri->setDisabled(false);
     ui->delete_2->setDisabled(false);
     ui->logout->setDisabled(false);
 }
@@ -152,7 +139,6 @@ void home::enableStyleButtons()
 {
     ui->directory->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
     ui->modify->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    ui->InsertUri->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
     ui->delete_2->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 }
 
@@ -160,7 +146,6 @@ void home::disableStyleButtons()
 {
     ui->directory->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
     ui->modify->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    ui->InsertUri->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
     ui->delete_2->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 }
 
