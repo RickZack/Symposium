@@ -51,6 +51,7 @@ icon::icon(QWidget *parent) :
 
     connect(ui->pushButton, SIGNAL(clicked()), parent, SLOT(chooseIcon()));
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(close()));
+    setAttribute( Qt::WA_DeleteOnClose );
 }
 
 icon::~icon()

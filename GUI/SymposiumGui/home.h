@@ -84,17 +84,10 @@ private slots:
 
 private:
     Ui::home *ui;
-    //deleteAccount *deleteAccountWindow;
     std::string pwd;
     inserturi *inserturiWindow;
-    //changeUserInfo *changeWindow;
-    //directory *directoryWindow;
-    //MainWindow *mw;
     class exit *ex;
     bool pressed=false;
-    //Symposium::clientdispatcher *cl;
-    errorconnection *errorWindow;
-    errorlogout *errorLog;
     /**
      * @brief quit from application
      */

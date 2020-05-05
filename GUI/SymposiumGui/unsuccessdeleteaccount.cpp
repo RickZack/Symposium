@@ -19,5 +19,5 @@ unsuccessdeleteaccount::~unsuccessdeleteaccount()
 
 void unsuccessdeleteaccount::on_pushButton_clicked()
 {
-    this->close();
+    close();
 }

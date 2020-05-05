@@ -92,7 +92,6 @@ public slots:
 
 private:
     Ui::inserturi *ui;
-    choosedir *dirWindow;
     std::string path;
     std::string nameDir;
     Symposium::privilege privilege;
@@ -102,20 +101,14 @@ private:
     Symposium::clientdispatcher *cl;
     home *h;
     directory *d;
-    notification *notWindow;
     std::string pwd;
     bool homeWindow;
     class exit *ex;
-    errorconnection *errorWindow;
-    errorlogout *errorLog;
+    choosedir *dirWindow;
     /**
      * @brief quit from application
      */
     void closeEvent(QCloseEvent *event);
-    /**
-     * @brief called when show() is invoked for this window and perform an animation
-     */
-    void showEvent(QShowEvent* event);
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

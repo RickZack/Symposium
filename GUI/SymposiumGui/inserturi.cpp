@@ -65,16 +65,6 @@ void inserturi::closeEvent(QCloseEvent *event)
         enableStyleButtons();
 }
 
-void inserturi::showEvent(QShowEvent *event)
-{
-    QDialog::showEvent(event);
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
 void inserturi::disableButtons()
 {
     ui->lineEdit->setReadOnly(true);
@@ -143,6 +133,7 @@ void inserturi::unsuccessInsert(std::string errorMess)
     hideLabelsError();
     enableStyleButtons();
     enableButtons();
+    pressed=false;
     ui->linkError->setText(QString::fromStdString(errorMess));
     ui->linkError->show();
 }
@@ -187,8 +178,8 @@ void inserturi::errorConnection()
     hideLabelsError();
     enableButtons();
     pressed=false;
-    errorWindow = new errorconnection(this);
-    int ret=errorWindow->exec();
+    errorconnection errorWindow(this);
+    int ret=errorWindow.exec();
     if(ret==0)
         enableStyleButtons();
 }
@@ -199,10 +190,10 @@ void inserturi::errorConnectionLogout(std::string str)
     enableStyleButtons();
     enableButtons();
     pressed=false;
-    errorLog = new errorlogout(this, QString::fromStdString(str));
-    errorLog->setClientDispatcher(cl);
+    errorlogout errorLog(this, QString::fromStdString(str));
+    errorLog.setClientDispatcher(cl);
     this->hide();
-    errorLog->show();
+    errorLog.show();
 }
 
 void inserturi::successInsert()
@@ -212,8 +203,8 @@ void inserturi::successInsert()
     ui->lineEdit->setText("");
     ui->name->setText("");
     pressed=false;
-    notWindow = new notification(this, "Link has been successfully created!");
-    int ret=notWindow->exec();
+    notification notWindow(this, "Link has been successfully created!");
+    int ret=notWindow.exec();
     if(ret==0)
         enableStyleButtons();
 }

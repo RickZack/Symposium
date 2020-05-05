@@ -42,11 +42,6 @@ void MainWindow::on_SignIn_clicked()
     #ifdef DISPATCHER_ON
     //cl->setSignIn(signinWindow);
     #endif
-
-    //signinWindow->setClientDispatcher(cl);
-    //signinWindow->show();
-    //hide();
-
 }
 
 void MainWindow::on_SignUp_clicked()
@@ -56,10 +51,6 @@ void MainWindow::on_SignUp_clicked()
     #ifdef DISPATCHER_ON
     //cl->setSignUp(signupWindow);
     #endif
-    //signupWindow->setClientDispatcher(cl);
-    //signupWindow->show();
-    //hide();
-
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

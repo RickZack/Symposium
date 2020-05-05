@@ -89,8 +89,6 @@ private:
     Symposium::privilege newPrivelege;
     std::string username;
     Symposium::clientdispatcher *cl;
-    errorconnection *errorWindow;
-    errorlogout *errorLog;
 
     void listusers();
     /**

@@ -90,17 +90,8 @@ private:
     Symposium::privilege privilegeToGrant;
     Symposium::uri u;
     Symposium::clientdispatcher *cl;
-    errorconnection *errorWindow;
-    errorlogout *errorLog;
     std::string time;
     Symposium::uint_positive_cnt::type documentId;
-    successlinks *link;
-
-
-    /**
-     * @brief called when show() is invoked for this window and perform an animation
-     */
-    void showEvent(QShowEvent* event);
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

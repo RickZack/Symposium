@@ -38,8 +38,8 @@ void activetimerlink::successLink(std::string path)
     enableButtons();
     enableStyleButtons();
     this->hide();
-    link = new successlinks(parentWidget(), 4, QString::fromStdString(path), "", QString::fromStdString(time));
-    link->exec();
+    successlinks link(parentWidget(), 4, QString::fromStdString(path), "", QString::fromStdString(time));
+    link.exec();
 }
 
 void activetimerlink::setClientDispatcher(Symposium::clientdispatcher *cl)
@@ -52,8 +52,8 @@ void activetimerlink::errorConnection()
     enableButtons();
     enableStyleButtons();
     this->hide();
-    errorWindow = new errorconnection();
-    errorWindow->exec();
+    errorconnection errorWindow(nullptr);
+    errorWindow.exec();
 }
 
 void activetimerlink::errorConnectionLogout(std::string str)
@@ -61,11 +61,11 @@ void activetimerlink::errorConnectionLogout(std::string str)
     enableButtons();
     enableStyleButtons();
     this->hide();
-    errorLog = new errorlogout(nullptr, QString::fromStdString(str));
+    errorlogout errorLog(nullptr, QString::fromStdString(str));
     parentWidget()->hide();
     parentWidget()->parentWidget()->hide();
-    errorLog->setClientDispatcher(cl);
-    errorLog->show();
+    errorLog.setClientDispatcher(cl);
+    errorLog.show();
 }
 
 
@@ -121,16 +121,6 @@ void activetimerlink::on_cancel_clicked()
 void activetimerlink::enableButtonsAfter()
 {
     enableStyleButtons();
-}
-
-void activetimerlink::showEvent(QShowEvent *event)
-{
-    QDialog::showEvent(event);
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void activetimerlink::disableButtons()

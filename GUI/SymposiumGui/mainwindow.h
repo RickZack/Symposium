@@ -61,8 +61,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    //sigin *signinWindow;
-    //signup *signupWindow;
     class exit *ex;
     /**
      * @brief quit from application

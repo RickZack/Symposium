@@ -77,13 +77,8 @@ private slots:
 private:
     Ui::signup *ui;
     std::string pwd;
-    home *homeWindow;
     icon *iconWindow;
-    //MainWindow *mw;
-    notification *notWindow;
-    errorconnection *errorWindow;
     std::string iconPath="";
-    //Symposium::clientdispatcher *cl;
     class exit *ex;
     bool pressed=false;
     /**

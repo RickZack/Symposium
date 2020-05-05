@@ -33,6 +33,7 @@ choosedir::choosedir(QWidget *parent, std::string pathDir) :
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(reset_text()));
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(enableButtonsAfter()));
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
+    setAttribute( Qt::WA_DeleteOnClose );
 }
 
 choosedir::~choosedir()

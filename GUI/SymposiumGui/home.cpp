@@ -38,12 +38,12 @@ home::~home()
 
 void home::success(){
     pressed = false;
-    this->successLogout();
+    successLogout();
 }
 
 void home::failure(const QString&){
     pressed = false;
-    this->errorConnection();
+    errorConnection();
 }
 
 void home::enableButtonsAfter()
@@ -54,9 +54,7 @@ void home::enableButtonsAfter()
 
 void home::on_delete_2_clicked()
 {
-    //disableStyleButtons();
-    //deleteAccountWindow = new deleteAccount(this);
-    //deleteAccountWindow->setClientDispatcher(cl);
+    disableStyleButtons();
     deleteAccount* del = new deleteAccount(this);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
@@ -82,7 +80,7 @@ void home::on_InsertUri_clicked()
 
 void home::on_modify_clicked()
 {
-    //changeWindow = new changeUserInfo(nullptr, pwd, cl);
+
     changeUserInfo* changeWindow = new changeUserInfo(nullptr, pwd, *this);
     goToWindow(*changeWindow);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
@@ -90,14 +88,10 @@ void home::on_modify_clicked()
     //cl.setChangeUserInfo(changeWindow);
     #endif
     //------------------------------------------------------------------
-    //changeWindow->show();
-    //this->hide();
 }
 
 void home::on_directory_clicked()
 {
-    //directoryWindow=new directory(nullptr, pwd, cl);
-    //directoryWindow->show();
     directory* dir = new directory(nullptr, pwd, *this);
     goToWindow(*dir);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
@@ -105,7 +99,6 @@ void home::on_directory_clicked()
     //cl.setDirectory(directoryWindow);
     #endif
     //------------------------------------------------------------------
-    //this->hide();
 }
 
 void home::logout()
@@ -181,19 +174,16 @@ void home::successLogout()
 {
     enableButtons();
     enableStyleButtons();
-    //this->hide();
     backToMainWin();
-    /*mw=new MainWindow();
-    mw->setClientDispatcher(cl);
-    mw->show();*/
 }
 
 void home::errorConnection()
 {
     enableButtons();
     enableStyleButtons();
-    errorWindow = new errorconnection();
-    int ret=errorWindow->exec();
+    pressed=false;
+    errorconnection errorWindow (nullptr);
+    int ret=errorWindow.exec();
     if(ret==0)
         enableStyleButtons();
 }
@@ -202,9 +192,10 @@ void home::errorConnectionLogout(const std::string str)
 {
     enableButtons();
     enableStyleButtons();
-    errorLog = new errorlogout(nullptr, QString::fromStdString(str));
-    //errorLog->setClientDispatcher(cl);
-    this->hide();
-    errorLog->show();
+    pressed=false;
+    errorlogout errorLog(nullptr, QString::fromStdString(str));
+    errorLog.setClientDispatcher(&cl);
+    hide();
+    errorLog.show();
 }
 

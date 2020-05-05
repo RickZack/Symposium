@@ -65,16 +65,16 @@ changeUserInfo::~changeUserInfo()
 
 void changeUserInfo::success(){
     pressed = false;
-    this->successEditUser();
+    successEditUser();
 }
 
 void changeUserInfo::failure(const QString& toPrint){
     pressed=false;
-    if(toPrint=="-1"){
-        this->errorConnection();
-    }else{
-        this->errorEditUser(toPrint);
-    }
+    if(toPrint=="-1")
+        errorConnection();
+    else
+        errorEditUser(toPrint);
+
 }
 
 void changeUserInfo::enableButtonsAfter()
@@ -126,8 +126,8 @@ void changeUserInfo::confirm_click()
     QString stringa="Your information has been successfully modified";
     hideLabelsError();
     enableButtons();
-    notWindow = new notification(this, stringa);
-    int ret=notWindow->exec();
+    notification notWindow(this, stringa);
+    int ret=notWindow.exec();
     if(ret==0)
         enableStyleButtons();
     pressed=false;
@@ -143,8 +143,8 @@ void changeUserInfo::errorConnection()
     pressed=false;
     enableButtons();
     enableStyleButtons();
-    errorWindow = new errorconnection(this);
-    errorWindow->show();
+    errorconnection errorWindow(this);
+    errorWindow.exec();
 }
 
 void changeUserInfo::errorConnectionLogout(const std::string str)
@@ -153,10 +153,10 @@ void changeUserInfo::errorConnectionLogout(const std::string str)
     pressed=false;
     enableButtons();
     enableStyleButtons();
-    errorLog = new errorlogout(this, QString::fromStdString(str));
-    //errorLog->setClientDispatcher(cl);
+    errorlogout errorLog(nullptr, QString::fromStdString(str));
+    errorLog.setClientDispatcher(&cl);
     this->close();
-    errorLog->show();
+    errorLog.exec();
 }
 
 void changeUserInfo::errorEditUser(const QString& errorMess)
@@ -174,21 +174,16 @@ void changeUserInfo::errorEditUser(const QString& errorMess)
 void changeUserInfo::successEditUser()
 {
     pwd=newpass;
-
-    //this->hide();
-    //hideLabelsError();
+    hideLabelsError();
     pressed=false;
     enableButtons();
     QString stringa="Your information has been successfully modified";
-    notWindow = new notification(this, stringa);
-    int ret=notWindow->exec();
+    notification notWindow(this, stringa);
+    int ret=notWindow.exec();
     if(ret==0)
         enableStyleButtons();
     home* h = new home(nullptr, pwd, *this);
     goToWindow(*h);
-    //h=new home(nullptr, pwd);
-    //h->setClientDispatcher(cl);
-    //h->show();
 }
 
 void changeUserInfo::disableStyleButtons()
@@ -258,8 +253,8 @@ void changeUserInfo::on_confirm2_clicked()
         hideLabelsError();
         enableButtons();
         QString stringa="Your information has been successfully modified";
-        notWindow = new notification(this, stringa);
-        int ret=notWindow->exec();
+        notification notWindow(this, stringa);
+        int ret=notWindow.exec();
         if(ret==0)
             enableStyleButtons();
         pwd=newp1.toStdString();
@@ -505,15 +500,11 @@ void changeUserInfo::on_newpwd2_textChanged(const QString &arg1)
 void changeUserInfo::on_cancel_clicked()
 {
     backToParent();
-    //h=new home(nullptr, pwd);
-    //h->setClientDispatcher(cl);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     //cl->setHome(h);
     #endif
     //------------------------------------------------------------------
-    //this->hide();
-    //h->show();
 }
 
 void changeUserInfo::on_newpwd1_textChanged(const QString &arg1)

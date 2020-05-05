@@ -36,7 +36,6 @@ private slots:
 private:
     QString str;
     Ui::errorlogout *ui;
-    MainWindow *w;
     Symposium::clientdispatcher *cl;
 };
 

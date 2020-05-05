@@ -41,8 +41,8 @@ void activealwayslink::successLink(std::string path)
     enableButtons();
     enableStyleButtons();
     this->hide();
-    link = new successlinks(parentWidget(), 1, QString::fromStdString(path));
-    link->exec();
+    successlinks link(parentWidget(), 1, QString::fromStdString(path));
+    link.exec();
 }
 
 void activealwayslink::setClientDispatcher(Symposium::clientdispatcher *cl)
@@ -55,8 +55,8 @@ void activealwayslink::errorConnection()
     enableButtons();
     enableStyleButtons();
     this->hide();
-    errorWindow = new errorconnection();
-    errorWindow->exec();
+    errorconnection errorWindow(nullptr);
+    errorWindow.exec();
 }
 
 void activealwayslink::errorConnectionLogout(std::string str)
@@ -64,11 +64,11 @@ void activealwayslink::errorConnectionLogout(std::string str)
     enableButtons();
     enableStyleButtons();
     this->hide();
-    errorLog = new errorlogout(nullptr, QString::fromStdString(str));
+    errorlogout errorLog(nullptr, QString::fromStdString(str));
     parentWidget()->hide();
     parentWidget()->parentWidget()->hide();
-    errorLog->setClientDispatcher(cl);
-    errorLog->show();
+    errorLog.setClientDispatcher(cl);
+    errorLog.show();
 }
 
 activealwayslink::~activealwayslink()
@@ -113,19 +113,9 @@ void activealwayslink::on_ok_clicked()
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     this->hide();
     enableButtons();
-    link = new successlinks(parentWidget(), 1, QString::fromStdString(pathFile));
-    link->exec();
+    successlinks link(parentWidget(), 1, QString::fromStdString(pathFile));
+    link.exec();
     //---------------------------------------------------------------------------------------------------------------
-}
-
-void activealwayslink::showEvent(QShowEvent *event)
-{
-    QDialog::showEvent(event);
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void activealwayslink::disableButtons()

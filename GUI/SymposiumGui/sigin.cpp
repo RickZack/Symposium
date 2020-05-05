@@ -51,8 +51,8 @@ void sigin::errorConnection()
     enableButtons();
     hideLabelsError();
     pressed=false;
-    errorWindow = new errorconnection(this);
-    int ret=errorWindow->exec();
+    errorconnection errorWindow(this);
+    int ret=errorWindow.exec();
     if(ret==0)
         enableStyleButtons();
 }
@@ -68,15 +68,12 @@ void sigin::errorSignIn()
 
 void sigin::successSignIn()
 {
-    //hide();
     pressed=false;
     home* homeWindow = new home(nullptr, pwd, *this);
     goToWindow(*homeWindow);
-    //homeWindow->setClientDispatcher(cl);
     #ifdef DISPATCHER_ON
     //cl->setHome(homeWindow);
     #endif
-    //homeWindow->show();
 }
 
 
@@ -112,13 +109,11 @@ void sigin::on_signin_clicked()
     #ifndef DISPATCHER_ON
     if(username=="test" && password=="test")
     {
-        //hide();
         enableButtons();
         enableStyleButtons();
         pressed=false;
         home* homeWindow= new home(nullptr, pwd, *this);
         goToWindow(*homeWindow);
-        //homeWindow->show();
     }
     else {
         pressed=false;

@@ -32,8 +32,8 @@ void activenonlink::successLink(std::string path)
     enableButtons();
     enableStyleButtons();
     this->close();
-    link = new successlinks(parentWidget(), 3, QString::fromStdString(path));
-    link->exec();
+    successlinks link(parentWidget(), 3, QString::fromStdString(path));
+    link.exec();
 }
 
 void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
@@ -44,19 +44,19 @@ void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 void activenonlink::errorConnection()
 {
     enableButtons();
-    errorWindow = new errorconnection(this);
-    errorWindow->show();
+    errorconnection errorWindow(nullptr);
+    errorWindow.exec();
 }
 
 void activenonlink::errorConnectionLogout(std::string str)
 {
     enableButtons();
-    errorLog = new errorlogout(nullptr, QString::fromStdString(str));
-    errorLog->setClientDispatcher(cl);
-    this->close();
+    errorlogout errorLog(nullptr, QString::fromStdString(str));
+    errorLog.setClientDispatcher(cl);
+    close();
     parentWidget()->close();
     parentWidget()->parentWidget()->hide();
-    errorLog->show();
+    errorLog.exec();
 }
 
 activenonlink::~activenonlink()
@@ -81,16 +81,6 @@ void activenonlink::on_ok_clicked()
 void activenonlink::on_cancel_clicked()
 {
     this->close();
-}
-
-void activenonlink::showEvent(QShowEvent *event)
-{
-    QDialog::showEvent(event);
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void activenonlink::disableButtons()

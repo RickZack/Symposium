@@ -34,14 +34,14 @@ signup::signup(QWidget *parent, SymWinInterface& si) :
 }
 
 void signup::success(){
-    this->successSignUp();
+    successSignUp();
 }
 
 void signup::failure(const QString& toPrint){
     if(toPrint=="-1"){
-        this->errorConnection();
+        errorConnection();
     }else{
-        this->errorSignUp(toPrint);
+        errorSignUp(toPrint);
     }
 }
 
@@ -50,8 +50,8 @@ void signup::errorConnection()
     enableButtons();
     hideLabelsError();
     pressed=false;
-    errorWindow = new errorconnection(this);
-    int ret=errorWindow->exec();
+    errorconnection errorWindow(this);
+    int ret=errorWindow.exec();
     if(ret==0)
         enableStyleButtons();
 }
@@ -72,17 +72,14 @@ void signup::successSignUp()
     enableButtons();
     enableStyleButtons();
     pressed=false;
-    //hide();
     home* homeWindow= new home(nullptr, pwd, *this);
     goToWindow(*homeWindow);
-    //homeWindow->setClientDispatcher(cl);
     #ifdef DISPATCHER_ON
     //cl->setHome(homeWindow);
     #endif
     homeWindow->disableStyleButtons();
-    notification* notWindow = new notification(nullptr, "Your account has been successfully created");
-    //homeWindow->show();
-    int ret=notWindow->exec();
+    notification notWindow(nullptr, "Your account has been successfully created");
+    int ret=notWindow.exec();
     if(ret==0)
         homeWindow->enableButtonsAfter();
 }
@@ -144,13 +141,11 @@ void signup::on_signin_clicked()
         }
         else
         {
-            //hide();
             home* homeWindow= new home(nullptr, pwd, *this);
             goToWindow(*homeWindow);
-            //homeWindow->show();
-            //homeWindow->disableStyleButtons();
-            notWindow = new notification(nullptr, "Your account has been successfully created");
-            int ret=notWindow->exec();
+            homeWindow->disableStyleButtons();
+            notification notWindow(nullptr, "Your account has been successfully created");
+            int ret=notWindow.exec();
             if(ret==0)
                 homeWindow->enableButtonsAfter();
         }

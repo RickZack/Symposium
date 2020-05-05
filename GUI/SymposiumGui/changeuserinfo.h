@@ -94,18 +94,13 @@ private slots:
 
 private:
     Ui::changeUserInfo *ui;
-    icon *iconWindow;
     std::string img;
     std::string newpass;
     Symposium::user us;
-    //Symposium::clientdispatcher *cl;
-    errorconnection *errorWindow;
-    errorlogout *errorLog;
-    notification *notWindow;
     bool pressed=false;
     bool passwordView=false;
-    //home *h;
     class exit *ex;
+    icon *iconWindow;
 
     void hiddeninformation();
     void showinformation();

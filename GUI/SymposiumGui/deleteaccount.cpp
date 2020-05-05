@@ -36,10 +36,11 @@ void deleteAccount::successDeleteAccount()
     mw->setClientDispatcher(cl);
     mw->show();*/
     QString str="Your account has been successfully deleted!";
-    notWindow = new notification(mw, str);
-    int ret=notWindow->exec();
-    if(ret==0)
-        mw->enableButtonsAfter();
+    notification notWindow(nullptr, str);
+    int ret=notWindow.exec();
+    //----------------------------DEVE ESSERE INVOCATO SU MAINWINDOW DA SISTEMARE
+    //if(ret==0)
+        //mw->enableButtonsAfter();
 }
 
 void deleteAccount::errorDeleteUser(const QString& errorMess)
@@ -114,18 +115,18 @@ void deleteAccount::errorConnection()
 {
     enableButtons();
     enableStyleButtons();
-    errorWindow = new errorconnection(this);
-    errorWindow->exec();
+    errorconnection errorWindow(this);
+    errorWindow.exec();
 }
 
 void deleteAccount::errorConnectionLogout(std::string str)
 {
     enableButtons();
     enableStyleButtons();
-    errorLog = new errorlogout(nullptr, QString::fromStdString(str));
+    errorlogout errorLog(nullptr, QString::fromStdString(str));
     //this->close();
     //parentWidget()->close();
-    errorLog->exec();
+    errorLog.exec();
 }
 
 void deleteAccount::on_cancel_clicked(){

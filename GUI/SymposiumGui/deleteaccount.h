@@ -62,12 +62,7 @@ private slots:
 
 private:
     Ui::deleteAccount *ui;
-    MainWindow *mw;
-    unsuccessdeleteaccount *window;
     Symposium::clientdispatcher *cl;
-    errorconnection *errorWindow;
-    errorlogout *errorLog;
-    notification *notWindow;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

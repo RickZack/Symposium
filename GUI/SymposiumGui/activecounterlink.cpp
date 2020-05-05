@@ -39,8 +39,8 @@ void activecounterlink::successLink(std::string path)
     enableButtons();
     enableStyleButtons();
     this->hide();
-    link = new successlinks(parentWidget(), 2, QString::fromStdString(path), QString::number(numCounter), "");
-    link->exec();
+    successlinks link(parentWidget(), 2, QString::fromStdString(path), QString::number(numCounter), "");
+    link.exec();
 }
 
 void activecounterlink::setClientDispatcher(Symposium::clientdispatcher *cl)
@@ -53,8 +53,8 @@ void activecounterlink::errorConnection()
     enableButtons();
     enableStyleButtons();
     this->hide();
-    errorWindow = new errorconnection();
-    errorWindow->exec();
+    errorconnection errorWindow(nullptr);
+    errorWindow.exec();
 }
 
 void activecounterlink::errorConnectionLogout(std::string str)
@@ -62,11 +62,11 @@ void activecounterlink::errorConnectionLogout(std::string str)
     enableButtons();
     enableStyleButtons();
     this->hide();
-    errorLog = new errorlogout(nullptr, QString::fromStdString(str));
+    errorlogout errorLog(nullptr, QString::fromStdString(str));
     parentWidget()->hide();
     parentWidget()->parentWidget()->hide();
-    errorLog->setClientDispatcher(cl);
-    errorLog->show();
+    errorLog.setClientDispatcher(cl);
+    errorLog.show();
 }
 
 
@@ -95,8 +95,8 @@ void activecounterlink::on_ok_clicked()
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
     this->hide();
     enableButtons();
-    link = new successlinks(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter));
-    link->exec();
+    successlinks link(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter));
+    link.exec();
 
     //----------------------------------------------------------------------------------
 
@@ -120,16 +120,6 @@ void activecounterlink::on_reader_clicked()
 void activecounterlink::on_cancel_clicked()
 {
     this->close();
-}
-
-void activecounterlink::showEvent(QShowEvent *event)
-{
-    QDialog::showEvent(event);
-    QPropertyAnimation* anim = new QPropertyAnimation(this, "windowOpacity");
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setDuration(1000);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void activecounterlink::disableButtons()

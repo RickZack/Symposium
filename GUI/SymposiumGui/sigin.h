@@ -55,11 +55,7 @@ private slots:
 private:
 
     Ui::sigin *ui;
-    //home *homeWindow;
-    errorconnection *errorWindow;
     std::string pwd;
-    //MainWindow *mw;
-    //Symposium::clientdispatcher *cl;
     class exit *ex;
     bool pressed=false;
     /**

@@ -129,8 +129,8 @@ void onlineusers::errorConnection()
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
-    errorWindow = new errorconnection(this);
-    errorWindow->exec();
+    errorconnection errorWindow(this);
+    errorWindow.exec();
 }
 
 void onlineusers::errorConnectionLogout(std::string str)
@@ -138,11 +138,11 @@ void onlineusers::errorConnectionLogout(std::string str)
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
-    errorLog = new errorlogout(this, QString::fromStdString(str));
+    errorlogout errorLog(this, QString::fromStdString(str));
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();
-    errorLog->exec();
+    errorLog.exec();
 }
 
 void onlineusers::on_button_clicked()

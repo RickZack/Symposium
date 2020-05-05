@@ -97,8 +97,6 @@ private:
     Symposium::privilege newPrivelege;
     std::string username;
     Symposium::clientdispatcher *cl;
-    errorconnection *errorWindow;
-    errorlogout *errorLog;
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     std::unordered_map<std::string, Symposium::privilege> users;
 
