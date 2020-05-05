@@ -39,14 +39,10 @@ public:
      */
     void successLogout();
     /**
-     * @brief called by clientdispatcher when there is some error with connection
-     */
-    void errorConnection();
-    /**
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user
      */
-    void errorConnectionLogout(const std::string str);
+    void errorConnectionLogout();
     /**
      * @brief disable the style of buttons
      */

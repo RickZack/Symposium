@@ -47,24 +47,14 @@ void activetimerlink::setClientDispatcher(Symposium::clientdispatcher *cl)
     this->cl = cl;
 }
 
-void activetimerlink::errorConnection()
+void activetimerlink::errorConnectionLogout()
 {
     enableButtons();
     enableStyleButtons();
     this->hide();
-    errorconnection errorWindow(nullptr);
-    errorWindow.exec();
-}
-
-void activetimerlink::errorConnectionLogout(std::string str)
-{
-    enableButtons();
-    enableStyleButtons();
-    this->hide();
-    errorlogout errorLog(nullptr, QString::fromStdString(str));
+    errorlogout errorLog(nullptr);
     parentWidget()->hide();
     parentWidget()->parentWidget()->hide();
-    errorLog.setClientDispatcher(cl);
     errorLog.show();
 }
 

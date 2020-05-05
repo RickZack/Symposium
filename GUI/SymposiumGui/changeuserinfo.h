@@ -37,14 +37,10 @@ public:
 
     std::string pwd;
     /**
-     * @brief called by clientdispatcher when there is some error with connection
-     */
-    void errorConnection();
-    /**
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user
      */
-    void errorConnectionLogout(const std::string str);
+    void errorConnectionLogout();
     /**
      * @brief called by clientdispatcher when there is some error to edit the information of the current user
      * @param errorMess the messagge to show

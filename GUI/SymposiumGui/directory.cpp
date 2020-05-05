@@ -113,7 +113,7 @@ void directory::success(){
 
 void directory::failure(const QString& toPrint){
     if(toPrint=="-1"){
-        this->errorConnection();
+        errorConnectionLogout();
     }else{
         this->failureActionDirectory(toPrint);
     }
@@ -796,18 +796,13 @@ void directory::successRename(){
 }
 
 
-void directory::errorConnection(){
-    errorWindow = new errorconnection(this);
-    errorWindow->show();
-}
-
 /*void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
 }*/
 
-void directory::errorConnectionLogout(std::string str){
-    errorLogoutWindow= new errorlogout(this, QString::fromStdString(str));
+void directory::errorConnectionLogout(){
+    errorLogoutWindow= new errorlogout(this);
     this->close();
     errorLogoutWindow->show();
 
