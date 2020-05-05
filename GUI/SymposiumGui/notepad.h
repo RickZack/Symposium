@@ -113,6 +113,8 @@ private slots:
 
     //void on_fontComboBox_activated(const QString &arg1);
 
+    void on_textEdit_textChanged();
+
 private:
     Ui::notepad *ui;
     QString mFilename;
@@ -140,6 +142,8 @@ private:
     int posBlock=0;
     QColor colPos;
     int pos;
+    bool okPaste=false;
+    int dim;
 
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void colorChanged(const QColor &c);
