@@ -71,9 +71,6 @@ void sigin::successSignIn()
     pressed=false;
     home* homeWindow = new home(nullptr, pwd, *this);
     goToWindow(*homeWindow);
-    #ifdef DISPATCHER_ON
-    //cl->setHome(homeWindow);
-    #endif
 }
 
 

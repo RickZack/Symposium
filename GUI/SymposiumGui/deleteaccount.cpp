@@ -5,8 +5,9 @@
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
 
-deleteAccount::deleteAccount(QWidget *parent) :
+deleteAccount::deleteAccount(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),
+    SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
     ui(new Ui::deleteAccount)
 {
     ui->setupUi(this);
@@ -14,13 +15,25 @@ deleteAccount::deleteAccount(QWidget *parent) :
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
+    //connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
+    //connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(delete_click()));
     enableButtons();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
+}
+
+void deleteAccount::success(){
+    this->successDeleteAccount();
+}
+
+void deleteAccount::failure(const QString& toPrint){
+    if(toPrint=="-1"){
+        errorConnectionLogout();
+    }else{
+        errorDeleteUser(toPrint);
+    }
 }
 
 
@@ -29,17 +42,19 @@ void deleteAccount::successDeleteAccount()
 {
     enableButtons();
     enableStyleButtons();
-    this->close();
-    parentWidget()->hide();
+    backToMainWin();
+    //this->close();
+    //parentWidget()->hide();
     /*mw=new MainWindow();
     mw->disableStyleButtons();
     mw->setClientDispatcher(cl);
     mw->show();*/
     QString str="Your account has been successfully deleted!";
-    notification notWindow(nullptr, str);
-    int ret=notWindow.exec();
+    notification notWindow(parentWidget(), str);
+    int ret= notWindow.exec();
     //----------------------------DEVE ESSERE INVOCATO SU MAINWINDOW DA SISTEMARE
-    //if(ret==0)
+    if(ret==0)
+        ((home*)parentWidget())->enableButtonsAfter();
         //mw->enableButtonsAfter();
 }
 
@@ -107,10 +122,6 @@ void deleteAccount::disableStyleButtons()
     ui->cancel->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 }
 
-void deleteAccount::setClientDispatcher(Symposium::clientdispatcher *cl){
-    this->cl = cl;
-}
-
 void deleteAccount::errorConnectionLogout()
 {
     enableButtons();
@@ -120,7 +131,17 @@ void deleteAccount::errorConnectionLogout()
 }
 
 void deleteAccount::on_cancel_clicked(){
-    this->close();
+    backToParent();
+    ((home*)parentWidget())->enableButtonsAfter();
+}
+
+void deleteAccount::closeEvent(QCloseEvent *event){
+    //event->ignore();
+    if(closedByUser())
+    {
+        backToParent();
+        ((home*)parentWidget())->enableButtonsAfter();
+    }
 }
 
 

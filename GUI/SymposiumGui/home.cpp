@@ -55,15 +55,16 @@ void home::enableButtonsAfter()
 void home::on_delete_2_clicked()
 {
     disableStyleButtons();
-    deleteAccount* del = new deleteAccount(this);
+    deleteAccount* del = new deleteAccount(this, *this);
+    goToWindow(*del);
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     //cl->setDeleteAccount(deleteAccountWindow);
     #endif
     //------------------------------------------------------------------
-    int ret=del->exec();
+    /*int ret=del->exec();
     if(ret==0)
-        enableStyleButtons();
+        enableStyleButtons();*/
 }
 
 

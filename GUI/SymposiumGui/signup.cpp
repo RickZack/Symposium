@@ -74,9 +74,6 @@ void signup::successSignUp()
     pressed=false;
     home* homeWindow= new home(nullptr, pwd, *this);
     goToWindow(*homeWindow);
-    #ifdef DISPATCHER_ON
-    //cl->setHome(homeWindow);
-    #endif
     homeWindow->disableStyleButtons();
     notification notWindow(nullptr, "Your account has been successfully created");
     int ret=notWindow.exec();
