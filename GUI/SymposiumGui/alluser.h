@@ -100,6 +100,15 @@ private:
      * @brief insert users in the tree
      */
     void insertusers();
+    /**
+     * @brief disable the style of buttons
+     */
+    void disableButtons();
+    /**
+     * @brief enable the style of buttons
+     */
+    void enableButtons();
+
 };
 
 #endif // ALLUSER_H
