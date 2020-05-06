@@ -157,6 +157,9 @@ protected:
  * @brief base class used forSymposiumGUI windows that must have a parent screen
  */
 struct SymChildWinInterface : public SymWinInterface{
+private:
+    friend struct SymModalWinInterface;
+    SymChildWinInterface(SymWinInterface& parentScreen);
 protected:
     SymChildWinInterface(SymWinInterface& parentScreen, isQWidget::QWidgetType);
     /**
@@ -218,7 +221,7 @@ protected:
      * @brief base class used forSymposiumGUI windows that are modal, i.e do not allow interaction
      * with previously opened and currently shown windows
      */
-struct SymModalWinInterface: public SymWinInterface{
+struct SymModalWinInterface: public SymChildWinInterface{
         SymModalWinInterface(SymWinInterface& parentScreen, isQDialog::QDialogType);
         friend class SymWinInterface;
     private:
