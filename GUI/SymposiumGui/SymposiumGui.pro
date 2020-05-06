@@ -80,6 +80,7 @@ SOURCES += \
         winmanager.cpp
 
 HEADERS += \
+        onoff_networkinteraction.h \
         about.h \
         activealwayslink.h \
         activecounterlink.h \

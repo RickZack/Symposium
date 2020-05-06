@@ -1,9 +1,8 @@
-//#define DISPATCHER_ON
-
 #include "signup.h"
 #include "ui_signup.h"
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
+#include "onoff_networkinteraction.h"
 
 signup::signup(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),

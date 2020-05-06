@@ -1,9 +1,8 @@
-//#define DISPATCHER_ON
-
 #include "home.h"
 #include "ui_home.h"
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
+#include "onoff_networkinteraction.h"
 
 home::home(QWidget *parent,const std::string pwd, SymWinInterface& si) :
     QMainWindow(parent),

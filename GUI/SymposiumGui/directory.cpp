@@ -1,10 +1,9 @@
-//#define DISPATCHER_ON
-
 #include "directory.h"
 #include "ui_directory.h"
 #include "home.h"
 #include "Dispatcher/clientdispatcher.h"
 #include <ostream>
+#include "onoff_networkinteraction.h"
 
 
 directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
@@ -257,9 +256,6 @@ void directory::on_actionHome_triggered()
 {
     this->esc = false;
     backToParent();
-    #ifdef DISPATCHER_ON
-    //cl->setHome(homeWindow);
-    #endif
 }
 
 void directory::on_actionUri_triggered()
@@ -308,7 +304,6 @@ void directory::deleteSource()
 {
    lastChoice = remove;
    disableStyleButtons();
-   //waiting();
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
    foreach(QListWidgetItem *items, item){
@@ -322,6 +317,7 @@ void directory::deleteSource()
        }
        #ifdef DISPATCHER_ON
        cl.removeResource(path,id);
+       waiting();
        #endif
 
        //-------------------------------------------------------------------
@@ -390,9 +386,9 @@ void directory::on_pushButton_3_clicked()
     //waiting();
     QString name= ui->name->text();
     std::string nameFolder=name.toStdString();
-    this->lastChoice = createFolder;
     #ifdef DISPATCHER_ON
     cl.createNewDir(path,nameFolder);
+    waiting();
     #else
     // anche questo da eliminare
     ui->name->setText(" ");
@@ -636,13 +632,13 @@ void directory::on_pushButton_4_clicked()
 {
     lastChoice = createNewSource;
     disableStyleButtons();
-    //waiting();
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
 
     //ui->name_2->setText(" "); // da rimuovere
     #ifdef DISPATCHER_ON
     cl.createNewSource(this->path,nameDocument);
+    waiting();
     #else
     // DA RIMUOVERE
     //w->close();
@@ -765,7 +761,6 @@ void directory::on_okButton_clicked()
 {
     lastChoice = rename;
     disableStyleButtons();
-    //waiting();
     QString newName=ui->renameLabel->text();
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
@@ -773,6 +768,7 @@ void directory::on_okButton_clicked()
          std::string id=searchForId(oldName,str,count);
          #ifdef DISPATCHER_ON
          cl.renameResource(this->path,id, newName.toStdString());
+         waiting();
          #else
          enableStyleButtons();
          //w->close();
@@ -919,6 +915,7 @@ void directory::on_OkPriv_clicked()
     //waiting();
     #ifdef DISPATCHER_ON
     cl.openSource(this->path,this->id,this->priv);
+    waiting();
     #else
     hideAll();
     enableStyleButtons();

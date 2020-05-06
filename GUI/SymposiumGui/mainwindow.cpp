@@ -1,5 +1,3 @@
-//#define DISPATCHER_ON
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "Dispatcher/clientdispatcher.h"
@@ -39,18 +37,12 @@ void MainWindow::on_SignIn_clicked()
 {
     sigin* signinWindow= new sigin(nullptr, *this);
     goToWindow(*signinWindow);
-    #ifdef DISPATCHER_ON
-    //cl->setSignIn(signinWindow);
-    #endif
 }
 
 void MainWindow::on_SignUp_clicked()
 {
     signup* signupWindow= new signup(nullptr, *this);
     goToWindow(*signupWindow);
-    #ifdef DISPATCHER_ON
-    //cl->setSignUp(signupWindow);
-    #endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

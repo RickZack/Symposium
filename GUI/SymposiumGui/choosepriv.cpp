@@ -1,7 +1,7 @@
-//#define DISPATCHER_ON
 #include "choosepriv.h"
 #include "Dispatcher/clientdispatcher.h"
 #include "ui_choosepriv.h"
+#include "onoff_networkinteraction.h"
 
 choosepriv::choosepriv(QWidget *parent,std::string path, std::string idSource, std::string oldPriv, Symposium::clientdispatcher *cl) :
     QMainWindow(parent),

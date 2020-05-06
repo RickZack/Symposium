@@ -28,13 +28,12 @@
  * Created on 24 Giugno 2019, 19.25
  */
 
-//#define DISPATCHER_ON
-
 #include "SymClient.h"
 #include "uri.h"
 #include "message.h"
 #include "filesystem.h"
 #include "SymposiumException.h"
+#include "onoff_networkinteraction.h"
 #ifdef DISPATCHER_ON
 #include "GUI/SymposiumGui/Dispatcher/clientdispatcher.h"
 #endif

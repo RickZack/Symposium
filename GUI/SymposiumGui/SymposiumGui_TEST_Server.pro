@@ -80,6 +80,7 @@ SOURCES += \
         winmanager.cpp
 
 HEADERS += \
+        onoff_networkinteraction.h \
         waiting.h \
         about.h \
         activealwayslink.h \

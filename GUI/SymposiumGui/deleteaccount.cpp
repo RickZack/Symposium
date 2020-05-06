@@ -1,9 +1,8 @@
-//#define DISPATCHER_ON
-
 #include "deleteaccount.h"
 #include "ui_deleteaccount.h"
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
+#include "onoff_networkinteraction.h"
 
 deleteAccount::deleteAccount(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),
