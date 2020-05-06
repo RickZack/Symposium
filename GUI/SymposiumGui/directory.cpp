@@ -1,4 +1,4 @@
-#define DISPATCHER_ON
+//#define DISPATCHER_ON
 
 #include "directory.h"
 #include "ui_directory.h"
@@ -636,13 +636,12 @@ void directory::on_pushButton_4_clicked()
 {
     lastChoice = createNewSource;
     disableStyleButtons();
-
+    //waiting();
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
 
     //ui->name_2->setText(" "); // da rimuovere
     #ifdef DISPATCHER_ON
-    waiting();
     cl.createNewSource(this->path,nameDocument);
     #else
     // DA RIMUOVERE
