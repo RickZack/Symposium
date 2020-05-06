@@ -1,4 +1,4 @@
-//#define DISPATCHER_ON
+#define DISPATCHER_ON
 
 #include "directory.h"
 #include "ui_directory.h"
@@ -32,15 +32,9 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     ui->back_button->setDisabled(true);
     ui->back_button->hide();
 
-    ui->renameLabel->hide();
-    ui->okButton->hide();
-    ui->renameName->hide();
-    ui->okButton_2->hide();
-
-
-
     ui->actionHome->setIcon(QIcon(":/icon/home.png"));
     ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
+
     hideAll();
     setAttribute( Qt::WA_DeleteOnClose );
 }
@@ -91,31 +85,36 @@ directory::~directory()
 }
 
 void directory::success(){
+    w->close();
+    enableStyleButtons();
+    hideAll();
     switch (lastChoice) {
     case createFolder:{
-        this->successCreate();
+        successCreate();
         break;
     }case remove:{
-        this->successRemove();
+        successRemove();
         break;
     }case rename:{
-        this->successRename();
+        successRename();
         break;
     }case createNewSource:{
-        this->successNewSource();
+        successNewSource();
         break;
     }case openSource:{
-        this->successOpen();
+        successOpen();
         break;
     }
     }
 }
 
 void directory::failure(const QString& toPrint){
+    enableStyleButtons();
+    //w->close();
     if(toPrint=="-1"){
         errorConnectionLogout();
     }else{
-        this->failureActionDirectory(toPrint);
+        failureActionDirectory(toPrint);
     }
 }
 
@@ -284,13 +283,11 @@ void directory::on_actionaddfile_triggered()
 
 
 void directory::openWindow(std::string str1){
-    hideAll();
     ui->myListWidget->clear();
     int counter=number_elements(str1);
     listGenerate(str1,counter);
     ui->back_button->setDisabled(false);
     ui->back_button->show();
-    this->show();
 }
 
 void directory::contextMenuEvent(QContextMenuEvent *event)
@@ -309,6 +306,9 @@ void directory::contextMenuEvent(QContextMenuEvent *event)
 //acts when the user clicks on the button "DELETE"
 void directory::deleteSource()
 {
+   lastChoice = remove;
+   disableStyleButtons();
+   //waiting();
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
    foreach(QListWidgetItem *items, item){
@@ -321,13 +321,14 @@ void directory::deleteSource()
            id=idPriv.first;
        }
        #ifdef DISPATCHER_ON
-       this->lastChoice = remove;
        cl.removeResource(path,id);
        #endif
 
        //-------------------------------------------------------------------
        //DA RIMUOVERE
        #ifndef DISPATCHER_ON
+       enableStyleButtons();
+       //w->close();
        bool msg=true;
        if(msg)
        {
@@ -384,12 +385,13 @@ void directory::failureActionDirectory(const QString& msg){
 // this method creates a new folder
 void directory::on_pushButton_3_clicked()
 {
-
+    lastChoice = createFolder;
+    disableStyleButtons();
+    //waiting();
     QString name= ui->name->text();
     std::string nameFolder=name.toStdString();
     this->lastChoice = createFolder;
     #ifdef DISPATCHER_ON
-    this->lastChoice = createFolder;
     cl.createNewDir(path,nameFolder);
     #else
     // anche questo da eliminare
@@ -397,6 +399,8 @@ void directory::on_pushButton_3_clicked()
     // std::string id=createNewDir(path,nameFolder);
     //--------------------------------------------------------------------
     // DA ELIMINARE
+    enableStyleButtons();
+    //w->close();
     std::string id="1"; //PER ESEMPIO
 
     if(id!="-1")
@@ -491,10 +495,12 @@ void directory::enableStyleButtons()
         ui->okButton_2->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         break;}
     case openSource:{
-    //open buttons
-    ui->OkPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    ui->cancPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    break;}
+        //open buttons
+        ui->OkPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->cancPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;}
+    case remove:{
+        break;}
     }
 }
 
@@ -502,32 +508,36 @@ void directory::disableStyleButtons()
 {
     switch (lastChoice) {
     case createFolder:{
-    //directory buttons
-    ui->pushButton_3->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    ui->okButton_3->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    break;}
+        //directory buttons
+        ui->pushButton_3->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->okButton_3->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;}
     case createNewSource:{
-    //file buttons
-    ui->pushButton_4->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    ui->okButton_4->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    break;}
+        //file buttons
+        ui->pushButton_4->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->okButton_4->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;}
     case rename:{
-    //rename buttons
-    ui->okButton->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    ui->okButton_2->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    break;}
+        //rename buttons
+        ui->okButton->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->okButton_2->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;}
     case openSource:{
-    //open buttons
-    ui->OkPriv->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    ui->cancPriv->setStyleSheet("background-color: grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
-    break;}
+        //open buttons
+        ui->OkPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->cancPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;}
+    case remove:{
+        break;}
     }
 }
 
 
 void directory::waiting()
 {
-
+    w = new class waiting(this);
+    w->move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w->rect().center());
+    w->exec();
 }
 
 void directory::hideAll()
@@ -566,7 +576,7 @@ void directory::hideAll()
     ui->okButton_2->setDisabled(true);
 
     //Resize directory view window
-    ui->myListWidget->setFixedWidth(500);
+    ui->myListWidget->setFixedWidth(692);
 
     //The privilege buttons
     hidePrivilegeButtons();
@@ -587,7 +597,7 @@ void directory::showNewDirectory()
     ui->label_8->show();
 
     //Resize directory view window
-    ui->myListWidget->setFixedWidth(360);
+    ui->myListWidget->setFixedWidth(270);
 }
 
 void directory::showNewFile()
@@ -604,7 +614,7 @@ void directory::showNewFile()
     ui->label_7->show();
 
     //Resize directory view window
-    ui->myListWidget->setFixedWidth(360);
+    ui->myListWidget->setFixedWidth(270);
 }
 
 void directory::showRename()
@@ -618,22 +628,26 @@ void directory::showRename()
     ui->okButton_2->setDisabled(false);
 
     //Resize directory view window
-    ui->myListWidget->setFixedWidth(360);
+    ui->myListWidget->setFixedWidth(270);
 }
 
 // creates a new file
 void directory::on_pushButton_4_clicked()
 {
+    lastChoice = createNewSource;
+    disableStyleButtons();
 
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
 
     //ui->name_2->setText(" "); // da rimuovere
     #ifdef DISPATCHER_ON
-    this->lastChoice = createNewSource;
+    waiting();
     cl.createNewSource(this->path,nameDocument);
     #else
     // DA RIMUOVERE
+    //w->close();
+    enableStyleButtons();
     std::string id="1"; //PER ESEMPIO
 
     if(id!="-1")
@@ -683,6 +697,7 @@ void directory::on_back_button_clicked()
 {
     std::string temp;
     std::size_t found;
+    hideAll();
 
     if(this->openFolders!=0){
 
@@ -723,8 +738,10 @@ void directory::on_back_button_clicked()
                 previousId = temp.substr(found+1,temp.size());
             }
             temp = temp + "/";
+            //waiting();
             str=cl.getStr(this->actualId, temp);
             str = manipulationHome(str);
+            //w->close();
         }
         ui->myListWidget->clear();
         int count=number_elements(str);
@@ -737,7 +754,6 @@ void directory::on_back_button_clicked()
         ui->back_button->setDisabled(true);
         ui->back_button->hide();
     }
-    this->show();
 }
 
 void directory::renameSource()
@@ -748,22 +764,22 @@ void directory::renameSource()
 
 void directory::on_okButton_clicked()
 {
+    lastChoice = rename;
+    disableStyleButtons();
+    //waiting();
     QString newName=ui->renameLabel->text();
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
          std::string oldName=items->text().toStdString();
          std::string id=searchForId(oldName,str,count);
          #ifdef DISPATCHER_ON
-         this->lastChoice = rename;
          cl.renameResource(this->path,id, newName.toStdString());
          #else
+         enableStyleButtons();
+         //w->close();
          items->setText(newName);
          ui->myListWidget->currentItem()->setSelected(false);
-         ui->renameLabel->clear();
-         ui->okButton->hide();
-         ui->renameLabel->hide();
-         ui->renameName->hide();
-         ui->okButton_2->hide();
+         hideAll();
          #endif
     }
 
@@ -777,10 +793,7 @@ void directory::successRename(){
         items->setText(newName);
         ui->myListWidget->currentItem()->setSelected(false);
         ui->renameLabel->clear();
-        ui->okButton->hide();
-        ui->renameLabel->hide();
-        ui->renameName->hide();
-        ui->okButton_2->hide();
+        hideAll();
     }
     //aggiorniamo la stringa del contenuto in modo che ci sia il nuovo nome della directory
     if(this->actualId=="0"){
@@ -795,12 +808,6 @@ void directory::successRename(){
     }
 }
 
-
-/*void directory::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
-    this->cl = cl;
-}*/
-
 void directory::errorConnectionLogout(){
     errorLogoutWindow= new errorlogout(this);
     this->close();
@@ -811,7 +818,7 @@ void directory::errorConnectionLogout(){
 
 void directory::on_myListWidget_itemDoubleClicked()
 {
-    this->openSelectedSource();
+    openSelectedSource();
 }
 
 
@@ -842,6 +849,7 @@ void directory::openSelectedSource(){
 
              // id and path e privilegio con cui apre
          {
+             ui->myListWidget->setFixedWidth(270);
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
              std::string id=idPriv.first;
              this->initialPriv=idPriv.second;
@@ -869,7 +877,7 @@ void directory::openSelectedSource(){
              // it is a SymLink
              // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
              // path e nome che ce li ho.
-
+             ui->myListWidget->setFixedWidth(270);
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
              std::string id=idPriv.first;
              std::string initialPriv=idPriv.second;
@@ -901,28 +909,29 @@ void directory::on_okButton_2_clicked()
 
 void directory::on_OkPriv_clicked()
 {
+    lastChoice = openSource;
+    disableStyleButtons();
     if(ui->writerButton->isEnabled())
         priv= Symposium::privilege::modify;
     else if(ui->readerButton->isEnabled())
         priv= Symposium::privilege::readOnly;
     else
         priv= Symposium::privilege::owner;
-
+    //waiting();
     #ifdef DISPATCHER_ON
-    this->lastChoice = openSource;
     cl.openSource(this->path,this->id,this->priv);
     #else
+    hideAll();
+    enableStyleButtons();
+    //w->close();
     notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path);
     notepadWindow->show();
     notepadWindow->showLabels();
     #endif
-
-    this->hidePrivilegeButtons();
 }
 
 notepad* directory::successOpen(){
     notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument());
-    //this->hide();
     notepadWindow->show();
     notepadWindow->showLabels();
     return notepadWindow;
@@ -930,7 +939,7 @@ notepad* directory::successOpen(){
 
 void directory::on_cancPriv_clicked()
 {
-    this->hidePrivilegeButtons();
+    hideAll();
 }
 
 void directory::hidePrivilegeButtons(){

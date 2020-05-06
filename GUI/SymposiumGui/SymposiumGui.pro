@@ -76,6 +76,7 @@ SOURCES += \
         Dispatcher/serverdispatcher.cpp \
         unsuccessdeleteaccount.cpp \
         symwininterface.cpp \
+        waiting.cpp \
         winmanager.cpp
 
 HEADERS += \
@@ -127,6 +128,7 @@ HEADERS += \
         Dispatcher/serverdispatcher.h \
         unsuccessdeleteaccount.h \
         symwininterface.h \
+        waiting.h \
         winmanager.h
 
 FORMS += \
@@ -156,7 +158,8 @@ FORMS += \
         sigin.ui \
         signup.ui \
         successlinks.ui \
-        unsuccessdeleteaccount.ui
+        unsuccessdeleteaccount.ui \
+        waiting.ui
 
 
 DEFINES = BOOST_ALL_NO_LIB

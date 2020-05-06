@@ -5,8 +5,8 @@
 
 #include <QMessageBox>
 #include <QTreeWidgetItem>
-#include <../../user.h>
-#include <../../document.h>
+#include "../../user.h"
+#include "../../document.h"
 #include "../../privilege.h"
 #include "../../Symposium.h"
 #include "errorconnection.h"
