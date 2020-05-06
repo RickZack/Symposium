@@ -41,18 +41,10 @@ void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
     this->cl = cl;
 }
 
-void activenonlink::errorConnection()
+void activenonlink::errorConnectionLogout()
 {
     enableButtons();
-    errorconnection errorWindow(nullptr);
-    errorWindow.exec();
-}
-
-void activenonlink::errorConnectionLogout(std::string str)
-{
-    enableButtons();
-    errorlogout errorLog(nullptr, QString::fromStdString(str));
-    errorLog.setClientDispatcher(cl);
+    errorlogout errorLog(nullptr);
     close();
     parentWidget()->close();
     parentWidget()->parentWidget()->hide();

@@ -124,21 +124,12 @@ void onlineusers::errorEditPrivilege(std::string errorMess)
                              tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
 }
 
-void onlineusers::errorConnection()
+void onlineusers::errorConnectionLogout()
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
-    errorconnection errorWindow(this);
-    errorWindow.exec();
-}
-
-void onlineusers::errorConnectionLogout(std::string str)
-{
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->button->setDisabled(false);
-    errorlogout errorLog(this, QString::fromStdString(str));
+    errorlogout errorLog(this);
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();

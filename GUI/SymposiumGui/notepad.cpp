@@ -299,7 +299,7 @@ void notepad::on_actionCut_triggered()
 void notepad::on_actionPaste_triggered()
 {
     ui->textEdit->paste();
-    this->contV_action(this->pos);
+    //this->contV_action(this->pos);
 }
 
 void notepad::addStyleFormat()
@@ -730,10 +730,10 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     if(event->key()==Qt::Key_Backspace)
         return handleDeleteKey();
     else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+V")) // Control_V action
-        return //this->on_actionPaste_triggered();
-                this->contV_action(pos);
+        return; //this->on_actionPaste_triggered();
+                //this->contV_action(pos);
     else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+C")) // Control_C action
-        return this->on_actionCopy_triggered();
+        return; //this->on_actionCopy_triggered();
     else if(isAKeyToIgnore(event))
         return;
     else{ //carattere alfabetico
@@ -751,6 +751,11 @@ bool notepad::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
            qDebug() << "key " << keyEvent->key() << "from" << obj;
            if(obj->objectName()=="textEdit"){
+               if(keyEvent->matches(QKeySequence::Paste)){
+                   this->okPaste=true;
+                   const QMimeData *md = QApplication::clipboard()->mimeData();
+                   this->dim=md->text().length();
+               }
                handleTextEditKeyPress(keyEvent);
            }
     }
@@ -876,21 +881,28 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     this->colPos=colC;
 }
 
-void notepad::contV_action(int pos){
-    QTextCursor curs= ui->textEdit->textCursor();
+void notepad::contV_action(int p){
+    QTextCursor curs=ui->textEdit->textCursor();
     int posAct= curs.position();
-    int posTmp=pos;
-    int dim=posAct-pos;
+    qDebug()<<"PosAct"<<posAct;
+    int posTmp=posAct-this->dim;
+    qDebug()<<"PosTmp"<<posTmp;
+    qDebug()<<"Dimensione"<<this->dim;
     int count=0;
 
-    while(count!=dim){
-        curs.setPosition(posTmp,QTextCursor::MoveAnchor);
-        curs.setPosition(posTmp+1,QTextCursor::KeepAnchor);
+    while(count!=this->dim){
+        //curs.setPosition(posTmp,QTextCursor::MoveAnchor);
+        //curs.setPosition(posTmp+1,QTextCursor::KeepAnchor);
+        curs.setPosition(posTmp);
+        curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
+        //ui->textEdit->setTextCursor(curs);
         QString charact=curs.selectedText();
-        curs.clearSelection();
+        qDebug()<<"charact"<<charact;
         int column=curs.positionInBlock();
         column= column-1;
         int row= curs.blockNumber();
+        qDebug()<<"row"<<row;
+        qDebug()<<"Column"<<column;
         std::string str=charact.toStdString();
         wchar_t ch=str[0];
         const std::pair<int, int> indexes={row,column};
@@ -915,12 +927,16 @@ void notepad::contV_action(int pos){
         //cl->localInsert(this->documentId, symbol &sym, &indexes)
         count++;posTmp++;
     }
+    this->okPaste=false;
+
 }
 
 void notepad::addCursor()
 {
     ui->textEdit->addUser(4, "Tizio");
 }
+
+
 
 void notepad::removeCursor()
 {
@@ -1355,4 +1371,15 @@ int notepad::countCharsInLine(int line)const {
             ch++;
     }
     return ch;
+}
+
+void notepad::on_textEdit_textChanged()
+{
+    if(okPaste){
+        qDebug()<<"testo"<<ui->textEdit->toPlainText();
+        QTextCursor c=ui->textEdit->textCursor();
+        qDebug()<<"Posizione ultima"<<c.position();
+        this->contV_action(this->dim);
+
+    }
 }

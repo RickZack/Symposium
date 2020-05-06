@@ -19,13 +19,8 @@ class errorlogout : public QDialog
     Q_OBJECT
 
 public:
-    explicit errorlogout(QWidget *parent = nullptr, QString str="");
+    explicit errorlogout(QWidget *parent = nullptr);
     ~errorlogout();
-    /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
 
 private slots:
     /**
@@ -34,9 +29,7 @@ private slots:
     void on_pushButton_clicked();
 
 private:
-    QString str;
     Ui::errorlogout *ui;
-    Symposium::clientdispatcher *cl;
 };
 
 #endif // ERRORLOGOUT_H

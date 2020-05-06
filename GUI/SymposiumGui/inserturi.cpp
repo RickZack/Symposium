@@ -160,24 +160,12 @@ void inserturi::on_add_clicked()
     }
 }
 
-
-void inserturi::errorConnection()
-{
-    hideLabelsError();
-    enableButtons();
-    errorconnection errorWindow(this);
-    int ret=errorWindow.exec();
-    if(ret==0)
-        enableStyleButtons();
-}
-
-void inserturi::errorConnectionLogout(std::string str)
+void inserturi::errorConnectionLogout()
 {
     hideLabelsError();
     enableStyleButtons();
     enableButtons();
-    errorlogout errorLog(this, QString::fromStdString(str));
-    errorLog.setClientDispatcher(cl);
+    errorlogout errorLog(this);
     this->hide();
     errorLog.show();
 }

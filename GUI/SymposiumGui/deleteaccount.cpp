@@ -111,21 +111,11 @@ void deleteAccount::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
 }
 
-void deleteAccount::errorConnection()
+void deleteAccount::errorConnectionLogout()
 {
     enableButtons();
     enableStyleButtons();
-    errorconnection errorWindow(this);
-    errorWindow.exec();
-}
-
-void deleteAccount::errorConnectionLogout(std::string str)
-{
-    enableButtons();
-    enableStyleButtons();
-    errorlogout errorLog(nullptr, QString::fromStdString(str));
-    //this->close();
-    //parentWidget()->close();
+    errorlogout errorLog(nullptr);
     errorLog.exec();
 }
 

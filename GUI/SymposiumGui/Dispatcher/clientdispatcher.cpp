@@ -290,7 +290,7 @@ void clientdispatcher::openSource(const std::string &path, const std::string &na
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -303,7 +303,7 @@ void clientdispatcher::openNewSource(const std::string &resourceId, privilege re
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraInsertUri->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraInsertUri->errorConnectionLogout();
     }
 }
 
@@ -316,7 +316,7 @@ void clientdispatcher::createNewSource(const std::string &path, const std::strin
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -329,7 +329,7 @@ void clientdispatcher::createNewDir(const std::string &path, const std::string &
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -340,7 +340,7 @@ void clientdispatcher::localInsert(uint_positive_cnt::type resourceId, const sym
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -351,7 +351,7 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -382,9 +382,9 @@ void clientdispatcher::editPrivilege(const std::string &targetUser, std::string 
     } catch (clientdispatcher::sendFailure) {
         this->closeConnection();
         if(this->currentWindow==13){
-            this->finestraOnlineUser->errorConnectionLogout(IMPOSSINVIARE);
+            this->finestraOnlineUser->errorConnectionLogout();
         }else{
-            this->finestraAllUser->errorConnectionLogout(IMPOSSINVIARE);
+            this->finestraAllUser->errorConnectionLogout();
         }
     }
 }
@@ -398,13 +398,13 @@ void clientdispatcher::shareResource(const std::string &resPath, const std::stri
         //errore nell'invio del messaggio
         this->closeConnection();
         if(this->currentWindow==8){
-            this->finestraActiveCounterLink->errorConnectionLogout(IMPOSSINVIARE);
+            this->finestraActiveCounterLink->errorConnectionLogout();
         }else if(this->currentWindow==9){
-            this->finestraActiveTimerLink->errorConnectionLogout(IMPOSSINVIARE);
+            this->finestraActiveTimerLink->errorConnectionLogout();
         }else if(this->currentWindow==10){
-            this->finestraActiveAlwaysLink->errorConnectionLogout(IMPOSSINVIARE);
+            this->finestraActiveAlwaysLink->errorConnectionLogout();
         }else{
-            this->finestraActiveNonLink->errorConnectionLogout(IMPOSSINVIARE);
+            this->finestraActiveNonLink->errorConnectionLogout();
         }
     }
 }
@@ -418,7 +418,7 @@ void clientdispatcher::renameResource(const std::string &resPath, const std::str
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -431,7 +431,7 @@ void clientdispatcher::removeResource(const std::string &resPath, const std::str
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -444,7 +444,7 @@ void clientdispatcher::closeSource(uint_positive_cnt::type resourceId) {
         this->deleteActiveDocument(resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -457,7 +457,7 @@ void clientdispatcher::editUser(user &newUserData) {
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraModificaUser->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraModificaUser->errorConnectionLogout();
     }
 }
 
@@ -470,7 +470,7 @@ void clientdispatcher::removeUser(const std::string &pwd) {
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraEliminaAccount->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraEliminaAccount->errorConnectionLogout();
     }
 }
 
@@ -481,7 +481,7 @@ void clientdispatcher::logout() {
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraHome->errorConnection();
+        this->finestraHome->errorConnectionLogout();
     }
 }
 
@@ -504,7 +504,7 @@ void clientdispatcher::moveMyCursor(uint_positive_cnt::type resId, int block, in
         sendMessage(mess, resId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraDirectory->errorConnectionLogout(IMPOSSINVIARE);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -892,34 +892,34 @@ void clientdispatcher::TimerExpired(){
             this->finestraSignup->errorConnection();
             break;
         }case 3:{
-            this->finestraInsertUri->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraInsertUri->errorConnectionLogout();
             break;
         }case 5:{
-            this->finestraEliminaAccount->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraEliminaAccount->errorConnectionLogout();
             break;
         }case 7:{
-            this->finestraModificaUser->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraModificaUser->errorConnectionLogout();
             break;
         }case 8:{
-            this->finestraActiveCounterLink->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraActiveCounterLink->errorConnectionLogout();
             break;
         }case 9:{
-            this->finestraActiveTimerLink->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraActiveTimerLink->errorConnectionLogout();
             break;
         }case 10:{
-            this->finestraActiveAlwaysLink->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraActiveAlwaysLink->errorConnectionLogout();
             break;
         }case 12:{
-            this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraDirectory->errorConnectionLogout();
             break;
         }case 13:{
-            this->finestraOnlineUser->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraOnlineUser->errorConnectionLogout();
             break;
         }case 14:{
-            this->finestraAllUser->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraAllUser->errorConnectionLogout();
             break;
         }case 15:{
-            this->finestraActiveNonLink->errorConnectionLogout(TIMERSCADUTO);
+            this->finestraActiveNonLink->errorConnectionLogout();
             break;
         }case 16:{
 
@@ -927,6 +927,6 @@ void clientdispatcher::TimerExpired(){
         }
     }else{
         //il timer è scaduto su un messaggio di localinsert, localremove, closesource o movemycursor, notifichiamo l'errore sulla finestra directory
-        this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
+        this->finestraDirectory->errorConnectionLogout();
     }
 }

@@ -71,7 +71,7 @@ void changeUserInfo::success(){
 void changeUserInfo::failure(const QString& toPrint){
     pressed=false;
     if(toPrint=="-1")
-        errorConnection();
+        errorConnectionLogout();
     else
         errorEditUser(toPrint);
 
@@ -136,25 +136,13 @@ void changeUserInfo::confirm_click()
 }
 
 
-
-void changeUserInfo::errorConnection()
+void changeUserInfo::errorConnectionLogout()
 {
     hideLabelsError();
     pressed=false;
     enableButtons();
     enableStyleButtons();
-    errorconnection errorWindow(this);
-    errorWindow.exec();
-}
-
-void changeUserInfo::errorConnectionLogout(const std::string str)
-{
-    hideLabelsError();
-    pressed=false;
-    enableButtons();
-    enableStyleButtons();
-    errorlogout errorLog(nullptr, QString::fromStdString(str));
-    errorLog.setClientDispatcher(&cl);
+    errorlogout errorLog(nullptr);
     this->close();
     errorLog.exec();
 }

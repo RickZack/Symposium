@@ -73,21 +73,12 @@ void alluser::errorEditPrivilege(std::string errorMess)
                              tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
 }
 
-void alluser::errorConnection()
+void alluser::errorConnectionLogout()
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
-    errorconnection errorWindow (nullptr);
-    errorWindow.exec();
-}
-
-void alluser::errorConnectionLogout(std::string str)
-{
-    ui->waiting->hide();
-    ui->gif->hide();
-    ui->button->setDisabled(false);
-    errorlogout errorLog(this, QString::fromStdString(str));
+    errorlogout errorLog(this);
     this->close();
     parentWidget()->close();
     parentWidget()->parentWidget()->close();

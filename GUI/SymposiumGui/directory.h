@@ -55,12 +55,6 @@ public:
      */
     void successRename();
 
-    /**
-     * @brief errorConnection acts when there is an error on the connection
-     * It shows an error msg
-     */
-    void errorConnection();
-
 
     /**
      * @brief directory::successRemouve remouves the selected source
@@ -89,7 +83,7 @@ public:
     /**
      * @brief errorLogout shows an error message and closes the window
      */
-     void errorConnectionLogout(std::string str);
+     void errorConnectionLogout();
 
     void openSelectedSource();
 

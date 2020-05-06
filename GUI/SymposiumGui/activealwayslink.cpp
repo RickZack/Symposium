@@ -50,24 +50,14 @@ void activealwayslink::setClientDispatcher(Symposium::clientdispatcher *cl)
     this->cl = cl;
 }
 
-void activealwayslink::errorConnection()
+void activealwayslink::errorConnectionLogout()
 {
     enableButtons();
     enableStyleButtons();
     this->hide();
-    errorconnection errorWindow(nullptr);
-    errorWindow.exec();
-}
-
-void activealwayslink::errorConnectionLogout(std::string str)
-{
-    enableButtons();
-    enableStyleButtons();
-    this->hide();
-    errorlogout errorLog(nullptr, QString::fromStdString(str));
+    errorlogout errorLog(nullptr);
     parentWidget()->hide();
     parentWidget()->parentWidget()->hide();
-    errorLog.setClientDispatcher(cl);
     errorLog.show();
 }
 

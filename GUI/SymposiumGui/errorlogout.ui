@@ -13,30 +13,22 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>84</x>
-     <y>39</y>
-     <width>411</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>90</y>
+     <x>160</x>
+     <y>50</y>
      <width>181</width>
-     <height>20</height>
+     <height>51</height>
     </rect>
    </property>
    <property name="text">
-    <string>Please, sign in again</string>
+    <string>Enable to contact server. 
+Please, check your connection
+and login again</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton">

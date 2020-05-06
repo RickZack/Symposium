@@ -43,7 +43,7 @@ void home::success(){
 
 void home::failure(const QString&){
     pressed = false;
-    errorConnection();
+    errorConnectionLogout();
 }
 
 void home::enableButtonsAfter()
@@ -162,24 +162,12 @@ void home::successLogout()
     backToMainWin();
 }
 
-void home::errorConnection()
+void home::errorConnectionLogout()
 {
     enableButtons();
     enableStyleButtons();
     pressed=false;
-    errorconnection errorWindow (nullptr);
-    int ret=errorWindow.exec();
-    if(ret==0)
-        enableStyleButtons();
-}
-
-void home::errorConnectionLogout(const std::string str)
-{
-    enableButtons();
-    enableStyleButtons();
-    pressed=false;
-    errorlogout errorLog(nullptr, QString::fromStdString(str));
-    errorLog.setClientDispatcher(&cl);
+    errorlogout errorLog(nullptr);
     hide();
     errorLog.show();
 }
