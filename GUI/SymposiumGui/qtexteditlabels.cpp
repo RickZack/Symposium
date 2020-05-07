@@ -24,11 +24,16 @@ void qtexteditlabels::scroll()
     int column=this->textCursor().positionInBlock();
     for(auto it:cursors)
         {
-            changePosition(it.second.first, it.second.second);
-            Symposium::uint_positive_cnt::type siteId=it.first;
-            QLabel *labelNameReverse=labels.find(siteId)->second.first;
-            QLabel *labelName=labels.find(siteId)->second.second;
-            showLabel(labelNameReverse, labelName);
+        if(it.first==thisUserSiteId)
+        {
+           block=it.second.first;
+           column=it.second.second;
+        }
+        changePosition(it.second.first, it.second.second);
+        Symposium::uint_positive_cnt::type siteId=it.first;
+        QLabel *labelNameReverse=labels.find(siteId)->second.first;
+        QLabel *labelName=labels.find(siteId)->second.second;
+        showLabel(labelNameReverse, labelName);
         }
     changePosition(block, column);
     j=1;

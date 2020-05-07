@@ -7,17 +7,20 @@
     <x>0</x>
     <y>0</y>
     <width>173</width>
-    <height>75</height>
+    <height>63</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:white;</string>
+  </property>
   <widget class="QLabel" name="gif">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
+     <x>1</x>
+     <y>1</y>
      <width>61</width>
      <height>61</height>
     </rect>

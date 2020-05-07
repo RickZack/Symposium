@@ -13,6 +13,10 @@ waiting::waiting(QWidget *parent) :
     movie->start();
 
     setAttribute( Qt::WA_DeleteOnClose );
+
+    setModal(true);
+
+    setAttribute(Qt::WA_TranslucentBackground);
 }
 
 waiting::~waiting()
