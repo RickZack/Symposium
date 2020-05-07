@@ -32,10 +32,10 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     ui->back_button->hide();
 
     ui->actionHome->setIcon(QIcon(":/icon/home.png"));
-    ui->back_button->setIcon(QIcon(":/resources/cartelle/back_icon"));
 
     hideAll();
     setAttribute( Qt::WA_DeleteOnClose );
+    ui->pathPlainEdit->setLineWrapMode(QPlainTextEdit::LineWrapMode::NoWrap);
 }
 
 std::string directory::manipulationHome(std::string& s){
@@ -87,6 +87,7 @@ void directory::success(){
     w->close();
     enableStyleButtons();
     hideAll();
+    pressed=false;
     switch (lastChoice) {
     case createFolder:{
         successCreate();
@@ -109,7 +110,8 @@ void directory::success(){
 
 void directory::failure(const QString& toPrint){
     enableStyleButtons();
-    //w->close();
+    w->close();
+    pressed=false;
     if(toPrint=="-1"){
         errorConnectionLogout();
     }else{
@@ -254,7 +256,6 @@ int directory::number_elements(std::string& string)
 
 void directory::on_actionHome_triggered()
 {
-    this->esc = false;
     backToParent();
 }
 
@@ -304,6 +305,7 @@ void directory::deleteSource()
 {
    lastChoice = remove;
    disableStyleButtons();
+   pressed=true;
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
    foreach(QListWidgetItem *items, item){
@@ -315,16 +317,17 @@ void directory::deleteSource()
            std::pair<std::string,std::string> idPriv=searchForPriv(nameSource,str,count);
            id=idPriv.first;
        }
+       waiting();
        #ifdef DISPATCHER_ON
        cl.removeResource(path,id);
-       waiting();
        #endif
 
        //-------------------------------------------------------------------
        //DA RIMUOVERE
        #ifndef DISPATCHER_ON
        enableStyleButtons();
-       //w->close();
+       w->close();
+       pressed=false;
        bool msg=true;
        if(msg)
        {
@@ -375,7 +378,8 @@ void directory::successRemove(){
 }
 
 void directory::failureActionDirectory(const QString& msg){
-    QMessageBox::warning(this, "Warning Message", msg);
+    ui->errorMess->setText(msg);
+    ui->errorMess->show();
 }
 
 // this method creates a new folder
@@ -383,12 +387,12 @@ void directory::on_pushButton_3_clicked()
 {
     lastChoice = createFolder;
     disableStyleButtons();
-    //waiting();
+    pressed=true;
+    waiting();
     QString name= ui->name->text();
     std::string nameFolder=name.toStdString();
     #ifdef DISPATCHER_ON
     cl.createNewDir(path,nameFolder);
-    waiting();
     #else
     // anche questo da eliminare
     ui->name->setText(" ");
@@ -396,7 +400,8 @@ void directory::on_pushButton_3_clicked()
     //--------------------------------------------------------------------
     // DA ELIMINARE
     enableStyleButtons();
-    //w->close();
+    pressed=false;
+    w->close();
     std::string id="1"; //PER ESEMPIO
 
     if(id!="-1")
@@ -451,24 +456,17 @@ void directory::successCreate(){
 //this method closes the window directory
 void directory::closeEvent(QCloseEvent *event)
 {
-    if(this->esc == true){
+    if(closedByUser())
+    {
         disableStyleButtons();
         event->ignore();
         ex=new class exit(this);
         int ret=ex->exec();
-        if(ret==0)
+        if(ret==0 && !pressed)
             enableStyleButtons();
     }
-    /*QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Exit",
-                                                                    tr("Are you sure to quit?\n"),
-                                                                     QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn != QMessageBox::Yes) {
-            event->ignore();
-        } else {
-
-            event->accept();
-        }*/
+    else
+        event->accept();
 
 }
 
@@ -531,9 +529,10 @@ void directory::disableStyleButtons()
 
 void directory::waiting()
 {
-    w = new class waiting(this);
-    w->move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w->rect().center());
-    w->exec();
+   hideAll();
+   w = new class waiting(this);
+   w->move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w->rect().center());
+   w->show();
 }
 
 void directory::hideAll()
@@ -544,6 +543,7 @@ void directory::hideAll()
     ui->label_2->hide();
     ui->name->hide();
     ui->name->setReadOnly(true);
+    ui->name->clear();
     ui->pushButton_3->hide();
     ui->pushButton_3->setDisabled(true);
     ui->okButton_3->hide();
@@ -556,6 +556,7 @@ void directory::hideAll()
     ui->label_6->hide();
     ui->name_2->hide();
     ui->name_2->setReadOnly(true);
+    ui->name_2->clear();
     ui->pushButton_4->setDisabled(true);
     ui->pushButton_4->hide();
     ui->okButton_4->setDisabled(true);
@@ -565,6 +566,7 @@ void directory::hideAll()
     //Rename hide
     ui->renameName->hide();
     ui->renameLabel->setReadOnly(true);
+    ui->renameLabel->clear();
     ui->renameLabel->hide();
     ui->okButton->hide();
     ui->okButton->setDisabled(true);
@@ -576,6 +578,8 @@ void directory::hideAll()
 
     //The privilege buttons
     hidePrivilegeButtons();
+
+    ui->errorMess->hide();
 
 }
 
@@ -594,6 +598,8 @@ void directory::showNewDirectory()
 
     //Resize directory view window
     ui->myListWidget->setFixedWidth(270);
+
+    lastChoice=createFolder;
 }
 
 void directory::showNewFile()
@@ -611,6 +617,8 @@ void directory::showNewFile()
 
     //Resize directory view window
     ui->myListWidget->setFixedWidth(270);
+
+    lastChoice=createNewSource;
 }
 
 void directory::showRename()
@@ -625,6 +633,8 @@ void directory::showRename()
 
     //Resize directory view window
     ui->myListWidget->setFixedWidth(270);
+
+    lastChoice=rename;
 }
 
 // creates a new file
@@ -632,19 +642,19 @@ void directory::on_pushButton_4_clicked()
 {
     lastChoice = createNewSource;
     disableStyleButtons();
+    pressed=true;
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
-
+    waiting();
     //ui->name_2->setText(" "); // da rimuovere
     #ifdef DISPATCHER_ON
     cl.createNewSource(this->path,nameDocument);
-    waiting();
     #else
     // DA RIMUOVERE
-    //w->close();
+    w->close();
     enableStyleButtons();
+    pressed=false;
     std::string id="1"; //PER ESEMPIO
-
     if(id!="-1")
          // OK dal dispatcher, posso creare il nuovo documento
     {
@@ -697,13 +707,13 @@ void directory::on_back_button_clicked()
     if(this->openFolders!=0){
 
         if(this->openFolders == 1){
-            ui->pathLabel->setText(QString::fromStdString("Path:"));
+            ui->pathPlainEdit->setPlainText(QString::fromStdString("Path:home/"));
         }else{
-            std::string pathLabel=ui->pathLabel->text().toStdString();
+            std::string pathLabel=ui->pathPlainEdit->toPlainText().toStdString();
             pathLabel.erase(pathLabel.end()-1);
             found=pathLabel.find_last_of("/");
             pathLabel.erase(found+1,pathLabel.size());
-            ui->pathLabel->setText(QString::fromStdString(pathLabel));
+            ui->pathPlainEdit->setPlainText(QString::fromStdString(pathLabel));
         }
         #ifdef DISPATCHER_ON
         //aggiorniamo il path
@@ -733,19 +743,17 @@ void directory::on_back_button_clicked()
                 previousId = temp.substr(found+1,temp.size());
             }
             temp = temp + "/";
-            //waiting();
             str=cl.getStr(this->actualId, temp);
             str = manipulationHome(str);
-            //w->close();
         }
         ui->myListWidget->clear();
         int count=number_elements(str);
         listGenerate(str,count);
         #endif
     }else{
-        std::string pathLabel=ui->pathLabel->text().toStdString();
+        std::string pathLabel=ui->pathPlainEdit->toPlainText().toStdString();
         pathLabel.erase(5,pathLabel.size());
-        ui->pathLabel->setText(QString::fromStdString(pathLabel));
+        ui->pathPlainEdit->setPlainText(QString::fromStdString(pathLabel));
         ui->back_button->setDisabled(true);
         ui->back_button->hide();
     }
@@ -761,17 +769,19 @@ void directory::on_okButton_clicked()
 {
     lastChoice = rename;
     disableStyleButtons();
+    pressed=true;
     QString newName=ui->renameLabel->text();
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
          std::string oldName=items->text().toStdString();
          std::string id=searchForId(oldName,str,count);
+         waiting();
          #ifdef DISPATCHER_ON
          cl.renameResource(this->path,id, newName.toStdString());
-         waiting();
          #else
          enableStyleButtons();
-         //w->close();
+         w->close();
+         pressed=false;
          items->setText(newName);
          ui->myListWidget->currentItem()->setSelected(false);
          hideAll();
@@ -805,7 +815,7 @@ void directory::successRename(){
 
 void directory::errorConnectionLogout(){
     errorLogoutWindow= new errorlogout(this);
-    this->close();
+    close();
     errorLogoutWindow->show();
 
 }
@@ -818,6 +828,7 @@ void directory::on_myListWidget_itemDoubleClicked()
 
 
 void directory::openSelectedSource(){
+    hideAll();
     // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
@@ -837,7 +848,7 @@ void directory::openSelectedSource(){
              #else
              std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
              #endif
-             ui->pathLabel->setText(ui->pathLabel->text()+QString::fromStdString(nameSource)+'/');
+             ui->pathPlainEdit->setPlainText(ui->pathPlainEdit->toPlainText()+QString::fromStdString(nameSource)+'/');
              this->openWindow(str);
 
          }else if(value=="file")
@@ -894,8 +905,10 @@ void directory::showPrivilegeButtons(){
     ui->writerButton->show();
     ui->readerButton->show();
     ui->ownerButton->show();
+    lastChoice=openSource;
 
 }
+
 void directory::on_okButton_2_clicked()
 {
      hideAll();
@@ -906,20 +919,21 @@ void directory::on_OkPriv_clicked()
 {
     lastChoice = openSource;
     disableStyleButtons();
+    pressed=true;
     if(ui->writerButton->isEnabled())
         priv= Symposium::privilege::modify;
     else if(ui->readerButton->isEnabled())
         priv= Symposium::privilege::readOnly;
     else
         priv= Symposium::privilege::owner;
-    //waiting();
+    waiting();
     #ifdef DISPATCHER_ON
     cl.openSource(this->path,this->id,this->priv);
-    waiting();
     #else
     hideAll();
     enableStyleButtons();
-    //w->close();
+    pressed=false;
+    w->close();
     notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path);
     notepadWindow->show();
     notepadWindow->showLabels();
@@ -931,6 +945,11 @@ notepad* directory::successOpen(){
     notepadWindow->show();
     notepadWindow->showLabels();
     return notepadWindow;
+}
+
+void directory::enableButtonsAfter()
+{
+    enableStyleButtons();
 }
 
 void directory::on_cancPriv_clicked()

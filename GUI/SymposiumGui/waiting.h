@@ -3,6 +3,8 @@
 
 #include <QDialog>
 #include <QMovie>
+#include "Dispatcher/clientdispatcher.h"
+
 
 namespace Ui {
 class waiting;
@@ -13,11 +15,13 @@ class waiting : public QDialog
     Q_OBJECT
 
 public:
-    explicit waiting(QWidget *parent = nullptr);
+    explicit waiting(QWidget *parent=nullptr);
     ~waiting();
+
 
 private:
     Ui::waiting *ui;
+
 };
 
 #endif // WAITING_H

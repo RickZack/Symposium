@@ -94,6 +94,9 @@ public:
      * @return
      */
     notepad *successOpen();
+
+public slots:
+    void enableButtonsAfter();
 private slots:
 
     /**
@@ -173,7 +176,7 @@ private:
     action lastChoice;
     class exit* ex;
     waiting *w;
-    bool esc=true;
+    bool pressed=false;
 
     /**
      * @brief openFolders this variable is used to say that a window has been opened and to enable/disable the BACK button
