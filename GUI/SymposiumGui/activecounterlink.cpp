@@ -1,9 +1,12 @@
 #include "activecounterlink.h"
 #include "ui_activecounterlink.h"
+#include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
+#include "onoff_networkinteraction.h"
 
-activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
+activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si) :
     QDialog(parent),
+    SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
     ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
@@ -24,29 +27,42 @@ activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_c
     //---------------------------------------------------------------------------------------------------------------
 }
 
-void activecounterlink::unsuccessLink(std::string errorMess)
+void activecounterlink::success()
+{
+    successLink();
+}
+
+void activecounterlink::failure(const QString &toPrint)
+{
+    if(toPrint=="-1"){
+        errorConnectionLogout();
+    }else{
+        unsuccessLink(toPrint);
+    }
+}
+
+void activecounterlink::unsuccessLink(const QString& errorMess)
 {
     enableButtons();
     enableStyleButtons();
-    this->hide();
-    QString error=QString::fromStdString(errorMess);
-    ui->errorMess->setText(error);
+    //this->hide();
+    ui->errorMess->setText(errorMess);
     ui->errorMess->show();
 }
 
-void activecounterlink::successLink(std::string path)
+void activecounterlink::successLink()
 {
     enableButtons();
     enableStyleButtons();
     this->hide();
-    successlinks link(parentWidget(), 2, QString::fromStdString(path), QString::number(numCounter), "");
+    successlinks link(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter), "");
     link.exec();
 }
 
-void activecounterlink::setClientDispatcher(Symposium::clientdispatcher *cl)
+/*void activecounterlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
-}
+}*/
 
 void activecounterlink::errorConnectionLogout()
 {
@@ -76,20 +92,22 @@ void activecounterlink::on_ok_clicked()
     if(numCounter!=0)
     {
         u.activateCount(numCounter, privilegeToGrant);
-        //cl->shareResource(pathFile, documentId, u);
+        #ifdef DISPATCHER_ON
+        cl.shareResource(pathFile, std::to_string(documentId), u);
+        #endif
         waiting();
         disableButtons();
         disableStyleButtons();
     }
-
+    #ifndef DISPATCHER_ON
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-    this->hide();
+    //this->hide();
     enableButtons();
     successlinks link(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter));
     link.exec();
 
     //----------------------------------------------------------------------------------
-
+    #endif
 }
 
 void activecounterlink::on_owner_clicked()

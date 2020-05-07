@@ -10,6 +10,7 @@
 #include "errorconnection.h"
 #include "errorlogout.h"
 #include "successlinks.h"
+#include "symwininterface.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -19,22 +20,25 @@ namespace Ui {
 class activealwayslink;
 }
 
-class activealwayslink : public QDialog
+class activealwayslink : public QDialog, public SymModalWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit activealwayslink(QWidget *parent = nullptr,  Symposium::uint_positive_cnt::type documentId=0, std::string pathFile="");
+    explicit activealwayslink(QWidget *parent,  Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si);
+
+    void success() override;
+    void failure(const QString& toPrint) override;
+
     /**
      * @brief called by clientdispatcher when there is some error to activate link
      * @param errorMess the messagge to show
      */
-    void unsuccessLink(std::string errorMess);
+    void unsuccessLink(const QString& errorMess);
     /**
      * @brief called by clientdispatcher when the activation of link was successfully done
-     * @param path the link to show to user
      */
-    void successLink(std::string path);
+    void successLink();
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -79,7 +83,7 @@ private:
     Ui::activealwayslink *ui;
     Symposium::privilege privilegeToGrant;
     Symposium::uri u;
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     Symposium::uint_positive_cnt::type documentId;
     std::string pathFile;
     /**

@@ -16,7 +16,6 @@ exit::exit(QWidget *parent, bool logout) :
     connect(ui->ok, SIGNAL(clicked()), qApp, SLOT(quit()));
 
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
 }
 
 void exit::setClientDispatcher(Symposium::clientdispatcher *cl)

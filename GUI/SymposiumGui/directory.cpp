@@ -262,8 +262,8 @@ void directory::on_actionHome_triggered()
 void directory::on_actionUri_triggered()
 {
     hideAll();
-    uriWindow=new inserturi(nullptr, pwd);
-    uriWindow->exec();
+    inserturi* uriWindow=new inserturi(nullptr, pwd, *this);
+    goToWindow(*uriWindow);
 }
 
 void directory::on_actionaddFolder_triggered()
@@ -388,8 +388,8 @@ void directory::on_pushButton_3_clicked()
     lastChoice = createFolder;
     disableStyleButtons();
     pressed=true;
-    waiting();
     QString name= ui->name->text();
+    waiting();
     std::string nameFolder=name.toStdString();
     #ifdef DISPATCHER_ON
     cl.createNewDir(path,nameFolder);

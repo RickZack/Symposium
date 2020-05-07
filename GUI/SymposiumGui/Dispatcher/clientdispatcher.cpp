@@ -247,7 +247,8 @@ void clientdispatcher::signUp(const std::string &username, const std::string &pw
         //chiudiamo la connessione
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraSignup->errorConnection();
+        this->winmanager.activeWindow().failure("-1");
+        //this->finestraSignup->errorConnection();
     }
 }
 
@@ -290,7 +291,8 @@ void clientdispatcher::openSource(const std::string &path, const std::string &na
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout();
+        this->winmanager.activeWindow().failure("-1");
+        //this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -303,7 +305,8 @@ void clientdispatcher::openNewSource(const std::string &resourceId, privilege re
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraInsertUri->errorConnectionLogout();
+        this->winmanager.activeWindow().failure("-1");
+        //this->finestraInsertUri->errorConnectionLogout();
     }
 }
 
@@ -316,7 +319,8 @@ void clientdispatcher::createNewSource(const std::string &path, const std::strin
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout();
+        this->winmanager.activeWindow().failure("-1");
+        //this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -329,7 +333,8 @@ void clientdispatcher::createNewDir(const std::string &path, const std::string &
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout();
+        this->winmanager.activeWindow().failure("-1");
+        //this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -583,11 +588,11 @@ void clientdispatcher::successDeleteAccount(){
 
 void clientdispatcher::successEditUser(){
     this->finestraModificaUser->successEditUser();
-}*/
+}
 
 void clientdispatcher::successInsertUri(){
     this->finestraInsertUri->successInsert();
-}
+}*/
 
 void clientdispatcher::successEditPrivilege(){
     if(this->currentWindow==13){
@@ -598,7 +603,7 @@ void clientdispatcher::successEditPrivilege(){
 }
 
 void clientdispatcher::successShareResource(std::string path){
-    if(this->currentWindow==8){
+    /*if(this->currentWindow==8){
         this->finestraActiveCounterLink->successLink(path);
     }else if(this->currentWindow==9){
         this->finestraActiveTimerLink->successLink(path);
@@ -606,7 +611,7 @@ void clientdispatcher::successShareResource(std::string path){
         this->finestraActiveAlwaysLink->successLink(path);
     }else{
         this->finestraActiveNonLink->successLink(path);
-    }
+    }*/
 }
 
 void clientdispatcher::successOpenSource(document &doc){

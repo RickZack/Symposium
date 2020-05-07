@@ -642,36 +642,36 @@ void notepad::visualizeAllUsers()
 
 void notepad::inactiveLink()
 {
-    nonlinkwindow = new activenonlink(this, documentId, pathToFile);
-    nonlinkwindow->setClientDispatcher(cl);
+    //nonlinkwindow = new activenonlink(this, documentId, pathToFile);
+    //nonlinkwindow->setClientDispatcher(cl);
     //cl->setActiveNonLink(nonlinkwindow);
-    nonlinkwindow->exec();
+    //nonlinkwindow->exec();
 
 }
 
 void notepad::activeAlwaysLink()
 {
-    alwayslinkwindow = new activealwayslink(this, documentId, pathToFile);
-    alwayslinkwindow->setClientDispatcher(cl);
+    //alwayslinkwindow = new activealwayslink(this, documentId, pathToFile);
+    //alwayslinkwindow->setClientDispatcher(cl);
     //cl->setActiveAlwaysLink(alwayslinkwindow);
-    alwayslinkwindow->exec();
+    //alwayslinkwindow->exec();
 
 }
 
 void notepad::timerLink()
 {
-    timerlinkwindow = new activetimerlink(this, documentId, pathToFile);
-    timerlinkwindow->setClientDispatcher(cl);
+    //timerlinkwindow = new activetimerlink(this, documentId, pathToFile);
+    //timerlinkwindow->setClientDispatcher(cl);
     //cl->setActiveTimerLink(timerlinkwindow);
-    timerlinkwindow->exec();
+    //timerlinkwindow->exec();
 }
 
 void notepad::counterLink()
 {
-    counterlinkwindow = new activecounterlink(this, documentId, pathToFile);
-    counterlinkwindow->setClientDispatcher(cl);
+    //counterlinkwindow = new activecounterlink(this, documentId, pathToFile);
+    //counterlinkwindow->setClientDispatcher(cl);
     //cl->setActiveCounterLink(counterlinkwindow);
-    counterlinkwindow->exec();
+    //counterlinkwindow->exec();
 }
 
 

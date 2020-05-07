@@ -233,7 +233,7 @@ namespace Symposium{
 
         //void successEditUser();
 
-        void successInsertUri();
+        //void successInsertUri();
 
         void successEditPrivilege();
 

@@ -168,7 +168,7 @@ private slots:
 
 private:
     Ui::directory *ui;
-    inserturi *uriWindow;
+    //inserturi *uriWindow;
     QListWidgetItem *item1;
     errorconnection *errorWindow;
     errorlogout *errorLogoutWindow;

@@ -10,6 +10,7 @@
 #include "errorconnection.h"
 #include "errorlogout.h"
 #include "successlinks.h"
+#include "symwininterface.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -19,27 +20,30 @@ namespace Ui {
 class activecounterlink;
 }
 
-class activecounterlink : public QDialog
+class activecounterlink : public QDialog, public SymModalWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit activecounterlink(QWidget *parent = nullptr, Symposium::uint_positive_cnt::type documentId=0, std::string pathFile="");
+    explicit activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si);
+
+    void success() override;
+    void failure(const QString& toPrint) override;
+
     /**
      * @brief called by clientdispatcher when there is some error to activate link
      * @param errorMess the messagge to show
      */
-    void unsuccessLink(std::string errorMess);
+    void unsuccessLink(const QString& errorMess);
     /**
      * @brief called by clientdispatcher when the activation of link was successfully done
-     * @param path the link to show to user
      */
-    void successLink(std::string path);
+    void successLink();
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
      */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
+    //void setClientDispatcher(Symposium::clientdispatcher *cl);
     /**
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user
@@ -81,7 +85,7 @@ private:
     Symposium::privilege privilegeToGrant;
     unsigned int numCounter;
     Symposium::uri u;
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     Symposium::uint_positive_cnt::type documentId;
 
     /**

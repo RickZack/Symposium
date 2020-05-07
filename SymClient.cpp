@@ -123,7 +123,7 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
                                     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
 	//notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successInsertUri();
+    this->dispatcher->successAction();
     #endif
 }
 
@@ -143,7 +143,6 @@ void SymClient::createNewSource(const std::string &path, const std::string &name
                                     (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    //this->dispatcher->successCreateNewSource(std::to_string(idToAssign), docReq);
     this->dispatcher->successCreateNewSource(docReq);
     #endif
 }
@@ -224,7 +223,8 @@ std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath,
     std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resName, newPrefs));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successShareResource("/" + resPath);
+    this->dispatcher->successAction();
+    //this->dispatcher->successShareResource("/" + resPath);
     #endif
     return fil;
 }

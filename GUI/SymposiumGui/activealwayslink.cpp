@@ -2,9 +2,11 @@
 #include "ui_activealwayslink.h"
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
+#include "onoff_networkinteraction.h"
 
-activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
+activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si) :
     QDialog(parent),
+    SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
     ui(new Ui::activealwayslink),  documentId(documentId), pathFile(pathFile)
 {
     ui->setupUi(this);
@@ -25,39 +27,53 @@ activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt
 
 }
 
-void activealwayslink::unsuccessLink(std::string errorMess)
+void activealwayslink::success()
+{
+    successLink();
+}
+
+void activealwayslink::failure(const QString &toPrint)
+{
+    if(toPrint=="-1"){
+        errorConnectionLogout();
+    }else{
+        unsuccessLink(toPrint);
+    }
+}
+
+void activealwayslink::unsuccessLink(const QString& errorMess)
 {
     enableButtons();
     enableStyleButtons();
     this->hide();
-    QString error=QString::fromStdString(errorMess);
-    ui->errorMess->setText(error);
+    ui->errorMess->setText(errorMess);
     ui->errorMess->show();
 
 }
 
-void activealwayslink::successLink(std::string path)
+void activealwayslink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    this->hide();
-    successlinks link(parentWidget(), 1, QString::fromStdString(path));
+    //this->hide();
+    successlinks link(parentWidget(), 1, QString::fromStdString(pathFile));
     link.exec();
 }
 
-void activealwayslink::setClientDispatcher(Symposium::clientdispatcher *cl)
+/*void activealwayslink::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
-}
+}*/
 
 void activealwayslink::errorConnectionLogout()
 {
+    backToMainWin();
     enableButtons();
     enableStyleButtons();
-    this->hide();
+    //this->hide();
     errorlogout errorLog(nullptr);
-    parentWidget()->hide();
-    parentWidget()->parentWidget()->hide();
+    //parentWidget()->hide();
+    //parentWidget()->parentWidget()->hide();
     errorLog.show();
 }
 
@@ -98,14 +114,17 @@ void activealwayslink::on_ok_clicked()
     waiting();
     disableButtons();
     disableStyleButtons();
-    //cl->shareResource(pathFile, documentId, u);
+    #ifdef DISPATCHER_ON
+    cl.shareResource(pathFile, std::to_string(documentId), u);
+    #else
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-    this->hide();
+    //this->hide();
     enableButtons();
     successlinks link(parentWidget(), 1, QString::fromStdString(pathFile));
     link.exec();
     //---------------------------------------------------------------------------------------------------------------
+    #endif
 }
 
 void activealwayslink::disableButtons()

@@ -10,6 +10,7 @@
 #include "errorlogout.h"
 #include "successlinks.h"
 #include <QMovie>
+#include "symwininterface.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -19,22 +20,25 @@ namespace Ui {
 class activenonlink;
 }
 
-class activenonlink : public QDialog
+class activenonlink : public QDialog, public SymModalWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit activenonlink(QWidget *parent = nullptr, Symposium::uint_positive_cnt::type documentId=0, std::string pathFile="");
+    explicit activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si);
     /**
      * @brief called by clientdispatcher when there is some error to deactivate link
      * @param errorMess the messagge to show
      */
-    void unsuccessLink(std::string errorMess);
+
+    void success() override;
+    void failure(const QString& toPrint) override;
+
+    void unsuccessLink(const QString& errorMess);
     /**
      * @brief called by clientdispatcher when the deactivation of link was successfully done
-     * @param path the link to show to user
      */
-    void successLink(std::string path);
+    void successLink();
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
@@ -67,7 +71,7 @@ private:
     Ui::activenonlink *ui;
     Symposium::uri u;
     std::string pathFile;
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     Symposium::uint_positive_cnt::type documentId;
     /**
      * @brief disable all buttons present so user cannot perform any operation

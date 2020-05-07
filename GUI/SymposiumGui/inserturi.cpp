@@ -3,10 +3,12 @@
 #include "directory.h"
 #include "home.h"
 #include "Dispatcher/clientdispatcher.h"
+#include "onoff_networkinteraction.h"
 
-inserturi::inserturi(QWidget *parent, std::string pwd, Symposium::clientdispatcher *cl) :
+inserturi::inserturi(QWidget *parent, std::string pwd, SymWinInterface& si) :
     QDialog(parent),
-    ui(new Ui::inserturi), cl(cl), pwd(pwd)
+    SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
+    ui(new Ui::inserturi), pwd(pwd)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -28,6 +30,18 @@ inserturi::inserturi(QWidget *parent, std::string pwd, Symposium::clientdispatch
 inserturi::~inserturi()
 {
     delete ui;
+}
+
+void inserturi::success(){
+    successInsert();
+}
+
+void inserturi::failure(const QString &toPrint){
+    if(toPrint=="-1"){
+        errorConnectionLogout();
+    }else{
+        unsuccessInsert(toPrint);
+    }
 }
 
 void inserturi::on_dir_clicked()
@@ -114,16 +128,16 @@ void inserturi::on_owner_clicked()
     privilege=Symposium::privilege::owner;
 }
 
-void inserturi::setClientDispatcher(Symposium::clientdispatcher *cl){
+/*void inserturi::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
-}
+}*/
 
-void inserturi::unsuccessInsert(std::string errorMess)
+void inserturi::unsuccessInsert(const QString& errorMess)
 {
     hideLabelsError();
     enableStyleButtons();
     enableButtons();
-    ui->linkError->setText(QString::fromStdString(errorMess));
+    ui->linkError->setText(errorMess);
     ui->linkError->show();
 }
 
@@ -153,7 +167,9 @@ void inserturi::on_add_clicked()
                 waiting();
                 disableButtons();
                 disableStyleButtons();
-                //cl->openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
+                #ifdef DISPATCHER_ON
+                cl.openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
+                #endif
             }
         }
 
@@ -184,7 +200,12 @@ void inserturi::successInsert()
 
 void inserturi::on_cancel_clicked()
 {
-    this->close();
+    backToParent();
+}
+
+void inserturi::closeEvent(QCloseEvent *event){
+    if(closedByUser())
+        backToParent();
 }
 
 void inserturi::enableButtonsAfter()

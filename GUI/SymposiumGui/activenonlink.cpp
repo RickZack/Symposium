@@ -1,8 +1,11 @@
 #include "activenonlink.h"
 #include "ui_activenonlink.h"
+#include "Dispatcher/clientdispatcher.h"
+#include "onoff_networkinteraction.h"
 
-activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
+activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si) :
     QDialog(parent),
+    SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
     ui(new Ui::activenonlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
@@ -17,37 +20,51 @@ activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type
     movie->start();
 }
 
-void activenonlink::unsuccessLink(std::string errorMess)
+void activenonlink::success()
+{
+    successLink();
+}
+
+void activenonlink::failure(const QString &toPrint)
+{
+    if(toPrint=="-1"){
+        errorConnectionLogout();
+    }else{
+        unsuccessLink(toPrint);
+    }
+}
+
+void activenonlink::unsuccessLink(const QString& errorMess)
 {
     enableButtons();
     enableStyleButtons();
-    QString error=QString::fromStdString(errorMess);
-    ui->errorMess->setText(error);
+    ui->errorMess->setText(errorMess);
     ui->errorMess->show();
 
 }
 
-void activenonlink::successLink(std::string path)
+void activenonlink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    this->close();
-    successlinks link(parentWidget(), 3, QString::fromStdString(path));
+    //this->close();
+    successlinks link(parentWidget(), 3, QString::fromStdString(pathFile));
     link.exec();
 }
 
-void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
+/*void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
-}
+}*/
 
 void activenonlink::errorConnectionLogout()
 {
+    backToMainWin();
     enableButtons();
     errorlogout errorLog(nullptr);
-    close();
-    parentWidget()->close();
-    parentWidget()->parentWidget()->hide();
+    //close();
+    //parentWidget()->close();
+    //parentWidget()->parentWidget()->hide();
     errorLog.exec();
 }
 
@@ -67,7 +84,9 @@ void activenonlink::on_ok_clicked()
     disableButtons();
     disableStyleButtons();
     u.deactivate();
-    //cl->shareResource(pathFile, documentId, u);
+    #ifdef DISPATCHER_ON
+    cl.shareResource(pathFile, std::to_string(documentId), u);
+    #endif
 }
 
 void activenonlink::on_cancel_clicked()

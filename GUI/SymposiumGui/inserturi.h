@@ -8,6 +8,7 @@
 #include "errorlogout.h"
 #include "notification.h"
 #include "exit.h"
+#include "symwininterface.h"
 
 class home;
 class directory;
@@ -21,22 +22,27 @@ namespace Ui {
 class inserturi;
 }
 
-class inserturi : public QDialog
+class inserturi : public QDialog, public SymModalWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit inserturi(QWidget *parent = nullptr, std::string pwd="", Symposium::clientdispatcher *cl=nullptr);
+    explicit inserturi(QWidget *parent, std::string pwd, SymWinInterface& si);
+
+    void success() override;
+
+    void failure(const QString& toPrint) override;
+
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
      */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
+    //void setClientDispatcher(Symposium::clientdispatcher *cl);
     /**
      * @brief called by clientdispatcher when there is some error during the operation
      * @param errorMess the messagge to show
      */
-    void unsuccessInsert(std::string errorMess);
+    void unsuccessInsert(const QString& errorMess);
     /**
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user
@@ -93,7 +99,7 @@ private:
     Symposium::privilege privilege;
     std::string showDir;
     std::string pathId;
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     std::string pwd;
     class exit *ex;
     choosedir *dirWindow;
@@ -122,6 +128,11 @@ private:
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
     void waiting();
+
+    /**
+     * @brief return to directory
+     */
+    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // INSERTURI_H

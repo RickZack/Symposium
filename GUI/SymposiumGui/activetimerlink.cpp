@@ -1,8 +1,11 @@
 #include "activetimerlink.h"
 #include "ui_activetimerlink.h"
+#include "onoff_networkinteraction.h"
+#include "Dispatcher/clientdispatcher.h"
 
-activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile) :
+activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si) :
     QDialog(parent),
+    SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
     ui(new Ui::activetimerlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
@@ -23,38 +26,53 @@ activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::
     //----------------------------------------------------------------------------------------------------
 }
 
-void activetimerlink::unsuccessLink(std::string errorMess)
+void activetimerlink::success()
+{
+    successLink();
+}
+
+void activetimerlink::failure(const QString &toPrint)
+{
+    if(toPrint=="-1"){
+        errorConnectionLogout();
+    }else{
+        unsuccessLink(toPrint);
+    }
+}
+
+
+void activetimerlink::unsuccessLink(const QString& errorMess)
 {
     enableButtons();
     enableStyleButtons();
-    QString error=QString::fromStdString(errorMess);
-    ui->errorMess->setText(error);
+    ui->errorMess->setText(errorMess);
     ui->errorMess->show();
 
 }
 
-void activetimerlink::successLink(std::string path)
+void activetimerlink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    this->hide();
-    successlinks link(parentWidget(), 4, QString::fromStdString(path), "", QString::fromStdString(time));
+    //this->hide();
+    successlinks link(parentWidget(), 4, QString::fromStdString(pathFile), "", QString::fromStdString(time));
     link.exec();
 }
 
-void activetimerlink::setClientDispatcher(Symposium::clientdispatcher *cl)
+/*void activetimerlink::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
-}
+}*/
 
 void activetimerlink::errorConnectionLogout()
 {
+    backToMainWin();
     enableButtons();
     enableStyleButtons();
-    this->hide();
+    //this->hide();
     errorlogout errorLog(nullptr);
-    parentWidget()->hide();
-    parentWidget()->parentWidget()->hide();
+    //parentWidget()->hide();
+    //parentWidget()->parentWidget()->hide();
     errorLog.show();
 }
 
@@ -78,13 +96,14 @@ void activetimerlink::on_ok_clicked()
     waiting();
     disableButtons();
     disableStyleButtons();
-    //cl->shareResource(pathFile, documentId, u);
+    #ifdef DISPATCHER_ON
+    cl.shareResource(pathFile, std::to_string(documentId), u);
+    #else
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-    successLink(pathFile);
+    successLink();
     //----------------------------------------------------------------------------------------------------
-
-
+    #endif
 
 }
 
