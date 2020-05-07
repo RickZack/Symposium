@@ -35,6 +35,7 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
 
     hideAll();
     setAttribute( Qt::WA_DeleteOnClose );
+    ui->pathPlainEdit->setLineWrapMode(QPlainTextEdit::LineWrapMode::NoWrap);
 }
 
 std::string directory::manipulationHome(std::string& s){
@@ -706,13 +707,13 @@ void directory::on_back_button_clicked()
     if(this->openFolders!=0){
 
         if(this->openFolders == 1){
-            ui->pathLabel->setText(QString::fromStdString("Path:"));
+            ui->pathPlainEdit->setPlainText(QString::fromStdString("Path:home/"));
         }else{
-            std::string pathLabel=ui->pathLabel->text().toStdString();
+            std::string pathLabel=ui->pathPlainEdit->toPlainText().toStdString();
             pathLabel.erase(pathLabel.end()-1);
             found=pathLabel.find_last_of("/");
             pathLabel.erase(found+1,pathLabel.size());
-            ui->pathLabel->setText(QString::fromStdString(pathLabel));
+            ui->pathPlainEdit->setPlainText(QString::fromStdString(pathLabel));
         }
         #ifdef DISPATCHER_ON
         //aggiorniamo il path
@@ -750,9 +751,9 @@ void directory::on_back_button_clicked()
         listGenerate(str,count);
         #endif
     }else{
-        std::string pathLabel=ui->pathLabel->text().toStdString();
+        std::string pathLabel=ui->pathPlainEdit->toPlainText().toStdString();
         pathLabel.erase(5,pathLabel.size());
-        ui->pathLabel->setText(QString::fromStdString(pathLabel));
+        ui->pathPlainEdit->setPlainText(QString::fromStdString(pathLabel));
         ui->back_button->setDisabled(true);
         ui->back_button->hide();
     }
@@ -847,7 +848,7 @@ void directory::openSelectedSource(){
              #else
              std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
              #endif
-             ui->pathLabel->setText(ui->pathLabel->text()+QString::fromStdString(nameSource)+'/');
+             ui->pathPlainEdit->setPlainText(ui->pathPlainEdit->toPlainText()+QString::fromStdString(nameSource)+'/');
              this->openWindow(str);
 
          }else if(value=="file")

@@ -14,7 +14,35 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color:rgb(249, 247, 241);</string>
+   <string notr="true">QMainWindow{
+background-color:rgb(249, 247, 241);
+}
+QScrollBar:horizontal {
+border-color:rgb(58, 80, 116);
+border-width: 1px;
+border-style: solid;
+background-color: rgb(240, 240, 240);
+height:10px;
+margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:horizontal {
+background-color: rgb(58, 80, 116);
+min-width: 25px;
+}
+QScrollBar::add-line:horizontal {
+border: 1px solid rgb(58, 80, 116);
+background-color: rgb(241, 241, 241);
+height: 0px;
+subcontrol-position: left;
+subcontrol-origin: margin;
+}
+QScrollBar::sub-line:horizontal {
+border: 1px solid rgb(58, 80, 116);
+background-color: rgb(241, 241, 241);
+height: 0px;
+subcontrol-position: right;
+subcontrol-origin: margin;
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="minimumSize">
@@ -27,8 +55,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>110</y>
-      <width>691</width>
+      <y>90</y>
+      <width>694</width>
       <height>581</height>
      </rect>
     </property>
@@ -210,7 +238,7 @@ color: rgb(58, 80, 116); </string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
+      <y>50</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -350,32 +378,6 @@ border-radius:15px;</string>
     </property>
     <property name="text">
      <string>Cancel</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="pathLabel">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>600</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Baskerville Old Face</family>
-      <pointsize>12</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgb(58, 80, 116); 
-font: 12pt &quot;Baskerville Old Face&quot;;</string>
-    </property>
-    <property name="text">
-     <string>Path:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_7">
@@ -571,9 +573,9 @@ border-radius:15px;</string>
    <widget class="QLabel" name="errorMess">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>70</y>
-      <width>501</width>
+      <x>107</x>
+      <y>50</y>
+      <width>500</width>
       <height>31</height>
      </rect>
     </property>
@@ -587,6 +589,37 @@ text-align:center;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="pathPlainEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>694</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPlainTextEdit{
+border: 1px solid;
+background-color:white;
+border-color: rgb(58, 80, 116);
+color: rgb(58, 80, 116);
+font: 10pt &quot;Baskerville Old Face&quot;;
+}</string>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAsNeeded</enum>
+    </property>
+    <property name="plainText">
+     <string>Path:home/</string>
+    </property>
+    <property name="textInteractionFlags">
+     <set>Qt::NoTextInteraction</set>
     </property>
    </widget>
   </widget>
