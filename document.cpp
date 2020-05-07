@@ -537,7 +537,7 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 
 
     // check if struct is empty or char is less than first char
-    if (totalLines==0||symbol.getCh()<symbols[0][0].getCh()) {ind={i0,i1};return ind;}
+    if (totalLines==0||symbol.getCh()<symbols[0][0].getCh() & symbol.getCh()!='\r') {ind={i0,i1};return ind;}
 
     int numCharsInLine=countCharsInLine(maxLine);
     auto lastSymbol=lastLine[numCharsInLine-1];
@@ -589,12 +589,8 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 std::pair<unsigned int, unsigned int>
 document::findEndPosition(const symbol aChar,int lines) const {
     std::pair<int,int> ind;
-    if(aChar.getCh()== '\r'){
-        ind={lines,0}; return ind;
-    } else{
-        int numCharsinLine=countCharsInLine(lines-1);
-        ind={lines-1,numCharsinLine-1};
-    }
+    int numCharsinLine=countCharsInLine(lines-1);
+    ind={lines-1,numCharsinLine};
     return ind;
 }
 

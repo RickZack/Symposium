@@ -119,7 +119,15 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         a3.setCharFormat(f);
         a4.setCharFormat(f);
 
+        // Ciao -> inserito con la remoteInsert
 
+        documentoProva.remoteInsert(2,s1);
+        documentoProva.remoteInsert(2,s2);
+        documentoProva.remoteInsert(2,s3);
+        documentoProva.remoteInsert(2,s4);
+        documentoProva.remoteInsert(2,acapo);
+
+/*
         // Ciao
         documentoProva.localInsert(i1,s1);
         documentoProva.localInsert(i2,s2);
@@ -132,8 +140,9 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         documentoProva.localInsert(i2,a2);
         documentoProva.localInsert(i3,a3);
         documentoProva.localInsert(i4,a4);
+        */
 
-        // Come stai
+        // Come stai -> inserito con la localInsert
         documentoProva.localInsert(i5,s5);
         documentoProva.localInsert(i6,s6);
         documentoProva.localInsert(i7,s7);
