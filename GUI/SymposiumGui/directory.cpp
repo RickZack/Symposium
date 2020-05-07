@@ -84,7 +84,7 @@ directory::~directory()
 }
 
 void directory::success(){
-    w->close();
+    //w->close();
     enableStyleButtons();
     hideAll();
     switch (lastChoice) {
@@ -317,7 +317,7 @@ void directory::deleteSource()
        }
        #ifdef DISPATCHER_ON
        cl.removeResource(path,id);
-       waiting();
+       //waiting();
        #endif
 
        //-------------------------------------------------------------------
@@ -388,7 +388,7 @@ void directory::on_pushButton_3_clicked()
     std::string nameFolder=name.toStdString();
     #ifdef DISPATCHER_ON
     cl.createNewDir(path,nameFolder);
-    waiting();
+    //waiting();
     #else
     // anche questo da eliminare
     ui->name->setText(" ");
@@ -638,7 +638,7 @@ void directory::on_pushButton_4_clicked()
     //ui->name_2->setText(" "); // da rimuovere
     #ifdef DISPATCHER_ON
     cl.createNewSource(this->path,nameDocument);
-    waiting();
+    //waiting();
     #else
     // DA RIMUOVERE
     //w->close();
@@ -768,7 +768,7 @@ void directory::on_okButton_clicked()
          std::string id=searchForId(oldName,str,count);
          #ifdef DISPATCHER_ON
          cl.renameResource(this->path,id, newName.toStdString());
-         waiting();
+         //waiting();
          #else
          enableStyleButtons();
          //w->close();
@@ -915,7 +915,7 @@ void directory::on_OkPriv_clicked()
     //waiting();
     #ifdef DISPATCHER_ON
     cl.openSource(this->path,this->id,this->priv);
-    waiting();
+    //waiting();
     #else
     hideAll();
     enableStyleButtons();
