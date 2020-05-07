@@ -165,7 +165,7 @@ private:
      * @brief contV_action to handle with the CONTROL-C CONTROL-V actions
      * @param pos
      */
-    void contV_action(int pos);
+    void contV_action();
 
     void addCursor();
     void removeCursor();

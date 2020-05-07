@@ -299,7 +299,10 @@ void notepad::on_actionCut_triggered()
 void notepad::on_actionPaste_triggered()
 {
     ui->textEdit->paste();
-    //this->contV_action(this->pos);
+    this->okPaste=true;
+    const QMimeData *md = QApplication::clipboard()->mimeData();
+    this->dim=md->text().length();
+    this->contV_action();
 }
 
 void notepad::addStyleFormat()
@@ -616,6 +619,8 @@ void notepad::visualizeAllUsers()
     users.insert(p1);
     users.insert(p2);
     users.insert(p3);
+    users.insert(p4);
+    users.insert(p5);
     Symposium::user thisUs=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     //---------------------------------------------------------------------------------------------------
     //std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
@@ -881,7 +886,7 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     this->colPos=colC;
 }
 
-void notepad::contV_action(int p){
+void notepad::contV_action(){
     QTextCursor curs=ui->textEdit->textCursor();
     int posAct= curs.position();
     qDebug()<<"PosAct"<<posAct;
@@ -1379,7 +1384,7 @@ void notepad::on_textEdit_textChanged()
         qDebug()<<"testo"<<ui->textEdit->toPlainText();
         QTextCursor c=ui->textEdit->textCursor();
         qDebug()<<"Posizione ultima"<<c.position();
-        this->contV_action(this->dim);
+        this->contV_action();
 
     }
 }

@@ -35,7 +35,7 @@
 #include <cmath>
 #include <fstream>
 #include <boost/archive/text_iarchive.hpp>
-#include "QDebug"
+//#include "QDebug"
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
@@ -120,8 +120,8 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
 
     int i0=indexes.first;
     int i1=indexes.second;
-    qDebug()<<"I0"<<i0;
-    qDebug()<<"i1"<<i1;
+   // qDebug()<<"I0"<<i0;
+    //qDebug()<<"i1"<<i1;
     checkIndex(i0,i1);
     this->updateCursorPos(toInsert.getSiteId(),i0,i1);
     symbol newSymb= generatePosition(indexes,toInsert);
@@ -140,7 +140,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         }
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
-    qDebug()<<"Simboli"<<toText();
+    //()<<"Simboli"<<toText();
 
     return newSymb;
 
@@ -271,28 +271,28 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
     }
 
     if(id2-id1>1){
-        qDebug()<<"Id2-id1>1"<<id2<<id1;
+       //qDebug()<<"Id2-id1>1"<<id2<<id1;
         unsigned newDigit= generateIdBetween(id1,id2,boundaryStrategy);
-        qDebug()<<"NewDigit"<<newDigit;
+        //qDebug()<<"NewDigit"<<newDigit;
         newPos.push_back(newDigit);
         return newPos;
     }else if(id2-id1==1){
-        qDebug()<<"Id2-id1==1"<<id2<<id1;
+       // qDebug()<<"Id2-id1==1"<<id2<<id1;
         newPos.push_back(id1);
         // pos1.slice(1) will remove from the posBefore the first element
         std::vector<int> pos1=posBefore;
-        qDebug()<<"PosB"<<posBefore;
+        //qDebug()<<"PosB"<<posBefore;
         if(!pos1.empty()){
             pos1.erase(pos1.begin());
         }
-        qDebug()<<"Pos1"<<pos1;
+        //qDebug()<<"Pos1"<<pos1;
         std::vector<int> pos2;
         return generatePosBetween(pos1, pos2, newPos, level+1 , /*siteIdB, siteIdA*/ b,a);
 
     }else if(id1==id2){
         //if(b.getSiteId()<a.getSiteId()){
         if(b.getSiteId()<a.getSiteId()){
-            qDebug()<<"Id2-id1==1"<<id2<<id1<<"SiteIdB<SiteIdA"<<b.getSiteId()<<a.getSiteId();
+            //qDebug()<<"Id2-id1==1"<<id2<<id1<<"SiteIdB<SiteIdA"<<b.getSiteId()<<a.getSiteId();
             newPos.push_back(id1);
             //pos1.slice(1)
             std::vector<int> pos1=posBefore;
@@ -300,12 +300,12 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
                  pos1.erase(pos1.begin());
             }
             std::vector<int> pos2;
-             qDebug()<<"Pos1"<<pos1;
-              qDebug()<<"Pos2"<<pos2;
+             //qDebug()<<"Pos1"<<pos1;
+              //qDebug()<<"Pos2"<<pos2;
             return generatePosBetween(pos1, pos2, newPos, level + 1, /*siteIdB, siteIdA*/ b,a);
 
         }else //if(b.getSiteId()==a.getSiteId()){
-            qDebug()<<"Id2-id1==1"<<id2<<id1<<"SiteIdB==SiteIdA"<<b.getSiteId()<<a.getSiteId();
+            //qDebug()<<"Id2-id1==1"<<id2<<id1<<"SiteIdB==SiteIdA"<<b.getSiteId()<<a.getSiteId();
             newPos.push_back(id1);
             //pos1.slice(1)
             std::vector<int> pos1=posBefore;
@@ -317,8 +317,8 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
             if(!pos2.empty()){
                 pos2.erase(pos2.begin());
             }
-            qDebug()<<"Pos1"<<pos1;
-            qDebug()<<"Pos2"<<pos2;
+            //qDebug()<<"Pos1"<<pos1;
+            //qDebug()<<"Pos2"<<pos2;
             return generatePosBetween(pos1, pos2, newPos, level + 1, /*siteIdB, siteIdA*/b,a);
         }
         /*else{
@@ -366,7 +366,7 @@ int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) co
         }
     }
 
-    qDebug()<<"Id1"<<id1<<"Id2"<<id2<<"New one"<<floor(rand()%(id2-id1))+id1;
+    //qDebug()<<"Id1"<<id1<<"Id2"<<id2<<"New one"<<floor(rand()%(id2-id1))+id1;
     return floor(rand()%(id2-id1))+id1;
 
 
