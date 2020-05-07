@@ -20,18 +20,16 @@ namespace Ui {
 class deleteAccount;
 }
 
-class deleteAccount : public QDialog
+class deleteAccount : public QDialog, public SymModalWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit deleteAccount(QWidget *parent);
+    explicit deleteAccount(QWidget *parent, SymWinInterface& si);
 
-    /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
+    void success() override;
+    void failure(const QString& toPrint) override;
+
     /**
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user
@@ -56,9 +54,14 @@ private slots:
 
     void on_cancel_clicked();
 
+    /**
+     * @brief quit from application
+     */
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::deleteAccount *ui;
-    Symposium::clientdispatcher *cl;
+    //Symposium::clientdispatcher *cl;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

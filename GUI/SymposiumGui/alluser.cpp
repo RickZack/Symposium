@@ -19,23 +19,9 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uin
     ui->tree->headerItem()->setText(0, "user:");
     ui->tree->headerItem()->setText(1, "privilege:");
     ui->tree->setColumnWidth(0, 300);
+    ui->notification->hide();
+    ui->errorMess->hide();
     privelege=Symposium::privilege::owner;
-    if(privelege!=Symposium::privilege::owner)
-    {
-        ui->button->setDisabled(true);
-        ui->owner->hide();
-        ui->owner->setDisabled(true);
-        ui->reader->hide();
-        ui->reader->setDisabled(true);
-        ui->modify->hide();
-        ui->modify->setDisabled(true);
-        ui->none->hide();
-        ui->none->setDisabled(true);
-        ui->button->hide();
-        ui->label->hide();
-    }
-    if(privelege==Symposium::privilege::owner)
-        ui->modify->click();
     ui->waiting->hide();
     ui->gif->hide();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
@@ -53,10 +39,10 @@ void alluser::successEditPrivilege()
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
-    QMessageBox::information(parentWidget(),
-                             tr("Modify Privilege"), tr("The privilege was successfully modify!"), QMessageBox::Ok);
-
+    ui->notification->show();
+    enableButtons();
     //onlineUsers=cl->allUser(documentID);
+    //users=cl->allUser(documentID);
     ui->tree->clear();
     insertusers();
 
@@ -68,9 +54,10 @@ void alluser::errorEditPrivilege(std::string errorMess)
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
+    enableButtons();
     QString error=QString::fromStdString(errorMess);
-    QMessageBox::information(parentWidget(),
-                             tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
+    ui->errorMess->show();
+    ui->errorMess->setText(error);
 }
 
 void alluser::errorConnectionLogout()
@@ -97,14 +84,20 @@ void alluser::insertusers()
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
         item->setIcon(0, QIcon(QString::fromStdString(it.first->getIconPath())));
-        qDebug()<<QString::fromStdString(us.getUsername());
         if(us.getUsername()==it.first->getUsername())
             item->setText(0, "(you)");
         else
             item->setText(0, QString::fromStdString(it.first->getUsername()));
-        std::ostringstream priv;
-        priv<<it.second.p;
-        item->setText(1, QString::fromStdString(priv.str()));
+
+        for(auto it2:users)
+        {
+            if(it.first->getUsername()==it2.first)
+            {
+                std::ostringstream priv;
+                priv<<it2.second;
+                item->setText(1, QString::fromStdString(priv.str()));
+            }
+        }
         ui->tree->addTopLevelItem(item);
     }
 
@@ -115,6 +108,7 @@ void alluser::insertusers()
         {
             if(it.first==it2.first->getUsername())
                 online=true;
+
         }
         if(!online)
         {
@@ -130,6 +124,22 @@ void alluser::insertusers()
             }
         }
     }
+}
+
+void alluser::disableButtons()
+{
+    ui->button->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->button_2->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->button->setDisabled(true);
+    ui->button_2->setDisabled(true);
+}
+
+void alluser::enableButtons()
+{
+    ui->button->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->button_2->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    ui->button->setDisabled(false);
+    ui->button_2->setDisabled(false);
 }
 
 void alluser::on_tree_itemClicked(QTreeWidgetItem *item, int column)
@@ -160,7 +170,10 @@ void alluser::on_button_clicked()
         }
        ui->waiting->show();
        ui->gif->show();
-       ui->button->setDisabled(true);
+       ui->notification->hide();
+       ui->errorMess->hide();
+       disableButtons();
+       //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
     }
 }
 

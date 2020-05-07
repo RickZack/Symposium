@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1137</width>
-    <height>942</height>
+    <width>714</width>
+    <height>806</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,8 +27,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>170</y>
-      <width>361</width>
+      <y>130</y>
+      <width>691</width>
       <height>561</height>
      </rect>
     </property>
@@ -42,8 +42,8 @@ border-color: rgb(58, 80, 116);</string>
    <widget class="QLineEdit" name="name">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>240</y>
+      <x>541</x>
+      <y>220</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -61,8 +61,8 @@ border-color: rgb(58, 80, 116); </string>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>190</y>
+      <x>360</x>
+      <y>180</y>
       <width>181</width>
       <height>21</height>
      </rect>
@@ -78,9 +78,9 @@ color: rgb(58, 80, 116); </string>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>440</x>
-      <y>240</y>
-      <width>221</width>
+      <x>300</x>
+      <y>220</y>
+      <width>241</width>
       <height>31</height>
      </rect>
     </property>
@@ -95,8 +95,8 @@ color: rgb(58, 80, 116); </string>
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>870</x>
-      <y>250</y>
+      <x>300</x>
+      <y>380</y>
       <width>105</width>
       <height>35</height>
      </rect>
@@ -120,8 +120,8 @@ border-radius:15px;</string>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>170</y>
+      <x>300</x>
+      <y>160</y>
       <width>51</width>
       <height>51</height>
      </rect>
@@ -139,7 +139,7 @@ border-radius:15px;</string>
    <widget class="QPushButton" name="pushButton_4">
     <property name="geometry">
      <rect>
-      <x>870</x>
+      <x>300</x>
       <y>380</y>
       <width>105</width>
       <height>35</height>
@@ -164,8 +164,8 @@ border-radius:15px;</string>
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>570</x>
-      <y>320</y>
+      <x>300</x>
+      <y>160</y>
       <width>51</width>
       <height>51</height>
      </rect>
@@ -183,10 +183,10 @@ border-radius:15px;</string>
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>340</y>
+      <x>360</x>
+      <y>180</y>
       <width>211</width>
-      <height>31</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="font">
@@ -210,7 +210,7 @@ color: rgb(58, 80, 116); </string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>120</y>
+      <y>80</y>
       <width>31</width>
       <height>31</height>
      </rect>
@@ -222,10 +222,10 @@ color: rgb(58, 80, 116); </string>
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>450</x>
-      <y>380</y>
+      <x>300</x>
+      <y>220</y>
       <width>241</width>
-      <height>21</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -239,8 +239,8 @@ color: rgb(58, 80, 116); </string>
    <widget class="QLineEdit" name="name_2">
     <property name="geometry">
      <rect>
-      <x>710</x>
-      <y>380</y>
+      <x>541</x>
+      <y>220</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -258,8 +258,8 @@ border-color: rgb(58, 80, 116); </string>
    <widget class="QLineEdit" name="renameLabel">
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>500</y>
+      <x>451</x>
+      <y>220</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -277,10 +277,10 @@ border-color: rgb(58, 80, 116); </string>
    <widget class="QLabel" name="renameName">
     <property name="geometry">
      <rect>
-      <x>460</x>
-      <y>510</y>
+      <x>300</x>
+      <y>220</y>
       <width>151</width>
-      <height>20</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -294,8 +294,8 @@ color: rgb(58, 80, 116); </string>
    <widget class="QPushButton" name="okButton">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>560</y>
+      <x>300</x>
+      <y>380</y>
       <width>105</width>
       <height>35</height>
      </rect>
@@ -319,8 +319,8 @@ border-radius:15px;</string>
    <widget class="QPushButton" name="okButton_2">
     <property name="geometry">
      <rect>
-      <x>700</x>
-      <y>560</y>
+      <x>530</x>
+      <y>380</y>
       <width>105</width>
       <height>35</height>
      </rect>
@@ -345,8 +345,8 @@ border-radius:15px;</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>60</y>
-      <width>971</width>
+      <y>20</y>
+      <width>600</width>
       <height>31</height>
      </rect>
     </property>
@@ -363,8 +363,8 @@ border-radius:15px;</string>
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>420</y>
+      <x>300</x>
+      <y>280</y>
       <width>381</width>
       <height>21</height>
      </rect>
@@ -380,8 +380,8 @@ color: rgb(58, 80, 116); </string>
    <widget class="QLabel" name="label_8">
     <property name="geometry">
      <rect>
-      <x>450</x>
-      <y>290</y>
+      <x>300</x>
+      <y>280</y>
       <width>421</width>
       <height>21</height>
      </rect>
@@ -397,11 +397,15 @@ color: rgb(58, 80, 116); </string>
    <widget class="QRadioButton" name="ownerButton">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>650</y>
+      <x>300</x>
+      <y>280</y>
       <width>97</width>
-      <height>16</height>
+      <height>20</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
      <string>Owner</string>
@@ -410,11 +414,15 @@ color: rgb(58, 80, 116); </string>
    <widget class="QRadioButton" name="readerButton">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>670</y>
+      <x>300</x>
+      <y>305</y>
       <width>97</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
      <string>Reader</string>
@@ -423,11 +431,15 @@ color: rgb(58, 80, 116); </string>
    <widget class="QRadioButton" name="writerButton">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>690</y>
+      <x>300</x>
+      <y>330</y>
       <width>97</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
      <string>Writer</string>
@@ -436,25 +448,25 @@ color: rgb(58, 80, 116); </string>
    <widget class="QLabel" name="privilegeLine">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>620</y>
-      <width>611</width>
-      <height>21</height>
+      <x>300</x>
+      <y>190</y>
+      <width>381</width>
+      <height>81</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the privilege you want for opening the selected document&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the privilege you want &lt;/p&gt;&lt;p&gt;for opening the selected document&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QPushButton" name="OkPriv">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>730</y>
+      <x>300</x>
+      <y>380</y>
       <width>105</width>
       <height>35</height>
      </rect>
@@ -472,8 +484,8 @@ border-radius:15px;</string>
    <widget class="QPushButton" name="cancPriv">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>730</y>
+      <x>530</x>
+      <y>380</y>
       <width>105</width>
       <height>35</height>
      </rect>
@@ -491,8 +503,8 @@ border-radius:15px;</string>
    <widget class="QPushButton" name="okButton_3">
     <property name="geometry">
      <rect>
-      <x>1020</x>
-      <y>250</y>
+      <x>530</x>
+      <y>380</y>
       <width>105</width>
       <height>35</height>
      </rect>
@@ -516,7 +528,7 @@ border-radius:15px;</string>
    <widget class="QPushButton" name="okButton_4">
     <property name="geometry">
      <rect>
-      <x>1010</x>
+      <x>530</x>
       <y>380</y>
       <width>105</width>
       <height>35</height>
@@ -544,7 +556,7 @@ border-radius:15px;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1137</width>
+     <width>714</width>
      <height>26</height>
     </rect>
    </property>

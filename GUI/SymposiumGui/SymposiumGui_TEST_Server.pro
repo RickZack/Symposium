@@ -30,6 +30,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++17
 
 SOURCES += \
+        waiting.cpp \
         about.cpp \
         activealwayslink.cpp \
         activecounterlink.cpp \
@@ -79,6 +80,8 @@ SOURCES += \
         winmanager.cpp
 
 HEADERS += \
+        onoff_networkinteraction.h \
+        waiting.h \
         about.h \
         activealwayslink.h \
         activecounterlink.h \
@@ -130,6 +133,7 @@ HEADERS += \
         winmanager.h
 
 FORMS += \
+        waiting.ui \
         about.ui \
         activealwayslink.ui \
         activecounterlink.ui \

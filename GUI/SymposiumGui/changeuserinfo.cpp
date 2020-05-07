@@ -1,10 +1,9 @@
-//#define DISPATCHER_ON
-
 #include "changeuserinfo.h"
 #include "ui_changeuserinfo.h"
 #include "Dispatcher/clientdispatcher.h"
 #include "home.h"
 #include <QMovie>
+#include "onoff_networkinteraction.h"
 
 changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, SymWinInterface& si) :
     QDialog(parent),

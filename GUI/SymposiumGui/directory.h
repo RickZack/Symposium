@@ -16,6 +16,7 @@
 #include "errorlogout.h"
 #include "notepad.h"
 #include "symwininterface.h"
+#include "waiting.h"
 
 namespace Ui {
 class directory;
@@ -166,13 +167,12 @@ private:
     Ui::directory *ui;
     inserturi *uriWindow;
     QListWidgetItem *item1;
-    //choosepriv *chooseprivWindow;
-    //Symposium::clientdispatcher *cl;
     errorconnection *errorWindow;
     errorlogout *errorLogoutWindow;
     notepad *notepadWindow;
     action lastChoice;
     class exit* ex;
+    waiting *w;
     bool esc=true;
 
     /**

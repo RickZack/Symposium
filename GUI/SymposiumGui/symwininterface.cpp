@@ -99,6 +99,11 @@ SymMainWinInterface::SymMainWinInterface(SymWinManager &m, Symposium::clientdisp
     s_parent=nullptr;
 }
 
+SymChildWinInterface::SymChildWinInterface(SymWinInterface &parentScreen) :SymWinInterface(parentScreen.handler, parentScreen.cl)
+{
+    s_parent=&parentScreen;
+}
+
 SymChildWinInterface::SymChildWinInterface(SymWinInterface &parentScreen, isQWidget::QWidgetType) :SymWinInterface(parentScreen.handler, parentScreen.cl)
 {
     s_parent=&parentScreen;
@@ -148,7 +153,7 @@ void SymNotepadWinInterface::forceClose()
     this->operator QWidget *()->close();
 }
 
-SymModalWinInterface::SymModalWinInterface(SymWinInterface &parentScreen, isQDialog::QDialogType) :SymWinInterface(parentScreen.handler, parentScreen.cl)
+SymModalWinInterface::SymModalWinInterface(SymWinInterface &parentScreen, isQDialog::QDialogType) :SymChildWinInterface(parentScreen)
 {
     s_parent=&parentScreen;
 }

@@ -1,9 +1,8 @@
-//#define DISPATCHER_ON
-
 #include "signup.h"
 #include "ui_signup.h"
 #include "Dispatcher/clientdispatcher.h"
 #include "mainwindow.h"
+#include "onoff_networkinteraction.h"
 
 signup::signup(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),
@@ -74,9 +73,6 @@ void signup::successSignUp()
     pressed=false;
     home* homeWindow= new home(nullptr, pwd, *this);
     goToWindow(*homeWindow);
-    #ifdef DISPATCHER_ON
-    //cl->setHome(homeWindow);
-    #endif
     homeWindow->disableStyleButtons();
     notification notWindow(nullptr, "Your account has been successfully created");
     int ret=notWindow.exec();

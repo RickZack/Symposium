@@ -1,9 +1,8 @@
-//#define DISPATCHER_ON
-
 #include "sigin.h"
 #include "ui_sigin.h"
 #include "mainwindow.h"
 #include "Dispatcher/clientdispatcher.h"
+#include "onoff_networkinteraction.h"
 
 sigin::sigin(QWidget *parent, SymWinInterface& si) :
     QDialog(parent),
@@ -71,9 +70,6 @@ void sigin::successSignIn()
     pressed=false;
     home* homeWindow = new home(nullptr, pwd, *this);
     goToWindow(*homeWindow);
-    #ifdef DISPATCHER_ON
-    //cl->setHome(homeWindow);
-    #endif
 }
 
 
