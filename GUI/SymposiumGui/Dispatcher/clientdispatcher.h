@@ -262,7 +262,7 @@ namespace Symposium{
          * @brief this method assign to @ref finestraLogin the pointer to the sigin window
          * @param a pointer to the sigin window
          */
-        void setSignIn(sigin* si);
+        //void setSignIn(sigin* si);
 
         /**
          * @brief this method insert into @ref finestreDocumenti the pair composed of the respurceID of the document and the pointer to the notepad window
@@ -275,69 +275,69 @@ namespace Symposium{
          * @brief this method assign to @ref finestraSignup the pointer to the signup window
          * @param a pointer to the signup window
          */
-        void setSignUp(signup *su);
+        //void setSignUp(signup *su);
 
         /**
          * @brief this method assign to @ref finestraInsertUri the pointer to the InsertUri window
          * @param a pointer to the InsertUri window
          */
-        void setInsertUri(inserturi *iu);
+        //void setInsertUri(inserturi *iu);
 
         /**
          * @brief this method assign to @ref finestraHome the pointer to the Home window
          * @param a pointer to the Home window
          */
-        void setHome(home *ho);
+        //void setHome(home *ho);
 
         /**
          * @brief this method assign to @ref finestraSceltaDir the pointer to the directory window
          * @param a pointer to the directory window
          */
-        void setDirectory(::directory *dr);
+        //void setDirectory(::directory *dr);
 
         /**
          * @brief this method assign to @ref finestraEliminaAccount the pointer to the delete account window
          * @param a pointer to the deleteaccount window
          */
-        void setDeleteAccount(deleteAccount *da);
+        //void setDeleteAccount(deleteAccount *da);
 
         /**
          * @brief this method assign to @ref finestraSceltaDir the pointer to the choose dir window
          * @param a pointer to the choosedir window
          */
-        void setChooseDir(choosedir *cd);
+        //void setChooseDir(choosedir *cd);
 
         /**
          * @brief this method assign to @ref finestraModificaUser the pointer to the change user info window
          * @param a pointer to the changeUserInfo window
          */
-        void setChangeUserInfo(changeUserInfo *cui);
+        //void setChangeUserInfo(changeUserInfo *cui);
 
         /**
          * @brief this method assign to @ref finestraActiveCounterLink the pointer to the active counter link window
          * @param a pointer to the activecounterlink window
          */
-        void setActiveCounterLink(activecounterlink *acl);
+        //void setActiveCounterLink(activecounterlink *acl);
 
         /**
          * @brief this method assign to @ref finestraActiveTimerLink the pointer to the active timer link window
          * @param a pointer to the activetimerlink window
          */
-        void setActiveTimerLink(activetimerlink *atl);
+        //void setActiveTimerLink(activetimerlink *atl);
 
         /**
          * @brief this method assign to @ref finestraActiveAlwaysLink the pointer to the active always link window
          * @param a pointer to the activealwayslink window
          */
-        void setActiveAlwaysLink(activealwayslink *aal);
+        //void setActiveAlwaysLink(activealwayslink *aal);
 
         void setOnlineUser(onlineusers *ou);
 
         void setAllUser(alluser *au);
 
-        void setActiveNonLink(activenonlink *anl);
+        //void setActiveNonLink(activenonlink *anl);
 
-        void setchoosepriv(choosepriv *pr);
+        //void setchoosepriv(choosepriv *pr);
 
         void stopTimer();
 

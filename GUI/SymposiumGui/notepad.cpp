@@ -46,8 +46,9 @@ const QString rsrcPath = ":/resources/images/win";
 
 #include "Dispatcher/clientdispatcher.h"
 
-notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,Symposium::document doc) :
+notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,Symposium::document doc, SymWinInterface& si, bool parentIsTransient) :
     QMainWindow(parent),
+    SymNotepadWinInterface (si, isQWidget::isQwidgetType(*this), parentIsTransient),
     documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)
 {
     ui->setupUi(this);
@@ -241,6 +242,34 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         ui->sizeBox->hide();
         ui->styleBox->hide();
     }
+    setFocusPolicy(Qt::StrongFocus);
+    setAttribute( Qt::WA_DeleteOnClose );
+}
+
+Symposium::uint_positive_cnt::type notepad::getId()
+{
+    return 1;
+}
+
+void notepad::successfullInsert(const Symposium::symbol &sym)
+{
+    //sym.dummyMethod(); //unuseful, just to suppress warning
+    QString mex("id of the current notepad is: ");
+    mex.append(this->getId());
+
+    //testCall(mex);
+}
+
+void notepad::failedInsert(const Symposium::symbol &sym)
+{
+    //sym.dummyMethod(); //unuseful, just to suppress warning
+    //testCall("");
+}
+
+void notepad::failedRemove(const Symposium::symbol &sym)
+{
+    //sym.dummyMethod(); //unuseful, just to suppress warning
+    //testCall("");
 }
 
 notepad::~notepad()
@@ -608,7 +637,7 @@ void notepad::fillTextEdit(){
 void notepad::visualizeUsers()
 {
     onlineuser = new onlineusers(this, priv, documentId, us, pathToFile);
-    onlineuser->setClientDispatcher(cl);
+    //onlineuser->setClientDispatcher(cl);
     //onlineuser->onlineUsers=cl->onlineUser(documentID);
     //cl->setOnlineUser(onlineuser);
     onlineuser->exec();
@@ -642,7 +671,8 @@ void notepad::visualizeAllUsers()
 
 void notepad::inactiveLink()
 {
-    //nonlinkwindow = new activenonlink(this, documentId, pathToFile);
+    activenonlink* nonlinkwindow = new activenonlink(this, documentId, pathToFile, *this);
+    goToWindow(*nonlinkwindow);
     //nonlinkwindow->setClientDispatcher(cl);
     //cl->setActiveNonLink(nonlinkwindow);
     //nonlinkwindow->exec();
@@ -651,7 +681,8 @@ void notepad::inactiveLink()
 
 void notepad::activeAlwaysLink()
 {
-    //alwayslinkwindow = new activealwayslink(this, documentId, pathToFile);
+    activealwayslink* alwayslinkwindow = new activealwayslink(this, documentId, pathToFile, *this);
+    goToWindow(*alwayslinkwindow);
     //alwayslinkwindow->setClientDispatcher(cl);
     //cl->setActiveAlwaysLink(alwayslinkwindow);
     //alwayslinkwindow->exec();
@@ -660,7 +691,8 @@ void notepad::activeAlwaysLink()
 
 void notepad::timerLink()
 {
-    //timerlinkwindow = new activetimerlink(this, documentId, pathToFile);
+    activetimerlink* timerlinkwindow = new activetimerlink(this, documentId, pathToFile, *this);
+    goToWindow(*timerlinkwindow);
     //timerlinkwindow->setClientDispatcher(cl);
     //cl->setActiveTimerLink(timerlinkwindow);
     //timerlinkwindow->exec();
@@ -668,7 +700,8 @@ void notepad::timerLink()
 
 void notepad::counterLink()
 {
-    //counterlinkwindow = new activecounterlink(this, documentId, pathToFile);
+    activecounterlink* counterlinkwindow = new activecounterlink(this, documentId, pathToFile, *this);
+    goToWindow(*counterlinkwindow);
     //counterlinkwindow->setClientDispatcher(cl);
     //cl->setActiveCounterLink(counterlinkwindow);
     //counterlinkwindow->exec();

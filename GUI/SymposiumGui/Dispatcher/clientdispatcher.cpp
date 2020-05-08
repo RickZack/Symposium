@@ -664,19 +664,19 @@ std::string clientdispatcher::showHome(){
 std::string clientdispatcher::showDir(bool recursive){
     return this->client.showDir(recursive);
 }
-
+/*
 void clientdispatcher::setSignIn(sigin* si){
     qDebug() << "metodo setSignIn";
     this->finestraLogin = si;
     qDebug() << "metodo setSignIn dopo assegnazione nuovo puntatore";
     this->currentWindow = 1;
     qDebug() << "metodo setSignIn dopo assegnazione a currentWindow";
-}
+}*/
 
 void clientdispatcher::setTextEdit(uint_positive_cnt::type resourceID, notepad *te){
     this->finestreDocumenti.push_back(std::make_pair(resourceID,te));
 }
-
+/*
 void clientdispatcher::setSignUp(signup *su){
     this->finestraSignup = su;
     this->currentWindow = 2;
@@ -727,11 +727,11 @@ void clientdispatcher::setActiveAlwaysLink(activealwayslink *aal){
     this->currentWindow = 10;
 }
 
-/*void clientdispatcher::signinExpired(){
+void clientdispatcher::signinExpired(){
     this->timer.stop();
     this->finestraLogin->errorConnection();
     qDebug() << "Timer scaduto\n";
-}/*/
+}*/
 
 void clientdispatcher::setOnlineUser(onlineusers *ou){
     this->finestraOnlineUser = ou;
@@ -743,7 +743,7 @@ void clientdispatcher::setAllUser(alluser *au){
     this->currentWindow = 14;
 }
 
-void clientdispatcher::setActiveNonLink(activenonlink *anl){
+/*void clientdispatcher::setActiveNonLink(activenonlink *anl){
     this->finestraActiveNonLink = anl;
     this->currentWindow = 15;
 }
@@ -751,7 +751,7 @@ void clientdispatcher::setActiveNonLink(activenonlink *anl){
 void clientdispatcher::setchoosepriv(choosepriv *pr){
     this->finestraChoosePriv = pr;
     this->currentWindow = 16;
-}
+}*/
 
 /*void clientdispatcher::signupExpired(){
     this->timer.stop();

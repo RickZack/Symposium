@@ -51,9 +51,9 @@ void choosepriv::on_pushButton_clicked(){
     #ifdef DISPATCHER_ON
     cl->openSource(this->path,this->idSource,this->priv);
     #else
-    notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
+    /*notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
     notepadWindow->show();
-    notepadWindow->showLabels();
+    notepadWindow->showLabels();*/
     #endif
     this->hide();
 }
@@ -67,11 +67,11 @@ void choosepriv::on_pushButton_2_clicked()
 // il successOpen riceve un documento, e stampa tutti i simboli che sono in esso presenti
 
 notepad* choosepriv::successOpen(Symposium::document &doc){
-    notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path,doc);
+    /*notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path,doc);
     this->hide();
     notepadWindow->show();
     notepadWindow->showLabels();
-    return notepadWindow;
+    return notepadWindow;*/
 }
 
 // DA CANCELLARE!

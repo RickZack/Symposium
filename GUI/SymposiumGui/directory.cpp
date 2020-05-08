@@ -691,7 +691,7 @@ notepad* directory::successNewSource(){
     int count=number_elements(str);
     listGenerate(str,count);
     //open the newly created document
-    notepad* nw= new notepad(this,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument());
+    notepad* nw= new notepad(this,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), *this);
     nw->show();
     nw->showLabels();
     return nw;
@@ -934,14 +934,14 @@ void directory::on_OkPriv_clicked()
     enableStyleButtons();
     pressed=false;
     w->close();
-    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path);
+    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
     notepadWindow->show();
     notepadWindow->showLabels();
     #endif
 }
 
 notepad* directory::successOpen(){
-    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument());
+    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
     notepadWindow->show();
     notepadWindow->showLabels();
     return notepadWindow;

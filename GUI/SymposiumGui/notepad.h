@@ -7,6 +7,7 @@
 #include <QTextEdit>
 #include <QCloseEvent>
 #include <QResizeEvent>
+#include <symwininterface.h>
 
 
 #include "onlineusers.h"
@@ -31,14 +32,23 @@ namespace Ui {
 class notepad;
 }
 
-class notepad : public QMainWindow
+class notepad : public QMainWindow, public SymNotepadWinInterface
 {
     Q_OBJECT
 
 public:
-    explicit notepad(QWidget *parent = nullptr, Symposium::uint_positive_cnt::type documentId=0,Symposium::privilege priv=Symposium::privilege::none,Symposium::privilege privOpen=Symposium::privilege::none,std::string pathToFile=" ",Symposium::document doc=Symposium::document());
+    explicit notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,Symposium::privilege priv,Symposium::privilege privOpen,std::string pathToFile,Symposium::document doc, SymWinInterface& si, bool parentIsTransient=false);
+
+    //Not used at the moment
+    void success() override{}
+    void failure(const QString&) override{}
+    Symposium::uint_positive_cnt::type getId() override;
+    void successfullInsert(const Symposium::symbol& sym) override;
+    void failedInsert(const Symposium::symbol& sym) override;
+    void failedRemove(const Symposium::symbol& sym) override;
+
     void setClientDispatcher(Symposium::clientdispatcher *cl);
-    ~notepad();
+    ~notepad() override;
 
     void moveUserCursor(Symposium::uint_positive_cnt::type siteID, int block, int column);
     void removeUserCursor(Symposium::uint_positive_cnt::type siteID);
@@ -131,10 +141,10 @@ private:
     std::string pathToFile;
     Symposium::privilege priv;
     Symposium::privilege privOpen;
-    activetimerlink *timerlinkwindow;
-    activecounterlink *counterlinkwindow;
-    activealwayslink *alwayslinkwindow;
-    activenonlink *nonlinkwindow;
+    //activetimerlink *timerlinkwindow;
+    //activecounterlink *counterlinkwindow;
+    //activealwayslink *alwayslinkwindow;
+    //activenonlink *nonlinkwindow;
 
     bool insertOthCh=false;
     bool highActivated=false;
