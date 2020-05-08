@@ -52,7 +52,7 @@ public:
      * @brief called by clientdispatcher when the link was successfully insert
      */
     void successInsert();
-    ~inserturi();
+    ~inserturi() override;
 
 private slots:
     /**
@@ -99,7 +99,6 @@ private:
     Symposium::privilege privilege;
     std::string showDir;
     std::string pathId;
-    //Symposium::clientdispatcher *cl;
     std::string pwd;
     class exit *ex;
     choosedir *dirWindow;

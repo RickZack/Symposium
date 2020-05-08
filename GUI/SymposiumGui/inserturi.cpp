@@ -15,7 +15,10 @@ inserturi::inserturi(QWidget *parent, std::string pwd, SymWinInterface& si) :
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    //showDir=cl->showDir(true);
+    #ifdef DISPATCHER_ON
+    showDir=cl->showDir(true);
+    #endif
+
     ui->writer->click();
     QPixmap pix2(":/icon/logo.png");
     int w=ui->logo->width();
@@ -59,7 +62,16 @@ void inserturi::change_text()
     path=dirWindow->pathId;
     nameDir=dirWindow->nameOfDir;
     if(!nameDir.empty())
-        ui->dir->setText(QString::fromStdString(dirWindow->nameOfDir));
+    {
+        size_t sizestr=dirWindow->nameOfDir.size();
+        std::string text=dirWindow->nameOfDir;
+        if(sizestr>40)
+        {
+            text.erase (text.begin()+40, text.end());
+            text.append("...");
+        }
+        ui->dir->setText(QString::fromStdString(text));
+    }
 }
 
 void inserturi::reset_text()
@@ -127,10 +139,6 @@ void inserturi::on_owner_clicked()
 {
     privilege=Symposium::privilege::owner;
 }
-
-/*void inserturi::setClientDispatcher(Symposium::clientdispatcher *cl){
-    this->cl = cl;
-}*/
 
 void inserturi::unsuccessInsert(const QString& errorMess)
 {
