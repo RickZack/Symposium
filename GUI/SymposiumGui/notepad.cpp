@@ -74,11 +74,11 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
                           s2('i', 1, 1, std::vector<int>(), false),
                           s3('a', 1, 2, std::vector<int>(), false),
                           s4('o', 1, 3, std::vector<int>(), false),
-                          s5('c', 1, 4, std::vector<int>(), false),
-                          s6('o', 1, 5, std::vector<int>(), false),
-                          s7('m', 1, 6, std::vector<int>(), false),
-                          s8('e', 1, 7, std::vector<int>(), false),
-                          s9(' ', 1, 8, std::vector<int>(), false),
+                          s5('c', 2, 4, std::vector<int>(), false),
+                          s6('o', 2, 5, std::vector<int>(), false),
+                          s7('m', 2, 6, std::vector<int>(), false),
+                          s8('e', 2, 7, std::vector<int>(), false),
+                          s9(' ', 2, 8, std::vector<int>(), false),
                           s10('s', 1, 9, std::vector<int>(), false),
                           s11('t', 1, 7, std::vector<int>(), false),
                           s12('a', 1, 7, std::vector<int>(), false),
@@ -1326,6 +1326,66 @@ void notepad::on_textEdit_cursorPositionChanged()
 
 void notepad::colorText(){
     insertOthCh=true;
+    /*
+     std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
+     QTextCursor curs=ui->textEdit->textCursor();
+     curs.movePosition(QTextCursor::Start);
+     int pi=curs.position();
+     curs.movePosition(QTextCursor::End);
+     int pf=curs.position();
+     curs.movePosition(QTextCursor::Start);
+     while(pi!=pf-1){
+       curs.setPosition(pi,QTextCursor::MoveAnchor);
+       curs.setPosition(pi+1,QTextCursor::KeepAnchor);
+       QTextCharFormat format=curs.charFormat();
+       format.setBackground(Qt::yellow);
+       curs.setCharFormat(format);
+       curs.setPosition(pi+1);
+       pi++;
+
+     }
+     */
+
+    std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
+    QTextCursor curs=ui->textEdit->textCursor();
+    int pi=0,pf=0,siteId;
+    curs.movePosition(QTextCursor::End);
+    int pend=curs.position();
+    curs.movePosition(QTextCursor::Start);
+    QColor userCol;
+    for(size_t i=0; i<symbols.size();i++){
+        for(size_t j=0;j<symbols[i].size();j++){
+            if(symbols[i][j].getSiteId()==symbols[i][j+1].getSiteId()){
+                siteId=symbols[i][j].getSiteId();
+                pf++;
+            }else{
+                //Symposium::Color colHigh=cl->getColor(this->documentId,siteId);
+                if(siteId==1){
+                    userCol=Qt::yellow;
+                    userCol.setAlpha(160);
+                }else{
+                    userCol=Qt::blue;
+                    userCol.setAlpha(160);
+                }
+                while(pi!=pf){
+                  curs.setPosition(pi,QTextCursor::MoveAnchor);
+                  curs.setPosition(pi+1,QTextCursor::KeepAnchor);
+                  QTextCharFormat format=curs.charFormat();
+                  format.setBackground(userCol);
+                  curs.setCharFormat(format);
+                  curs.setPosition(pi+1);
+                  pi++;
+                  if (pi==pend)
+                      return;
+
+                }
+                pi=pf;
+                pf+=1;
+            }
+        }
+    }
+
+    /*
     QTextCharFormat chFormat;
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
@@ -1381,7 +1441,7 @@ void notepad::colorText(){
     }
 
     }
-
+*/
     insertOthCh=false;
  }
 
@@ -1397,7 +1457,7 @@ void notepad::on_actionhighlight_triggered()
         this->highActivated=true;
         this->insertedChars=0;
         ui->actionhighlight->setChecked(true);
-        ui->textEdit->clear();
+        //ui->textEdit->clear();
         this->colorText();
     }
     else{
