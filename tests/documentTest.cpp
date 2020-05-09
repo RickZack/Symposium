@@ -197,9 +197,14 @@ TEST_P(docRemoteInsertUpdateCursor, InsertionUpdatePosition){
     EXPECT_EQ(input.newIndex2, u2index);
 }
 updatePos updates[]={
+        //0)position updated according index of insertion, one insertion does not affect the other user's cursor
         updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,1}, {0,2}},
-        updatePos{symbol('a', 1, 1, {1}, true), symbol('b', 0, 1, {1}, true), {0,2}, {0,1}},
-        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 0, 2, {2}, true), {0,2}, {0,2}}
+        //1)insertion of the second symbol affects the other user's cursor: a|(1) ->b|(0)a|(1)
+        updatePos{symbol('a', 1, 1, {1}, true), symbol('b', 0, 1, {1}, true), {0,1}, {0,2}},
+        //2)both symbols from the same user, affects the initial position of other user's cursor: |(1) ->a|(0)|(1) -> ab|(0)|(1)
+        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 0, 2, {2}, true), {0,2}, {0,2}},
+        //3)like 1, but s2 contains "new line" and it's inserted before s1, so affects other user's cursor
+        updatePos{symbol('a', 0, 1, {2}, true), symbol('\r', 1, 1, {1}, true), {1,0}, {0,1}}
 };
 INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertUpdateCursor, testing::ValuesIn(updates));
 
@@ -217,16 +222,22 @@ TEST_P(docRemoteRemoveUpdateCursor, RemovalUpdatePosition){
     d.access(user1, privilege::modify); d.access(user2, privilege::modify);
 
     d.remoteInsert(input.s1.getSiteId(), input.s1);
-    d.remoteRemove(input.s2.getSiteId(), input.s1);
+    d.remoteInsert(input.s2.getSiteId(), input.s2);
+    d.remoteRemove(input.s1.getSiteId(), input.s1);
 
     sessionData u1=std::find_if(d.getActiveUsers().begin(), d.getActiveUsers().end(), [](auto el){return el.first->getSiteId()==0;})->second;
     sessionData u2=std::find_if(d.getActiveUsers().begin(), d.getActiveUsers().end(), [](auto el){return el.first->getSiteId()==1;})->second;
+    std::pair<unsigned, unsigned> u1index={u1.row, u1.col};
+    std::pair<unsigned, unsigned> u2index={u2.row, u2.col};
 
-    EXPECT_TRUE(u1.row==input.newIndex1.first && u1.col==input.newIndex1.second);
-    EXPECT_TRUE(u1.row==input.newIndex2.first && u1.col==input.newIndex2.second);
+    EXPECT_EQ(input.newIndex1, u1index);
+    EXPECT_EQ(input.newIndex2, u2index);
 }
 updatePos updates2[]={
-        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,1}, {0,0}}
+        //0)position updated according index of removal, one removal does not affect the other user's cursor: a|(0)b|(1) -> a|(0)|(1)
+        updatePos{symbol('b', 1, 1, {2}, true), symbol('a', 0, 1, {1}, true), {0,1}, {0,1}},
+        //1) removal of the second symbol affects the other user's cursor: a|(0)b|(1) ->|(0)b|(1)
+        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,0}, {0,1}}
 };
 INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCursor, testing::ValuesIn(updates2));
 
