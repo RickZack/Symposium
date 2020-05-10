@@ -11,7 +11,8 @@ home::home(QWidget *parent,const std::string pwd, SymWinInterface& si) :
 {
     ui->setupUi(this);
     setFixedSize(size());
-    setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setAttribute( Qt::WA_DeleteOnClose );
 
     connect(ui->logout, SIGNAL(clicked()), this, SLOT(logout()));
@@ -168,7 +169,7 @@ void home::errorConnectionLogout()
     enableStyleButtons();
     pressed=false;
     errorlogout errorLog(nullptr);
-    hide();
-    errorLog.show();
+    backToMainWin();
+    errorLog.exec();
 }
 

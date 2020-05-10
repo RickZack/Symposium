@@ -47,24 +47,15 @@ void activenonlink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    //this->close();
     successlinks link(parentWidget(), 3, QString::fromStdString(pathFile));
     link.exec();
 }
-
-/*void activenonlink::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
-    this->cl = cl;
-}*/
 
 void activenonlink::errorConnectionLogout()
 {
     backToMainWin();
     enableButtons();
     errorlogout errorLog(nullptr);
-    //close();
-    //parentWidget()->close();
-    //parentWidget()->parentWidget()->hide();
     errorLog.exec();
 }
 

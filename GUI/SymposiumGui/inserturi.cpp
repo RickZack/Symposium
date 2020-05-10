@@ -186,12 +186,9 @@ void inserturi::on_add_clicked()
 
 void inserturi::errorConnectionLogout()
 {
-    hideLabelsError();
-    enableStyleButtons();
-    enableButtons();
     errorlogout errorLog(this);
-    this->hide();
-    errorLog.show();
+    backToMainWin();
+    errorLog.exec();
 }
 
 void inserturi::successInsert()

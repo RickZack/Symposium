@@ -59,20 +59,13 @@ void activecounterlink::successLink()
     link.exec();
 }
 
-/*void activecounterlink::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
-    this->cl = cl;
-}*/
-
 void activecounterlink::errorConnectionLogout()
 {
     enableButtons();
     enableStyleButtons();
-    this->hide();
+    backToMainWin();
     errorlogout errorLog(nullptr);
-    parentWidget()->hide();
-    parentWidget()->parentWidget()->hide();
-    errorLog.show();
+    errorLog.exec();
 }
 
 

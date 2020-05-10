@@ -36,6 +36,10 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     hideAll();
     setAttribute( Qt::WA_DeleteOnClose );
     ui->pathPlainEdit->setLineWrapMode(QPlainTextEdit::LineWrapMode::NoWrap);
+
+    setFixedSize(size());
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 }
 
 std::string directory::manipulationHome(std::string& s){
@@ -290,6 +294,8 @@ void directory::openWindow(std::string str1){
 void directory::contextMenuEvent(QContextMenuEvent *event)
 {
         QMenu submenu;
+        QString style="QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}";
+        submenu.setStyleSheet(style);
         submenu.addAction(tr("Open"),this,&directory::openSelectedSource);
         submenu.addSeparator();
         submenu.addAction(tr("Delete"),this,&directory::deleteSource);
@@ -814,10 +820,9 @@ void directory::successRename(){
 }
 
 void directory::errorConnectionLogout(){
-    errorLogoutWindow= new errorlogout(this);
-    close();
-    errorLogoutWindow->show();
-
+    errorlogout errorLog(nullptr);
+    backToMainWin();
+    errorLog.exec();
 }
 
 
