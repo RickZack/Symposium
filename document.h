@@ -176,6 +176,8 @@ namespace Symposium {
          * @param targetSiteId the user whose cursor's position has been changed
          * @param newRow the new row number
          * @param newCol the new column number
+         * @param toInsert to verify if a '\r' symbol has beed introduced
+         * @param ins true if a symbol has been inserted, false if a symbol has been removed
          */
         virtual void updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol);
 
@@ -243,7 +245,7 @@ namespace Symposium {
          * @return the position
          */
         std::pair<unsigned int, unsigned int>
-        findEndPosition(const symbol aChar, int lines) const;
+        findEndPosition(int lines) const;
 
         /**
          * @brief it searches for the symbol that is inserted in the middle of the line
@@ -313,6 +315,7 @@ namespace Symposium {
 
 
 
+        void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newCol, symbol symb, bool ins);
     };
 }
 

@@ -124,6 +124,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     //qDebug()<<"i1"<<i1;
     checkIndex(i0,i1);
     this->updateCursorPos(toInsert.getSiteId(),i0,i1);
+    this->updateOtherCursorPos(toInsert.getSiteId(),i1,toInsert,true);
     symbol newSymb= generatePosition(indexes,toInsert);
     newSymb.setCharFormat(toInsert.getCharFormat());
 
@@ -380,6 +381,7 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     //taking into account the position of the cursor.
     // TO DO
     this->updateCursorPos(siteId,i0,i1);
+    this->updateOtherCursorPos(siteId,i1,sym,false);
     symbols[i0].erase(symbols[i0].begin()+i1);
     return sym;
 
@@ -395,6 +397,7 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     int i1=indexes.second;
     // taking into account the position of the cursor.
     this->updateCursorPos(siteId,i0,i1);
+    this->updateOtherCursorPos(siteId,i1,toInsert,true);
     checkIndex(i0,i1);
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
@@ -407,6 +410,7 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     int i0=pos.first;
     int i1=pos.second;
     this->updateCursorPos(siteId,i0,i1);
+    this->updateOtherCursorPos(siteId,i1,toRemove,false);
     if(i0==-1 || i1==-1){
         return std::pair<unsigned int, unsigned int>();
     }
@@ -418,6 +422,8 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     else {
         symbols[i0].erase(symbols[i0].begin()+i1);
     }
+
+
     return pos;
 }
 
@@ -544,8 +550,12 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 
     //char is greater than all existing chars (insert and end)
 
-    if(symbol>lastSymbol){
-        ind= findEndPosition(lastSymbol,totalLines);
+    if(symbol.getCh()=='\r'||symbol>lastSymbol){
+        ind= findEndPosition(totalLines);
+        return ind;
+    }
+    if(lastSymbol.getCh()=='\r'){
+        ind={maxLine+1,0};
         return ind;
     }
 
@@ -587,7 +597,7 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 }
 
 std::pair<unsigned int, unsigned int>
-document::findEndPosition(const symbol aChar,int lines) const {
+document::findEndPosition(int lines) const {
     std::pair<int,int> ind;
     int numCharsinLine=countCharsInLine(lines-1);
     ind={lines-1,numCharsinLine};
@@ -645,7 +655,6 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     //if the struct is empty or char is less than first char
     if(symbols.empty()||symbol.getCh()<symbols[0][0].getCh()){
         i0=-1; i1=-1; ind={i0,i1}; return ind;
-
     }
 
     // counts the number of chars in the last line
@@ -655,6 +664,8 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     //char is greater than all existing chars(insert at end)
     if(symbol.getCh()>lastChar.getCh()){
        i0=-1; i1=-1; ind={i0,i1}; return ind;
+    }else if(symbol.getCh()==lastChar.getCh()){
+        i0=maxLine; i1=chars-1; ind={i0,i1}; return ind;
     }
 
     // binary search
@@ -733,6 +744,36 @@ void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned in
            break;
        }
    }
+}
+
+void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId,unsigned int newCol,symbol symb,bool ins) {
+    for(auto& i: activeUsers){
+        // On the same line, there are two different cursors
+        if(symb.getCh()!='\r' && i.second.row==newCol && i.first->getSiteId()!=targetSiteId){
+            // The action is to insert a character
+            if(ins){
+                i.second.col+=1;
+                break;
+            }else{
+                i.second.col-=1;
+                break;
+            }
+
+        } // On the same line, there are two different cursors and I'm inserting the \r
+        else if(symb.getCh()=='\r' && i.second.row==newCol && i.first->getSiteId()!=targetSiteId){
+            // inserting a character
+            if(ins){
+               i.second.row+=1;
+               i.second.col=i.second.col-newCol;
+               break;
+            }else{
+                i.second.row-=1;
+                i.second.col=i.second.col+newCol;
+                break;
+            }
+
+        }
+    }
 }
 
 std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVerify) {

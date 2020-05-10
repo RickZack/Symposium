@@ -122,11 +122,11 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
         // Ciao -> inserito con la remoteInsert
 
-        documentoProva.remoteInsert(2,s1);
-        documentoProva.remoteInsert(2,s2);
-        documentoProva.remoteInsert(2,s3);
-        documentoProva.remoteInsert(2,s4);
-        documentoProva.remoteInsert(2,acapo);
+        documentoProva.remoteInsert(1,s1);
+        documentoProva.remoteInsert(1,s2);
+        documentoProva.remoteInsert(1,s3);
+        documentoProva.remoteInsert(1,s4);
+        documentoProva.remoteInsert(1,acapo);
 
 /*
         // Ciao
@@ -156,7 +156,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         documentoProva.localInsert(iacapo2,acapo);
 
 
-        std::pair<int, int> in1={2,0}, in2={2,1}, in3={2,2},in4={2,3},in5={2,4},in6={2,5},in7={2,6},in8={2,7},in9={2,8};
+        std::pair<int, int> in1={2,0}, in2={2,1}, in3={2,2},in4={2,3},in5={2,4},in6={2,5},in7={2,6},in8={2,7},in9={2,8},in10={2,9};
             Symposium::symbol sn1('T', 2, 0, std::vector<int>(), false),
                               sn2('u', 2, 1, std::vector<int>(), false),
                               sn3('t', 2, 2, std::vector<int>(), false),
@@ -165,7 +165,8 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
                               sn6(' ', 2, 5, std::vector<int>(), false),
                               sn7('o', 2, 6, std::vector<int>(), false),
                               sn8('k', 2, 7, std::vector<int>(), false),
-                              sn9('!', 2, 8, std::vector<int>(), false);
+                              sn9('!', 2, 8, std::vector<int>(), false),
+                              sn10('\r', 2, 8, std::vector<int>(), false);
 
             Symposium::Color colore(200,30,0);
             const std::string ft1="Lucida Console";
@@ -190,6 +191,42 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             documentoProva.localInsert(in7,sn7);
             documentoProva.localInsert(in8,sn8);
             documentoProva.localInsert(in9,sn9);
+            documentoProva.localInsert(in10,sn10);
+
+            Symposium::symbol sr1('F', 1, 0, std::vector<int>(), false),
+                              sr2('a', 1, 1, std::vector<int>(), false),
+                              sr3('b', 1, 2, std::vector<int>(), false),
+                              sr4('i', 1, 3, std::vector<int>(), false),
+                              sr5('o', 1, 4, std::vector<int>(), false),
+                              sr6('l', 1, 5, std::vector<int>(), false),
+                              sr7('a', 1, 6, std::vector<int>(), false);
+
+            sr1.setCharFormat(f);
+            sr2.setCharFormat(f);
+            sr3.setCharFormat(f);
+            sr4.setCharFormat(f);
+            sr5.setCharFormat(f);
+            sr6.setCharFormat(f);
+            sr7.setCharFormat(f);
+
+
+            documentoProva.remoteInsert(1,sr1);
+            documentoProva.remoteInsert(1,sr2);
+            documentoProva.remoteInsert(1,sr3);
+            documentoProva.remoteInsert(1,sr4);
+            documentoProva.remoteInsert(1,sr5);
+            documentoProva.remoteInsert(1,sr6);
+            documentoProva.remoteInsert(1,sr7);
+
+
+           Symposium::symbol sac('\r', 2, 8, std::vector<int>(), false);
+           std::pair<int, int> iac={3,7};
+
+           documentoProva.localInsert(iac,sac);
+           documentoProva.remoteInsert(1,sr1);
+           documentoProva.remoteRemove(1,sr1);
+
+
 
   //---------------------------------------------------------------------------------------------------------
 
@@ -219,8 +256,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
     QMenu *menuSym=menuBar()->addMenu(tr("Prova RichText"));
     menuSym->addAction(tr("Verify Sym"),this,&notepad::verifySymbol2);
-    menuSym->addAction(tr("Remote Insert"),this,&notepad::prova_remoteInsert);
-    menuSym->addAction(tr("Remote Delete"),this,&notepad::prova_remoteDelete);
 
     QMenu *userMenu2=menuBar()->addMenu(tr("ProvaCursori"));
     userMenu2->addAction(tr("Add Cursor"), this, &notepad::addCursor);
@@ -510,7 +545,6 @@ void notepad::textColor()
         return;
     QTextCharFormat fmt;
     fmt.setForeground(col);
-    //mergeFormatOnWordOrSelection(fmt);
     colorChanged(col);
 
     //set a lighter color
@@ -557,7 +591,7 @@ void notepad::colorChanged(const QColor &c)
     QPixmap pix(64, 64);
     pix.fill(c);
     ui->actionColorText->setIcon(pix);
-    ui->textEdit->setTextColor(c);
+    //ui->textEdit->setTextColor(c);
 
 }
 
@@ -938,8 +972,6 @@ void notepad::contV_action(){
     int count=0;
 
     while(count!=this->dim){
-        //curs.setPosition(posTmp,QTextCursor::MoveAnchor);
-        //curs.setPosition(posTmp+1,QTextCursor::KeepAnchor);
         curs.setPosition(posTmp);
         curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
         //ui->textEdit->setTextCursor(curs);
@@ -1054,64 +1086,6 @@ void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt::t
     insertOthCh=false;
 
 }
-//------------------------------------------------------------------------------------------------------------------------------------------
-//prova remoteInsert
-void notepad::prova_remoteInsert(){
-
-    insertOthCh=true;
-    // take the position in which the character has to be added.
-    int row=0;
-    int column=1;
-
-    QTextCursor curs=ui->textEdit->textCursor();
-    int actBlock=curs.blockNumber();
-    int actColm=curs.positionInBlock();
-
-    //QTextCursor curs=ui->textEdit->textCursor();
-
-    //extract information from sym to build the character to insert in the textEdit block
-
-    QTextCharFormat ch_format;QFont ch_font;
-
-    ch_font.setFamily("Times New Roman");
-    ch_font.setBold(true);
-    ch_font.setUnderline(true);
-    ch_font.setItalic(true);
-    ch_font.setPointSize(9);
-    ch_format.setForeground(QColor(255,0,0));
-
-
-    // set the font and the color to the character
-    ch_format.setFont(ch_font);
-    if(this->highActivated){
-        QColor colUser=Qt::blue;
-        ch_format.setBackground(colUser);
-    }
-
-
-    // go to the position of the character
-    //ui->textEdit->changePosition(2,row,column);
-
-
-    curs.movePosition(QTextCursor::Start);
-    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,row);
-    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
-    ui->textEdit->setTextCursor(curs);
-    ui->textEdit->changePosition(2,row,column++);
-
-
-    //insert the character
-
-    QString ch="F";
-
-    curs.insertText(ch,ch_format);
-    ui->textEdit->changePosition(2,row,column++);
-    ui->textEdit->changePosition(actBlock,actColm);
-
-    insertOthCh=false;
-
-}
-//------------------------------------------------------------------------------------------------------------------------------------------
 
 void notepad::verifySymbol(Symposium::symbol sym,std::pair<int,int> indexes){
 
@@ -1259,38 +1233,6 @@ void notepad::remoteDelete(std::pair<int,int> indexes,Symposium::uint_positive_c
 
     insertOthCh=false;
 }
-
-//-------------------------------------------------------------------------------------------------------------------------------------------
-// PROVA REMOTE DELETE DA CANCELLARE
-void notepad::prova_remoteDelete(){
-
-    insertOthCh=true;
-
-    // the position of the character to delete
-    int block=0;
-    int column=1;
-    // in Qt the column starts from 1, while in symbols it starts from 0
-    column++;
-
-    QTextCursor curs=ui->textEdit->textCursor();
-    int actBlock=curs.blockNumber();
-    int actColm=curs.positionInBlock();
-    // go to the position of the character
-
-    curs.movePosition(QTextCursor::Start);
-    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,block);
-    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
-    ui->textEdit->setTextCursor(curs);
-    ui->textEdit->changePosition(2,block,column--);
-
-    curs.deletePreviousChar();
-
-    ui->textEdit->changePosition(2,block,column--);
-    ui->textEdit->changePosition(actBlock,actColm);
-
-    insertOthCh=false;
-}
-
 
 void notepad::setClientDispatcher(Symposium::clientdispatcher *cl)
 {

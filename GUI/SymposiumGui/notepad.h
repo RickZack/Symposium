@@ -208,10 +208,8 @@ private:
      */
     void fillTextEdit();
 
-    //------------------------------------------------------------------------------------------------------------------------------------------
-    void prova_remoteInsert();
+    //------------------------------------------------------------------------------------------------------------------------------------------ 
     void verifySymbol2();
-    void prova_remoteDelete();
 
     Symposium::document documentoProva;
     static constexpr wchar_t  emptyChar='~';
