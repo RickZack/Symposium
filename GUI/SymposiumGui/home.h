@@ -77,8 +77,6 @@ private slots:
 private:
     Ui::home *ui;
     std::string pwd;
-    inserturi *inserturiWindow;
-    class exit *ex;
     bool pressed=false;
     /**
      * @brief quit from application

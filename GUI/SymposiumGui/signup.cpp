@@ -196,8 +196,8 @@ void signup::closeEvent(QCloseEvent *event)
     {
         disableStyleButtons();
         event->ignore();
-        class exit* ex=new class exit(this);
-        int ret=ex->exec();
+        class exit ex(this, false, &cl);
+        int ret=ex.exec();
         if(ret==0 && !pressed)
             enableStyleButtons();
     }

@@ -56,7 +56,6 @@ private:
 
     Ui::sigin *ui;
     std::string pwd;
-    class exit *ex;
     bool pressed=false;
     /**
      * @brief quit from application

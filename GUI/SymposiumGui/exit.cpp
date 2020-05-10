@@ -3,9 +3,9 @@
 #include "Dispatcher/clientdispatcher.h"
 
 
-exit::exit(QWidget *parent, bool logout) :
+exit::exit(QWidget *parent, bool logout, Symposium::clientdispatcher *cl) :
     QDialog(parent),
-    ui(new Ui::exit), logout(logout)
+    ui(new Ui::exit), logout(logout), cl(cl)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -16,11 +16,6 @@ exit::exit(QWidget *parent, bool logout) :
     connect(ui->ok, SIGNAL(clicked()), qApp, SLOT(quit()));
 
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
-}
-
-void exit::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
-    this->cl=cl;
 }
 
 exit::~exit()

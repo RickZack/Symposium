@@ -18,13 +18,7 @@ class exit : public QDialog
     Q_OBJECT
 
 public:
-    explicit exit(QWidget *parent = nullptr, bool logout=false);
-
-    /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    void setClientDispatcher( Symposium::clientdispatcher *cl);
+    explicit exit(QWidget *parent, bool logout, Symposium::clientdispatcher *cl);
 
     ~exit();
 

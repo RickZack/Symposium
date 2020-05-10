@@ -61,7 +61,7 @@ icon::~icon()
 
 void icon::on_pushButton_clicked()
 {
-    hide();
+    close();
 }
 
 void icon::on_beaver_clicked()

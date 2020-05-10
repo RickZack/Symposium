@@ -466,8 +466,8 @@ void directory::closeEvent(QCloseEvent *event)
     {
         disableStyleButtons();
         event->ignore();
-        ex=new class exit(this);
-        int ret=ex->exec();
+        class exit ex(this, true, &cl);
+        int ret=ex.exec();
         if(ret==0 && !pressed)
             enableStyleButtons();
     }
@@ -533,7 +533,7 @@ void directory::disableStyleButtons()
 }
 
 
-void directory::waiting()
+void directory::waitingFunction()
 {
    hideAll();
    w = new class waiting(this);

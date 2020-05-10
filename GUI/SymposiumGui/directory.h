@@ -168,13 +168,9 @@ private slots:
 
 private:
     Ui::directory *ui;
-    //inserturi *uriWindow;
     QListWidgetItem *item1;
-    errorconnection *errorWindow;
-    errorlogout *errorLogoutWindow;
     notepad *notepadWindow;
     action lastChoice;
-    class exit* ex;
     waiting *w;
     bool pressed=false;
 
@@ -272,7 +268,7 @@ private:
     /**
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
-    void waiting();
+    void waitingFunction();
     /**
      * @brief hide all label and buttons and diasable the buttons
      */

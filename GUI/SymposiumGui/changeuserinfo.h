@@ -95,7 +95,6 @@ private:
     Symposium::user us;
     bool pressed=false;
     bool passwordView=false;
-    class exit *ex;
     icon *iconWindow;
 
     void hiddeninformation();

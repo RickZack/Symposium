@@ -61,7 +61,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    class exit *ex;
     /**
      * @brief quit from application
      */

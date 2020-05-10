@@ -40,16 +40,11 @@ public:
      */
     void successLink();
     /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    //void setClientDispatcher(Symposium::clientdispatcher *cl);
-    /**
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user
      */
     void errorConnectionLogout();
-    ~activecounterlink();
+    ~activecounterlink() override;
 
 public slots:
     /**
@@ -85,7 +80,6 @@ private:
     Symposium::privilege privilegeToGrant;
     unsigned int numCounter;
     Symposium::uri u;
-    //Symposium::clientdispatcher *cl;
     Symposium::uint_positive_cnt::type documentId;
 
     /**

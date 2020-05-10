@@ -358,8 +358,8 @@ void changeUserInfo::closeEvent(QCloseEvent *event)
     if(closedByUser()){
         disableStyleButtons();
         event->ignore();
-        ex=new class exit(this);
-        int ret=ex->exec();
+        class exit ex(this, true, &cl);
+        int ret=ex.exec();
         if(ret==0 && !pressed)
             enableStyleButtons();
     }

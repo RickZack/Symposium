@@ -79,7 +79,6 @@ private:
     std::string pwd;
     icon *iconWindow;
     std::string iconPath="";
-    class exit *ex;
     bool pressed=false;
     /**
      * @brief quit from application
