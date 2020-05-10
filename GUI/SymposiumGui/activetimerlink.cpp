@@ -59,21 +59,14 @@ void activetimerlink::successLink()
     link.exec();
 }
 
-/*void activetimerlink::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
-    this->cl = cl;
-}*/
-
 void activetimerlink::errorConnectionLogout()
 {
     backToMainWin();
     enableButtons();
     enableStyleButtons();
-    //this->hide();
     errorlogout errorLog(nullptr);
-    //parentWidget()->hide();
-    //parentWidget()->parentWidget()->hide();
-    errorLog.show();
+    backToMainWin();
+    errorLog.exec();
 }
 
 

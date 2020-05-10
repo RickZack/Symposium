@@ -42,12 +42,6 @@ void deleteAccount::successDeleteAccount()
     enableButtons();
     enableStyleButtons();
     backToMainWin();
-    //this->close();
-    //parentWidget()->hide();
-    /*mw=new MainWindow();
-    mw->disableStyleButtons();
-    mw->setClientDispatcher(cl);
-    mw->show();*/
     QString str="Your account has been successfully deleted!";
     notification notWindow(parentWidget(), str);
     int ret= notWindow.exec();
@@ -126,6 +120,7 @@ void deleteAccount::errorConnectionLogout()
     enableButtons();
     enableStyleButtons();
     errorlogout errorLog(nullptr);
+    backToMainWin();
     errorLog.exec();
 }
 

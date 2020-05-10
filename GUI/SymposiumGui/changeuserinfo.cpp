@@ -142,7 +142,7 @@ void changeUserInfo::errorConnectionLogout()
     enableButtons();
     enableStyleButtons();
     errorlogout errorLog(nullptr);
-    this->close();
+    backToMainWin();
     errorLog.exec();
 }
 

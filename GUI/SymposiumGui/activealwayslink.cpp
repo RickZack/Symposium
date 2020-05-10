@@ -55,26 +55,17 @@ void activealwayslink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    //this->hide();
     successlinks link(parentWidget(), 1, QString::fromStdString(pathFile));
     link.exec();
 }
-
-/*void activealwayslink::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
-    this->cl = cl;
-}*/
 
 void activealwayslink::errorConnectionLogout()
 {
     backToMainWin();
     enableButtons();
     enableStyleButtons();
-    //this->hide();
     errorlogout errorLog(nullptr);
-    //parentWidget()->hide();
-    //parentWidget()->parentWidget()->hide();
-    errorLog.show();
+    errorLog.exec();
 }
 
 activealwayslink::~activealwayslink()

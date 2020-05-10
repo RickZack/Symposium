@@ -10,7 +10,8 @@ MainWindow::MainWindow(QWidget *parent, SymWinManager& m, Symposium::clientdispa
 {
     ui->setupUi(this);
     setFixedSize(size());
-    this->setWindowFlags(this->windowFlags() & ~Qt::MSWindowsFixedSizeDialogHint);
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     QPixmap pix(":/icon/logo.png");
     int w=ui->label->width();
