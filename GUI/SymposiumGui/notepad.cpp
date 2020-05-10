@@ -70,10 +70,10 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
     //----------------------------------------------------------------------------------------------------------------------------
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2},i4={0,3},iacapo={0,4},i5={1,0},i6={1,1},i7={1,2},i8={1,3},i9={1,4},i10={1,5},i11={1,6},i12={1,7},i13={1,8},iacapo2={1,9};
-        Symposium::symbol s1('C', 1, 0, std::vector<int>(), false),
-                          s2('i', 1, 1, std::vector<int>(), false),
-                          s3('a', 1, 2, std::vector<int>(), false),
-                          s4('o', 1, 3, std::vector<int>(), false),
+    Symposium::symbol s1('C', 1, 0, {1}, false),
+                          s2('i', 1, 1, {2}, false),
+                          s3('a', 1, 2,{3}, false),
+                          s4('o', 1, 3,{4}, false),
                           s5('c', 2, 4, std::vector<int>(), false),
                           s6('o', 2, 5, std::vector<int>(), false),
                           s7('m', 2, 6, std::vector<int>(), false),
@@ -83,7 +83,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
                           s11('t', 1, 7, std::vector<int>(), false),
                           s12('a', 1, 7, std::vector<int>(), false),
                           s13('i', 1, 7, std::vector<int>(), false),
-                          acapo('\r',1,7, std::vector<int>(), false),
+                          acapo('\r',1,7, {5}, false),
                           a1('E',2,3,std::vector<int>(), false),
                           a2('h',2,3,std::vector<int>(), false),
                           a3('i',2,3,std::vector<int>(), false),
@@ -135,13 +135,13 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         documentoProva.localInsert(i3,s3);
         documentoProva.localInsert(i4,s4);
         documentoProva.localInsert(iacapo,acapo);
-
+*/
         // Ehi
         documentoProva.localInsert(i1,a1);
         documentoProva.localInsert(i2,a2);
         documentoProva.localInsert(i3,a3);
         documentoProva.localInsert(i4,a4);
-        */
+
 
         // Come stai -> inserito con la localInsert
         documentoProva.localInsert(i5,s5);
@@ -193,40 +193,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             documentoProva.localInsert(in9,sn9);
             documentoProva.localInsert(in10,sn10);
 
-            Symposium::symbol sr1('F', 1, 0, std::vector<int>(), false),
-                              sr2('a', 1, 1, std::vector<int>(), false),
-                              sr3('b', 1, 2, std::vector<int>(), false),
-                              sr4('i', 1, 3, std::vector<int>(), false),
-                              sr5('o', 1, 4, std::vector<int>(), false),
-                              sr6('l', 1, 5, std::vector<int>(), false),
-                              sr7('a', 1, 6, std::vector<int>(), false);
-
-            sr1.setCharFormat(f);
-            sr2.setCharFormat(f);
-            sr3.setCharFormat(f);
-            sr4.setCharFormat(f);
-            sr5.setCharFormat(f);
-            sr6.setCharFormat(f);
-            sr7.setCharFormat(f);
-
-
-            documentoProva.remoteInsert(1,sr1);
-            documentoProva.remoteInsert(1,sr2);
-            documentoProva.remoteInsert(1,sr3);
-            documentoProva.remoteInsert(1,sr4);
-            documentoProva.remoteInsert(1,sr5);
-            documentoProva.remoteInsert(1,sr6);
-            documentoProva.remoteInsert(1,sr7);
-
-
-           Symposium::symbol sac('\r', 2, 8, std::vector<int>(), false);
-           std::pair<int, int> iac={3,7};
-
-           documentoProva.localInsert(iac,sac);
-           documentoProva.remoteInsert(1,sr1);
-           documentoProva.remoteRemove(1,sr1);
-
-
+            //documentoProva.remoteRemove(1,s4);
 
   //---------------------------------------------------------------------------------------------------------
 
