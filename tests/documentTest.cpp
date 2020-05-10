@@ -201,10 +201,10 @@ updatePos updates[]={
         updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,1}, {0,2}},
         //1)insertion of the second symbol affects the other user's cursor: a|(1) ->b|(0)a|(1)
         updatePos{symbol('a', 1, 1, {1}, true), symbol('b', 0, 1, {1}, true), {0,1}, {0,2}},
-        //2)both symbols from the same user, affects the initial position of other user's cursor: |(1) ->a|(0)|(1) -> ab|(0)|(1)
-        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 0, 2, {2}, true), {0,2}, {0,2}},
+        //2)both symbols from the same user, does not affect the initial position of other user's cursor: |(1) ->|(1)a|(0) -> |(1)ab|(0)
+        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 0, 2, {2}, true), {0,2}, {0,0}},
         //3)like 1, but s2 contains "new line" and it's inserted before s1, so affects other user's cursor
-        updatePos{symbol('a', 0, 1, {2}, true), symbol('\r', 1, 1, {1}, true), {1,0}, {0,1}}
+        updatePos{symbol('a', 0, 1, {2}, true), symbol('\r', 1, 1, {1}, true), {1,1}, {1,0}}
 };
 INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertUpdateCursor, testing::ValuesIn(updates));
 
@@ -237,7 +237,9 @@ updatePos updates2[]={
         //0)position updated according index of removal, one removal does not affect the other user's cursor: a|(0)b|(1) -> a|(0)|(1)
         updatePos{symbol('b', 1, 1, {2}, true), symbol('a', 0, 1, {1}, true), {0,1}, {0,1}},
         //1) removal of the second symbol affects the other user's cursor: a|(0)b|(1) ->|(0)b|(1)
-        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,0}, {0,1}}
+        updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,0}, {0,1}},
+        //2) removal of "new line" character: \r|(1)b|(0) -> |(1)b|(0)
+        updatePos{symbol('\r', 1, 1, {1}, true), symbol('a', 0, 1, {2}, true), {0,1}, {0,0}},
 };
 INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCursor, testing::ValuesIn(updates2));
 
