@@ -1,5 +1,6 @@
 #include "choosedir.h"
 #include "ui_choosedir.h"
+#include "onoff_networkinteraction.h"
 
 
 
@@ -201,6 +202,6 @@ void choosedir::on_choose_clicked()
         QMessageBox::information(parentWidget(),
                                  tr("Choose Directory"), tr("Your need to choose a directory"), QMessageBox::Ok);
     else
-        this->hide();
+        this->close();
 }
 

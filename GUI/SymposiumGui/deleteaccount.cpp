@@ -77,6 +77,8 @@ void deleteAccount::delete_click()
         //------------------------------------------------------------------PARTE DA DECOMENTARE
         #ifdef DISPATCHER_ON
         cl.removeUser(password);
+        #else
+        successDeleteAccount();
         #endif
         //------------------------------------------------------------------
     }

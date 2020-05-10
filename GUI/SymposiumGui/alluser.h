@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <forward_list>
+#include "symwininterface.h"
 
 #include "../../document.h"
 #include "../../privilege.h"
@@ -24,7 +25,7 @@ namespace Ui {
 class alluser;
 }
 
-class alluser : public QDialog
+class alluser : public QDialog, public SymModalWinInterface
 {
     Q_OBJECT
 
@@ -32,17 +33,21 @@ public:
     explicit alluser(QWidget *parent, Symposium::privilege privelege,
                         Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile,
                      std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers,
-                     std::unordered_map<std::string, Symposium::privilege> users);
+                     std::unordered_map<std::string, Symposium::privilege> users, SymWinInterface& si);
     Symposium::privilege privelege;
     Symposium::user us;
     std::string pathFile;
     Symposium::uint_positive_cnt::type documentID;
 
+    void success() override;
+
+    void failure(const QString& toPrint) override;
+
     /**
      * @brief setting of clientdispatcher
      * @param cl clientdispatcher for reference
      */
-    void setClientDispatcher(Symposium::clientdispatcher *cl);
+    //void setClientDispatcher(Symposium::clientdispatcher *cl);
     /**
      * @brief called by clientdispatcher when the edit of privilege for the user selected was successfully done
      */
@@ -51,7 +56,7 @@ public:
      * @brief called by clientdispatcher when there is some error to edit the privilege for the user selected
      * @param errorMess the messagge to show
      */
-    void errorEditPrivilege(std::string errorMess);
+    void errorEditPrivilege(const QString& errorMess);
     /**
      * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
      * @param str the string error to visualized for user

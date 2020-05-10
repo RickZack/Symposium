@@ -137,7 +137,7 @@ private:
     //-------------------------------------------------------------------
 
     onlineusers *onlineuser;
-    alluser *alluserWindow;
+    //alluser *alluserWindow;
     std::string pathToFile;
     Symposium::privilege priv;
     Symposium::privilege privOpen;

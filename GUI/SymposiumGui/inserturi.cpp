@@ -16,7 +16,8 @@ inserturi::inserturi(QWidget *parent, std::string pwd, SymWinInterface& si) :
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     #ifdef DISPATCHER_ON
-    showDir=cl->showDir(true);
+    showDir=cl.showDir(true);
+    showDir = manipulationPath(showDir);
     #endif
 
     ui->writer->click();
@@ -33,6 +34,46 @@ inserturi::inserturi(QWidget *parent, std::string pwd, SymWinInterface& si) :
 inserturi::~inserturi()
 {
     delete ui;
+}
+
+std::string inserturi::manipulationPath(std::string& s){
+    std::string result;
+    std::string estratta;
+    std::size_t found;
+    std::size_t foundn = 0;
+    std::size_t dim_s = s.size();
+    //delete first username and space
+    found = s.find_first_of(" ");
+    s.erase(0, found+1);
+    //check the first character is space yet
+    while(s.substr(0,1) == " "){
+        s.erase(0,1);
+    }
+    dim_s = s.size();
+    //check if there is no directory
+    if(dim_s == 0)
+        return s;
+    //add space between directory
+    while(dim_s != 0){
+        foundn = s.find_first_of("\n");
+        estratta = s.substr(0,foundn+1);
+        //delete start space
+        while(estratta.substr(0,1) == " "){
+            estratta.erase(0,1);
+        }
+        //delete final space
+        while(estratta.substr(estratta.size()-1,1) == " "){
+            estratta.erase(estratta.size()-1,1);
+        }
+        result = result +  estratta + " ";
+        s.erase(0,foundn+1);
+        dim_s = s.size();
+    }
+    //delete final space
+    found = result.find_last_of(" ");
+    dim_s = result.size();
+    result.erase(found, dim_s);
+    return result;
 }
 
 void inserturi::success(){

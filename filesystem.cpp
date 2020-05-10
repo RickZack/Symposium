@@ -507,8 +507,11 @@ std::string directory::print(const std::string &targetUser, bool recursive, unsi
                 std::shared_ptr<directory> dir=std::dynamic_pointer_cast<directory>(it);
                 std::ostringstream typeres;
                 typeres<<dir->resType();
-                std::string spaces;
-                spaces.insert(result.end(), indent, ' ');
+                std::string spaces = "";
+                if(result.size()>=indent)
+                    spaces.insert(result.end(), indent, ' ');
+                else
+                    spaces.push_back(' ');
                 result=result+typeres.str()+" "+std::to_string(it->getId())+" "+spaces+dir->name+"\n";
                 if(recursive)
                     result+=dir->print(targetUser, recursive, indent+1);

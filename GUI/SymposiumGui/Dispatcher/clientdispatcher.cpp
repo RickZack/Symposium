@@ -58,9 +58,9 @@ int clientdispatcher::run(int argc, char **argv){
     MainWindow w(nullptr, this->winmanager, *this);
     (this->winmanager).setActive(w);
     w.show();
-    //notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "");
-    //notepadWindow.show();
-    //notepadWindow.showLabels();
+    notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "");
+    notepadWindow.show();
+    notepadWindow.showLabels();
     return a.exec();
 }
 
@@ -109,50 +109,6 @@ void clientdispatcher::readyRead(){
 
         this->winmanager.activeWindow().failure(QString::fromStdString(mes->getErrDescr()));
         this->userpwd="";
-
-        /*switch(currentWindow){
-        case 1:{
-            //this->finestraLogin->errorSignIn();
-            break;
-        }case 2:{
-            //this->finestraSignup->errorSignUp(mes->getErrDescr());
-            //this->userpwd="";
-            break;
-        }case 3:{
-            this->finestraInsertUri->unsuccessInsert(mes->getErrDescr());
-            break;
-        }case 5:{
-            //this->finestraEliminaAccount->errorDeleteUser(mes->getErrDescr());
-            break;
-        }case 7:{
-            //this->finestraModificaUser->errorEditUser(mes->getErrDescr());
-            break;
-        }case 8:{
-            this->finestraActiveCounterLink->unsuccessLink(mes->getErrDescr());
-            break;
-        }case 9:{
-            this->finestraActiveTimerLink->unsuccessLink(mes->getErrDescr());
-            break;
-        }case 10:{
-            this->finestraActiveAlwaysLink->unsuccessLink(mes->getErrDescr());
-            break;
-        }case 12:{
-            //this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
-            break;
-        }case 13:{
-            this->finestraOnlineUser->errorEditPrivilege(mes->getErrDescr());
-            break;
-        }case 14:{
-            this->finestraAllUser->errorEditPrivilege(mes->getErrDescr());
-            break;
-        }case 15:{
-            this->finestraActiveNonLink->unsuccessLink(mes->getErrDescr());
-            break;
-        }case 16:{
-            this->finestraDirectory->failureActionDirectory(mes->getErrDescr());
-            break;
-        }
-        }*/
 
     } catch (SymClientException& e){
         //eccezione di relatedMessage non trovato
@@ -248,7 +204,6 @@ void clientdispatcher::signUp(const std::string &username, const std::string &pw
         this->closeConnection();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
-        //this->finestraSignup->errorConnection();
     }
 }
 
@@ -265,22 +220,12 @@ void clientdispatcher::logIn(const std::string &username, const std::string &pwd
         this->closeConnection();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
-        //this->finestraLogin->errorConnection();
     }
 }
 
 void clientdispatcher::autologIn(){
     logIn(this->username, this->userpwd);
 }
-
-/*bool clientdispatcher::isAutoLogin(){
-    if(this->userpwd==""){
-        return false;
-    }else{
-        this->userpwd="";
-        return true;
-    }
-}*/
 
 void clientdispatcher::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.openSource(path,name,reqPriv));
@@ -292,7 +237,6 @@ void clientdispatcher::openSource(const std::string &path, const std::string &na
         this->closeConnection();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
-        //this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -306,7 +250,6 @@ void clientdispatcher::openNewSource(const std::string &resourceId, privilege re
         this->closeConnection();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
-        //this->finestraInsertUri->errorConnectionLogout();
     }
 }
 
@@ -320,7 +263,6 @@ void clientdispatcher::createNewSource(const std::string &path, const std::strin
         this->closeConnection();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
-        //this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -334,7 +276,6 @@ void clientdispatcher::createNewDir(const std::string &path, const std::string &
         this->closeConnection();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
-        //this->finestraDirectory->errorConnectionLogout();
     }
 }
 
@@ -570,30 +511,6 @@ void clientdispatcher::successAction(){
     this->userpwd = "";
 }
 
-/*void clientdispatcher::successLogin(){
-    this->winmanager.activeWindow().success();
-}
-
-void clientdispatcher::successLogout(){
-    this->winmanager.activeWindow().success();
-}
-
-void clientdispatcher::successSignUp(){
-    this->winmanager.activeWindow().success();
-}
-
-void clientdispatcher::successDeleteAccount(){
-    this->finestraEliminaAccount->successDeleteAccount();
-}
-
-void clientdispatcher::successEditUser(){
-    this->finestraModificaUser->successEditUser();
-}
-
-void clientdispatcher::successInsertUri(){
-    this->finestraInsertUri->successInsert();
-}*/
-
 void clientdispatcher::successEditPrivilege(){
     if(this->currentWindow==13){
        this->finestraOnlineUser->successEditPrivilege();
@@ -623,23 +540,11 @@ const document& clientdispatcher::getOpenDocument(){
     return this->requestDoc;
 }
 
-/*void clientdispatcher::successRemoveResource(){
-    this->finestraDirectory->successRemove();
-}*/
-
-/*void clientdispatcher::successCreateNewDir(const std::string ID){
-    this->finestraDirectory->successCreate();
-}*/
-
 void clientdispatcher::successCreateNewSource(const document &doc){
     this->requestDoc = doc;
     this->successAction();
     //this->setTextEdit(doc.getId(),this->finestraDirectory->successNewSource(ID, doc));
 }
-
-/*void clientdispatcher::successRenameResource(){
-    this->finestraDirectory->successRename();
-}*/
 
 void clientdispatcher::closeConnection(){
     this->socket.close();
@@ -664,74 +569,10 @@ std::string clientdispatcher::showHome(){
 std::string clientdispatcher::showDir(bool recursive){
     return this->client.showDir(recursive);
 }
-/*
-void clientdispatcher::setSignIn(sigin* si){
-    qDebug() << "metodo setSignIn";
-    this->finestraLogin = si;
-    qDebug() << "metodo setSignIn dopo assegnazione nuovo puntatore";
-    this->currentWindow = 1;
-    qDebug() << "metodo setSignIn dopo assegnazione a currentWindow";
-}*/
 
 void clientdispatcher::setTextEdit(uint_positive_cnt::type resourceID, notepad *te){
     this->finestreDocumenti.push_back(std::make_pair(resourceID,te));
 }
-/*
-void clientdispatcher::setSignUp(signup *su){
-    this->finestraSignup = su;
-    this->currentWindow = 2;
-}
-
-void clientdispatcher::setInsertUri(inserturi *iu){
-    this->finestraInsertUri = iu;
-    this->currentWindow = 3;
-}
-
-void clientdispatcher::setHome(home *ho){
-    this->finestraHome = ho;
-    this->currentWindow = 4;
-}
-
-void clientdispatcher::setDirectory(::directory *dr){
-    this->finestraDirectory = dr;
-    this->currentWindow = 12;
-}
-
-void clientdispatcher::setDeleteAccount(deleteAccount *da){
-    this->finestraEliminaAccount = da;
-    this->currentWindow = 5;
-}
-
-void clientdispatcher::setChooseDir(choosedir *cd){
-    this->finestraSceltaDir = cd;
-    this->currentWindow = 6;
-}
-
-void clientdispatcher::setChangeUserInfo(changeUserInfo *cui){
-    this->finestraModificaUser = cui;
-    this->currentWindow = 7;
-}
-
-void clientdispatcher::setActiveCounterLink(activecounterlink *acl){
-    this->finestraActiveCounterLink = acl;
-    this->currentWindow = 8;
-}
-
-void clientdispatcher::setActiveTimerLink(activetimerlink *atl){
-    this->finestraActiveTimerLink = atl;
-    this->currentWindow = 9;
-}
-
-void clientdispatcher::setActiveAlwaysLink(activealwayslink *aal){
-    this->finestraActiveAlwaysLink = aal;
-    this->currentWindow = 10;
-}
-
-void clientdispatcher::signinExpired(){
-    this->timer.stop();
-    this->finestraLogin->errorConnection();
-    qDebug() << "Timer scaduto\n";
-}*/
 
 void clientdispatcher::setOnlineUser(onlineusers *ou){
     this->finestraOnlineUser = ou;
@@ -742,145 +583,6 @@ void clientdispatcher::setAllUser(alluser *au){
     this->finestraAllUser = au;
     this->currentWindow = 14;
 }
-
-/*void clientdispatcher::setActiveNonLink(activenonlink *anl){
-    this->finestraActiveNonLink = anl;
-    this->currentWindow = 15;
-}
-
-void clientdispatcher::setchoosepriv(choosepriv *pr){
-    this->finestraChoosePriv = pr;
-    this->currentWindow = 16;
-}*/
-
-/*void clientdispatcher::signupExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    this->finestraSignup->errorConnection();
-}*/
-
-/*void clientdispatcher::removeUserExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    this->finestraEliminaAccount->errorConnectionLogout(TIMERSCADUTO);
-}
-
-void clientdispatcher::editUserExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    this->finestraModificaUser->errorConnectionLogout(TIMERSCADUTO);
-}
-
-void clientdispatcher::openNewSourceExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    this->finestraInsertUri->errorConnectionLogout(TIMERSCADUTO);
-}
-
-void clientdispatcher::openSourceExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
-}
-
-void clientdispatcher::editPrivilegeExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    if(this->currentWindow==13){
-        this->finestraOnlineUser->errorConnectionLogout(TIMERSCADUTO);
-    }else{
-        this->finestraAllUser->errorConnectionLogout(TIMERSCADUTO);
-    }
-}
-
-void clientdispatcher::shareResourceExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    if(this->currentWindow==8){
-        this->finestraActiveCounterLink->errorConnectionLogout(TIMERSCADUTO);
-    }else if(this->currentWindow==9){
-        this->finestraActiveTimerLink->errorConnectionLogout(TIMERSCADUTO);
-    }else if(this->currentWindow==10){
-        this->finestraActiveAlwaysLink->errorConnectionLogout(TIMERSCADUTO);
-    }else{
-        this->finestraActiveNonLink->errorConnectionLogout(TIMERSCADUTO);
-    }
-}
-
-void clientdispatcher::removeResourceExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
-}
-
-void clientdispatcher::createNewDirExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
-}
-
-void clientdispatcher::createNewSourceExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
-}*/
-
-/*void clientdispatcher::localRemoveExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-
-    // COSA FACCIAMO
-}*/
-
-/*void clientdispatcher::localInsertExpired(){
-    this->timer.stop();
-    qDebug() << "Timer scaduto\n";
-
-    // COSA FACCIAMO??
-}*/
-
-/*void clientdispatcher::closeSourceExpired(){
-    this->timer.stop();
-
-    // COSA FACCIAMO??
-
-
-    qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeConnection();
-    //dobbiamo notificare alla GUI
-    //this->finestraDirectory->errorConnectionLogout(TIMERSCADUTO);
-}*/
 
 void clientdispatcher::TimerExpired(){
     this->timer.stop();

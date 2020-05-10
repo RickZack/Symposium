@@ -697,10 +697,11 @@ void notepad::visualizeAllUsers()
     //---------------------------------------------------------------------------------------------------
     //std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
     //std::unordered_map<std::string, Symposium::privilege> users=cl->allUser(documentID);
-    alluserWindow = new alluser(this,  priv, documentId, thisUs, pathToFile, onlineUsers, users);
-    alluserWindow->setClientDispatcher(cl);
+    alluser* alluserWindow = new alluser(this,  priv, documentId, thisUs, pathToFile, onlineUsers, users, *this);
+    goToWindow(*alluserWindow);
+    //alluserWindow->setClientDispatcher(cl);
     //cl->setAllUser(alluserWindow);
-    alluserWindow->exec();
+    //alluserWindow->exec();
 }
 
 void notepad::inactiveLink()

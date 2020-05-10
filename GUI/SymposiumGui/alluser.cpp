@@ -5,8 +5,9 @@
 
 alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile,
                  std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers,
-                 std::unordered_map<std::string, Symposium::privilege> users) :
+                 std::unordered_map<std::string, Symposium::privilege> users, SymWinInterface& si) :
     QDialog(parent),
+    SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
     privelege(privelege), us(user), pathFile(pathFile),  documentID(documentID),  ui(new Ui::alluser), onlineUsers(onlineUsers), users(users)
 {
     ui->setupUi(this);
@@ -29,10 +30,22 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uin
     movie->start();
 }
 
-void alluser::setClientDispatcher(Symposium::clientdispatcher *cl)
+void alluser::success(){
+    successEditPrivilege();
+}
+
+void alluser::failure(const QString& toPrint){
+    if(toPrint=="-1"){
+        errorConnectionLogout();
+    }else{
+        errorEditPrivilege(toPrint);
+    }
+}
+
+/*void alluser::setClientDispatcher(Symposium::clientdispatcher *cl)
 {
     this->cl = cl;
-}
+}*/
 
 void alluser::successEditPrivilege()
 {
@@ -49,15 +62,14 @@ void alluser::successEditPrivilege()
 
 }
 
-void alluser::errorEditPrivilege(std::string errorMess)
+void alluser::errorEditPrivilege(const QString& errorMess)
 {
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
     enableButtons();
-    QString error=QString::fromStdString(errorMess);
     ui->errorMess->show();
-    ui->errorMess->setText(error);
+    ui->errorMess->setText(errorMess);
 }
 
 void alluser::errorConnectionLogout()
@@ -66,9 +78,7 @@ void alluser::errorConnectionLogout()
     ui->gif->hide();
     ui->button->setDisabled(false);
     errorlogout errorLog(this);
-    this->close();
-    parentWidget()->close();
-    parentWidget()->parentWidget()->close();
+    backToMainWin();
     errorLog.exec();
 }
 

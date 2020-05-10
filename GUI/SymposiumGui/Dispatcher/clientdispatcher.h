@@ -148,8 +148,6 @@ namespace Symposium{
 
         void autologIn();
 
-        //bool isAutoLogin();
-
 
         void openSource(const std::string &path, const std::string &name, privilege reqPriv);
 
@@ -223,31 +221,13 @@ namespace Symposium{
         std::string showDir(bool recursive);
 
 
-        //void successLogin();
-
-        //void successLogout();
-
-        //void successSignUp();
-
-        //void successDeleteAccount();
-
-        //void successEditUser();
-
-        //void successInsertUri();
-
         void successEditPrivilege();
 
         void successShareResource(std::string path);
 
         void successOpenSource(document &doc);
 
-        //void successRemoveResource();
-
-        //void successCreateNewDir(const std::string ID);
-
         void successCreateNewSource(const document &doc);
-
-        //void successRenameResource();
 
         void closeConnection();
 
@@ -259,98 +239,20 @@ namespace Symposium{
 
 
         /**
-         * @brief this method assign to @ref finestraLogin the pointer to the sigin window
-         * @param a pointer to the sigin window
-         */
-        //void setSignIn(sigin* si);
-
-        /**
          * @brief this method insert into @ref finestreDocumenti the pair composed of the respurceID of the document and the pointer to the notepad window
          * @param resourceID the ID of the document
          * @param te a pointer to the notepad window
          */
         void setTextEdit(uint_positive_cnt::type resourceID, notepad *te);
 
-        /**
-         * @brief this method assign to @ref finestraSignup the pointer to the signup window
-         * @param a pointer to the signup window
-         */
-        //void setSignUp(signup *su);
-
-        /**
-         * @brief this method assign to @ref finestraInsertUri the pointer to the InsertUri window
-         * @param a pointer to the InsertUri window
-         */
-        //void setInsertUri(inserturi *iu);
-
-        /**
-         * @brief this method assign to @ref finestraHome the pointer to the Home window
-         * @param a pointer to the Home window
-         */
-        //void setHome(home *ho);
-
-        /**
-         * @brief this method assign to @ref finestraSceltaDir the pointer to the directory window
-         * @param a pointer to the directory window
-         */
-        //void setDirectory(::directory *dr);
-
-        /**
-         * @brief this method assign to @ref finestraEliminaAccount the pointer to the delete account window
-         * @param a pointer to the deleteaccount window
-         */
-        //void setDeleteAccount(deleteAccount *da);
-
-        /**
-         * @brief this method assign to @ref finestraSceltaDir the pointer to the choose dir window
-         * @param a pointer to the choosedir window
-         */
-        //void setChooseDir(choosedir *cd);
-
-        /**
-         * @brief this method assign to @ref finestraModificaUser the pointer to the change user info window
-         * @param a pointer to the changeUserInfo window
-         */
-        //void setChangeUserInfo(changeUserInfo *cui);
-
-        /**
-         * @brief this method assign to @ref finestraActiveCounterLink the pointer to the active counter link window
-         * @param a pointer to the activecounterlink window
-         */
-        //void setActiveCounterLink(activecounterlink *acl);
-
-        /**
-         * @brief this method assign to @ref finestraActiveTimerLink the pointer to the active timer link window
-         * @param a pointer to the activetimerlink window
-         */
-        //void setActiveTimerLink(activetimerlink *atl);
-
-        /**
-         * @brief this method assign to @ref finestraActiveAlwaysLink the pointer to the active always link window
-         * @param a pointer to the activealwayslink window
-         */
-        //void setActiveAlwaysLink(activealwayslink *aal);
-
         void setOnlineUser(onlineusers *ou);
 
         void setAllUser(alluser *au);
-
-        //void setActiveNonLink(activenonlink *anl);
-
-        //void setchoosepriv(choosepriv *pr);
 
         void stopTimer();
 
 
     private:
-        /*int getmsgaction(const std::shared_ptr<clientMessage> Message);
-        int getClassOfMessage(const clientMessage& Message);
-        int getPrivilege(const privilege priv);
-        int getmsgOutcome(const msgOutcome& Message);
-        QString getActionOwner(const std::shared_ptr<clientMessage> Message);
-        QString getnewUser(const user& utente);
-        QString getSymbolserialized(const symbol& sym);
-        QString getUriserialized(const uri& uri);*/
         notepad* getCorrectNotepadbyResourceID(uint_positive_cnt::type resourceID);
         void deleteActiveDocument(uint_positive_cnt::type resourceID);
 
@@ -359,20 +261,6 @@ namespace Symposium{
 
     public slots:
         void readyRead();
-        /*void signinExpired();
-        void signupExpired();
-        void removeUserExpired();
-        void editUserExpired();
-        void openNewSourceExpired();
-        void openSourceExpired();
-        void editPrivilegeExpired();
-        void shareResourceExpired();
-        void removeResourceExpired();
-        void createNewDirExpired();
-        void createNewSourceExpired();
-        void localRemoveExpired();
-        void localInsertExpired();
-        void closeSourceExpired();*/
         void TimerExpired();
     };
 }

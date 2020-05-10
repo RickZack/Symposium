@@ -100,7 +100,6 @@ private:
     std::string showDir;
     std::string pathId;
     std::string pwd;
-    class exit *ex;
     choosedir *dirWindow;
 
     /**
@@ -132,6 +131,8 @@ private:
      * @brief return to directory
      */
     void closeEvent(QCloseEvent *event) override;
+
+    std::string manipulationPath(std::string& s);
 };
 
 #endif // INSERTURI_H
