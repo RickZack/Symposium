@@ -245,7 +245,7 @@ namespace Symposium {
          * @return the position
          */
         std::pair<unsigned int, unsigned int>
-        findEndPosition(int lines) const;
+        findEndPosition(int lines, symbol lastSymbol) const;
 
         /**
          * @brief it searches for the symbol that is inserted in the middle of the line

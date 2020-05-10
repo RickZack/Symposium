@@ -143,6 +143,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     //()<<"Simboli"<<toText();
 
+
     return newSymb;
 
 }
@@ -543,13 +544,14 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 
 
     // check if struct is empty or char is less than first char
-    if (totalLines==0||symbol.getCh()<symbols[0][0].getCh() & symbol.getCh()!='\r') {ind={i0,i1};return ind;}
-
+    //if (totalLines==0||symbol.getCh()<symbols[0][0].getCh() & symbol.getCh()!='\r') {ind={i0,i1};return ind;}
+    if(totalLines==0 || symbol<symbols[0][0]){ind={0,0}; return ind;}
     int numCharsInLine=countCharsInLine(maxLine);
     auto lastSymbol=lastLine[numCharsInLine-1];
 
     //char is greater than all existing chars (insert and end)
 
+    /*
     if(symbol.getCh()=='\r'||symbol>lastSymbol){
         ind= findEndPosition(totalLines);
         return ind;
@@ -557,6 +559,10 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
     if(lastSymbol.getCh()=='\r'){
         ind={maxLine+1,0};
         return ind;
+    }
+    */
+    if(symbol>lastSymbol){
+        return findEndPosition(totalLines,lastSymbol);
     }
 
     //binary search
@@ -597,10 +603,14 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 }
 
 std::pair<unsigned int, unsigned int>
-document::findEndPosition(int lines) const {
+document::findEndPosition(int lines,symbol lastSymbol) const {
     std::pair<int,int> ind;
-    int numCharsinLine=countCharsInLine(lines-1);
-    ind={lines-1,numCharsinLine};
+    if(lastSymbol.getCh()=='\r'){
+        ind={lines,0};
+    }else{
+        int numCharsinLine=countCharsInLine(lines-1);
+        ind={lines-1,numCharsinLine};
+    }
     return ind;
 }
 
@@ -611,7 +621,7 @@ int document::findInsertInLine(const symbol ch, const std::vector<Symposium::sym
     int right= countCharsInLine(line)-1;
     int mid;
 
-    if(ch>vector[left]){
+    if(ch<vector[left]){
         ind=left;
         return ind;
     } else if(ch>vector[right]){
@@ -653,7 +663,12 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     std::vector<Symposium::symbol> currentLine;
 
     //if the struct is empty or char is less than first char
+    /*
     if(symbols.empty()||symbol.getCh()<symbols[0][0].getCh()){
+        i0=-1; i1=-1; ind={i0,i1}; return ind;
+    }
+*/
+    if(symbols.empty()||symbol<symbols[0][0]){
         i0=-1; i1=-1; ind={i0,i1}; return ind;
     }
 
@@ -662,10 +677,18 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     auto lastChar=lastLine[chars-1];
 
     //char is greater than all existing chars(insert at end)
-    if(symbol.getCh()>lastChar.getCh()){
+    /*
+    if(symbol.getCh()>lastChar.getCh() && lastChar.getCh()!='\r'){
        i0=-1; i1=-1; ind={i0,i1}; return ind;
     }else if(symbol.getCh()==lastChar.getCh()){
         i0=maxLine; i1=chars-1; ind={i0,i1}; return ind;
+    }
+
+    */
+    if(symbol==lastChar){
+       i0=maxLine; i1=chars-1; ind={i0,i1}; return ind;
+    }else if(symbol>lastChar){
+        i0=-1; i1=-1; ind={i0,i1}; return ind;
     }
 
     // binary search
