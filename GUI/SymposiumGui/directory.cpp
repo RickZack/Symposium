@@ -323,7 +323,7 @@ void directory::deleteSource()
            std::pair<std::string,std::string> idPriv=searchForPriv(nameSource,str,count);
            id=idPriv.first;
        }
-       waiting();
+       waitingFunction();
        #ifdef DISPATCHER_ON
        cl.removeResource(path,id);
        #endif
@@ -395,7 +395,7 @@ void directory::on_pushButton_3_clicked()
     disableStyleButtons();
     pressed=true;
     QString name= ui->name->text();
-    waiting();
+    waitingFunction();
     std::string nameFolder=name.toStdString();
     #ifdef DISPATCHER_ON
     cl.createNewDir(path,nameFolder);
@@ -651,7 +651,7 @@ void directory::on_pushButton_4_clicked()
     pressed=true;
     QString name= ui->name_2->text();
     std::string nameDocument=name.toStdString();
-    waiting();
+    waitingFunction();
     //ui->name_2->setText(" "); // da rimuovere
     #ifdef DISPATCHER_ON
     cl.createNewSource(this->path,nameDocument);
@@ -781,7 +781,7 @@ void directory::on_okButton_clicked()
     foreach(QListWidgetItem *items, selectedItem){
          std::string oldName=items->text().toStdString();
          std::string id=searchForId(oldName,str,count);
-         waiting();
+         waitingFunction();
          #ifdef DISPATCHER_ON
          cl.renameResource(this->path,id, newName.toStdString());
          #else
@@ -931,7 +931,7 @@ void directory::on_OkPriv_clicked()
         priv= Symposium::privilege::readOnly;
     else
         priv= Symposium::privilege::owner;
-    waiting();
+    waitingFunction();
     #ifdef DISPATCHER_ON
     cl.openSource(this->path,this->id,this->priv);
     #else
