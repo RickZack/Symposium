@@ -244,6 +244,20 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         ui->sizeBox->hide();
         ui->styleBox->hide();
     }
+
+    ui->tree->setColumnCount(1);
+    ui->tree->header()->setVisible(false);
+    #ifndef DISPATCHER_ON
+    us=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
+    #endif
+    insertusers();
+    ui->tree->header()->setStretchLastSection(false);
+    ui->tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    ui->showUsers->setDisabled(true);
+    ui->showUsers->hide();
+
+
     setFocusPolicy(Qt::StrongFocus);
     setAttribute( Qt::WA_DeleteOnClose );
 }
@@ -300,6 +314,7 @@ void notepad::removeUserCursor(Symposium::uint_positive_cnt::type siteID)
 void notepad::addUserCursor(Symposium::uint_positive_cnt::type siteID, std::string username)
 {
     ui->textEdit->addUser(siteID, username);
+    insertusers();
 }
 
 
@@ -666,9 +681,6 @@ void notepad::visualizeAllUsers()
     //std::unordered_map<std::string, Symposium::privilege> users=cl->allUser(documentID);
     alluser* alluserWindow = new alluser(this,  priv, documentId, thisUs, pathToFile, onlineUsers, users, *this);
     goToWindow(*alluserWindow);
-    //alluserWindow->setClientDispatcher(cl);
-    //cl->setAllUser(alluserWindow);
-    //alluserWindow->exec();
 }
 
 void notepad::inactiveLink()
@@ -723,8 +735,23 @@ void notepad::resizeEvent(QResizeEvent *event)
 {
     int w=event->size().width();
     int h=event->size().height();
-    w=w-19;
+    int w1=w-240;
+    int w2=w-260;
+    int w3=w-30;
+    int w4=w-118;
+    if(showUsers)
+        w=w-30-240;
+    else
+        w=w-39;
     h=h-159;
+    ui->hideUsers->move(w2, 60);
+    ui->showUsers->move(w3, 60);
+    ui->tree->move(w1, 90);
+    ui->labelUser->move(w1, 60);
+    ui->labelCountUser->move(w4, 60);
+    ui->tree->resize(ui->tree->width(), h-30);
+    ui->hideUsers->resize(ui->hideUsers->width(), h);
+    ui->showUsers->resize(ui->showUsers->width(), h);
     ui->textEdit->resize(w, h);
     ui->textEdit->scroll();
 
@@ -743,6 +770,7 @@ void notepad::showLabels()
     //----------------------------------------------------------------------------
 
     //-------------------------------------------------PARTE DA CANCELLARE
+    onlineUsers.clear();
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
     Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
@@ -988,6 +1016,7 @@ void notepad::addCursor()
 void notepad::removeCursor()
 {
     ui->textEdit->removeUser(4);
+    insertusers();
 }
 
 void notepad::changeCursorPos()
@@ -1030,7 +1059,7 @@ void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt::t
     // check if the highlight button is activated;
     // if yes-> highlight the inserted character with the color of the user
     if(this->highActivated){
-        Symposium::Color colHigh=cl->getColor(this->documentId,sym.getSiteId());
+        Symposium::Color colHigh=cl.getColor(this->documentId,sym.getSiteId());
         QColor colUser;
         colUser=static_cast<QColor>(colHigh);
         ch_format.setBackground(colUser);
@@ -1090,7 +1119,7 @@ void notepad::verifySymbol(Symposium::symbol sym,std::pair<int,int> indexes){
     // check if the highlight button is activated;
     // if yes-> highlight the inserted character with the color of the user
     if(this->highActivated){
-        Symposium::Color colHigh=cl->getColor(this->documentId,sym.getSiteId());
+        Symposium::Color colHigh=cl.getColor(this->documentId,sym.getSiteId());
         QColor colUser;
         colUser=static_cast<QColor>(colHigh);
         ch_format.setBackground(colUser);
@@ -1202,10 +1231,6 @@ void notepad::remoteDelete(std::pair<int,int> indexes,Symposium::uint_positive_c
     insertOthCh=false;
 }
 
-void notepad::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
-    this->cl = cl;
-}
 
 void notepad::on_textEdit_cursorPositionChanged()
 {
@@ -1390,6 +1415,37 @@ int notepad::countCharsInLine(int line)const {
     return ch;
 }
 
+void notepad::insertusers()
+{
+    int count=0;
+    #ifdef DISPATCHER_ON
+    const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
+    #else
+    Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
+    Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
+    Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
+    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 0, 0)};
+    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 2, 2)};
+    std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 0, 0)};
+
+    onlineUsers.push_front(p1);
+    onlineUsers.push_front(p2);
+    onlineUsers.push_front(p3);
+    #endif
+    for(auto it:onlineUsers)
+    {
+        QTreeWidgetItem *item=new QTreeWidgetItem();
+        item->setIcon(0, QIcon(QString::fromStdString(it.first->getIconPath())));
+        if(us.getUsername()==it.first->getUsername())
+            item->setText(0, "(you)");
+        else
+            item->setText(0, QString::fromStdString(it.first->getUsername()));
+        ui->tree->addTopLevelItem(item);
+        count++;
+    }
+    ui->labelCountUser->setText(QString::number(count));
+}
+
 void notepad::on_textEdit_textChanged()
 {
     if(okPaste){
@@ -1399,4 +1455,45 @@ void notepad::on_textEdit_textChanged()
         this->contV_action();
 
     }
+}
+
+void notepad::on_hideUsers_clicked()
+{
+    showUsers=false;
+
+    int w=this->size().width();
+    int h=this->size().height();
+    w=w-39;
+    h=h-159;
+    ui->textEdit->resize(w, h);
+    ui->textEdit->scroll();
+
+    ui->hideUsers->setDisabled(true);
+    ui->hideUsers->hide();
+    ui->tree->hide();
+    ui->labelUser->hide();
+    ui->labelCountUser->hide();
+
+    ui->showUsers->setDisabled(false);
+    ui->showUsers->show();
+}
+
+void notepad::on_showUsers_clicked()
+{
+    showUsers=true;
+    int w=this->size().width();
+    int h=this->size().height();
+    w=w-30-240;
+    h=h-159;
+    ui->textEdit->resize(w, h);
+    ui->textEdit->scroll();
+
+    ui->hideUsers->setDisabled(false);
+    ui->hideUsers->show();
+    ui->tree->show();
+    ui->labelUser->show();
+    ui->labelCountUser->show();
+
+    ui->showUsers->setDisabled(true);
+    ui->showUsers->hide();
 }

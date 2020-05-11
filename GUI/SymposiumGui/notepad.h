@@ -125,13 +125,17 @@ private slots:
 
     void on_textEdit_textChanged();
 
+    void on_hideUsers_clicked();
+
+    void on_showUsers_clicked();
+
 private:
     Ui::notepad *ui;
     QString mFilename;
     Symposium::uint_positive_cnt::type documentId;
     Symposium::user us;
-    Symposium::clientdispatcher *cl;
     Symposium::document doc;
+    bool showUsers=true;
     //-----------------------------------------------------------------------------PARTE DA CANCELLARE
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     //-------------------------------------------------------------------
@@ -141,11 +145,6 @@ private:
     std::string pathToFile;
     Symposium::privilege priv;
     Symposium::privilege privOpen;
-    //activetimerlink *timerlinkwindow;
-    //activecounterlink *counterlinkwindow;
-    //activealwayslink *alwayslinkwindow;
-    //activenonlink *nonlinkwindow;
-
     bool insertOthCh=false;
     bool highActivated=false;
     int insertedChars=0;
@@ -219,6 +218,8 @@ private:
     int columnForReturn=0;
     void deleteMultipleLines(int sR, int eR, int c, int sL, bool lines);
     int countCharsInLine(int line) const;
+
+    void insertusers();
 };
 
 #endif // NOTEPAD_H

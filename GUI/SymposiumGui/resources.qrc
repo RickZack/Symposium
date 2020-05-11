@@ -171,5 +171,7 @@
         <file>icon/pdf.png</file>
         <file>icon/offline.png</file>
         <file>icon/goback.png</file>
+        <file>icon/left-and-right-arrows.png</file>
+        <file>icon/left-arrow.png</file>
     </qresource>
 </RCC>

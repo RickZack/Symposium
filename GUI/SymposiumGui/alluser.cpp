@@ -42,11 +42,6 @@ void alluser::failure(const QString& toPrint){
     }
 }
 
-/*void alluser::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
-    this->cl = cl;
-}*/
-
 void alluser::successEditPrivilege()
 {
     ui->waiting->hide();

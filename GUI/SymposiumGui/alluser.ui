@@ -156,6 +156,9 @@ background-color:white;
 border-color: rgb(58, 80, 116);
 </string>
    </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
    <property name="indentation">
     <number>0</number>
    </property>

@@ -14,7 +14,58 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color:rgb(249, 247, 241);</string>
+   <string notr="true">QMainWindow{background-color:rgb(249, 247, 241);}
+QScrollBar:horizontal {
+border-color:rgb(58, 80, 116);
+border-width: 1px;
+border-style: solid;
+background-color: rgb(240, 240, 240);
+height:10px;
+margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:horizontal {
+background-color: rgb(58, 80, 116);
+min-width: 25px;
+}
+QScrollBar::add-line:horizontal {
+border: 1px solid rgb(58, 80, 116);
+background-color: rgb(241, 241, 241);
+height: 0px;
+subcontrol-position: left;
+subcontrol-origin: margin;
+}
+QScrollBar::sub-line:horizontal {
+border: 1px solid rgb(58, 80, 116);
+background-color: rgb(241, 241, 241);
+height: 0px;
+subcontrol-position: right;
+subcontrol-origin: margin;
+}
+QScrollBar:vertical {              
+    border: 1px solid rgb(58, 80, 116);
+    background:white;
+    width:10px;    
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:vertical {
+   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+   stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116), stop:1 rgb(58, 80, 116));
+   min-height: 0px;
+}
+QScrollBar::add-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1 rgb(58, 80, 116));
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0  rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1rgb(58, 80, 116));
+    height: 0 px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="qtexteditlabels" name="textEdit">
@@ -22,7 +73,7 @@
      <rect>
       <x>10</x>
       <y>60</y>
-      <width>781</width>
+      <width>530</width>
       <height>441</height>
      </rect>
     </property>
@@ -74,31 +125,7 @@ QComboBox QAbstractItemView {
 	background-color: white;
 	color:  rgb(58, 80, 116);
 }
-QScrollBar:vertical {              
-    border: 1px solid rgb(58, 80, 116);
-    background:white;
-    width:10px;    
-    margin: 0px 0px 0px 0px;
-}
-QScrollBar::handle:vertical {
-   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-   stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116), stop:1 rgb(58, 80, 116));
-   min-height: 0px;
-}
-QScrollBar::add-line:vertical {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-    stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1 rgb(58, 80, 116));
-    height: 0px;
-    subcontrol-position: bottom;
-    subcontrol-origin: margin;
-}
-QScrollBar::sub-line:vertical {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-    stop: 0  rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1rgb(58, 80, 116));
-    height: 0 px;
-    subcontrol-position: top;
-    subcontrol-origin: margin;
-}</string>
+</string>
        </property>
        <property name="editable">
         <bool>false</bool>
@@ -144,31 +171,7 @@ QComboBox QAbstractItemView {
 	background-color: white;
 	color:  rgb(58, 80, 116);
 }
-QScrollBar:vertical {              
-    border: 1px solid rgb(58, 80, 116);
-    background:white;
-    width:10px;    
-    margin: 0px 0px 0px 0px;
-}
-QScrollBar::handle:vertical {
-   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-   stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116), stop:1 rgb(58, 80, 116));
-   min-height: 0px;
-}
-QScrollBar::add-line:vertical {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-    stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1 rgb(58, 80, 116));
-    height: 0px;
-    subcontrol-position: bottom;
-    subcontrol-origin: margin;
-}
-QScrollBar::sub-line:vertical {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-    stop: 0  rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1rgb(58, 80, 116));
-    height: 0 px;
-    subcontrol-position: top;
-    subcontrol-origin: margin;
-}</string>
+</string>
        </property>
        <property name="currentFont">
         <font>
@@ -210,31 +213,7 @@ QComboBox QAbstractItemView {
 	background-color: white;
 	color:  rgb(58, 80, 116);
 }
-QScrollBar:vertical {              
-    border: 1px solid rgb(58, 80, 116);
-    background:white;
-    width:10px;    
-    margin: 0px 0px 0px 0px;
-}
-QScrollBar::handle:vertical {
-   background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-   stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116), stop:1 rgb(58, 80, 116));
-   min-height: 0px;
-}
-QScrollBar::add-line:vertical {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-    stop: 0 rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1 rgb(58, 80, 116));
-    height: 0px;
-    subcontrol-position: bottom;
-    subcontrol-origin: margin;
-}
-QScrollBar::sub-line:vertical {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-    stop: 0  rgb(58, 80, 116), stop: 0.5 rgb(58, 80, 116),  stop:1rgb(58, 80, 116));
-    height: 0 px;
-    subcontrol-position: top;
-    subcontrol-origin: margin;
-}</string>
+</string>
        </property>
        <property name="editable">
         <bool>true</bool>
@@ -242,6 +221,113 @@ QScrollBar::sub-line:vertical {
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QTreeWidget" name="tree">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>90</y>
+      <width>230</width>
+      <height>411</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); 
+background-color:white;
+border-color: rgb(58, 80, 116);</string>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="indentation">
+     <number>0</number>
+    </property>
+    <column>
+     <property name="text">
+      <string notr="true">1</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QPushButton" name="hideUsers">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>60</y>
+      <width>20</width>
+      <height>441</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>hide users</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/icon/left-and-right-arrows.png</normaloff>:/icon/left-and-right-arrows.png</iconset>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="showUsers">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>60</y>
+      <width>20</width>
+      <height>441</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>show users</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/icon/left-arrow.png</normaloff>:/icon/left-arrow.png</iconset>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelUser">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>60</y>
+      <width>122</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
+    <property name="text">
+     <string>Users online:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCountUser">
+    <property name="geometry">
+     <rect>
+      <x>682</x>
+      <y>60</y>
+      <width>108</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
