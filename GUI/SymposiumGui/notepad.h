@@ -177,21 +177,6 @@ private:
     void colorText();
     void addStyleFormat();
 
-    QAction *actionTextBold;
-    QAction *actionTextUnderline;
-    QAction *actionTextItalic;
-    QAction *actionTextColor;
-    QAction *actionAlignLeft;
-    QAction *actionAlignCenter;
-    QAction *actionAlignRight;
-    QAction *actionAlignJustify;
-    QAction *actionSelect;
-
-    QComboBox *comboStyle;
-    QFontComboBox *comboFont;
-    QComboBox *comboSize;
-
-    QTextEdit *textEdit;
 
     std::string idDoc;
 
