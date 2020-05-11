@@ -136,12 +136,7 @@ private:
     Symposium::user us;
     Symposium::document doc;
     bool showUsers=true;
-    //-----------------------------------------------------------------------------PARTE DA CANCELLARE
-    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
-    //-------------------------------------------------------------------
 
-    onlineusers *onlineuser;
-    //alluser *alluserWindow;
     std::string pathToFile;
     Symposium::privilege priv;
     Symposium::privilege privOpen;
@@ -158,8 +153,6 @@ private:
     void colorChanged(const QColor &c);
     void fontChanged(const QFont &f);
 
-
-    void visualizeUsers();
     void visualizeAllUsers();
     void inactiveLink();
     void activeAlwaysLink();

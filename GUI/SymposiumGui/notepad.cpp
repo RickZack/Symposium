@@ -197,18 +197,24 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
   //---------------------------------------------------------------------------------------------------------
 
+    #ifndef DISPATCHER_ON
     priv=Symposium::privilege::owner;
     privOpen=Symposium::privilege::owner;
-    //this->setToolButtonStyle(Qt::ToolButtonFollowStyle);
     ui->textEdit->setThisUserPrivilege(privOpen);
-    pathToFile="/1/2/3/4/5/6/7";
-    //us=cl->getUser();
+    this->pathToFile="/1/2/3/4/5/6/7";
+    us=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
+    #else
+    us=cl->getUser();
+    #endif
+
+    //this->setToolButtonStyle(Qt::ToolButtonFollowStyle);
+
+
     // Symposium::Color colorSymp=cl->getColor(this->documentId,us->getSiteId());
     // QColor myColor;
     // myColor=static_cast<QColor>(colorSymp);
 
     QMenu *userMenu=menuBar()->addMenu(tr("Users"));
-    userMenu->addAction(tr("Online Users"), this, &notepad::visualizeUsers);
     if(priv==Symposium::privilege::owner)
         userMenu->addAction(tr("All users"), this, &notepad::visualizeAllUsers);
     if(priv==Symposium::privilege::owner)
@@ -247,9 +253,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
     ui->tree->setColumnCount(1);
     ui->tree->header()->setVisible(false);
-    #ifndef DISPATCHER_ON
-    us=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
-    #endif
     insertusers();
     ui->tree->header()->setStretchLastSection(false);
     ui->tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -309,6 +312,7 @@ void notepad::moveUserCursor(Symposium::uint_positive_cnt::type siteID, int bloc
 void notepad::removeUserCursor(Symposium::uint_positive_cnt::type siteID)
 {
     ui->textEdit->removeUser(siteID);
+    insertusers();
 }
 
 void notepad::addUserCursor(Symposium::uint_positive_cnt::type siteID, std::string username)
@@ -648,37 +652,39 @@ void notepad::fillTextEdit(){
     insertOthCh=false;
 }
 
-
-
-void notepad::visualizeUsers()
-{
-    onlineuser = new onlineusers(this, priv, documentId, us, pathToFile);
-    //onlineuser->setClientDispatcher(cl);
-    //onlineuser->onlineUsers=cl->onlineUser(documentID);
-    //cl->setOnlineUser(onlineuser);
-    onlineuser->exec();
-}
-
 void notepad::visualizeAllUsers()
 {
-    //----------------------------------------------------PARTE DA CANCELLARE
+    #ifndef DISPATCHER_ON
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
+    Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
+    Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
+    Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
+    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify, 0, 0)};
+    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify, 2, 2)};
+    std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly, 0, 0)};
+
+    onlineUsers.push_front(p1);
+    onlineUsers.push_front(p2);
+    onlineUsers.push_front(p3);
+
     std::unordered_map<std::string, Symposium::privilege> users;
     std::pair p=std::make_pair<std::string, Symposium::privilege>("Carlo", Symposium::privilege::modify);
-    std::pair p1=std::make_pair<std::string, Symposium::privilege>("Vincenzo", Symposium::privilege::readOnly);
-    std::pair p2=std::make_pair<std::string, Symposium::privilege>("Matteo", Symposium::privilege::owner);
-    std::pair p3=std::make_pair<std::string, Symposium::privilege>("Claudio", Symposium::privilege::modify);
-    std::pair p4=std::make_pair<std::string, Symposium::privilege>("Mario", Symposium::privilege::owner);
-    std::pair p5=std::make_pair<std::string, Symposium::privilege>("Federico", Symposium::privilege::modify);
+    std::pair p4=std::make_pair<std::string, Symposium::privilege>("Vincenzo", Symposium::privilege::readOnly);
+    std::pair p5=std::make_pair<std::string, Symposium::privilege>("Matteo", Symposium::privilege::owner);
+    std::pair p6=std::make_pair<std::string, Symposium::privilege>("Claudio", Symposium::privilege::modify);
+    std::pair p7=std::make_pair<std::string, Symposium::privilege>("Mario", Symposium::privilege::owner);
+    std::pair p8=std::make_pair<std::string, Symposium::privilege>("Federico", Symposium::privilege::modify);
     users.insert(p);
-    users.insert(p1);
-    users.insert(p2);
-    users.insert(p3);
     users.insert(p4);
     users.insert(p5);
+    users.insert(p6);
+    users.insert(p7);
+    users.insert(p8);
     Symposium::user thisUs=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
-    //---------------------------------------------------------------------------------------------------
-    //std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
-    //std::unordered_map<std::string, Symposium::privilege> users=cl->allUser(documentID);
+    #else
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
+    std::unordered_map<std::string, Symposium::privilege> users=cl->allUser(documentID);
+    #endif
     alluser* alluserWindow = new alluser(this,  priv, documentId, thisUs, pathToFile, onlineUsers, users, *this);
     goToWindow(*alluserWindow);
 }
@@ -687,38 +693,24 @@ void notepad::inactiveLink()
 {
     activenonlink* nonlinkwindow = new activenonlink(this, documentId, pathToFile, *this);
     goToWindow(*nonlinkwindow);
-    //nonlinkwindow->setClientDispatcher(cl);
-    //cl->setActiveNonLink(nonlinkwindow);
-    //nonlinkwindow->exec();
-
 }
 
 void notepad::activeAlwaysLink()
 {
     activealwayslink* alwayslinkwindow = new activealwayslink(this, documentId, pathToFile, *this);
     goToWindow(*alwayslinkwindow);
-    //alwayslinkwindow->setClientDispatcher(cl);
-    //cl->setActiveAlwaysLink(alwayslinkwindow);
-    //alwayslinkwindow->exec();
-
 }
 
 void notepad::timerLink()
 {
     activetimerlink* timerlinkwindow = new activetimerlink(this, documentId, pathToFile, *this);
     goToWindow(*timerlinkwindow);
-    //timerlinkwindow->setClientDispatcher(cl);
-    //cl->setActiveTimerLink(timerlinkwindow);
-    //timerlinkwindow->exec();
 }
 
 void notepad::counterLink()
 {
     activecounterlink* counterlinkwindow = new activecounterlink(this, documentId, pathToFile, *this);
     goToWindow(*counterlinkwindow);
-    //counterlinkwindow->setClientDispatcher(cl);
-    //cl->setActiveCounterLink(counterlinkwindow);
-    //counterlinkwindow->exec();
 }
 
 
@@ -759,18 +751,13 @@ void notepad::resizeEvent(QResizeEvent *event)
 
 void notepad::showLabels()
 {
-    //------------------------------------------------------PARTE DA DECOMMENTARE
-
-    /*ui->textEdit->setDocumentId(documentId);
+    #ifdef DISPATCHER_ON
+    ui->textEdit->setDocumentId(documentId);
     ui->textEdit->setClientDispatcher(cl);
     ui->textEdit->setThisUserSiteId(us.getSiteId());
-    const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users=cl->onlineUser(int documentID)
-    ui->textEdit->constractLabelsCursors(users, us.getSiteId());
-    */
-    //----------------------------------------------------------------------------
-
-    //-------------------------------------------------PARTE DA CANCELLARE
-    onlineUsers.clear();
+    const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(int documentID);
+    #else
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
     Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
@@ -781,9 +768,10 @@ void notepad::showLabels()
     onlineUsers.push_front(p1);
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);
+    #endif
     ui->textEdit->constractLabelsCursors(onlineUsers, u1->getSiteId());
     ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());
-    //---------------------------------------------------------------------
+
 }
 
 bool notepad::isAKeyToIgnore(QKeyEvent* event){
@@ -1238,8 +1226,7 @@ void notepad::on_textEdit_cursorPositionChanged()
     QTextCursor cc=ui->textEdit->textCursor();
     QTextCharFormat ch=ui->textEdit->currentCharFormat();
      if(insertOthCh==false){
-        ui->textEdit->thisUserChangePosition(1);
-        //ui->textEdit->thisUserChangePosition(us.getSiteId())
+        ui->textEdit->thisUserChangePosition(us.getSiteId());
      }
 
      if(!cc.hasSelection()){
@@ -1418,9 +1405,11 @@ int notepad::countCharsInLine(int line)const {
 void notepad::insertusers()
 {
     int count=0;
+    ui->tree->clear();
     #ifdef DISPATCHER_ON
     const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
     #else
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
     Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);

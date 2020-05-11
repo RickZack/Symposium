@@ -84,14 +84,12 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
 
-            //-----------------------------------------------------------------------------PARTE DA DECOMMENTARE
-            /*Color c=cl->getColor(documentId,it.first->getSiteId());
-            QString str=QString::fromStdString(c.rgb_hex_string());*/
-            //---------------------------------------------------------------------------------
-
-            //---------------------------------------------------------------------------PARTE DA CANCELLARE
+            #ifdef DISPATCHER_ON
+            Color c=cl->getColor(documentId,it.first->getSiteId());
+            QString str=QString::fromStdString(c.rgb_hex_string());
+            #else
             QString str="#ff0000";
-            //---------------------------------------------------------------------------
+            #endif
             labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -128,14 +126,12 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
 
-            //-----------------------------------------------------------------------------PARTE DA DECOMMENTARE
-            /*Color c=cl->getColor(documentId,it.first->getSiteId());
-            QString str=QString::fromStdString(c.rgb_hex_string());*/
-            //----------------------------------------------------------------------------------------------------
-
-            //-----------------------------------------------------------------------------PARTE DA CANCELLARE
+            #ifdef DISPATCHER_ON
+            Color c=cl->getColor(documentId,it.first->getSiteId());
+            QString str=QString::fromStdString(c.rgb_hex_string());
+            #else
             QString str="#ff0000";
-            //-------------------------------------------------------------------------------------------------
+            #endif
             labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -186,14 +182,12 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     QString nameLabelReverse=QString::fromStdString(name)+"\u25BC";
     QLabel *labelNameReverse=new QLabel(nameLabelReverse, this);
 
-    //-----------------------------------------------------------------------------PARTE DA DECOMMENTARE
-    /*Color c=cl->getColor(documentId,it.first->getSiteId());
-    QString str=QString::fromStdString(c.rgb_hex_string());*/
-    //-----------------------------------------------------------------------------
-
-    //-----------------------------------------------------------------------------PARTE DA CANCELLARE
+    #ifdef DISPATCHER_ON
+    Color c=cl->getColor(documentId,it.first->getSiteId());
+    QString str=QString::fromStdString(c.rgb_hex_string());
+    #else
     QString str="#ff0000";
-    //--------------------------------------------------------------------------------------------
+    #endif
     labelNameReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
     QLabel *newLabel=new QLabel(nameLabel, this);
     newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -229,7 +223,7 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
     {
         if(priv!=Symposium::privilege::readOnly)
         {
-            //-----------------------------------------------------------------------------PARTE DA CANCELLARE
+            //-----------------------------------------------------------------------------PARTE DA CANCELLARE SE SI VUOLE ELIMINARE LA PROPRIA LABEL
             QLabel *labelName=labels.find(siteId)->second.second;
             QLabel *labelReverseName=labels.find(siteId)->second.first;
             QTextCursor newCursor=this->textCursor();
@@ -241,11 +235,11 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
             //--------------------------------------------------------------------------------------------------------------
             QTextCursor cursor= this->textCursor();
 
-            //-----------------------------------------------------------------------------PARTE DA DECOMMENTARE
-            /*int column=cursor.positionInBlock();
+            #ifdef DISPATCHER_ON
+            int column=cursor.positionInBlock();
             int block= cursor.blockNumber();
-            cl->moveMyCursor(int documentId, int block, int column);*/
-            //------------------------------------------------------------------------------------------------
+            cl->moveMyCursor(int documentId, int block, int column);
+            #endif
         }
     }
 
