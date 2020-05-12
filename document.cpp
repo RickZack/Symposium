@@ -121,10 +121,11 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     int i0=indexes.first;
     int i1=indexes.second;
     checkIndex(i0,i1);
+    // I have to handle the position of the following cursors
+    this->updateOtherCursorPos(toInsert.getSiteId(),i0,i1,toInsert,true);
     // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
     this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
-    // I have to handle the position of the following cursors
-    this->updateOtherCursorPos(toInsert.getSiteId(),i0,i1+1,toInsert,true);
+
     symbol newSymb= generatePosition(indexes,toInsert);
     newSymb.setCharFormat(toInsert.getCharFormat());
 
@@ -381,9 +382,10 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     //checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
     //taking into account the position of the cursor.
-    // TO DO
-    this->updateCursorPos(siteId,i0,i1);
+
     this->updateOtherCursorPos(siteId,i0,i1,sym,false);
+    this->updateCursorPos(siteId,i0,i1);
+
     symbols[i0].erase(symbols[i0].begin()+i1);
     return sym;
 
@@ -397,9 +399,10 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     std::pair<int,int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
-    // taking into account the position of the cursor.
+    // I have to handle the position of the following cursors
+    this->updateOtherCursorPos(siteId,i0,i1,toInsert,true);
+    // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
     this->updateCursorPos(siteId,i0,i1+1);
-    this->updateOtherCursorPos(siteId,i0,i1+1,toInsert,true);
     checkIndex(i0,i1);
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
@@ -411,8 +414,8 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
-    this->updateCursorPos(siteId,i0,i1);
     this->updateOtherCursorPos(siteId,i0,i1,toRemove,false);
+    this->updateCursorPos(siteId,i0,i1);
     if(i0==-1 || i1==-1){
         return std::pair<unsigned int, unsigned int>();
     }
@@ -424,8 +427,6 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     else {
         symbols[i0].erase(symbols[i0].begin()+i1);
     }
-
-
     return pos;
 }
 
@@ -727,9 +728,9 @@ unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<S
     while(left+1<right){
         mid=floor(left+(right-left)/2);
 
-        if(symbol==vector[left]){
+        if(symbol==vector[mid]){
             return mid;
-        } else if(symbol>vector[left]){
+        } else if(symbol>vector[mid]){
             left=mid;
         } else{
             right=mid;
@@ -775,13 +776,13 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId,unsigne
                if(i.second.row==newRow){
                    if(i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
                    i.second.row+=1;
-                   i.second.col=i.second.col-newCol+1;
+                   i.second.col=i.second.col-newCol;
                    }
                }else
                    i.second.row+=1;
             }else{
                 i.second.row-=1;
-                i.second.col=i.second.col+newCol-1;
+                i.second.col=i.second.col+newCol;
             }
 
         }

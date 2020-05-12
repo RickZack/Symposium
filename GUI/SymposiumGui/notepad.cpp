@@ -128,6 +128,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         documentoProva.remoteInsert(1,s4);
         documentoProva.remoteInsert(1,acapo);
 
+
 /*
         // Ciao
         documentoProva.localInsert(i1,s1);
@@ -135,7 +136,9 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         documentoProva.localInsert(i3,s3);
         documentoProva.localInsert(i4,s4);
         documentoProva.localInsert(iacapo,acapo);
-*/
+
+        */
+
         // Ehi
         documentoProva.localInsert(i1,a1);
         documentoProva.localInsert(i2,a2);
@@ -192,8 +195,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             documentoProva.localInsert(in8,sn8);
             documentoProva.localInsert(in9,sn9);
             documentoProva.localInsert(in10,sn10);
-
-            //documentoProva.remoteRemove(1,s4);
 
   //---------------------------------------------------------------------------------------------------------
 
