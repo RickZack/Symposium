@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icon/logo1.png</normaloff>:/icon/logo1.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow{background-color:rgb(249, 247, 241);}
 QScrollBar:horizontal {

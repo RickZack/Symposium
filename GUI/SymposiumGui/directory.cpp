@@ -830,6 +830,7 @@ void directory::on_myListWidget_itemDoubleClicked()
 
 void directory::openSelectedSource(){
     hideAll();
+    title="";
     // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
@@ -858,6 +859,7 @@ void directory::openSelectedSource(){
          {
              ui->myListWidget->setFixedWidth(270);
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
+             title=QString::fromStdString(nameSource);
              std::string id=idPriv.first;
              this->initialPriv=idPriv.second;
              // The user has to choose the privilege:
@@ -937,6 +939,7 @@ void directory::on_OkPriv_clicked()
     pressed=false;
     w->close();
     notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
+    notepadWindow->setWindowTitle(title);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
     if(privOpen==Symposium::privilege::readOnly)
@@ -946,6 +949,7 @@ void directory::on_OkPriv_clicked()
 
 notepad* directory::successOpen(){
     notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
+    notepadWindow->setWindowTitle(title);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
     if(privOpen==Symposium::privilege::readOnly)

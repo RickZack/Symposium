@@ -171,6 +171,7 @@ private:
     QListWidgetItem *item1;
     action lastChoice;
     waiting *w;
+    QString title;
     bool pressed=false;
 
     /**
