@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QPropertyAnimation>
+#include <QCloseEvent>
 #include "../../uri.h"
 #include "../../Symposium.h"
 #include "errorconnection.h"
@@ -87,6 +88,10 @@ private:
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
     void waiting();
+    /**
+     * @brief return to directory
+     */
+    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // ACTIVENONLINK_H
