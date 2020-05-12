@@ -46,17 +46,11 @@
 #include "../../../SymClient.h"
 #include "../winmanager.h"
 
-class sigin;
 class notepad;
-class signup;
 class inserturi;
-class home;
-class directory;
 class onlineusers;
 class alluser;
-class deleteAccount;
 class choosedir;
-class changeUserInfo;
 class activecounterlink;
 class activetimerlink;
 class activealwayslink;
@@ -86,25 +80,24 @@ namespace Symposium{
         int currentWindow = 0;                          //variabile che dice qual è la finestra attiva
         QTimer timer;
         SymWinManager winmanager;                       //gestore finestre
-        std::queue<std::pair<std::chrono::milliseconds, uint_positive_cnt::type>> attese;
-        uint_positive_cnt::type ResIDofWaitingMessage;
+        std::queue<std::chrono::milliseconds> attese;
         std::string userpwd;
         std::string username;
         document tp;
         document& requestDoc;
         // ELENCO DEI PUNTATORI A FINESTRA CHE SARRANNO POI DA ELIMINARE
 
-        sigin* finestraLogin;                           //1
-        signup* finestraSignup;                         //2
+        //sigin* finestraLogin;                           //1
+        //signup* finestraSignup;                         //2
         inserturi* finestraInsertUri;                   //3
-        home* finestraHome;                             //4
-        deleteAccount* finestraEliminaAccount;          //5
+        //home* finestraHome;                             //4
+        //deleteAccount* finestraEliminaAccount;          //5
         choosedir* finestraSceltaDir;                   //6
-        changeUserInfo* finestraModificaUser;           //7
+        //changeUserInfo* finestraModificaUser;           //7
         activecounterlink* finestraActiveCounterLink;   //8
         activetimerlink* finestraActiveTimerLink;       //9
         activealwayslink* finestraActiveAlwaysLink;     //10
-        ::directory* finestraDirectory;                 //12
+        //::directory* finestraDirectory;                 //12
         onlineusers* finestraOnlineUser;                //13
         alluser* finestraAllUser;                       //14
         activenonlink* finestraActiveNonLink;           //15
@@ -112,15 +105,12 @@ namespace Symposium{
 
         // FINE ELENCO PUNTATORI ALLE FINESTRE
 
-        std::vector<std::pair<uint_positive_cnt::type,notepad*>> finestreDocumenti;         //coppia resourceID-Puntatore a finestra
-        //std::shared_ptr<clientMessage> message;      //Contiene il messaggio che abbiamo inviato e di cui attendiamo risposta dal server
-
     public:
         clientdispatcher(QObject *parent = nullptr);
 
         int run(int argc, char **argv);
 
-        void TimerStart(std::chrono::milliseconds timeToSend, uint_positive_cnt::type resourceId);
+        void TimerStart(std::chrono::milliseconds timeToSend);
 
         void openConnection();
 
@@ -237,14 +227,6 @@ namespace Symposium{
 
         const document& getOpenDocument();
 
-
-        /**
-         * @brief this method insert into @ref finestreDocumenti the pair composed of the respurceID of the document and the pointer to the notepad window
-         * @param resourceID the ID of the document
-         * @param te a pointer to the notepad window
-         */
-        void setTextEdit(uint_positive_cnt::type resourceID, notepad *te);
-
         void setOnlineUser(onlineusers *ou);
 
         void setAllUser(alluser *au);
@@ -253,10 +235,8 @@ namespace Symposium{
 
 
     private:
-        notepad* getCorrectNotepadbyResourceID(uint_positive_cnt::type resourceID);
-        void deleteActiveDocument(uint_positive_cnt::type resourceID);
 
-        //classi per eccezioni
+        //classe per eccezione
         class sendFailure{};
 
     public slots:

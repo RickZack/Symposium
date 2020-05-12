@@ -30,25 +30,21 @@
 
 #include <chrono>
 #include <QApplication>
-#include "../sigin.h"
-#include "../signup.h"
-#include "../deleteaccount.h"
-#include "../changeuserinfo.h"
 #include "../textedit.h"
 #include "../onlineusers.h"
 #include "../alluser.h"
 #include "../../../filesystem.h"
-#include "../directory.h"
 #include "../mainwindow.h"
 #include "clientdispatcher.h"
 
 
 using namespace Symposium;
 
-clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), requestDoc(tp),finestreDocumenti()
+clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), requestDoc(tp)
 {
     this->client.setClientDispatcher(this);
     this->userpwd = "";
+    connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::TimerExpired);
 }
 
 int clientdispatcher::run(int argc, char **argv){
@@ -58,9 +54,9 @@ int clientdispatcher::run(int argc, char **argv){
     MainWindow w(nullptr, this->winmanager, *this);
     (this->winmanager).setActive(w);
     w.show();
-    //notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "",this->tp,w);
-    //notepadWindow.show();
-    //notepadWindow.showLabels();
+    notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "",this->tp,w);
+    notepadWindow.show();
+    notepadWindow.showLabels();
     return a.exec();
 }
 
@@ -117,10 +113,10 @@ void clientdispatcher::readyRead(){
 
         switch(currentWindow){
         case 1:{
-            this->finestraLogin->errorSignIn();
+            //this->finestraLogin->errorSignIn();
             break;
         }case 2:{
-            this->finestraSignup->errorSignUp("eccezione");
+            //this->finestraSignup->errorSignUp("eccezione");
             break;
         }case 3:{
             //this->finestraInsertUri->unsuccessInsert();
@@ -171,21 +167,19 @@ void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageT
         throw sendFailure();
     }else{
         std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-        TimerStart(tempo, resourceId);
+        TimerStart(tempo);
         qDebug() << "Sended to server: " << QString::fromStdString(ofs.str());
     }
 }
 
-void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend, uint_positive_cnt::type resourceId){
+void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend){
     if(this->timer.isActive()){
         //timer già attivo, quindi inseriamo in coda
-        attese.push(std::make_pair(timeToSend, resourceId));
+        attese.push(timeToSend);
     }else{
-        connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::TimerExpired);
         std::chrono::milliseconds difftemp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - timeToSend;
         int numero = TEMPOATTESA - difftemp.count();
         this->timer.start(numero);
-        ResIDofWaitingMessage = resourceId;
     }
 }
 
@@ -286,7 +280,9 @@ void clientdispatcher::localInsert(uint_positive_cnt::type resourceId, const sym
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraDirectory->errorConnectionLogout();
+        this->closeConnection();
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -297,23 +293,25 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraDirectory->errorConnectionLogout();
+        this->closeConnection();
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
 void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index){
-    notepad* n = getCorrectNotepadbyResourceID(resourceId);
-    n->remoteInsert(newSym, siteId, index);
+    notepad& n = (notepad&)(this->winmanager.getNotepad(resourceId));
+    n.remoteInsert(newSym, siteId, index);
 }
 
 void clientdispatcher::remoteRemove(uint_positive_cnt::type resourceId, uint_positive_cnt::type siteId, std::pair<int, int> indexes){
-    notepad* n = getCorrectNotepadbyResourceID(resourceId);
-    n->remoteDelete(indexes,siteId);
+    notepad& n = (notepad&)(this->winmanager.getNotepad(resourceId));
+    n.remoteDelete(indexes,siteId);
 }
 
 void clientdispatcher::verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes){
-    notepad* n = getCorrectNotepadbyResourceID(resId);
-    n->verifySymbol(newSym, indexes);
+    notepad& n = (notepad&)(this->winmanager.getNotepad(resId));
+    n.verifySymbol(newSym, indexes);
 }
 
 Color clientdispatcher::getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID){
@@ -364,7 +362,7 @@ void clientdispatcher::renameResource(const std::string &resPath, const std::str
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout();
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -377,7 +375,7 @@ void clientdispatcher::removeResource(const std::string &resPath, const std::str
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraDirectory->errorConnectionLogout();
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -387,10 +385,12 @@ void clientdispatcher::closeSource(uint_positive_cnt::type resourceId) {
         //inviamo il messaggio
         sendMessage(mess, resourceId);
         //eliminiamo il riferimento alla finestra del documento che è stato chiuso
-        this->deleteActiveDocument(resourceId);
+        this->winmanager.removeNotepad(resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraDirectory->errorConnectionLogout();
+        this->closeConnection();
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -403,7 +403,7 @@ void clientdispatcher::editUser(user &newUserData) {
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraModificaUser->errorConnectionLogout();
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -416,7 +416,7 @@ void clientdispatcher::removeUser(const std::string &pwd) {
         //errore nell'invio del messaggio
         this->closeConnection();
         //dobbiamo notificare alla GUI
-        this->finestraEliminaAccount->errorConnectionLogout();
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -427,7 +427,8 @@ void clientdispatcher::logout() {
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraHome->errorConnectionLogout();
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -450,46 +451,29 @@ void clientdispatcher::moveMyCursor(uint_positive_cnt::type resId, int block, in
         sendMessage(mess, resId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->finestraDirectory->errorConnectionLogout();
+        this->closeConnection();
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
 void clientdispatcher::moveUserCursor(uint_positive_cnt::type resId, int block, int column, uint_positive_cnt::type siteId){
-    notepad* finestra = this->getCorrectNotepadbyResourceID(resId);
-    finestra->moveUserCursor(siteId,block,column);
+    notepad& finestra = (notepad&)(this->winmanager.getNotepad(resId));
+    finestra.moveUserCursor(siteId,block,column);
 }
 
 void clientdispatcher::addUserCursor(uint_positive_cnt::type siteID, std::string username, uint_positive_cnt::type resourceID){
-    notepad* finestra = this->getCorrectNotepadbyResourceID(resourceID);
-    finestra->addUserCursor(siteID,username);
+    notepad& finestra = (notepad&)(this->winmanager.getNotepad(resourceID));
+    finestra.addUserCursor(siteID,username);
 }
 
 void clientdispatcher::removeUserCursor(uint_positive_cnt::type siteID, uint_positive_cnt::type resourceID){
-    notepad* finestra = this->getCorrectNotepadbyResourceID(resourceID);
-    finestra->removeUserCursor(siteID);
+    notepad& finestra = (notepad&)(this->winmanager.getNotepad(resourceID));
+    finestra.removeUserCursor(siteID);
 }
 
 std::string clientdispatcher::getStr(std::string ID_Cartella, std::string path){
     return this->client.directoryContent(ID_Cartella,path);
-}
-
-
-notepad* clientdispatcher::getCorrectNotepadbyResourceID(uint_positive_cnt::type resourceID){
-    for (std::pair<uint_positive_cnt::type,notepad*> it:this->finestreDocumenti){
-        if(it.first == resourceID)
-            return (it.second);
-    }
-}
-
-void clientdispatcher::deleteActiveDocument(uint_positive_cnt::type resourceID){
-    int i=0,s=-1;
-    for (std::pair<uint_positive_cnt::type,notepad*> it:this->finestreDocumenti){
-        if(it.first == resourceID)
-            s = i;
-        i++;
-    }
-    if(s!=-1)
-        this->finestreDocumenti.erase(this->finestreDocumenti.begin()+s);
 }
 
 void clientdispatcher::stopTimer(){
@@ -498,10 +482,9 @@ void clientdispatcher::stopTimer(){
     qDebug() << "Timer stoppato";
     if(!this->attese.empty()){
         qDebug() << "Coda attese non vuota, timer reinserito";
-        std::pair<std::chrono::milliseconds, uint_positive_cnt::type> coppia = this->attese.front();
-        std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - coppia.first;
+        std::chrono::milliseconds estratto = this->attese.front();
+        std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - estratto;
         this->timer.start(TEMPOATTESA - tempo.count());
-        ResIDofWaitingMessage = coppia.second;
         this->attese.pop();
     }
 }
@@ -543,7 +526,6 @@ const document& clientdispatcher::getOpenDocument(){
 void clientdispatcher::successCreateNewSource(const document &doc){
     this->requestDoc = doc;
     this->successAction();
-    //this->setTextEdit(doc.getId(),this->finestraDirectory->successNewSource(ID, doc));
 }
 
 void clientdispatcher::closeConnection(){
@@ -570,10 +552,6 @@ std::string clientdispatcher::showDir(bool recursive){
     return this->client.showDir(recursive);
 }
 
-void clientdispatcher::setTextEdit(uint_positive_cnt::type resourceID, notepad *te){
-    this->finestreDocumenti.push_back(std::make_pair(resourceID,te));
-}
-
 void clientdispatcher::setOnlineUser(onlineusers *ou){
     this->finestraOnlineUser = ou;
     this->currentWindow = 13;
@@ -589,51 +567,6 @@ void clientdispatcher::TimerExpired(){
     qDebug() << "Timer scaduto\n";
     //chiudiamo la connessione
     this->closeConnection();
-    //dobbiamo notificare alla GUI. Prendiamo la finestra giusta
-    if(this->ResIDofWaitingMessage==0){
-        switch (this->currentWindow) {
-        case 1:{
-            this->finestraLogin->errorConnection();
-            break;
-        }case 2:{
-            this->finestraSignup->errorConnection();
-            break;
-        }case 3:{
-            this->finestraInsertUri->errorConnectionLogout();
-            break;
-        }case 5:{
-            this->finestraEliminaAccount->errorConnectionLogout();
-            break;
-        }case 7:{
-            this->finestraModificaUser->errorConnectionLogout();
-            break;
-        }case 8:{
-            this->finestraActiveCounterLink->errorConnectionLogout();
-            break;
-        }case 9:{
-            this->finestraActiveTimerLink->errorConnectionLogout();
-            break;
-        }case 10:{
-            this->finestraActiveAlwaysLink->errorConnectionLogout();
-            break;
-        }case 12:{
-            this->finestraDirectory->errorConnectionLogout();
-            break;
-        }case 13:{
-            this->finestraOnlineUser->errorConnectionLogout();
-            break;
-        }case 14:{
-            this->finestraAllUser->errorConnectionLogout();
-            break;
-        }case 15:{
-            this->finestraActiveNonLink->errorConnectionLogout();
-            break;
-        }case 16:{
-
-        }
-        }
-    }else{
-        //il timer è scaduto su un messaggio di localinsert, localremove, closesource o movemycursor, notifichiamo l'errore sulla finestra directory
-        this->finestraDirectory->errorConnectionLogout();
-    }
+    //dobbiamo notificare alla GUI.
+    this->winmanager.activeWindow().failure("-1");
 }
