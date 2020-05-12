@@ -203,12 +203,12 @@ void inserturi::on_add_clicked()
     }
     else
     {
-        std::string pathLink=ui->lineEdit->text().toStdString();
+        pathLink=ui->lineEdit->text().toStdString();
         std::size_t found = pathLink.find_last_of('/');
         if(found==std::string::npos)
             ui->formatError->show();
         else{
-            std::string resourceId=pathLink.substr(found+1);
+            resourceId=pathLink.substr(found+1);
             if(resourceId=="")
                 ui->formatError->show();
             else
@@ -216,6 +216,7 @@ void inserturi::on_add_clicked()
                 waiting();
                 disableButtons();
                 disableStyleButtons();
+                title=ui->name->text();
                 #ifdef DISPATCHER_ON
                 cl.openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
                 #endif
@@ -228,8 +229,9 @@ void inserturi::on_add_clicked()
 void inserturi::errorConnectionLogout()
 {
     errorlogout errorLog(this);
-    backToMainWin();
-    errorLog.exec();
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
 }
 
 void inserturi::successInsert()
@@ -241,7 +243,14 @@ void inserturi::successInsert()
     notification notWindow(this, "Link has been successfully created!");
     int ret=notWindow.exec();
     if(ret==0)
-        enableStyleButtons();
+    {
+         notepad* notepadWindow= new notepad(nullptr,std::stol(this->resourceId),privilege,privilege,pathLink,cl.getOpenDocument(), *this);
+         notepadWindow->setWindowTitle(title);
+         goToWindow(*notepadWindow);
+         notepadWindow->showLabels();
+         if(privilege==Symposium::privilege::readOnly)
+             notepadWindow->setreadonly();
+    }
 }
 
 void inserturi::on_cancel_clicked()

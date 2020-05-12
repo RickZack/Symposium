@@ -13,9 +13,6 @@ deleteAccount::deleteAccount(QWidget *parent, SymWinInterface& si) :
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-
-    //connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
-    //connect(ui->cancel, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
     connect(ui->delete_2, SIGNAL(clicked()), this, SLOT(delete_click()));
     enableButtons();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
@@ -41,14 +38,12 @@ void deleteAccount::successDeleteAccount()
 {
     enableButtons();
     enableStyleButtons();
-    backToMainWin();
     QString str="Your account has been successfully deleted!";
     notification notWindow(parentWidget(), str);
     int ret= notWindow.exec();
     //----------------------------DEVE ESSERE INVOCATO SU MAINWINDOW DA SISTEMARE
     if(ret==0)
-        ((home*)parentWidget())->enableButtonsAfter();
-        //mw->enableButtonsAfter();
+        backToMainWin();
 }
 
 void deleteAccount::errorDeleteUser(const QString& errorMess)
@@ -132,7 +127,6 @@ void deleteAccount::on_cancel_clicked(){
 }
 
 void deleteAccount::closeEvent(QCloseEvent *event){
-    //event->ignore();
     if(closedByUser())
     {
         backToParent();

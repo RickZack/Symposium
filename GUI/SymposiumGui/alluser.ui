@@ -18,7 +18,7 @@
     <normaloff>:/icon/logo1.png</normaloff>:/icon/logo1.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QMainWindow{
+   <string notr="true">QDialog{
 background-color:rgb(249, 247, 241);
 }
 QScrollBar:horizontal {

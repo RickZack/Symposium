@@ -270,7 +270,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
 Symposium::uint_positive_cnt::type notepad::getId()
 {
-    return 1;
+    return documentId;
 }
 
 void notepad::successfullInsert(const Symposium::symbol &sym)
@@ -719,11 +719,21 @@ void notepad::counterLink()
 
 
 void notepad::closeEvent(QCloseEvent *event){
-
-    event->ignore();
-    this->notepad::hide();
-    //cl->closeSource(this->documentId);
-
+    #ifdef DISPATCHER_ON
+    cl.closeSource(this->documentId);
+    #endif
+    if(closedByUser()){
+        event->accept();
+        if(isLastNotepadOpened())
+            showParent();
+        closeNotepad();
+    }
+    else {
+        event->accept();
+        if(isLastNotepadOpened())
+            showParent();
+        closeNotepad();
+    }
 }
 
 void notepad::resizeEvent(QResizeEvent *event)
@@ -734,11 +744,14 @@ void notepad::resizeEvent(QResizeEvent *event)
     int w2=w-260;
     int w3=w-30;
     int w4=w-118;
+    int w5=w-160;
     if(showUsers)
         w=w-30-240;
     else
         w=w-39;
     h=h-159;
+    if(privOpen!=Symposium::privilege::readOnly)
+        ui->pushButton->move(w5, 20);
     ui->hideUsers->move(w2, 60);
     ui->showUsers->move(w3, 60);
     ui->tree->move(w1, 90);

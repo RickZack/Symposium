@@ -69,15 +69,15 @@ void signup::errorSignUp(const QString& errorMess)
 void signup::successSignUp()
 {
     enableButtons();
-    enableStyleButtons();
+    hideLabelsError();
     pressed=false;
-    home* homeWindow= new home(nullptr, pwd, *this);
-    goToWindow(*homeWindow);
-    homeWindow->disableStyleButtons();
     notification notWindow(nullptr, "Your account has been successfully created");
     int ret=notWindow.exec();
     if(ret==0)
-        homeWindow->enableButtonsAfter();
+    {
+        home* homeWindow= new home(nullptr, pwd, *this);
+        goToWindow(*homeWindow);
+    }
 }
 
 
@@ -99,6 +99,8 @@ void signup::on_signin_clicked()
     QString password = ui->password->text();
     QString nickname =ui->nickname->text();
     pwd=password.toStdString();
+    disableStyleButtons();
+    disableButtons();
 
     //--------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
@@ -111,8 +113,6 @@ void signup::on_signin_clicked()
         else
         {
             waiting();
-            disableStyleButtons();
-            disableButtons();
             pressed=true;
             cl.signUp(username.toStdString(), password.toStdString(), nickname.toStdString(), iconPath);
          }
@@ -137,13 +137,14 @@ void signup::on_signin_clicked()
         }
         else
         {
-            home* homeWindow= new home(nullptr, pwd, *this);
-            goToWindow(*homeWindow);
-            homeWindow->disableStyleButtons();
+            hideLabelsError();
             notification notWindow(nullptr, "Your account has been successfully created");
             int ret=notWindow.exec();
             if(ret==0)
-                homeWindow->enableButtonsAfter();
+            {
+                home* homeWindow= new home(nullptr, pwd, *this);
+                goToWindow(*homeWindow);
+            }
         }
     }
     else {

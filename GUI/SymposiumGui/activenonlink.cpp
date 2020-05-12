@@ -54,10 +54,11 @@ void activenonlink::successLink()
 
 void activenonlink::errorConnectionLogout()
 {
-    backToMainWin();
     enableButtons();
     errorlogout errorLog(nullptr);
-    errorLog.exec();
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
 }
 
 activenonlink::~activenonlink()

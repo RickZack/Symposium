@@ -57,10 +57,10 @@ void activecounterlink::successLink()
 void activecounterlink::errorConnectionLogout()
 {
     enableButtons();
-    enableStyleButtons();
-    backToMainWin();
     errorlogout errorLog(nullptr);
-    errorLog.exec();
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
 }
 
 

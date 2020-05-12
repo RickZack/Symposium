@@ -142,8 +142,9 @@ void changeUserInfo::errorConnectionLogout()
     enableButtons();
     enableStyleButtons();
     errorlogout errorLog(nullptr);
-    backToMainWin();
-    errorLog.exec();
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
 }
 
 void changeUserInfo::errorEditUser(const QString& errorMess)
@@ -169,8 +170,7 @@ void changeUserInfo::successEditUser()
     int ret=notWindow.exec();
     if(ret==0)
         enableStyleButtons();
-    home* h = new home(nullptr, pwd, *this);
-    goToWindow(*h);
+    backToParent();
 }
 
 void changeUserInfo::disableStyleButtons()
@@ -244,8 +244,7 @@ void changeUserInfo::on_confirm2_clicked()
         int ret=notWindow.exec();
         if(ret==0)
             enableStyleButtons();
-        pwd=newp1.toStdString();
-        pressed=false;
+        backToParent();
         #endif
         //--------------------------------------------------------------------------
     }
@@ -487,11 +486,6 @@ void changeUserInfo::on_newpwd2_textChanged(const QString &arg1)
 void changeUserInfo::on_cancel_clicked()
 {
     backToParent();
-    //------------------------------------------------------------------PARTE DA DECOMENTARE
-    #ifdef DISPATCHER_ON
-    //cl->setHome(h);
-    #endif
-    //------------------------------------------------------------------
 }
 
 void changeUserInfo::on_newpwd1_textChanged(const QString &arg1)

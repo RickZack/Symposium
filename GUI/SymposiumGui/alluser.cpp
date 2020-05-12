@@ -49,8 +49,10 @@ void alluser::successEditPrivilege()
     ui->button->setDisabled(false);
     ui->notification->show();
     enableButtons();
-    //onlineUsers=cl->allUser(documentID);
-    //users=cl->allUser(documentID);
+    #ifdef DISPATCHER_ON
+    onlineUsers=cl->allUser(documentID);
+    users=cl->allUser(documentID);
+    #endif
     ui->tree->clear();
     insertusers();
 
@@ -73,8 +75,10 @@ void alluser::errorConnectionLogout()
     ui->gif->hide();
     ui->button->setDisabled(false);
     errorlogout errorLog(this);
-    backToMainWin();
-    errorLog.exec();
+    disableButtons();
+    int ret=errorLog.exec();
+    if(ret==0)
+       backToMainWin();
 }
 
 alluser::~alluser()
@@ -178,7 +182,9 @@ void alluser::on_button_clicked()
        ui->notification->hide();
        ui->errorMess->hide();
        disableButtons();
-       //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
+       #ifdef DISPATCHER_ON
+       cl->editPrivilege(username, pathFile, newPrivelege, documentID);
+       #endif
     }
 }
 
@@ -204,5 +210,5 @@ void alluser::on_none_clicked()
 
 void alluser::on_button_2_clicked()
 {
-    close();
+    backToParent();
 }

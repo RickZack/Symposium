@@ -101,6 +101,9 @@ private:
     std::string pathId;
     std::string pwd;
     choosedir *dirWindow;
+    std::string pathLink;
+    std::string resourceId;
+    QString title;
 
     /**
      * @brief disable all buttons present so user cannot perform any operation

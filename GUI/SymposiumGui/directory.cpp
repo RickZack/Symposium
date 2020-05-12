@@ -817,8 +817,9 @@ void directory::successRename(){
 
 void directory::errorConnectionLogout(){
     errorlogout errorLog(nullptr);
-    backToMainWin();
-    errorLog.exec();
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
 }
 
 

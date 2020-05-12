@@ -58,11 +58,10 @@ void activealwayslink::successLink()
 
 void activealwayslink::errorConnectionLogout()
 {
-    backToMainWin();
-    enableButtons();
-    enableStyleButtons();
     errorlogout errorLog(nullptr);
-    errorLog.exec();
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
 }
 
 activealwayslink::~activealwayslink()

@@ -62,9 +62,6 @@ void home::on_delete_2_clicked()
     //cl->setDeleteAccount(deleteAccountWindow);
     #endif
     //------------------------------------------------------------------
-    /*int ret=del->exec();
-    if(ret==0)
-        enableStyleButtons();*/
 }
 
 
@@ -93,15 +90,15 @@ void home::on_directory_clicked()
 
 void home::logout()
 {
+    pressed=true;
+    waiting();
+    disableButtons();
+    disableStyleButtons();
     //------------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
     cl.logout();
     #endif
     //------------------------------------------------------------------
-    pressed=true;
-    waiting();
-    disableButtons();
-    disableStyleButtons();
 }
 
 void home::closeEvent(QCloseEvent *event)
@@ -158,8 +155,6 @@ void home::waiting()
 
 void home::successLogout()
 {
-    enableButtons();
-    enableStyleButtons();
     backToMainWin();
 }
 
@@ -169,7 +164,8 @@ void home::errorConnectionLogout()
     enableStyleButtons();
     pressed=false;
     errorlogout errorLog(nullptr);
-    backToMainWin();
-    errorLog.exec();
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
 }
 

@@ -57,12 +57,11 @@ void activetimerlink::successLink()
 
 void activetimerlink::errorConnectionLogout()
 {
-    backToMainWin();
     enableButtons();
-    enableStyleButtons();
     errorlogout errorLog(nullptr);
-    backToMainWin();
-    errorLog.exec();
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
 }
 
 
