@@ -29,6 +29,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_about_clicked()
 {
     about aboutWindow(this);
+    disableStyleButtons();
     aboutWindow.exec();
 }
 

@@ -697,8 +697,8 @@ notepad* directory::successNewSource(){
     int count=number_elements(str);
     listGenerate(str,count);
     //open the newly created document
-    notepad* nw= new notepad(this,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), *this);
-    nw->show();
+    notepad* nw= new notepad(nullptr,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), *this);
+    goToWindow(*nw);
     nw->showLabels();
     return nw;
 }
@@ -797,15 +797,7 @@ void directory::on_okButton_clicked()
 }
 
 void directory::successRename(){
-    QString newName=ui->renameLabel->text();
-    ui->renameLabel->clear();
-    QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
-    foreach(QListWidgetItem *items, selectedItem){
-        items->setText(newName);
-        ui->myListWidget->currentItem()->setSelected(false);
-        ui->renameLabel->clear();
-        hideAll();
-    }
+    hideAll();
     //aggiorniamo la stringa del contenuto in modo che ci sia il nuovo nome della directory
     if(this->actualId=="0"){
         str = cl.showHome();
@@ -817,6 +809,10 @@ void directory::successRename(){
         str=cl.getStr(this->actualId, temp);
         str = manipulationHome(str);
     }
+
+    ui->myListWidget->clear();
+    int count=number_elements(str);
+    listGenerate(str,count);
 }
 
 void directory::errorConnectionLogout(){
@@ -834,6 +830,7 @@ void directory::on_myListWidget_itemDoubleClicked()
 
 void directory::openSelectedSource(){
     hideAll();
+    title="";
     // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
@@ -862,19 +859,20 @@ void directory::openSelectedSource(){
          {
              ui->myListWidget->setFixedWidth(270);
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
+             title=QString::fromStdString(nameSource);
              std::string id=idPriv.first;
              this->initialPriv=idPriv.second;
              // The user has to choose the privilege:
              this->showPrivilegeButtons();
              // set the old Privilege
              if (this->initialPriv=="modify"){
-                 privOpen= Symposium::privilege::modify;
+                 priv= Symposium::privilege::modify;
              }
              else if(this->initialPriv=="readOnly"){
-                 privOpen= Symposium::privilege::readOnly;
+                 priv= Symposium::privilege::readOnly;
              }
              else{
-                 privOpen= Symposium::privilege::owner;
+                 priv= Symposium::privilege::owner;
              }
 
 
@@ -925,30 +923,37 @@ void directory::on_OkPriv_clicked()
     lastChoice = openSource;
     disableStyleButtons();
     pressed=true;
-    if(ui->writerButton->isEnabled())
-        priv= Symposium::privilege::modify;
-    else if(ui->readerButton->isEnabled())
-        priv= Symposium::privilege::readOnly;
+    if(ui->writerButton->isChecked())
+        privOpen= Symposium::privilege::modify;
+    else if(ui->readerButton->isChecked())
+        privOpen= Symposium::privilege::readOnly;
     else
-        priv= Symposium::privilege::owner;
+        privOpen= Symposium::privilege::owner;
     waitingFunction();
     #ifdef DISPATCHER_ON
     cl.openSource(this->path,this->id,this->priv);
     #else
+    priv=Symposium::privilege::owner;
     hideAll();
     enableStyleButtons();
     pressed=false;
     w->close();
-    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
-    notepadWindow->show();
+    notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
+    notepadWindow->setWindowTitle(title);
+    goToWindow(*notepadWindow);
     notepadWindow->showLabels();
+    if(privOpen==Symposium::privilege::readOnly)
+        notepadWindow->setreadonly();
     #endif
 }
 
 notepad* directory::successOpen(){
-    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
-    notepadWindow->show();
+    notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
+    notepadWindow->setWindowTitle(title);
+    goToWindow(*notepadWindow);
     notepadWindow->showLabels();
+    if(privOpen==Symposium::privilege::readOnly)
+        notepadWindow->setreadonly();
     return notepadWindow;
 }
 

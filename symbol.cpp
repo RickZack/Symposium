@@ -82,7 +82,15 @@ bool symbol::operator<(const symbol &rhs) const {
         if (this->pos[i] > rhs.pos[i])
             return false;
     }
-    return this->siteId <= rhs.siteId;
+    if(this->pos.size()==rhs.pos.size()){
+            if(this->siteId < rhs.siteId)
+                return true;
+            else
+                return false;
+        }
+    else if(this->pos.size()>rhs.pos.size())
+            return false;
+  return true;
 }
 
 bool symbol::operator>(const symbol &rhs) const {

@@ -86,6 +86,8 @@ public:
 
     void showLabels();
 
+    void setreadonly();
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
