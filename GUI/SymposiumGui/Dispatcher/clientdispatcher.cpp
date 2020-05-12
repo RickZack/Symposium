@@ -58,9 +58,9 @@ int clientdispatcher::run(int argc, char **argv){
     MainWindow w(nullptr, this->winmanager, *this);
     (this->winmanager).setActive(w);
     w.show();
-    notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "",this->tp,w);
-    notepadWindow.show();
-    notepadWindow.showLabels();
+    //notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "",this->tp,w);
+    //notepadWindow.show();
+    //notepadWindow.showLabels();
     return a.exec();
 }
 

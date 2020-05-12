@@ -198,8 +198,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
   //---------------------------------------------------------------------------------------------------------
 
     #ifndef DISPATCHER_ON
-    priv=Symposium::privilege::owner;
-    privOpen=Symposium::privilege::owner;
     ui->textEdit->setThisUserPrivilege(privOpen);
     this->pathToFile="/1/2/3/4/5/6/7";
     us=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
@@ -214,16 +212,29 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     // QColor myColor;
     // myColor=static_cast<QColor>(colorSymp);
 
-    QMenu *userMenu=menuBar()->addMenu(tr("Users"));
-    if(priv==Symposium::privilege::owner)
-        userMenu->addAction(tr("All users"), this, &notepad::visualizeAllUsers);
+
+    if(privOpen==Symposium::privilege::readOnly)
+    {
+        ui->pushButton->move(10, 20);
+        ui->menubar->clear();
+        ui->actionCopy->setDisabled(true);
+        ui->actionCopy->setVisible(false);
+        ui->actionCut->setDisabled(true);
+        ui->actionCut->setVisible(false);
+        ui->actionPaste->setDisabled(true);
+        ui->actionPaste->setVisible(false);
+        ui->actionCopy->setDisabled(true);
+        ui->actionCopy->setVisible(false);
+    }
     if(priv==Symposium::privilege::owner)
     {
+        QMenu *userMenu=menuBar()->addMenu(tr("Users' privilege"));
+        userMenu->addAction(tr("Show all users"), this, &notepad::visualizeAllUsers);
         QMenu *shareMenu=menuBar()->addMenu(tr("Share File"));
-        shareMenu->addAction(tr("Make all links inactive"), this, &notepad::inactiveLink);
-        shareMenu->addAction(tr("Make all links active"), this, &notepad::activeAlwaysLink);
-        shareMenu->addAction(tr("Make all links active for a certain period"), this, &notepad::timerLink);
-        shareMenu->addAction(tr("Make all links active for a limit number of shares"), this, &notepad::counterLink);
+        shareMenu->addAction(tr("Disable links"), this, &notepad::inactiveLink);
+        shareMenu->addAction(tr("Enable links"), this, &notepad::activeAlwaysLink);
+        shareMenu->addAction(tr("Timer links"), this, &notepad::timerLink);
+        shareMenu->addAction(tr("Number links"), this, &notepad::counterLink);
     }
 
 
@@ -241,15 +252,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     this->fillTextEdit();
 
     ui->textEdit->setCursorWidth(3);
-
-    if(privOpen==Symposium::privilege::readOnly)
-    {
-        ui->textEdit->setReadOnly(true);
-        ui->formatText->hide();
-        ui->fontComboBox->hide();
-        ui->sizeBox->hide();
-        ui->styleBox->hide();
-    }
 
     ui->tree->setColumnCount(1);
     ui->tree->header()->setVisible(false);
@@ -770,8 +772,8 @@ void notepad::showLabels()
     onlineUsers.push_front(p3);
     #endif
     ui->textEdit->constractLabelsCursors(onlineUsers, u1->getSiteId());
-    ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());
-
+    if(privOpen!=Symposium::privilege::readOnly)
+        ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());
 }
 
 bool notepad::isAKeyToIgnore(QKeyEvent* event){
@@ -1501,4 +1503,13 @@ bool notepad::event(QEvent *e)
 void notepad::on_pushButton_clicked()
 {
     showParent();
+}
+
+void notepad::setreadonly()
+{
+    ui->textEdit->setReadOnly(true);
+    ui->formatText->hide();
+    ui->fontComboBox->hide();
+    ui->sizeBox->hide();
+    ui->styleBox->hide();
 }

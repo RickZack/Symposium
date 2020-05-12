@@ -868,13 +868,13 @@ void directory::openSelectedSource(){
              this->showPrivilegeButtons();
              // set the old Privilege
              if (this->initialPriv=="modify"){
-                 privOpen= Symposium::privilege::modify;
+                 priv= Symposium::privilege::modify;
              }
              else if(this->initialPriv=="readOnly"){
-                 privOpen= Symposium::privilege::readOnly;
+                 priv= Symposium::privilege::readOnly;
              }
              else{
-                 privOpen= Symposium::privilege::owner;
+                 priv= Symposium::privilege::owner;
              }
 
 
@@ -925,16 +925,17 @@ void directory::on_OkPriv_clicked()
     lastChoice = openSource;
     disableStyleButtons();
     pressed=true;
-    if(ui->writerButton->isEnabled())
-        priv= Symposium::privilege::modify;
-    else if(ui->readerButton->isEnabled())
-        priv= Symposium::privilege::readOnly;
+    if(ui->writerButton->isChecked())
+        privOpen= Symposium::privilege::modify;
+    else if(ui->readerButton->isChecked())
+        privOpen= Symposium::privilege::readOnly;
     else
-        priv= Symposium::privilege::owner;
+        privOpen= Symposium::privilege::owner;
     waitingFunction();
     #ifdef DISPATCHER_ON
     cl.openSource(this->path,this->id,this->priv);
     #else
+    priv=Symposium::privilege::owner;
     hideAll();
     enableStyleButtons();
     pressed=false;
@@ -942,6 +943,8 @@ void directory::on_OkPriv_clicked()
     notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
     notepadWindow->show();
     notepadWindow->showLabels();
+    if(privOpen==Symposium::privilege::readOnly)
+        notepadWindow->setreadonly();
     #endif
 }
 
@@ -949,6 +952,8 @@ notepad* directory::successOpen(){
     notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
     notepadWindow->show();
     notepadWindow->showLabels();
+    if(privOpen==Symposium::privilege::readOnly)
+        notepadWindow->setreadonly();
     return notepadWindow;
 }
 

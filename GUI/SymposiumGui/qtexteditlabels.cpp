@@ -120,7 +120,7 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
     //-----------------------------------------------------------------------------------------------------------------PARTE DA CANCELLARE PER ELIMINARE IL CURSORE VISIBILE CON LA LABEL
     for(auto it:users)
     {
-        if(it.first->getSiteId()==siteId && it.second.p!=Symposium::privilege::readOnly)
+        if(it.first->getSiteId()==siteId && priv!=Symposium::privilege::readOnly)
         {
             QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
