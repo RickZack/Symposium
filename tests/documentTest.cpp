@@ -246,7 +246,7 @@ INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCur
 TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrder){
     Insertion input=GetParam();
     d.remoteInsert(1, input.s1);
-    d.remoteRemove(1, input.s2);
+    d.remoteRemove(1, input.s1);
 
     ASSERT_FALSE(d.getSymbols().empty());
 

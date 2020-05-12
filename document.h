@@ -315,7 +315,7 @@ namespace Symposium {
 
 
 
-        void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newCol, symbol symb, bool ins);
+        void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol, symbol symb, bool ins);
     };
 }
 
