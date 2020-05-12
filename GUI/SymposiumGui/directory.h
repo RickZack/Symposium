@@ -169,7 +169,6 @@ private slots:
 private:
     Ui::directory *ui;
     QListWidgetItem *item1;
-    notepad *notepadWindow;
     action lastChoice;
     waiting *w;
     bool pressed=false;

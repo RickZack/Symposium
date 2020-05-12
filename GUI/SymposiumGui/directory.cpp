@@ -697,8 +697,8 @@ notepad* directory::successNewSource(){
     int count=number_elements(str);
     listGenerate(str,count);
     //open the newly created document
-    notepad* nw= new notepad(this,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), *this);
-    nw->show();
+    notepad* nw= new notepad(nullptr,std::stol(id),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), *this);
+    goToWindow(*nw);
     nw->showLabels();
     return nw;
 }
@@ -936,8 +936,8 @@ void directory::on_OkPriv_clicked()
     enableStyleButtons();
     pressed=false;
     w->close();
-    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
-    notepadWindow->show();
+    notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
+    goToWindow(*notepadWindow);
     notepadWindow->showLabels();
     if(privOpen==Symposium::privilege::readOnly)
         notepadWindow->setreadonly();
@@ -945,8 +945,8 @@ void directory::on_OkPriv_clicked()
 }
 
 notepad* directory::successOpen(){
-    notepadWindow= new notepad(this,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
-    notepadWindow->show();
+    notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
+    goToWindow(*notepadWindow);
     notepadWindow->showLabels();
     if(privOpen==Symposium::privilege::readOnly)
         notepadWindow->setreadonly();
