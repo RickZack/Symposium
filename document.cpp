@@ -120,11 +120,11 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
 
     int i0=indexes.first;
     int i1=indexes.second;
-   // qDebug()<<"I0"<<i0;
-    //qDebug()<<"i1"<<i1;
     checkIndex(i0,i1);
-    this->updateCursorPos(toInsert.getSiteId(),i0,i1);
-    this->updateOtherCursorPos(toInsert.getSiteId(),i1,toInsert,true);
+    // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
+    this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
+    // I have to handle the position of the following cursors
+    this->updateOtherCursorPos(toInsert.getSiteId(),i0,i1+1,toInsert,true);
     symbol newSymb= generatePosition(indexes,toInsert);
     newSymb.setCharFormat(toInsert.getCharFormat());
 
@@ -142,6 +142,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     //()<<"Simboli"<<toText();
+    //qDebug()<<"Posizioni"<<newSymb.getPos();
 
 
     return newSymb;
@@ -382,7 +383,7 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     //taking into account the position of the cursor.
     // TO DO
     this->updateCursorPos(siteId,i0,i1);
-    this->updateOtherCursorPos(siteId,i1,sym,false);
+    this->updateOtherCursorPos(siteId,i0,i1,sym,false);
     symbols[i0].erase(symbols[i0].begin()+i1);
     return sym;
 
@@ -397,8 +398,8 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     int i0=indexes.first;
     int i1=indexes.second;
     // taking into account the position of the cursor.
-    this->updateCursorPos(siteId,i0,i1);
-    this->updateOtherCursorPos(siteId,i1,toInsert,true);
+    this->updateCursorPos(siteId,i0,i1+1);
+    this->updateOtherCursorPos(siteId,i0,i1+1,toInsert,true);
     checkIndex(i0,i1);
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
@@ -411,7 +412,7 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     int i0=pos.first;
     int i1=pos.second;
     this->updateCursorPos(siteId,i0,i1);
-    this->updateOtherCursorPos(siteId,i1,toRemove,false);
+    this->updateOtherCursorPos(siteId,i0,i1,toRemove,false);
     if(i0==-1 || i1==-1){
         return std::pair<unsigned int, unsigned int>();
     }
@@ -663,12 +664,8 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     std::vector<Symposium::symbol> currentLine;
 
     //if the struct is empty or char is less than first char
-    /*
-    if(symbols.empty()||symbol.getCh()<symbols[0][0].getCh()){
-        i0=-1; i1=-1; ind={i0,i1}; return ind;
-    }
-*/
-    if(symbols.empty()||symbol<symbols[0][0]){
+    auto firstSymbol=symbols[0][0];
+    if(symbols.empty()||symbol<firstSymbol){
         i0=-1; i1=-1; ind={i0,i1}; return ind;
     }
 
@@ -677,17 +674,7 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     auto lastChar=lastLine[chars-1];
 
     //char is greater than all existing chars(insert at end)
-    /*
-    if(symbol.getCh()>lastChar.getCh() && lastChar.getCh()!='\r'){
-       i0=-1; i1=-1; ind={i0,i1}; return ind;
-    }else if(symbol.getCh()==lastChar.getCh()){
-        i0=maxLine; i1=chars-1; ind={i0,i1}; return ind;
-    }
-
-    */
-    if(symbol==lastChar){
-       i0=maxLine; i1=chars-1; ind={i0,i1}; return ind;
-    }else if(symbol>lastChar){
+    if(symbol>lastChar){
         i0=-1; i1=-1; ind={i0,i1}; return ind;
     }
 
@@ -769,30 +756,32 @@ void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned in
    }
 }
 
-void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId,unsigned int newCol,symbol symb,bool ins) {
+void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId,unsigned int newRow,unsigned int newCol,symbol symb,bool ins) {
     for(auto& i: activeUsers){
-        // On the same line, there are two different cursors
-        if(symb.getCh()!='\r' && i.second.row==newCol && i.first->getSiteId()!=targetSiteId){
+        // On the same line, there are cursors with different siteId
+        if(symb.getCh()!='\r' && i.second.row==newRow && i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
             // The action is to insert a character
             if(ins){
                 i.second.col+=1;
-                break;
             }else{
                 i.second.col-=1;
-                break;
             }
 
-        } // On the same line, there are two different cursors and I'm inserting the \r
-        else if(symb.getCh()=='\r' && i.second.row==newCol && i.first->getSiteId()!=targetSiteId){
+        } // I'm changing the line
+        else if(symb.getCh()=='\r'){
             // inserting a character
             if(ins){
-               i.second.row+=1;
-               i.second.col=i.second.col-newCol;
-               break;
+                // There are different cursor on the same line: they have to change the row index and the column index
+               if(i.second.row==newRow){
+                   if(i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
+                   i.second.row+=1;
+                   i.second.col=i.second.col-newCol+1;
+                   }
+               }else
+                   i.second.row+=1;
             }else{
                 i.second.row-=1;
-                i.second.col=i.second.col+newCol;
-                break;
+                i.second.col=i.second.col+newCol-1;
             }
 
         }
