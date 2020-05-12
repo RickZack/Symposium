@@ -216,6 +216,11 @@ protected:
      * close itself and call SymChildWinInterface::backToMainWin() to return to the main window
      */
     void backToMainWin();
+    /**
+     * @brief isLastNotepadOpened indicates whether this is the only remaining opened SymNotepadWinInterface window
+     * @return true if it's the only remaining opened window, false otherwise
+     */
+    bool isLastNotepadOpened() const;
 };
     /**
      * @brief base class used forSymposiumGUI windows that are modal, i.e do not allow interaction

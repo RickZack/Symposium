@@ -38,6 +38,7 @@
 class SymWinManager{
     SymWinInterface* current;
     std::forward_list<std::pair<Symposium::uint_positive_cnt::type, SymNotepadWinInterface*>> editors;
+    unsigned numOfActiveEditors;
 public:
     SymWinManager();
     /**
@@ -73,6 +74,10 @@ public:
      * windows and close them.
      */
     void closeAllNotepads();
+    /**
+     * @brief numOfActiveNotepads helper function to be user to know how many SymNotepadWinInterface are currently opened
+     */
+    unsigned getNumOfActiveEditors() const;
 
     SymWinManager(SymWinManager&)= delete;
     SymWinManager(SymWinManager&&)= delete;

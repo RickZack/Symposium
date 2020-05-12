@@ -48,6 +48,7 @@ void SymWinManager::setActive(SymWinInterface &newScreen){
 
 void SymWinManager::addNotepad(Symposium::uint_positive_cnt::type id, SymNotepadWinInterface &tx) {
     editors.push_front({id, &tx});
+    numOfActiveEditors++;
 }
 
 SymNotepadWinInterface &SymWinManager::getNotepad(Symposium::uint_positive_cnt::type id) {
@@ -60,8 +61,10 @@ SymNotepadWinInterface &SymWinManager::getNotepad(Symposium::uint_positive_cnt::
 void SymWinManager::removeNotepad(Symposium::uint_positive_cnt::type id)
 {
     for(auto& ed: editors)
-        if (ed.first==id)
+        if (ed.first==id){
+            numOfActiveEditors--;
             return editors.remove(ed);
+        }
 }
 
 void SymWinManager::closeAllNotepads()
@@ -70,4 +73,10 @@ void SymWinManager::closeAllNotepads()
         editors.front().second->forceClose();
         editors.pop_front();
     }
+    numOfActiveEditors=0;
+}
+
+unsigned SymWinManager::getNumOfActiveEditors() const
+{
+    return numOfActiveEditors;
 }

@@ -147,6 +147,11 @@ void SymNotepadWinInterface::backToMainWin()
     SymChildWinInterface::backToMainWin();
 }
 
+bool SymNotepadWinInterface::isLastNotepadOpened() const
+{
+    return handler.getNumOfActiveEditors()==1;
+}
+
 void SymNotepadWinInterface::forceClose()
 {
     forceQuit=true;
