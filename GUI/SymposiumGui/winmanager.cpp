@@ -31,7 +31,7 @@
 #include<QDebug>
 
 
-SymWinManager::SymWinManager()
+SymWinManager::SymWinManager() :numOfActiveEditors(0)
 {
     current=nullptr;
 }
