@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>670</width>
-    <height>259</height>
+    <height>227</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,33 +18,7 @@
     <normaloff>:/icon/logo1.png</normaloff>:/icon/logo1.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QDialog{background-color:rgb(249, 247, 241);}
-QScrollBar:horizontal {
-border-color:rgb(58, 80, 116);
-border-width: 1px;
-border-style: solid;
-background-color: rgb(240, 240, 240);
-height:10px;
-margin: 0px 0px 0px 0px;
-}
-QScrollBar::handle:horizontal {
-background-color: rgb(58, 80, 116);
-min-width: 25px;
-}
-QScrollBar::add-line:horizontal {
-border: 1px solid rgb(58, 80, 116);
-background-color: rgb(241, 241, 241);
-height: 0px;
-subcontrol-position: left;
-subcontrol-origin: margin;
-}
-QScrollBar::sub-line:horizontal {
-border: 1px solid rgb(58, 80, 116);
-background-color: rgb(241, 241, 241);
-height: 0px;
-subcontrol-position: right;
-subcontrol-origin: margin;
-}</string>
+   <string notr="true">background-color:rgb(249, 247, 241);</string>
   </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
@@ -86,20 +60,37 @@ color: rgb(58, 80, 116);</string>
   <widget class="QPushButton" name="ok">
    <property name="geometry">
     <rect>
-     <x>465</x>
-     <y>190</y>
+     <x>282</x>
+     <y>150</y>
      <width>105</width>
      <height>35</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
 color: rgb(249, 247, 241); 
 font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;</string>
    </property>
    <property name="text">
-    <string>Close</string>
+    <string>Ok</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="link">
+   <property name="geometry">
+    <rect>
+     <x>183</x>
+     <y>80</y>
+     <width>370</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116);</string>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="share1">
@@ -214,76 +205,6 @@ color: rgb(58, 80, 116);</string>
    </property>
    <property name="text">
     <string/>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QPlainTextEdit" name="pathPlainEdit">
-   <property name="geometry">
-    <rect>
-     <x>183</x>
-     <y>80</y>
-     <width>370</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QPlainTextEdit{
-background-color:rgb(249, 247, 241);
-border: none;
-color: rgb(58, 80, 116);
-font: 12pt &quot;Baskerville Old Face&quot;;
-}</string>
-   </property>
-   <property name="verticalScrollBarPolicy">
-    <enum>Qt::ScrollBarAlwaysOff</enum>
-   </property>
-   <property name="horizontalScrollBarPolicy">
-    <enum>Qt::ScrollBarAsNeeded</enum>
-   </property>
-   <property name="plainText">
-    <string/>
-   </property>
-   <property name="textInteractionFlags">
-    <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>190</y>
-     <width>105</width>
-     <height>35</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
-color: rgb(249, 247, 241); 
-font: 14pt &quot;Baskerville Old Face&quot;;
-border-radius:15px;</string>
-   </property>
-   <property name="text">
-    <string>Send mail</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>170</x>
-     <y>135</y>
-     <width>330</width>
-     <height>45</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
-color: rgb(58, 80, 116);</string>
-   </property>
-   <property name="text">
-    <string>You can share this link with an email
- or copy it and share it as you want</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

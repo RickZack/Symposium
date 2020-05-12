@@ -6,7 +6,6 @@
 #include "../../uri.h"
 #include "../../Symposium.h"
 #include <QMessageBox>
-#include <QCloseEvent>
 
 #include "errorconnection.h"
 #include "errorlogout.h"
@@ -26,7 +25,7 @@ class activealwayslink : public QDialog, public SymModalWinInterface
     Q_OBJECT
 
 public:
-    explicit activealwayslink(QWidget *parent,  Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si);
+    explicit activealwayslink(QWidget *parent,  Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si);
 
     void success() override;
     void failure(const QString& toPrint) override;
@@ -81,7 +80,6 @@ private:
     Symposium::uri u;
     Symposium::uint_positive_cnt::type documentId;
     std::string pathFile;
-    Symposium::user us;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */
@@ -102,10 +100,6 @@ private:
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
     void waiting();
-    /**
-     * @brief return to directory
-     */
-    void closeEvent(QCloseEvent *event) override;
 };
 
 

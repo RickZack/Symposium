@@ -47,8 +47,7 @@ void activenonlink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    backToParent();
-    successlinks link(parentWidget(), 3, QString::fromStdString(pathFile), 0, "", Symposium::user(), Symposium::privilege());
+    successlinks link(parentWidget(), 3, QString::fromStdString(pathFile));
     link.exec();
 }
 
@@ -78,14 +77,12 @@ void activenonlink::on_ok_clicked()
     u.deactivate();
     #ifdef DISPATCHER_ON
     cl.shareResource(pathFile, std::to_string(documentId), u);
-    #else
-    success();
     #endif
 }
 
 void activenonlink::on_cancel_clicked()
 {
-    backToParent();
+    this->close();
 }
 
 void activenonlink::disableButtons()
@@ -120,12 +117,4 @@ void activenonlink::waiting()
     ui->waiting->show();
     ui->gif->show();
     ui->errorMess->hide();
-}
-
-void activenonlink::closeEvent(QCloseEvent *event)
-{
-    if(closedByUser())
-        backToParent();
-    else
-        event->accept();
 }

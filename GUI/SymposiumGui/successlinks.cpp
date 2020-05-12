@@ -2,9 +2,9 @@
 #include "ui_successlinks.h"
 
 
-successlinks::successlinks(QWidget *parent, int caseLink, QString str, QString numShares, QString time, Symposium::user us, Symposium::privilege priv) :
+successlinks::successlinks(QWidget *parent, int caseLink, QString str, QString numShares, QString time) :
     QDialog(parent),
-    ui(new Ui::successlinks), caseLink(caseLink), str(str), numShares(numShares), time(time), us(us), priv(priv)
+    ui(new Ui::successlinks), caseLink(caseLink), str(str), numShares(numShares), time(time)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -20,8 +20,7 @@ successlinks::successlinks(QWidget *parent, int caseLink, QString str, QString n
         noshare();
     else if(caseLink==4)
         timeshare();
-    ui->pathPlainEdit->setPlainText(str);
-    ui->pathPlainEdit->setLineWrapMode(QPlainTextEdit::LineWrapMode::NoWrap);
+    ui->link->setText(str);
 }
 
 successlinks::~successlinks()
@@ -31,7 +30,7 @@ successlinks::~successlinks()
 
 void successlinks::on_ok_clicked()
 {
-    close();
+    this->close();
 }
 
 void successlinks::hideAll()
@@ -56,14 +55,8 @@ void successlinks::share()
 void successlinks::noshare()
 {
     ui->label->hide();
-    ui->pathPlainEdit->hide();
+    ui->link->hide();
     ui->share4->show();
-    ui->ok->move(282,105);
-    ui->pushButton->setDisabled(true);
-    ui->pushButton->hide();
-    ui->label_2->hide();
-    ui->ok->setText("Ok");
-    ui->ok->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 }
 
 void successlinks::timeshare()
@@ -71,17 +64,4 @@ void successlinks::timeshare()
     ui->timer1->show();
     ui->timer2->setText(time);
     ui->timer2->show();
-}
-
-void successlinks::on_pushButton_clicked()
-{
-    close();
-    QString user(QString::fromStdString(us.getNickname()));
-    std::ostringstream privString;
-    privString<<priv;
-    QString privilege(QString::fromStdString(privString.str()));
-    QString emailAddr("");
-    QString subject("Symposium - invitation to collaborate");
-    QString body("You have a new invitation to collaborate.\n\n"+user+" decided to share with you a file with the privilege "+privilege+" on Symposium.\nYou can access it pasting the following resource identifier: "+str+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.");
-    QDesktopServices::openUrl(QUrl("mailto:"+emailAddr+"?subject="+subject+"&body="+body, QUrl::TolerantMode));
 }

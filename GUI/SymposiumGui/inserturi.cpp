@@ -252,8 +252,6 @@ void inserturi::on_cancel_clicked()
 void inserturi::closeEvent(QCloseEvent *event){
     if(closedByUser())
         backToParent();
-    else
-        event->accept();
 }
 
 void inserturi::enableButtonsAfter()

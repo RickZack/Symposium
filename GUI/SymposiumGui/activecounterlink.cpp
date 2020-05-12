@@ -4,10 +4,10 @@
 #include <QMovie>
 #include "onoff_networkinteraction.h"
 
-activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si) :
+activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId), us(us)
+    ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -21,6 +21,10 @@ activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_c
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
+
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
+    this->pathFile="/1/2/3/4/5";
+    //---------------------------------------------------------------------------------------------------------------
 }
 
 void activecounterlink::success()
@@ -41,6 +45,7 @@ void activecounterlink::unsuccessLink(const QString& errorMess)
 {
     enableButtons();
     enableStyleButtons();
+    //this->hide();
     ui->errorMess->setText(errorMess);
     ui->errorMess->show();
 }
@@ -49,8 +54,8 @@ void activecounterlink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    backToParent();
-    successlinks link(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter), "", us, privilegeToGrant);
+    this->hide();
+    successlinks link(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter), "");
     link.exec();
 }
 
@@ -88,7 +93,13 @@ void activecounterlink::on_ok_clicked()
         disableStyleButtons();
     }
     #ifndef DISPATCHER_ON
-    successLink();
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
+    //this->hide();
+    enableButtons();
+    successlinks link(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter));
+    link.exec();
+
+    //----------------------------------------------------------------------------------
     #endif
 }
 
@@ -109,7 +120,7 @@ void activecounterlink::on_reader_clicked()
 
 void activecounterlink::on_cancel_clicked()
 {
-    backToParent();
+    this->close();
 }
 
 void activecounterlink::disableButtons()
@@ -144,12 +155,4 @@ void activecounterlink::waiting()
     ui->gif->show();
     ui->waiting->show();
     ui->errorMess->hide();
-}
-
-void activecounterlink::closeEvent(QCloseEvent *event)
-{
-    if(closedByUser())
-        backToParent();
-    else
-        event->accept();
 }

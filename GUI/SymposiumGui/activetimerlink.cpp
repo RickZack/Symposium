@@ -3,10 +3,10 @@
 #include "onoff_networkinteraction.h"
 #include "Dispatcher/clientdispatcher.h"
 
-activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si) :
+activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    ui(new Ui::activetimerlink), pathFile(pathFile), documentId(documentId), us(us)
+    ui(new Ui::activetimerlink), pathFile(pathFile), documentId(documentId)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -20,6 +20,10 @@ activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
+
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
+    this->pathFile="1/2/3/4/5";
+    //----------------------------------------------------------------------------------------------------
 }
 
 void activetimerlink::success()
@@ -50,8 +54,8 @@ void activetimerlink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    backToParent();
-    successlinks link(parentWidget(), 4, QString::fromStdString(pathFile), "", QString::fromStdString(time), us, privilegeToGrant);
+    //this->hide();
+    successlinks link(parentWidget(), 4, QString::fromStdString(pathFile), "", QString::fromStdString(time));
     link.exec();
 }
 
@@ -74,28 +78,25 @@ activetimerlink::~activetimerlink()
 void activetimerlink::on_ok_clicked()
 {
     QDateTime date=ui->time->dateTime();
-    QDateTime dateNow=QDateTime::currentDateTime();
-    if(date>dateNow)
-    {
-        std::tm tm = {};
-        std::chrono::system_clock::time_point endTime;
-        time=date.toString().toStdString();
-        std::stringstream ss(time);
-        ss >> std::get_time(&tm, "%b %d %Y %H:%M:%S");
-        endTime=std::chrono::system_clock::from_time_t(std::mktime(&tm));
+    std::tm tm = {};
+    std::chrono::system_clock::time_point endTime;
+    time=date.toString().toStdString();
+    std::stringstream ss(time);
+    ss >> std::get_time(&tm, "%b %d %Y %H:%M:%S");
+    endTime=std::chrono::system_clock::from_time_t(std::mktime(&tm));
 
-        u.activateTimer(endTime, privilegeToGrant);
-        waiting();
-        disableButtons();
-        disableStyleButtons();
-        #ifdef DISPATCHER_ON
-        cl.shareResource(pathFile, std::to_string(documentId), u);
-        #else
-        successLink();
-        #endif
-    }
-    else
-      unsuccessLink("You have to choose time in the future non in the past!");
+    u.activateTimer(endTime, privilegeToGrant);
+    waiting();
+    disableButtons();
+    disableStyleButtons();
+    #ifdef DISPATCHER_ON
+    cl.shareResource(pathFile, std::to_string(documentId), u);
+    #else
+
+    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
+    successLink();
+    //----------------------------------------------------------------------------------------------------
+    #endif
 
 }
 
@@ -116,7 +117,7 @@ void activetimerlink::on_reader_clicked()
 
 void activetimerlink::on_cancel_clicked()
 {
-    backToParent();
+    this->close();
 }
 
 void activetimerlink::enableButtonsAfter()
@@ -156,12 +157,4 @@ void activetimerlink::waiting()
     ui->waiting->show();
     ui->gif->show();
     ui->errorMess->hide();
-}
-
-void activetimerlink::closeEvent(QCloseEvent *event)
-{
-    if(closedByUser())
-        backToParent();
-    else
-        event->accept();
 }

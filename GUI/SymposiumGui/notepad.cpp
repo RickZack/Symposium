@@ -697,19 +697,19 @@ void notepad::inactiveLink()
 
 void notepad::activeAlwaysLink()
 {
-    activealwayslink* alwayslinkwindow = new activealwayslink(this, documentId, pathToFile, us, *this);
+    activealwayslink* alwayslinkwindow = new activealwayslink(this, documentId, pathToFile, *this);
     goToWindow(*alwayslinkwindow);
 }
 
 void notepad::timerLink()
 {
-    activetimerlink* timerlinkwindow = new activetimerlink(this, documentId, pathToFile, us, *this);
+    activetimerlink* timerlinkwindow = new activetimerlink(this, documentId, pathToFile, *this);
     goToWindow(*timerlinkwindow);
 }
 
 void notepad::counterLink()
 {
-    activecounterlink* counterlinkwindow = new activecounterlink(this, documentId, pathToFile, us, *this);
+    activecounterlink* counterlinkwindow = new activecounterlink(this, documentId, pathToFile, *this);
     goToWindow(*counterlinkwindow);
 }
 
@@ -1485,20 +1485,4 @@ void notepad::on_showUsers_clicked()
 
     ui->showUsers->setDisabled(true);
     ui->showUsers->hide();
-}
-
-bool notepad::event(QEvent *e)
-{
-    if (e->type() == QEvent::WindowActivate) {
-        obtainFocus();
-    }
-    else if(e->type() == QEvent::WindowDeactivate){
-        focusToDirectory();
-    }
-    return QWidget::event(e);
-}
-
-void notepad::on_pushButton_clicked()
-{
-    showParent();
 }

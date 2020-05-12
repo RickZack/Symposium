@@ -329,25 +329,6 @@ color: rgb(58, 80, 116); </string>
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>640</x>
-      <y>20</y>
-      <width>130</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
-color: rgb(249, 247, 241); 
-font: 11pt &quot;Baskerville Old Face&quot;;
-border-radius:15px;</string>
-    </property>
-    <property name="text">
-     <string>Open directory</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
