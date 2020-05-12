@@ -16,8 +16,8 @@ inserturi::inserturi(QWidget *parent, std::string pwd, SymWinInterface& si) :
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     #ifdef DISPATCHER_ON
-    showDir=cl.showDir(true);
-    showDir = manipulationPath(showDir);
+    this->showDir=cl.showDir(true);
+    this->showDir = manipulationPath(this->showDir);
     #endif
 
     ui->writer->click();
@@ -91,7 +91,7 @@ void inserturi::failure(const QString &toPrint){
 void inserturi::on_dir_clicked()
 {
     disableStyleButtons();
-    dirWindow=new choosedir(this, showDir);
+    dirWindow=new choosedir(this, this->showDir);
     int ret=dirWindow->exec();
     pathId=dirWindow->pathId;
     if(ret==0)

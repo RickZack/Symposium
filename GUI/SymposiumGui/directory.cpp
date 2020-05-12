@@ -797,15 +797,7 @@ void directory::on_okButton_clicked()
 }
 
 void directory::successRename(){
-    QString newName=ui->renameLabel->text();
-    ui->renameLabel->clear();
-    QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
-    foreach(QListWidgetItem *items, selectedItem){
-        items->setText(newName);
-        ui->myListWidget->currentItem()->setSelected(false);
-        ui->renameLabel->clear();
-        hideAll();
-    }
+    hideAll();
     //aggiorniamo la stringa del contenuto in modo che ci sia il nuovo nome della directory
     if(this->actualId=="0"){
         str = cl.showHome();
@@ -817,6 +809,10 @@ void directory::successRename(){
         str=cl.getStr(this->actualId, temp);
         str = manipulationHome(str);
     }
+
+    ui->myListWidget->clear();
+    int count=number_elements(str);
+    listGenerate(str,count);
 }
 
 void directory::errorConnectionLogout(){
