@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <QMessageBox>
 #include <QPropertyAnimation>
+#include <QCloseEvent>
 #include "../../privilege.h"
 #include "../../uri.h"
 #include "../../Symposium.h"
@@ -30,7 +31,7 @@ class activetimerlink : public QDialog, public SymModalWinInterface
     Q_OBJECT
 
 public:
-    explicit activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si);
+    explicit activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si);
 
     void success() override;
     void failure(const QString& toPrint) override;
@@ -86,6 +87,7 @@ private:
     Symposium::uri u;
     std::string time;
     Symposium::uint_positive_cnt::type documentId;
+    Symposium::user us;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */
@@ -106,6 +108,10 @@ private:
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
     void waiting();
+    /**
+     * @brief return to directory
+     */
+    void closeEvent(QCloseEvent *event) override;
 
 };
 

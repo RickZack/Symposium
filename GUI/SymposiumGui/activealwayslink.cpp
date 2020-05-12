@@ -4,10 +4,10 @@
 #include <QMovie>
 #include "onoff_networkinteraction.h"
 
-activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si) :
+activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    ui(new Ui::activealwayslink),  documentId(documentId), pathFile(pathFile)
+    ui(new Ui::activealwayslink),  documentId(documentId), pathFile(pathFile), us(us)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -20,10 +20,6 @@ activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
-
-    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-    this->pathFile="/1/2/3/4/5";
-    //---------------------------------------------------------------------------------------------------------------
 
 }
 
@@ -55,7 +51,8 @@ void activealwayslink::successLink()
 {
     enableButtons();
     enableStyleButtons();
-    successlinks link(parentWidget(), 1, QString::fromStdString(pathFile));
+    backToParent();
+    successlinks link(parentWidget(), 1, QString::fromStdString(pathFile), 0, "", us, privilegeToGrant);
     link.exec();
 }
 
@@ -95,7 +92,7 @@ void activealwayslink::on_reader_clicked()
 
 void activealwayslink::on_cancel_clicked()
 {
-    this->close();
+    backToParent();
 }
 
 void activealwayslink::on_ok_clicked()
@@ -110,10 +107,7 @@ void activealwayslink::on_ok_clicked()
     #else
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-    //this->hide();
-    enableButtons();
-    successlinks link(parentWidget(), 1, QString::fromStdString(pathFile));
-    link.exec();
+    successLink();
     //---------------------------------------------------------------------------------------------------------------
     #endif
 }
@@ -150,4 +144,11 @@ void activealwayslink::waiting()
     ui->waiting->show();
     ui->gif->show();
     ui->errorMess->hide();
+}
+
+void activealwayslink::closeEvent(QCloseEvent *event){
+    if(closedByUser())
+        backToParent();
+    else
+        event->accept();
 }

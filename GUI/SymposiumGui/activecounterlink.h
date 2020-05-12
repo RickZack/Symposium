@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QPropertyAnimation>
+#include <QCloseEvent>
 #include "../../privilege.h"
 #include "../../uri.h"
 #include "../../Symposium.h"
@@ -25,7 +26,7 @@ class activecounterlink : public QDialog, public SymModalWinInterface
     Q_OBJECT
 
 public:
-    explicit activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si);
+    explicit activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si);
 
     void success() override;
     void failure(const QString& toPrint) override;
@@ -81,6 +82,7 @@ private:
     unsigned int numCounter;
     Symposium::uri u;
     Symposium::uint_positive_cnt::type documentId;
+    Symposium::user us;
 
     /**
      * @brief disable all buttons present so user cannot perform any operation
@@ -102,6 +104,10 @@ private:
      * @brief waiting of the conclusion of the operation by clientdispatcher
      */
     void waiting();
+    /**
+     * @brief return to directory
+     */
+    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // ACTIVECOUNTERLINK_H

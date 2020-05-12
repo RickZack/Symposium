@@ -129,6 +129,10 @@ private slots:
 
     void on_showUsers_clicked();
 
+    bool event(QEvent *e) override;
+
+    void on_pushButton_clicked();
+
 private:
     Ui::notepad *ui;
     QString mFilename;
