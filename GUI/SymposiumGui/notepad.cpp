@@ -238,15 +238,6 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         shareMenu->addAction(tr("Number links"), this, &notepad::counterLink);
     }
 
-
-    QMenu *menuSym=menuBar()->addMenu(tr("Prova RichText"));
-    menuSym->addAction(tr("Verify Sym"),this,&notepad::verifySymbol2);
-
-    QMenu *userMenu2=menuBar()->addMenu(tr("ProvaCursori"));
-    userMenu2->addAction(tr("Add Cursor"), this, &notepad::addCursor);
-    userMenu2->addAction(tr("Change Cursor"), this, &notepad::changeCursorPos);
-    userMenu2->addAction(tr("Remove Cursor"), this, &notepad::removeCursor);
-
     ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));
     ui->actionhighlight->setCheckable(true);
 
@@ -732,7 +723,6 @@ void notepad::closeEvent(QCloseEvent *event){
         event->accept();
         if(isLastNotepadOpened())
             showParent();
-        closeNotepad();
     }
 }
 
