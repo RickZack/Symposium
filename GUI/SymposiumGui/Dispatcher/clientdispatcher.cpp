@@ -304,21 +304,17 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
 // verifySymbol(), moveUserCursor(), addUserCursor() e removeUserCursor().
 // In questo modo non sarà necessario usare il cast
 void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index){
-    //FIXME: Usa static_cast
-    // notepad& n2=static_cast<notepad&>(this->winmanager.getNotepad(resourceId));
-    notepad& n = (notepad&)(this->winmanager.getNotepad(resourceId));
+    notepad& n = static_cast<notepad&>(this->winmanager.getNotepad(resourceId));
     n.remoteInsert(newSym, siteId, index);
 }
 
 void clientdispatcher::remoteRemove(uint_positive_cnt::type resourceId, uint_positive_cnt::type siteId, std::pair<int, int> indexes){
-    //FIXME: Usa static_cast
-    notepad& n = (notepad&)(this->winmanager.getNotepad(resourceId));
+    notepad& n = static_cast<notepad&>(this->winmanager.getNotepad(resourceId));
     n.remoteDelete(indexes,siteId);
 }
 
 void clientdispatcher::verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes){
-    //FIXME: Usa static_cast
-    notepad& n = (notepad&)(this->winmanager.getNotepad(resId));
+    notepad& n = static_cast<notepad&>(this->winmanager.getNotepad(resId));
     n.verifySymbol(newSym, indexes);
 }
 
@@ -466,20 +462,17 @@ void clientdispatcher::moveMyCursor(uint_positive_cnt::type resId, int block, in
 }
 
 void clientdispatcher::moveUserCursor(uint_positive_cnt::type resId, int block, int column, uint_positive_cnt::type siteId){
-    //FIXME: Usa static_cast
-    notepad& finestra = (notepad&)(this->winmanager.getNotepad(resId));
+    notepad& finestra = static_cast<notepad&>(this->winmanager.getNotepad(resId));
     finestra.moveUserCursor(siteId,block,column);
 }
 
 void clientdispatcher::addUserCursor(uint_positive_cnt::type siteID, std::string username, uint_positive_cnt::type resourceID){
-    //FIXME: Usa static_cast
-    notepad& finestra = (notepad&)(this->winmanager.getNotepad(resourceID));
+    notepad& finestra = static_cast<notepad&>(this->winmanager.getNotepad(resourceID));
     finestra.addUserCursor(siteID,username);
 }
 
 void clientdispatcher::removeUserCursor(uint_positive_cnt::type siteID, uint_positive_cnt::type resourceID){
-    //FIXME: Usa static_cast
-    notepad& finestra = (notepad&)(this->winmanager.getNotepad(resourceID));
+    notepad& finestra = static_cast<notepad&>(this->winmanager.getNotepad(resourceID));
     finestra.removeUserCursor(siteID);
 }
 
