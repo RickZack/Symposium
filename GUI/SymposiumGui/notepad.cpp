@@ -1,6 +1,7 @@
 #include "notepad.h"
 #include "ui_notepad.h"
 //#include "directory.h"
+#include "onoff_networkinteraction.h"
 
 #include <QAction>
 #include <QApplication>
@@ -69,6 +70,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     ui->fontComboBox->activated("Times New Roman");
 
     //----------------------------------------------------------------------------------------------------------------------------
+    #ifndef DISPATCHER_ON
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2},i4={0,3},iacapo={0,4},i5={1,0},i6={1,1},i7={1,2},i8={1,3},i9={1,4},i10={1,5},i11={1,6},i12={1,7},i13={1,8},iacapo2={1,9};
     Symposium::symbol s1('C', 1, 0, {1}, false),
                           s2('i', 1, 1, {2}, false),
@@ -195,15 +197,13 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             documentoProva.localInsert(in8,sn8);
             documentoProva.localInsert(in9,sn9);
             documentoProva.localInsert(in10,sn10);
-
   //---------------------------------------------------------------------------------------------------------
 
-    #ifndef DISPATCHER_ON
     ui->textEdit->setThisUserPrivilege(privOpen);
     this->pathToFile="/1/2/3/4/5/6/7";
     us=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     #else
-    us=cl->getUser();
+    us=cl.getUser();
     #endif
 
     //this->setToolButtonStyle(Qt::ToolButtonFollowStyle);
@@ -676,10 +676,10 @@ void notepad::visualizeAllUsers()
     users.insert(p8);
     Symposium::user thisUs=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
     #else
-    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
-    std::unordered_map<std::string, Symposium::privilege> users=cl->allUser(documentID);
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
+    std::unordered_map<std::string, Symposium::privilege> users=cl.allUser(documentId);
     #endif
-    alluser* alluserWindow = new alluser(this,  priv, documentId, thisUs, pathToFile, onlineUsers, users, *this);
+    alluser* alluserWindow = new alluser(this,  priv, documentId, this->us, pathToFile, onlineUsers, users, *this);
     goToWindow(*alluserWindow);
 }
 
@@ -759,9 +759,9 @@ void notepad::showLabels()
 {
     #ifdef DISPATCHER_ON
     ui->textEdit->setDocumentId(documentId);
-    ui->textEdit->setClientDispatcher(cl);
+    //ui->textEdit->setClientDispatcher(cl);
     ui->textEdit->setThisUserSiteId(us.getSiteId());
-    const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(int documentID);
+    const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     #else
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
@@ -775,9 +775,9 @@ void notepad::showLabels()
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);
     #endif
-    ui->textEdit->constractLabelsCursors(onlineUsers, u1->getSiteId());
+    ui->textEdit->constractLabelsCursors(onlineUsers, us.getSiteId());
     if(privOpen!=Symposium::privilege::readOnly)
-        ui->textEdit->insertCurrentUser(onlineUsers, u1->getSiteId());
+        ui->textEdit->insertCurrentUser(onlineUsers, us.getSiteId());
 }
 
 bool notepad::isAKeyToIgnore(QKeyEvent* event){
@@ -1413,7 +1413,7 @@ void notepad::insertusers()
     int count=0;
     ui->tree->clear();
     #ifdef DISPATCHER_ON
-    const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl->onlineUser(documentID);
+    const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     #else
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
