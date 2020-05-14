@@ -130,7 +130,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
     if(toInsert.getCh()=='\r'){
-        // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
+        // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0+1,0)
         this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
         symbol checkSym=symbols[i0][i1];
         if(checkSym.getCh()=='\r'){
@@ -404,8 +404,12 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     int i1=indexes.second;
     // I have to handle the position of the following cursors
     this->updateOtherCursorPos(siteId,i0,i1,toInsert,true);
-    // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
-    this->updateCursorPos(siteId,i0,i1+1);
+    if(toInsert.getCh()=='\r'){
+        this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
+    }
+    else{
+        this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
+    }
     checkIndex(i0,i1);
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
