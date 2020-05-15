@@ -123,8 +123,6 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     checkIndex(i0,i1);
     // I have to handle the position of the following cursors
     this->updateOtherCursorPos(toInsert.getSiteId(),i0,i1,toInsert,true);
-    // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
-    this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
 
     symbol newSymb= generatePosition(indexes,toInsert);
     newSymb.setCharFormat(toInsert.getCharFormat());
@@ -132,6 +130,8 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
     if(toInsert.getCh()=='\r'){
+        // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0+1,0)
+        this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
         symbol checkSym=symbols[i0][i1];
         if(checkSym.getCh()=='\r'){
             return newSymb;
@@ -140,6 +140,9 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end());
         symbols.push_back(std::vector<symbol>(1,emptySymbol));
         }
+    }else{
+        // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
+        this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     //()<<"Simboli"<<toText();
@@ -401,8 +404,12 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     int i1=indexes.second;
     // I have to handle the position of the following cursors
     this->updateOtherCursorPos(siteId,i0,i1,toInsert,true);
-    // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
-    this->updateCursorPos(siteId,i0,i1+1);
+    if(toInsert.getCh()=='\r'){
+        this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
+    }
+    else{
+        this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
+    }
     checkIndex(i0,i1);
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
@@ -770,7 +777,7 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId,unsigne
 
         } // I'm changing the line
         else if(symb.getCh()=='\r'){
-            // inserting a character
+            // inserting the \r character
             if(ins){
                 // There are different cursor on the same line: they have to change the row index and the column index
                if(i.second.row==newRow){
@@ -779,7 +786,11 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId,unsigne
                    i.second.col=i.second.col-newCol;
                    }
                }else
+                   // there are different cursors on different lines: they have to change only the row index
+                   if(i.first->getSiteId()!=targetSiteId){
                    i.second.row+=1;
+                   }
+                // deleting the \r character
             }else{
                 i.second.row-=1;
                 i.second.col=i.second.col+newCol;
