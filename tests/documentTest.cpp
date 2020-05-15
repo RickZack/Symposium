@@ -248,7 +248,7 @@ TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrder){
     d.remoteInsert(1, input.s1);
     d.remoteRemove(1, input.s2);
 
-    //ASSERT_FALSE(d.getSymbols().empty());
+    ASSERT_FALSE(d.getSymbols().empty());
 
     EXPECT_EQ(input.expected[0], d.getSymbols().front()[0]);
 }
