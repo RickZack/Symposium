@@ -72,12 +72,21 @@ namespace Symposium {
         }
     };
 
+    enum class align{
+        left,                           /**< to declare that the row has a left alignment */
+        right,                          /**< to declare that the row has a right alignment */
+        center,                         /**< to declare that the row has a center alignment */
+        justify,                         /**< to declare that the row has a justified alignment */
+        emptyAlignment
+    };
+
     class document {
-        static uint_positive_cnt idCounter;                                           /**< id to be assigned to the next created document */
-        uint_positive_cnt::type id;                                                         /**< unique identifier for the document */
-        std::vector<std::vector<symbol>> symbols;                      /**< container of characters and metadata for CRDT*/
-        std::forward_list<std::pair<const user *, sessionData>> activeUsers;    /**< list of users currently active on the document, with the current privilege*/
-        int numchar;                                                    /**< number of printable characters */
+        static uint_positive_cnt idCounter;                                             /**< id to be assigned to the next created document */
+        uint_positive_cnt::type id;                                                     /**< unique identifier for the document */
+        std::vector<std::vector<symbol>> symbols;                                       /**< container of characters and metadata for CRDT*/
+        std::forward_list<std::pair<const user *, sessionData>> activeUsers;            /**< list of users currently active on the document, with the current privilege*/
+        std::vector<std::pair<align,unsigned>> alignmentStyle;                        /**< vector that contains for each row the alignment left/right/center/justify and the style index */
+        int numchar;                                                                    /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
         int level=0;
@@ -221,6 +230,8 @@ namespace Symposium {
 
 
         void checkVector();
+
+        std::vector<std::pair<align, unsigned> > getAlignmentStyle() const;
 
     private:
         /**

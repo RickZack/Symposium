@@ -40,6 +40,8 @@
 namespace Symposium {
 
     struct format{
+
+        /* format */
         std::string familyType;
         bool isBold;
         bool isUnderlined;
@@ -47,9 +49,17 @@ namespace Symposium {
         unsigned size;
         Color col;
 
-        format():format("", false, false, false, 12,Color(0,0,0)){}
-        format(const std::string& ft, bool bold, bool underline, bool italic, unsigned size, Color col):
-        familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), size(size),col(col){}
+        /* alignment */
+        unsigned indexStyle;
+        unsigned left;
+        unsigned right;
+        unsigned center;
+        unsigned justify;
+
+
+        format():format("", false, false, false, 12,Color(0,0,0),0,0,0,0,0){}
+        format(const std::string& ft, bool bold, bool underline, bool italic, unsigned size, Color col,unsigned indexStyle, unsigned left, unsigned right,unsigned center, unsigned justify):
+        familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), size(size),col(col),indexStyle(indexStyle),left(left),right(right),center(center),justify(justify){}
 
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version);

@@ -97,8 +97,8 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         Symposium::Color rosso(255,0,0);
         const std::string ft="Times New Roman";
         unsigned size=9;
-        Symposium::format f(ft,false,false,false,size,nero);
-         Symposium::format f1("Times New Roman",true,true,false,9,rosso);
+        Symposium::format f(ft,false,false,false,size,nero,0,0,0,0,0);
+         Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,0,0,0,0);
          //Ciao
         s1.setCharFormat(f1);
         s2.setCharFormat(f1);
@@ -176,7 +176,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             Symposium::Color colore(200,30,0);
             const std::string ft1="Lucida Console";
             unsigned size2=9;
-            Symposium::format fn1(ft1,false,false,true,size2,colore);
+            Symposium::format fn1(ft1,false,false,true,size2,colore,0,0,0,0,0);
             sn1.setCharFormat(fn1);
             sn2.setCharFormat(fn1);
             sn3.setCharFormat(fn1);
@@ -396,22 +396,26 @@ void notepad::on_actionColorText_triggered()
 void notepad::on_actionAlignTextLeft_triggered()
 {
     textAlign(ui->actionAlignTextLeft);
+    this->left=1;
 }
 
 void notepad::on_actionAlignCenter_triggered()
 {
     textAlign(ui->actionAlignCenter);
+    this->center=1;
 }
 
 
 void notepad::on_actionAlignTextRight_triggered()
 {
    textAlign(ui->actionAlignTextRight);
+   this->right=1;
 }
 
 void notepad::on_actionAlignTextJustify_triggered()
 {
     textAlign(ui->actionAlignTextJustify);
+    this->justify=1;
 }
 
 void notepad::on_actionBoldFont_triggered()
@@ -503,6 +507,9 @@ void notepad::textStyle(int styleIndex)
     }
 
     cursor.endEditBlock();
+
+    // set the style index
+    this->indexStyle=styleIndex;
 }
 
 
@@ -796,7 +803,6 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCharFormat format = cursor.charFormat();
     QString testo=event->text();
     int row, column;
-    this->pos=cursor.position();
 
     if(event->key()==Qt::Key_Backspace)
         return handleDeleteKey();
@@ -939,7 +945,15 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     int red=col.red();
     int green=col.green();
     Symposium::Color myCol(red,green,blue);
-    Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
+    Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->left,this->right,this->center,this->justify};
+
+    // set the alignment values to zero default value
+    this->indexStyle=0;
+    this->left=0;
+    this->right=0;
+    this->center=0;
+    this->justify=0;
+
     std::vector<int> pos;
 
     // per test adesso, il mio siteid è 1 e anche il mio counter
@@ -947,8 +961,6 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     sym.setCharFormat(charFormat);
     this->documentoProva.localInsert(indexes,sym);
     //cl->localInsert(this->documentId,sym,indexes);
-
-    this->posBlock=ui->textEdit->textCursor().positionInBlock();
     this->colPos=colC;
 }
 
@@ -987,7 +999,15 @@ void notepad::contV_action(){
         int red=col.red();
         int green=col.green();
         Symposium::Color myCol(red,green,blue);
-        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol};
+        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->left,this->right,this->center,this->justify};
+
+        // set the alignment values to zero default value
+        this->indexStyle=0;
+        this->left=0;
+        this->right=0;
+        this->center=0;
+        this->justify=0;
+
         std::vector<int> pos;
         // SISTEMARE IL SITEID E IL COUNTER IN SYMBOL
         Symposium::symbol sym(ch,1,1,pos,false);
@@ -1383,7 +1403,6 @@ void notepad::on_actionhighlight_triggered()
 
     if(highActivated==false){
         this->highActivated=true;
-        this->insertedChars=0;
         ui->actionhighlight->setChecked(true);
         //ui->textEdit->clear();
         this->colorText();
@@ -1391,7 +1410,6 @@ void notepad::on_actionhighlight_triggered()
     else{
         this->highActivated=false;
         ui->actionhighlight->setChecked(false);
-        this->insertedChars=0;
         ui->textEdit->clear();
         this->fillTextEdit();
 

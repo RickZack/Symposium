@@ -70,7 +70,14 @@ bool included(unsigned ind0, unsigned ind){
 
 
 
-document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)) {
+std::vector<std::pair<align, unsigned> > document::getAlignmentStyle() const
+{
+    return alignmentStyle;
+}
+
+document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)),
+    alignmentStyle(1,std::pair(align::emptyAlignment,0))
+{
     id=idCounter;
     idCounter++;
 }
@@ -103,7 +110,7 @@ document & document::access(const user &newActive, privilege accessPriv) {
 
 void document::checkIndex(unsigned int i0, unsigned int i1) {
     int mult_fac=2;
-
+    /* resize the symbols vector*/
     if(i0>=symbols.size()){
         symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
 
@@ -111,9 +118,13 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     if(i1>=symbols[i0].size()){
        symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
+    }
 
+    /* resize the alignmentStyle vector */
+    if(i0>=alignmentStyle.size()){
+        alignmentStyle.resize((i0+1)*mult_fac,std::pair(align::emptyAlignment,0));
+    }
 
-}
 }
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
@@ -121,14 +132,25 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     int i0=indexes.first;
     int i1=indexes.second;
     checkIndex(i0,i1);
-    // I have to handle the position of the following cursors
+
+    /* handle the position of the following cursors */
     this->updateOtherCursorPos(toInsert.getSiteId(),i0,i1,toInsert,true);
 
     symbol newSymb= generatePosition(indexes,toInsert);
-    newSymb.setCharFormat(toInsert.getCharFormat());
+    format charFormat=toInsert.getCharFormat();
+    newSymb.setCharFormat(charFormat);
+
+    /* set the alignmentStyle vector */
+    std::pair<align,unsigned> styleValues;
+    if(charFormat.left==1){styleValues={align::left,charFormat.indexStyle};}
+    else if(charFormat.right==1){styleValues={align::right,charFormat.indexStyle};}
+    else if(charFormat.center==1){styleValues={align::center,charFormat.indexStyle};}
+    else{styleValues={align::justify,charFormat.indexStyle};}
+    alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
 
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
+
     if(toInsert.getCh()=='\r'){
         // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0+1,0)
         this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
@@ -147,11 +169,10 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     //()<<"Simboli"<<toText();
     //qDebug()<<"Posizioni"<<newSymb.getPos();
-
-
     return newSymb;
 
 }
+
 
 symbol document::generatePosition(const std::pair<unsigned int, unsigned int> indexes, const symbol &toInsert){
     std::vector<int> posBefore;
@@ -178,7 +199,7 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
 
     int level=0;
     std::vector<int> inPos;
-    //std::vector<int> newPos= generatePosBetween(posBefore, posAfter, inPos, level, siteIdB, siteIdA);
+
     std::vector<int> newPos= generatePosBetween(posBefore, posAfter, inPos, level, symB, symA);
 
 

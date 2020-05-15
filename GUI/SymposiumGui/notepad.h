@@ -148,12 +148,15 @@ private:
     Symposium::privilege privOpen;
     bool insertOthCh=false;
     bool highActivated=false;
-    int insertedChars=0;
-    int posBlock=0;
     QColor colPos;
-    int pos;
     bool okPaste=false;
     int dim;
+
+    unsigned indexStyle;                                                /**< to set the index for the style */
+    unsigned left;                                                      /**< to set for each row if there is a left alignment */
+    unsigned right;                                                     /**< to set for each row if there is a right alignment */
+    unsigned center;                                                    /**< to set for each row if there is a center alignment */
+    unsigned justify;                                                   /**< to set for each row if there is a justified alignment */
 
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void colorChanged(const QColor &c);
@@ -171,7 +174,6 @@ private:
 
     /**
      * @brief contV_action to handle with the CONTROL-C CONTROL-V actions
-     * @param pos
      */
     void contV_action();
 
@@ -202,7 +204,6 @@ private:
     int columnForReturn=0;
     void deleteMultipleLines(int sR, int eR, int c, int sL, bool lines);
     int countCharsInLine(int line) const;
-
     void insertusers();
 };
 
