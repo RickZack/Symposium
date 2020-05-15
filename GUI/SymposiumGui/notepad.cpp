@@ -47,7 +47,7 @@ const QString rsrcPath = ":/resources/images/win";
 
 #include "Dispatcher/clientdispatcher.h"
 
-notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,Symposium::document doc, SymWinInterface& si, bool parentIsTransient) :
+notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,Symposium::document& doc, SymWinInterface& si, bool parentIsTransient) :
     QMainWindow(parent),
     SymNotepadWinInterface (si, isQWidget::isQwidgetType(*this), parentIsTransient),
     documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)

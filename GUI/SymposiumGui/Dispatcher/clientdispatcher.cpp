@@ -518,18 +518,14 @@ void clientdispatcher::successShareResource(std::string path){
     }*/
 }
 
-void clientdispatcher::successOpenSource(document &doc){
+
+void clientdispatcher::updateRequestDocandSuccess(document &doc){
     this->requestDoc = doc;
     this->successAction();
 }
 
-const document& clientdispatcher::getOpenDocument(){
+document& clientdispatcher::getOpenDocument(){
     return this->requestDoc;
-}
-
-void clientdispatcher::successCreateNewSource(const document &doc){
-    this->requestDoc = doc;
-    this->successAction();
 }
 
 void clientdispatcher::closeConnection(){

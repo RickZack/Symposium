@@ -37,7 +37,7 @@ class notepad : public QMainWindow, public SymNotepadWinInterface
     Q_OBJECT
 
 public:
-    explicit notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,Symposium::privilege priv,Symposium::privilege privOpen,std::string pathToFile,Symposium::document doc, SymWinInterface& si, bool parentIsTransient=false);
+    explicit notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,Symposium::privilege priv,Symposium::privilege privOpen,std::string pathToFile,Symposium::document& doc, SymWinInterface& si, bool parentIsTransient=false);
 
     //Not used at the moment
     void success() override{}

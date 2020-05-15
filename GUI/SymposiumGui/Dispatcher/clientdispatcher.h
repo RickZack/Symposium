@@ -215,23 +215,21 @@ namespace Symposium{
 
         void successShareResource(std::string path);
 
-        void successOpenSource(document &doc);
-
-        void successCreateNewSource(const document &doc);
-
         void closeConnection();
 
         void successAction();
 
         std::string getStr(std::string ID_Cartella, std::string path);
 
-        const document& getOpenDocument();
+        document& getOpenDocument();
 
         void setOnlineUser(onlineusers *ou);
 
         void setAllUser(alluser *au);
 
         void stopTimer();
+
+        void updateRequestDocandSuccess(document &doc);
 
 
     private:

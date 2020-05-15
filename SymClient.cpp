@@ -98,7 +98,7 @@ void SymClient::openSource(const std::string &path, const std::string &name, con
     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successOpenSource(doc);
+    this->dispatcher->updateRequestDocandSuccess(doc);
     #endif
 }
 
@@ -123,7 +123,7 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
                                     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
 	//notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successAction();
+    this->dispatcher->updateRequestDocandSuccess(doc);
     #endif
 }
 
@@ -143,7 +143,7 @@ void SymClient::createNewSource(const std::string &path, const std::string &name
                                     (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successCreateNewSource(docReq);
+    this->dispatcher->updateRequestDocandSuccess(docReq);
     #endif
 }
 
@@ -157,7 +157,6 @@ void SymClient::createNewDir(const std::string &path, const std::string &name, u
     this->getLoggedUser().newDirectory(name,path,idToAssign);
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    //this->dispatcher->successCreateNewDir(std::to_string(idToAssign));
     this->dispatcher->successAction();
     #endif
 }
