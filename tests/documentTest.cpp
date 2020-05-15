@@ -246,21 +246,21 @@ INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCur
 TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrder){
     Insertion input=GetParam();
     d.remoteInsert(1, input.s1);
-    d.remoteRemove(1, input.s1);
+    d.remoteRemove(1, input.s2);
 
-    ASSERT_FALSE(d.getSymbols().empty());
+    //ASSERT_FALSE(d.getSymbols().empty());
 
-    EXPECT_EQ(input.expected, d.getSymbols().front());
+    EXPECT_EQ(input.expected[0], d.getSymbols().front()[0]);
 }
 Insertion inserts2[]={
         Insertion(symbol('c', 1, 1, {1}, false), symbol('c', 1, 1, {1}, false),
-                  std::vector<symbol>()),
+                  {document::emptySymbol}),
 
         Insertion(symbol('c', 1, 1, {1}, false), symbol('b', 1, 1, {1}, false),
                   {symbol('c', 1, 1, {1}, false)}),
 
         Insertion(symbol('c', 1, 1, {1}, false), symbol('c', 1, 1, {1, 2}, false),
-                  {symbol('c', 1, 1, {1}, false), }),
+                  {symbol('c', 1, 1, {1}, false)}),
 };
 INSTANTIATE_TEST_CASE_P(RemoveRemoteSymbols, docRemoteRemoveSymbolTest, testing::ValuesIn(inserts2));
 

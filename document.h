@@ -85,7 +85,6 @@ namespace Symposium {
         static const std::string basePath;
 
         static constexpr wchar_t  emptyChar='~';
-        static const symbol emptySymbol;
 
         friend class boost::serialization::access;
         template<class Archive>
@@ -93,6 +92,7 @@ namespace Symposium {
             ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
         };
     public:
+        static const symbol emptySymbol;
         static bool serializeFull;
         document(uint_positive_cnt::type id = document::idCounter);
 
