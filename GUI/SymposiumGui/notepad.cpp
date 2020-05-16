@@ -72,10 +72,10 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     //----------------------------------------------------------------------------------------------------------------------------
     #ifndef DISPATCHER_ON
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2},i4={0,3},iacapo={0,4},i5={1,0},i6={1,1},i7={1,2},i8={1,3},i9={1,4},i10={1,5},i11={1,6},i12={1,7},i13={1,8},iacapo2={1,9};
-    Symposium::symbol s1('C', 1, 0, {1}, false),
-                          s2('i', 1, 1, {2}, false),
-                          s3('a', 1, 2,{3}, false),
-                          s4('o', 1, 3,{4}, false),
+    Symposium::symbol s1('C', 1, 0, std::vector<int>(), false),
+                          s2('i', 1, 1, std::vector<int>(), false),
+                          s3('a', 1, 2,std::vector<int>(), false),
+                          s4('o', 1, 3,std::vector<int>(), false),
                           s5('c', 2, 4, std::vector<int>(), false),
                           s6('o', 2, 5, std::vector<int>(), false),
                           s7('m', 2, 6, std::vector<int>(), false),
@@ -97,25 +97,16 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         Symposium::Color rosso(255,0,0);
         const std::string ft="Times New Roman";
         unsigned size=9;
-        Symposium::format f(ft,false,false,false,size,nero,0,0,0,0,0);
-         Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,0,0,0,0);
+        Symposium::format f(ft,false,false,false,size,nero,6,0,1,0,0);
+         Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,0,1,0,0);
          //Ciao
-        s1.setCharFormat(f1);
+        s1.setCharFormat(f1); // ciao deve apparire a sinistra normalmente
         s2.setCharFormat(f1);
         s3.setCharFormat(f1);
         s4.setCharFormat(f1);
+        acapo.setCharFormat(f1);
 
 
-        // Come stai
-        s5.setCharFormat(f1);
-        s6.setCharFormat(f1);
-        s7.setCharFormat(f1);
-        s8.setCharFormat(f1);
-        s9.setCharFormat(f);
-        s10.setCharFormat(f);
-        s11.setCharFormat(f);
-        s12.setCharFormat(f);
-        s13.setCharFormat(f);
 
         a1.setCharFormat(f);
         a2.setCharFormat(f);
@@ -123,7 +114,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         a4.setCharFormat(f);
 
         // Ciao -> inserito con la remoteInsert
-
+/*
         documentoProva.remoteInsert(1,s1);
         documentoProva.remoteInsert(1,s2);
         documentoProva.remoteInsert(1,s3);
@@ -131,7 +122,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         documentoProva.remoteInsert(1,acapo);
 
 
-/*
+ */
         // Ciao
         documentoProva.localInsert(i1,s1);
         documentoProva.localInsert(i2,s2);
@@ -139,14 +130,27 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         documentoProva.localInsert(i4,s4);
         documentoProva.localInsert(iacapo,acapo);
 
-        */
+ /*
 
         // Ehi
         documentoProva.localInsert(i1,a1);
         documentoProva.localInsert(i2,a2);
         documentoProva.localInsert(i3,a3);
         documentoProva.localInsert(i4,a4);
+*/
 
+
+        // Come stai
+        s5.setCharFormat(f);
+        s6.setCharFormat(f);
+        s7.setCharFormat(f);
+        s8.setCharFormat(f);
+        s9.setCharFormat(f);
+        s10.setCharFormat(f);
+        s11.setCharFormat(f);
+        s12.setCharFormat(f);
+        s13.setCharFormat(f);
+        acapo.setCharFormat(f);
 
         // Come stai -> inserito con la localInsert
         documentoProva.localInsert(i5,s5);
@@ -176,7 +180,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
             Symposium::Color colore(200,30,0);
             const std::string ft1="Lucida Console";
             unsigned size2=9;
-            Symposium::format fn1(ft1,false,false,true,size2,colore,0,0,0,0,0);
+            Symposium::format fn1(ft1,false,false,true,size2,colore,3,0,1,0,0);
             sn1.setCharFormat(fn1);
             sn2.setCharFormat(fn1);
             sn3.setCharFormat(fn1);
@@ -242,6 +246,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     ui->actionhighlight->setCheckable(true);
 
     this->fillTextEdit();
+    this->fixAlignment();
 
     ui->textEdit->setCursorWidth(3);
 
@@ -648,9 +653,42 @@ void notepad::fillTextEdit(){
              this->currentCharFormatChanged(chFormat);
             }
          }
-       }
-     }
+    }
+
+  }
+
     insertOthCh=false;
+
+}
+
+void notepad::fixAlignment(){
+    std::vector<std::pair<Symposium::align,unsigned>> alignmentStyle= this->documentoProva.getAlignmentStyle();
+    QTextCursor curs=ui->textEdit->textCursor();
+    for(size_t i=0;i<alignmentStyle.size();i++){
+        std::pair<Symposium::align,unsigned> style=alignmentStyle[i];
+        curs.movePosition(QTextCursor::Start);
+        curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,i);
+        ui->textEdit->setTextCursor(curs);
+        if(style.first==Symposium::align::left){
+            //this->textAlign(ui->actionAlignTextLeft);
+            ui->textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
+            this->textStyle(style.second);}
+        else if(style.first==Symposium::align::right){
+            //this->textAlign(ui->actionAlignTextRight);
+             ui->textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
+             this->textStyle(style.second);}
+        else if(style.first==Symposium::align::center){
+            //this->textAlign(ui->actionAlignCenter);
+             ui->textEdit->setAlignment(Qt::AlignCenter | Qt::AlignAbsolute);
+             this->textStyle(style.second);}
+        else if (style.first==Symposium::align::justify){
+            //this->textAlign(ui->actionAlignTextJustify);
+             ui->textEdit->setAlignment(Qt::AlignJustify | Qt::AlignAbsolute);
+             this->textStyle(style.second);}
+        else{
+            this->textAlign(ui->actionAlignTextLeft); /**< default alignment */
+            this->textStyle(style.second);}
+       }
 }
 
 void notepad::visualizeAllUsers()
@@ -1155,66 +1193,6 @@ void notepad::verifySymbol(Symposium::symbol sym,std::pair<int,int> indexes){
     ui->textEdit->changePosition(actBlock,actColm);
     insertOthCh=false;
 }
-
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------
-// SOLO PER TEST DI VERIFYSYMBOL
-void notepad::verifySymbol2(){
-
-    insertOthCh=true;
-    int row=0;
-    int column=0;
-
-
-    QTextCursor curs=ui->textEdit->textCursor();
-    int actBlock=curs.blockNumber();
-    int actColm=curs.positionInBlock();
-
-    //extract information from sym to build the character to insert in the textEdit block
-    //Symposium::format f= sym.getCharFormat();
-    QTextCharFormat ch_format;QFont ch_font;
-
-    ch_font.setFamily(QString::fromStdString("MShell Dla 2"));
-    ch_font.setBold(false);
-    ch_font.setUnderline(false);
-    ch_font.setItalic(false);
-    ch_font.setPointSize(8);
-    Symposium::Color col(0, 0, 0);
-
-    // conversion from Symposium::Color to QColor
-    QColor qCol;
-    qCol=static_cast<QColor>(col);
-    QBrush brh(qCol);
-
-    // set the font and the color to the character
-    ch_format.setFont(ch_font);
-    ch_format.setForeground(brh);
-
-    // check if the highlight button is activated;
-    // if yes-> highlight the inserted character with the color of the user
-    if(this->highActivated){
-        QColor colUser=Qt::red;
-        ch_format.setBackground(colUser);
-    }
-
-    curs.movePosition(QTextCursor::Start);
-    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,row);
-    curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
-    ui->textEdit->setTextCursor(curs);
-
-
-    // delete the character and replace it with the same that has a defined Color
-    curs.deleteChar();
-    //wchar_t symch=sym.getCh();
-    QString ch;
-    //ch[0]=symch;
-    curs.insertText("H",ch_format);
-
-    // go back to the starting position
-    ui->textEdit->changePosition(actBlock,actColm);
-    insertOthCh=false;
-}
-//--------------------------------------------------------------------------------------------------------------------------------------------------
 
 void notepad::remoteDelete(std::pair<int,int> indexes,Symposium::uint_positive_cnt::type siteId){
 

@@ -205,6 +205,7 @@ private:
     void deleteMultipleLines(int sR, int eR, int c, int sL, bool lines);
     int countCharsInLine(int line) const;
     void insertusers();
+    void fixAlignment();
 };
 
 #endif // NOTEPAD_H

@@ -146,7 +146,9 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     else if(charFormat.right==1){styleValues={align::right,charFormat.indexStyle};}
     else if(charFormat.center==1){styleValues={align::center,charFormat.indexStyle};}
     else{styleValues={align::justify,charFormat.indexStyle};}
-    alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
+    if(alignmentStyle[i0].first==align::emptyAlignment){
+      alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
+    }
 
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
@@ -411,6 +413,8 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     this->updateCursorPos(siteId,i0,i1);
 
     symbols[i0].erase(symbols[i0].begin()+i1);
+    if(i1==0 && symbols[0][0]==emptySymbol)
+        alignmentStyle.erase(alignmentStyle.begin()+i0);
     return sym;
 
 }
@@ -432,6 +436,18 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
     }
     checkIndex(i0,i1);
+
+    /* set the alignmentStyle vector */
+    format charFormat=toInsert.getCharFormat();
+    std::pair<align,unsigned> styleValues;
+    if(charFormat.left==1){styleValues={align::left,charFormat.indexStyle};}
+    else if(charFormat.right==1){styleValues={align::right,charFormat.indexStyle};}
+    else if(charFormat.center==1){styleValues={align::center,charFormat.indexStyle};}
+    else{styleValues={align::justify,charFormat.indexStyle};}
+    if(alignmentStyle[i0].first==align::emptyAlignment){
+      alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
+    }
+
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
 
@@ -444,17 +460,13 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
     int i1=pos.second;
     this->updateOtherCursorPos(siteId,i0,i1,toRemove,false);
     this->updateCursorPos(siteId,i0,i1);
-    if(i0==-1 || i1==-1){
+    if(i0!=-1 && i1!=-1 && symbols[i0][i1]==toRemove)
+         symbols[i0].erase(symbols[i0].begin()+i1);
+    else
         return std::pair<unsigned int, unsigned int>();
-    }
-    //FIXME: se lo lasci come ultima opzione, puoi evitare di scrivere questo codice
-    else if(symbols[i0][i1]!=toRemove){
-        //FIXME: dummy return, fix
-        return std::pair<unsigned int, unsigned int>();
-    }
-    else {
-        symbols[i0].erase(symbols[i0].begin()+i1);
-    }
+
+    if(i1==0 && symbols[0][0]==emptySymbol)
+        alignmentStyle.erase(alignmentStyle.begin()+i0);
     return pos;
 }
 
