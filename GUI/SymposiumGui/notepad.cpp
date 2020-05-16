@@ -755,9 +755,6 @@ void notepad::counterLink()
 
 
 void notepad::closeEvent(QCloseEvent *event){
-    #ifdef DISPATCHER_ON
-    cl.closeSource(this->documentId);
-    #endif
     if(closedByUser()){
         event->accept();
         if(isLastNotepadOpened())
@@ -769,6 +766,9 @@ void notepad::closeEvent(QCloseEvent *event){
         if(isLastNotepadOpened())
             showParent();
     }
+    #ifdef DISPATCHER_ON
+    cl.closeSource(this->documentId);
+    #endif
 }
 
 void notepad::resizeEvent(QResizeEvent *event)

@@ -114,7 +114,8 @@ void directory::success(){
 
 void directory::failure(const QString& toPrint){
     enableStyleButtons();
-    w->close();
+    if(this->lastChoice != createNewSource)
+        w->close();
     pressed=false;
     if(toPrint=="-1"){
         errorConnectionLogout();
@@ -649,12 +650,10 @@ void directory::on_pushButton_4_clicked()
     lastChoice = createNewSource;
     disableStyleButtons();
     pressed=true;
-    QString name= ui->name_2->text();
-    std::string nameDocument=name.toStdString();
+    this->title = ui->name_2->text();
     waitingFunction();
-    //ui->name_2->setText(" "); // da rimuovere
     #ifdef DISPATCHER_ON
-    cl.createNewSource(this->path,nameDocument);
+    cl.createNewSource(this->path,title.toStdString());
     #else
     // DA RIMUOVERE
     w->close();
@@ -665,7 +664,7 @@ void directory::on_pushButton_4_clicked()
          // OK dal dispatcher, posso creare il nuovo documento
     {
         count++;
-        std::string new_str=" file "+id+' '+name.toStdString()+'\n';
+        std::string new_str=" file "+id+' '+title.toStdString()+'\n';
         str=str+new_str;
         ui->myListWidget->clear();
         int count=number_elements(str);
@@ -698,6 +697,7 @@ notepad* directory::successNewSource(){
     listGenerate(str,count);
     //open the newly created document
     notepad* nw= new notepad(nullptr,cl.getOpenDocument().getId(),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), *this);
+    nw->setWindowTitle(title);
     goToWindow(*nw);
     nw->showLabels();
     return nw;
@@ -939,7 +939,8 @@ void directory::on_OkPriv_clicked()
     enableStyleButtons();
     pressed=false;
     w->close();
-    notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,cl.getOpenDocument(), *this);
+    Symposium::document d;
+    notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,d, *this);
     notepadWindow->setWindowTitle(title);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
