@@ -437,7 +437,8 @@ void sendResMessage::invokeMethod(SymClient &client) {
     switch(mex->getAction())
     {
         case msgType::createRes:{
-            client.createNewSource(mex2->getPath(), mex2->getName(), resource->getId());
+            std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
+            client.createNewSource(mex2->getPath(), mex2->getName(), resource->getId(), f);
             break;
         }
         case msgType::openRes:{

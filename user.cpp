@@ -123,7 +123,7 @@ std::string user::showDir(bool recursive) const {
 
 std::shared_ptr<file> user::newFile(const std::string &fileName, const std::string &pathFromHome, uint_positive_cnt::type idToAssign) const {
 
-    std::shared_ptr<file> newF= home->addFile(pathFromHome, fileName);
+    std::shared_ptr<file> newF= home->addFile(pathFromHome, fileName, idToAssign);
     newF->setUserPrivilege(this->getUsername(), privilege::owner);
     return newF;
 }

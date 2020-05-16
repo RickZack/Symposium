@@ -516,7 +516,7 @@ TEST_F(clientMessageTest, updateDocMsgTestCallsCloseSource){
 class SymClientMock: public SymClient{
 public:
     MOCK_METHOD2(setUserColors, void(uint_positive_cnt::type, const std::map<uint_positive_cnt::type, user>&));
-    MOCK_METHOD3(createNewSource, void(const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD4(createNewSource, void(const std::string&, const std::string&, uint_positive_cnt::type, const std::shared_ptr<file>));
     MOCK_METHOD3(createNewDir, void(const std::string&, const std::string&, uint_positive_cnt::type));
     MOCK_METHOD4(openSource, void(const std::string&, const std::string&, const std::shared_ptr<file>, privilege priv));
     MOCK_METHOD6(openNewSource, void(const std::string &resId, privilege reqPriv, const std::string &destPath, const std::string &destName, uint_positive_cnt::type idToAssign, const std::shared_ptr<file> fileAsked));
@@ -594,7 +594,7 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
     //the client has sent the following message
     cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
     m=new sendResMessage(msgType::createRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, createNewSource(clientMessageTest::path, clientMessageTest::name, dummyFile->getId()));
+    EXPECT_CALL(client, createNewSource(clientMessageTest::path, clientMessageTest::name, dummyFile->getId(), dummyFile));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);

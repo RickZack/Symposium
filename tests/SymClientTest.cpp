@@ -361,7 +361,7 @@ TEST_F(SymClientTest, createNewSourceOpensDocAndPutInActive)
     //the data used to call newFile must be taken from the relative askResMessage in unanswered (cmex)
     EXPECT_CALL(userReceived, newFile(filename, path, fileSentByServer->getId())).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, access(userReceived, privilege::owner)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.createNewSource(path, filename, fileSentByServer->getId());
+    client.createNewSource(path, filename, fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
 }
 
@@ -373,7 +373,7 @@ TEST_F(SymClientTest, createNewSourceGenerateColorForUser)
 
     EXPECT_CALL(userReceived, newFile(filename, path, fileSentByServer->getId())).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, access(userReceived, privilege::owner)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.createNewSource(path, filename, fileSentByServer->getId());
+    client.createNewSource(path, filename, fileSentByServer->getId(), fileSentByServer);
 
     EXPECT_TRUE(userHasAssignedColor(userReceived.getSiteId(), docSentByServer.getId()));
 }

@@ -160,12 +160,15 @@ namespace Symposium {
          * @param path is the path where the user want to put the file into
          * @param name is the name to assign to the new file
          * @param idToAssign is the id assigned to the file from the server
+         * @param fileCreated the file sent back by the server in a @ref sendResMessage
          *
          * The new file is created by calling user::newFile with the (@e path, @e name) taken from
          * the previously sent @ref askResMessage and @e idToAssign taken from the file object contained
          * in the @ref sendResMessage just received
          */
-        virtual void createNewSource(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign);
+        virtual void
+        createNewSource(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign,
+                        const std::shared_ptr<file> fileCreated);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to create a directory

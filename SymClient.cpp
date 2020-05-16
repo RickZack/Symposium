@@ -114,7 +114,7 @@ void SymClient::openNewSource(const std::string &resId, privilege reqPriv, const
                               uint_positive_cnt::type idToAssign, const std::shared_ptr<file> fileAsked) {
     std::string filePath = resId.substr(0,resId.find_last_of("/"));
     std::string fileName = resId.substr(resId.find_last_of("/")+1);
-    (this->getLoggedUser().getHome()).get()->addLink(destPath, destName, filePath, fileName, idToAssign);
+    (this->getLoggedUser().getHome())->addLink(destPath, destName, filePath, fileName, idToAssign);
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
     colorGen c;
@@ -133,8 +133,10 @@ askResMessage SymClient::createNewSource(const std::string &path, const std::str
     return *mess;
 }
 
-void SymClient::createNewSource(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
+void SymClient::createNewSource(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign,
+                                const std::shared_ptr<file> fileCreated) {
     std::shared_ptr<file> file = this->getLoggedUser().newFile(name, path, idToAssign);
+    file->replacement(fileCreated);
     document& docReq = file->access(this->getLoggedUser(), privilege::owner);
     activeFile.push_front(file);
     colorGen c;
@@ -270,7 +272,7 @@ std::string SymClient::showDir(bool recursive) const {
 
 updateDocMessage SymClient::closeSource(uint_positive_cnt::type resourceId) {
     document* d = getActiveDocumentbyID(resourceId);
-    activeFile.remove_if([resourceId](std::shared_ptr<file> it){return (it->getDoc().getId() == resourceId);});
+    activeFile.remove_if([resourceId](const std::shared_ptr<file>& it){return (it->getDoc().getId() == resourceId);});
     activeDoc.remove_if([&](auto that){return that.first==d;});
     d->close(this->getLoggedUser());
     std::shared_ptr<updateDocMessage> mess (new updateDocMessage(msgType::closeRes,{SymClient::getLoggedUser().getUsername(), ""}, resourceId));
