@@ -43,30 +43,27 @@ public:
     void success() override{}
     void failure(const QString&) override{}
     Symposium::uint_positive_cnt::type getId() override;
-    void successfullInsert(const Symposium::symbol& sym) override;
-    void failedInsert(const Symposium::symbol& sym) override;
-    void failedRemove(const Symposium::symbol& sym) override;
 
     void setClientDispatcher(Symposium::clientdispatcher *cl);
     ~notepad() override;
 
-    void moveUserCursor(Symposium::uint_positive_cnt::type siteID, int block, int column);
-    void removeUserCursor(Symposium::uint_positive_cnt::type siteID);
-    void addUserCursor(Symposium::uint_positive_cnt::type siteID, std::string username);
+    void moveUserCursor(Symposium::uint_positive_cnt::type siteID, unsigned block, unsigned column) override;
+    void removeUserCursor(Symposium::uint_positive_cnt::type siteID) override;
+    void addUserCursor(Symposium::uint_positive_cnt::type siteID, const std::string& username) override;
 
     /**
      * @brief remoteInsert inserts a character derived from another user
      * @param siteId referred to the user that wants to insert the char
      * @param indexes the position in which the character has to be inserted
      */
-    void remoteInsert(Symposium::symbol, Symposium::uint_positive_cnt::type siteId,std::pair<int,int> indexes);
+    void remoteInsert(const Symposium::symbol& sym, Symposium::uint_positive_cnt::type siteId, const std::pair<unsigned,unsigned>& indexes) override;
 
     /**
      * @brief remoteDelete deletes a character derived from another user
      * @param indexes the position in which the character that has to be removed is is
      * @param siteId referred to the user that want to delete
      */
-    void remoteDelete(std::pair<int, int> indexes, Symposium::uint_positive_cnt::type siteId);
+    void remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposium::uint_positive_cnt::type siteId) override;
 
     /**
      * @brief verifySymbol inserts the character with the right Color
@@ -74,7 +71,7 @@ public:
      * @param siteId
      * @param indexes
      */
-    void verifySymbol(const Symposium::symbol &sym, const std::pair<int, int> indexes);
+    void verifySymbol(const Symposium::symbol& sym, const std::pair<unsigned, unsigned>& indexes) override;
 
     /**
      * @brief closeEvent closes the window

@@ -277,74 +277,6 @@ Symposium::uint_positive_cnt::type notepad::getId()
     return documentId;
 }
 
-void notepad::successfullInsert(const Symposium::symbol &sym)
-{
-    //sym.dummyMethod(); //unuseful, just to suppress warning
-    QString mex("id of the current notepad is: ");
-    mex.append(this->getId());
-
-    //testCall(mex);
-}
-
-
-
-void notepad::failedInsert(const Symposium::symbol &sym)
-{
-    //sym.dummyMethod(); //unuseful, just to suppress warning
-    //testCall("");
-
-}
-
-void notepad::failedRemove(const Symposium::symbol &sym)
-{
-    //sym.dummyMethod(); //unuseful, just to suppress warning
-    //testCall("");
-    /*
-    QTextCursor curs=ui->textEdit->textCursor();
-    insertOthCh=true;
-    ui->textEdit->changePosition(indexes.first,indexes.second);
-    Symposium::format f=sym.getCharFormat();
-    QTextCharFormat ch_format;QFont ch_font;
-
-    ch_font.setFamily(QString::fromStdString(f.familyType));
-    ch_font.setBold(f.isBold);
-    ch_font.setUnderline(f.isUnderlined);
-    ch_font.setItalic(f.isItalic);
-    ch_font.setPointSize(f.size);
-    Symposium::Color col=f.col;
-
-    // conversion from Symposium::Color to QColor
-    QColor qCol;
-    qCol=static_cast<QColor>(col);
-
-    // set the font and the color to the character
-    ch_format.setFont(ch_font);
-    ch_format.setForeground(qCol);
-
-    // check if the highlight button is activated;
-    // if yes-> highlight the inserted character with the color of the user
-    if(this->highActivated){
-    Symposium::Color colHigh=cl.getColor(this->documentId,sym.getSiteId());
-    QColor colUser;
-    colUser=static_cast<QColor>(colHigh);
-    ch_format.setBackground(colUser);
-     }
-
-     // go to the position of the character
-
-     curs.movePosition(QTextCursor::Start);
-     curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,indexes.first);
-     curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,indexes.second+1);
-     ui->textEdit->setTextCursor(curs);
-
-
-     //insert the character
-     wchar_t symch=sym.getCh();
-     QString ch;
-     ch[0]=symch;
-     curs.insertText(ch,ch_format);
-     */
-}
 
 notepad::~notepad()
 {
@@ -354,7 +286,7 @@ notepad::~notepad()
 
 
 
-void notepad::moveUserCursor(Symposium::uint_positive_cnt::type siteID, int block, int column)
+void notepad::moveUserCursor(Symposium::uint_positive_cnt::type siteID, unsigned block, unsigned column)
 {
     ui->textEdit->changePosition(siteID, block, column);
 }
@@ -365,7 +297,7 @@ void notepad::removeUserCursor(Symposium::uint_positive_cnt::type siteID)
     insertusers();
 }
 
-void notepad::addUserCursor(Symposium::uint_positive_cnt::type siteID, std::string username)
+void notepad::addUserCursor(Symposium::uint_positive_cnt::type siteID, const std::string& username)
 {
     ui->textEdit->addUser(siteID, username);
     insertusers();
@@ -968,7 +900,7 @@ void notepad::handleDeleteKey(){
                 deleteMultipleLines(row_start,row_end,col,dim+1,false);
             }
         }
-        qDebug()<<"Caratteri"<<this->documentoProva.toText();
+        //qDebug()<<"Caratteri"<<this->documentoProva.toText();
         return;
  }else{
     row=cursor.blockNumber();
@@ -1133,7 +1065,7 @@ void notepad::changeCursorPos()
 }
 
 
-void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt::type siteId, std::pair<int,int> indexes){
+void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positive_cnt::type siteId, const std::pair<unsigned,unsigned>& indexes){
 
     insertOthCh=true;
     // take the position in which the character has to be added.
@@ -1192,7 +1124,7 @@ void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt::t
 
 }
 
-void notepad::verifySymbol(const Symposium::symbol &sym, const std::pair<int,int> indexes){
+void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigned, unsigned>& indexes){
 
     insertOthCh=true;
 
@@ -1250,7 +1182,7 @@ void notepad::verifySymbol(const Symposium::symbol &sym, const std::pair<int,int
     insertOthCh=false;
 }
 
-void notepad::remoteDelete(std::pair<int,int> indexes,Symposium::uint_positive_cnt::type siteId){
+void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposium::uint_positive_cnt::type siteId){
 
     insertOthCh=true;
 

@@ -183,9 +183,13 @@ struct SymMainWinInterface: public SymWinInterface{
 struct SymNotepadWinInterface: public SymChildWinInterface{
     SymNotepadWinInterface(SymWinInterface& parentScreen, isQWidget::QWidgetType, bool parentIsTransient);
     virtual Symposium::uint_positive_cnt::type getId()=0;
-    virtual void successfullInsert(const Symposium::symbol& sym)=0;
-    virtual void failedInsert(const Symposium::symbol& sym)=0;
-    virtual void failedRemove(const Symposium::symbol& sym)=0;
+    virtual void remoteInsert(const Symposium::symbol& sym, Symposium::uint_positive_cnt::type siteId, const std::pair<unsigned,unsigned>& indexes)=0;
+    virtual void remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposium::uint_positive_cnt::type siteId)=0;
+    virtual void verifySymbol(const Symposium::symbol& sym, const std::pair<unsigned, unsigned>& indexes)=0;
+
+    virtual void moveUserCursor(Symposium::uint_positive_cnt::type siteID, unsigned block, unsigned column)=0;
+    virtual void addUserCursor(Symposium::uint_positive_cnt::type siteID, const std::string& username)=0;
+    virtual void removeUserCursor(Symposium::uint_positive_cnt::type siteID)=0;
     /**
      * @brief forceClose used by the SymWinManager to close this SymNotepadWinInterface window forcefully
      */
