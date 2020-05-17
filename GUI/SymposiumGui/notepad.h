@@ -74,7 +74,7 @@ public:
      * @param siteId
      * @param indexes
      */
-    void verifySymbol(Symposium::symbol sym, std::pair<int, int> indexes);
+    void verifySymbol(const Symposium::symbol &sym, const std::pair<int, int> indexes);
 
     /**
      * @brief closeEvent closes the window
@@ -141,6 +141,7 @@ private:
     Symposium::uint_positive_cnt::type documentId;
     Symposium::user us;
     Symposium::document doc;
+    static constexpr wchar_t  emptyChar='~';
     bool showUsers=true;
 
     std::string pathToFile;
@@ -193,19 +194,40 @@ private:
      */
     void fillTextEdit();
 
-    //------------------------------------------------------------------------------------------------------------------------------------------ 
-    void verifySymbol2();
+    /**
+     * @brief fixAlignment to fix for each row the alignment stile
+     */
+    void fixAlignment();
 
     Symposium::document documentoProva;
-    static constexpr wchar_t  emptyChar='~';
 
+    /**
+     * @brief sendSymbolToInsert to set the correct parameters in such a way to call the localInsert method
+     * @param row
+     * @param column
+     * @param text: the character inserted into the document
+     * @param format: the format of the character inserted into the document
+     */
     void sendSymbolToInsert(int row, int column, QString text, QTextCharFormat format);
-    int charsInLine=0;
-    int columnForReturn=0;
+
+    /**
+     * @brief deleteMultipleLines to handle the elimination of multiple lines by selection
+     * @param sR: the starting row index of the selection
+     * @param eR: the ending row index of the selection
+     * @param c:  the starting column index of the selection
+     * @param sL: the dimension of the selection
+     * @param lines: a boolen to declare if the last line has been deleted or not
+     */
     void deleteMultipleLines(int sR, int eR, int c, int sL, bool lines);
+
+    /**
+     * @brief countCharsInLine: counts the number of the chars in a line
+     * @param line: index of the line
+     * @return number of chars
+     */
     int countCharsInLine(int line) const;
     void insertusers();
-    void fixAlignment();
+
 };
 
 #endif // NOTEPAD_H

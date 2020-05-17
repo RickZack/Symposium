@@ -98,9 +98,10 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
         const std::string ft="Times New Roman";
         unsigned size=9;
         Symposium::format f(ft,false,false,false,size,nero,6,0,1,0,0);
-         Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,0,1,0,0);
-         //Ciao
-        s1.setCharFormat(f1); // ciao deve apparire a sinistra normalmente
+         Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,1,0,0,0);
+
+        //Ciao
+        s1.setCharFormat(f1);
         s2.setCharFormat(f1);
         s3.setCharFormat(f1);
         s4.setCharFormat(f1);
@@ -212,7 +213,7 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
 
     //this->setToolButtonStyle(Qt::ToolButtonFollowStyle);
 
-
+    /* Personal highlight color definition */
     // Symposium::Color colorSymp=cl->getColor(this->documentId,us->getSiteId());
     // QColor myColor;
     // myColor=static_cast<QColor>(colorSymp);
@@ -264,6 +265,13 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     setAttribute( Qt::WA_DeleteOnClose );
 }
 
+template<>
+Symposium::Color::operator QColor() const{
+    uint8_t r,g,b;
+    std::tie(r,g,b)= this->getRgb();
+    return QColor(r,g,b);
+}
+
 Symposium::uint_positive_cnt::type notepad::getId()
 {
     return documentId;
@@ -278,16 +286,64 @@ void notepad::successfullInsert(const Symposium::symbol &sym)
     //testCall(mex);
 }
 
+
+
 void notepad::failedInsert(const Symposium::symbol &sym)
 {
     //sym.dummyMethod(); //unuseful, just to suppress warning
     //testCall("");
+
 }
 
 void notepad::failedRemove(const Symposium::symbol &sym)
 {
     //sym.dummyMethod(); //unuseful, just to suppress warning
     //testCall("");
+    /*
+    QTextCursor curs=ui->textEdit->textCursor();
+    insertOthCh=true;
+    ui->textEdit->changePosition(indexes.first,indexes.second);
+    Symposium::format f=sym.getCharFormat();
+    QTextCharFormat ch_format;QFont ch_font;
+
+    ch_font.setFamily(QString::fromStdString(f.familyType));
+    ch_font.setBold(f.isBold);
+    ch_font.setUnderline(f.isUnderlined);
+    ch_font.setItalic(f.isItalic);
+    ch_font.setPointSize(f.size);
+    Symposium::Color col=f.col;
+
+    // conversion from Symposium::Color to QColor
+    QColor qCol;
+    qCol=static_cast<QColor>(col);
+
+    // set the font and the color to the character
+    ch_format.setFont(ch_font);
+    ch_format.setForeground(qCol);
+
+    // check if the highlight button is activated;
+    // if yes-> highlight the inserted character with the color of the user
+    if(this->highActivated){
+    Symposium::Color colHigh=cl.getColor(this->documentId,sym.getSiteId());
+    QColor colUser;
+    colUser=static_cast<QColor>(colHigh);
+    ch_format.setBackground(colUser);
+     }
+
+     // go to the position of the character
+
+     curs.movePosition(QTextCursor::Start);
+     curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,indexes.first);
+     curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,indexes.second+1);
+     ui->textEdit->setTextCursor(curs);
+
+
+     //insert the character
+     wchar_t symch=sym.getCh();
+     QString ch;
+     ch[0]=symch;
+     curs.insertText(ch,ch_format);
+     */
 }
 
 notepad::~notepad()
@@ -295,12 +351,7 @@ notepad::~notepad()
     delete ui;
 }
 
-template<>
-Symposium::Color::operator QColor() const{
-    uint8_t r,g,b;
-    std::tie(r,g,b)= this->getRgb();
-    return QColor(r,g,b);
-}
+
 
 
 void notepad::moveUserCursor(Symposium::uint_positive_cnt::type siteID, int block, int column)
@@ -611,7 +662,7 @@ void notepad::fillTextEdit(){
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
     QString ch;
-    // save in symbols all the symbols contained in the document
+    /* save in symbols all the symbols contained in the document */
     //std::vector<std::vector<Symposium::symbol>> symbols= this->doc.getSymbols();
     std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
     if(symbols[0][0].getCh()==emptyChar){
@@ -662,6 +713,8 @@ void notepad::fillTextEdit(){
 }
 
 void notepad::fixAlignment(){
+    /* save in the alignmentStyle the vector that defines for each row its style */
+    //std::vector<std::pair<Symposium::align,unsigned>> alignmentStyle=this->doc.getAlignmentStyle();
     std::vector<std::pair<Symposium::align,unsigned>> alignmentStyle= this->documentoProva.getAlignmentStyle();
     QTextCursor curs=ui->textEdit->textCursor();
     for(size_t i=0;i<alignmentStyle.size();i++){
@@ -670,23 +723,23 @@ void notepad::fixAlignment(){
         curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,i);
         ui->textEdit->setTextCursor(curs);
         if(style.first==Symposium::align::left){
-            //this->textAlign(ui->actionAlignTextLeft);
-            ui->textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
+            this->textAlign(ui->actionAlignTextLeft);
+            //ui->textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
             this->textStyle(style.second);}
         else if(style.first==Symposium::align::right){
-            //this->textAlign(ui->actionAlignTextRight);
-             ui->textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
+             this->textAlign(ui->actionAlignTextRight);
+             //ui->textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
              this->textStyle(style.second);}
         else if(style.first==Symposium::align::center){
-            //this->textAlign(ui->actionAlignCenter);
-             ui->textEdit->setAlignment(Qt::AlignCenter | Qt::AlignAbsolute);
+             this->textAlign(ui->actionAlignCenter);
+             //ui->textEdit->setAlignment(Qt::AlignCenter | Qt::AlignAbsolute);
              this->textStyle(style.second);}
         else if (style.first==Symposium::align::justify){
-            //this->textAlign(ui->actionAlignTextJustify);
-             ui->textEdit->setAlignment(Qt::AlignJustify | Qt::AlignAbsolute);
+             this->textAlign(ui->actionAlignTextJustify);
+             //ui->textEdit->setAlignment(Qt::AlignJustify | Qt::AlignAbsolute);
              this->textStyle(style.second);}
         else{
-            this->textAlign(ui->actionAlignTextLeft); /**< default alignment */
+            this->textAlign(ui->actionAlignTextLeft); /**< default alignment in the case the vector is initialized w/ emptyAlignment */
             this->textStyle(style.second);}
        }
 }
@@ -898,6 +951,7 @@ void notepad::handleDeleteKey(){
         /* I'm on the same line*/
         if(row_start==row_end){
             while(dim>0){
+                //cl.localRemove(this->documentId,{row_start,col});
                 this->documentoProva.localRemove({row_start,col},1);
                 dim--;
             }
@@ -907,7 +961,7 @@ void notepad::handleDeleteKey(){
             numLines=documentoProva.countsNumLines();
             qDebug()<<"NumLines"<<numLines;
             dim=row_end-row_start;
-            /*I'm deleting also the last line: I have to delete also the enter character*/
+            /*I'm deleting also the last line: I have to delete also the enter character */
             if(row_end==numLines-1){
                 deleteMultipleLines(row_start,row_end,col,dim+1,true);
             }else{/*I'm not deleting the last line: in the previous line we have to maintain the enter character*/
@@ -931,6 +985,7 @@ void notepad::handleDeleteKey(){
     }
     else if(col<0) //deleting from an empty document, discard the action
         return;
+    //cl.localRemove(this->documentId,{row,col});
     documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
     if(row==0 && col==0){
         QColor black=Qt::black;
@@ -958,6 +1013,7 @@ void notepad::deleteMultipleLines(int sR,int eR,int c,int sL,bool lines){
           length=countCharsInLine(sR)-1-c;}
       }
         while(length>0){
+            //cl.localRemove(this->documentId,{sR,c});
             this->documentoProva.localRemove({sR,c},1);
             length--;
         }
@@ -1136,7 +1192,7 @@ void notepad::remoteInsert(Symposium::symbol sym,Symposium::uint_positive_cnt::t
 
 }
 
-void notepad::verifySymbol(Symposium::symbol sym,std::pair<int,int> indexes){
+void notepad::verifySymbol(const Symposium::symbol &sym, const std::pair<int,int> indexes){
 
     insertOthCh=true;
 
@@ -1252,26 +1308,6 @@ void notepad::on_textEdit_cursorPositionChanged()
 
 void notepad::colorText(){
     insertOthCh=true;
-    /*
-     std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
-     QTextCursor curs=ui->textEdit->textCursor();
-     curs.movePosition(QTextCursor::Start);
-     int pi=curs.position();
-     curs.movePosition(QTextCursor::End);
-     int pf=curs.position();
-     curs.movePosition(QTextCursor::Start);
-     while(pi!=pf-1){
-       curs.setPosition(pi,QTextCursor::MoveAnchor);
-       curs.setPosition(pi+1,QTextCursor::KeepAnchor);
-       QTextCharFormat format=curs.charFormat();
-       format.setBackground(Qt::yellow);
-       curs.setCharFormat(format);
-       curs.setPosition(pi+1);
-       pi++;
-
-     }
-     */
-
     std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
     QTextCursor curs=ui->textEdit->textCursor();
     int pi=0,pf=0,siteId;
@@ -1281,7 +1317,7 @@ void notepad::colorText(){
     QColor userCol;
     for(size_t i=0; i<symbols.size();i++){
         for(size_t j=0;j<symbols[i].size();j++){
-            if(symbols[i][j].getSiteId()==symbols[i][j+1].getSiteId()){
+            if(symbols[i][j].getSiteId()==symbols[i][j+1].getSiteId() && symbols[i][j].getCh()!=emptyChar){
                 siteId=symbols[i][j].getSiteId();
                 pf++;
             }else{
@@ -1311,63 +1347,6 @@ void notepad::colorText(){
         }
     }
 
-    /*
-    QTextCharFormat chFormat;
-    QColor qCol;
-    QTextCursor curs=ui->textEdit->textCursor();
-    QString ch;
-    // save in symbols all the symbols contained in the document
-    //std::vector<std::vector<Symposium::symbol>> symbols= this->doc.getSymbols();
-    std::vector<std::vector<Symposium::symbol>> symbols= this->documentoProva.getSymbols();
-    if(symbols[0][0].getCh()==emptyChar){
-        QColor black=Qt::black;
-        black.setAlpha(160);
-        ui->textEdit->setTextColor(black);
-        ui->textEdit->setText("");
-        return;
-    }
-    for(size_t i=0;i<symbols.size();i++){
-        for(size_t j=0;j<symbols[i].size();j++){
-            int column=j;
-            //extract the symbol
-            Symposium::symbol sym=symbols[i][j];
-            Symposium::Color uC(243,121,137);
-            QColor userCol;
-            if(sym.getSiteId()==1){userCol=Qt::yellow;}
-            else {userCol= static_cast<QColor>(uC);}
-            //estract the character
-            ch[0]=sym.getCh();
-            if(ch[0]!=emptyChar){
-                QTextCharFormat chFormat;
-                Symposium::format format=sym.getCharFormat();
-                //estract the information about the font/color
-                QFont font;
-                font.setFamily(QString::fromStdString(format.familyType));
-                font.setBold(format.isBold);
-                font.setUnderline(format.isUnderlined);
-                font.setItalic(format.isItalic);
-                font.setPointSize(format.size);
-                Symposium::Color col=format.col;
-                //conversion from Color to QColor
-                qCol=static_cast<QColor>(col);
-                colorChanged(qCol);
-
-                if(!sym.isVerified())
-                  {
-                    qCol.setAlpha(160);
-                    userCol.setAlpha(160);
-                  }
-                chFormat.setFont(font); chFormat.setForeground(qCol);chFormat.setBackground(userCol);
-                // go to the position of the character
-                ui->textEdit->changePosition(i,column);
-                this->currentCharFormatChanged(chFormat);
-                curs.insertText(ch,chFormat);
-
-            }
-    }
-
-    }
-*/
     insertOthCh=false;
  }
 
@@ -1382,7 +1361,6 @@ void notepad::on_actionhighlight_triggered()
     if(highActivated==false){
         this->highActivated=true;
         ui->actionhighlight->setChecked(true);
-        //ui->textEdit->clear();
         this->colorText();
     }
     else{
@@ -1390,6 +1368,7 @@ void notepad::on_actionhighlight_triggered()
         ui->actionhighlight->setChecked(false);
         ui->textEdit->clear();
         this->fillTextEdit();
+        this->fixAlignment();
 
     }
 }
@@ -1513,3 +1492,4 @@ void notepad::setreadonly()
     ui->sizeBox->hide();
     ui->styleBox->hide();
 }
+

@@ -76,7 +76,7 @@ namespace Symposium {
         left,                           /**< to declare that the row has a left alignment */
         right,                          /**< to declare that the row has a right alignment */
         center,                         /**< to declare that the row has a center alignment */
-        justify,                         /**< to declare that the row has a justified alignment */
+        justify,                        /**< to declare that the row has a justified alignment */
         emptyAlignment
     };
 
@@ -125,9 +125,6 @@ namespace Symposium {
          * @return
          */
         int countCharsInLine(int line) const;
-
-
-
 
         bool operator==(const document &rhs) const;
 
@@ -296,10 +293,6 @@ namespace Symposium {
          * @param vector1 the posAfter
          * @return the searched position
          */
-        //std::vector<int>
-        //generatePosBetween(std::vector<int> vector, std::vector<int> vector1, std::vector<int> vector2, int level,
-                           //int i,
-                           //int i1);
         std::vector<int>
         generatePosBetween(std::vector<int> vector, std::vector<int> vector1, std::vector<int> vector2, int level,
                            symbol b,
@@ -322,9 +315,14 @@ namespace Symposium {
          */
         char retrieveStrategy(const int level);
 
-
-
-
+        /**
+         * @brief updateOtherCursorPos to update the position of the cursors different from mine in the document
+         * @param targetSiteId : my siteId to find all the users different from me
+         * @param newRow : i index in the document
+         * @param newCol : j index in the document
+         * @param symb   : symbol that has been inserted. Useful to verify if I'm in a particular case \r
+         * @param ins    : to understand if the action is an insertion or a remove
+         */
 
         void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol, symbol symb, bool ins);
     };
