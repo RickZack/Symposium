@@ -66,7 +66,7 @@ void file::serialize(Archive &ar, const unsigned int version){
 template<class Archive>
 void symlink::serialize(Archive &ar, const unsigned int version){
     ar & boost::serialization::base_object<Symposium::filesystem>(*this);
-    ar & pathToFile & fileName;
+    ar & absPathWithoutId & resId;
 };
 
 
@@ -308,21 +308,21 @@ std::tuple<std::string, std::string> directory::separateFirst(std::string path)
 
 
 
-std::shared_ptr<filesystem> directory::get(const std::string &path, const std::string &name) {
-    if(path==""||path=="./")//if path is "here" so I only need to get the object with the id represented by name
+std::shared_ptr<filesystem> directory::get(const std::string &resPath, const std::string &resId) {
+    if(resPath == "" || resPath == "./")//if path is "here" so I only need to get the object with the id represented by name
     {
         auto it=std::find_if(contained.begin(), contained.end(),
-                             [name](std::shared_ptr<filesystem> i){return std::to_string(i->getId())==name;});
+                             [resId](std::shared_ptr<filesystem> i){return std::to_string(i->getId()) == resId;});
         if(it==contained.end())
             throw filesystemException(filesystemException::noGet, UnpackFileLineFunction());
         return *it;
     }
     std::string idRes;
     std::string pathRes;
-    if(path.back()=='/')
-        pathRes.append(path.begin(),path.end()-1);
+    if(resPath.back() == '/')
+        pathRes.append(resPath.begin(), resPath.end() - 1);
     else
-        pathRes.append(path);
+        pathRes.append(resPath);
     tie(pathRes, idRes)= separateFirst(pathRes);//otherwise need to separate the first directory and move into it
 
     auto it=std::find_if(contained.begin(), contained.end(),
@@ -333,20 +333,20 @@ std::shared_ptr<filesystem> directory::get(const std::string &path, const std::s
     if((*it)->resType()!=resourceType::directory)//if the element is not a directory, there is some error in path
         throw filesystemException(filesystemException::noGet, UnpackFileLineFunction());
     std::shared_ptr <directory> dir=std::dynamic_pointer_cast<directory>(*it);
-    return dir->get(pathRes, name);
+    return dir->get(pathRes, resId);
 }
 
 
-std::shared_ptr<directory> directory::getDir(const std::string &path, const std::string &name) {
-    std::shared_ptr<filesystem> res=this->get(path, name);
+std::shared_ptr<directory> directory::getDir(const std::string &resPath, const std::string &resId) {
+    std::shared_ptr<filesystem> res=this->get(resPath, resId);
     if(res->resType()!=resourceType::directory)
         throw filesystemException(filesystemException::noGetDir, UnpackFileLineFunction());
     return std::dynamic_pointer_cast<directory>(res);
 
 }
 
-std::shared_ptr<file> directory::getFile(const std::string &path, const std::string &name) {
-    std::shared_ptr<filesystem> res=this->get(path, name);
+std::shared_ptr<file> directory::getFile(const std::string &resPath, const std::string &resId) {
+    std::shared_ptr<filesystem> res=this->get(resPath, resId);
     if(res->resType()==resourceType::file)
         return std::dynamic_pointer_cast<file>(res);
     if(res->resType()==resourceType::symlink) //is used also for symlink because symlink is the reference to the file object
@@ -361,14 +361,14 @@ std::shared_ptr<file> directory::getFile(const std::string &path, const std::str
     throw filesystemException(filesystemException::noGetFile, UnpackFileLineFunction());
 }
 
-std::string directory::setName(const std::string &path, const std::string &fileName, const std::string& newName) {
+std::string directory::setName(const std::string &resPath, const std::string &resId, const std::string& newName) {
     std::string pathRename;
     std::string idRename;
-    tie(pathRename, idRename)= separate(path);
+    tie(pathRename, idRename)= separate(resPath);
     std::shared_ptr<directory> save=getDir(pathRename, idRename);
     if(std::any_of(save->contained.begin(), save->contained.end(), [newName](const std::shared_ptr<filesystem> i){return i->getName()==newName;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
-    std::shared_ptr<filesystem> res=this->get(path, fileName);
+    std::shared_ptr<filesystem> res=this->get(resPath, resId);
     std::string old=res->getName();
     std::string newN=res->setName(newName);
     return old;
@@ -376,10 +376,10 @@ std::string directory::setName(const std::string &path, const std::string &fileN
 
 
 
-std::shared_ptr<directory> directory::addDirectory(const std::string &name, uint_positive_cnt::type idToAssign) {
-    if(std::any_of(contained.begin(), contained.end(), [name](const std::shared_ptr<filesystem> &i){return i->getName()==name;}))
+std::shared_ptr<directory> directory::addDirectory(const std::string &resName, uint_positive_cnt::type idToAssign) {
+    if(std::any_of(contained.begin(), contained.end(), [resName](const std::shared_ptr<filesystem> &i){return i->getName() == resName;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
-    std::shared_ptr<directory> newDir(new directory(name, idToAssign));
+    std::shared_ptr<directory> newDir(new directory(resName, idToAssign));
     newDir->parent=this->self;
     newDir->self=newDir;
     contained.push_back(newDir);
@@ -387,41 +387,41 @@ std::shared_ptr<directory> directory::addDirectory(const std::string &name, uint
 }
 
 
-std::shared_ptr<file> directory::addFile(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign) {
+std::shared_ptr<file> directory::addFile(const std::string &resPath, const std::string &resName, uint_positive_cnt::type idToAssign) {
     std::string pathAdd;
     std::string idAdd;
     std::shared_ptr<directory> save;
-    if(path!="./")
+    if(resPath != "./")
         {
-        tie(pathAdd, idAdd)= separate(path);
+        tie(pathAdd, idAdd)= separate(resPath);
         save=getDir(pathAdd, idAdd);
         }
     else
         save=self.lock();
-    if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
+    if(std::any_of(save->contained.begin(), save->contained.end(), [resName](const std::shared_ptr<filesystem> i){return i->getName() == resName;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
-    std::shared_ptr<file> newFile(new file(name, idToAssign));
+    std::shared_ptr<file> newFile(new file(resName, idToAssign));
     save->contained.push_back(newFile);
     return newFile;
 }
 
 std::shared_ptr<class symlink>
-directory::addLink(const std::string &path, const std::string &name, const std::string &filePath,
-                   const std::string &fileName, uint_positive_cnt::type idToAssign)
+directory::addLink(const std::string &symPath, const std::string &symName, const std::string &absPathWithoutId,
+                   const std::string &resId, uint_positive_cnt::type idToAssign)
 {
     std::string pathAdd;
     std::string idAdd;
     std::shared_ptr<directory> save;
-    if(path!="./")
+    if(symPath != "./")
     {
-        tie(pathAdd, idAdd)= separate(path);
+        tie(pathAdd, idAdd)= separate(symPath);
         save=getDir(pathAdd, idAdd);
     }
     else
         save=self.lock();
-    if(std::any_of(save->contained.begin(), save->contained.end(), [name](const std::shared_ptr<filesystem> i){return i->getName()==name;}))
+    if(std::any_of(save->contained.begin(), save->contained.end(), [symName](const std::shared_ptr<filesystem> i){return i->getName() == symName;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
-    std::shared_ptr<symlink> newSym(new symlink(name, filePath, fileName, idToAssign));
+    std::shared_ptr<symlink> newSym(new symlink(symName, absPathWithoutId, resId, idToAssign));
     save->contained.push_back(newSym);
     return newSym;
 }
@@ -432,24 +432,24 @@ resourceType directory::resType() const {
 
 
 document &
-directory::access(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode) {
-   std::shared_ptr<file> f=getFile(path, resName);
+directory::access(const user &targetUser, const std::string &resPath, const std::string &resId, privilege accessMode) {
+   std::shared_ptr<file> f=getFile(resPath, resId);
     return f->access(targetUser, accessMode);
 }
 
 
 
-std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &path, const std::string &resName) {
-    std::shared_ptr<filesystem> obj=this->get(path, resName); //take the object to remove
+std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std::string &resPath, const std::string &resId) {
+    std::shared_ptr<filesystem> obj=this->get(resPath, resId); //take the object to remove
     std::string idRem;
-    if(path!="./" && !path.empty())
+    if(resPath != "./" && !resPath.empty())
     {
         std::string pathRem;
-        tie(pathRem, idRem)= separate(path);
+        tie(pathRem, idRem)= separate(resPath);
         std::shared_ptr<directory> dir=this->getDir(pathRem, idRem);
-        return dir->remove(targetUser, "", resName); //call remove recursivly if the path is not "here" in order to take the right directory of the object to remove
+        return dir->remove(targetUser, "", resId); //call remove recursivly if the path is not "here" in order to take the right directory of the object to remove
     }
-    idRem=resName;//otherwise the path is "here"
+    idRem=resId;//otherwise the path is "here"
     if(obj->resType()==resourceType::file)//if the object to remove is the file
     {
         std::shared_ptr<file> f=std::dynamic_pointer_cast<file>(obj);
@@ -524,10 +524,10 @@ std::string directory::print(const std::string &targetUser, bool recursive, unsi
 }
 
 
-Symposium::symlink::symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
-                            uint_positive_cnt::type idToAssign) : filesystem(name, idToAssign), pathToFile(pathToFile), fileName(fileName) {
+Symposium::symlink::symlink(const std::string &symName, const std::string &absPathWithoutId, const std::string &resId,
+                            uint_positive_cnt::type idToAssign) : filesystem(symName, idToAssign), absPathWithoutId(absPathWithoutId), resId(resId) {
 
-    if(!pathIsValid2(pathToFile))
+    if(!pathIsValid2(absPathWithoutId))
         throw filesystemException(filesystemException::pathNvalid, UnpackFileLineFunction());
     strategy=std::make_unique<TrivialAccess>();
 
@@ -538,16 +538,16 @@ resourceType Symposium::symlink::resType() const {
 }
 
 document& Symposium::symlink::access(const user &targetUser, privilege accessMode) {
-    std::shared_ptr<file> f=directory::getRoot()->getFile(pathToFile, fileName);
+    std::shared_ptr<file> f=directory::getRoot()->getFile(absPathWithoutId, resId);
     return f->access(targetUser, accessMode);
 }
 
 std::string Symposium::symlink::getPath() {
-    return pathToFile+"/"+fileName;
+    return absPathWithoutId + "/" + resId;
 }
 
 std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
-    std::shared_ptr<file> file=directory::getRoot()->getFile(pathToFile, fileName);
+    std::shared_ptr<file> file=directory::getRoot()->getFile(absPathWithoutId, resId);
     std::ostringstream priv;
     std::ostringstream typeres;
     typeres<<resType();
@@ -562,6 +562,3 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool recurs
     return typeres.str()+" "+std::to_string(getId())+" "+ritorno+name + " " + priv.str();
 }
 
-const std::string &Symposium::symlink::getFileName() const {
-    return fileName;
-}

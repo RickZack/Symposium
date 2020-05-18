@@ -35,7 +35,7 @@
 #include <cmath>
 #include <fstream>
 #include <boost/archive/text_iarchive.hpp>
-#include "QDebug"
+//#include "QDebug"
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
@@ -170,7 +170,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     //()<<"Simboli"<<toText();
-    qDebug()<<"Posizioni"<<newSymb.getPos();
+    //qDebug()<<"Posizioni"<<newSymb.getPos();
     return newSymb;
 
 }

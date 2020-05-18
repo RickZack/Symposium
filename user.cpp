@@ -121,37 +121,37 @@ std::string user::showDir(bool recursive) const {
 
 }
 
-std::shared_ptr<file> user::newFile(const std::string &fileName, const std::string &pathFromHome, uint_positive_cnt::type idToAssign) const {
+std::shared_ptr<file> user::newFile(const std::string &resName, const std::string &resPath, uint_positive_cnt::type idToAssign) const {
 
-    std::shared_ptr<file> newF= home->addFile(pathFromHome, fileName, idToAssign);
+    std::shared_ptr<file> newF= home->addFile(resPath, resName, idToAssign);
     newF->setUserPrivilege(this->getUsername(), privilege::owner);
     return newF;
 }
 
 
 std::shared_ptr<directory>
-user::newDirectory(const std::string &dirName, const std::string &pathFromHome, uint_positive_cnt::type idToAssign) const{
+user::newDirectory(const std::string &resName, const std::string &resPath, uint_positive_cnt::type idToAssign) const{
     std::shared_ptr<directory> newDir;
     std::string pathToDir;
     std::string idDir;
     std::shared_ptr<directory> dir=home;
-    if(!(pathFromHome.empty()) && pathFromHome!="./" && pathFromHome!=".")
+    if(!(resPath.empty()) && resPath != "./" && resPath != ".")
     {
-        tie(pathToDir, idDir)= filesystem::separate(pathFromHome);
+        tie(pathToDir, idDir)= filesystem::separate(resPath);
         dir=home->getDir(pathToDir, idDir);
     }
-    newDir=dir->addDirectory(dirName, idToAssign);
+    newDir=dir->addDirectory(resName, idToAssign);
     return newDir;
 }
 
 
 
-std::pair<int, std::shared_ptr<file>> user::accessFile(const std::string &resId, const std::string &path,  const std::string &fileName ) const {    std::string pathAdd;
+std::pair<int, std::shared_ptr<file>> user::accessFile(const std::string &absolutePath, const std::string &destPath, const std::string &destName ) const {    std::string pathAdd;
     std::string idAdd;
 
     std::shared_ptr<directory> root1=this->home->getRoot();
 
-    tie(pathAdd, idAdd)= filesystem::separate(resId); //separate the path and the id of file which the user want
+    tie(pathAdd, idAdd)= filesystem::separate(absolutePath); //separate the path and the id of file which the user want
 
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
 
@@ -163,22 +163,22 @@ std::pair<int, std::shared_ptr<file>> user::accessFile(const std::string &resId,
     if(priv2==privilege::none)
         throw userException(userException::noPriv, UnpackFileLineFunction());
 
-    std::shared_ptr<symlink> sym= home->addLink(path, fileName, pathAdd, idAdd);
+    std::shared_ptr<symlink> sym= home->addLink(destPath, destName, pathAdd, idAdd);
     return std::make_pair(sym->getId(), fi);
 }
 
 //FIXME: al chiamante serve avere indietro il file e il documento aperto, potremmo tornare un pair
-std::shared_ptr<file> user::openFile(const std::string &path, const std::string &fileName, privilege accessMode) const {
-    auto f=home->getFile(path, fileName);
+std::shared_ptr<file> user::openFile(const std::string &resPath, const std::string &resId, privilege accessMode) const {
+    auto f=home->getFile(resPath, resId);
     //FIXME: perchè abbiamo commentato questa linea?
     // In origine volevo solo avere indietro il file al posto del documento
-    //document& newD= home->access(*this, path, fileName, accessMode);
+    //document& newD= home->access(*this, path, resId, accessMode);
     return f;
 }
 
-privilege user::editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
+privilege user::editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resId,
                               privilege newPrivilege) const {
-    std::shared_ptr<file> newF=home->getFile(resPath, resName);
+    std::shared_ptr<file> newF=home->getFile(resPath, resId);
     privilege newP;
     if((this->username!=otherUser && newF->getUserPrivilege(this->username)==privilege::owner) ||
         (this->username==otherUser && newF->validateAction(this->username, newPrivilege)))
@@ -195,8 +195,8 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
     return newP;
 }*/
 
-std::shared_ptr<filesystem> user::shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) const {
-    std::shared_ptr<file> newF=home->getFile(resPath, resName);
+std::shared_ptr<filesystem> user::shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs) const {
+    std::shared_ptr<file> newF=home->getFile(resPath, resId);
     uri u;
     u=newF->setSharingPolicy(username, newPrefs);
     return newF;
@@ -236,14 +236,14 @@ const std::string &user::getPwdHash() const {
 }
 
 std::shared_ptr<filesystem>
-user::renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) const {
-    std::shared_ptr<filesystem> object=home->get(resPath, resName);
+user::renameResource(const std::string &resPath, const std::string &resId, const std::string &newName) const {
+    std::shared_ptr<filesystem> object=home->get(resPath, resId);
     object->setName(newName);
     return object;
 }
 
-std::shared_ptr<filesystem> user::removeResource(const std::string &path, const std::string &name) const {
-    std::shared_ptr<filesystem> object=home->remove(*this, path, name);
+std::shared_ptr<filesystem> user::removeResource(const std::string &resPath, const std::string &resId) const {
+    std::shared_ptr<filesystem> object=home->remove(*this, resPath, resId);
     return object;
 }
 

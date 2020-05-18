@@ -326,12 +326,12 @@ namespace Symposium {
      * @brief class used to model a pointer to an object of class @link file file @endlink
      *
      * In the application design only pointers to objects of class @link file file @enlink are allowed,
-     * but @e pathToFile could point to a directory. As long as the mentioned behaviour is desired,
-     * @e pathToFile must point to a @link file file @endlink
+     * but @e absPathWithoutId could point to a directory. As long as the mentioned behaviour is desired,
+     * @e absPathWithoutId must point to a @link file file @endlink
      */
     class symlink : public filesystem {
-        std::string pathToFile;    /**< absolute path to a @e file, obtained as concatenation of @e id */
-        std::string fileName;      /**< name of the file pointed, meaning its @e id */
+        std::string absPathWithoutId;    /**< absolute path to a @e file, obtained as concatenation of @e id */
+        std::string resId;               /**< id of the file pointed */
 
         friend class boost::serialization::access;
 
@@ -341,17 +341,15 @@ namespace Symposium {
 
         symlink()=default;
     public:
-        symlink(const std::string &name, const std::string &pathToFile, const std::string &fileName,
+        symlink(const std::string &symName, const std::string &absPathWithoutId, const std::string &resId,
                 uint_positive_cnt::type idToAssign=0);
-
-        const std::string &getFileName() const;
 
         std::string getPath();
 
         resourceType resType() const override;
 
         /**
-         * @brief access the file named @e fileName located in @e pathToFile
+         * @brief access the file named @e resId located in @e absPathWithoutId
          *
          * Retrieves the resource indicated in parameters and call the method @ access on it.
          * The resource should be a file, because pointers to directories are not allowed in this
@@ -401,42 +399,42 @@ namespace Symposium {
         static std::shared_ptr<directory> emptyDir(); //necessary to build a new user client side
         static std::shared_ptr<directory> getRoot();
 
-        virtual std::shared_ptr<filesystem> get(const std::string &path, const std::string &name);
+        virtual std::shared_ptr<filesystem> get(const std::string &resPath, const std::string &resId);
 
-        virtual std::shared_ptr<directory> getDir(const std::string &path, const std::string &name);
+        virtual std::shared_ptr<directory> getDir(const std::string &resPath, const std::string &resId);
 
-        virtual std::shared_ptr<file> getFile(const std::string &path, const std::string &name);
+        virtual std::shared_ptr<file> getFile(const std::string &resPath, const std::string &resId);
 
         std::string
-        setName(const std::string &path, const std::string &fileName, const std::string &newName);
+        setName(const std::string &resPath, const std::string &resId, const std::string &newName);
 
 
-        virtual std::shared_ptr<directory> addDirectory(const std::string &name, uint_positive_cnt::type idToAssign=0);
+        virtual std::shared_ptr<directory> addDirectory(const std::string &resName, uint_positive_cnt::type idToAssign= 0);
 
-        virtual std::shared_ptr<file> addFile(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign=0);
+        virtual std::shared_ptr<file> addFile(const std::string &resPath, const std::string &resName, uint_positive_cnt::type idToAssign= 0);
 
         virtual std::shared_ptr<Symposium::symlink>
-        addLink(const std::string &path, const std::string &name, const std::string &filePath,
-                const std::string &fileName, uint_positive_cnt::type idToAssign=0);
+        addLink(const std::string &symPath, const std::string &symName, const std::string &absPathWithoutId,
+                const std::string &resId, uint_positive_cnt::type idToAssign=0);
 
         virtual resourceType resType() const override;
 
         /**
          * @brief traverse the filesystem and invoke @e access on @e resName
          * @param targetUser the user who asked for this action
-         * @param path relative path to the resource from the current directory
-         * @param resName the name of the resource to access (file or symlink)
+         * @param resPath relative path to the resource from the current directory
+         * @param resId the id of the resource to access (file or symlink)
          * @param accessMode the privilege asked by the user for opening the file
          * @return the document contained in the file object
          */
         virtual document &
-        access(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode);
+        access(const user &targetUser, const std::string &resPath, const std::string &resId, privilege accessMode);
 
         /**
          * @brief traverse the filesystem and invoke @e remove on @e resName
          * @param targetUser the user who asked for this action
-         * @param path relative path to the resource from the current directory
-         * @param resName the name of the resource to remove
+         * @param resPath relative path to the resource from the current directory
+         * @param resId the name of the resource to remove
          * @return the resource just removed from the filesystem
          *
          * Removes a file, a symlink or a directory from the current directory. The parameter
@@ -444,7 +442,7 @@ namespace Symposium {
          * is a file
          */
         virtual std::shared_ptr<filesystem>
-        remove(const user &targetUser, const std::string &path, const std::string &resName);
+        remove(const user &targetUser, const std::string &resPath, const std::string &resId);
 
         /**
          * @brief Call storeContent() on contained filesystem objects

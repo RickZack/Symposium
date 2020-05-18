@@ -779,7 +779,7 @@ TEST_F(SymServerTestFilesystemFunctionality, closeSourceClosesTheDocumentAndGene
 
 
 TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUserAndPropagateChanges){
-    user thirdUser("ThirdUser", loggedUserPwd, "nickname", "./thisDir/a.jpg", 10, nullptr);
+    user thirdUser("ThirdUser", loggedUserPwd, "nickname", "./thisDir/a.jpg", 10, userDir);
     setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilegeAndCloseSource(defaultPrivilege);
@@ -793,7 +793,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUs
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
 
-    server.editPrivilege(loggedUserUsername, anotherUserUsername, "./" + loggedUserUsername + "/" + filePath.substr(2),
+    server.editPrivilege(loggedUserUsername, anotherUserUsername, filePath,
                          fileName, privilege::readOnly, msId);
     privMessage toSend(received);
     toSend.clearAuthParam();
@@ -819,7 +819,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUs
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
 
-    server.editPrivilege(loggedUserUsername, anotherUserUsername, "./" + loggedUserUsername + "/" + filePath.substr(2),
+    server.editPrivilege(loggedUserUsername, anotherUserUsername, filePath,
                          fileName, privilege::readOnly, msId);
 
     //send response (confirmation)
@@ -838,7 +838,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeClosesDocumentIfNotPre
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
     EXPECT_CALL(doc, close(loggedUser));
-    server.editPrivilege(loggedUserUsername, anotherUserUsername, "./" + loggedUserUsername + "/" + filePath.substr(2),
+    server.editPrivilege(loggedUserUsername, anotherUserUsername, filePath,
                          fileName, privilege::readOnly, 0);
 }
 
@@ -849,7 +849,7 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCalledByUnloggedUser){
     server.hardWrongLogout(loggedUser);
 
     EXPECT_THROW(server.editPrivilege(loggedUserUsername, anotherUserUsername,
-                                      "./" + loggedUserUsername + "/" + filePath.substr(2), fileName,
+                                      filePath, fileName,
                                       privilege::readOnly, 0), SymServerException);
     /*
      * Cases in which, for an error, the operation goes wrong, so an exception is raised, are to be handled
@@ -861,12 +861,12 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeOnUserWorkingOnDocumen
     setStageForAccessedDoc(loggedUser);
     setAnotherUserActive();
     makeAnotherUserToHavePrivilege(defaultPrivilege);
-    //call expected because we need to retrieve the document id of the document named fileName (in the loggedUser space)
+    //call expected because we need to retrieve the document id of the document named resId (in the loggedUser space)
     //to check that anotherUser is not working on the same document
     EXPECT_CALL(*justInserted, openFile(filePath, fileName, privilege::owner)).WillOnce(::testing::Return(fileToReturn));
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_THROW(server.editPrivilege(loggedUserUsername, anotherUserUsername,
-                                      "./" + loggedUserUsername + "/" + filePath.substr(2), fileName,
+                                      filePath, fileName,
                                       privilege::readOnly, 0), SymServerException);
     /*
      * Cases in which, for an error, the operation goes wrong, so an exception is raised, are to be handled

@@ -562,7 +562,7 @@
       <bpmn:outgoing>SequenceFlow_0xoffg5</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_16osiph</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:task id="Task_1hkkf8v" name="call addLink(path, name, filePath, fileName)">
+    <bpmn:task id="Task_1hkkf8v" name="call addLink(path, name, filePath, resId)">
       <bpmn:incoming>SequenceFlow_16osiph</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0rx0lze</bpmn:outgoing>
     </bpmn:task>

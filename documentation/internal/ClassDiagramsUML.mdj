@@ -10777,7 +10777,7 @@
 											"top": 478,
 											"width": 103.32080078125,
 											"height": 13,
-											"text": "-pathToFile: string",
+											"text": "-absPathWithoutId: string",
 											"horizontalAlignment": 0
 										},
 										{
@@ -12768,7 +12768,7 @@
 							"_parent": {
 								"$ref": "AAAAAAFrrR3GmadRzTY="
 							},
-							"name": "pathToFile",
+							"name": "absPathWithoutId",
 							"visibility": "private",
 							"type": "string"
 						},

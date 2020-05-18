@@ -110,55 +110,57 @@ namespace Symposium {
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to open a document
-         * @param path the path of the file to open, relative to user's home directory
-         * @param name the name of the file to open
+         * @param resPath the path of the file to open, relative to user's home directory
+         * @param resId the id of the file to open
          * @param reqPriv the privilege requested opening the file
          * @return a properly constructed @ref askResMessage to send to the server
          */
-        askResMessage openSource(const std::string &path, const std::string &name, privilege reqPriv);
+        askResMessage openSource(const std::string &resPath, const std::string &resId, privilege reqPriv);
 
         /**
          * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
+         * @param resPath the path of the file to open, relative to user's home directory
+         * @param resId the id of the file to open
          * @param fileAsked the file sent back by the server in a @ref sendResMessage
          */
-        virtual void openSource(const std::string &path, const std::string &name, const std::shared_ptr<file> fileAsked,
+        virtual void openSource(const std::string &resPath, const std::string &resId, const std::shared_ptr<file> fileAsked,
                                 privilege reqPriv);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to open a document
-         * @param resourceId the universal resource identifier for the resource to open
+         * @param absolutePath the absolute path to the resource to open
          * @param reqPriv the privilege requested opening the file
          * @param destPath the path inside user's home directory where to put a symlink to the file
          * @return a properly constructed @ref askResMessage to send to the server
          */
         virtual askResMessage
-        openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName="");
+        openNewSource(const std::string &absolutePath, privilege reqPriv, const std::string &destPath, const std::string& destName= "");
 
         /**
          * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
-         * @param resId the unique resource identifier (URI) of the asked resource
+         * @param absolutePath the absolute path to the resource to open
          * @param reqPriv the privilege requested opening the file
          * @param destPath the path where to put the @ref symlink to @e name, inside @e opener 's home directory
          * @param destName the name to assign to the symlink
          * @param idToAssign is the id assigned to the file from the server
          * @param fileAsked the file sent back by the server in a @ref sendResMessage
          */
-        virtual void openNewSource(const std::string &resId, privilege reqPriv, const std::string &destPath,
+        virtual void openNewSource(const std::string &absolutePath, privilege reqPriv, const std::string &destPath,
                                    const std::string &destName,
                                    uint_positive_cnt::type idToAssign, const std::shared_ptr<file> fileAsked);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to create a file
-         * @param path the path of the file to create, relative to user's home directory
-         * @param name the name of the file to create
+         * @param resPath the path of the file to create, relative to user's home directory
+         * @param resName the name of the file to create
          * @return a properly constructed @ref askResMessage to send to the server
          */
-        virtual askResMessage createNewSource(const std::string &path, const std::string &name);
+        virtual askResMessage createNewSource(const std::string &resPath, const std::string &resName);
 
         /**
          * @brief add to @e activeFile the @e fileAsked and opens the document adding it to @e activeDoc
-         * @param path is the path where the user want to put the file into
-         * @param name is the name to assign to the new file
+         * @param resPath is the path where the user want to put the file into
+         * @param resName is the name to assign to the new file
          * @param idToAssign is the id assigned to the file from the server
          * @param fileCreated the file sent back by the server in a @ref sendResMessage
          *
@@ -167,70 +169,70 @@ namespace Symposium {
          * in the @ref sendResMessage just received
          */
         virtual void
-        createNewSource(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign,
+        createNewSource(const std::string &resPath, const std::string &resName, uint_positive_cnt::type idToAssign,
                         const std::shared_ptr<file> fileCreated);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to create a directory
-         * @param path the path of the directory to create, relative to user's home directory
-         * @param name the name of the directory to create
+         * @param resPath the path of the directory to create, relative to user's home directory
+         * @param resName the name of the directory to create
          * @return the name of the file to create
          */
-        virtual askResMessage createNewDir(const std::string &path, const std::string &name);
+        virtual askResMessage createNewDir(const std::string &resPath, const std::string &resName);
 
         /**
          * @brief add the directory to user's filesystem
-         * @param path is the path where the user want to put the directory into
-         * @param name is the name to assign to the new directory
+         * @param resPath is the path where the user want to put the directory into
+         * @param resName is the name to assign to the new directory
          * @param idToAssign is the id assigned to the directory from the server
          *
          * The new directory is created by calling user::newDirectory with the (@e path, @e name) taken from
          * the previously sent @ref askResMessage and @e idToAssign taken from the directory object contained
          * in the @ref sendResMessage just received
          */
-        virtual void createNewDir(const std::string &path, const std::string &name, uint_positive_cnt::type idToAssign);
+        virtual void createNewDir(const std::string &resPath, const std::string &resName, uint_positive_cnt::type idToAssign);
 
         /**
          * @brief insert a symbol on an opened document and constructs a message to sent to the server
-         * @param resourceId the document the insertion refers to
+         * @param docId the document the insertion refers to
          * @param newSym the symbol to insert
          * @return a properly constructed @ref symbolMessage to send to the server
          */
-        virtual symbolMessage localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<unsigned int, unsigned int> &index);
+        virtual symbolMessage localInsert(uint_positive_cnt::type docId, const symbol &newSym, const std::pair<unsigned int, unsigned int> &index);
 
         /**
          * @brief remove a symbol on an opened document and constructs a message to sent to the server
-         * @param resourceId the document the deletion refers to
+         * @param docId the document the deletion refers to
          * @param indexes the position of the symbol to remove
          * @return a properly constructed @ref symbolMessage to send to the server
          */
-        virtual symbolMessage localRemove(uint_positive_cnt::type resourceId, const std::pair<unsigned int, unsigned int> indexes);
+        virtual symbolMessage localRemove(uint_positive_cnt::type docId, const std::pair<unsigned int, unsigned int> &indexes);
 
         /**
          * @brief propagate a symbol insertion on document content made by another user
          * @param siteId the site id of the user performing the insertion
-         * @param resourceId the document the insertion refers to
+         * @param docId the document the insertion refers to
          * @param newSym the symbol to insert
          *
          * This method is called after having received a @ref symbolMessage
          */
         virtual void
-        remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &newSym);
+        remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type docId, const symbol &newSym);
 
         /**
          * @brief propagate a symbol deletion on document content made by another user
          * @param siteId the site id of the user performing the removal
-         * @param resourceId the document the deletion refers to
+         * @param docId the document the deletion refers to
          * @param rmSym the symbol to remove
          *
          * This method is called after having received a @ref symbolMessage
          */
         virtual void
-        remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type resourceId, const symbol &rmSym);
+        remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type docId, const symbol &rmSym);
 
         /**
          * @brief set the symbol of the opened document that has @e resourceId to "verified"
-         * @param resourceId the id of the document the symbol refers to
+         * @param docId the id of the document the symbol refers to
          * @param sym the symbol to verify
          *
          * When the server answers to a client's @ref symbolMessage, it sends a @ref serverMessage containing
@@ -238,34 +240,34 @@ namespace Symposium {
          * message is retrieved and @ref symbolMessage::completeAction is called: it calls this method if the
          * outcome is positive.
          */
-        virtual void verifySymbol(uint_positive_cnt::type resourceId, const symbol &sym);
+        virtual void verifySymbol(uint_positive_cnt::type docId, const symbol &sym);
 
         /**
          * @brief constructs a message to sent to the server to inform other users that local user has moved his cursor
-         * @param resourceId the id of the document
+         * @param docId the id of the document
          * @param row X coordinate of the new position of cursor
          * @param col Y coordinate of the new position of cursor
          * @return a properly constructed @ref cursorMessage to send to the server
          */
-        virtual cursorMessage updateCursorPos(uint_positive_cnt::type resourceId, unsigned int row, unsigned int col);
+        virtual cursorMessage updateCursorPos(uint_positive_cnt::type docId, unsigned int row, unsigned int col);
 
         /**
          * @brief update the position of user's cursor that has that @ref userSiteId on the document
          * @param userSiteId the site id of the user moving his cursor
-         * @param resourceId the id of the document
+         * @param docId the id of the document
          * @param row X coordinate of the new position of user's cursor
          * @param col Y coordinate of the new position of user's cursor
          *
          * This method is called after having received a @ref cursorMessage
          *
          */
-        virtual void updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type resourceId, unsigned int row, unsigned int col);
+        virtual void updateCursorPos(uint_positive_cnt::type userSiteId, uint_positive_cnt::type docId, unsigned int row, unsigned int col);
 
         /**
          * @brief constructs a @ref privMessage to send to the server to ask to change privileges for a resource
          * @param targetUser the user whose privilege has to be modified
-         * @param resPath the absolute path of the resource
-         * @param resName the name of the resource
+         * @param resPath the relative path of the resource
+         * @param resId the id of the resource
          * @param newPrivilege the new privilege to be granted to @e targetUser
          * @return a properly constructed @ref privMessage to send to the server
          *
@@ -274,14 +276,14 @@ namespace Symposium {
          * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
          * privilege SymClient::editPrivilege that will actually perform the privilege change.
          */
-        virtual privMessage editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
+        virtual privMessage editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resId,
                                           privilege newPrivilege);
 
         /**
          * @brief edit the privilege of @e targetUser user for the resource @e resName in @e resPath to @e newPrivilege
          * @param targetUser the user whose privilege has to be modified
-         * @param resPath the absolute path of the resource
-         * @param resName the name of the resource
+         * @param resPath the relative path of the resource
+         * @param resId the id of the resource
          * @param newPrivilege the new privilege to be granted to @e targetUser
          * @param msgRcv indicate whether the method is called after having sent a @ref privMessage
          * @return the old privilege of @e targetUser had on the resource
@@ -292,13 +294,13 @@ namespace Symposium {
          * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
          * of this method and the one that returns a privMessage.
          */
-        virtual privilege editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resName,
+        virtual privilege editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resId,
                                         privilege newPrivilege, bool msgRcv);
 
         /**
          * @brief constructs a @ref uriMessage to send to the server to ask to change sharing preferences for a resource
-         * @param resPath the absolute path of the resource
-         * @param resName the name of the resource
+         * @param resPath the relative path of the resource
+         * @param resId the id of the resource
          * @param newPrefs new sharing preferences to set the resource to
          * @return a properly constructed @ref uriMessage to send to the server
          *
@@ -307,12 +309,12 @@ namespace Symposium {
          * The message is put on @e unanswered, so when the client will receive an answer for a message, it will invoke
          * uri SymClient::shareResource that will actually perform the sharing preference change.
          */
-        virtual uriMessage shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
+        virtual uriMessage shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs);
 
         /**
          * @brief set new sharing preferences for a resource
-         * @param resPath the absolute path of the resource
-         * @param resName the name of the resource
+         * @param resPath the relative path of the resource
+         * @param resId the id of the resource
          * @param newPrefs new sharing preferences for the resource
          * @param msgRcv indicate whether the method is called after having sent a @ref uriMessage
          * @return the old @e sharingPolicy
@@ -323,13 +325,13 @@ namespace Symposium {
          * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
          * of this method and the one that returns a uriMessage.
          */
-        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs, bool msgRcv);
+        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs, bool msgRcv);
 
         /**
          * @brief constructs a @ref uriMessage to send to the server to ask to change the name of a resource
          * @param resPath the relative path to the user's @e home directory where to create the file
-         * @param resName the resource's name (meaning its unique id)
-         * @param newName the new resource's name (not the id)
+         * @param resId the resource's id
+         * @param newName the new resource's name
          * @return a properly constructed @ref askResMessage to send to the server
          *
          * When a user client side wants to set a new name for a resource, it sends a @ref askResMessage.
@@ -338,12 +340,12 @@ namespace Symposium {
          * std::shared_ptr<filesystem> SymClient::renameResource that will actually perform the renaming.
          */
         virtual askResMessage
-        renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
+        renameResource(const std::string &resPath, const std::string &resId, const std::string &newName);
 
         /**
          * @brief removes a resource from @e remover 's @e home directory
          * @param resPath the relative path to the user's @e home directory where to create the file
-         * @param resName the resource's name
+         * @param resId the resource's id
          * @param newName the new resource's name
          * @param msgRcv indicates whether this method is called after having received a @ref serverMessage
          * @return the resource just renamed
@@ -355,12 +357,12 @@ namespace Symposium {
          * of this method and the one that returns a askResMessage.
          */
         virtual std::shared_ptr<filesystem>
-        renameResource(const std::string &resPath, const std::string &resName, const std::string &newName, bool msgRcv);
+        renameResource(const std::string &resPath, const std::string &resId, const std::string &newName, bool msgRcv);
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to remove a resource
          * @param resPath the relative path to the user's @e home directory where to create the file
-         * @param resName the resource's name
+         * @param resId the resource's id
          * @return a properly constructed @ref askResMessage to send to the server
          *
          * When a user client side wants remove a resource, it sends a @ref askResMessage.
@@ -369,12 +371,12 @@ namespace Symposium {
          * std::shared_ptr<filesystem> SymClient::removeResource that will actually perform the removing.
          */
         virtual askResMessage
-        removeResource(const std::string &resPath, const std::string &resName);
+        removeResource(const std::string &resPath, const std::string &resId);
 
         /**
          * @brief removes a resource from @e remover 's @e home directory
          * @param resPath the relative path to the user's @e home directory where to create the file
-         * @param resName the resource's name
+         * @param resId the resource's id
          * @param msgRcv indicates whether this method is called after having received a @ref serverMessage
          * @return the resource just removed
          *
@@ -385,7 +387,7 @@ namespace Symposium {
          * of this method and the one that returns a askResMessage.
          */
         virtual std::shared_ptr<filesystem>
-        removeResource(const std::string &resPath, const std::string &resName, bool msgRcv);
+        removeResource(const std::string &resPath, const std::string &resId, bool msgRcv);
 
         /**
          * @brief show the content of user's root directory
@@ -414,12 +416,12 @@ namespace Symposium {
 
         /**
         * @brief close a @ref document for a user
-        * @param resourceId document to be closed
+        * @param docId document to be closed
         *
         * When a user client side wants to remove a resource, it sends a @ref updateDocMessage and removes the document with
         * id @e resourceId from @e activeDoc and @e activeFile.
         */
-        updateDocMessage closeSource(uint_positive_cnt::type resourceId);
+        updateDocMessage closeSource(uint_positive_cnt::type docId);
 
         /**
          * @brief changes user's data
@@ -477,29 +479,29 @@ namespace Symposium {
 
         /**
          * @brief assign to each user working on the same document on which @e loggedUser is working a unique color
-         * @param resId the identified of the document the mapping was requested for
+         * @param docId the identified of the document the mapping was requested for
          * @param siteIdToUser the mapping siteId->user asked to the server
          *
          * Receive the mapping siteId->user from the server and assigns to each user a unique color among the colors
          * assigned to the users working on the same document.
          */
         virtual void
-        setUserColors(uint_positive_cnt::type resId, const std::map<uint_positive_cnt::type, user> &siteIdToUser);
+        setUserColors(uint_positive_cnt::type docId, const std::map<uint_positive_cnt::type, user> &siteIdToUser);
 
         /**
          * @brief add @e targetUser to the list of active users of the document
-         * @param resourceId the id of the document the update refers to
+         * @param docId the id of the document the update refers to
          * @param targetUser the user to add
          * @param Priv the privilege of the user to add
          */
-        virtual void addActiveUser(uint_positive_cnt::type resourceId, user &targetUser, privilege Priv);
+        virtual void addActiveUser(uint_positive_cnt::type docId, user &targetUser, privilege Priv);
 
         /**
          * @brief remove @e targetUser to the list of active users of the document
-         * @param resourceId the id of the document the update refers to
+         * @param docId the id of the document the update refers to
          * @param targetUser the user to remove
          */
-        virtual void removeActiveUser(uint_positive_cnt::type resourceId, user &targetUser);
+        virtual void removeActiveUser(uint_positive_cnt::type docId, user &targetUser);
 
         /**
          * @brief retrieve a @ref clientMessage previously sent by the client related to @e smex, removing it from @e unanswered

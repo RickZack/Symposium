@@ -124,51 +124,51 @@ namespace Symposium {
         virtual std::string showDir(bool recursive = false) const;
 
         /**
-         * @brief creates a new file named @e fileName in @e pathFromHome
-         * @param fileName name to be assigned to the new file
-         * @param pathFromHome path inside the home to put the file. By default is the home itself
+         * @brief creates a new file named @e resId in @e pathFromHome
+         * @param resName name to be assigned to the new file
+         * @param resPath path inside the home to put the file. By default is the home itself
          * @return the pointer to the file just created
          */
         virtual std::shared_ptr<file>
-        newFile(const std::string &fileName, const std::string &pathFromHome= ".", uint_positive_cnt::type idToAssign= 0) const;
+        newFile(const std::string &resName, const std::string &resPath= ".", uint_positive_cnt::type idToAssign= 0) const;
 
         /**
          * @brief creates a new directory named @e dirName in @e pathFromHome
-         * @param dirName name to be assigned to the new directory
-         * @param pathFromHome path inside the home to put the directory. By default is the home itself
+         * @param resName name to be assigned to the new directory
+         * @param resPath path inside the home to put the directory. By default is the home itself
          * @return the pointer to the directory just created
          */
 
         virtual std::shared_ptr<directory>
-        newDirectory(const std::string &dirName, const std::string &pathFromHome = ".", uint_positive_cnt::type idToAssign=0) const;
+        newDirectory(const std::string &resName, const std::string &resPath = ".", uint_positive_cnt::type idToAssign= 0) const;
 
         /**
          * @brief adds a link to the resource for which the user has been granted a privilege
-         * @param resId the uri of the resource to be linked by the symlink
-         * @param path the path to put the resource into
-         * @param fileName the name of the new link
+         * @param absolutePath the uri of the resource to be linked by the symlink
+         * @param destPath the path to put the resource into
+         * @param destName the name of the new link
          * @throws @ref userException "User don't have any privilege to this file anymore"
          * @return the file just added
          */
         virtual std::pair<int, std::shared_ptr<file>>
-        accessFile(const std::string &resId, const std::string &path, const std::string &fileName = "") const;
+        accessFile(const std::string &absolutePath, const std::string &destPath, const std::string &destName = "") const;
 
         /**
          * @brief open a @link file file @endlink already present in the user's filesystem
-         * @param path location of the file relative to the @e home directory
-         * @param fileName id of the file to be opened
+         * @param resPath location of the file relative to the @e home directory
+         * @param resId id of the file to be opened
          * @param accessMode the privilege asked by the user for opening the file
          * @return the document contained in the file
          *
          * This method calls the @ref directory::access method on @e home passing the current user as the one asking the action
          */
-        virtual std::shared_ptr<file> openFile(const std::string &path, const std::string &fileName, privilege accessMode) const;
+        virtual std::shared_ptr<file> openFile(const std::string &resPath, const std::string &resId, privilege accessMode) const;
 
         /**
          * @brief edit the privilege of @e otherUser user for the resource @e resName in @e resPath to @e newPrivilege
          * @param otherUser the user whose privilege has to be modified
          * @param resPath relative path to the resource from the current user's @e home
-         * @param resName the id of the target resource
+         * @param resId the id of the target resource
          * @param newPrivilege the new privilege to be granted to @e targetUser
          * @throws @ref userException "User cannot upgrade this privilege"
          * @return the old privilege of @e targetUser had on the resource
@@ -177,26 +177,26 @@ namespace Symposium {
          * This method calls @ref directory::getFile method on the @e home, retrieving the file, and calls
          * @ref file::setUserPrivilege passing @e otherUser as the one on which take action
          */
-        virtual privilege editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resName,
+        virtual privilege editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resId,
                                         privilege newPrivilege) const;
 
 
 
         /**
          * @brief set new sharing preferences for a resource
-         * @param resPath the absolute path of the resource
-         * @param resName the id of the resource
+         * @param resPath the relative path of the resource
+         * @param resId the id of the resource
          * @param newPrefs new sharing preferences for the resource
          * @return the old @e sharingPolicy
          *
          * Calls @ref directory::getFile on @e home and then file::setSharingPolicy on the retrieved file
          */
-        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs) const;
+        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs) const;
 
         /**
          * @brief renames a resource
          * @param resPath the relative path to the @e home directory where to find the resource
-         * @param resName the resource's id
+         * @param resId the resource's id
          * @param newName the new resource's name
          * @return the resource just renamed
          *
@@ -204,15 +204,15 @@ namespace Symposium {
          * Please note that, in case the filesystem object is a symlink, this method renames the symlink, not the resource pointed.
          */
         virtual std::shared_ptr<filesystem>
-        renameResource(const std::string &resPath, const std::string &resName, const std::string &newName) const;
+        renameResource(const std::string &resPath, const std::string &resId, const std::string &newName) const;
 
         /**
          * @brief removes a filesystem object
-         * @param path the path inside the user's home directory where the target file is located
-         * @param name the file id
+         * @param resPath the path inside the user's home directory where the target file is located
+         * @param resId the file id
          * @return the filesystem object just removed from the user's filesystem
          */
-        virtual std::shared_ptr<filesystem> removeResource(const std::string &path, const std::string &name) const;
+        virtual std::shared_ptr<filesystem> removeResource(const std::string &resPath, const std::string &resId) const;
 
         /**
          * @brief constructs a copy of the current user object clearing the @e pwdHash and the @e hashSalt

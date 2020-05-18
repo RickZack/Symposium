@@ -119,8 +119,8 @@
          /**
           * @brief access a document that is already in the user's filesystem
           * @param opener the user who wants to access the document
-          * @param path the path of the document, relative to user's home directory
-          * @param name the document's name
+          * @param resPath the path of the file, relative to user's home directory
+          * @param resId the file's id
           * @param reqPriv the privilege requested opening the document
           * @return the document just retrieved
           * @throws SymServerException thrown if the user @ref opener is not logged in
@@ -132,13 +132,13 @@
           * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
           */
          virtual std::shared_ptr<file>
-         openSource(const std::string &opener, const std::string &path, const std::string &name, privilege reqPriv,
+         openSource(const std::string &opener, const std::string &resPath, const std::string &resId, privilege reqPriv,
                     uint_positive_cnt::type respMsgId);
 
          /**
           * @brief access a user's document via uri to the filesystem of the another user
           * @param opener the user who made the request
-          * @param resourceId the absolute path of the requested document
+          * @param absolutePath the absolute path of the requested document
           * @param destPath the path where to put the @ref symlink to @e name, inside @e opener 's home directory
           * @param destName the name to assign to the symlink
           * @param reqPriv the privilege requested opening the document
@@ -154,14 +154,14 @@
           * and send back to the client a @ref sendResMessage with the symlink just created
           */
          virtual std::shared_ptr<file>
-         openNewSource(const std::string &opener, const std::string &resourceId, const std::string &destPath,
+         openNewSource(const std::string &opener, const std::string &absolutePath, const std::string &destPath,
                        const std::string &destName, privilege reqPriv, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief creates a new file with an empty document inside
           * @param opener the user who made the request
-          * @param path the relative path to the @e opener 's @e home directory where to create the file
-          * @param name the name of the new file
+          * @param resPath the relative path to the @e opener 's @e home directory where to create the file
+          * @param resName the name of the new file
           * @return the document just created
           * @throws SymServerException thrown if the user @ref opener is not logged in
           * @throws filesystemException rethrown if there are problems creating the resource
@@ -170,14 +170,14 @@
           * containing the resource just added to @e path.
           */
          virtual const document &
-         createNewSource(const std::string &opener, const std::string &path, const std::string &name,
+         createNewSource(const std::string &opener, const std::string &resPath, const std::string &resName,
                          uint_positive_cnt::type respMsgId);
 
          /**
           * @brief creates a new directory in the user's filesystem
           * @param opener the user who made the request
-          * @param path the relative path to the @e opener 's @e home directory where to create the directory
-          * @param name the name of the new directory
+          * @param resPath the relative path to the @e opener 's @e home directory where to create the directory
+          * @param resName the name of the new directory
           * @return the directory just created
           * @throws SymServerException thrown if the user @ref opener is not logged in
           * @throws filesystemException rethrown if there are problems creating the resource
@@ -186,13 +186,13 @@
           * containing the directory just added to @e path.
           */
          virtual std::shared_ptr<directory>
-         createNewDir(const std::string &opener, const std::string &path, const std::string &name,
+         createNewDir(const std::string &opener, const std::string &resPath, const std::string &resName,
                       uint_positive_cnt::type respMsgId);
 
          /**
           * @brief update a document with a new symbol from a client
           * @param inserter the user who is working on the document
-          * @param resourceId the id of the document inside @e workingDoc
+          * @param docId the id of the document inside @e workingDoc
           * @param symMsg message received containing the symbol to insert
           *
           * When a user client side inserts a new symbol, the client sends to the server a @ref symbolMessage containing
@@ -201,12 +201,12 @@
           * update its own copy of the document and propagate the update to the other clients putting the message in
           * @e workingQueue
           */
-         virtual void remoteInsert(const std::string &inserter, uint_positive_cnt::type resourceId, symbolMessage &symMsg);
+         virtual void remoteInsert(const std::string &inserter, uint_positive_cnt::type docId, symbolMessage &symMsg);
 
          /**
           * @brief update a document removing a symbol
           * @param remover the user who is working on the document
-          * @param resourceId the id of the document inside @e workingDoc
+          * @param docId the id of the document inside @e workingDoc
           * @param rmMsg message received containing the symbol to remove
           *
           * When a user client side removes a symbol, the client sends to the server a @ref symbolMessage containing
@@ -215,24 +215,24 @@
           * update its own copy of the document and propagate the update to the other clients putting the message in
           * @e workingQueue
           */
-         virtual void remoteRemove(const std::string &remover, uint_positive_cnt::type resourceId, symbolMessage &rmMsg);
+         virtual void remoteRemove(const std::string &remover, uint_positive_cnt::type docId, symbolMessage &rmMsg);
          //dispatchMessages ->function to be active in background to send messages from server to client
          //updateActiveUsers(); ->useful or just done inside other functions?
 
          /**
           * @brief update the current position of user's cursor inside one of the documents he's working on
           * @param targetUser the user whose cursor position has changed
-          * @param resourceId the id of the document in which the user's cursor has been moved
+          * @param docId the id of the document in which the user's cursor has been moved
           * @param crMsg the message received by the client
           */
-         virtual void updateCursorPos(const std::string &targetUser, uint_positive_cnt::type resourceId, cursorMessage& crMsg);
+         virtual void updateCursorPos(const std::string &targetUser, uint_positive_cnt::type docId, cursorMessage& crMsg);
 
          /**
           * @brief edit the privilege of @e targetUser user for the resource @e resName in @e resPath to @e newPrivilege
           * @param actionUser the user who made the request
           * @param targetUser the user whose privilege has to be modified
-          * @param resPath the absolute path of the resource
-          * @param resName the name of the resource
+          * @param resPath the relative path to the @e actionUser 's @e home directory
+          * @param resId the id of the resource
           * @param newPrivilege the new privilege to be granted to @e targetUser
           * @return the old privilege of @e targetUser had on the resource
           *
@@ -245,13 +245,13 @@
           */
          virtual privilege
          editPrivilege(const std::string &actionUser, const std::string &targetUser, const std::string &resPath,
-                       const std::string &resName, privilege newPrivilege, uint_positive_cnt::type respMsgId);
+                       const std::string &resId, privilege newPrivilege, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief set new sharing preferences for a resource
           * @param actionUser the user who made the request
-          * @param resPath the absolute path of the resource
-          * @param resName the name of the resource
+          * @param resPath the relative path to the @e actionUser 's @e home directory
+          * @param resId the id of the resource
           * @param newPrefs new sharing preferences for the resource
           * @return the old @e sharingPolicy
           *
@@ -261,15 +261,15 @@
           * At the end send a @ref serverMessage with the action outcome
           */
          virtual std::shared_ptr<filesystem>
-         shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resName,
+         shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resId,
                        const uri &newPrefs, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief renames a resource from @e remover 's @e home directory
           * @param renamer the user who is asking to rename its resource
           * @param resPath the relative path to the @e renamer 's @e home directory where to find the resource
-          * @param resName the resource's name (meaning the its unique id)
-          * @param newName the new resource's name (not the id)
+          * @param resId the resource's id
+          * @param newName the new resource's name
           * @return the resource just renamed
           *
           * When a user client side wants to set a new name for a resource, it sends a @ref askResMessage and waits
@@ -279,32 +279,32 @@
           * Sends back a @ref serveMessage, to indicate whether the action succeeded or not.
           */
          virtual std::shared_ptr<filesystem>
-         renameResource(const std::string &renamer, const std::string &resPath, const std::string &resName,
+         renameResource(const std::string &renamer, const std::string &resPath, const std::string &resId,
                         const std::string &newName, uint_positive_cnt::type respMsgId);
 
          /**
           * @brief removes a resource from @e remover 's @e home directory
           * @param remover the user who is asking to remove its resource
           * @param resPath the relative path to the @e remover 's @e home directory where to create the file
-          * @param resName the resource's name
+          * @param resId the resource's id
           * @return the resource just removed
           *
           * When a user client side wants remove a resource, it sends a @ref askResMessage and waits for an answer from the server.
           * The server checks that @e actionUser is in @e registered and in @e active, then calls @ref user::renameResource on @e remover.
           */
          virtual std::shared_ptr<filesystem>
-         removeResource(const std::string &remover, const std::string &resPath, const std::string &resName,
+         removeResource(const std::string &remover, const std::string &resPath, const std::string &resId,
                         uint_positive_cnt::type respMsgId);
 
          /**
          * @brief close a @ref document for a user
          * @param actionUser the user who wants to close the document
-         * @param resIdtoClose document to be closed
+         * @param docId document's id to be closed
          *
          * This method is invoked by receiving a @ref updateDocMessage and has the effect of calling
          * @ref document::close and the removal of @e actionUser from @e workingDoc for @e toClose
          */
-         virtual void closeSource(const std::string &actionUser, uint_positive_cnt::type resIdtoClose,
+         virtual void closeSource(const std::string &actionUser, uint_positive_cnt::type docId,
                                   uint_positive_cnt::type respMsgId);
 
          /**
@@ -346,7 +346,7 @@
          /**
           * @brief maps siteIds to users to allow a client to identify the owner of each change in a document
           * @param actionUser the user who is asking for the mapping
-          * @param resourceId the id of the  document for which the client asked for the mapping
+          * @param docId the id of the  document for which the client asked for the mapping
           * @return the mapping siteId->user
           *
           * This method id invoked by receiving a @ref updateDocMessage with @action <em> action=msgType::mapChangesToUser </em>.
@@ -356,7 +356,7 @@
           * Sends to the client a @ref mapMessage
           */
          virtual std::map<uint_positive_cnt::type, user>
-         mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::type resourceId,
+         mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::type docId,
                          uint_positive_cnt::type respMsgId);
          //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
@@ -419,7 +419,7 @@
           * @return a pair that containt {false, nulltpr} if the user is not working on the resource that has the given
           * @e resourceId, or {true, pointer to document} if the user is working on the resource
           */
-         std::pair<bool, document *> userIsWorkingOnDocument(const std::string &username, int resourceId) const;
+         std::pair<bool, document *> userIsWorkingOnDocument(const std::string &username, uint_positive_cnt::type resourceId) const;
 
         /**
          * @brief Handles the access of @e actionUser to the document to change the privileges of a target user
@@ -429,7 +429,7 @@
          * @param actionU the user who is changing the privileges of the target user
          * @return the resId of the document involved in the privilege change
          */
-         int
+        uint_positive_cnt::type
          handleAccessToDoc(const std::string &actionUser, const std::string &resName,
                            const std::string &pathFromUserHome, const user &actionU);
 
@@ -440,7 +440,7 @@
          * @param working indicates whether an exception is to be raised if the user work or do not work on the resource
          * @throws SymServerException thrown if @e targetUser has state @e working on resource @e docId
          */
-         void handleUserState(const std::string &targetUser, int docId, bool working=true);
+         void handleUserState(const std::string &targetUser, uint_positive_cnt::type docId, bool working= true);
 
          /**
           * @brief extract the siteIds associated to the given @e resId, excluding @e siteIdToExclude from the result
@@ -448,14 +448,14 @@
           * @param siteIdToExclude a siteId to exclude from the result, tipically the one of the user who asked for this
           * @return a list of siteIds
           */
-         virtual std::forward_list<uint_positive_cnt::type> siteIdsFor(uint_positive_cnt::type resId, uint_positive_cnt::type siteIdToExclude=-1) const;
+         std::forward_list<uint_positive_cnt::type> siteIdsFor(uint_positive_cnt::type resId, uint_positive_cnt::type siteIdToExclude=0) const;
 
          /**
           * @brief extract the resIds of the documents associated with the user names @e username
           * @param username the name of the user for which the mapping is needed
           * @return a list of resIds
           */
-         virtual std::forward_list<uint_positive_cnt::type> resIdOfDocOfUser(const std::string& username) const;
+         std::forward_list<uint_positive_cnt::type> resIdOfDocOfUser(const std::string& username) const;
 
          /**
           * @brief extract the siteIds of the users that are associated with at least one of resIds in @e resIds
@@ -463,7 +463,7 @@
           * @param siteIdToExclude a siteId to exclude from the result, tipically the one of the user who asked for this
           * @return a list of siteIds
           */
-         virtual std::forward_list<uint_positive_cnt::type>
+         std::forward_list<uint_positive_cnt::type>
          siteIdOfUserOfDoc(const std::forward_list<uint_positive_cnt::type> &resIds, unsigned int siteIdToExclude= -1) const;
 
          /**
@@ -471,7 +471,7 @@
           * @param siteIds the list of user (by means of their siteId) the message @e toSend should be forwarded to
           * @param toSend the message to send to every user that has siteId in @e siteIds
           */
-         void insertMessageForSiteIds(const std::forward_list<uint_positive_cnt::type> &siteIds, std::shared_ptr<serverMessage> toSend);
+         void insertMessageForSiteIds(const std::forward_list<uint_positive_cnt::type> &siteIds, const std::shared_ptr<serverMessage>& toSend);
 
         /**
          * @brief Call document::close on all the documents left opened by the user that just logged out and propagate

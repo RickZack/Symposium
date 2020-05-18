@@ -157,7 +157,7 @@ Insertion inserts[]={
         Insertion(symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {1, 2}, true),
                   {symbol('a', 0, 1, {1}, true), symbol('b', 0, 1, {1, 2}, true)}),
 };
-INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertSymbolTest, testing::ValuesIn(inserts));
+INSTANTIATE_TEST_SUITE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertSymbolTest, testing::ValuesIn(inserts));
 
 struct docRemoteRemoveSymbolTest: public testing::TestWithParam<Insertion>{
     document d;
@@ -206,7 +206,7 @@ updatePos updates[]={
         //3)like 1, but s2 contains "new line" and it's inserted before s1, so affects other user's cursor
         updatePos{symbol('a', 0, 1, {2}, true), symbol('\r', 1, 1, {1}, true), {1,1}, {1,0}}
 };
-INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertUpdateCursor, testing::ValuesIn(updates));
+INSTANTIATE_TEST_SUITE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertUpdateCursor, testing::ValuesIn(updates));
 
 //TODO: da rivedere
 struct docRemoteRemoveUpdateCursor: public testing::TestWithParam<updatePos>{
@@ -241,7 +241,7 @@ updatePos updates2[]={
         //2) removal of "new line" character: \r|(1)b|(0) -> |(1)b|(0)
         updatePos{symbol('\r', 1, 1, {1}, true), symbol('a', 0, 1, {2}, true), {0,1}, {0,0}},
 };
-INSTANTIATE_TEST_CASE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCursor, testing::ValuesIn(updates2));
+INSTANTIATE_TEST_SUITE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCursor, testing::ValuesIn(updates2));
 
 TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrder){
     Insertion input=GetParam();
@@ -262,7 +262,7 @@ Insertion inserts2[]={
         Insertion(symbol('c', 1, 1, {1}, false), symbol('c', 1, 1, {1, 2}, false),
                   {symbol('c', 1, 1, {1}, false)}),
 };
-INSTANTIATE_TEST_CASE_P(RemoveRemoteSymbols, docRemoteRemoveSymbolTest, testing::ValuesIn(inserts2));
+INSTANTIATE_TEST_SUITE_P(RemoveRemoteSymbols, docRemoteRemoveSymbolTest, testing::ValuesIn(inserts2));
 
 TEST_F(documentTest, canRetrieveSiteIds){
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2};

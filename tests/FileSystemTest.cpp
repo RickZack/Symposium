@@ -163,12 +163,12 @@ TEST_F(FileSystemTestRobust, FileThrowsOnMalformedRealPath){
     file *f;
     std::string someWrongFormats[]={"../", "..", ".", "./", "path", "./dir/file.jpg"};
     for (auto& path:someWrongFormats)
-        EXPECT_THROW(f= new file("fileName", 0), filesystemException);
+        EXPECT_THROW(f= new file("resId", 0), filesystemException);
 }
 */
 TEST_F(FileSystemTestRobust, FileAcceptsWellFormedRealPath) {
     std::string aGoodPath{"./dir1/dir2/dir3"};
-    file f("fileName", 0);
+    file f("resId", 0);
 }
 
 struct FileSystemTestSharing: ::testing::Test{
