@@ -47,10 +47,9 @@ const QString rsrcPath = ":/resources/images/win";
 
 #include "Dispatcher/clientdispatcher.h"
 
-notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,Symposium::document& doc, SymWinInterface& si, bool parentIsTransient) :
+notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,const Symposium::document& doc, Symposium::uint_positive_cnt::type fileID, SymWinInterface& si, bool parentIsTransient) :
     QMainWindow(parent),
-    SymNotepadWinInterface (si, isQWidget::isQwidgetType(*this), parentIsTransient),
-    documentId(documentId), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc),ui(new Ui::notepad)
+    SymNotepadWinInterface (si, isQWidget::isQwidgetType(*this), parentIsTransient), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc), fileId(fileID), ui(new Ui::notepad)
 {
     ui->setupUi(this);
     setMinimumSize(800, 600);
@@ -207,8 +206,9 @@ notepad::notepad(QWidget *parent, Symposium::uint_positive_cnt::type documentId,
     ui->textEdit->setThisUserPrivilege(privOpen);
     this->pathToFile="/1/2/3/4/5/6/7";
     us=Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
+    this->documentId = 1;
     #else
-    us=cl.getUser();
+    this->documentId = doc.getId();
     #endif
 
     //this->setToolButtonStyle(Qt::ToolButtonFollowStyle);
@@ -589,10 +589,10 @@ void notepad::fillTextEdit(){
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
     QString ch;
-    std::vector<std::vector<Symposium::symbol>> symbols;
+    //std::vector<std::vector<Symposium::symbol>> symbols;
     /* save in symbols all the symbols contained in the document */
     #ifdef DISPATCHER_ON
-    symbols= this->doc.getSymbols();
+    const std::vector<std::vector<Symposium::symbol>>& symbols= this->doc.getSymbols();
     #else
     symbols= this->documentoProva.getSymbols();
     #endif
@@ -708,7 +708,7 @@ void notepad::visualizeAllUsers()
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     std::unordered_map<std::string, Symposium::privilege> users=cl.allUser(documentId);
     #endif
-    alluser* alluserWindow = new alluser(this,  priv, documentId, this->us, pathToFile, onlineUsers, users, *this);
+    alluser* alluserWindow = new alluser(this,  priv, documentId, cl.getUser(), pathToFile, onlineUsers, users, *this);
     goToWindow(*alluserWindow);
 }
 
@@ -720,19 +720,19 @@ void notepad::inactiveLink()
 
 void notepad::activeAlwaysLink()
 {
-    activealwayslink* alwayslinkwindow = new activealwayslink(this, documentId, pathToFile, us, *this);
+    activealwayslink* alwayslinkwindow = new activealwayslink(this, fileId, pathToFile, cl.getUser(), *this);
     goToWindow(*alwayslinkwindow);
 }
 
 void notepad::timerLink()
 {
-    activetimerlink* timerlinkwindow = new activetimerlink(this, documentId, pathToFile, us, *this);
+    activetimerlink* timerlinkwindow = new activetimerlink(this, documentId, pathToFile, cl.getUser(), *this);
     goToWindow(*timerlinkwindow);
 }
 
 void notepad::counterLink()
 {
-    activecounterlink* counterlinkwindow = new activecounterlink(this, documentId, pathToFile, us, *this);
+    activecounterlink* counterlinkwindow = new activecounterlink(this, documentId, pathToFile, cl.getUser(), *this);
     goToWindow(*counterlinkwindow);
 }
 
@@ -789,7 +789,7 @@ void notepad::showLabels()
     #ifdef DISPATCHER_ON
     ui->textEdit->setDocumentId(documentId);
     //ui->textEdit->setClientDispatcher(cl);
-    ui->textEdit->setThisUserSiteId(us.getSiteId());
+    ui->textEdit->setThisUserSiteId(cl.getUser().getSiteId());
     const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     #else
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
@@ -804,9 +804,9 @@ void notepad::showLabels()
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);
     #endif
-    ui->textEdit->constractLabelsCursors(onlineUsers, us.getSiteId());
+    ui->textEdit->constractLabelsCursors(onlineUsers, cl.getUser().getSiteId());
     if(privOpen!=Symposium::privilege::readOnly)
-        ui->textEdit->insertCurrentUser(onlineUsers, us.getSiteId());
+        ui->textEdit->insertCurrentUser(onlineUsers, cl.getUser().getSiteId());
 }
 
 bool notepad::isAKeyToIgnore(QKeyEvent* event){
@@ -882,7 +882,7 @@ void notepad::handleDeleteKey(){
         if(row_start==row_end){
             while(dim>0){
                 #ifdef DISPATCHER_ON
-                cl.localRemove(this->documentId,{row_star,col});
+                cl.localRemove(this->documentId,{row_start,col});
                 #else
                 this->documentoProva.localRemove({row_start,col},1);
                 #endif
@@ -990,9 +990,9 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     std::vector<int> pos;
 
 #ifdef DISPATCHER_ON
-    Symposium::symbol sym(ch,us.getSiteId,1,pos,false);
+    Symposium::symbol sym(ch,cl.getUser().getSiteId(),1,pos,false);
     sym.setCharFormat(charFormat);
-    cl.localInsert(this->documentId,&sym,&indexes);
+    cl.localInsert(this->documentId,sym,indexes);
 #else
     Symposium::symbol sym(ch,1,1,pos,false);
     sym.setCharFormat(charFormat);
@@ -1047,9 +1047,9 @@ void notepad::contV_action(){
 
         std::vector<int> pos;
 #ifdef DISPATCHER_ON
-        Symposium::symbol sym(ch,us.getSiteId,1,pos,false);
+        Symposium::symbol sym(ch,cl.getUser().getSiteId(),1,pos,false);
         sym.setCharFormat(charFormat);
-        cl.localInsert(this->documentId,&sym,&indexes);
+        cl.localInsert(this->documentId,sym,indexes);
 #else
         Symposium::symbol sym(ch,1,1,pos,false);
         sym.setCharFormat(charFormat);
@@ -1238,7 +1238,7 @@ void notepad::on_textEdit_cursorPositionChanged()
     QTextCursor cc=ui->textEdit->textCursor();
     QTextCharFormat ch=ui->textEdit->currentCharFormat();
      if(insertOthCh==false){
-        ui->textEdit->thisUserChangePosition(us.getSiteId());
+        ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
      }
 
      if(!cc.hasSelection()){
@@ -1372,7 +1372,7 @@ void notepad::insertusers()
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
         item->setIcon(0, QIcon(QString::fromStdString(it.first->getIconPath())));
-        if(us.getUsername()==it.first->getUsername())
+        if(cl.getUser().getUsername()==it.first->getUsername())
             item->setText(0, "(you)");
         else
             item->setText(0, QString::fromStdString(it.first->getUsername()));

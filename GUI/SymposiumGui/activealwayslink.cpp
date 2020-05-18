@@ -4,10 +4,10 @@
 #include <QMovie>
 #include "onoff_networkinteraction.h"
 
-activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si) :
+activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, Symposium::user us, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    ui(new Ui::activealwayslink),  documentId(documentId), pathFile(pathFile), us(us)
+    ui(new Ui::activealwayslink),  fileId(fileId), pathFile(pathFile), us(us)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -101,7 +101,7 @@ void activealwayslink::on_ok_clicked()
     disableButtons();
     disableStyleButtons();
     #ifdef DISPATCHER_ON
-    cl.shareResource(pathFile, std::to_string(documentId), u);
+    cl.shareResource(pathFile, std::to_string(fileId), u);
     #else
 
     //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE

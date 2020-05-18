@@ -83,8 +83,8 @@ namespace Symposium{
         std::queue<std::chrono::milliseconds> attese;
         std::string userpwd;
         std::string username;
-        document tp;
-        document& requestDoc;
+        uint_positive_cnt::type openDocumentID;
+        uint_positive_cnt::type openFileID;
         // ELENCO DEI PUNTATORI A FINESTRA CHE SARRANNO POI DA ELIMINARE
 
         //sigin* finestraLogin;                           //1
@@ -178,7 +178,7 @@ namespace Symposium{
         /**
          * @brief method to provide the current user to the GUI
          */
-        user getUser();
+        const user& getUser();
 
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
@@ -221,7 +221,9 @@ namespace Symposium{
 
         std::string getStr(std::string ID_Cartella, std::string path);
 
-        document& getOpenDocument();
+        const document& getOpenDocument();
+
+        uint_positive_cnt::type getOpenFileID();
 
         void setOnlineUser(onlineusers *ou);
 
@@ -229,7 +231,7 @@ namespace Symposium{
 
         void stopTimer();
 
-        void updateRequestDocandSuccess(document &doc);
+        void updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID);
 
 
     private:

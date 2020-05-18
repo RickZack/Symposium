@@ -98,7 +98,7 @@ void SymClient::openSource(const std::string &resPath, const std::string &resId,
     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocandSuccess(doc);
+    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),fileAsked->getId());
     #endif
 }
 
@@ -123,7 +123,7 @@ void SymClient::openNewSource(const std::string &absolutePath, privilege reqPriv
                                     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
 	//notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocandSuccess(doc);
+    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),fileAsked->getId());
     #endif
 }
 
@@ -145,7 +145,7 @@ void SymClient::createNewSource(const std::string &resPath, const std::string &r
                                     (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocandSuccess(docReq);
+    this->dispatcher->updateRequestDocFileandSuccess(docReq.getId(),file->getId());
     #endif
 }
 
@@ -185,7 +185,7 @@ void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::
     std::pair<unsigned int, unsigned int> p = d->remoteInsert(siteId, newSym);
     //notifica alla gui
     #ifdef DISPATCHER_ON
-    this->dispatcher->remoteInsert(resourceId,newSym, siteId, p);
+    this->dispatcher->remoteInsert(docId,newSym, siteId, p);
     #endif
 }
 
@@ -194,7 +194,7 @@ void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::
     std::pair<unsigned int, unsigned int> p = d->remoteRemove(siteId, rmSym);
     //notifica alla gui
     #ifdef DISPATCHER_ON
-    this->dispatcher->remoteRemove(resourceId, siteId, p);
+    this->dispatcher->remoteRemove(docId, siteId, p);
     #endif
 }
 
@@ -354,7 +354,7 @@ void SymClient::addActiveUser(uint_positive_cnt::type docId, user &targetUser, p
     //dobbiamo aggiungiamo il cursore alla GUI, se necessario
     #ifdef DISPATCHER_ON
     if(Priv!=privilege::readOnly){
-        this->dispatcher->addUserCursor(targetUser.getSiteId(),targetUser.getUsername(),resourceId);
+        this->dispatcher->addUserCursor(targetUser.getSiteId(),targetUser.getUsername(),docId);
     }
     #endif
 }
@@ -363,7 +363,7 @@ void SymClient::removeActiveUser(uint_positive_cnt::type docId, user &targetUser
     getActiveDocumentbyID(docId)->close(targetUser);
     //dobbiamo rimuovere il cursore dalla GUI, se il cursore non era presente, la GUI non fa niente
     #ifdef DISPATCHER_ON
-    this->dispatcher->removeUserCursor(targetUser.getSiteId(),resourceId);
+    this->dispatcher->removeUserCursor(targetUser.getSiteId(),docId);
     #endif
 }
 
@@ -397,7 +397,7 @@ void SymClient::verifySymbol(uint_positive_cnt::type docId, const symbol &sym) {
     std::pair<unsigned int, unsigned int> p = d->verifySymbol(sym);
     //notifichiamo alla GUI
     #ifdef DISPATCHER_ON
-    this->dispatcher->verifySymbol(resourceId, sym, p);
+    this->dispatcher->verifySymbol(docId, sym, p);
     #endif
 }
 
@@ -442,6 +442,14 @@ document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
 }
 
+const document& SymClient::getActiveDocumenttoOpenbyID(uint_positive_cnt::type id){
+    for (std::pair<document*, colorGen> it:this->activeDoc){
+        if((it.first->getId() == id))
+            return *(it.first);
+    }
+    throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
+}
+
 colorGen SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
     for (std::pair<document*, colorGen> it:this->activeDoc){
         if((it.first->getId() == id))
@@ -449,7 +457,7 @@ colorGen SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
     }
 }
 
-const user SymClient::userData(){
+const user& SymClient::userData(){
     return this->getLoggedUser();
 }
 
@@ -463,7 +471,7 @@ void SymClient::updateCursorPos(uint_positive_cnt::type userSiteId, uint_positiv
     document* d = getActiveDocumentbyID(docId);
     d->updateCursorPos(userSiteId,row,col);
     #ifdef DISPATCHER_ON
-    this->dispatcher->moveUserCursor(resourceId,row,col,userSiteId);
+    this->dispatcher->moveUserCursor(docId,row,col,userSiteId);
     #endif
 }
 

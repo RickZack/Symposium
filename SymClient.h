@@ -541,7 +541,7 @@ namespace Symposium {
         * @brief it provides the logged user with all data
         * @return the logged user
         */
-        const user userData();
+        const user& userData();
 
         /**
         * @brief show the content of directory with ID @ref ID_Cartella
@@ -565,6 +565,8 @@ namespace Symposium {
          */
         const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &
         getUserColors() const;
+
+        const document& getActiveDocumenttoOpenbyID(uint_positive_cnt::type id);
 
     private:
         /**

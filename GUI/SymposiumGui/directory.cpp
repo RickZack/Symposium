@@ -696,7 +696,7 @@ notepad* directory::successNewSource(){
     int count=number_elements(str);
     listGenerate(str,count);
     //open the newly created document
-    notepad* nw= new notepad(nullptr,cl.getOpenDocument().getId(),Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), *this);
+    notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
     nw->setWindowTitle(title);
     goToWindow(*nw);
     nw->showLabels();
@@ -940,7 +940,7 @@ void directory::on_OkPriv_clicked()
     pressed=false;
     w->close();
     Symposium::document d;
-    notepad* notepadWindow= new notepad(nullptr,std::stol(this->id),priv,privOpen,path,d, *this);
+    notepad* notepadWindow= new notepad(nullptr,priv,privOpen,path,d,0, *this);
     notepadWindow->setWindowTitle(title);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
@@ -950,7 +950,7 @@ void directory::on_OkPriv_clicked()
 }
 
 notepad* directory::successOpen(){
-    notepad* notepadWindow= new notepad(nullptr,cl.getOpenDocument().getId(),priv,privOpen,path,cl.getOpenDocument(), *this);
+    notepad* notepadWindow= new notepad(nullptr,priv,privOpen,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
     notepadWindow->setWindowTitle(title);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();

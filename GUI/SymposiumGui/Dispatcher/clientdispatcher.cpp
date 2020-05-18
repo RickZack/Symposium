@@ -40,7 +40,7 @@
 
 using namespace Symposium;
 
-clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), requestDoc(tp)
+clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent)
 {
     this->client.setClientDispatcher(this);
     this->userpwd = "";
@@ -509,13 +509,18 @@ void clientdispatcher::successShareResource(std::string path){
 }
 
 
-void clientdispatcher::updateRequestDocandSuccess(document &doc){
-    this->requestDoc = doc;
+void clientdispatcher::updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID){
+    this->openDocumentID = docID;
+    this->openFileID = fileID;
     this->successAction();
 }
 
-document& clientdispatcher::getOpenDocument(){
-    return this->requestDoc;
+const document& clientdispatcher::getOpenDocument(){
+    return this->client.getActiveDocumenttoOpenbyID(this->openDocumentID);
+}
+
+uint_positive_cnt::type clientdispatcher::getOpenFileID(){
+    return this->openFileID;
 }
 
 void clientdispatcher::closeConnection(){
@@ -530,7 +535,7 @@ std::unordered_map<std::string, privilege> clientdispatcher::allUser(uint_positi
     return (this->client.allUsersonDocument(documentID));
 }
 
-user clientdispatcher::getUser(){
+const user& clientdispatcher::getUser(){
     return this->client.userData();
 }
 
