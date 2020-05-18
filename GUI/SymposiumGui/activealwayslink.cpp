@@ -41,7 +41,6 @@ void activealwayslink::unsuccessLink(const QString& errorMess)
 {
     enableButtons();
     enableStyleButtons();
-    this->hide();
     ui->errorMess->setText(errorMess);
     ui->errorMess->show();
 
