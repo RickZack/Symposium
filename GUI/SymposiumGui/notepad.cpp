@@ -788,7 +788,6 @@ void notepad::showLabels()
 {
     #ifdef DISPATCHER_ON
     ui->textEdit->setDocumentId(documentId);
-    //ui->textEdit->setClientDispatcher(cl);
     ui->textEdit->setThisUserSiteId(cl.getUser().getSiteId());
     const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     #else
@@ -804,9 +803,15 @@ void notepad::showLabels()
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);
     #endif
+    #ifdef DISPATCHER_ON
     ui->textEdit->constractLabelsCursors(onlineUsers, cl.getUser().getSiteId());
     if(privOpen!=Symposium::privilege::readOnly)
         ui->textEdit->insertCurrentUser(onlineUsers, cl.getUser().getSiteId());
+    #else
+    ui->textEdit->constractLabelsCursors(onlineUsers, us.getSiteId());
+    if(privOpen!=Symposium::privilege::readOnly)
+        ui->textEdit->insertCurrentUser(onlineUsers, us.getSiteId());
+    #endif
 }
 
 bool notepad::isAKeyToIgnore(QKeyEvent* event){
@@ -1256,7 +1261,11 @@ void notepad::on_textEdit_cursorPositionChanged()
     QTextCursor cc=ui->textEdit->textCursor();
     QTextCharFormat ch=ui->textEdit->currentCharFormat();
      if(insertOthCh==false){
+        #ifdef DISPATCHER_ON
         ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
+        #else
+        ui->textEdit->thisUserChangePosition(us.getSiteId());
+        #endif
      }
 
      if(!cc.hasSelection()){
