@@ -700,6 +700,7 @@ notepad* directory::successNewSource(){
     nw->setWindowTitle(title);
     goToWindow(*nw);
     nw->showLabels();
+    nw->fixAlignment();
     return nw;
 }
 
@@ -955,6 +956,7 @@ notepad* directory::successOpen(){
     notepadWindow->setWindowTitle(title);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
+    notepadWindow->fixAlignment();
     if(privOpen==Symposium::privilege::readOnly)
         notepadWindow->setreadonly();
     return notepadWindow;
