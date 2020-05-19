@@ -63,6 +63,16 @@ TEST_F(documentTest, userIsNoLongerInActiveListAfterClosing){
     EXPECT_TRUE(d.getActiveUsers().empty());
 }
 
+//Introduced on 19/05/2020, after suspected bug in retrieving the content of a document after freeing memory
+TEST_F(documentTest, retrievingAfterStoring){
+    user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    d.access(someUser, privilege ::modify);
+    ASSERT_TRUE(d.getSymbols().size()>0 && d.getSymbols()[0].size()>0);
+    d.close(someUser);
+    d.access(someUser, privilege ::modify);
+    EXPECT_TRUE(d.getSymbols().size()>0 && d.getSymbols()[0].size()>0);
+}
+
 TEST_F(documentTest, localAddingSymbolsInSequence){
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2};
     symbol s1('a', 0, 0, std::vector<int>(), false),
