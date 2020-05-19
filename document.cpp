@@ -483,7 +483,9 @@ bool document::load() {
     if(input.good()){
         try {
             boost::archive::text_iarchive ia(input);
-            ia>>*this;
+            document temp;
+            ia>>temp;
+            *this=std::move(temp);
             return true;
         }
         catch(std::exception& e) {
