@@ -589,7 +589,7 @@ void notepad::fillTextEdit(){
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
     QString ch;
-    //std::vector<std::vector<Symposium::symbol>> symbols;
+    std::vector<std::vector<Symposium::symbol>> symbols;
     /* save in symbols all the symbols contained in the document */
     #ifdef DISPATCHER_ON
     const std::vector<std::vector<Symposium::symbol>>& symbols= this->doc.getSymbols();
@@ -883,6 +883,8 @@ void notepad::handleDeleteKey(){
             while(dim>0){
                 #ifdef DISPATCHER_ON
                 cl.localRemove(this->documentId,{row_start,col});
+                std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
+                ui->textEdit->translateCursors(onlineUsers);
                 #else
                 this->documentoProva.localRemove({row_start,col},1);
                 #endif
@@ -920,6 +922,8 @@ void notepad::handleDeleteKey(){
         return;
     #ifdef DISPATCHER_ON
     cl.localRemove(this->documentId,{row,col});
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
+    ui->textEdit->translateCursors(onlineUsers);
     #else
     documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
     #endif
@@ -951,6 +955,8 @@ void notepad::deleteMultipleLines(int sR,int eR,int c,int sL,bool lines){
         while(length>0){
             #ifdef DISPATCHER_ON
             cl.localRemove(this->documentId,{sR,c});
+            std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
+            ui->textEdit->translateCursors(onlineUsers);
             #else
             this->documentoProva.localRemove({sR,c},1);
             #endif
@@ -993,6 +999,8 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     Symposium::symbol sym(ch,cl.getUser().getSiteId(),1,pos,false);
     sym.setCharFormat(charFormat);
     cl.localInsert(this->documentId,sym,indexes);
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
+    ui->textEdit->translateCursors(onlineUsers);
 #else
     Symposium::symbol sym(ch,1,1,pos,false);
     sym.setCharFormat(charFormat);
@@ -1050,6 +1058,8 @@ void notepad::contV_action(){
         Symposium::symbol sym(ch,cl.getUser().getSiteId(),1,pos,false);
         sym.setCharFormat(charFormat);
         cl.localInsert(this->documentId,sym,indexes);
+        std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
+        ui->textEdit->translateCursors(onlineUsers);
 #else
         Symposium::symbol sym(ch,1,1,pos,false);
         sym.setCharFormat(charFormat);
@@ -1137,6 +1147,10 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     curs.insertText(ch,ch_format);
     ui->textEdit->changePosition(siteId,row,column++);
     ui->textEdit->changePosition(actBlock,actColm);
+    #ifdef DISPATCHER_ON
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
+    ui->textEdit->translateCursors(onlineUsers);
+    #endif
     insertOthCh=false;
 
 }
@@ -1227,6 +1241,10 @@ void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposi
 
     ui->textEdit->changePosition(siteId,block,column--);
     ui->textEdit->changePosition(actBlock,actColm);
+    #ifdef DISPATCHER_ON
+    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
+    ui->textEdit->translateCursors(onlineUsers);
+    #endif
 
     insertOthCh=false;
 }

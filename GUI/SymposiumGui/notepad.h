@@ -137,7 +137,7 @@ private:
     QString mFilename;
     Symposium::uint_positive_cnt::type documentId;
     Symposium::uint_positive_cnt::type fileId;
-    //Symposium::user& us;
+    Symposium::user us;
     const Symposium::document& doc;
     static constexpr wchar_t  emptyChar='~';
     bool showUsers=true;
