@@ -85,6 +85,10 @@ public:
     void showLabels();
 
     void setreadonly();
+    /**
+     * @brief fixAlignment to fix for each row the alignment stile
+     */
+    void fixAlignment();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
@@ -197,10 +201,6 @@ private:
      */
     void fillTextEdit();
 
-    /**
-     * @brief fixAlignment to fix for each row the alignment stile
-     */
-    void fixAlignment();
 
     Symposium::document documentoProva;
 

@@ -944,6 +944,7 @@ void directory::on_OkPriv_clicked()
     notepadWindow->setWindowTitle(title);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
+    notepadWindow->fixAlignment();
     if(privOpen==Symposium::privilege::readOnly)
         notepadWindow->setreadonly();
     #endif

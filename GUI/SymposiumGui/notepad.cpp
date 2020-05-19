@@ -241,7 +241,6 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     ui->actionhighlight->setCheckable(true);
 
     this->fillTextEdit();
-    this->fixAlignment();
 
     ui->textEdit->setCursorWidth(3);
 
@@ -380,12 +379,14 @@ void notepad::on_actionAlignTextLeft_triggered()
 {
     textAlign(ui->actionAlignTextLeft);
     this->type=1;
+    ui->textEdit->scroll();
 }
 
 void notepad::on_actionAlignCenter_triggered()
 {
     textAlign(ui->actionAlignCenter);
     this->type=2;
+    ui->textEdit->scroll();
 }
 
 
@@ -393,12 +394,14 @@ void notepad::on_actionAlignTextRight_triggered()
 {
    textAlign(ui->actionAlignTextRight);
    this->type=3;
+   ui->textEdit->scroll();
 }
 
 void notepad::on_actionAlignTextJustify_triggered()
 {
     textAlign(ui->actionAlignTextJustify);
     this->type=4;
+    ui->textEdit->scroll();
 }
 
 void notepad::on_actionBoldFont_triggered()
@@ -493,6 +496,7 @@ void notepad::textStyle(int styleIndex)
 
     // set the style index
     this->indexStyle=styleIndex;
+    ui->textEdit->scroll();
 }
 
 
@@ -645,6 +649,7 @@ void notepad::fillTextEdit(){
 
 void notepad::fixAlignment(){
     /* save in the alignmentStyle the vector that defines for each row its style */
+    insertOthCh=true;
     std::vector<std::pair<Symposium::align,unsigned>> alignmentStyle;
     #ifdef DISPATCHER_ON
     alignmentStyle=this->doc.getAlignmentStyle();
@@ -652,6 +657,11 @@ void notepad::fixAlignment(){
     alignmentStyle= this->documentoProva.getAlignmentStyle();
     #endif
     QTextCursor curs=ui->textEdit->textCursor();
+
+    /* store the initial position of the cursor */
+    int row=curs.blockNumber();
+    int column=curs.positionInBlock();
+
     for(size_t i=0;i<alignmentStyle.size();i++){
         std::pair<Symposium::align,unsigned> style=alignmentStyle[i];
         curs.movePosition(QTextCursor::Start);
@@ -673,6 +683,8 @@ void notepad::fixAlignment(){
             this->textAlign(ui->actionAlignTextLeft); /**< default alignment in the case the vector is initialized w/ emptyAlignment */
             this->textStyle(style.second);}
        }
+    ui->textEdit->changePosition(row,column);
+    insertOthCh=false;
 }
 
 void notepad::visualizeAllUsers()
