@@ -37,6 +37,7 @@ class notepad : public QMainWindow, public SymNotepadWinInterface
     Q_OBJECT
 
 public:
+
     explicit notepad(QWidget *parent,Symposium::privilege priv,Symposium::privilege privOpen,std::string pathToFile,const Symposium::document& doc, Symposium::uint_positive_cnt::type fileID, SymWinInterface& si, bool parentIsTransient=false);
 
     //Not used at the moment
@@ -151,11 +152,15 @@ private:
     bool okPaste=false;
     int dim;
 
-    unsigned indexStyle;                                                /**< to set the index for the style */
-    unsigned left;                                                      /**< to set for each row if there is a left alignment */
-    unsigned right;                                                     /**< to set for each row if there is a right alignment */
-    unsigned center;                                                    /**< to set for each row if there is a center alignment */
-    unsigned justify;                                                   /**< to set for each row if there is a justified alignment */
+    unsigned indexStyle;                                                /**< to set the index for the style */                                                              
+    /**
+     * @brief type to set the kind of alignment:
+     * if type==1->left alignment
+     * if type==2->right alignment
+     * if type==3->center alignment
+     * if type==4->justified
+     */
+    unsigned type;
 
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void colorChanged(const QColor &c);
@@ -226,6 +231,10 @@ private:
     int countCharsInLine(int line) const;
     void insertusers();
 
+    /**
+     * @brief uncolorText to restore the default background color
+     */
+    void uncolorText();
 };
 
 #endif // NOTEPAD_H

@@ -50,16 +50,19 @@ namespace Symposium {
         Color col;
 
         /* alignment */
-        unsigned indexStyle;
-        unsigned left;
-        unsigned right;
-        unsigned center;
-        unsigned justify;
+        unsigned indexStyle;            /**< to set the style of the text **/
+
+        //unsigned left;
+        //unsigned right;
+        //unsigned center;
+        //unsigned justify;
+        unsigned type;                  /**< to set the kind of alignment of the text **/
 
 
-        format():format("", false, false, false, 12,Color(0,0,0),0,0,0,0,0){}
-        format(const std::string& ft, bool bold, bool underline, bool italic, unsigned size, Color col,unsigned indexStyle, unsigned left, unsigned right,unsigned center, unsigned justify):
-        familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), size(size),col(col),indexStyle(indexStyle),left(left),right(right),center(center),justify(justify){}
+
+        format():format("", false, false, false, 12,Color(0,0,0),0,0/*,0,0,0*/){}
+        format(const std::string& ft, bool bold, bool underline, bool italic, unsigned size, Color col,unsigned indexStyle, unsigned type/*unsigned left, unsigned right,unsigned center, unsigned justify*/):
+        familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), size(size),col(col),indexStyle(indexStyle), type(type)/*left(left),right(right),center(center),justify(justify)*/{}
 
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version);

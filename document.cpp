@@ -142,9 +142,9 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
 
     /* set the alignmentStyle vector */
     std::pair<align,unsigned> styleValues;
-    if(charFormat.left==1){styleValues={align::left,charFormat.indexStyle};}
-    else if(charFormat.right==1){styleValues={align::right,charFormat.indexStyle};}
-    else if(charFormat.center==1){styleValues={align::center,charFormat.indexStyle};}
+    if(charFormat.type==1){styleValues={align::left,charFormat.indexStyle};}
+    else if(charFormat.type==2){styleValues={align::right,charFormat.indexStyle};}
+    else if(charFormat.type==3){styleValues={align::center,charFormat.indexStyle};}
     else{styleValues={align::justify,charFormat.indexStyle};}
     if(alignmentStyle[i0].first==align::emptyAlignment){
       alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
@@ -400,9 +400,9 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     /* set the alignmentStyle vector */
     format charFormat=toInsert.getCharFormat();
     std::pair<align,unsigned> styleValues;
-    if(charFormat.left==1){styleValues={align::left,charFormat.indexStyle};}
-    else if(charFormat.right==1){styleValues={align::right,charFormat.indexStyle};}
-    else if(charFormat.center==1){styleValues={align::center,charFormat.indexStyle};}
+    if(charFormat.type==1){styleValues={align::left,charFormat.indexStyle};}
+    else if(charFormat.type==2){styleValues={align::right,charFormat.indexStyle};}
+    else if(charFormat.type==3){styleValues={align::center,charFormat.indexStyle};}
     else{styleValues={align::justify,charFormat.indexStyle};}
     if(alignmentStyle[i0].first==align::emptyAlignment){
       alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);

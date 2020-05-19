@@ -96,8 +96,8 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
         Symposium::Color rosso(255,0,0);
         const std::string ft="Times New Roman";
         unsigned size=9;
-        Symposium::format f(ft,false,false,false,size,nero,6,0,1,0,0);
-         Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,1,0,0,0);
+        Symposium::format f(ft,false,false,false,size,nero,6,1);
+        Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,3);
 
         //Ciao
         s1.setCharFormat(f1);
@@ -180,7 +180,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
             Symposium::Color colore(200,30,0);
             const std::string ft1="Lucida Console";
             unsigned size2=9;
-            Symposium::format fn1(ft1,false,false,true,size2,colore,3,0,1,0,0);
+            Symposium::format fn1(ft1,false,false,true,size2,colore,3,2);
             sn1.setCharFormat(fn1);
             sn2.setCharFormat(fn1);
             sn3.setCharFormat(fn1);
@@ -379,26 +379,26 @@ void notepad::on_actionColorText_triggered()
 void notepad::on_actionAlignTextLeft_triggered()
 {
     textAlign(ui->actionAlignTextLeft);
-    this->left=1;
+    this->type=1;
 }
 
 void notepad::on_actionAlignCenter_triggered()
 {
     textAlign(ui->actionAlignCenter);
-    this->center=1;
+    this->type=2;
 }
 
 
 void notepad::on_actionAlignTextRight_triggered()
 {
    textAlign(ui->actionAlignTextRight);
-   this->right=1;
+   this->type=3;
 }
 
 void notepad::on_actionAlignTextJustify_triggered()
 {
     textAlign(ui->actionAlignTextJustify);
-    this->justify=1;
+    this->type=4;
 }
 
 void notepad::on_actionBoldFont_triggered()
@@ -989,15 +989,11 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     int red=col.red();
     int green=col.green();
     Symposium::Color myCol(red,green,blue);
-    Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->left,this->right,this->center,this->justify};
+    Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->type};
 
     // set the alignment values to zero default value
     this->indexStyle=0;
-    this->left=0;
-    this->right=0;
-    this->center=0;
-    this->justify=0;
-
+    this->type=0;
     std::vector<int> pos;
 
 #ifdef DISPATCHER_ON
@@ -1049,14 +1045,11 @@ void notepad::contV_action(){
         int red=col.red();
         int green=col.green();
         Symposium::Color myCol(red,green,blue);
-        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->left,this->right,this->center,this->justify};
+        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->type};
 
         // set the alignment values to zero default value
         this->indexStyle=0;
-        this->left=0;
-        this->right=0;
-        this->center=0;
-        this->justify=0;
+        this->type=0;
 
         std::vector<int> pos;
 #ifdef DISPATCHER_ON
@@ -1277,10 +1270,15 @@ void notepad::on_textEdit_cursorPositionChanged()
         this->currentCharFormatChanged(ch);
 }
 
-    QColor myC=Qt::yellow;
-    myC.setAlpha(160);
+    #ifdef DISPATCHER_ON
+    Symposium::Color colHigh=cl.getColor(this->documentId,siteId);
+    QColor userCol=static_cast<QColor>(colHigh);
+    #else
+    QColor userCol=Qt::yellow;
+    userCol.setAlpha(160);
+    #endif
 
-    if(this->highActivated){ui->textEdit->setTextBackgroundColor(myC);
+    if(this->highActivated){ui->textEdit->setTextBackgroundColor(userCol);
 }
 
 }
@@ -1294,6 +1292,11 @@ void notepad::colorText(){
     symbols= this->documentoProva.getSymbols();
     #endif
     QTextCursor curs=ui->textEdit->textCursor();
+
+    /* store the initial position of the cursor */
+    int row=curs.blockNumber();
+    int column=curs.positionInBlock();
+
     int pi=0,pf=0,siteId;
     curs.movePosition(QTextCursor::End);
     int pend=curs.position();
@@ -1334,10 +1337,36 @@ void notepad::colorText(){
             }
         }
     }
-
+    ui->textEdit->changePosition(row,column);
     insertOthCh=false;
  }
 
+void notepad::uncolorText(){
+    insertOthCh=true;
+    QTextCursor curs=ui->textEdit->textCursor();
+    /* store the initial position of the cursor */
+    int row=curs.blockNumber();
+    int column=curs.positionInBlock();
+    curs.movePosition(QTextCursor::Start);
+    int pi=curs.position();
+    curs.movePosition(QTextCursor::End);
+    int pf=curs.position();
+    curs.movePosition(QTextCursor::Start);
+    while(pi!=pf){
+      curs.setPosition(pi,QTextCursor::MoveAnchor);
+      curs.setPosition(pi+1,QTextCursor::KeepAnchor);
+      QTextCharFormat format=curs.charFormat();
+      QColor defCol(255,255,255);
+      format.setBackground(defCol);
+      curs.setCharFormat(format);
+      curs.setPosition(pi+1);
+      pi++;
+      if (pi==pf)
+          return;
+      }
+     ui->textEdit->changePosition(row,column);
+     insertOthCh=false;
+}
 
 
 
@@ -1354,9 +1383,10 @@ void notepad::on_actionhighlight_triggered()
     else{
         this->highActivated=false;
         ui->actionhighlight->setChecked(false);
-        ui->textEdit->clear();
-        this->fillTextEdit();
-        this->fixAlignment();
+        this->uncolorText();
+        //ui->textEdit->clear();
+        //this->fillTextEdit();
+        //this->fixAlignment();
 
     }
 }
