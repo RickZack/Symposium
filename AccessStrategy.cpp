@@ -111,19 +111,19 @@ bool RMOAccess::operator!=(const RMOAccess &rhs) const {
     return !(rhs == *this);
 }
 
-bool TrivialAccess::validateAction(const std::string &targetUser, privilege requested) const {
+bool TrivialAccess::validateAction(const std::string &, privilege) const {
     return true;
 }
 
-privilege TrivialAccess::setPrivilege(const std::string &targetUser, privilege toGrant) {
+privilege TrivialAccess::setPrivilege(const std::string &, privilege) {
     return privilege::none;
 }
 
-privilege TrivialAccess::getPrivilege(const std::string &targetUser) const {
+privilege TrivialAccess::getPrivilege(const std::string &) const {
     return privilege::none;
 }
 
-bool TrivialAccess::moreOwner(std::string username) const{
+bool TrivialAccess::moreOwner(std::string) const{
     return false;
 }
 

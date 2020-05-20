@@ -91,7 +91,7 @@ namespace Symposium {
 
         bool operator!=(const uri &rhs) const;
 
-        static const privilege getDefaultPrivilege();
+        static privilege getDefaultPrivilege();
 
         /**
          * @brief set activePolicy as activateAlways with @ref newPrivilege

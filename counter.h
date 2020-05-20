@@ -47,7 +47,7 @@ class basic_counter{
 
     struct iterator{
         basic_counter cnt;
-        iterator(basic_counter& c): cnt(c){};
+        iterator(basic_counter& c): cnt(c){}
         const basic_counter& operator*(){
             return cnt;
         }
@@ -64,7 +64,7 @@ class basic_counter{
 protected:
     friend class boost::serialization::access;
     template<class Archive>
-    void serialize(Archive &ar, const unsigned int version){
+    void serialize(Archive &ar, const unsigned int){
         ar & cnt;
     }
 
@@ -72,12 +72,12 @@ public:
     static constexpr T start_val=N;
     static constexpr T end_val=E;
     typedef T type;
-    basic_counter(): cnt(N){};
+    basic_counter(): cnt(N){}
 
 
 
     struct forward_iterator: public iterator{
-        forward_iterator(basic_counter& c): iterator(c){};
+        forward_iterator(basic_counter& c): iterator(c){}
         forward_iterator begin(){
             return *this;
         }
@@ -97,7 +97,7 @@ public:
     };
 
     struct reverse_iterator: public iterator{
-        reverse_iterator(basic_counter& c):iterator(c){};
+        reverse_iterator(basic_counter& c):iterator(c){}
         reverse_iterator begin(){
             return *this;
         }
@@ -287,7 +287,7 @@ struct uint_counter : public basic_counter<unsigned , N>{};
 
 template <typename T, std::enable_if_t<std::is_unsigned<T>::value, int> =0>
 struct positive_cnt : private basic_counter<T, 1>{
-    positive_cnt(): basic_counter<T, 1>(){};
+    positive_cnt(): basic_counter<T, 1>(){}
     using typename basic_counter<T, 1>::type;
     using basic_counter<T, 1>::start_val;
     using basic_counter<T, 1>::operator++;

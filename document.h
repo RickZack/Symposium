@@ -52,13 +52,13 @@ namespace Symposium {
         unsigned int row, col;
         std::chrono::system_clock::time_point tmstmp;
         privilege p;
-        sessionData(privilege p=privilege::none, unsigned int row=0, unsigned int col=0): p{p}, row{row}, col{col}{
+        sessionData(privilege p=privilege::none, unsigned int row=0, unsigned int col=0):  row{row}, col{col}, p{p}{
             tmstmp=std::chrono::system_clock::now();
         }
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version){
+        void serialize(Archive &ar, const unsigned int){
             ar & row & col & boost::serialization::make_binary_object(&tmstmp, sizeof(tmstmp)) & p;
-        };
+        }
 
         bool operator==(const sessionData &rhs) const {
             return row == rhs.row &&
@@ -97,9 +97,9 @@ namespace Symposium {
 
         friend class boost::serialization::access;
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version){
+        void serialize(Archive &ar, const unsigned int){
             ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
-        };
+        }
     public:
         static const symbol emptySymbol;
         static bool serializeFull;

@@ -44,7 +44,7 @@ using namespace Symposium;
 BOOST_CLASS_EXPORT(Symposium::user)
 
 template<class Archive>
-void user::serialize(Archive &ar, const unsigned int version){
+void user::serialize(Archive &ar, const unsigned int){
     //TODO: save home
     ar & username & pwdHash & hashSalt & siteId & nickname & iconPath & home;
 };
@@ -168,7 +168,7 @@ std::pair<int, std::shared_ptr<file>> user::accessFile(const std::string &absolu
 }
 
 //FIXME: al chiamante serve avere indietro il file e il documento aperto, potremmo tornare un pair
-std::shared_ptr<file> user::openFile(const std::string &resPath, const std::string &resId, privilege accessMode) const {
+std::shared_ptr<file> user::openFile(const std::string &resPath, const std::string &resId, privilege) const {
     auto f=home->getFile(resPath, resId);
     //FIXME: perchè abbiamo commentato questa linea?
     // In origine volevo solo avere indietro il file al posto del documento
@@ -199,7 +199,7 @@ std::shared_ptr<filesystem> user::shareResource(const std::string &resPath, cons
     std::shared_ptr<file> newF=home->getFile(resPath, resId);
     uri u;
     u=newF->setSharingPolicy(username, newPrefs);
-    return newF;
+    return std::dynamic_pointer_cast<filesystem>(newF);
 }
 
 
@@ -258,7 +258,7 @@ std::string user::saltGenerate()
     std::uniform_int_distribution<> dis(20, 30);
     std::poisson_distribution<int> distribution(rand());
 
-    for (size_t i = 0; i < dis(generator); i++)//salt have random lenght between 20 and 30
+    for (std::uniform_int_distribution<int>::result_type i = 0; i < dis(generator); i++)//salt have random lenght between 20 and 30
     {
         sale+=static_cast<char>(distribution(generator));//the sequence of random characters used as salt
     }

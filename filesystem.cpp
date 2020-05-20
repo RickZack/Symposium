@@ -53,25 +53,25 @@ std::shared_ptr<directory> directory::root;
 
 
 template<class Archive>
-void filesystem::serialize(Archive &ar, const unsigned int version){
+void filesystem::serialize(Archive &ar, const unsigned int){
     ar & id & name & sharingPolicy & strategy;
 };
 
 template<class Archive>
-void file::serialize(Archive &ar, const unsigned int version){
+void file::serialize(Archive &ar, const unsigned int){
     ar & boost::serialization::base_object<Symposium::filesystem>(*this);
     ar & doc;
 };
 
 template<class Archive>
-void symlink::serialize(Archive &ar, const unsigned int version){
+void symlink::serialize(Archive &ar, const unsigned int){
     ar & boost::serialization::base_object<Symposium::filesystem>(*this);
     ar & absPathWithoutId & resId;
 };
 
 
 template<class Archive>
-void directory::serialize(Archive &ar, const unsigned int version){
+void directory::serialize(Archive &ar, const unsigned int){
     ar & boost::serialization::base_object<Symposium::filesystem>(*this);
     ar & root & contained & parent & self;
 }
@@ -94,7 +94,7 @@ const std::string &filesystem::getName() const {
     return name;
 }
 
-privilege filesystem::getUserPrivilege(const std::string &targetUser) const {
+privilege filesystem::getUserPrivilege(const std::string &) const {
     throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
@@ -102,7 +102,7 @@ uri &filesystem::getSharingPolicy() {
     return sharingPolicy;
 }
 
-privilege filesystem::setUserPrivilege(const std::string &targetUser, privilege newPrivilege) {
+privilege filesystem::setUserPrivilege(const std::string &, privilege) {
     throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
@@ -111,7 +111,7 @@ std::string filesystem::setName(const std::string &newName) {
     return name;
 }
 
-uri filesystem::setSharingPolicy(const std::string &actionUser, const uri &newSharingPrefs) {
+uri filesystem::setSharingPolicy(const std::string &, const uri &) {
     throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
@@ -139,7 +139,10 @@ std::tuple<std::string, std::string>  filesystem::separate(const std::string &pa
         return std::make_tuple(path3, id2); //return clear path and the id
     }
     path2.append(path3,0, found); //path to the directory of the current user
-    id2.append(path3.begin()+found+1,path3.end()); //the id of directory where the current user want to insert the file
+    auto it=path3.begin();
+    std::advance(it, found+1);
+    id2.append(it,path3.end()); //the id of directory where the current user want to insert the file
+
     return  std::make_tuple(path2, id2);
 }
 
@@ -218,7 +221,7 @@ void file::deleteFromStrategy(const std::string &userName)
    strategy->setPrivilege(userName, privilege::none);
 }
 
-std::string file::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
+std::string file::print(const std::string &targetUser, bool, unsigned int indent) const {
     std::string ritorno;
     if (indent>0)
         ritorno.insert(0, indent, ' '); //first need to insert indent
@@ -257,7 +260,7 @@ bool file::operator!=(const file &rhs) const {
     return !(rhs == *this);
 }
 
-directory::directory(const std::string &name, const int &idToAssign) : filesystem(name, idToAssign) {
+directory::directory(const std::string &name, const uint_positive_cnt::type &idToAssign) : filesystem(name, idToAssign) {
 
     strategy=std::make_unique<TrivialAccess>();
 }
@@ -546,7 +549,7 @@ std::string Symposium::symlink::getPath() {
     return absPathWithoutId + "/" + resId;
 }
 
-std::string Symposium::symlink::print(const std::string &targetUser, bool recursive, unsigned int indent) const {
+std::string Symposium::symlink::print(const std::string &targetUser, bool, unsigned int indent) const {
     std::shared_ptr<file> file=directory::getRoot()->getFile(absPathWithoutId, resId);
     std::ostringstream priv;
     std::ostringstream typeres;

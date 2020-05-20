@@ -89,7 +89,7 @@
 
      protected:
          //Needed by boost::serialization
-         clientMessage():message(1){};
+         clientMessage():message(1){}
          clientMessage(const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type msgId = 0);
      public:
 
@@ -247,7 +247,7 @@
 
          bool operator!=(const signUpMessage &rhs) const;
 
-         virtual ~signUpMessage() override{};
+         virtual ~signUpMessage() override{}
      };
 
     /**
@@ -350,7 +350,7 @@
          template<class Archive>
          void serialize(Archive &ar, const unsigned int version);
          //Needed by boost::serialization
-         loginMessage():serverMessage(msgOutcome::success, 1){};
+         loginMessage():serverMessage(msgOutcome::success, 1){}
 
          user loggedUser;
      public:

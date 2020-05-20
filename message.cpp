@@ -62,7 +62,7 @@ message::message(uint_positive_cnt::type msgId){
 }
 
 template<class Archive>
-void message::serialize(Archive &ar, const unsigned int version)
+void message::serialize(Archive &ar, const unsigned int)
 {
     ar & msgId & action;
 }
@@ -96,7 +96,7 @@ clientMessage::clientMessage(const std::pair<std::string, std::string> &actionOw
 }
 
 template<class Archive>
-void clientMessage::serialize(Archive &ar, const unsigned int version)
+void clientMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::message>(*this);
@@ -170,7 +170,7 @@ askResMessage::askResMessage(msgType action, const std::pair<std::string, std::s
 }
 
 template<class Archive>
-void askResMessage::serialize(Archive &ar, const unsigned int version)
+void askResMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
@@ -262,7 +262,7 @@ signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::s
 }
 
 template<class Archive>
-void signUpMessage::serialize(Archive &ar, const unsigned int version)
+void signUpMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
@@ -296,7 +296,7 @@ serverMessage::serverMessage(msgOutcome result, uint_positive_cnt::type msgId) :
 }
 
 template<class Archive>
-void serverMessage::serialize(Archive &ar, const unsigned int version)
+void serverMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::message>(*this);
@@ -343,7 +343,7 @@ loginMessage::loginMessage(msgType action, msgOutcome result, const user &logged
 }
 
 template<class Archive>
-void loginMessage::serialize(Archive &ar, const unsigned int version)
+void loginMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
@@ -381,7 +381,7 @@ mapMessage::mapMessage(msgType action, msgOutcome result, const std::map<uint_po
 }
 
 template<class Archive>
-void mapMessage::serialize(Archive &ar, const unsigned int version)
+void mapMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
@@ -420,7 +420,7 @@ sendResMessage::sendResMessage(msgType action, msgOutcome result, std::shared_pt
 }
 
 template<class Archive>
-void sendResMessage::serialize(Archive &ar, const unsigned int version)
+void sendResMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
@@ -482,7 +482,7 @@ privMessage::privMessage(msgType action, const std::pair<std::string, std::strin
 }
 
 template<class Archive>
-void privMessage::serialize(Archive &ar, const unsigned int version)
+void privMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
@@ -581,7 +581,7 @@ symbolMessage::symbolMessage(msgType action, const std::pair<std::string, std::s
 }
 
 template<class Archive>
-void symbolMessage::serialize(Archive &ar, const unsigned int version)
+void symbolMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
@@ -682,7 +682,7 @@ uriMessage::uriMessage(msgType action, const std::pair<std::string, std::string>
 }
 
 template<class Archive>
-void uriMessage::serialize(Archive &ar, const unsigned int version)
+void uriMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
@@ -735,7 +735,7 @@ updateActiveMessage::updateActiveMessage(msgType action, msgOutcome result, cons
 }
 
 template<class Archive>
-void updateActiveMessage::serialize(Archive &ar, const unsigned int version)
+void updateActiveMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
@@ -795,7 +795,7 @@ updateDocMessage::updateDocMessage(msgType action, const std::pair<std::string, 
 }
 
 template<class Archive>
-void updateDocMessage::serialize(Archive &ar, const unsigned int version)
+void updateDocMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
@@ -844,7 +844,7 @@ userDataMessage::userDataMessage(msgType action, const std::pair<std::string, st
 }
 
 template<class Archive>
-void userDataMessage::serialize(Archive &ar, const unsigned int version)
+void userDataMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
@@ -888,7 +888,7 @@ cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::s
 }
 
 template<class Archive>
-void cursorMessage::serialize(Archive &ar, const unsigned int version)
+void cursorMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);

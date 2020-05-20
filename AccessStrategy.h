@@ -55,7 +55,7 @@ namespace Symposium {
     class AccessStrategy {
         friend class boost::serialization::access;
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version){};
+        void serialize(Archive &, const unsigned int){}
     public:
         /**
          * @brief validate an action from user @ref targetUser that requires @ref requested
@@ -91,7 +91,7 @@ namespace Symposium {
 
         friend class boost::serialization::access;
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version)
+        void serialize(Archive &ar, const unsigned int)
         {
             // save/load base class information
             ar & boost::serialization::base_object<Symposium::AccessStrategy>(*this);
@@ -123,7 +123,7 @@ namespace Symposium {
     class TrivialAccess : public AccessStrategy {
         friend class boost::serialization::access;
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version)
+        void serialize(Archive &ar, const unsigned int)
         {
             // save/load base class information
             ar & boost::serialization::base_object<Symposium::AccessStrategy>(*this);

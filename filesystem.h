@@ -394,7 +394,7 @@ namespace Symposium {
         directory()=default;
 
     protected:
-        directory(const std::string &name, const int &idToAssign=0);
+        directory(const std::string &name, const uint_positive_cnt::type &idToAssign=0);
     public:
         static std::shared_ptr<directory> emptyDir(); //necessary to build a new user client side
         static std::shared_ptr<directory> getRoot();

@@ -50,13 +50,13 @@ format symbol::getCharFormat() const
 symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos, bool verified) : ch(ch), siteId(siteId),
                                                                                                   counter(counter), pos(pos), verified(verified) {}
 template<class Archive>
-void format::serialize(Archive &ar, const unsigned int version){
+void format::serialize(Archive &ar, const unsigned int){
     ar & familyType & isBold & isUnderlined & isItalic & size & col &indexStyle &type/*&left &right &center &justify*/;
 };
 BOOST_CLASS_EXPORT(Symposium::format);
 
 template<class Archive>
-void symbol::serialize(Archive &ar, const unsigned int version){
+void symbol::serialize(Archive &ar, const unsigned int){
     ar & ch & siteId & counter & pos & verified & charFormat;
 };
 BOOST_CLASS_EXPORT(Symposium::symbol);
@@ -75,8 +75,8 @@ const std::vector<int> &symbol::getPos() const {
 
 
 bool symbol::operator<(const symbol &rhs) const {
-    int size=std::min(this->pos.size(), rhs.pos.size());
-    for(int i=0; i<size; i++) {
+    auto size=std::min(this->pos.size(), rhs.pos.size());
+    for(unsigned long long i=0; i<size; i++) {
         if (this->pos[i] < rhs.pos[i])
             return true;
         if (this->pos[i] > rhs.pos[i])

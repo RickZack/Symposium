@@ -397,22 +397,7 @@ namespace Symposium {
         std::string showDir(bool recursive=false) const;
 
 
-        /**
-         * @brief list the document according a @e condition
-         * @tparam C a function or functional object (@ref filterShared, @ref filterPrivilege)
-         * @param condition a filter condition to apply to each document to decide whether to list it or not
-         * @return the string containing the list of files that respect @e condition
-         */
-        template<typename C, typename=std::enable_if<std::is_invocable_r<bool,C>::value>>
-        std::string show(C condition){}
 
-        /**
-         * @brief visualize which user made which change in the document, using @e userColors
-         * @tparam C a function or functional object
-         * @param condition a filter condition to apply to document's text to decide what to show (e.g only changes made by a specific user)
-         */
-        template<typename C, typename=std::enable_if<std::is_invocable_r<bool,C>::value>>
-        void showChanges(C condition){}
 
         /**
         * @brief close a @ref document for a user
@@ -528,14 +513,14 @@ namespace Symposium {
          * @param documentID the id of the document
          * @return the list of online users
          */
-        const std::forward_list<std::pair<const user *, sessionData>> onlineUsersonDocument(int documentID);
+        const std::forward_list<std::pair<const user *, sessionData>> onlineUsersonDocument(uint_positive_cnt::type documentID);
 
         /**
          * @brief it provides the list of all users who modified the specified document
          * @param documentID the id of the document
          * @return the list of all users
          */
-        const std::unordered_map<std::string, privilege> allUsersonDocument(int documentID);
+        const std::unordered_map<std::string, privilege> allUsersonDocument(uint_positive_cnt::type documentID);
 
         /**
         * @brief it provides the logged user with all data
@@ -588,7 +573,7 @@ namespace Symposium {
          * @param id the id of the content document into the file
          * @return the file that content the document with specified ID
          */
-        const std::shared_ptr<file> getFilebyDocumentID(int id);
+        const std::shared_ptr<file> getFilebyDocumentID(uint_positive_cnt::type id);
 
         /**
              * @brief set all the details of the user just logged
@@ -605,31 +590,5 @@ namespace Symposium {
 // - sent, to understand what message the server is answering to and to detect errors. Then it will call
 // - the invokeMethod of the message to perform the action
 
-    /**
-     * @brief class used to create functional objects to be used in @ref SymClient::show
-     *
-     * Filter user's home directory print basing on the fact that a file has not been created by @e currentUser
-     */
-    class filterShared {
-        const user &currentUser;
-    public:
-        explicit filterShared(const user &currentUser);
-
-        bool operator()(std::shared_ptr<file> file);
-    };
-
-    /**
-     * @brief class used to create functional objects to be used in @ref SymClient::show
-     *
-     * Filter user's home directory print basing on the privilege that has been granted to @e currentUser
-     */
-    class filterPrivilege {
-        const user &currentUser;
-        privilege filter;
-    public:
-        explicit filterPrivilege(const user &currentUser, privilege filter = privilege::readOnly);
-
-        bool operator()(std::shared_ptr<file> file);
-    };
 }
 #endif //SYMPOSIUM_SYMCLIENT_H

@@ -206,7 +206,7 @@ privMessage SymClient::editPrivilege(const std::string &targetUser, const std::s
 }
 
 privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resId,
-                                   privilege newPrivilege, bool msgRcv) {
+                                   privilege newPrivilege, bool) {
     privilege* p = new privilege(this->getLoggedUser().editPrivilege(targetUser, resPath, resId, newPrivilege));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
@@ -220,7 +220,7 @@ uriMessage SymClient::shareResource(const std::string &resPath, const std::strin
     return *mess;
 }
 
-std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs, bool msgRcv) {    //TODO: modified this method, return the file: FATTO
+std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs, bool) {
     std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resId, newPrefs));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
@@ -239,7 +239,7 @@ SymClient::renameResource(const std::string &resPath, const std::string &resId, 
 
 std::shared_ptr<filesystem>
 SymClient::renameResource(const std::string &resPath, const std::string &resId, const std::string &newName,
-                          bool msgRcv) {
+                          bool) {
     std::shared_ptr<filesystem> f (getLoggedUser().renameResource(resPath, resId, newName));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
@@ -256,7 +256,7 @@ askResMessage SymClient::removeResource(const std::string &resPath, const std::s
 }
 
 std::shared_ptr<filesystem>
-SymClient::removeResource(const std::string &resPath, const std::string &resId, bool msgRcv) {
+SymClient::removeResource(const std::string &resPath, const std::string &resId, bool) {
     std::shared_ptr<filesystem> f = this->getLoggedUser().removeResource(resPath, resId);
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
@@ -286,7 +286,7 @@ userDataMessage SymClient::editUser(user &newUserData) {
     return *mess;
 }
 
-const user SymClient::editUser(user &newUserData, bool msgRcv) {
+const user SymClient::editUser(user &newUserData, bool) {
     (const_cast<user&>(this->getLoggedUser())).setNewData(newUserData);
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
@@ -307,7 +307,7 @@ clientMessage SymClient::logout() {
     return *mess;
 }
 
-void SymClient::logout(bool msgRcv){
+void SymClient::logout(bool){
     std::shared_ptr<user> u(new user());
     this->setLoggedUser(*u);
     this->userColors.clear();
@@ -401,38 +401,22 @@ void SymClient::verifySymbol(uint_positive_cnt::type docId, const symbol &sym) {
     #endif
 }
 
-filterShared::filterShared(const user &currentUser): currentUser{currentUser} {
-    //TODO: to implement
-}
-
-const std::forward_list<std::pair<const user *, sessionData>> SymClient::onlineUsersonDocument(int documentID){
+const std::forward_list<std::pair<const user *, sessionData>> SymClient::onlineUsersonDocument(uint_positive_cnt::type documentID){
     return ((this->getActiveDocumentbyID(documentID))->getActiveUsers());
 }
 
-const std::unordered_map<std::string, privilege> SymClient::allUsersonDocument(int documentID){
+const std::unordered_map<std::string, privilege> SymClient::allUsersonDocument(uint_positive_cnt::type documentID){
     return ((this->getFilebyDocumentID(documentID))->getUsers());
 }
 
-const std::shared_ptr<file> SymClient::getFilebyDocumentID(int id){
+const std::shared_ptr<file> SymClient::getFilebyDocumentID(uint_positive_cnt::type id){
     for (std::shared_ptr<file> it:this->activeFile){
         if((it->getDoc()).getId() == id)
             return (it);
     }
+    return std::shared_ptr<file>();
 }
 
-bool filterShared::operator()(std::shared_ptr<file> file) {
-    //TODO: to implement
-    return false;
-}
-
-filterPrivilege::filterPrivilege(const user &currentUser, privilege filter): currentUser{currentUser} {
-    //TODO: to implement
-}
-
-bool filterPrivilege::operator()(std::shared_ptr<file> file) {
-    //TODO: to implement
-    return false;
-}
 
 document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
     for (std::pair<document*, colorGen> it:this->activeDoc){
@@ -455,6 +439,7 @@ colorGen SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
         if((it.first->getId() == id))
             return (it.second);
     }
+    return colorGen();
 }
 
 const user& SymClient::userData(){
@@ -479,7 +464,7 @@ std::string SymClient::directoryContent(std::string &ID_Cartella, std::string &p
     return this->getLoggedUser().getHome()->getDir(path,ID_Cartella)->print(this->getLoggedUser().getUsername(),false);
 }
 
-void SymClient::removeUser(bool msgRcv) {
+void SymClient::removeUser(bool) {
     std::shared_ptr<user> u(new user());
     this->setLoggedUser(*u);
     this->userColors.clear();

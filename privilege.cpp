@@ -77,7 +77,7 @@ privilege& Symposium::operator++(privilege& oldPriv){
     switch(oldPriv){
         case privilege::readOnly: return oldPriv=privilege::modify;
         case privilege::modify:   return oldPriv=privilege::owner;
-        default:                  return oldPriv=oldPriv;
+        default:                  return oldPriv;
     }
 }
 
