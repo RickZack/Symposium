@@ -233,6 +233,8 @@ namespace Symposium{
 
         void updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID);
 
+        void closeAllNotepads();
+
 
     private:
 

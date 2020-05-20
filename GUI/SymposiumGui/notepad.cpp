@@ -596,7 +596,7 @@ void notepad::fillTextEdit(){
     std::vector<std::vector<Symposium::symbol>> symbols;
     /* save in symbols all the symbols contained in the document */
     #ifdef DISPATCHER_ON
-    const std::vector<std::vector<Symposium::symbol>>& symbols= this->doc.getSymbols();
+    symbols= this->doc.getSymbols();
     #else
     symbols= this->documentoProva.getSymbols();
     #endif
@@ -1283,7 +1283,7 @@ void notepad::on_textEdit_cursorPositionChanged()
 }
 
     #ifdef DISPATCHER_ON
-    Symposium::Color colHigh=cl.getColor(this->documentId,siteId);
+    Symposium::Color colHigh=cl.getColor(this->documentId,cl.getUser().getSiteId());
     QColor userCol=static_cast<QColor>(colHigh);
     #else
     QColor userCol=Qt::yellow;

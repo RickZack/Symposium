@@ -114,7 +114,7 @@ void directory::success(){
 
 void directory::failure(const QString& toPrint){
     enableStyleButtons();
-    if(this->lastChoice != createNewSource)
+    //if(this->lastChoice != createNewSource)
         w->close();
     pressed=false;
     if(toPrint=="-1"){
@@ -463,10 +463,10 @@ void directory::successCreate(){
 //this method closes the window directory
 void directory::closeEvent(QCloseEvent *event)
 {
+    event->ignore();
     if(closedByUser())
     {
         disableStyleButtons();
-        event->ignore();
         class exit ex(this, true, &cl);
         int ret=ex.exec();
         if(ret==0 && !pressed)
@@ -951,7 +951,7 @@ void directory::on_OkPriv_clicked()
     #endif
 }
 
-notepad* directory::successOpen(){
+void directory::successOpen(){
     notepad* notepadWindow= new notepad(nullptr,priv,privOpen,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
     notepadWindow->setWindowTitle(title);
     goToWindow(*notepadWindow);
@@ -959,7 +959,6 @@ notepad* directory::successOpen(){
     notepadWindow->fixAlignment();
     if(privOpen==Symposium::privilege::readOnly)
         notepadWindow->setreadonly();
-    return notepadWindow;
 }
 
 void directory::enableButtonsAfter()

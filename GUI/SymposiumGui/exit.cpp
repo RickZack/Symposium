@@ -24,11 +24,10 @@ void exit::doLogout()
 {
     if(logout)
     {
+        cl->closeAllNotepads();
         cl->closeConnection();
     }
 }
-
-
 
 
 void exit::on_ok_clicked()
