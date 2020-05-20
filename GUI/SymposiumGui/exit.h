@@ -28,6 +28,8 @@ private slots:
      */
     void doLogout();
 
+    void on_ok_clicked();
+
 signals:
     void closeSig();
 

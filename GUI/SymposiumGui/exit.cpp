@@ -12,9 +12,6 @@ exit::exit(QWidget *parent, bool logout, Symposium::clientdispatcher *cl) :
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    connect(ui->ok, SIGNAL(clicked()), this, SLOT(doLogout()));
-    connect(ui->ok, SIGNAL(clicked()), qApp, SLOT(quit()));
-
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
 }
 
@@ -33,3 +30,9 @@ void exit::doLogout()
 
 
 
+
+void exit::on_ok_clicked()
+{
+    doLogout();
+    qApp->quit();
+}
