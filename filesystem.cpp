@@ -106,11 +106,6 @@ privilege filesystem::setUserPrivilege(const std::string &, privilege) {
     throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
 
-std::string filesystem::setName(const std::string &newName) {
-    filesystem::name=newName;
-    return name;
-}
-
 uri filesystem::setSharingPolicy(const std::string &, const uri &) {
     throw filesystemException(filesystemException::objSha, UnpackFileLineFunction());
 }
@@ -162,6 +157,10 @@ bool filesystem::operator==(const filesystem &rhs) const {
 
 bool filesystem::operator!=(const filesystem &rhs) const {
     return !(rhs == *this);
+}
+
+void filesystem::setName(const std::string &name) {
+    filesystem::name = name;
 }
 
 
@@ -378,7 +377,7 @@ std::string directory::setName(const std::string &resPath, const std::string &re
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
     std::shared_ptr<filesystem> res=this->get(resPath, resId);
     std::string old=res->getName();
-    std::string newN=res->setName(newName);
+    res->setName(newName);
     return old;
 }
 

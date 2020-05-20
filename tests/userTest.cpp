@@ -49,6 +49,7 @@ struct dirMock: public directory{
 
     MOCK_METHOD4(access, document&(const user &targetUser, const std::string &path, const std::string &resName, privilege accessMode));
     MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &, const std::string &, const std::string &));
+    MOCK_METHOD3(setName, std::string(const std::string &, const std::string &, const std::string &));
 
     MOCK_CONST_METHOD3(print, std::string(const std::string &targetUser, bool recursive, unsigned int indent));
 
@@ -92,19 +93,19 @@ struct dummyFunctional{
 
 struct UserTest: ::testing::Test{
     user *u;
-    ::testing::NiceMock<dirMock> *homeDir;
-    ::testing::NiceMock<dirMock> *Dir;
-    ::testing::NiceMock<dirMock> *Root;
-    ::testing::NiceMock<fileMock> *dummyFile;
+    std::shared_ptr<::testing::NiceMock<dirMock>> homeDir;
+    std::shared_ptr<::testing::NiceMock<dirMock>> Dir;
+    std::shared_ptr<::testing::NiceMock<dirMock>> Root;
+    std::shared_ptr<::testing::NiceMock<fileMock>> dummyFile;
     static dummyFunctional dummyFunc;
 
     UserTest(){
-        homeDir=new ::testing::NiceMock<dirMock>();
-        dummyFile= new ::testing::NiceMock<fileMock>();
-        Dir=new ::testing::NiceMock<dirMock>();
-        Root=new ::testing::NiceMock<dirMock>();
-        homeDir->setRootOfHome(std::shared_ptr<dirMock>(Root));
-        u=new user("username", "AP@ssw0rd!", "noempty", "", 0, std::shared_ptr<directory>(homeDir));
+        homeDir=std::make_shared<::testing::NiceMock<dirMock>>();
+        dummyFile=std::make_shared<::testing::NiceMock<fileMock>>();
+        Dir=std::make_shared<::testing::NiceMock<dirMock>>();
+        Root=std::make_shared<::testing::NiceMock<dirMock>>();
+        homeDir->setRootOfHome(Root);
+        u=new user("username", "AP@ssw0rd!", "noempty", "", 0, homeDir);
 
     }
     ~UserTest(){
@@ -112,11 +113,10 @@ struct UserTest: ::testing::Test{
             delete u;
             u=nullptr;
         }
-        ::testing::Mock::AllowLeak(homeDir);
-        ::testing::Mock::AllowLeak(Root);
-        ::testing::Mock::AllowLeak(Dir);
-        ::testing::Mock::AllowLeak(dummyFile);
-
+        ::testing::Mock::AllowLeak(homeDir.get());
+        ::testing::Mock::AllowLeak(dummyFile.get());
+        ::testing::Mock::AllowLeak(Dir.get());
+        ::testing::Mock::AllowLeak(Root.get());
     }
 };
 
@@ -131,7 +131,7 @@ TEST_F(UserTest, callAccessFile){
      *     -sym1 (has id=decided internally)
      */
     std::shared_ptr<class symlink> returned(new Symposium::symlink("sym1", "./1", "4"));
-    EXPECT_CALL(*Root, getFile("1", "4")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
+    EXPECT_CALL(*Root, getFile("1", "4")).WillOnce(::testing::Return(dummyFile));
     EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
     EXPECT_CALL(*dummyFile, getSharingPolicy()).WillOnce(::testing::ReturnRef(um));
     EXPECT_CALL(*homeDir, addLink("/2", "sym1", "1", "4",0)).WillOnce(::testing::Return(returned));
@@ -163,7 +163,7 @@ TEST_F(UserTest, callEditPrivilege){
     user otherUser("otherUser", "AP@ssw0rd!", "noempty", "", 0, nullptr);
     //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
-    EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
+    EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(dummyFile));
     EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(privilege::owner));
     EXPECT_CALL(*dummyFile, setUserPrivilege(otherUser.getUsername(), privilege::owner));
     u->editPrivilege(otherUser.getUsername(), ".", "dummyFile", privilege::owner);
@@ -181,8 +181,14 @@ TEST_F(UserTest, callEditPrivilege){
 
 TEST_F(UserTest, callRemoveResource)
 {
-    EXPECT_CALL(*homeDir, remove(*u, ".", "dir")).WillOnce(::testing::Return(std::shared_ptr<filesystem>(Dir)));
-    u->removeResource(".", "dir");
+    EXPECT_CALL(*homeDir, remove(*u, "./", "1"));
+    u->removeResource("./", "1");
+}
+
+//Test added on 20/05/2020, because was called a wrong version of setName, that is now deleted
+TEST_F(UserTest, callSetName){
+    EXPECT_CALL(*homeDir, setName("./1", "5", "newName"));
+    u->renameResource("./1", "5", "newName");
 }
 
 TEST_F(UserTest, callShowDir)
@@ -203,7 +209,7 @@ TEST_F(UserTest, callShareResource){
     uri ur;
     //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
-    EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
+    EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(dummyFile));
     EXPECT_CALL(*dummyFile, setSharingPolicy(u->getUsername(), ur));
     u->shareResource(".", "dummyFile", ur);
 }

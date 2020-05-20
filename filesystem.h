@@ -95,6 +95,9 @@ namespace Symposium {
         //Needed by boost::serialization
         filesystem() = default;
 
+    public:
+        void setName(const std::string &name);
+
 
     public:
         filesystem(const std::string &name, const uint_positive_cnt::type idToAssign = 0);
@@ -145,18 +148,6 @@ namespace Symposium {
          * @return the type of the current filesystem object (file, directory, symlink)
          */
         virtual resourceType resType() const = 0;
-
-        /**
-         * @brief change the current file's name
-         * @param newName newName new name to assign to the resource
-         * @return the old name of the current resource
-         *
-         * On client side this method sends a request to the server to change the current file's name
-         * sending a message of type @ref askResMessage: if the message outcome from the server is positive,
-         * then confirm the action, otherwise revert it.
-         * On server side validate the action, perform the action and send a @ref serverMessage with the outcome.
-         */
-        std::string setName(const std::string &newName);
 
         /**
          * @brief set new @e sharingPolicy for a filesystem object
@@ -406,7 +397,7 @@ namespace Symposium {
         virtual std::shared_ptr<file> getFile(const std::string &resPath, const std::string &resId);
 
         std::string
-        setName(const std::string &resPath, const std::string &resId, const std::string &newName);
+        virtual setName(const std::string &resPath, const std::string &resId, const std::string &newName);
 
 
         virtual std::shared_ptr<directory> addDirectory(const std::string &resName, uint_positive_cnt::type idToAssign= 0);
