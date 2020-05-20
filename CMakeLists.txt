@@ -13,7 +13,7 @@ if(WIN32)
     endif (CMAKE_COMPILER_IS_MINGW)
     #set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/minGW73_64/lib/cmake")
     #set(CMAKE_PREFIX_PATH "D:/akimo/app/Qt/5.12.2/mingw73_64/lib/cmake")
-    set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/mingw73_64/lib/cmake")
+    #set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/mingw73_64/lib/cmake")
 else()
     set(CMAKE_PREFIX_PATH "/home/riccardo/Qt/5.12.3/gcc_64/lib/cmake")
 endif(WIN32)
@@ -58,15 +58,19 @@ FILE(GLOB SHA256_LIB ${CMAKE_SOURCE_DIR}/lib/hash/*.cpp ${CMAKE_SOURCE_DIR}/lib/
 
 # List of sources and headers for clientDispatcher
 FILE(GLOB CLIENT_FILES ${CMAKE_SOURCE_DIR}/GUI/SymposiumGui/Dispatcher/client*.cpp ${CMAKE_SOURCE_DIR}/GUI/SymposiumGui/Dispatcher/client*.h)
+FILE(GLOB SYMPOSIUM_CLIENT ${CLIENT_FILES} ${CORE_FILES} ${SHA256_LIB})
+list(REMOVE_ITEM SYMPOSIUM_CLIENT ${CMAKE_SOURCE_DIR}/SymServer.cpp ${CMAKE_SOURCE_DIR}/SymServer.h)
 
-# List of sources and headers for clientDispatcher
+# List of sources and headers for serverDispatcher
 FILE(GLOB SERVER_FILES ${CMAKE_SOURCE_DIR}/GUI/SymposiumGui/Dispatcher/server*.cpp ${CMAKE_SOURCE_DIR}/GUI/SymposiumGui/Dispatcher/server*.h)
+FILE(GLOB SYMPOSIUM_SERVER ${SERVER_FILES} ${CORE_FILES} ${SHA256_LIB})
+list(REMOVE_ITEM SYMPOSIUM_SERVER ${CMAKE_SOURCE_DIR}/SymClient.cpp ${CMAKE_SOURCE_DIR}/SymClient.h)
 
 # Files and headers for SymposiumTest target: this is the executable that will run the tests for Symposium
 add_executable(SymposiumTest main.cpp ${CORE_FILES} ${SHA256_LIB} ${TEST_FILES})
 
 # Files and headers for SymposiumGUI target: this is the executable that will run the client with the GUI
-add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SHA256_LIB} ${CORE_FILES} ${CLIENT_FILES}
+add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SYMPOSIUM_CLIENT}
         GUI/SymposiumGui/about.cpp GUI/SymposiumGui/successlinks.cpp GUI/SymposiumGui/successlinks.h
         GUI/SymposiumGui/successlinks.ui GUI/SymposiumGui/about.h GUI/SymposiumGui/about.ui
         GUI/SymposiumGui/waiting.ui GUI/SymposiumGui/waiting.cpp GUI/SymposiumGui/waiting.h
@@ -100,10 +104,12 @@ add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SHA256_LIB} ${CORE_FILES
         GUI/SymposiumGui/unsuccessdeleteaccount.cpp GUI/SymposiumGui/unsuccessdeleteaccount.h GUI/SymposiumGui/unsuccessdeleteaccount.ui
         GUI/SymposiumGui/winmanager.cpp GUI/SymposiumGui/winmanager.h
         GUI/SymposiumGui/symwininterface.h GUI/SymposiumGui/symwininterface.cpp
+        GUI/SymposiumGui/onoff_networkinteraction.h
         )
 
 # Files and headers for SymposiumServer target: this is the executable that will run the server
-add_executable(SymposiumServer GUI/SymposiumGui/Dispatcher/mainServer.cpp ${SHA256_LIB} ${CORE_FILES} ${SERVER_FILES})
+message(${CORE_FILES})
+add_executable(SymposiumServer GUI/SymposiumGui/Dispatcher/mainServer.cpp ${SYMPOSIUM_SERVER} GUI/SymposiumGui/onoff_networkinteraction.h)
 
 # Linking Google Test libraries for SymposiumTest target
 target_link_libraries(SymposiumTest gtest gtest_main gmock gmock_main)
