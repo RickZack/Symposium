@@ -51,7 +51,7 @@ void activealwayslink::successLink()
     enableButtons();
     enableStyleButtons();
     backToParent();
-    successlinks link(parentWidget(), 1, QString::fromStdString(pathFile), 0, "", us, privilegeToGrant);
+    successlinks link(parentWidget(), 1, QString::fromStdString(pathFile), "", "", us, privilegeToGrant);
     link.exec();
 }
 

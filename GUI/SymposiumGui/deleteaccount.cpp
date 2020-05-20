@@ -37,11 +37,9 @@ void deleteAccount::failure(const QString& toPrint){
 void deleteAccount::successDeleteAccount()
 {
     enableButtons();
-    enableStyleButtons();
     QString str="Your account has been successfully deleted!";
     notification notWindow(parentWidget(), str);
     int ret= notWindow.exec();
-    //----------------------------DEVE ESSERE INVOCATO SU MAINWINDOW DA SISTEMARE
     if(ret==0)
         backToMainWin();
 }
@@ -123,14 +121,14 @@ void deleteAccount::errorConnectionLogout()
 
 void deleteAccount::on_cancel_clicked(){
     backToParent();
-    ((home*)parentWidget())->enableButtonsAfter();
+    reinterpret_cast<home*>(parentWidget())->enableButtonsAfter();
 }
 
-void deleteAccount::closeEvent(QCloseEvent *event){
+void deleteAccount::closeEvent(QCloseEvent *){
     if(closedByUser())
     {
         backToParent();
-        ((home*)parentWidget())->enableButtonsAfter();
+        reinterpret_cast<home*>(parentWidget())->enableButtonsAfter();
     }
 }
 

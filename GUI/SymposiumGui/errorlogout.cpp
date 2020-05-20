@@ -22,7 +22,4 @@ errorlogout::~errorlogout()
 void errorlogout::on_pushButton_clicked()
 {
     this->close();
-    /*w=new MainWindow();
-    w->setClientDispatcher(cl);
-    w->show();*/
 }

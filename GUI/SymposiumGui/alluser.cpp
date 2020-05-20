@@ -151,7 +151,7 @@ void alluser::enableButtons()
     ui->button_2->setDisabled(false);
 }
 
-void alluser::on_tree_itemClicked(QTreeWidgetItem *item, int column)
+void alluser::on_tree_itemClicked(QTreeWidgetItem *item, int)
 {
     username=item->text(0).toStdString();
 }

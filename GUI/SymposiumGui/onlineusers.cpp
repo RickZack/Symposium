@@ -175,7 +175,7 @@ void onlineusers::on_button_clicked()
         }
 }
 
-void onlineusers::on_tree_itemClicked(QTreeWidgetItem *item, int column)
+void onlineusers::on_tree_itemClicked(QTreeWidgetItem *item, int)
 {
     username=item->text(0).toStdString();
 }
