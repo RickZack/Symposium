@@ -24,7 +24,6 @@ void exit::doLogout()
 {
     if(logout)
     {
-        cl->closeAllNotepads();
         cl->closeConnection();
     }
 }

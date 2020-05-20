@@ -381,8 +381,6 @@ void clientdispatcher::closeSource(uint_positive_cnt::type resourceId) {
     try {
         //inviamo il messaggio
         sendMessage(mess, resourceId);
-        //eliminiamo il riferimento alla finestra del documento che è stato chiuso
-        this->winmanager.removeNotepad(resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeConnection();
@@ -524,11 +522,8 @@ uint_positive_cnt::type clientdispatcher::getOpenFileID(){
 }
 
 void clientdispatcher::closeConnection(){
-    this->socket.close();
-}
-
-void clientdispatcher::closeAllNotepads(){
     this->winmanager.closeAllNotepads();
+    this->socket.close();
 }
 
 const std::forward_list<std::pair<const user *, sessionData>> clientdispatcher::onlineUser(uint_positive_cnt::type documentID){
