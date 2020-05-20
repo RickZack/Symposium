@@ -93,7 +93,7 @@ public:
      * @param doc
      * @return
      */
-    notepad *successOpen();
+    void successOpen();
 
 public slots:
     void enableButtonsAfter();

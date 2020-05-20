@@ -527,6 +527,10 @@ void clientdispatcher::closeConnection(){
     this->socket.close();
 }
 
+void clientdispatcher::closeAllNotepads(){
+    this->winmanager.closeAllNotepads();
+}
+
 const std::forward_list<std::pair<const user *, sessionData>> clientdispatcher::onlineUser(uint_positive_cnt::type documentID){
     return (this->client.onlineUsersonDocument(documentID));
 }
