@@ -367,8 +367,13 @@ std::shared_ptr<file> directory::getFile(const std::string &resPath, const std::
 std::string directory::setName(const std::string &resPath, const std::string &resId, const std::string& newName) {
     std::string pathRename;
     std::string idRename;
-    tie(pathRename, idRename)= separate(resPath);
-    std::shared_ptr<directory> save=getDir(pathRename, idRename);
+    std::shared_ptr<directory> save;
+    if(resPath!="./"){
+        tie(pathRename, idRename)= separate(resPath);
+        save=getDir(pathRename, idRename);
+    }
+    else
+        save=this->self.lock();
     if(std::any_of(save->contained.begin(), save->contained.end(), [newName](const std::shared_ptr<filesystem> i){return i->getName()==newName;}))
         throw filesystemException(filesystemException::sameName, UnpackFileLineFunction());
     std::shared_ptr<filesystem> res=this->get(resPath, resId);

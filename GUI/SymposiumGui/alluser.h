@@ -62,7 +62,7 @@ public:
      * @param str the string error to visualized for user
      */
     void errorConnectionLogout();
-    ~alluser();
+    ~alluser() override;
 
 private slots:
     /**
@@ -97,7 +97,6 @@ private:
     Ui::alluser *ui;
     Symposium::privilege newPrivelege;
     std::string username;
-    Symposium::clientdispatcher *cl;
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     std::unordered_map<std::string, Symposium::privilege> users;
 

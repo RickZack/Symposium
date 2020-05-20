@@ -48,7 +48,7 @@ void activenonlink::successLink()
     enableButtons();
     enableStyleButtons();
     backToParent();
-    successlinks link(parentWidget(), 3, QString::fromStdString(pathFile), 0, "", Symposium::user(), Symposium::privilege());
+    successlinks link(parentWidget(), 3, QString::fromStdString(pathFile), "", "", Symposium::user(), Symposium::privilege());
     link.exec();
 }
 

@@ -238,7 +238,7 @@ const std::string &user::getPwdHash() const {
 std::shared_ptr<filesystem>
 user::renameResource(const std::string &resPath, const std::string &resId, const std::string &newName) const {
     std::shared_ptr<filesystem> object=home->get(resPath, resId);
-    object->setName(newName);
+    home->setName(resPath, resId, newName);
     return object;
 }
 
