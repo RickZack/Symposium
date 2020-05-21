@@ -176,26 +176,31 @@ void directory::listGenerate(std::string str_first, int count)
 
 std::string directory::searchForId(std::string word,std::string str,int count)
 {
-    std::string id_to_return;
+    std::string id_to_return, id, name, priv;
+
     for(int i=0;i<count;i++){
 
         std::string type=separate_word(str);
         if(type=="directory"){
-        std::string id=separate_word(str);
-        std::string name=separate_word(str);
+        id=separate_word(str);
+        name=separate_word(str);
         name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
-        if(name==word){
-            id_to_return=id;
-            i=count;
-        }
+            if(name==word){
+                id_to_return=id;
+                i=count;
+            }
         }
         else{
-            std::string id=separate_word(str);
-            std::string name=separate_word(str);
-            std::string priv=separate_word(str);
+            //is a file or symlink
+            id=separate_word(str);
+            name=separate_word(str);
+            priv=separate_word(str);
+            if(name==word){
+                id_to_return=id;
+                i=count;
             }
+        }
 }
-
    return id_to_return;
 }
 
