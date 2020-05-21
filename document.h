@@ -85,8 +85,10 @@ namespace Symposium {
         uint_positive_cnt::type id;                                                     /**< unique identifier for the document */
         std::vector<std::vector<symbol>> symbols;                                       /**< container of characters and metadata for CRDT*/
         std::forward_list<std::pair<const user *, sessionData>> activeUsers;            /**< list of users currently active on the document, with the current privilege*/
-        std::vector<std::pair<align,unsigned>> alignmentStyle;                        /**< vector that contains for each row the alignment left/right/center/justify and the style index */
-        int numchar;                                                                    /**< number of printable characters */
+        std::vector<std::pair<align,unsigned>> alignmentStyle;                          /**< vector that contains for each row the alignment left/right/center/justify and the style index */
+        //TODO: bisogna implementare il conteggio dei caratteri. Come in un normale editor, bisogna mostrare il
+        // numero di caratteri presenti del documento. La GUI potrà usare il getter getNumChar per visualizzare questo numero
+        unsigned numchar;                                                               /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
         int level=0;
@@ -98,11 +100,15 @@ namespace Symposium {
         friend class boost::serialization::access;
         template<class Archive>
         void serialize(Archive &ar, const unsigned int){
-            ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
+            if(!serializeFull)
+                ar & id;
+            else //serialize all the information only when sending or saving onto disk
+                ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
         }
     public:
         static const symbol emptySymbol;
         static bool serializeFull;
+        static bool doLoadAndStore;
         document(uint_positive_cnt::type id = document::idCounter);
 
         uint_positive_cnt::type getId() const;
@@ -111,20 +117,20 @@ namespace Symposium {
 
         const std::forward_list<std::pair<const user *, sessionData>> &getActiveUsers() const;
 
-        int getNumchar() const;
+        unsigned int getNumchar() const;
 
         /**
          * @brief countsNumLines counts the number of line effectively present in the symbols vector
          * @return number of lines
          */
-        int countsNumLines() const;
+        unsigned int countsNumLines() const;
 
         /**
          * @brief countCharsInLine counts the number of chars that are present in the @e line
          * @param line
-         * @return
+         * @return the number of chars that are present in the @e line
          */
-        int countCharsInLine(int line) const;
+        unsigned int countCharsInLine(unsigned int line) const;
 
         bool operator==(const document &rhs) const;
 
@@ -226,9 +232,7 @@ namespace Symposium {
         void checkIndex(unsigned int i0, unsigned int i1);
 
 
-        void checkVector();
-
-        std::vector<std::pair<align, unsigned> > getAlignmentStyle() const;
+        const std::vector<std::pair<align, unsigned int>> & getAlignmentStyle() const;
 
     private:
         /**
@@ -253,15 +257,17 @@ namespace Symposium {
          * @return the position
          */
         std::pair<unsigned int, unsigned int>
-        findEndPosition(int lines, symbol lastSymbol) const;
+        findEndPosition(unsigned int lines, const symbol &lastSymbol) const;
 
+        //TODO: non si capisce cosa ritorna. Se sai che sarà sicuramente un num. positivo
+        // torna un unsigned e non un int
         /**
          * @brief it searches for the symbol that is inserted in the middle of the line
          * @param ch symbol
          * @param vector line in which the symbol is searched
          * @return
          */
-        int findInsertInLine(const symbol ch, const std::vector<Symposium::symbol> vector, int line) const;
+        int findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const;
 
         /**
          * @brief it searches for the position of a symbol in order to find it and eliminate it
@@ -270,34 +276,38 @@ namespace Symposium {
          */
         std::pair<unsigned int, unsigned int> findPosition(const symbol &symbol) const;
 
+        //TODO: documentazione mancante
+        unsigned int findIndexInLine(const symbol &sym, const std::vector<symbol> &vector, unsigned int charsInLine) const;
 
-        unsigned int findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector,int charsInLine) const;
-
+        //TODO: la documentazione va in contrasto con il tipo di ritorno. Torni una posizione o un simbolo?
         /**
          * @brief searches the position before the one of the considered value
          * @param pair the indexes
          * @return the searched position
          */
-        symbol findPosBefore(const std::pair<unsigned int, unsigned int> pair) const;
+        symbol findPosBefore(const std::pair<unsigned int, unsigned int> &pair) const;
 
+        //TODO: la documentazione va in contrasto con il tipo di ritorno. Torni una posizione o un simbolo?
         /**
          * @brief searches the position after the one of the considered value
          * @param pair the indexes
          * @return the searched position
          */
-        symbol findPosAfter(const std::pair<unsigned int, unsigned int> pair) const;
+        symbol findPosAfter(const std::pair<unsigned int, unsigned int> &pair) const;
 
         /**
          * @brief recoursive algorithm to dynamically generates the relative position of a symbol inserted in between two other ones
-         * @param vector the posBefore
-         * @param vector1 the posAfter
+         * @param posBefore the posBefore
+         * @param posAfter the posAfter
          * @return the searched position
          */
         std::vector<int>
-        generatePosBetween(std::vector<int> vector, std::vector<int> vector1, std::vector<int> vector2, int level,
-                           symbol b,
-                           symbol a);
+        generatePosBetween(const std::vector<int> &posBefore, const std::vector<int> &posAfter, std::vector<int> newPos, int level,
+                           const symbol &b,
+                           const symbol &a);
 
+        //TODO: non si capisce cosa ritorna. Se sai che sarà sicuramente un num. positivo
+        // torna un unsigned e non un int
         /**
          * @brief finds the id of the symbol inserted in between two other onws
          * @param id1
@@ -305,26 +315,24 @@ namespace Symposium {
          * @param boundaryStrategy
          * @return
          */
-
-        int generateIdBetween(int id1, int id2,const char boundaryStrategy) const;
+        int generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const;
 
         /**
          * @brief it modifies the @e strategy parameter
          * @param level
          * @return
          */
-        char retrieveStrategy(const int level);
+        char retrieveStrategy(int level);
 
         /**
          * @brief updateOtherCursorPos to update the position of the cursors different from mine in the document
-         * @param targetSiteId : my siteId to find all the users different from me
-         * @param newRow : i index in the document
-         * @param newCol : j index in the document
-         * @param symb   : symbol that has been inserted. Useful to verify if I'm in a particular case \r
-         * @param ins    : to understand if the action is an insertion or a remove
+         * @param targetSiteId  my siteId to find all the users different from me
+         * @param newRow  i index in the document
+         * @param newCol  j index in the document
+         * @param symb    symbol that has been inserted. Useful to verify if I'm in a particular case \r
+         * @param ins     to understand if the action is an insertion or a remove
          */
-
-        void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol, symbol symb, bool ins);
+        void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol, const symbol &symb, bool ins);
     };
 }
 

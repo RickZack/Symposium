@@ -66,6 +66,7 @@ TEST_F(documentTest, userIsNoLongerInActiveListAfterClosing){
 //Introduced on 19/05/2020, after suspected bug in retrieving the content of a document after freeing memory
 TEST_F(documentTest, retrievingAfterStoring){
     user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    document::doLoadAndStore=true; //make sure that this mechanism is active. By default is disabled if creating a SymClient object
     d.access(someUser, privilege ::modify);
     ASSERT_TRUE(d.getSymbols().size()>0 && d.getSymbols()[0].size()>0);
     d.close(someUser);

@@ -42,6 +42,8 @@ uint_positive_cnt document::idCounter;
 const symbol document::emptySymbol(emptyChar, 0, 0, {0, 0});
 const std::string document::basePath="./docs/";
 bool document::serializeFull=true;
+bool document::doLoadAndStore=true;
+
 
 #define UnpackFileLineFunction()  __FILE__, __LINE__, __PRETTY_FUNCTION__
 
@@ -70,7 +72,7 @@ bool included(unsigned ind0, unsigned ind){
 
 
 
-std::vector<std::pair<align, unsigned> > document::getAlignmentStyle() const
+const std::vector<std::pair<align, unsigned int>> & document::getAlignmentStyle() const
 {
     return alignmentStyle;
 }
@@ -94,7 +96,7 @@ const std::forward_list<std::pair<const user *, sessionData>> &document::getActi
     return activeUsers;
 }
 
-int document::getNumchar() const {
+unsigned int document::getNumchar() const {
     return numchar;
 }
 
@@ -202,7 +204,7 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
 
 
 
-symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> indexes) const {
+symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> &indexes) const {
     int line=indexes.first;
     int ch=indexes.second;
     assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
@@ -232,8 +234,8 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> index
 }
 
 
-int document::countCharsInLine(int line)const {
-    int ch=0;
+unsigned int document::countCharsInLine(unsigned int line)const {
+    unsigned ch=0;
     for(size_t i=0;i<symbols[line].size();i++){
         if(symbols[line][i]!=emptySymbol)
             ch++;
@@ -242,7 +244,7 @@ int document::countCharsInLine(int line)const {
 }
 
 
-symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexes) const {
+symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> &indexes) const {
     int line=indexes.first;
     int ch=indexes.second;
     int numChars=countCharsInLine(line);
@@ -266,8 +268,8 @@ symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> indexe
 
 
 std::vector<int>
-document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAfter, std::vector<int> newPos, int level,
-                             symbol b, symbol a) {
+document::generatePosBetween(const std::vector<int> &posBefore, const std::vector<int> &posAfter, std::vector<int> newPos, int level,
+                             const symbol &b, const symbol &a) {
 
     /* change 2 to any other number to change base multiplication */
     int base=pow(2,level)*32;
@@ -324,7 +326,7 @@ document::generatePosBetween(std::vector<int> posBefore, std::vector<int> posAft
 }
 
 
-char document::retrieveStrategy(const int level){
+char document::retrieveStrategy(int level){
 
    int sizeSC=strategyCache.size();
    if(level<sizeSC){
@@ -344,7 +346,7 @@ char document::retrieveStrategy(const int level){
 }
 
 
-int document::generateIdBetween(int id1, int id2,const char boundaryStrategy) const {
+int document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const {
     int boundary=10;
     if((id2-id1)<boundary){
         id1+=1;
@@ -462,6 +464,8 @@ void document::close(const user &noLongerActive) {
 
 
 void document::store() const {
+    if(!doLoadAndStore) return;
+    document::serializeFull=true; //this is public attribute, just to be sure that here saving is complete
     std::string storePath=basePath+std::to_string(id)+".dat";
     std::ofstream out{storePath, std::ios::out | std::ios::trunc};
     if(out.good()) {
@@ -479,6 +483,7 @@ void document::store() const {
 }
 
 bool document::load() {
+    if(!doLoadAndStore) return false;
     std::ifstream input{basePath+std::to_string(id)+".dat", std::ios::in};
     if(input.good()){
         try {
@@ -516,8 +521,8 @@ bool document::operator!=(const document &rhs) const {
     return !(rhs == *this);
 }
 
-int document::countsNumLines() const{
-    int numLines=0;
+unsigned int document::countsNumLines() const{
+    unsigned numLines=0;
     for(size_t i=0;i<symbols.size();i++){
         if(symbols[i][0]!=emptySymbol)
             numLines++;
@@ -596,7 +601,7 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 }
 
 std::pair<unsigned int, unsigned int>
-document::findEndPosition(int lines,symbol lastSymbol) const {
+document::findEndPosition(unsigned int lines, const symbol &lastSymbol) const {
     std::pair<int,int> ind;
     if(lastSymbol.getCh()=='\r'){
         ind={lines,0};
@@ -608,7 +613,7 @@ document::findEndPosition(int lines,symbol lastSymbol) const {
 }
 
 
-int document::findInsertInLine(const symbol ch, const std::vector<Symposium::symbol> vector,int line) const {
+int document::findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const {
     int ind=0;
     int left=0;
     int right= countCharsInLine(line)-1;
@@ -706,29 +711,29 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 
 }
 
-unsigned int document::findIndexInLine(const symbol &symbol, const std::vector<Symposium::symbol> vector,int dimLine) const {
+unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symbol> &vector, unsigned int dimLine) const {
     int left=0;
     int right=dimLine-1;
     int mid;
 
-    if(vector[0]==emptySymbol||symbol<vector[left]){
+    if(vector[0]==emptySymbol || sym < vector[left]){
         return left;
-    } else if(symbol>vector[right]){
+    } else if(sym > vector[right]){
         return this->countsNumLines();
     }
     while(left+1<right){
         mid=floor(left+(right-left)/2);
 
-        if(symbol==vector[mid]){
+        if(sym == vector[mid]){
             return mid;
-        } else if(symbol>vector[mid]){
+        } else if(sym > vector[mid]){
             left=mid;
         } else{
             right=mid;
         }
     }
 
-    if(symbol==vector[left]){
+    if(sym == vector[left]){
         return left;
     }
 
@@ -748,7 +753,8 @@ void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned in
    }
 }
 
-void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId,unsigned int newRow,unsigned int newCol,symbol symb,bool ins) {
+void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol,
+                                    const symbol &symb, bool ins) {
     for(auto& i: activeUsers){
         // On the same line, there are cursors with different siteId
         if(symb.getCh()!='\r' && i.second.row==newRow && i.second.col>newCol && i.first->getSiteId()!=targetSiteId){

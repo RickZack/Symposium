@@ -40,7 +40,9 @@
 
 using namespace Symposium;
 
-SymClient::SymClient(): loggedUser("username", "P@assW0rd!!", "noempty", "", 0, nullptr), activeFile(), activeDoc(), userColors(), unanswered(){
+SymClient::SymClient(): loggedUser("username", "P@assW0rd!!", "noempty", "", 0, nullptr),
+                        activeFile(), activeDoc(), userColors(), unanswered(){
+    document::doLoadAndStore=false;
 }
 
 void SymClient::setLoggedUser(const user &loggedUser) {
