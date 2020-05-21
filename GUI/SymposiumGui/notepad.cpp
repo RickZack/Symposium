@@ -275,6 +275,9 @@ Symposium::uint_positive_cnt::type notepad::getId()
 notepad::~notepad()
 {
     delete ui;
+    #ifdef DISPATCHER_ON
+    cl.closeSource(this->documentId);
+    #endif
 }
 
 
@@ -593,12 +596,12 @@ void notepad::fillTextEdit(){
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
     QString ch;
-    std::vector<std::vector<Symposium::symbol>> symbols;
+    //std::vector<std::vector<Symposium::symbol>> symbols;
     /* save in symbols all the symbols contained in the document */
     #ifdef DISPATCHER_ON
-    symbols= this->doc.getSymbols();
+    auto& symbols= this->doc.getSymbols();
     #else
-    symbols= this->documentoProva.getSymbols();
+    auto& symbols= this->documentoProva.getSymbols();
     #endif
     if(symbols[0][0].getCh()==emptyChar){
         QColor black=Qt::black;
@@ -762,9 +765,6 @@ void notepad::closeEvent(QCloseEvent *event){
         if(isLastNotepadOpened())
             showParent();
     }
-    #ifdef DISPATCHER_ON
-    cl.closeSource(this->documentId);
-    #endif
 }
 
 void notepad::resizeEvent(QResizeEvent *event)

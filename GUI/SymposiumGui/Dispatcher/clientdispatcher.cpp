@@ -522,7 +522,6 @@ uint_positive_cnt::type clientdispatcher::getOpenFileID(){
 }
 
 void clientdispatcher::closeConnection(){
-    this->winmanager.closeAllNotepads();
     this->socket.close();
 }
 
