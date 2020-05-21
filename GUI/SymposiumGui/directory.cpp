@@ -20,7 +20,7 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     str=cl.showHome();
     path = "./";
     qDebug() << "prima della manipolazione str: " << QString::fromStdString(str);
-    str = manipulationHome(str);
+    str = manipulationPath(str);
     #else
     str="directory 1 Folder1\n file 9 Folder1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
     #endif
@@ -42,7 +42,7 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 }
 
-std::string directory::manipulationHome(std::string& s){
+std::string directory::manipulationPath(std::string& s){
     std::string result;
     std::string estratta;
     std::size_t found;
@@ -447,16 +447,10 @@ void directory::successCreate(){
         temp.erase(found+1,temp.size());
         this->str = cl.getStr(this->actualId, temp);
     }
-    this->str = manipulationHome(this->str);
-    //std::string new_str;
-    //if(str.empty()){new_str="directory "+id+' '+name.toStdString()+'\n';}
-    //        else{new_str=" directory "+id+' '+name.toStdString()+'\n';}
-    //qDebug() << "new_str: " << QString::fromStdString(new_str) << " name: " << name << " " << QString::fromStdString(str);
-    //str=str+new_str;
+    this->str = manipulationPath(this->str);
     ui->myListWidget->clear();
     int count=number_elements(str);
     listGenerate(str,count);
-
 }
 
 
@@ -691,7 +685,7 @@ notepad* directory::successNewSource(){
         temp.erase(found+1,temp.size());
         this->str = cl.getStr(this->actualId, temp);
     }
-    this->str = manipulationHome(this->str);
+    this->str = manipulationPath(this->str);
     ui->myListWidget->clear();
     int count=number_elements(str);
     listGenerate(str,count);
@@ -735,7 +729,7 @@ void directory::on_back_button_clicked()
             actualId = "0";
             previousId = "0";
             str=cl.showHome();
-            str = manipulationHome(str);
+            str = manipulationPath(str);
             ui->back_button->hide();
         }else{
             actualId = previousId;
@@ -751,7 +745,7 @@ void directory::on_back_button_clicked()
             }
             temp = temp + "/";
             str=cl.getStr(this->actualId, temp);
-            str = manipulationHome(str);
+            str = manipulationPath(str);
         }
         ui->myListWidget->clear();
         int count=number_elements(str);
@@ -802,13 +796,13 @@ void directory::successRename(){
     //aggiorniamo la stringa del contenuto in modo che ci sia il nuovo nome della directory
     if(this->actualId=="0"){
         str = cl.showHome();
-        str = manipulationHome(str);
+        str = manipulationPath(str);
     }else{
         std::string temp = path;
         temp.erase(temp.end()-1);
         temp.erase(temp.find_last_of("/")+1,temp.size());
         str=cl.getStr(this->actualId, temp);
-        str = manipulationHome(str);
+        str = manipulationPath(str);
     }
 
     ui->myListWidget->clear();
@@ -847,7 +841,7 @@ void directory::openSelectedSource(){
              // open the folder Window
              #ifdef DISPATCHER_ON
              str=cl.getStr(this->actualId, this->path);
-             str = manipulationHome(str);
+             str = manipulationPath(str);
              path+=actualId+'/';
              #else
              std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
@@ -862,7 +856,7 @@ void directory::openSelectedSource(){
              ui->myListWidget->setFixedWidth(270);
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
              title=QString::fromStdString(nameSource);
-             std::string id=idPriv.first;
+             this->selectedId=idPriv.first;
              this->initialPriv=idPriv.second;
              // The user has to choose the privilege:
              this->showPrivilegeButtons();
@@ -876,14 +870,6 @@ void directory::openSelectedSource(){
              else{
                  priv= Symposium::privilege::owner;
              }
-
-
-             // I have to open the choosepriv first
-             //chooseprivWindow = new choosepriv(this, this->path, id, initialPriv, this->cl);
-             #ifdef DISPATCHER_ON
-             //cl->setchoosepriv(chooseprivWindow);
-             #endif
-             //chooseprivWindow->show();
          }else{
              // it is a SymLink
              // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
@@ -933,7 +919,7 @@ void directory::on_OkPriv_clicked()
         privOpen= Symposium::privilege::owner;
     waitingFunction();
     #ifdef DISPATCHER_ON
-    cl.openSource(this->path,this->id,this->priv);
+    cl.openSource(this->path,this->selectedId,this->priv);
     #else
     priv=Symposium::privilege::owner;
     hideAll();

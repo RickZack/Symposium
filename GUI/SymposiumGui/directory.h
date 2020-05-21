@@ -180,7 +180,7 @@ private:
     int openFolders=-1;
 
     /**
-     * @brief path is the path that shows all the folders visited
+     * @brief path is the path that shows all the folders visited like a sequence of folder-id, separate of "/"
      */
     std::string path;
     /**
@@ -188,7 +188,7 @@ private:
      */
     std::string previousId;
     /**
-     * @brief actualId is the id referred to the opened window. Useful to build the path.
+     * @brief actualId is the id referred to the opened folder. Useful to build the path.
      */
     std::string actualId;
 
@@ -199,6 +199,12 @@ private:
     std::string id;
     // this variable is used to count the number of elements created
     int count;
+
+    /**
+     * @brief selectedId is the ID of selected file.
+     */
+    std::string selectedId;
+
     std::string separate_word(std::string& string);
     Symposium::privilege priv=Symposium::privilege::none;
     Symposium::privilege privOpen=Symposium::privilege::none;
@@ -251,7 +257,7 @@ private:
 
     void contextMenuEvent(QContextMenuEvent *event) override;
 
-    std::string manipulationHome(std::string& s);
+    std::string manipulationPath(std::string& s);
 
     /**
      * @brief quit from application
