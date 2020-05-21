@@ -109,7 +109,10 @@ void directory::success(){
         successOpen();
         break;
     }
+        default:
+            break;
     }
+    lastChoice=noAction;
 }
 
 void directory::failure(const QString& toPrint){
@@ -649,10 +652,10 @@ void directory::on_pushButton_4_clicked()
     lastChoice = createNewSource;
     disableStyleButtons();
     pressed=true;
-    this->title = ui->name_2->text();
+    this->curResName = ui->name_2->text();
     waitingFunction();
     #ifdef DISPATCHER_ON
-    cl.createNewSource(this->path,title.toStdString());
+    cl.createNewSource(this->path,curResName.toStdString());
     #else
     // DA RIMUOVERE
     w->close();
@@ -696,10 +699,12 @@ notepad* directory::successNewSource(){
     listGenerate(str,count);
     //open the newly created document
     notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
-    nw->setWindowTitle(title);
+    nw->setWindowTitle(curResName);
     goToWindow(*nw);
     nw->showLabels();
     nw->fixAlignment();
+    //To make notepad's title change when renaming the file
+    QObject::connect(this, SIGNAL(resNameChanged(Symposium::uint_positive_cnt::type, const QString&)), nw, SLOT(modifyWinTitle(Symposium::uint_positive_cnt::type, const QString&)));
     return nw;
 }
 
@@ -776,14 +781,15 @@ void directory::on_okButton_clicked()
     lastChoice = rename;
     disableStyleButtons();
     pressed=true;
-    QString newName=ui->renameLabel->text();
+    curResName=ui->renameLabel->text();
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
          std::string oldName=items->text().toStdString();
-         std::string id=searchForId(oldName,str,count);
+         std::string sId=searchForId(oldName, str, count);
+         curResId=std::stoul(sId);
          waitingFunction();
          #ifdef DISPATCHER_ON
-         cl.renameResource(this->path,id, newName.toStdString());
+         cl.renameResource(this->path, sId, curResName.toStdString());
          #else
          enableStyleButtons();
          w->close();
@@ -813,6 +819,8 @@ void directory::successRename(){
     ui->myListWidget->clear();
     int count=number_elements(str);
     listGenerate(str,count);
+    //make the right notepad window's title change
+    emit resNameChanged(curResId, curResName);
 }
 
 void directory::errorConnectionLogout(){
@@ -831,7 +839,6 @@ void directory::on_myListWidget_itemDoubleClicked()
 
 void directory::openSelectedSource(){
     hideAll();
-    title="";
     // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
@@ -860,7 +867,7 @@ void directory::openSelectedSource(){
          {
              ui->myListWidget->setFixedWidth(270);
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
-             title=QString::fromStdString(nameSource);
+             curResName=QString::fromStdString(nameSource);
              this->selectedId=idPriv.first;
              this->initialPriv=idPriv.second;
              // The user has to choose the privilege:
@@ -944,12 +951,17 @@ void directory::on_OkPriv_clicked()
 
 void directory::successOpen(){
     notepad* notepadWindow= new notepad(nullptr,priv,privOpen,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
-    notepadWindow->setWindowTitle(title);
+    //TODO: sarebbe meglio passare al costruttore le informazioni al costruttore e nella classe notepad chiamare le varie
+    // setTitle, showLabels, ecc..
+    notepadWindow->setWindowTitle(curResName);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
     notepadWindow->fixAlignment();
+    //TODO: ad esempio la setreadonly potrebbe essere chiamata da notepad, ed essere quinid un afunzione privata
     if(privOpen==Symposium::privilege::readOnly)
         notepadWindow->setreadonly();
+    //To make notepad's title change when renaming the file
+    QObject::connect(this, SIGNAL(resNameChanged(Symposium::uint_positive_cnt::type, const QString&)), notepadWindow, SLOT(modifyWinTitle(Symposium::uint_positive_cnt::type, const QString&)));
 }
 
 void directory::enableButtonsAfter()

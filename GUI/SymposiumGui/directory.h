@@ -35,7 +35,8 @@ class directory : public QMainWindow, public SymChildWinInterface
         remove,
         rename,
         createNewSource,
-        openSource
+        openSource,
+        noAction
     };
 
 public:
@@ -94,6 +95,9 @@ public:
      * @return
      */
     void successOpen();
+
+    signals:
+    void resNameChanged(Symposium::uint_positive_cnt::type resId, const QString& newName);
 
 public slots:
     void enableButtonsAfter();
@@ -168,10 +172,18 @@ private slots:
 
 private:
     Ui::directory *ui;
+    //TODO: cosa è? a che serve?
     QListWidgetItem *item1;
-    action lastChoice;
+    /*
+     * Variables related to success()
+     */
+    action lastChoice;                              /**< indicates the last action requested to the server */
+    Symposium::uint_positive_cnt::type curResId;    /**< resId of the currently selected resource, for an action has been requested */
+    QString curResName;                             /**< resName of the currently selected resource, for an action has been requested */
+
+
     waiting *w;
-    QString title;
+    //TODO: spiegare come è usato, a cosa serve
     bool pressed=false;
 
     /**
@@ -192,9 +204,10 @@ private:
      */
     std::string actualId;
 
+    //TODO: a che serve la password? Abbiamo fatto apposta a non memorizzarla mai in chiaro dentro user, perchè qui la teniamo?
     std::string pwd;
+    //TODO: a che servono? Nomi meno generici
     std::string str;
-    std::string old_str;
     int countDir;
     std::string id;
     // this variable is used to count the number of elements created

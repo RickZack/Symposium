@@ -1528,3 +1528,8 @@ void notepad::setreadonly()
     ui->styleBox->hide();
 }
 
+void notepad::modifyWinTitle(Symposium::uint_positive_cnt::type resId, const QString& newName) {
+    if(fileId==resId)
+        this->setWindowTitle(newName);
+}
+

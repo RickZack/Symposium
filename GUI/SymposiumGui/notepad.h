@@ -137,6 +137,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void modifyWinTitle(Symposium::uint_positive_cnt::type resId, const QString& newName);
+
 private:
     Ui::notepad *ui;
     QString mFilename;
