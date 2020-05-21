@@ -687,7 +687,7 @@ notepad* directory::successNewSource(){
     }
     this->str = manipulationPath(this->str);
     ui->myListWidget->clear();
-    int count=number_elements(str);
+    this->count=number_elements(str);
     listGenerate(str,count);
     //open the newly created document
     notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
