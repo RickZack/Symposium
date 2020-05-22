@@ -21,5 +21,11 @@ about::~about()
 void about::on_ok_clicked()
 {
     this->close();
+
+}
+
+void about::closeEvent(QCloseEvent *e) {
+    emit ui->ok->click();
+    QDialog::closeEvent(e);
 }
 

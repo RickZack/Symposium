@@ -15,6 +15,7 @@ class about : public QDialog
 public:
     explicit about(QWidget *parent);
     ~about() override;
+    void closeEvent(QCloseEvent* e) override;
 
 private slots:
     /**

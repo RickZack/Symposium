@@ -13,6 +13,7 @@ class notification : public QDialog
 
 public:
     explicit notification(QWidget *parent = nullptr, QString str="");
+    void closeEvent(QCloseEvent * e) override;
     ~notification();
 
 private:

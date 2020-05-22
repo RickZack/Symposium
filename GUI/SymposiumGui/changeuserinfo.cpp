@@ -108,15 +108,21 @@ void changeUserInfo::confirm_click()
     newpass=pwd;
     QString username = ui->username->text();
     QString nickname = ui->nickname->text();
-    disableButtons();
-    disableStyleButtons();
-    waiting();
     pressed=true;
     //------------------------------------------------------------------PARTE DA DECOMMENTARE
     #ifdef DISPATCHER_ON
     QString imagine = QString::fromStdString(img);
-    Symposium::user usNew(username.toStdString(), pwd, nickname.toStdString(), img, us.getSiteId(), us.getHome());
-    cl.editUser(usNew);
+    if(nickname.isEmpty()){
+        ui->error->setText("You must have a nickname!");
+        ui->error->show();
+    }
+    else {
+        Symposium::user usNew(username.toStdString(), pwd, nickname.toStdString(), img, us.getSiteId(), us.getHome());
+        disableButtons();
+        disableStyleButtons();
+        waiting();
+        cl.editUser(usNew);
+    }
     #endif
     //------------------------------------------------------------------
 
