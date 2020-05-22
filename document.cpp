@@ -343,7 +343,7 @@ char document::retrieveStrategy(int level){
 }
 
 
-int document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const {
+unsigned document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const {
     uint_positive_cnt::type boundary=10;
     if((id2-id1)<boundary){
         id1+=1;
@@ -545,7 +545,6 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 
 
     // check if struct is empty or char is less than first char
-    //if (totalLines==0||symbol.getCh()<symbols[0][0].getCh() & symbol.getCh()!='\r') {ind={i0,i1};return ind;}
     if(totalLines==0 || symbol<symbols[0][0]){ind={0,0}; return ind;}
     int numCharsInLine=countCharsInLine(maxLine);
     auto lastSymbol=lastLine[numCharsInLine-1];
@@ -605,8 +604,8 @@ document::findEndPosition(unsigned int lines, const symbol &lastSymbol) const {
 }
 
 
-int document::findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const {
-    int ind=0;
+unsigned document::findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const {
+    unsigned ind=0;
     int left=0;
     int right= countCharsInLine(line)-1;
     int mid;
@@ -795,6 +794,12 @@ std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVer
     return indexes;
 }
 
+void document::countChars(){
+    unsigned lines= this->countsNumLines();
+    for (size_t i=0;i<lines-1;i++){
+        this->numchar+=this->countCharsInLine(i)-1;
+    }
+}
 
 
 

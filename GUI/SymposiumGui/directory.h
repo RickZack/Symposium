@@ -172,8 +172,7 @@ private slots:
 
 private:
     Ui::directory *ui;
-    //TODO: cosa è? a che serve?
-    QListWidgetItem *item1;
+
     /*
      * Variables related to success()
      */
@@ -206,11 +205,20 @@ private:
 
     //TODO: a che serve la password? Abbiamo fatto apposta a non memorizzarla mai in chiaro dentro user, perchè qui la teniamo?
     std::string pwd;
-    //TODO: a che servono? Nomi meno generici
+
+    /**
+     * @brief str is a string that contains the list of all the files
+     */
     std::string str;
     int countDir;
+    /**
+     * @brief id related to the file
+     */
     std::string id;
-    // this variable is used to count the number of elements created
+
+    /**
+     * @brief count to count the number of elements created
+     */
     int count;
 
     /**

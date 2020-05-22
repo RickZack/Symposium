@@ -78,8 +78,6 @@ namespace Symposium {
         std::vector<std::vector<symbol>> symbols;                                       /**< container of characters and metadata for CRDT*/
         std::forward_list<std::pair<const user *, sessionData>> activeUsers;            /**< list of users currently active on the document, with the current privilege*/
         std::vector<std::pair<alignType,unsigned>> alignmentStyle;                      /**< vector that contains for each row the alignment left/right/center/justify and the style index */
-        //TODO: bisogna implementare il conteggio dei caratteri. Come in un normale editor, bisogna mostrare il
-        // numero di caratteri presenti del documento. La GUI potrà usare il getter getNumChar per visualizzare questo numero
         unsigned numchar;                                                               /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
@@ -251,15 +249,14 @@ namespace Symposium {
         std::pair<unsigned int, unsigned int>
         findEndPosition(unsigned int lines, const symbol &lastSymbol) const;
 
-        //TODO: non si capisce cosa ritorna. Se sai che sarà sicuramente un num. positivo
-        // torna un unsigned e non un int
+
         /**
-         * @brief it searches for the symbol that is inserted in the middle of the line
+         * @brief it searches the position in a line for the symbol that has to be inserted throught the RemoteInsert operation
          * @param ch symbol
          * @param vector line in which the symbol is searched
-         * @return
+         * @return the index in the line at which the symbol is
          */
-        int findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const;
+        unsigned findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const;
 
         /**
          * @brief it searches for the position of a symbol in order to find it and eliminate it
@@ -268,22 +265,28 @@ namespace Symposium {
          */
         std::pair<unsigned int, unsigned int> findPosition(const symbol &symbol) const;
 
-        //TODO: documentazione mancante
+        /**
+         * @brief findIndexInLine searches the position in a line for the symbol that has to be deleted throught the RemoteDelete operation
+         * @param sym symbol that has to be deleted
+         * @param vector corresponds to the line in which the symbol is
+         * @param charsInLine the number of the chars in Line
+         * @return
+         */
         unsigned int findIndexInLine(const symbol &sym, const std::vector<symbol> &vector, unsigned int charsInLine) const;
 
-        //TODO: la documentazione va in contrasto con il tipo di ritorno. Torni una posizione o un simbolo?
+
         /**
          * @brief searches the position before the one of the considered value
          * @param pair the indexes
-         * @return the searched position
+         * @return the symbol. If there no exists a previous symbol, it returns an emptySymbol
          */
         symbol findPosBefore(const std::pair<unsigned int, unsigned int> &pair) const;
 
-        //TODO: la documentazione va in contrasto con il tipo di ritorno. Torni una posizione o un simbolo?
+
         /**
          * @brief searches the position after the one of the considered value
          * @param pair the indexes
-         * @return the searched position
+         * @return the symbol. If there no exists a following symbol, it returns an empty Symbol
          */
         symbol findPosAfter(const std::pair<unsigned int, unsigned int> &pair) const;
 
@@ -298,16 +301,15 @@ namespace Symposium {
                            const symbol &b,
                            const symbol &a);
 
-        //TODO: non si capisce cosa ritorna. Se sai che sarà sicuramente un num. positivo
-        // torna un unsigned e non un int
+
         /**
-         * @brief finds the id of the symbol inserted in between two other onws
+         * @brief finds the a correct value for the position of a symbol inserted between other two symbols
          * @param id1
          * @param id2
          * @param boundaryStrategy
          * @return
          */
-        int generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const;
+        unsigned generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const;
 
         /**
          * @brief it modifies the @e strategy parameter
@@ -325,6 +327,11 @@ namespace Symposium {
          * @param ins     to understand if the action is an insertion or a remove
          */
         void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol, const symbol &symb, bool ins);
+
+        /**
+         * @brief countChars counts the number of chars inside the document
+         */
+        void countChars();
     };
 }
 
