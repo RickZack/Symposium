@@ -23,10 +23,6 @@ public:
     ~exit();
 
 private slots:
-    /**
-     * @brief perform close connection if it is necessary
-     */
-    void doLogout();
 
     void on_ok_clicked();
 
