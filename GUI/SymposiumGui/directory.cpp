@@ -666,7 +666,7 @@ void directory::on_pushButton_4_clicked()
          // OK dal dispatcher, posso creare il nuovo documento
     {
         count++;
-        std::string new_str=" file "+id+' '+title.toStdString()+'\n';
+        std::string new_str=" file "+id+' '+curResName.toStdString()+'\n';
         str=str+new_str;
         ui->myListWidget->clear();
         int count=number_elements(str);
@@ -794,7 +794,7 @@ void directory::on_okButton_clicked()
          enableStyleButtons();
          w->close();
          pressed=false;
-         items->setText(newName);
+         items->setText(curResName);
          ui->myListWidget->currentItem()->setSelected(false);
          hideAll();
          #endif
@@ -940,7 +940,7 @@ void directory::on_OkPriv_clicked()
     w->close();
     Symposium::document d;
     notepad* notepadWindow= new notepad(nullptr,priv,privOpen,path,d,0, *this);
-    notepadWindow->setWindowTitle(title);
+    notepadWindow->setWindowTitle(curResName);
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
     notepadWindow->fixAlignment();
