@@ -96,8 +96,8 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
         Symposium::Color rosso(255,0,0);
         const std::string ft="Times New Roman";
         unsigned size=9;
-        Symposium::format f(ft,false,false,false,size,nero,6,1);
-        Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,3);
+        Symposium::format f(ft,false,false,false,size,nero,6,Symposium::alignType::left);
+        Symposium::format f1("Times New Roman",true,true,false,9,rosso,0,Symposium::alignType::right);
 
         //Ciao
         s1.setCharFormat(f1);
@@ -180,7 +180,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
             Symposium::Color colore(200,30,0);
             const std::string ft1="Lucida Console";
             unsigned size2=9;
-            Symposium::format fn1(ft1,false,false,true,size2,colore,3,2);
+            Symposium::format fn1(ft1,false,false,true,size2,colore,3,Symposium::alignType::center);
             sn1.setCharFormat(fn1);
             sn2.setCharFormat(fn1);
             sn3.setCharFormat(fn1);
@@ -382,6 +382,7 @@ void notepad::on_actionAlignTextLeft_triggered()
 {
     textAlign(ui->actionAlignTextLeft);
     this->type=1;
+    this->alignment=Symposium::alignType::left;
     ui->textEdit->scroll();
 }
 
@@ -389,6 +390,7 @@ void notepad::on_actionAlignCenter_triggered()
 {
     textAlign(ui->actionAlignCenter);
     this->type=2;
+    this->alignment=Symposium::alignType::center;
     ui->textEdit->scroll();
 }
 
@@ -396,6 +398,7 @@ void notepad::on_actionAlignCenter_triggered()
 void notepad::on_actionAlignTextRight_triggered()
 {
    textAlign(ui->actionAlignTextRight);
+   this->alignment=Symposium::alignType::right;
    this->type=3;
    ui->textEdit->scroll();
 }
@@ -404,6 +407,7 @@ void notepad::on_actionAlignTextJustify_triggered()
 {
     textAlign(ui->actionAlignTextJustify);
     this->type=4;
+    this->alignment=Symposium::alignType::left;
     ui->textEdit->scroll();
 }
 
@@ -653,7 +657,7 @@ void notepad::fillTextEdit(){
 void notepad::fixAlignment(){
     /* save in the alignmentStyle the vector that defines for each row its style */
     insertOthCh=true;
-    std::vector<std::pair<Symposium::align,unsigned>> alignmentStyle;
+    std::vector<std::pair<Symposium::alignType,unsigned>> alignmentStyle;
     #ifdef DISPATCHER_ON
     alignmentStyle=this->doc.getAlignmentStyle();
     #else
@@ -666,20 +670,20 @@ void notepad::fixAlignment(){
     int column=curs.positionInBlock();
 
     for(size_t i=0;i<alignmentStyle.size();i++){
-        std::pair<Symposium::align,unsigned> style=alignmentStyle[i];
+        std::pair<Symposium::alignType,unsigned> style=alignmentStyle[i];
         curs.movePosition(QTextCursor::Start);
         curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,i);
         ui->textEdit->setTextCursor(curs);
-        if(style.first==Symposium::align::left){
+        if(style.first==Symposium::alignType::left){
             this->textAlign(ui->actionAlignTextLeft);
             this->textStyle(style.second);}
-        else if(style.first==Symposium::align::right){
+        else if(style.first==Symposium::alignType::right){
              this->textAlign(ui->actionAlignTextRight);
              this->textStyle(style.second);}
-        else if(style.first==Symposium::align::center){
+        else if(style.first==Symposium::alignType::center){
              this->textAlign(ui->actionAlignCenter);
              this->textStyle(style.second);}
-        else if (style.first==Symposium::align::justify){
+        else if (style.first==Symposium::alignType::justify){
              this->textAlign(ui->actionAlignTextJustify);
              this->textStyle(style.second);}
         else{
@@ -1001,7 +1005,7 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     int red=col.red();
     int green=col.green();
     Symposium::Color myCol(red,green,blue);
-    Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->type};
+    Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
 
     // set the alignment values to zero default value
     this->indexStyle=0;
@@ -1057,7 +1061,7 @@ void notepad::contV_action(){
         int red=col.red();
         int green=col.green();
         Symposium::Color myCol(red,green,blue);
-        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->type};
+        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
 
         // set the alignment values to zero default value
         this->indexStyle=0;

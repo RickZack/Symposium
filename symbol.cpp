@@ -51,7 +51,7 @@ symbol::symbol(wchar_t ch, int siteId, int counter, const std::vector<int> &pos,
                                                                                                   counter(counter), pos(pos), verified(verified) {}
 template<class Archive>
 void format::serialize(Archive &ar, const unsigned int){
-    ar & familyType & isBold & isUnderlined & isItalic & size & col &indexStyle &type/*&left &right &center &justify*/;
+    ar & familyType & isBold & isUnderlined & isItalic & size & col &indexStyle &type;
 };
 BOOST_CLASS_EXPORT(Symposium::format);
 

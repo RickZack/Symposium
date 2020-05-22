@@ -72,20 +72,12 @@ namespace Symposium {
         }
     };
 
-    enum class align{
-        left,                           /**< to declare that the row has a left alignment */
-        right,                          /**< to declare that the row has a right alignment */
-        center,                         /**< to declare that the row has a center alignment */
-        justify,                        /**< to declare that the row has a justified alignment */
-        emptyAlignment
-    };
-
     class document {
         static uint_positive_cnt idCounter;                                             /**< id to be assigned to the next created document */
         uint_positive_cnt::type id;                                                     /**< unique identifier for the document */
         std::vector<std::vector<symbol>> symbols;                                       /**< container of characters and metadata for CRDT*/
         std::forward_list<std::pair<const user *, sessionData>> activeUsers;            /**< list of users currently active on the document, with the current privilege*/
-        std::vector<std::pair<align,unsigned>> alignmentStyle;                          /**< vector that contains for each row the alignment left/right/center/justify and the style index */
+        std::vector<std::pair<alignType,unsigned>> alignmentStyle;                      /**< vector that contains for each row the alignment left/right/center/justify and the style index */
         //TODO: bisogna implementare il conteggio dei caratteri. Come in un normale editor, bisogna mostrare il
         // numero di caratteri presenti del documento. La GUI potrà usare il getter getNumChar per visualizzare questo numero
         unsigned numchar;                                                               /**< number of printable characters */
@@ -232,7 +224,7 @@ namespace Symposium {
         void checkIndex(unsigned int i0, unsigned int i1);
 
 
-        const std::vector<std::pair<align, unsigned int>> & getAlignmentStyle() const;
+        const std::vector<std::pair<alignType, unsigned int>> & getAlignmentStyle() const;
 
     private:
         /**

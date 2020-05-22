@@ -72,13 +72,13 @@ bool included(unsigned ind0, unsigned ind){
 
 
 
-const std::vector<std::pair<align, unsigned int>> & document::getAlignmentStyle() const
+const std::vector<std::pair<alignType, unsigned int>> & document::getAlignmentStyle() const
 {
     return alignmentStyle;
 }
 
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)),
-    alignmentStyle(1,std::pair(align::emptyAlignment,0))
+    alignmentStyle(1,std::pair(alignType::emptyAlignment,0))
 {
     id=idCounter;
     idCounter++;
@@ -124,7 +124,7 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
 
     /* resize the alignmentStyle vector */
     if(i0>=alignmentStyle.size()){
-        alignmentStyle.resize((i0+1)*mult_fac,std::pair(align::emptyAlignment,0));
+        alignmentStyle.resize((i0+1)*mult_fac,std::pair(alignType::emptyAlignment,0));
     }
 
 }
@@ -143,12 +143,9 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     newSymb.setCharFormat(charFormat);
 
     /* set the alignmentStyle vector */
-    std::pair<align,unsigned> styleValues;
-    if(charFormat.type==1){styleValues={align::left,charFormat.indexStyle};}
-    else if(charFormat.type==2){styleValues={align::right,charFormat.indexStyle};}
-    else if(charFormat.type==3){styleValues={align::center,charFormat.indexStyle};}
-    else{styleValues={align::justify,charFormat.indexStyle};}
-    if(alignmentStyle[i0].first==align::emptyAlignment){
+    std::pair<alignType,unsigned> styleValues;
+    styleValues={charFormat.type,charFormat.indexStyle};
+    if(alignmentStyle[i0].first==alignType::emptyAlignment){
       alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
     }
 
@@ -347,7 +344,7 @@ char document::retrieveStrategy(int level){
 
 
 int document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const {
-    int boundary=10;
+    uint_positive_cnt::type boundary=10;
     if((id2-id1)<boundary){
         id1+=1;
     }else{
@@ -383,10 +380,9 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
 
 
 
-std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
+std::pair<unsigned, unsigned> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
 
-
-    std::pair<int,int> indexes=findInsertIndex(toInsert);
+    std::pair<unsigned,unsigned> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
     // I have to handle the position of the following cursors
@@ -401,15 +397,11 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
 
     /* set the alignmentStyle vector */
     format charFormat=toInsert.getCharFormat();
-    std::pair<align,unsigned> styleValues;
-    if(charFormat.type==1){styleValues={align::left,charFormat.indexStyle};}
-    else if(charFormat.type==2){styleValues={align::right,charFormat.indexStyle};}
-    else if(charFormat.type==3){styleValues={align::center,charFormat.indexStyle};}
-    else{styleValues={align::justify,charFormat.indexStyle};}
-    if(alignmentStyle[i0].first==align::emptyAlignment){
+    std::pair<alignType,unsigned> styleValues;
+    styleValues={charFormat.type,charFormat.indexStyle};
+    if(alignmentStyle[i0].first==alignType::emptyAlignment){
       alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
     }
-
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
 

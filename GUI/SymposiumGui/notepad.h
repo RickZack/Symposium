@@ -157,6 +157,7 @@ private:
     QColor colPos;
     bool okPaste=false;
     int dim;
+    Symposium::alignType alignment=Symposium::alignType::left;
 
     unsigned indexStyle;                                                /**< to set the index for the style */                                                              
     /**
