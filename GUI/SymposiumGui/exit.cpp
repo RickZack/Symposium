@@ -13,6 +13,7 @@ exit::exit(QWidget *parent, bool logout, Symposium::clientdispatcher *cl) :
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
+
 }
 
 exit::~exit()
@@ -20,17 +21,11 @@ exit::~exit()
     delete ui;
 }
 
-void exit::doLogout()
-{
-    if(logout)
-    {
-        cl->closeConnection();
-    }
-}
-
 
 void exit::on_ok_clicked()
 {
-    doLogout();
-    qApp->quit();
+    if(logout)
+        cl->closeApp();
+    else
+        qApp->quit();
 }

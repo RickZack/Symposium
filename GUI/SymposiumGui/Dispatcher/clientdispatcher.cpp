@@ -40,10 +40,9 @@
 
 using namespace Symposium;
 
-clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent)
+clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), appIsClosing(false)
 {
     this->client.setClientDispatcher(this);
-    this->userpwd = "";
     connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::TimerExpired);
 }
 
@@ -99,7 +98,12 @@ void clientdispatcher::readyRead(){
     boost::archive::text_iarchive ia(accumulo);
     ia >> mes;
     try {
-        mes->invokeMethod(this->client);
+        /*
+         * When the app is closing no need to notify the user with action's outcome.
+         * Can be dangerous to do so because is case of logout a success() invocation is expected to happen
+         */
+        if(!appIsClosing)
+            mes->invokeMethod(this->client);
     } catch (messageException& e) {
         //eccezione di insuccesso dell'operazione
 
@@ -164,7 +168,8 @@ void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageT
     //inviamo il messaggio
     uscita << byteArray;
     if (uscita.status() != QDataStream::Ok){
-        throw sendFailure();
+        if(!appIsClosing)
+            throw sendFailure();
     }else{
         std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         TimerStart(tempo);
@@ -195,7 +200,7 @@ void clientdispatcher::signUp(const std::string &username, const std::string &pw
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         //chiudiamo la connessione
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -211,7 +216,7 @@ void clientdispatcher::logIn(const std::string &username, const std::string &pwd
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         //chiudiamo la connessione
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -228,7 +233,7 @@ void clientdispatcher::openSource(const std::string &path, const std::string &na
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -241,7 +246,7 @@ void clientdispatcher::openNewSource(const std::string &resourceId, privilege re
         sendMessage(mess, std::stoi(resourceId));
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -254,7 +259,7 @@ void clientdispatcher::createNewSource(const std::string &path, const std::strin
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -267,7 +272,7 @@ void clientdispatcher::createNewDir(const std::string &path, const std::string &
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -280,7 +285,7 @@ void clientdispatcher::localInsert(uint_positive_cnt::type resourceId, const sym
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -293,7 +298,7 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -321,7 +326,7 @@ void clientdispatcher::editPrivilege(const std::string &targetUser, std::string 
         //inviamo il messaggio
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
-        this->closeConnection();
+        this->closeApp();
         if(this->currentWindow==13){
             this->finestraOnlineUser->errorConnectionLogout();
         }else{
@@ -337,7 +342,7 @@ void clientdispatcher::shareResource(const std::string &resPath, const std::stri
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         if(this->currentWindow==8){
             this->finestraActiveCounterLink->errorConnectionLogout();
         }else if(this->currentWindow==9){
@@ -357,7 +362,7 @@ void clientdispatcher::renameResource(const std::string &resPath, const std::str
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -370,7 +375,7 @@ void clientdispatcher::removeResource(const std::string &resPath, const std::str
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -383,7 +388,7 @@ void clientdispatcher::closeSource(uint_positive_cnt::type resourceId) {
         sendMessage(mess, resourceId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -396,7 +401,7 @@ void clientdispatcher::editUser(user &newUserData) {
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -409,7 +414,7 @@ void clientdispatcher::removeUser(const std::string &pwd) {
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -446,7 +451,7 @@ void clientdispatcher::moveMyCursor(uint_positive_cnt::type resId, int block, in
         sendMessage(mess, resId);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-        this->closeConnection();
+        this->closeApp();
         //dobbiamo notificare alla GUI
         this->winmanager.activeWindow().failure("-1");
     }
@@ -521,8 +526,10 @@ uint_positive_cnt::type clientdispatcher::getOpenFileID(){
     return this->openFileID;
 }
 
-void clientdispatcher::closeConnection(){
-    this->socket.close();
+void clientdispatcher::closeApp(){
+    winmanager.closeAllNotepads();
+    appIsClosing=true;
+    qApp->quit();
 }
 
 const std::forward_list<std::pair<const user *, sessionData>> clientdispatcher::onlineUser(uint_positive_cnt::type documentID){
@@ -559,7 +566,11 @@ void clientdispatcher::TimerExpired(){
     this->timer.stop();
     qDebug() << "Timer scaduto\n";
     //chiudiamo la connessione
-    this->closeConnection();
+    this->closeApp();
     //dobbiamo notificare alla GUI.
     this->winmanager.activeWindow().failure("-1");
+}
+
+clientdispatcher::~clientdispatcher() {
+    logout();
 }

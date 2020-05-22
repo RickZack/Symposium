@@ -21,3 +21,8 @@ notification::~notification()
     delete ui;
 }
 
+void notification::closeEvent(QCloseEvent *e) {
+    emit ui->ok->click();
+    QDialog::closeEvent(e);
+}
+

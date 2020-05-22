@@ -99,8 +99,7 @@ void signup::on_signin_clicked()
     QString password = ui->password->text();
     QString nickname =ui->nickname->text();
     pwd=password.toStdString();
-    disableStyleButtons();
-    disableButtons();
+
 
     //--------------------------------------------------------------PARTE DA DECOMENTARE
     #ifdef DISPATCHER_ON
@@ -112,6 +111,8 @@ void signup::on_signin_clicked()
         }
         else
         {
+            disableStyleButtons();
+            disableButtons();
             waiting();
             pressed=true;
             cl.signUp(username.toStdString(), password.toStdString(), nickname.toStdString(), iconPath);

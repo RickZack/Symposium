@@ -104,7 +104,7 @@ namespace Symposium{
         choosepriv* finestraChoosePriv;                 //16
 
         // FINE ELENCO PUNTATORI ALLE FINESTRE
-
+        bool appIsClosing;
     public:
         clientdispatcher(QObject *parent = nullptr);
 
@@ -215,7 +215,10 @@ namespace Symposium{
 
         void successShareResource(std::string path);
 
-        void closeConnection();
+        /**
+         * @brief closes all the notepads, set the state to closing and closes the Qt application
+         */
+        void closeApp();
 
         void successAction();
 
@@ -233,10 +236,12 @@ namespace Symposium{
 
         void updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID);
 
+        ~clientdispatcher() override;
+
     private:
 
         //classe per eccezione
-        class sendFailure{};
+    class sendFailure : public std::exception {};
 
     public slots:
         void readyRead();
