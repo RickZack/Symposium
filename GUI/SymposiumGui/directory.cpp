@@ -758,7 +758,7 @@ void directory::on_back_button_clicked()
             str = manipulationPath(str);
         }
         ui->myListWidget->clear();
-        int count=number_elements(str);
+        this->count=number_elements(str);
         listGenerate(str,count);
         #endif
     }else{
