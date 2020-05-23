@@ -686,18 +686,22 @@ void notepad::fixAlignment(){
             this->textAlign(ui->actionAlignTextLeft);
             this->textStyle(style.second);
             ui->actionAlignTextLeft->setChecked(true);
+            ui->styleBox->setEditText(ui->styleBox->itemText(style.second));
 
         }else if(style.first==Symposium::alignType::right){
              this->textAlign(ui->actionAlignTextRight);
              this->textStyle(style.second);
+             ui->styleBox->setEditText(ui->styleBox->itemText(style.second));
              ui->actionAlignTextRight->setChecked(true);
         }else if(style.first==Symposium::alignType::center){
              this->textAlign(ui->actionAlignCenter);
              this->textStyle(style.second);
+             ui->styleBox->setEditText(ui->styleBox->itemText(style.second));
              ui->actionAlignCenter->setChecked(true);
         }else if (style.first==Symposium::alignType::justify){
              this->textAlign(ui->actionAlignTextJustify);
              this->textStyle(style.second);
+             ui->styleBox->setEditText(ui->styleBox->itemText(style.second));
              ui->actionAlignTextJustify->setChecked(true);
         }
         /*else{
@@ -1343,17 +1347,6 @@ void notepad::on_textEdit_cursorPositionChanged()
 
     QTextCursor cc=ui->textEdit->textCursor();
     QTextCharFormat ch=ui->textEdit->currentCharFormat();
-    Qt::Alignment al=ui->textEdit->alignment();
-    qDebug()<<"Al"<<al;
-    if(al==Qt::AlignLeading)
-        ui->actionAlignTextLeft->setChecked(true);
-    else if(al==Qt::AlignTrailing)
-        ui->actionAlignTextRight->setChecked(true);
-    else if(al==Qt::AlignHCenter)
-        ui->actionAlignCenter->setChecked(true);
-    //else
-        //ui->actionAlignTextJustify->setChecked(true);
-
      if(insertOthCh==false){
         #ifdef DISPATCHER_ON
         ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
