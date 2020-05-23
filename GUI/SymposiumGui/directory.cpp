@@ -250,7 +250,7 @@ std::string directory::separate_word(std::string& string)
     return separato;
 }
 
-std::string directory::generateString(std::string string)
+std::string directory::generateString(std::string& string)
 {
     for(size_t i = 0; i < string.size(); i++)
       if(string[i] == '\n')
@@ -258,7 +258,7 @@ std::string directory::generateString(std::string string)
     return string;
 }
 
-int directory::number_elements(std::string& string)
+int directory::number_elements(const std::string& string)
 {
     int count=0;
     for(size_t i = 0; i < string.size(); i++)
@@ -292,7 +292,7 @@ void directory::on_actionaddfile_triggered()
 }
 
 
-void directory::openWindow(std::string str1){
+void directory::openWindow(const std::string& str1){
     ui->myListWidget->clear();
     int counter=number_elements(str1);
     listGenerate(str1,counter);
@@ -883,17 +883,10 @@ void directory::openSelectedSource(){
                  priv= Symposium::privilege::owner;
              }
          }else{
-             // it is a SymLink
-             // TECNICAMENTE IO DOVREI TROVARE IL PATH E IL NOME ed inviarlo al DISPATCHER
-             // path e nome che ce li ho.
              ui->myListWidget->setFixedWidth(270);
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
              std::string id=idPriv.first;
              std::string initialPriv=idPriv.second;
-             // I have to open the choosepriv first
-             //chooseprivWindow= new choosepriv(this,this->path,this->id,initialPriv);
-             //cl->setchoosepriv(chooseprivWindow)
-             //chooseprivWindow->show();
 
          }
     qDebug() << "str: " << QString::fromStdString(str) << " path: " << QString::fromStdString(path);

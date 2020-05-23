@@ -156,7 +156,6 @@ private slots:
     void on_myListWidget_itemDoubleClicked();
 
 
-
     void on_okButton_2_clicked();
 
     /**
@@ -210,6 +209,7 @@ private:
      * @brief str is a string that contains the list of all the files
      */
     std::string str;
+
     int countDir;
     /**
      * @brief id related to the file
@@ -237,7 +237,7 @@ private:
      * @param string that shows all the info about the sources
      * @return #of elements inside the string
      */
-    int number_elements(std::string& string);
+    int number_elements(const std::string& string);
 
 
     /**
@@ -245,7 +245,7 @@ private:
      * @param string that shows all the info about the sources
      * @return the string without \n
      */
-    std::string generateString(std::string str);
+    std::string generateString(std::string& str);
 
     /**
      * @brief directory::searchForId extracts the id of the selected directory
@@ -273,7 +273,7 @@ private:
      * This is useful to move from a folder to another one
      * @param str1 cointains all the sources inside the attual folder
      */
-    void openWindow(std::string str1);
+    void openWindow(const std::string& str1);
 
 
     void contextMenuEvent(QContextMenuEvent *event) override;

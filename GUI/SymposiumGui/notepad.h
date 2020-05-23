@@ -100,7 +100,7 @@ private slots:
     void on_actionCut_triggered();
     void textFamily(const QString &f);
     void textSize(const QString &p);
-    void textStyle(int styleIndex);
+    QTextListFormat::Style textStyle(int styleIndex);
     void textColor();
     void textAlign(QAction *a);
     void currentCharFormatChanged(const QTextCharFormat &format);
@@ -157,18 +157,10 @@ private:
     QColor colPos;
     bool okPaste=false;
     int dim;
-    Symposium::alignType alignment=Symposium::alignType::left;
-
+    Symposium::alignType alignment=Symposium::alignType::left;          /**< to set the alignment type for the style */
     unsigned indexStyle;                                                /**< to set the index for the style */                                                              
-    /**
-     * @brief type to set the kind of alignment:
-     * if type==1->left alignment
-     * if type==2->right alignment
-     * if type==3->center alignment
-     * if type==4->justified
-     */
-    unsigned type;
-
+    unsigned numChars;                                                  /**< to save the numChars contained in the document */
+    std::string labelChars;                                             /**< to convert the @numChars into a string*/
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void colorChanged(const QColor &c);
     void fontChanged(const QFont &f);

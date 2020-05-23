@@ -82,6 +82,7 @@ document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<
 {
     id=idCounter;
     idCounter++;
+    this->numchar=0;
 }
 
 uint_positive_cnt::type document::getId() const {
@@ -131,6 +132,8 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
 
+    if(toInsert.getCh()!='\r')
+        this->numchar++;
     int i0=indexes.first;
     int i1=indexes.second;
     checkIndex(i0,i1);
@@ -362,10 +365,13 @@ unsigned document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_
 }
 
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId) {
+
     int i0=indexes.first;
     int i1=indexes.second;
     //checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
+    if(sym.getCh()!='\r')
+        this->numchar--;
     //taking into account the position of the cursor.
 
     this->updateOtherCursorPos(siteId,i0,i1,sym,false);
@@ -382,6 +388,8 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
 
 std::pair<unsigned, unsigned> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
 
+    if(toInsert.getCh()!='\r')
+        this->numchar++;
     std::pair<unsigned,unsigned> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
@@ -409,6 +417,8 @@ std::pair<unsigned, unsigned> document::remoteInsert(uint_positive_cnt::type sit
 
 
 std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
+    if(toRemove.getCh()!='\r')
+        this->numchar--;
     std::pair<int,int> pos=findPosition(toRemove);
     int i0=pos.first;
     int i1=pos.second;
@@ -794,12 +804,7 @@ std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVer
     return indexes;
 }
 
-void document::countChars(){
-    unsigned lines= this->countsNumLines();
-    for (size_t i=0;i<lines-1;i++){
-        this->numchar+=this->countCharsInLine(i)-1;
-    }
-}
+
 
 
 

@@ -81,7 +81,6 @@ namespace Symposium {
         unsigned numchar;                                                               /**< number of printable characters */
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
-        int level=0;
         bool loaded;
         static const std::string basePath;
 
@@ -93,7 +92,7 @@ namespace Symposium {
             if(!serializeFull)
                 ar & id;
             else //serialize all the information only when sending or saving onto disk
-                ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy;
+                ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy &alignmentStyle;
         }
     public:
         static const symbol emptySymbol;
@@ -328,10 +327,7 @@ namespace Symposium {
          */
         void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol, const symbol &symb, bool ins);
 
-        /**
-         * @brief countChars counts the number of chars inside the document
-         */
-        void countChars();
+
     };
 }
 

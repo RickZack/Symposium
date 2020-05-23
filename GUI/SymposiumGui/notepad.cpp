@@ -240,7 +240,18 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));
     ui->actionhighlight->setCheckable(true);
 
+
     this->fillTextEdit();
+
+    #ifdef DISPATCHER_ON
+    this->numChars=this->doc.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
+    #else
+    this->numChars=this->documentoProva.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
+    #endif
 
     ui->textEdit->setCursorWidth(3);
 
@@ -381,7 +392,6 @@ void notepad::on_actionColorText_triggered()
 void notepad::on_actionAlignTextLeft_triggered()
 {
     textAlign(ui->actionAlignTextLeft);
-    this->type=1;
     this->alignment=Symposium::alignType::left;
     ui->textEdit->scroll();
 }
@@ -389,7 +399,6 @@ void notepad::on_actionAlignTextLeft_triggered()
 void notepad::on_actionAlignCenter_triggered()
 {
     textAlign(ui->actionAlignCenter);
-    this->type=2;
     this->alignment=Symposium::alignType::center;
     ui->textEdit->scroll();
 }
@@ -399,14 +408,12 @@ void notepad::on_actionAlignTextRight_triggered()
 {
    textAlign(ui->actionAlignTextRight);
    this->alignment=Symposium::alignType::right;
-   this->type=3;
    ui->textEdit->scroll();
 }
 
 void notepad::on_actionAlignTextJustify_triggered()
 {
     textAlign(ui->actionAlignTextJustify);
-    this->type=4;
     this->alignment=Symposium::alignType::left;
     ui->textEdit->scroll();
 }
@@ -436,7 +443,7 @@ void notepad::on_actionUnderlineFont_triggered()
 }
 
 
-void notepad::textStyle(int styleIndex)
+QTextListFormat::Style notepad::textStyle(int styleIndex)
 {
     QTextCursor cursor = ui->textEdit->textCursor();
     QTextListFormat::Style style = QTextListFormat::ListStyleUndefined;
@@ -504,6 +511,7 @@ void notepad::textStyle(int styleIndex)
     // set the style index
     this->indexStyle=styleIndex;
     ui->textEdit->scroll();
+    return style;
 }
 
 
@@ -676,22 +684,29 @@ void notepad::fixAlignment(){
         ui->textEdit->setTextCursor(curs);
         if(style.first==Symposium::alignType::left){
             this->textAlign(ui->actionAlignTextLeft);
-            this->textStyle(style.second);}
-        else if(style.first==Symposium::alignType::right){
+            this->textStyle(style.second);
+            ui->actionAlignTextLeft->setChecked(true);
+
+        }else if(style.first==Symposium::alignType::right){
              this->textAlign(ui->actionAlignTextRight);
-             this->textStyle(style.second);}
-        else if(style.first==Symposium::alignType::center){
+             this->textStyle(style.second);
+             ui->actionAlignTextRight->setChecked(true);
+        }else if(style.first==Symposium::alignType::center){
              this->textAlign(ui->actionAlignCenter);
-             this->textStyle(style.second);}
-        else if (style.first==Symposium::alignType::justify){
+             this->textStyle(style.second);
+             ui->actionAlignCenter->setChecked(true);
+        }else if (style.first==Symposium::alignType::justify){
              this->textAlign(ui->actionAlignTextJustify);
-             this->textStyle(style.second);}
-        else{
+             this->textStyle(style.second);
+             ui->actionAlignTextJustify->setChecked(true);
+        }
+        /*else{
             this->textAlign(ui->actionAlignTextLeft); /**< default alignment in the case the vector is initialized w/ emptyAlignment */
-            this->textStyle(style.second);}
-       }
+            //this->textStyle(style.second);}
+      }
     ui->textEdit->changePosition(row,column);
     insertOthCh=false;
+
 }
 
 void notepad::visualizeAllUsers()
@@ -899,22 +914,33 @@ void notepad::handleDeleteKey(){
         qDebug()<<"end"<<row_end;
         qDebug()<<"Dimensione"<<end-start;
 
+
         /* I'm on the same line*/
         if(row_start==row_end){
             while(dim>0){
                 #ifdef DISPATCHER_ON
                 cl.localRemove(this->documentId,{row_start,col});
+                this->numChars=this->doc.getNumchar();
+                this->labelChars=std::to_string(this->numChars);
+                ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
                 std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
                 ui->textEdit->translateCursors(onlineUsers);
                 #else
                 this->documentoProva.localRemove({row_start,col},1);
+                this->numChars=this->documentoProva.getNumchar();
+                this->labelChars=std::to_string(this->numChars);
+                ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
                 #endif
                 dim--;
             }
 
         }else{
             /*I'm deleting multiple lines*/
+            #ifdef DISPATCHER_ON
+            numLines=this->doc.countsNumLines();
+            #else
             numLines=documentoProva.countsNumLines();
+            #endif
             qDebug()<<"NumLines"<<numLines;
             dim=row_end-row_start;
             /*I'm deleting also the last line: I have to delete also the enter character */
@@ -943,10 +969,16 @@ void notepad::handleDeleteKey(){
         return;
     #ifdef DISPATCHER_ON
     cl.localRemove(this->documentId,{row,col});
+    this->numChars=this->doc.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     ui->textEdit->translateCursors(onlineUsers);
     #else
     documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
+    this->numChars=this->documentoProva.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
     #endif
     if(row==0 && col==0){
         QColor black=Qt::black;
@@ -976,10 +1008,16 @@ void notepad::deleteMultipleLines(int sR,int eR,int c,int sL,bool lines){
         while(length>0){
             #ifdef DISPATCHER_ON
             cl.localRemove(this->documentId,{sR,c});
+            this->numChars=this->doc.getNumchar();
+            this->labelChars=std::to_string(this->numChars);
+            ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
             std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
             ui->textEdit->translateCursors(onlineUsers);
             #else
             this->documentoProva.localRemove({sR,c},1);
+            this->numChars=this->documentoProva.getNumchar();
+            this->labelChars=std::to_string(this->numChars);
+            ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
             #endif
             length--;
         }
@@ -1009,19 +1047,26 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
 
     // set the alignment values to zero default value
     this->indexStyle=0;
-    this->type=0;
+    this->alignment=Symposium::alignType::left;
     std::vector<int> pos;
+
 
 #ifdef DISPATCHER_ON
     Symposium::symbol sym(ch,cl.getUser().getSiteId(),1,pos,false);
     sym.setCharFormat(charFormat);
     cl.localInsert(this->documentId,sym,indexes);
+    this->numChars=this->doc.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     ui->textEdit->translateCursors(onlineUsers);
 #else
     Symposium::symbol sym(ch,1,1,pos,false);
     sym.setCharFormat(charFormat);
     this->documentoProva.localInsert(indexes,sym);
+    this->numChars=this->documentoProva.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
 #endif
     this->colPos=colC;
 }
@@ -1065,21 +1110,31 @@ void notepad::contV_action(){
 
         // set the alignment values to zero default value
         this->indexStyle=0;
-        this->type=0;
+        this->alignment=Symposium::alignType::left;
 
         std::vector<int> pos;
 #ifdef DISPATCHER_ON
         Symposium::symbol sym(ch,cl.getUser().getSiteId(),1,pos,false);
         sym.setCharFormat(charFormat);
         cl.localInsert(this->documentId,sym,indexes);
+        this->numChars=this->doc.getNumchar();
+        this->labelChars=std::to_string(this->numChars);
+        ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
+
         std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
         ui->textEdit->translateCursors(onlineUsers);
 #else
         Symposium::symbol sym(ch,1,1,pos,false);
         sym.setCharFormat(charFormat);
         this->documentoProva.localInsert(indexes,sym);
+        this->numChars=this->documentoProva.getNumchar();
+        this->labelChars=std::to_string(this->numChars);
+        ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
+
+
 #endif
         count++;posTmp++;
+
     }
     this->okPaste=false;
 }
@@ -1166,6 +1221,16 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     ui->textEdit->translateCursors(onlineUsers);
     #endif
     insertOthCh=false;
+
+    #ifdef DISPATCHER_ON
+    this->numChars=this->doc.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
+    #else
+    this->numChars=this->documentoProva.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
+    #endif
 
 }
 
@@ -1261,6 +1326,15 @@ void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposi
     #endif
 
     insertOthCh=false;
+    #ifdef DISPATCHER_ON
+    this->numChars=this->doc.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
+    #else
+    this->numChars=this->documentoProva.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
+    #endif
 }
 
 
@@ -1269,6 +1343,17 @@ void notepad::on_textEdit_cursorPositionChanged()
 
     QTextCursor cc=ui->textEdit->textCursor();
     QTextCharFormat ch=ui->textEdit->currentCharFormat();
+    Qt::Alignment al=ui->textEdit->alignment();
+    qDebug()<<"Al"<<al;
+    if(al==Qt::AlignLeading)
+        ui->actionAlignTextLeft->setChecked(true);
+    else if(al==Qt::AlignTrailing)
+        ui->actionAlignTextRight->setChecked(true);
+    else if(al==Qt::AlignHCenter)
+        ui->actionAlignCenter->setChecked(true);
+    //else
+        //ui->actionAlignTextJustify->setChecked(true);
+
      if(insertOthCh==false){
         #ifdef DISPATCHER_ON
         ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
@@ -1400,9 +1485,6 @@ void notepad::on_actionhighlight_triggered()
         this->highActivated=false;
         ui->actionhighlight->setChecked(false);
         this->uncolorText();
-        //ui->textEdit->clear();
-        //this->fillTextEdit();
-        //this->fixAlignment();
 
     }
 }
@@ -1485,6 +1567,7 @@ void notepad::on_hideUsers_clicked()
 
     ui->showUsers->setDisabled(false);
     ui->showUsers->show();
+
 }
 
 void notepad::on_showUsers_clicked()
