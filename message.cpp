@@ -84,6 +84,10 @@ bool message::operator!=(const message &rhs) const {
     return !(rhs == *this);
 }
 
+bool message::isFinalMex() const {
+    return action==msgType::logout || action==msgType::removeUser;
+}
+
 clientMessage::clientMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type msgId)
         : message(msgId), actionOwner(actionOwner) {
     if(action!=msgType::login && action!=msgType::removeUser && action!=msgType::logout)
@@ -250,6 +254,7 @@ void askResMessage::completeAction(SymClient &client, msgOutcome serverResult) {
             break;
     }
 }
+
 BOOST_CLASS_EXPORT(Symposium::askResMessage)
 
 signUpMessage::signUpMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
@@ -347,7 +352,9 @@ void loginMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
-    ar & loggedUser;
+    document::doLightSerializing([&](){
+        ar & loggedUser;
+    });
 }
 
 const user &loginMessage::getLoggedUser() const {
@@ -739,7 +746,11 @@ void updateActiveMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
-    ar & newUser & resourceId & userPrivilege;
+    // just to be sure that no document's content is serialized.
+    // newUser.home should be null in this kind of message
+    document::doLightSerializing([&](){
+        ar & newUser & resourceId & userPrivilege;
+    });
 }
 
 

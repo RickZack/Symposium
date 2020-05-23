@@ -187,7 +187,7 @@
 											"top": 153,
 											"width": 274.84716796875,
 											"height": 13,
-											"text": "+getMesgId()",
+											"text": "+getMesgId(): unsigned",
 											"horizontalAlignment": 0
 										},
 										{
@@ -204,7 +204,24 @@
 											"top": 168,
 											"width": 274.84716796875,
 											"height": 13,
-											"text": "+getAction()",
+											"text": "+getAction(): msgType",
+											"horizontalAlignment": 0
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAFyQZE6bnC+N+M=",
+											"_parent": {
+												"$ref": "AAAAAAFrUWFqn7FTF7k="
+											},
+											"model": {
+												"$ref": "AAAAAAFyQZE6HnC7RMI="
+											},
+											"font": "Arial;13;0",
+											"left": 509,
+											"top": 183,
+											"width": 274.84716796875,
+											"height": 13,
+											"text": "+isFinalMex(): bool",
 											"horizontalAlignment": 0
 										}
 									],
@@ -212,7 +229,7 @@
 									"left": 504,
 									"top": 148,
 									"width": 284.84716796875,
-									"height": 38
+									"height": 53
 								},
 								{
 									"_type": "UMLReceptionCompartmentView",
@@ -252,7 +269,7 @@
 							"left": 504,
 							"top": 72,
 							"width": 284.84716796875,
-							"height": 114,
+							"height": 129,
 							"stereotypeDisplay": "decoration-label",
 							"nameCompartment": {
 								"$ref": "AAAAAAFrUWFqnrFN5/g="
@@ -2002,8 +2019,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 474,
-									"top": 254,
+									"left": 471,
+									"top": 262,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 15,
@@ -2023,8 +2040,8 @@
 									},
 									"visible": null,
 									"font": "Arial;13;0",
-									"left": 464,
-									"top": 243,
+									"left": 461,
+									"top": 251,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 30,
@@ -2044,8 +2061,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 495,
-									"top": 277,
+									"left": 490,
+									"top": 285,
 									"height": 13,
 									"alpha": -1.5707963267948966,
 									"distance": 15,
@@ -2063,7 +2080,7 @@
 								"$ref": "AAAAAAFrUX0T6LQSwEs="
 							},
 							"lineStyle": 1,
-							"points": "389:359;581:186",
+							"points": "391:359;571:201",
 							"showVisibility": true,
 							"nameLabel": {
 								"$ref": "AAAAAAFrUX472rRrOCE="
@@ -2096,8 +2113,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 851,
-									"top": 282,
+									"left": 857,
+									"top": 290,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 15,
@@ -2117,8 +2134,8 @@
 									},
 									"visible": null,
 									"font": "Arial;13;0",
-									"left": 843,
-									"top": 294,
+									"left": 849,
+									"top": 302,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 30,
@@ -2138,8 +2155,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 868,
-									"top": 257,
+									"left": 874,
+									"top": 265,
 									"height": 13,
 									"alpha": -1.5707963267948966,
 									"distance": 15,
@@ -2157,7 +2174,7 @@
 								"$ref": "AAAAAAFrUX05XrQ8EUw="
 							},
 							"lineStyle": 1,
-							"points": "992:367;729:186",
+							"points": "990:367;742:201",
 							"showVisibility": true,
 							"nameLabel": {
 								"$ref": "AAAAAAFrUX5fgrR+U3I="
@@ -7353,7 +7370,18 @@
 							"_parent": {
 								"$ref": "AAAAAAFrUWFqnLFKrPA="
 							},
-							"name": "getMesgId"
+							"name": "getMesgId",
+							"parameters": [
+								{
+									"_type": "UMLParameter",
+									"_id": "AAAAAAFyQZJSm3DJois=",
+									"_parent": {
+										"$ref": "AAAAAAFrxjnm1i1QQd8="
+									},
+									"type": "unsigned",
+									"direction": "return"
+								}
+							]
 						},
 						{
 							"_type": "UMLOperation",
@@ -7361,7 +7389,39 @@
 							"_parent": {
 								"$ref": "AAAAAAFrUWFqnLFKrPA="
 							},
-							"name": "getAction"
+							"name": "getAction",
+							"parameters": [
+								{
+									"_type": "UMLParameter",
+									"_id": "AAAAAAFyQZIjCXDGS7s=",
+									"_parent": {
+										"$ref": "AAAAAAFrUZWscbcVMCQ="
+									},
+									"type": {
+										"$ref": "AAAAAAFrUWP0PbGMxMc="
+									},
+									"direction": "return"
+								}
+							]
+						},
+						{
+							"_type": "UMLOperation",
+							"_id": "AAAAAAFyQZE6HnC7RMI=",
+							"_parent": {
+								"$ref": "AAAAAAFrUWFqnLFKrPA="
+							},
+							"name": "isFinalMex",
+							"parameters": [
+								{
+									"_type": "UMLParameter",
+									"_id": "AAAAAAFyQZGF3HDDqvM=",
+									"_parent": {
+										"$ref": "AAAAAAFyQZE6HnC7RMI="
+									},
+									"type": "bool",
+									"direction": "return"
+								}
+							]
 						}
 					]
 				},
@@ -10801,7 +10861,7 @@
 									"font": "Arial;13;0",
 									"left": 232,
 									"top": 473,
-									"width": 113.32080078125,
+									"width": 155.9580078125,
 									"height": 38
 								},
 								{
@@ -13186,7 +13246,8 @@
 								"$ref": "AAAAAAFw/4oRtQpifaY="
 							},
 							"name": "siteId",
-							"visibility": "private"
+							"visibility": "private",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -13195,7 +13256,8 @@
 								"$ref": "AAAAAAFw/4oRtQpifaY="
 							},
 							"name": "resourceId",
-							"visibility": "private"
+							"visibility": "private",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -13204,7 +13266,8 @@
 								"$ref": "AAAAAAFw/4oRtQpifaY="
 							},
 							"name": "row",
-							"visibility": "private"
+							"visibility": "private",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -13213,7 +13276,8 @@
 								"$ref": "AAAAAAFw/4oRtQpifaY="
 							},
 							"name": "col",
-							"visibility": "private"
+							"visibility": "private",
+							"type": ""
 						}
 					],
 					"operations": [

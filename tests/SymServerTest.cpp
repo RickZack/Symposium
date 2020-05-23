@@ -701,8 +701,8 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveCallsRemoteRemoveOnDocA
     server.forceSiteIdForResId(&doc, anotherUser);
 
     symbol toRemove('a', 0, 0, {}, false);
-    symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove, rand());
-    symbolMessage toSend(msgType::removeSymbol, {{}, {}}, msgOutcome::success, 0, doc.getId(), toRemove.setVerified(), received.getMsgId());
+    symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, msId, doc.getId(), toRemove, rand());
+    symbolMessage toSend(msgType::removeSymbol, {{}, {}}, msgOutcome::success, msId, doc.getId(), toRemove.setVerified(), received.getMsgId());
     EXPECT_CALL(doc, remoteRemove(received.getSiteId(), toSend.getSym()));
     server.remoteRemove(loggedUserUsername, doc.getId(), received);
 

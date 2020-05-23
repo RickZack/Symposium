@@ -163,43 +163,49 @@ SymServer::createNewDir(const std::string &opener, const std::string &resPath, c
     return d;
 }
 
-void SymServer::remoteInsert(const std::string &inserter, uint_positive_cnt::type docId, symbolMessage &symMsg) {
+void SymServer::remoteInsert(const std::string &inserter, uint_positive_cnt::type docId, const symbolMessage &symMsg) {
     if(!userIsActive(inserter))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(inserter, docId);
     if(!docRetrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
-    symMsg.clearAuthParam();
-    docRetrieved.second->remoteInsert(symMsg.getSiteId(), symMsg.verifySym().getSym());
-    insertMessageForSiteIds(siteIdsFor(docId, getRegistered(inserter).getSiteId()), std::shared_ptr<serverMessage>(new symbolMessage(symMsg)));
+    auto toSend=new symbolMessage(symMsg);
+    toSend->verifySym().clearAuthParam();
+    docRetrieved.second->remoteInsert(symMsg.getSiteId(), toSend->getSym());
+
+
+    insertMessageForSiteIds(siteIdsFor(docId, getRegistered(inserter).getSiteId()), std::shared_ptr<serverMessage>(toSend));
     generateSimpleResponse(getRegistered(inserter).getSiteId(), msgType::insertSymbol, symMsg.getMsgId());
 }
 
-void SymServer::remoteRemove(const std::string &remover, uint_positive_cnt::type docId, symbolMessage &rmMsg) {
+void SymServer::remoteRemove(const std::string &remover, uint_positive_cnt::type docId, const symbolMessage &rmMsg) {
     if(!userIsActive(remover))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(remover, docId);
     user& actionU=getRegistered(remover);
     if(!docRetrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
-    rmMsg.clearAuthParam();
-    docRetrieved.second->remoteRemove(0, rmMsg.verifySym().getSym());
-    insertMessageForSiteIds(siteIdsFor(docId, actionU.getSiteId()), std::shared_ptr<serverMessage>(new symbolMessage(rmMsg)));
+    auto toSend=new symbolMessage(rmMsg);
+    toSend->verifySym().clearAuthParam();
 
+    docRetrieved.second->remoteRemove(toSend->getSiteId(), toSend->getSym());
+
+    insertMessageForSiteIds(siteIdsFor(docId, actionU.getSiteId()), std::shared_ptr<serverMessage>(toSend));
     generateSimpleResponse(actionU.getSiteId(), msgType::removeSymbol, rmMsg.getMsgId());
 }
 
-void SymServer::updateCursorPos(const std::string &targetUser, uint_positive_cnt::type docId, cursorMessage &crMsg) {
+void SymServer::updateCursorPos(const std::string &targetUser, uint_positive_cnt::type docId, const cursorMessage &crMsg) {
     if(!userIsActive(targetUser))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(targetUser, docId);
     user& actionU=getRegistered(targetUser);
     if(!docRetrieved.first)
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
-    crMsg.clearAuthParam();
     docRetrieved.second->updateCursorPos(actionU.getSiteId(), crMsg.getRow(), crMsg.getCol());
-    insertMessageForSiteIds(siteIdsFor(docId, actionU.getSiteId()), std::shared_ptr<serverMessage>(new cursorMessage(crMsg)));
 
+    auto toSend=new cursorMessage(crMsg);
+    toSend->clearAuthParam();
+    insertMessageForSiteIds(siteIdsFor(docId, actionU.getSiteId()), std::shared_ptr<serverMessage>(toSend));
     generateSimpleResponse(actionU.getSiteId(), msgType::updateCursor, crMsg.getMsgId());
 }
 
@@ -487,8 +493,7 @@ std::pair<const uint_positive_cnt::type, std::shared_ptr<serverMessage>> SymServ
             result.first=mexForSiteId.first;
             result.second=mexForSiteId.second.front();
             mexForSiteId.second.pop();
-            msgType typeOfMex=result.second->getAction();
-            if(typeOfMex==msgType::logout || typeOfMex==msgType::removeUser)
+            if(result.second->isFinalMex())
                 siteIdToMex.erase(result.first);
             break;
         }
@@ -547,9 +552,9 @@ bool SymServer::load() {
 
 SymServer::~SymServer() {
     if(storeData) {
-        document::serializeFull=false;
-        store();
-        document::serializeFull=true;
+        document::doLightSerializing([this]() {
+            this->store();
+        });
         rootDir->storeContent();
     }
 }

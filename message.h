@@ -54,22 +54,21 @@
      protected:
          static uint_positive_cnt msgCounter;
          uint_positive_cnt::type msgId;                 /**< random identifier for the message, used when a message is followed by an answer*/
-         msgType action;            /**< Defines the action for the current message */
+         msgType action;                                /**< Defines the action for the current message */
 
          message(uint_positive_cnt::type msgId= 0);
-
      public:
          uint_positive_cnt::type getMsgId() const;
 
          msgType getAction() const;
+
+         bool isFinalMex() const;
 
          bool operator==(const message &rhs) const;
 
          bool operator!=(const message &rhs) const;
 
          virtual ~message() = default;
-
-         std::tuple<std::string, std::string> separate(const std::string &path);
      };
 
 /**
@@ -200,6 +199,7 @@
          void invokeMethod(SymServer &server) override;
 
          void completeAction(SymClient &client, msgOutcome serverResult) override;
+
 
          bool operator==(const askResMessage &rhs) const;
          bool operator!=(const askResMessage &rhs) const;

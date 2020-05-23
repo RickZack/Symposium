@@ -804,14 +804,8 @@ std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVer
     return indexes;
 }
 
-
-
-
-
-
-
-
-
-
-
-
+void document::doLightSerializing(const std::function<void(void)> &op) {
+    document::serializeFull=false;
+    op();
+    document::serializeFull=true;
+}

@@ -398,12 +398,12 @@ public:
     MOCK_METHOD3(mapSiteIdToUser, std::map<uint_positive_cnt::type, user>(const std::string&, uint_positive_cnt::type, uint_positive_cnt::type));
 
     MOCK_METHOD6(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, const std::string&, privilege, uint_positive_cnt::type));
-    MOCK_METHOD3(remoteInsert, void(const std::string&, uint_positive_cnt::type resourceId, symbolMessage&));
-    MOCK_METHOD3(remoteRemove, void(const std::string&, uint_positive_cnt::type, symbolMessage& rmMsg));
+    MOCK_METHOD3(remoteInsert, void(const std::string&, uint_positive_cnt::type resourceId, const symbolMessage&));
+    MOCK_METHOD3(remoteRemove, void(const std::string&, uint_positive_cnt::type, const symbolMessage& rmMsg));
     MOCK_METHOD5(shareResource, std::shared_ptr<filesystem>(const std::string& actionUser, const std::string&, const std::string&, const uri&, uint_positive_cnt::type));
     MOCK_METHOD3(editUser, const user&(const std::string&, user&, uint_positive_cnt::type));
     MOCK_METHOD3(closeSource, void(const std::string&, uint_positive_cnt::type, uint_positive_cnt::type));
-    MOCK_METHOD3(updateCursorPos, void(const std::string&, uint_positive_cnt::type, cursorMessage&));
+    MOCK_METHOD3(updateCursorPos, void(const std::string&, uint_positive_cnt::type, const cursorMessage&));
 };
 
 struct clientMessageTest: public testing::Test{

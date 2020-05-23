@@ -201,7 +201,7 @@
           * update its own copy of the document and propagate the update to the other clients putting the message in
           * @e workingQueue
           */
-         virtual void remoteInsert(const std::string &inserter, uint_positive_cnt::type docId, symbolMessage &symMsg);
+         virtual void remoteInsert(const std::string &inserter, uint_positive_cnt::type docId, const symbolMessage &symMsg);
 
          /**
           * @brief update a document removing a symbol
@@ -215,9 +215,7 @@
           * update its own copy of the document and propagate the update to the other clients putting the message in
           * @e workingQueue
           */
-         virtual void remoteRemove(const std::string &remover, uint_positive_cnt::type docId, symbolMessage &rmMsg);
-         //dispatchMessages ->function to be active in background to send messages from server to client
-         //updateActiveUsers(); ->useful or just done inside other functions?
+         virtual void remoteRemove(const std::string &remover, uint_positive_cnt::type docId, const symbolMessage &rmMsg);
 
          /**
           * @brief update the current position of user's cursor inside one of the documents he's working on
@@ -225,7 +223,7 @@
           * @param docId the id of the document in which the user's cursor has been moved
           * @param crMsg the message received by the client
           */
-         virtual void updateCursorPos(const std::string &targetUser, uint_positive_cnt::type docId, cursorMessage& crMsg);
+         virtual void updateCursorPos(const std::string &targetUser, uint_positive_cnt::type docId, const cursorMessage &crMsg);
 
          /**
           * @brief edit the privilege of @e targetUser user for the resource @e resName in @e resPath to @e newPrivilege

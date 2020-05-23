@@ -82,9 +82,10 @@ namespace Symposium {
         std::vector<char> strategyCache ;
         wchar_t  strategy='r';
         bool loaded;
-        static const std::string basePath;
 
+        static const std::string basePath;
         static constexpr wchar_t  emptyChar='~';
+        static bool serializeFull;
 
         friend class boost::serialization::access;
         template<class Archive>
@@ -96,7 +97,6 @@ namespace Symposium {
         }
     public:
         static const symbol emptySymbol;
-        static bool serializeFull;
         static bool doLoadAndStore;
         document(uint_positive_cnt::type id = document::idCounter);
 
@@ -206,6 +206,13 @@ namespace Symposium {
          * @return a bool indicating success of failure on loading
          */
         bool load();
+
+        /**
+         * @brief executes @e op assuring that, if @ref serialize method wil be invoked,
+         * the serialization will involve all object's attributes
+         * @param op the operation to be executed with full serialization
+         */
+        static void doLightSerializing(const std::function<void(void)>& op);
 
         /**
          * @brief retrieves the set of siteId in the current document
