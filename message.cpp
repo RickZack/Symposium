@@ -28,7 +28,6 @@
  * Created on 16 Giugno 2019, 12.39
  */
 #include <string>
-#include <iostream>
 #include "filesystem.h"
 #include "message.h"
 #include "SymServer.h"
@@ -48,7 +47,6 @@ using namespace Symposium;
 
 
 
-//FIXME: put unsigned, siteIds must be positive, because a negative id is assumed as "no user present"
 uint_positive_cnt message::msgCounter;
 
 message::message(uint_positive_cnt::type msgId){
@@ -357,10 +355,6 @@ void loginMessage::serialize(Archive &ar, const unsigned int)
     });
 }
 
-const user &loginMessage::getLoggedUser() const {
-    return loggedUser;
-}
-
 void loginMessage::invokeMethod(SymClient &client) {
     auto msg= client.retrieveRelatedMessage(*this);
     if(action==msgType::login)
@@ -393,10 +387,6 @@ void mapMessage::serialize(Archive &ar, const unsigned int)
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
     ar & siteIdToUser;
-}
-
-const std::map<uint_positive_cnt::type, user> & mapMessage::getSiteIdToUser() const {
-    return siteIdToUser;
 }
 
 void mapMessage::invokeMethod(SymClient &client) {
@@ -432,10 +422,6 @@ void sendResMessage::serialize(Archive &ar, const unsigned int)
     // save/load base class information
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
     ar & symId & resource;
-}
-
-std::shared_ptr<filesystem> sendResMessage::getResource() const {
-    return resource;
 }
 
 void sendResMessage::invokeMethod(SymClient &client) {
@@ -495,18 +481,6 @@ void privMessage::serialize(Archive &ar, const unsigned int)
     ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
     ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
     ar & resourceId & targetUser & newPrivilege;
-}
-
-const std::string &privMessage::getResourceId() const {
-    return resourceId;
-}
-
-const std::string &privMessage::getTargetUser() const {
-    return targetUser;
-}
-
-privilege privMessage::getNewPrivilege() const {
-    return newPrivilege;
 }
 
 void privMessage::invokeMethod(SymServer &server) {
@@ -598,10 +572,6 @@ void symbolMessage::serialize(Archive &ar, const unsigned int)
 
 uint_positive_cnt::type symbolMessage::getSiteId() const {
     return siteId;
-}
-
-uint_positive_cnt::type symbolMessage::getResourceId() const {
-    return resourceId;
 }
 
 const symbol &symbolMessage::getSym() const {
@@ -754,10 +724,6 @@ void updateActiveMessage::serialize(Archive &ar, const unsigned int)
 }
 
 
-const user &updateActiveMessage::getNewUser() const {
-    return newUser;
-}
-
 int updateActiveMessage::getResourceId() const {
     return resourceId;
 }
@@ -890,9 +856,9 @@ BOOST_CLASS_EXPORT(Symposium::userDataMessage)
 
 cursorMessage::cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                              uint_positive_cnt::type siteId,
-                             uint_positive_cnt::type resourceId, int row, int col, uint_positive_cnt::type msgId) : message(msgId), clientMessage(actionOwner, msgId),
-                                                                            serverMessage(result, msgId), siteId(siteId),
-                                                                            resourceId(resourceId), row(row), col(col){
+                             uint_positive_cnt::type resourceId, unsigned int row, unsigned int col, uint_positive_cnt::type msgId) : message(msgId), clientMessage(actionOwner, msgId),
+                                                                                                                                      serverMessage(result, msgId), siteId(siteId),
+                                                                                                                                      resourceId(resourceId), row(row), col(col){
     if(action!=msgType::updateCursor)
         throw messageException(messageException::action, UnpackFileLineFunction());
     this->action=action;
@@ -929,15 +895,11 @@ bool cursorMessage::operator!=(const cursorMessage &rhs) const {
     return !(rhs == *this);
 }
 
-uint_positive_cnt::type cursorMessage::getResourceId() const {
-    return resourceId;
-}
-
-int cursorMessage::getRow() const {
+unsigned int cursorMessage::getRow() const {
     return row;
 }
 
-int cursorMessage::getCol() const {
+unsigned int cursorMessage::getCol() const {
     return col;
 }
 

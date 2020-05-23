@@ -50,13 +50,13 @@
      class message {
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
      protected:
          static uint_positive_cnt msgCounter;
          uint_positive_cnt::type msgId;                 /**< random identifier for the message, used when a message is followed by an answer*/
          msgType action;                                /**< Defines the action for the current message */
 
-         message(uint_positive_cnt::type msgId= 0);
+         explicit message(uint_positive_cnt::type msgId= 0);
      public:
          uint_positive_cnt::type getMsgId() const;
 
@@ -82,14 +82,14 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, const unsigned int);
 
 
 
      protected:
          //Needed by boost::serialization
          clientMessage():message(1){}
-         clientMessage(const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type msgId = 0);
+         explicit clientMessage(const std::pair<std::string, std::string> &actionOwner, uint_positive_cnt::type msgId = 0);
      public:
 
          /**
@@ -139,7 +139,7 @@
 
          bool operator!=(const clientMessage &rhs) const;
 
-         virtual ~clientMessage() override = default;
+         ~clientMessage() override = default;
      };
 
 
@@ -156,7 +156,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
          //Needed by boost::serialization
          askResMessage()=default;
 
@@ -220,7 +220,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
          signUpMessage()=default;
 
          user newUser;          /**< new SympUser data inserted by the user */
@@ -247,7 +247,7 @@
 
          bool operator!=(const signUpMessage &rhs) const;
 
-         virtual ~signUpMessage() override{}
+         ~signUpMessage() override{}
      };
 
     /**
@@ -256,7 +256,7 @@
      class updateDocMessage : public clientMessage {
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, const unsigned int);
          //Needed by boost::serialization
          updateDocMessage()=default;
 
@@ -296,11 +296,11 @@
      class serverMessage : public virtual message {
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
          serverMessage()=default;
      protected:
          //Needed by boost::serialization
-         serverMessage(msgOutcome result, uint_positive_cnt::type msgId = 0);
+         explicit serverMessage(msgOutcome result, uint_positive_cnt::type msgId = 0);
 
          msgOutcome result;         /**< result of an operation asked to the server */
          std::string errDescr;
@@ -334,7 +334,7 @@
 
          bool operator!=(const serverMessage &rhs) const;
 
-         virtual ~serverMessage() = default;
+         ~serverMessage() override = default;
      };
 
 /**
@@ -348,7 +348,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
          //Needed by boost::serialization
          loginMessage():serverMessage(msgOutcome::success, 1){}
 
@@ -359,8 +359,6 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          loginMessage(msgType action, msgOutcome result, const user &loggedUser, uint_positive_cnt::type msgId = 0);
-
-         const user &getLoggedUser() const;
 
          /**
           * @brief enable the client have the same representation for an user after a login
@@ -375,7 +373,7 @@
 
          bool operator!=(const loginMessage &rhs) const;
 
-         virtual ~loginMessage() = default;
+         ~loginMessage() override = default;
      };
 
 /**
@@ -389,7 +387,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
          //Needed by boost::serialization
          mapMessage(): serverMessage(msgOutcome::success, 1){}
 
@@ -400,8 +398,6 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          mapMessage(msgType action, msgOutcome result, const std::map<uint_positive_cnt::type, user> &siteIdToUser, uint_positive_cnt::type msgId = 0);
-
-         const std::map<uint_positive_cnt::type, user> & getSiteIdToUser() const;
 
          /**
           * @brief update the mapping siteId->pair<user, color> with the information sent by the server
@@ -416,7 +412,7 @@
 
          bool operator!=(const mapMessage &rhs) const;
 
-         virtual ~mapMessage() = default;
+         ~mapMessage() override = default;
      };
 
 /**
@@ -426,11 +422,11 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
          //Needed by boost::serialization
          sendResMessage():serverMessage(msgOutcome::success, 1){}
 
-         uint_positive_cnt::type symId;             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
+         uint_positive_cnt::type symId{};             /**< in case of <em> action=msgType::openNewRes </em>, the id assigned to the symlink */
          std::shared_ptr<filesystem> resource;
      public:
 
@@ -438,8 +434,6 @@
           * @throws messageException if @e action is not consistent with the message type
           */
          sendResMessage(msgType action, msgOutcome result, std::shared_ptr<filesystem> resource, uint_positive_cnt::type symId=0, uint_positive_cnt::type msgId = 0);
-
-         std::shared_ptr<filesystem> getResource() const;
 
          /**
           * @brief make a client receive a new resource after a request
@@ -454,7 +448,7 @@
           */
          void invokeMethod(SymClient &client) override;
 
-         virtual ~sendResMessage() = default;
+         ~sendResMessage() override = default;
      };
 
 /**
@@ -471,7 +465,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
 
          updateActiveMessage():serverMessage(msgOutcome::success, 1){}
          user newUser;              /**< user who joined the document */
@@ -484,8 +478,6 @@
           */
          updateActiveMessage(msgType action, msgOutcome result, const user &newUser, uint_positive_cnt::type resourceId,
                              privilege priv = privilege::readOnly, uint_positive_cnt::type msgId = 0);
-
-         const user &getNewUser() const;
 
          int getResourceId() const;
 
@@ -519,7 +511,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
 
          privMessage():serverMessage(msgOutcome::success, 1){}
 
@@ -534,12 +526,6 @@
          privMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                      const std::string &resourceId, const std::string &targetUser, privilege newPrivilege,
                      uint_positive_cnt::type msgId = 0);
-
-         const std::string &getResourceId() const;
-
-         const std::string &getTargetUser() const;
-
-         privilege getNewPrivilege() const;
 
          /**
           * @brief asks the server to modify a file privilege
@@ -565,7 +551,7 @@
 
          bool operator!=(const privMessage &rhs) const;
 
-         virtual ~privMessage() = default;
+         ~privMessage() override = default;
      };
 
 /**
@@ -579,7 +565,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
 
          //Needed for boost::serialization
          symbolMessage(): serverMessage(msgOutcome::success, 1), sym('a', 0, 0, {}){}
@@ -597,8 +583,6 @@
                        uint_positive_cnt::type resourceId, const symbol &sym, uint_positive_cnt::type msgId = 0);
 
          uint_positive_cnt::type getSiteId() const;
-
-         uint_positive_cnt::type getResourceId() const;
 
          /**
           * @brief set the contained symbol as "verified" calling @ref symbol::setVerified on @e sym
@@ -656,7 +640,7 @@
 
          bool operator!=(const symbolMessage &rhs) const;
 
-         virtual ~symbolMessage() = default;
+         ~symbolMessage() override = default;
      };
 
 /**
@@ -669,7 +653,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
 
          //Needed for boost::serialization
          uriMessage():serverMessage(msgOutcome::success, 1){}
@@ -711,7 +695,7 @@
 
          bool operator!=(const uriMessage &rhs) const;
 
-         virtual ~uriMessage() = default;
+         ~uriMessage() override = default;
      };
 
 
@@ -722,7 +706,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
 
          //Needed for boost::serialization
          userDataMessage():serverMessage(msgOutcome::success, 1){}
@@ -772,20 +756,20 @@
      class cursorMessage: public clientMessage, public serverMessage{
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
 
          //Needed for boost::serialization
          cursorMessage():serverMessage(msgOutcome::success, 1){}
 
          uint_positive_cnt::type siteId;                /**< siteId of the client that send the message */
          uint_positive_cnt::type resourceId;            /**< resourceId of the resource on which the user cursor's position has changed */
-         int row;                                       /**< new row of the cursor */
-         int col;                                       /**< new column of the cursor */
+         unsigned row;                                  /**< new row of the cursor */
+         unsigned col;                                  /**< new column of the cursor */
 
      public:
          cursorMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                        uint_positive_cnt::type siteId,
-                       uint_positive_cnt::type resourceId, int row, int col, uint_positive_cnt::type msgId = 0);
+                       uint_positive_cnt::type resourceId, unsigned int row, unsigned int col, uint_positive_cnt::type msgId = 0);
 
          /**
           * @brief notify the server that the position of the user's cursor has changed
@@ -799,17 +783,15 @@
           */
          void invokeMethod(SymClient &client) override;
 
-         uint_positive_cnt::type getResourceId() const;
+         unsigned int getRow() const;
 
-         int getRow() const;
-
-         int getCol() const;
+         unsigned int getCol() const;
 
          bool operator==(const cursorMessage &rhs) const;
 
          bool operator!=(const cursorMessage &rhs) const;
 
-         virtual ~cursorMessage()= default;
+         ~cursorMessage() override = default;
 
      };
 

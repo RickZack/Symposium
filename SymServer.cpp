@@ -30,7 +30,6 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/unordered_map.hpp>
 #include <boost/serialization/export.hpp>
 #include <fstream>
 
@@ -44,8 +43,8 @@
 
 using namespace Symposium;
 
-uint_positive_cnt SymServer::idCounter;
-const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", ":/resources/avatar/unknown.png", 0, nullptr);
+uint_positive_cnt SymServer::idCounter; // NOLINT
+const user SymServer::unknownUser("unknown", "@dummY!Pwd", "unknown", ":/resources/avatar/unknown.png", 0, nullptr); // NOLINT
 
 const user & SymServer::addUser(user &newUser, uint_positive_cnt::type respMsgId) {
     if(userIsRegistered(newUser.getUsername()))
@@ -65,7 +64,7 @@ const user & SymServer::addUser(user &newUser, uint_positive_cnt::type respMsgId
     return target;
 }
 
-const user SymServer::login(const std::string &username, const std::string &pwd, uint_positive_cnt::type respMsgId) {
+const user& SymServer::login(const std::string &username, const std::string &pwd, uint_positive_cnt::type respMsgId) {
     SymServerException::SymServerExceptionCodes exCode=SymServerException::userNotLogged;
     if(!userIsRegistered(username))
         throw SymServerException(SymServerException::userNotRegistered, UnpackFileLineFunction());
@@ -362,8 +361,8 @@ SymServer::mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::typ
     // con N pari alla dimensione di registered.
     // Idea: findUserBySiteId potrebbe ricevere un elenco di siteId e tornare
     // un elenco di user. In questo modo la complessità diventa O(N)
-    for(int siteId:siteIds){
-        user founded= findUserBySiteId(siteId);
+    for(uint_positive_cnt::type siteId:siteIds){
+        const user& founded= findUserBySiteId(siteId);
         result.emplace(siteId, founded);
     }
 
@@ -393,7 +392,7 @@ SymServer::SymServer(bool loading, bool storing) : loadData(loading), storeData(
 }
 
 template<class Archive>
-void SymServer::serialize(Archive &ar, const unsigned int version)
+void SymServer::serialize(Archive &ar, const unsigned int)
 {
     ar & registered & idCounter  & rootDir;
 }
@@ -413,7 +412,7 @@ std::pair<bool, document*> SymServer::userIsWorkingOnDocument(const std::string 
     return result;
 }
 
-user SymServer::findUserBySiteId(int id) const noexcept{
+const user& SymServer::findUserBySiteId(int id) const noexcept{
     for(const auto& elem:registered)
         if(elem.second.getSiteId()==id)
             return elem.second;
@@ -506,7 +505,7 @@ void SymServer::generateSimpleResponse(unsigned int recvSiteId, msgType action, 
 }
 
 bool SymServer::operator==(const SymServer &rhs) const {
-    return registered == rhs.registered && idCounter == rhs.idCounter;
+    return registered == rhs.registered;
 }
 
 bool SymServer::operator!=(const SymServer &rhs) const {

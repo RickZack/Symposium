@@ -113,7 +113,7 @@
           * @e password corresponds to a user contained in @e registered, then sends the retrieved user object to
           * the client, after having darken the @e password and the @e hashSalt, via a @ref loginMessage
           */
-         virtual const user
+         virtual const user&
          login(const std::string &username, const std::string &pwd, uint_positive_cnt::type respMsgId);
 
          /**
@@ -402,7 +402,7 @@
           * Some of them are also virtual to be overridden in test suites (read ./tests/SymServerTest.cpp)
           */
          virtual bool userIsRegistered(const std::string &toCheck) const noexcept ;
-         virtual user findUserBySiteId(int id) const noexcept;
+         virtual const user& findUserBySiteId(int id) const noexcept;
          virtual bool userIsActive(const std::string &username) const;
 
          /*

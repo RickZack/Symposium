@@ -29,12 +29,18 @@
  */
 
 #include <gtest/gtest.h>
-#include <boost/serialization/unique_ptr.hpp>
+#include <memory>
 #include <gmock/gmock.h>
+#include <boost/serialization/unique_ptr.hpp> //NOLINT
+
 #include "../message.h"
 #include "../SymServer.h"
 #include "../SymClient.h"
 #include "../filesystem.h"
+
+#pragma clang diagnostic ignored "cert-err58-cpp" //NOLINT
+#pragma clang diagnostic ignored "cert-msc50-cpp" //NOLINT
+#pragma clang diagnostic ignored "cppcoreguidelines-pro-type-static-cast-downcast" //NOLINT
 
 using namespace Symposium;
 
@@ -74,11 +80,11 @@ const std::vector<msgType> fourthGroup={msgType::addActiveUser, msgType::removeA
  */
 #define EXPECT_THROW_MESSAGE_CONSTRUCTION(statement, action, exceptionType) \
         EXPECT_THROW(statement, exceptionType) \
-        <<"action: "<<action<<" should not be compatible with message class";
+        <<"action: "<<action<<" should not be compatible with message class"
 
 #define EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(statement, action) \
         EXPECT_NO_THROW(statement) \
-        <<"action: "<<action<<" should be compatible with message class";
+        <<"action: "<<action<<" should be compatible with message class"
 
 struct simpleMsgTypeTest: ::testing::TestWithParam<msgType>{
     message *m;
@@ -86,12 +92,11 @@ struct simpleMsgTypeTest: ::testing::TestWithParam<msgType>{
     simpleMsgTypeTest(){
         m=nullptr;
     }
-    virtual ~simpleMsgTypeTest(){
+    ~simpleMsgTypeTest() override{
         /*
          * If construction succeed (and it shouldn't), m points to some memory that has to be freed
          */
-        if(m!= nullptr)
-            delete m;
+        delete m;
     }
 };
 
@@ -131,39 +136,39 @@ std::ostream& operator<<(std::ostream& output, msgType m){
 struct serverMsgNotForbidden: simpleMsgTypeTest{};
 TEST_P(serverMsgNotForbidden, serverMsgNoThrowInConstruction){
     msgType action=GetParam();
-    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m= new serverMessage(action, msgOutcome::success), action)
+    EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m= new serverMessage(action, msgOutcome::success), action);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, serverMsgNotForbidden, testing::ValuesIn(fourthGroup));
 
 struct askResMsgForbiddenActions: simpleMsgTypeTest{};
 
 TEST_P(askResMsgForbiddenActions, askResThrowExceptionInConstruction){
     msgType action=GetParam();
-    EXPECT_THROW_MESSAGE_CONSTRUCTION(m= new askResMessage(action, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0), action, messageException);
+    EXPECT_THROW_MESSAGE_CONSTRUCTION((m= new askResMessage(action, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0)), action, messageException);
 }
 
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, askResMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 struct signUpMsgForbiddenActions: simpleMsgTypeTest {
     user u;
 
     signUpMsgForbiddenActions() : u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr) {}
-    ~signUpMsgForbiddenActions()=default;
+    ~signUpMsgForbiddenActions() override =default;
 };
 
 TEST_P(signUpMsgForbiddenActions, signUpThrowExceptionInConstruction){
     msgType action=GetParam();
-    EXPECT_THROW_MESSAGE_CONSTRUCTION(m=new signUpMessage(action, {"",""}, u), action, messageException);
+    EXPECT_THROW_MESSAGE_CONSTRUCTION((m=new signUpMessage(action, {"",""}, u)), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(AllButRegistrationFromFirstGroup, signUpMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(firstGroup.begin()+1, firstGroup.end())));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(AllButRegistrationFromFirstGroup, signUpMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(firstGroup.begin()+1, firstGroup.end())));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 
 struct updateDocMsgForbiddenActions: simpleMsgTypeTest {};
@@ -172,20 +177,20 @@ TEST_P(updateDocMsgForbiddenActions, updateDocThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new updateDocMessage(action, {"", ""}, 0), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(AllButMapChangesFromThirdGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
-INSTANTIATE_TEST_CASE_P(AllButCloseResFromFourthGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-2)));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(AllButMapChangesFromThirdGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
+INSTANTIATE_TEST_SUITE_P(AllButCloseResFromFourthGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-2)));
 
 struct loginMsgForbiddenActions: signUpMsgForbiddenActions {};
 TEST_P(loginMsgForbiddenActions, loginThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new loginMessage(action, msgOutcome::success, u), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(AllButRegistrationAndLoginFromFirstGroup, loginMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(firstGroup.begin()+2, firstGroup.end())));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(AllButRegistrationAndLoginFromFirstGroup, loginMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(firstGroup.begin()+2, firstGroup.end())));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 
 struct mapMsgForbiddenActions: simpleMsgTypeTest {};
@@ -193,24 +198,24 @@ TEST_P(mapMsgForbiddenActions, mapThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new mapMessage(action, msgOutcome::success, std::map<uint_positive_cnt::type, user>()), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(AllButMapChangesFromThirdGroup, mapMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(AllButMapChangesFromThirdGroup, mapMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 struct sendResMsgForbiddenActions: simpleMsgTypeTest {
     std::shared_ptr<filesystem> f;
     sendResMsgForbiddenActions(): f(new file("name", 0)){};
-    ~sendResMsgForbiddenActions()=default;
+    ~sendResMsgForbiddenActions() override =default;
 };
 TEST_P(sendResMsgForbiddenActions, sendResThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new sendResMessage(action, msgOutcome::success, f), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(fourthGroup));
-INSTANTIATE_TEST_CASE_P(changeResNameAndRemove, sendResMsgForbiddenActions, testing::Values(msgType::changeResName, msgType::removeRes));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(changeResNameAndRemove, sendResMsgForbiddenActions, testing::Values(msgType::changeResName, msgType::removeRes));
 
 
 struct updateActiveMsgForbiddenActions: signUpMsgForbiddenActions {};
@@ -218,10 +223,10 @@ TEST_P(updateActiveMsgForbiddenActions, updateActiveThrowExceptionInConstruction
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new updateActiveMessage(action, msgOutcome::success, u, 0), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(OnlyCloseResFromFourthGroup, updateActiveMsgForbiddenActions, testing::Values(msgType::closeRes));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_SUITE_P(OnlyCloseResFromFourthGroup, updateActiveMsgForbiddenActions, testing::Values(msgType::closeRes));
 
 
 struct privMsgForbiddenActions: simpleMsgTypeTest {};
@@ -230,12 +235,12 @@ TEST_P(privMsgForbiddenActions, privThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new privMessage(action, {"", ""}, msgOutcome::success, "", "", privilege::modify), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(secondGroup));
 std::vector<msgType> ThirdWtChangePriv(thirdGroup);
-auto res=ThirdWtChangePriv.erase(ThirdWtChangePriv.begin()+1);
-INSTANTIATE_TEST_CASE_P(AllButChangePrivilgesFromThirdGroup, privMsgForbiddenActions, testing::ValuesIn(ThirdWtChangePriv));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+[[maybe_unused]] auto res=ThirdWtChangePriv.erase(ThirdWtChangePriv.begin()+1);
+INSTANTIATE_TEST_SUITE_P(AllButChangePrivilgesFromThirdGroup, privMsgForbiddenActions, testing::ValuesIn(ThirdWtChangePriv));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 struct symbolMsgForbiddenActions: simpleMsgTypeTest {
     symbol s;
@@ -245,10 +250,10 @@ TEST_P(symbolMsgForbiddenActions, symbolThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new symbolMessage(action, {"", ""}, msgOutcome::success, 0, 0, s), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(AllButSymInsRemFromThirdGroup, symbolMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin(), thirdGroup.end()-2)));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(AllButSymInsRemFromThirdGroup, symbolMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin(), thirdGroup.end()-2)));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 struct uriMsgForbiddenActions: simpleMsgTypeTest {};
 TEST_P(uriMsgForbiddenActions, uriThrowExceptionInConstruction) {
@@ -256,12 +261,12 @@ TEST_P(uriMsgForbiddenActions, uriThrowExceptionInConstruction) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new uriMessage(action, {"", ""}, msgOutcome::success, "path",
                                                          "name", uri(), 0), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(secondGroup));
 std::vector<msgType> ThirdWtShareRes(thirdGroup);
-auto res2=ThirdWtShareRes.erase(ThirdWtShareRes.begin()+2);
-INSTANTIATE_TEST_CASE_P(AllButShareResFromThirdGroup, uriMsgForbiddenActions, testing::ValuesIn(ThirdWtShareRes));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+[[maybe_unused]] auto res2=ThirdWtShareRes.erase(ThirdWtShareRes.begin()+2);
+INSTANTIATE_TEST_SUITE_P(AllButShareResFromThirdGroup, uriMsgForbiddenActions, testing::ValuesIn(ThirdWtShareRes));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 struct userDataMsgForbiddenActions: signUpMsgForbiddenActions {};
 TEST_P(userDataMsgForbiddenActions, userDataThrowExceptionInConstruction) {
@@ -269,11 +274,11 @@ TEST_P(userDataMsgForbiddenActions, userDataThrowExceptionInConstruction) {
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new userDataMessage(action, {"", ""}, msgOutcome::success, u), action, messageException);
 }
 std::vector<msgType> FirstWtChangeUserData(firstGroup);
-auto res3=FirstWtChangeUserData.erase(FirstWtChangeUserData.begin()+2, FirstWtChangeUserData.begin()+4);
-INSTANTIATE_TEST_CASE_P(FirstWtChangeUserData, userDataMsgForbiddenActions, testing::ValuesIn(FirstWtChangeUserData));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(thirdGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+[[maybe_unused]] auto res3=FirstWtChangeUserData.erase(FirstWtChangeUserData.begin()+2, FirstWtChangeUserData.begin()+4);
+INSTANTIATE_TEST_SUITE_P(FirstWtChangeUserData, userDataMsgForbiddenActions, testing::ValuesIn(FirstWtChangeUserData));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 
 //Added on 17/03/2020, after introduction of cursorMessage
 struct cursorMsgForbiddenActions: simpleMsgTypeTest {};
@@ -281,10 +286,10 @@ TEST_P(cursorMsgForbiddenActions, cursorThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_THROW_MESSAGE_CONSTRUCTION(m = new cursorMessage(action, {"", ""}, msgOutcome::success, 0, 0, 0, 0, 0), action, messageException);
 }
-INSTANTIATE_TEST_CASE_P(firstGroupMsgTypeSet, cursorMsgForbiddenActions, testing::ValuesIn(firstGroup));
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, cursorMsgForbiddenActions, testing::ValuesIn(secondGroup));
-INSTANTIATE_TEST_CASE_P(AllButSymInsRemFromThirdGroup, cursorMsgForbiddenActions, testing::ValuesIn(thirdGroup));
-INSTANTIATE_TEST_CASE_P(allButCursorUpdateFromFourthGroup, cursorMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-1)));
+INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, cursorMsgForbiddenActions, testing::ValuesIn(firstGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, cursorMsgForbiddenActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(AllButSymInsRemFromThirdGroup, cursorMsgForbiddenActions, testing::ValuesIn(thirdGroup));
+INSTANTIATE_TEST_SUITE_P(allButCursorUpdateFromFourthGroup, cursorMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-1)));
 
 //After bug found 11/12/2019: not only we need to throw when an action is illegal, but we do need to NOT
 //throw when it's legal! The following test should assure complete coverage for this consistency check
@@ -294,20 +299,20 @@ TEST_P(askResMsgLegalActions, askResNoThrowExceptionInConstruction){
     msgType action=GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m= new askResMessage(action, {"", ""}, "", "", "", uri::getDefaultPrivilege(), 0), action);
 }
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, askResMsgLegalActions, testing::ValuesIn(secondGroup));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, askResMsgLegalActions, testing::ValuesIn(secondGroup));
 
 struct signUpMsgLegalActions: simpleMsgTypeTest {
     user u;
 
     signUpMsgLegalActions() : u("username", "AP@ssw0rd!", "noempty", "", 0, nullptr) {}
-    ~signUpMsgLegalActions()=default;
+    ~signUpMsgLegalActions() override =default;
 };
 
 TEST_P(signUpMsgLegalActions, signUpNoThrowExceptionInConstruction){
     msgType action=GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m=new signUpMessage(action, {"",""}, u), action);
 }
-INSTANTIATE_TEST_CASE_P(Registration, signUpMsgLegalActions, testing::Values(msgType::registration));
+INSTANTIATE_TEST_SUITE_P(Registration, signUpMsgLegalActions, testing::Values(msgType::registration));
 
 struct updateDocMsgLegalActions: simpleMsgTypeTest {};
 
@@ -315,25 +320,25 @@ TEST_P(updateDocMsgLegalActions, updateDocNoThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new updateDocMessage(action, {"", ""}, 0), action);
 }
-INSTANTIATE_TEST_CASE_P(MapChangesAndCloseRes, updateDocMsgLegalActions, testing::Values(msgType::mapChangesToUser, msgType::closeRes));
+INSTANTIATE_TEST_SUITE_P(MapChangesAndCloseRes, updateDocMsgLegalActions, testing::Values(msgType::mapChangesToUser, msgType::closeRes));
 
 struct sendResMsgLegalActions: simpleMsgTypeTest {
     std::shared_ptr<filesystem> f;
     sendResMsgLegalActions(): f(new file("name", 0)){};
-    ~sendResMsgLegalActions()=default;
+    ~sendResMsgLegalActions() override =default;
 };
 TEST_P(sendResMsgLegalActions, sendResNoThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new sendResMessage(action, msgOutcome::success, f), action);
 }
-INSTANTIATE_TEST_CASE_P(secondGroupMsgTypeSet, sendResMsgLegalActions, testing::ValuesIn(std::vector<msgType>(secondGroup.begin(), secondGroup.begin()+4)));
+INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, sendResMsgLegalActions, testing::ValuesIn(std::vector<msgType>(secondGroup.begin(), secondGroup.begin()+4)));
 
 struct updateActiveMsgLegalActions: signUpMsgForbiddenActions {};
 TEST_P(updateActiveMsgLegalActions, updateActiveThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new updateActiveMessage(action, msgOutcome::success, u, 0), action);
 }
-INSTANTIATE_TEST_CASE_P(CloseRes, updateActiveMsgLegalActions, testing::Values(msgType::addActiveUser, msgType::removeActiveUser));
+INSTANTIATE_TEST_SUITE_P(CloseRes, updateActiveMsgLegalActions, testing::Values(msgType::addActiveUser, msgType::removeActiveUser));
 
 struct privMsgLegalActions: simpleMsgTypeTest {};
 
@@ -341,7 +346,7 @@ TEST_P(privMsgLegalActions, privNoThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new privMessage(action, {"", ""}, msgOutcome::success, "", "", privilege::modify), action);
 }
-INSTANTIATE_TEST_CASE_P(fourthGroupMsgTypeSet, privMsgLegalActions, testing::Values(msgType::changePrivileges));
+INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, privMsgLegalActions, testing::Values(msgType::changePrivileges));
 
 struct symbolMsgLegalActions: simpleMsgTypeTest {
     symbol s;
@@ -351,7 +356,7 @@ TEST_P(symbolMsgLegalActions, symbolNoThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new symbolMessage(action, {"", ""}, msgOutcome::success, 0, 0, s), action);
 }
-INSTANTIATE_TEST_CASE_P(InsertSymbol, symbolMsgLegalActions, testing::Values(msgType::insertSymbol));
+INSTANTIATE_TEST_SUITE_P(InsertSymbol, symbolMsgLegalActions, testing::Values(msgType::insertSymbol));
 
 struct uriMsgLegalActions: simpleMsgTypeTest {};
 TEST_P(uriMsgLegalActions, uriNoThrowExceptionInConstruction) {
@@ -359,14 +364,14 @@ TEST_P(uriMsgLegalActions, uriNoThrowExceptionInConstruction) {
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new uriMessage(action, {"", ""}, msgOutcome::success, "path",
                                                          "name", uri(), 0), action);
 }
-INSTANTIATE_TEST_CASE_P(ShareRes, uriMsgLegalActions, testing::Values(msgType::shareRes));
+INSTANTIATE_TEST_SUITE_P(ShareRes, uriMsgLegalActions, testing::Values(msgType::shareRes));
 
 struct userDataMsgLegalActions: signUpMsgForbiddenActions {};
 TEST_P(userDataMsgLegalActions, userNoDataThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new userDataMessage(action, {"", ""}, msgOutcome::success, u), action);
 }
-INSTANTIATE_TEST_CASE_P(ChangeUserData, userDataMsgLegalActions, testing::Values(msgType::changeUserData));
+INSTANTIATE_TEST_SUITE_P(ChangeUserData, userDataMsgLegalActions, testing::Values(msgType::changeUserData));
 
 //Added on 17/03/2020, after introduction of cursorMessage
 struct cursorMsgLegalActions: simpleMsgTypeTest {};
@@ -374,7 +379,7 @@ TEST_P(cursorMsgLegalActions, cursorUpdateNoThrowExceptionInConstruction) {
     msgType action = GetParam();
     EXPECT_NO_THROW_MESSAGE_CONSTRUCTION(m = new cursorMessage(action, {"", ""}, msgOutcome::success, 1, 1, 1, 1), action);
 }
-INSTANTIATE_TEST_CASE_P(updateCursorPos, cursorMsgLegalActions, testing::Values(msgType::updateCursor));
+INSTANTIATE_TEST_SUITE_P(updateCursorPos, cursorMsgLegalActions, testing::Values(msgType::updateCursor));
 
 /*
  * Basic logic tests for messages sent ONLY by the client (clientMessage)
@@ -385,7 +390,7 @@ INSTANTIATE_TEST_CASE_P(updateCursorPos, cursorMsgLegalActions, testing::Values(
 class SymServerMock: public SymServer{
 public:
     SymServerMock() : SymServer(false, false){}
-    MOCK_METHOD3(login, const user(const std::string&, const std::string&, uint_positive_cnt::type));
+    MOCK_METHOD3(login, const user&(const std::string&, const std::string&, uint_positive_cnt::type));
     MOCK_METHOD2(logout, void(const std::string&, uint_positive_cnt::type));
     MOCK_METHOD3(removeUser, void(const std::string&, const std::string&, uint_positive_cnt::type));
     MOCK_METHOD2(addUser, const user&(user&, uint_positive_cnt::type));
@@ -409,9 +414,9 @@ public:
 struct clientMessageTest: public testing::Test{
     clientMessage *m;
     user u;
-    static const std::string path;
-    static const std::string name;
+    static const std::string resPath;
     static const std::string resId;
+    static const std::string absPath;
     static const std::string username;
     static const std::string pwd;
     static const int resourceId;
@@ -419,20 +424,20 @@ struct clientMessageTest: public testing::Test{
     clientMessageTest(): u(username, pwd, "noempty", "", 0, nullptr){
         m= nullptr;
     }
-    ~clientMessageTest(){
+    ~clientMessageTest() override{
         delete m;
     }
 };
-const std::string clientMessageTest::path="./dir1/dir2";
-const std::string clientMessageTest::name="somefile";
-const std::string clientMessageTest::resId="./someUserDir/hisDir/hisFile";
+const std::string clientMessageTest::resPath="./dir1/dir2";
+const std::string clientMessageTest::resId="somefile";
+const std::string clientMessageTest::absPath="./someUserDir/hisDir/hisFile";
 const std::string clientMessageTest::username="mario";
 const std::string clientMessageTest::pwd="AP@ssw0rd!";
 const int clientMessageTest::resourceId=10;
 
 TEST_F(clientMessageTest, clientMessageTestCallsLoginOnServer){
     m=new clientMessage(msgType::login, {username, pwd});
-    EXPECT_CALL(server, login(m->getActionOwner().first, m->getActionOwner().second, m->getMsgId())).WillOnce(::testing::Return(u));
+    EXPECT_CALL(server, login(m->getActionOwner().first, m->getActionOwner().second, m->getMsgId())).WillOnce(::testing::ReturnRef(u));
     m->invokeMethod(server);
 }
 
@@ -456,41 +461,41 @@ TEST_F(clientMessageTest, signUpMsgTestCallsAddUserOnServer){
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewSource){
     document d;
-    m= new askResMessage(msgType::createRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, createNewSource(m->getActionOwner().first, path, name, m->getMsgId())).WillOnce(::testing::ReturnRef(d));
+    m= new askResMessage(msgType::createRes, {username, ""}, resPath, resId, "", uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, createNewSource(m->getActionOwner().first, resPath, resId, m->getMsgId())).WillOnce(::testing::ReturnRef(d));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsOpenSource){
-    m= new askResMessage(msgType::openRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, openSource(m->getActionOwner().first, path, name, uri::getDefaultPrivilege(), m->getMsgId()));
+    m= new askResMessage(msgType::openRes, {username, ""}, resPath, resId, "", uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, openSource(m->getActionOwner().first, resPath, resId, uri::getDefaultPrivilege(), m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsOpenNewSource){
-    m= new askResMessage(msgType::openNewRes, {username, ""}, path, name, resId, uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, openNewSource(username, resId, path, name, uri::getDefaultPrivilege(), m->getMsgId()));
+    m= new askResMessage(msgType::openNewRes, {username, ""}, resPath, resId, absPath, uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, openNewSource(username, absPath, resPath, resId, uri::getDefaultPrivilege(), m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsRenameResource){
     //If @e action is "changeResName" then @e resourceId is the new file name. See def. of askResMessage in message.h
-    m= new askResMessage(msgType::changeResName, {username, ""}, path, name, resId, uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, renameResource(username, path, name, resId, m->getMsgId())).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
+    m= new askResMessage(msgType::changeResName, {username, ""}, resPath, resId, absPath, uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, renameResource(username, resPath, resId, absPath, m->getMsgId())).WillOnce(::testing::Return(std::shared_ptr<filesystem>()));
 
     //resID non è un nuovo nome della risorsa, sistemare!
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsCreateNewDir){
-    m= new askResMessage(msgType::createNewDir, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, createNewDir(username, path, name, m->getMsgId()));
+    m= new askResMessage(msgType::createNewDir, {username, ""}, resPath, resId, "", uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, createNewDir(username, resPath, resId, m->getMsgId()));
     m->invokeMethod(server);
 }
 
 TEST_F(clientMessageTest, askResMsgTestCallsRemoveResource){
-    m= new askResMessage(msgType::removeRes, {username, ""}, path, name, "", uri::getDefaultPrivilege(), 0);
-    EXPECT_CALL(server, removeResource(username, path, name, m->getMsgId())).WillOnce(::testing::Return(std::shared_ptr<directory>()));
+    m= new askResMessage(msgType::removeRes, {username, ""}, resPath, resId, "", uri::getDefaultPrivilege(), 0);
+    EXPECT_CALL(server, removeResource(username, resPath, resId, m->getMsgId())).WillOnce(::testing::Return(std::shared_ptr<directory>()));
     m->invokeMethod(server);
 }
 
@@ -550,7 +555,7 @@ struct serverMessageTest: public testing::Test{
         cm=nullptr;
         m= nullptr;
     }
-    ~serverMessageTest(){
+    ~serverMessageTest() override{
         delete m;
     }
 };
@@ -592,9 +597,9 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
     std::shared_ptr<file> dummyFile(new file("file", 5));
     //data to call createNewSource() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
-    cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
+    cm= new askResMessage(msgType::createRes, {clientMessageTest::username, ""}, clientMessageTest::resPath, clientMessageTest::resId, "", uri::getDefaultPrivilege(), 0);
     m=new sendResMessage(msgType::createRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, createNewSource(clientMessageTest::path, clientMessageTest::name, dummyFile->getId(), dummyFile));
+    EXPECT_CALL(client, createNewSource(clientMessageTest::resPath, clientMessageTest::resId, dummyFile->getId(), dummyFile));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);
@@ -603,10 +608,10 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewSource){
 TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
     //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
-    cm= new askResMessage(msgType::createNewDir, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
+    cm= new askResMessage(msgType::createNewDir, {clientMessageTest::username, ""}, clientMessageTest::resPath, clientMessageTest::resId, "", uri::getDefaultPrivilege(), 0);
     auto dirCreated=directory::emptyDir();
     m=new sendResMessage(msgType::createNewDir, msgOutcome::success, dirCreated);
-    EXPECT_CALL(client, createNewDir(clientMessageTest::path, clientMessageTest::name, dirCreated->getId()));
+    EXPECT_CALL(client, createNewDir(clientMessageTest::resPath, clientMessageTest::resId, dirCreated->getId()));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);
@@ -615,9 +620,9 @@ TEST_F(serverMessageTest, sendResMsgTestCallsCreateNewDir){
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
     std::shared_ptr<file> dummyFile(new file("file", 1));
     dummyFile->setUserPrivilege(clientMessageTest::username, uri::getDefaultPrivilege());
-    cm= new askResMessage(msgType::openRes, {clientMessageTest::username, {}}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
+    cm= new askResMessage(msgType::openRes, {clientMessageTest::username, {}}, clientMessageTest::resPath, clientMessageTest::resId, "", uri::getDefaultPrivilege(), 0);
     m=new sendResMessage(msgType::openRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, openSource(clientMessageTest::path, clientMessageTest::name, dummyFile, dummyFile->getUserPrivilege(clientMessageTest::username)));
+    EXPECT_CALL(client, openSource(clientMessageTest::resPath, clientMessageTest::resId, dummyFile, dummyFile->getUserPrivilege(clientMessageTest::username)));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);
@@ -626,11 +631,11 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenSource){
 TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
     //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
-    cm= new askResMessage(msgType::openNewRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, clientMessageTest::resId, uri::getDefaultPrivilege(), 0);
+    cm= new askResMessage(msgType::openNewRes, {clientMessageTest::username, ""}, clientMessageTest::resPath, clientMessageTest::resId, clientMessageTest::absPath, uri::getDefaultPrivilege(), 0);
     std::shared_ptr<filesystem> dummyFile(new file("file", 1));
     dummyFile->setUserPrivilege(clientMessageTest::username, uri::getDefaultPrivilege());
     m=new sendResMessage(msgType::openNewRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, openNewSource(clientMessageTest::resId, uri::getDefaultPrivilege(), clientMessageTest::path, clientMessageTest::name, dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
+    EXPECT_CALL(client, openNewSource(clientMessageTest::absPath, uri::getDefaultPrivilege(), clientMessageTest::resPath, clientMessageTest::resId, dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);
@@ -639,9 +644,9 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
 TEST_F(serverMessageTest, serverMsgTestCallsRenameResource){
     //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
-    cm= new askResMessage(msgType::changeResName, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "newName", uri::getDefaultPrivilege(), 0);
+    cm= new askResMessage(msgType::changeResName, {clientMessageTest::username, ""}, clientMessageTest::resPath, clientMessageTest::resId, "newName", uri::getDefaultPrivilege(), 0);
     m=new serverMessage(msgType::changeResName, msgOutcome::success);
-    EXPECT_CALL(client, renameResource(clientMessageTest::path, clientMessageTest::name, "newName", true));
+    EXPECT_CALL(client, renameResource(clientMessageTest::resPath, clientMessageTest::resId, "newName", true));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);
@@ -650,9 +655,9 @@ TEST_F(serverMessageTest, serverMsgTestCallsRenameResource){
 TEST_F(serverMessageTest, serverResMsgTestCallsRemoveResource){
     //data to call createNewDir() with is retrieved by the previously sent askResMessage, so suppose
     //the client has sent the following message
-    cm= new askResMessage(msgType::removeRes, {clientMessageTest::username, ""}, clientMessageTest::path, clientMessageTest::name, "", uri::getDefaultPrivilege(), 0);
+    cm= new askResMessage(msgType::removeRes, {clientMessageTest::username, ""}, clientMessageTest::resPath, clientMessageTest::resId, "", uri::getDefaultPrivilege(), 0);
     m=new serverMessage(msgType::removeRes, msgOutcome::success);
-    EXPECT_CALL(client, removeResource(clientMessageTest::path, clientMessageTest::name, true));
+    EXPECT_CALL(client, removeResource(clientMessageTest::resPath, clientMessageTest::resId, true));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);
@@ -674,7 +679,7 @@ TEST_F(serverMessageTest, updateActiveMsgTestCallsAddActiveUsers){
     m=new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, sentByServer, 0);
     //m is a serverMessage, we need a cast to extract the resource id
     //this will not be necessary in code because SymClient::addActiveUser() is called from within the invokeMethod()
-    updateActiveMessage* uam=static_cast<updateActiveMessage*>(m);
+    auto* uam=static_cast<updateActiveMessage*>(m);
     EXPECT_CALL(client, addActiveUser(uam->getResourceId(), sentByServer, uam->getUserPrivilege()));
     m->invokeMethod(client);
 }
@@ -684,7 +689,7 @@ TEST_F(serverMessageTest, updateActiveMsgTestCallsRemoveActiveUsers){
     m=new updateActiveMessage(msgType::removeActiveUser, msgOutcome::success, sentByServer, 0);
     //m is a serverMessage, we need a cast to extract the resource id
     //this will not be necessary in code because SymClient::removeActiveUser() is called from within the invokeMethod()
-    updateActiveMessage* uam=static_cast<updateActiveMessage*>(m);
+    auto* uam=static_cast<updateActiveMessage*>(m);
     EXPECT_CALL(client, removeActiveUser(uam->getResourceId(), sentByServer));
     m->invokeMethod(client);
 }
@@ -729,7 +734,7 @@ struct DoubleEndMessageTest: public testing::Test{
         fromServer=nullptr;
         fromClient= nullptr;
     }
-    ~DoubleEndMessageTest(){
+    ~DoubleEndMessageTest() override{
         delete fromServer;
         delete fromClient;
     }
@@ -770,7 +775,7 @@ TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilegeOnOtherClient){
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnSuccess){
     fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
-    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    auto* fc= static_cast<symbolMessage*>(fromClient);
     EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
     fromClient->invokeMethod(server);
 
@@ -790,7 +795,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnSuccess){
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnFailure){
     fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
-    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    auto* fc= static_cast<symbolMessage*>(fromClient);
     EXPECT_CALL(server, remoteInsert(username, resourceId, *fc));
     fromClient->invokeMethod(server);
 
@@ -810,7 +815,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnFailure){
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnOtherClient){
     fromClient=new symbolMessage(msgType::insertSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
-    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    auto* fc= static_cast<symbolMessage*>(fromClient);
 
     //the message from client is forwarded to and the symbol contained it's now verified
     symbol s=fc->getSym(); s.setVerified();
@@ -822,7 +827,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnOtherClient){
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnSuccess){
     fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
-    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    auto* fc= static_cast<symbolMessage*>(fromClient);
     EXPECT_CALL(server, remoteRemove(username, resourceId, *fc));
     fromClient->invokeMethod(server);
 
@@ -840,7 +845,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnSuccess){
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
     fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
     //symbolMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
-    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    auto* fc= static_cast<symbolMessage*>(fromClient);
     EXPECT_CALL(server, remoteRemove(username, resourceId, *fc));
     fromClient->invokeMethod(server);
 
@@ -860,7 +865,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteInsertOnFailure){
 
 TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnOtherClient){
     fromClient=new symbolMessage(msgType::removeSymbol,{username, {}}, msgOutcome::success, 10,resourceId, dummySymbol);
-    symbolMessage* fc= static_cast<symbolMessage*>(fromClient);
+    auto* fc= static_cast<symbolMessage*>(fromClient);
 
     //the message from client is forwarded to the other client, but the password is cleaned and it's now verified
     symbol s=fc->getSym(); s.setVerified();
@@ -872,7 +877,7 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnOtherClient){
 TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemove){
     fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path, name,
                                dummyUri);
-    uriMessage* fc= static_cast<uriMessage*>(fromClient);
+    auto* fc= static_cast<uriMessage*>(fromClient);
     EXPECT_CALL(server, shareResource(username, path, name, dummyUri, fromClient->getMsgId()));
     fromClient->invokeMethod(server);
 
@@ -889,7 +894,7 @@ TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemoveOnOtherClient){
     fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path,
                                name,
                                dummyUri);
-    uriMessage* fc= static_cast<uriMessage*>(fromClient);
+    auto* fc= static_cast<uriMessage*>(fromClient);
 
     //the message from client is forwarded to the other client, but the password is cleaned
     fromServer= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path, name,
@@ -924,9 +929,9 @@ TEST_F(DoubleEndMessageTest, userDataMsgCallsEditUserOnOtherClient){
 
 //Added on 18/03/2020, after introduction of cursorMessage
 TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursor){
-    srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
+    unsigned int row=rand()%1000, col=rand()%1000;
     fromClient=new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col);
-    cursorMessage* cr= static_cast<cursorMessage*>(fromClient);
+    auto* cr= static_cast<cursorMessage*>(fromClient);
 
     EXPECT_CALL(server, updateCursorPos(username, resourceId, *cr));
     fromClient->invokeMethod(server);
@@ -941,7 +946,7 @@ TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursor){
 }
 
 TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursorOnOtherClient){
-    srand(time(NULL)); unsigned int row=rand()%1000, col=rand()%1000;
+    unsigned int row=rand()%1000, col=rand()%1000;
     fromClient=new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col);
 
     fromServer= new cursorMessage(msgType::updateCursor, {username, {}}, msgOutcome::success, u.getSiteId(), resourceId, row, col, fromClient->getMsgId());
@@ -964,12 +969,12 @@ struct messageSerialization: public testing::Test{
         boost::archive::text_iarchive ia(stream);
         ia>>as;
     }
-    ~messageSerialization()=default;
+    ~messageSerialization() override =default;
 };
 
 TEST_F(messageSerialization, clientMessage){
-    toStore=std::unique_ptr<clientMessage>(new clientMessage(msgType::login, {"try","pass"},10));
-    toLoad=std::unique_ptr<message>(new clientMessage(msgType::login, {"",""},10));
+    toStore=std::make_unique<clientMessage>(msgType::login, std::pair{"try","pass"},10);
+    toLoad=std::make_unique<clientMessage>(msgType::login, std::pair{"",""},10);
     ASSERT_NE(*dynamic_cast<clientMessage*>(toStore.get()), *dynamic_cast<clientMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -977,8 +982,8 @@ TEST_F(messageSerialization, clientMessage){
 }
 
 TEST_F(messageSerialization, serverMessage){
-    toStore=std::unique_ptr<serverMessage>(new serverMessage(msgType::login, msgOutcome::success,10));
-    toLoad=std::unique_ptr<serverMessage>(new serverMessage(msgType::login, msgOutcome::failure,10));
+    toStore=std::make_unique<serverMessage>(msgType::login, msgOutcome::success,10);
+    toLoad=std::make_unique<serverMessage>(msgType::login, msgOutcome::failure,10);
     ASSERT_NE(*dynamic_cast<serverMessage*>(toStore.get()), *dynamic_cast<serverMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -986,8 +991,8 @@ TEST_F(messageSerialization, serverMessage){
 }
 
 TEST_F(messageSerialization, askResMessage){
-    toStore=std::unique_ptr<askResMessage>(new askResMessage(msgType::openRes, {"", ""}, "", "","",privilege::readOnly,10));
-    toLoad=std::unique_ptr<askResMessage>(new askResMessage(msgType::openRes, {"", ""}, "path", "name", "",privilege::modify, 10));
+    toStore=std::make_unique<askResMessage>(msgType::openRes, std::pair{"", ""}, "", "","",privilege::readOnly,10);
+    toLoad=std::make_unique<askResMessage>(msgType::openRes, std::pair{"", ""}, "path", "name", "",privilege::modify, 10);
     ASSERT_NE(*dynamic_cast<askResMessage*>(toStore.get()), *dynamic_cast<askResMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -995,8 +1000,8 @@ TEST_F(messageSerialization, askResMessage){
 }
 
 TEST_F(messageSerialization, updateDocMessage){
-    toStore=std::unique_ptr<updateDocMessage>(new updateDocMessage(msgType::mapChangesToUser, {"",""}, 100,10));
-    toLoad=std::unique_ptr<updateDocMessage>(new updateDocMessage(msgType::mapChangesToUser, {"",""}, 10,10));
+    toStore=std::make_unique<updateDocMessage>(msgType::mapChangesToUser, std::pair{"",""}, 100,10);
+    toLoad=std::make_unique<updateDocMessage>(msgType::mapChangesToUser, std::pair{"",""}, 10,10);
     ASSERT_NE(*dynamic_cast<updateDocMessage*>(toStore.get()), *dynamic_cast<updateDocMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1004,8 +1009,8 @@ TEST_F(messageSerialization, updateDocMessage){
 }
 
 TEST_F(messageSerialization, signUpMessage){
-    toStore=std::unique_ptr<signUpMessage>(new signUpMessage(msgType::registration, {"", ""}, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr),10));
-    toLoad=std::unique_ptr<signUpMessage>(new signUpMessage(msgType::registration, {"", ""}, user(),10));
+    toStore=std::make_unique<signUpMessage>(msgType::registration, std::pair{"", ""}, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr),10);
+    toLoad=std::make_unique<signUpMessage>(msgType::registration, std::pair{"", ""}, user(),10);
     ASSERT_NE(*dynamic_cast<signUpMessage*>(toStore.get()), *dynamic_cast<signUpMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1013,8 +1018,8 @@ TEST_F(messageSerialization, signUpMessage){
 }
 
 TEST_F(messageSerialization, loginMessage){
-    toStore=std::unique_ptr<loginMessage>(new loginMessage(msgType::login, msgOutcome::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr),10));
-    toLoad=std::unique_ptr<loginMessage>(new loginMessage(msgType::login, msgOutcome::success, user(),10));
+    toStore=std::make_unique<loginMessage>(msgType::login, msgOutcome::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr),10);
+    toLoad=std::make_unique<loginMessage>(msgType::login, msgOutcome::success, user(),10);
     ASSERT_NE(*dynamic_cast<loginMessage*>(toStore.get()), *dynamic_cast<loginMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1022,8 +1027,8 @@ TEST_F(messageSerialization, loginMessage){
 }
 
 TEST_F(messageSerialization, sendResMessage){
-    toStore=std::unique_ptr<sendResMessage>(new sendResMessage(msgType::openRes, msgOutcome::success, directory::getRoot(), 10));
-    toLoad=std::unique_ptr<sendResMessage>(new sendResMessage(msgType::openRes, msgOutcome::success, directory::emptyDir(), 10));
+    toStore=std::make_unique<sendResMessage>(msgType::openRes, msgOutcome::success, directory::getRoot(), 10);
+    toLoad=std::make_unique<sendResMessage>(msgType::openRes, msgOutcome::success, directory::emptyDir(), 10);
     ASSERT_NE(*dynamic_cast<sendResMessage*>(toStore.get()), *dynamic_cast<sendResMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1031,8 +1036,8 @@ TEST_F(messageSerialization, sendResMessage){
 }
 
 TEST_F(messageSerialization, updateActiveMessage){
-    toStore=std::unique_ptr<updateActiveMessage>(new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr), 10,privilege::readOnly, 10));
-    toLoad=std::unique_ptr<updateActiveMessage>(new updateActiveMessage(msgType::addActiveUser, msgOutcome::success, user(), 10, privilege::readOnly, 10));
+    toStore=std::make_unique<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr), 10,privilege::readOnly, 10);
+    toLoad=std::make_unique<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, user(), 10, privilege::readOnly, 10);
     ASSERT_NE(*dynamic_cast<updateActiveMessage*>(toStore.get()), *dynamic_cast<updateActiveMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1043,8 +1048,8 @@ TEST_F(messageSerialization, mapMessage){
     std::map<uint_positive_cnt::type, user> expected({
                                          std::pair<int, user>(2, SymServer::unknownUser),
                                          std::pair<int, user>(3, SymServer::unknownUser)});
-    toStore=std::unique_ptr<mapMessage>(new mapMessage(msgType::mapChangesToUser, msgOutcome::success, expected,10));
-    toLoad=std::unique_ptr<mapMessage>(new mapMessage(msgType::mapChangesToUser, msgOutcome::success, std::map<uint_positive_cnt::type, user>(),10));
+    toStore=std::make_unique<mapMessage>(msgType::mapChangesToUser, msgOutcome::success, expected,10);
+    toLoad=std::make_unique<mapMessage>(msgType::mapChangesToUser, msgOutcome::success, std::map<uint_positive_cnt::type, user>(),10);
     ASSERT_NE(*dynamic_cast<mapMessage*>(toStore.get()), *dynamic_cast<mapMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1052,8 +1057,8 @@ TEST_F(messageSerialization, mapMessage){
 }
 
 TEST_F(messageSerialization, privMessage){
-    toStore=std::unique_ptr<privMessage>(new privMessage(msgType::changePrivileges, {"", ""}, msgOutcome::success, "./10/11", "user", privilege::readOnly, 10));
-    toLoad=std::unique_ptr<privMessage>(new privMessage(msgType::changePrivileges, {"", ""}, msgOutcome::success, "./10/11", "user2", privilege::readOnly,10));
+    toStore=std::make_unique<privMessage>(msgType::changePrivileges, std::pair{"", ""}, msgOutcome::success, "./10/11", "user", privilege::readOnly, 10);
+    toLoad=std::make_unique<privMessage>(msgType::changePrivileges, std::pair{"", ""}, msgOutcome::success, "./10/11", "user2", privilege::readOnly,10);
     ASSERT_NE(*dynamic_cast<privMessage*>(toStore.get()), *dynamic_cast<privMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1061,8 +1066,8 @@ TEST_F(messageSerialization, privMessage){
 }
 
 TEST_F(messageSerialization, symbolMessage){
-    toStore=std::unique_ptr<symbolMessage>(new symbolMessage(msgType::insertSymbol, {"",""},msgOutcome ::success, 10, 10, symbol('a', 0, 1, std::vector<int>(), false), 10));
-    toLoad=std::unique_ptr<symbolMessage>(new symbolMessage(msgType::insertSymbol, {"",""},msgOutcome ::success, 10, 10, symbol('b', 0, 1, std::vector<int>(), false), 10));
+    toStore=std::make_unique<symbolMessage>(msgType::insertSymbol, std::pair{"",""},msgOutcome ::success, 10, 10, symbol('a', 0, 1, std::vector<int>(), false), 10);
+    toLoad=std::make_unique<symbolMessage>(msgType::insertSymbol, std::pair{"",""},msgOutcome ::success, 10, 10, symbol('b', 0, 1, std::vector<int>(), false), 10);
     ASSERT_NE(*dynamic_cast<symbolMessage*>(toStore.get()), *dynamic_cast<symbolMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1070,8 +1075,8 @@ TEST_F(messageSerialization, symbolMessage){
 }
 
 TEST_F(messageSerialization, uriMessage){
-toStore=std::unique_ptr<uriMessage>(new uriMessage(msgType::shareRes, {"",""},msgOutcome ::success, "path", "name", uri(uriPolicy::activeAlways), 10));
-toLoad=std::unique_ptr<uriMessage>(new uriMessage(msgType::shareRes, {"",""},msgOutcome ::success, "path", "name", uri(), 10));
+toStore=std::make_unique<uriMessage>(msgType::shareRes, std::pair{"",""},msgOutcome ::success, "path", "name", uri(uriPolicy::activeAlways), 10);
+toLoad=std::make_unique<uriMessage>(msgType::shareRes, std::pair{"",""},msgOutcome ::success, "path", "name", uri(), 10);
 ASSERT_NE(*dynamic_cast<uriMessage*>(toStore.get()), *dynamic_cast<uriMessage*>(toLoad.get()));
 storeMessage(toStore);
 loadMessage(toLoad);
@@ -1079,8 +1084,8 @@ EXPECT_EQ(*dynamic_cast<uriMessage*>(toStore.get()), *dynamic_cast<uriMessage*>(
 }
 
 TEST_F(messageSerialization, userDataMessage){
-    toStore=std::unique_ptr<userDataMessage>(new userDataMessage(msgType::changeUserData, {"",""},msgOutcome ::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr), 10));
-    toLoad=std::unique_ptr<userDataMessage>(new userDataMessage(msgType::changeUserData, {"",""},msgOutcome ::success, user(), 10));
+    toStore=std::make_unique<userDataMessage>(msgType::changeUserData, std::pair{"",""},msgOutcome ::success, user("user", "AP@ssw0rd!", "noempty", "", 0, nullptr), 10);
+    toLoad=std::make_unique<userDataMessage>(msgType::changeUserData, std::pair{"",""},msgOutcome ::success, user(), 10);
     ASSERT_NE(*dynamic_cast<userDataMessage*>(toStore.get()), *dynamic_cast<userDataMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);
@@ -1088,8 +1093,8 @@ TEST_F(messageSerialization, userDataMessage){
 }
 
 TEST_F(messageSerialization, cursorMessage){
-    toStore=std::unique_ptr<cursorMessage>(new cursorMessage(msgType::updateCursor, {"",""},msgOutcome ::success, 0, 0, 0, 0, 10));
-    toLoad=std::unique_ptr<cursorMessage>(new cursorMessage(msgType::updateCursor, {"",""},msgOutcome ::success, 0, 0, 0, 10, 10));
+    toStore=std::make_unique<cursorMessage>(msgType::updateCursor, std::pair{"",""},msgOutcome ::success, 0, 0, 0, 0, 10);
+    toLoad=std::make_unique<cursorMessage>(msgType::updateCursor, std::pair{"",""},msgOutcome ::success, 0, 0, 0, 10, 10);
     ASSERT_NE(*dynamic_cast<cursorMessage*>(toStore.get()), *dynamic_cast<cursorMessage*>(toLoad.get()));
     storeMessage(toStore);
     loadMessage(toLoad);

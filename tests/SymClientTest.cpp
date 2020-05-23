@@ -32,7 +32,6 @@
 #include <gmock/gmock.h>
 #include "../SymClient.h"
 #include "../filesystem.h"
-#include "../user.h"
 
 using namespace Symposium;
 
@@ -140,8 +139,8 @@ struct SymClientTest : ::testing::Test{
     static const std::string username;
     static const std::string pwd;
     static const std::string nickname;
-    static const std::string path;
-    static const std::string filename;
+    static const std::string resPath;
+    static const std::string resId;
     static constexpr privilege aPrivilege=privilege::modify;
     static const std::string destPath;
     static uri newPreferences;
@@ -151,10 +150,10 @@ struct SymClientTest : ::testing::Test{
     SymClientDocMock docInUserFilesystem, docSentByServer;
     static const std::pair<unsigned, unsigned> indexes;
     SymClientTest(): userReceived(username, pwd, nickname, iconPath, 0, std::shared_ptr<SymClientDirMock>(new SymClientDirMock(username))),
-                     fileSentByServer(new SymClientFileMock(filename, "./dir1/dir2")),
-                     fileInUserFilesystem(new SymClientFileMock(filename, "./dir1/dir2")),
+                     fileSentByServer(new SymClientFileMock(resId, "./dir1/dir2")),
+                     fileInUserFilesystem(new SymClientFileMock(resId, "./dir1/dir2")),
                      docInUserFilesystem(120), docSentByServer(120),
-                     dirSentByServer(new SymClientDirMock(filename)){};
+                     dirSentByServer(new SymClientDirMock(resId)){};
     bool everyUserHasDifferentColor(){
         auto mapped=client.getUserColors();
         std::set<std::tuple<int, int, Color>> colors; //{siteId, documentId, color}
@@ -187,17 +186,17 @@ struct SymClientTest : ::testing::Test{
     }
     void setStageForOpenedDoc(){
         setStageForLoggedUser();
-        EXPECT_CALL(userReceived, openFile(path, filename, aPrivilege)).WillOnce(::testing::Return(fileInUserFilesystem));
+        EXPECT_CALL(userReceived, openFile(resPath, resId, aPrivilege)).WillOnce(::testing::Return(fileInUserFilesystem));
         EXPECT_CALL(*fileSentByServer, access(userReceived, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(docSentByServer));
-        client.openSource(path, filename, fileSentByServer, uri::getDefaultPrivilege());
+        client.openSource(resPath, resId, fileSentByServer, uri::getDefaultPrivilege());
         ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
         //tests that the document returned by openFile() has now the same content of the document sent by the server
         EXPECT_EQ(docInUserFilesystem, docSentByServer);
     }
 
-    bool userHasAssignedColor(uint_positive_cnt::type siteId, uint_positive_cnt::type resId){
+    bool userHasAssignedColor(uint_positive_cnt::type siteId, uint_positive_cnt::type thisResId){
         auto colorMap=client.getUserColors();
-        return colorMap.find({siteId, resId})!=colorMap.end();
+        return colorMap.find({siteId, thisResId}) != colorMap.end();
     }
     /*
      * Just impose that every time we generate a clientMessage the msgId is different
@@ -218,23 +217,24 @@ struct SymClientTest : ::testing::Test{
      * It's a little workaround, sets to the same value the msgId of the copy
      * of two given messages, the compares them using standard operator==
      */
-    void messageAreAnalogous(message& m1, message& m2){
-        int m2PrevSiteId=m2.getMsgId();
+    template<class T>
+    void messageAreAnalogous(T& toTest, const T &expected){
+        int m2PrevSiteId=toTest.getMsgId();
         //change m2's siteId to make the comparison fail only
         //if there are members different from msgId that are not equal
-        messageIntruder::setId(m2, m1.getMsgId());
-        EXPECT_EQ(m1, m2);
+        messageIntruder::setId(toTest, expected.getMsgId());
+        EXPECT_EQ(toTest, expected);
         //reset the previous msgId of m2
-        messageIntruder::setId(m2, m2PrevSiteId);
+        messageIntruder::setId(toTest, m2PrevSiteId);
     }
 };
 const std::string SymClientTest::iconPath="./icons/icon1.jpg";
 const std::string SymClientTest::username="username";
 const std::string SymClientTest::pwd="AP@ssw0rd!";
 const std::string SymClientTest::nickname="nickname";
-const std::string SymClientTest::path="./dir1/dir2";
-const std::string SymClientTest::filename="file1";
-const std::string SymClientTest::destPath="./dir1/dir2";
+const std::string SymClientTest::resPath="./1/2";
+const std::string SymClientTest::resId="3";
+const std::string SymClientTest::destPath="./4/5";
 const std::string SymClientTest::anotherUsername="anotherUsername";
 uri SymClientTest::newPreferences(uriPolicy::activeAlways);
 const std::pair<unsigned, unsigned> SymClientTest::indexes={0,0};
@@ -245,14 +245,14 @@ TEST_F(SymClientTest, setLoggedUserAssignesUserReceivedToClient){
 }
 
 TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){
-    auto mex= client.signUp(username, pwd, nickname, path);
+    auto mex= client.signUp(username, pwd, nickname, resPath);
     user expected(username, pwd, nickname, iconPath, 0, nullptr);
     EXPECT_EQ(expected, mex.getNewUser());
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
 //FIXME: this won't work
 TEST_F(SymClientTest, signUpAssignesLoggedUser){
-    auto mex= client.signUp(username, pwd, nickname, path);
+    auto mex= client.signUp(username, pwd, nickname, resPath);
     //just imagine that the server has answered with msgOutcome::success to client's signUpMessage, the response contain the
     //complete user data
     client.signUp(userReceived);
@@ -275,9 +275,9 @@ TEST_F(SymClientTest, loginAssignesLoggedUser){
 
 TEST_F(SymClientTest, openSourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.openSource(path, filename, privilege::readOnly);
+    auto mex=client.openSource(resPath, resId, privilege::readOnly);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::openRes, {username, ""}, path, filename, "", uri::getDefaultPrivilege(), 0);
+    askResMessage expected(msgType::openRes, {username, ""}, resPath, resId, "", uri::getDefaultPrivilege(), 0);
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -285,13 +285,13 @@ TEST_F(SymClientTest, openSourceConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, openSourceOpensDocAndPutInActive)
 {
     setStageForLoggedUser();
-    auto mex=client.openSource(path, filename, privilege::readOnly);
+    auto mex=client.openSource(resPath, resId, privilege::readOnly);
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openSource on client
     //the data use to call openFile must be taken from the relative askResMessage in unanswered
-    EXPECT_CALL(userReceived, openFile(path, filename, privilege::readOnly)).WillOnce(::testing::Return(fileInUserFilesystem));
+    EXPECT_CALL(userReceived, openFile(resPath, resId, privilege::readOnly)).WillOnce(::testing::Return(fileInUserFilesystem));
     EXPECT_CALL(*fileSentByServer, access(userReceived, privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openSource(path, filename, fileSentByServer, privilege::readOnly);
+    client.openSource(resPath, resId, fileSentByServer, privilege::readOnly);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docInUserFilesystem, fileSentByServer->getId()));
     //tests that the document returned by openFile() has now the same content of the document sent by the server
     EXPECT_EQ(docInUserFilesystem, docSentByServer);
@@ -300,20 +300,20 @@ TEST_F(SymClientTest, openSourceOpensDocAndPutInActive)
 TEST_F(SymClientTest, openSourceGenerateColorForUser)
 {
     setStageForLoggedUser();
-    auto mex=client.openSource(path, filename, privilege::readOnly);
+    auto mex=client.openSource(resPath, resId, privilege::readOnly);
 
-    EXPECT_CALL(userReceived, openFile(path, filename, privilege::readOnly)).WillOnce(::testing::Return(fileInUserFilesystem));
+    EXPECT_CALL(userReceived, openFile(resPath, resId, privilege::readOnly)).WillOnce(::testing::Return(fileInUserFilesystem));
     EXPECT_CALL(*fileSentByServer, access(userReceived, privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openSource(path, filename, fileSentByServer, privilege::readOnly);
+    client.openSource(resPath, resId, fileSentByServer, privilege::readOnly);
 
     EXPECT_TRUE(userHasAssignedColor(userReceived.getSiteId(), docSentByServer.getId()));
 }
 
 TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, destPath, filename);
+    auto mex=client.openNewSource(resPath + "/" + resId, privilege::readOnly, destPath, resId);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::openNewRes, {username, ""}, destPath, filename, path + "/" + filename, uri::getDefaultPrivilege(), 0);
+    askResMessage expected(msgType::openNewRes, {username, ""}, destPath, resId, resPath + "/" + resId, uri::getDefaultPrivilege(), 0);
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -321,33 +321,33 @@ TEST_F(SymClientTest, openNewSourceConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, openNewSourceOpensDocAndPutInActive)
 {
     setStageForLoggedUser();
-    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym");
+    auto mex=client.openNewSource(resPath + "/" + resId, privilege::readOnly, "./", "sym");
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call openNewSource on client
     //the data use to call accessFile must be taken from the relative askResMessage in unanswered
-    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink("./", "sym", path, filename, fileSentByServer->getId()));
+    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink("./", "sym", resPath, resId, fileSentByServer->getId()));
     EXPECT_CALL(*fileSentByServer, access(client.getLoggedUser(), privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym", fileSentByServer->getId(), fileSentByServer);
+    client.openNewSource(resPath + "/" + resId, privilege::readOnly, "./", "sym", fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
 }
 
 TEST_F(SymClientTest, openNewSourceGenerateColorForUser)
 {
     setStageForLoggedUser();
-    auto mex=client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym");
+    auto mex=client.openNewSource(resPath + "/" + resId, privilege::readOnly, "./", "sym");
 
-    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink("./", "sym", path, filename, fileSentByServer->getId()));
+    EXPECT_CALL(*static_cast<SymClientDirMock*>(client.getLoggedUser().getHome().get()), addLink("./", "sym", resPath, resId, fileSentByServer->getId()));
     EXPECT_CALL(*fileSentByServer, access(client.getLoggedUser(), privilege::readOnly)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.openNewSource(path+"/"+filename, privilege::readOnly, "./", "sym", fileSentByServer->getId(), fileSentByServer);
+    client.openNewSource(resPath + "/" + resId, privilege::readOnly, "./", "sym", fileSentByServer->getId(), fileSentByServer);
 
     EXPECT_TRUE(userHasAssignedColor(userReceived.getSiteId(), docSentByServer.getId()));
 }
 
 TEST_F(SymClientTest, createNewSourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.createNewSource(path, filename);
+    auto mex=client.createNewSource(resPath, resId);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::createRes, {username, ""}, path, filename, "", uri::getDefaultPrivilege(), 0);
+    askResMessage expected(msgType::createRes, {username, ""}, resPath, resId, "", uri::getDefaultPrivilege(), 0);
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -355,34 +355,34 @@ TEST_F(SymClientTest, createNewSourceConstructsGoodMessageAndInsertInUnanswered)
 TEST_F(SymClientTest, createNewSourceOpensDocAndPutInActive)
 {
     setStageForLoggedUser();
-    auto cmex=client.createNewSource(path, filename);
+    auto cmex=client.createNewSource(resPath, resId);
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call createNewSource on client
     //the data used to call newFile must be taken from the relative askResMessage in unanswered (cmex)
-    EXPECT_CALL(userReceived, newFile(filename, path, fileSentByServer->getId())).WillOnce(::testing::Return(fileSentByServer));
+    EXPECT_CALL(userReceived, newFile(resId, resPath, fileSentByServer->getId())).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, access(userReceived, privilege::owner)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.createNewSource(path, filename, fileSentByServer->getId(), fileSentByServer);
+    client.createNewSource(resPath, resId, fileSentByServer->getId(), fileSentByServer);
     ASSERT_NO_FATAL_FAILURE(correctInsertionOfFileAndDocumentInLists(docSentByServer.getId(), &docSentByServer, fileSentByServer->getId()));
 }
 
 TEST_F(SymClientTest, createNewSourceGenerateColorForUser)
 {
     setStageForLoggedUser();
-    auto cmex=client.createNewSource(path, filename);
+    auto cmex=client.createNewSource(resPath, resId);
 
 
-    EXPECT_CALL(userReceived, newFile(filename, path, fileSentByServer->getId())).WillOnce(::testing::Return(fileSentByServer));
+    EXPECT_CALL(userReceived, newFile(resId, resPath, fileSentByServer->getId())).WillOnce(::testing::Return(fileSentByServer));
     EXPECT_CALL(*fileSentByServer, access(userReceived, privilege::owner)).WillOnce(::testing::ReturnRef(docSentByServer));
-    client.createNewSource(path, filename, fileSentByServer->getId(), fileSentByServer);
+    client.createNewSource(resPath, resId, fileSentByServer->getId(), fileSentByServer);
 
     EXPECT_TRUE(userHasAssignedColor(userReceived.getSiteId(), docSentByServer.getId()));
 }
 
 TEST_F(SymClientTest, createNewDirConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.createNewDir(path, filename);
+    auto mex=client.createNewDir(resPath, resId);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::createNewDir, {username, ""}, path, filename, "", uri::getDefaultPrivilege(), 0);
+    askResMessage expected(msgType::createNewDir, {username, ""}, resPath, resId, "", uri::getDefaultPrivilege(), 0);
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -390,12 +390,12 @@ TEST_F(SymClientTest, createNewDirConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, createNewDirOpensDocAndPutInActive)
 {
     setStageForLoggedUser();
-    auto mex=client.createNewDir(path, filename);
+    auto mex=client.createNewDir(resPath, resId);
     //just imagine that the server has answered with msgOutcome::success to client's askResMessage, the response contain the
     //resource asked. sendResMessage has already been tested to call createNewSource on client
     //the data use to call newDirectory must be taken from the relative askResMessage in unanswered
-    EXPECT_CALL(userReceived, newDirectory(filename, path, dirSentByServer->getId())).WillOnce(::testing::Return(dirSentByServer));
-    client.createNewDir(path, filename, dirSentByServer->getId());
+    EXPECT_CALL(userReceived, newDirectory(resId, resPath, dirSentByServer->getId())).WillOnce(::testing::Return(dirSentByServer));
+    client.createNewDir(resPath, resId, dirSentByServer->getId());
 }
 
 TEST_F(SymClientTest, localInsertConstructsGoodMessageAndInsertInUnanswered){
@@ -451,9 +451,9 @@ TEST_F(SymClientTest, verifySymbolCallsVerifySymOnDoc){
 
 TEST_F(SymClientTest, editPrivilegeConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.editPrivilege(anotherUsername, path, filename, privilege::modify);
+    auto mex=client.editPrivilege(anotherUsername, resPath, resId, privilege::modify);
     messageHasCorrectOwner(mex);
-    privMessage expected(msgType::changePrivileges, {username, ""}, msgOutcome::success, path+"/"+filename, anotherUsername, privilege::modify);
+    privMessage expected(msgType::changePrivileges, {username, ""}, msgOutcome::success, resPath + "/" + resId, anotherUsername, privilege::modify);
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -461,16 +461,16 @@ TEST_F(SymClientTest, editPrivilegeConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, editPrivilegeCallsEditPrivilegeOnUser){
     setStageForLoggedUser();
     SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
-    EXPECT_CALL(logUser, editPrivilege(anotherUsername, path, filename, privilege::modify));
-    client.editPrivilege(anotherUsername, path, filename, privilege::modify, true);
+    EXPECT_CALL(logUser, editPrivilege(anotherUsername, resPath, resId, privilege::modify));
+    client.editPrivilege(anotherUsername, resPath, resId, privilege::modify, true);
 }
 
 TEST_F(SymClientTest, shareResourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.shareResource(path, filename, newPreferences);
+    auto mex=client.shareResource(resPath, resId, newPreferences);
     messageHasCorrectOwner(mex);
-    uriMessage expected(msgType::shareRes, {username, ""}, msgOutcome::success, "", "",
-                        newPreferences, 0);
+    uriMessage expected(msgType::shareRes, {username, ""}, msgOutcome::success, resPath, resId,
+                        newPreferences);
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -478,15 +478,15 @@ TEST_F(SymClientTest, shareResourceConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, shareResourceCallsShareResourceOnUser){
     setStageForLoggedUser();
     SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
-    EXPECT_CALL(logUser, shareResource(path, filename, newPreferences));
-    client.shareResource(path, filename, newPreferences, true);
+    EXPECT_CALL(logUser, shareResource(resPath, resId, newPreferences));
+    client.shareResource(resPath, resId, newPreferences, true);
 }
 
 TEST_F(SymClientTest, renameResourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.renameResource(path, filename, "newName");
+    auto mex=client.renameResource(resPath, resId, "newName");
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::changeResName, {username, ""}, path, filename, "newName", uri::getDefaultPrivilege(), 0);
+    askResMessage expected(msgType::changeResName, {username, ""}, resPath, resId, "newName", uri::getDefaultPrivilege(), 0);
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -494,15 +494,15 @@ TEST_F(SymClientTest, renameResourceConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, renameResourceCallsRenameResourceOnUser){
     setStageForLoggedUser();
     SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
-    EXPECT_CALL(logUser, renameResource(path, filename, "newName"));
-    client.renameResource(path, filename, "newName", true);
+    EXPECT_CALL(logUser, renameResource(resPath, resId, "newName"));
+    client.renameResource(resPath, resId, "newName", true);
 }
 
 TEST_F(SymClientTest, removeResourceConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
-    auto mex=client.removeResource(path, filename);
+    auto mex=client.removeResource(resPath, resId);
     messageHasCorrectOwner(mex);
-    askResMessage expected(msgType::removeRes, {username, ""}, path, filename, "", uri::getDefaultPrivilege(), 0);
+    askResMessage expected(msgType::removeRes, {username, ""}, resPath, resId, "", uri::getDefaultPrivilege(), 0);
     messageAreAnalogous(mex, expected);
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
@@ -510,8 +510,8 @@ TEST_F(SymClientTest, removeResourceConstructsGoodMessageAndInsertInUnanswered){
 TEST_F(SymClientTest, removeResourceCallsRemoveResourceOnUser){
     setStageForLoggedUser();
     SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
-    EXPECT_CALL(logUser, removeResource(path, filename));
-    client.removeResource(path, filename, true);
+    EXPECT_CALL(logUser, removeResource(resPath, resId));
+    client.removeResource(resPath, resId, true);
 }
 
 TEST_F(SymClientTest, closeSourceConstructsGoodMessageAndInsertInUnanswered){

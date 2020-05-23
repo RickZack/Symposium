@@ -59,7 +59,6 @@ namespace Symposium {
 
     class SymClient {
     protected:
-        //ADD: stuff for connectivity, necessary to define constructor
         user loggedUser;                                                          /**< logged user and its data */
         std::forward_list<std::shared_ptr<file>> activeFile;                      /**< list of active documents */
         std::forward_list<std::pair<document *, colorGen> > activeDoc;            /**< list of files the active documents are related to */
@@ -71,7 +70,7 @@ namespace Symposium {
          * Use this function to access to loggedUser, because it allows the tests to work with a mock class
          * of user and verify expectations about calls on loggedUser
          */
-        const virtual user& getLoggedUser() const;
+        virtual const user& getLoggedUser() const;
 
     public:
         //Some methods are virtual in order to use the mocks in tests
@@ -584,11 +583,5 @@ namespace Symposium {
              */
         virtual void setLoggedUser(const user &loggedUser);
     };
-
-//TODO: add methods to allow consumption of messages sent by server as answer to client messages. E.g:
-// - when a message is received, the client must search if there is a message with the same id previously
-// - sent, to understand what message the server is answering to and to detect errors. Then it will call
-// - the invokeMethod of the message to perform the action
-
 }
 #endif //SYMPOSIUM_SYMCLIENT_H
