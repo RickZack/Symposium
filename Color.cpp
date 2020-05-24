@@ -86,7 +86,9 @@ Color colorGen::hsv_to_rbg(double h, double s, double v) {
 }
 
 std::string Color::rgb_hex_string() {
+    unsigned r,g,b;
     std::ostringstream out;
+    std::tie(r,g,b)=getRgb();
     out<<"#"<<std::hex<<r<<g<<b;
     return out.str();
 }
