@@ -3,6 +3,8 @@
 #include <QTextEdit>
 #include <QLabel>
 #include <forward_list>
+
+#include"onoff_networkinteraction.h"
 #include "../../user.h"
 #include "../../Color.h"
 #include "../../document.h"
@@ -99,12 +101,11 @@ public:
      * @brief translate labels so they remain anchor to the logical position
      * @param users forward_list of users who used now this document
      */
-    void translateCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users);
+    void translateCursors(const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>>& users);
+    int j=0;
 
 private:
 
-    int j=0;
-    int i=0;
     Symposium::uint_positive_cnt::type thisUserSiteId=1;
     Symposium::uint_positive_cnt::type documentId;
     std::map<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>> labels;

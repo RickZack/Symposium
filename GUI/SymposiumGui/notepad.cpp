@@ -54,6 +54,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     ui->setupUi(this);
     setMinimumSize(800, 600);
 
+
     qApp->installEventFilter(this);
 
     QActionGroup *alignGroup= new QActionGroup(this);
@@ -823,6 +824,7 @@ void notepad::showLabels()
 {
     #ifdef DISPATCHER_ON
     ui->textEdit->setDocumentId(documentId);
+    ui->textEdit->setClientDispatcher(&cl);
     ui->textEdit->setThisUserSiteId(cl.getUser().getSiteId());
     const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     #else
@@ -873,7 +875,9 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+C")) // Control_C action
         return;
     else if(isAKeyToIgnore(event))
-        return;
+    {
+        event->ignore();
+        return;}
     else{ //carattere alfabetico
         row=cursor.blockNumber();
         column=cursor.positionInBlock();
@@ -884,9 +888,9 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
 
 bool notepad::eventFilter(QObject *obj, QEvent *event)
 {
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
     if (event->type() == QEvent::KeyPress)
     {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
            qDebug() << "key " << keyEvent->key() << "from" << obj;
            if(obj->objectName()=="textEdit"){
                if(keyEvent->matches(QKeySequence::Paste)){
@@ -896,6 +900,13 @@ bool notepad::eventFilter(QObject *obj, QEvent *event)
                }
                handleTextEditKeyPress(keyEvent);
            }
+    }
+    else if(event->type()== QEvent::KeyRelease)
+    {
+        if(isAKeyToIgnore(keyEvent))
+            event->ignore();
+        else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C"))
+            ui->textEdit->translateCursors(doc.getActiveUsers());
     }
     return QObject::eventFilter(obj, event);
 }
@@ -927,8 +938,6 @@ void notepad::handleDeleteKey(){
                 this->numChars=this->doc.getNumchar();
                 this->labelChars=std::to_string(this->numChars);
                 ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
-                std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
-                ui->textEdit->translateCursors(onlineUsers);
                 #else
                 this->documentoProva.localRemove({row_start,col},1);
                 this->numChars=this->documentoProva.getNumchar();
@@ -976,8 +985,6 @@ void notepad::handleDeleteKey(){
     this->numChars=this->doc.getNumchar();
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
-    ui->textEdit->translateCursors(onlineUsers);
     #else
     documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
     this->numChars=this->documentoProva.getNumchar();
@@ -1062,8 +1069,6 @@ void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharForm
     this->numChars=this->doc.getNumchar();
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
-    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
-    ui->textEdit->translateCursors(onlineUsers);
 #else
     Symposium::symbol sym(ch,1,1,pos,false);
     sym.setCharFormat(charFormat);
@@ -1125,8 +1130,6 @@ void notepad::contV_action(){
         this->labelChars=std::to_string(this->numChars);
         ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
 
-        std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
-        ui->textEdit->translateCursors(onlineUsers);
 #else
         Symposium::symbol sym(ch,1,1,pos,false);
         sym.setCharFormat(charFormat);
@@ -1220,10 +1223,7 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     curs.insertText(ch,ch_format);
     ui->textEdit->changePosition(siteId,row,column++);
     ui->textEdit->changePosition(actBlock,actColm);
-    #ifdef DISPATCHER_ON
-    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
-    ui->textEdit->translateCursors(onlineUsers);
-    #endif
+
     insertOthCh=false;
 
     #ifdef DISPATCHER_ON
@@ -1324,10 +1324,7 @@ void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposi
 
     ui->textEdit->changePosition(siteId,block,column--);
     ui->textEdit->changePosition(actBlock,actColm);
-    #ifdef DISPATCHER_ON
-    std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
-    ui->textEdit->translateCursors(onlineUsers);
-    #endif
+
 
     insertOthCh=false;
     #ifdef DISPATCHER_ON
@@ -1423,7 +1420,10 @@ void notepad::colorText(){
                   curs.setPosition(pi+1);
                   pi++;
                   if (pi==pend)
+                  {
+                      insertOthCh=false;
                       return;
+                  }
 
                 }
                 pi=pf;
@@ -1456,7 +1456,10 @@ void notepad::uncolorText(){
       curs.setPosition(pi+1);
       pi++;
       if (pi==pf)
+      {
+          insertOthCh=false;
           return;
+      }
       }
      ui->textEdit->changePosition(row,column);
      insertOthCh=false;

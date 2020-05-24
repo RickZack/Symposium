@@ -88,7 +88,7 @@ directory::~directory()
 }
 
 void directory::success(){
-    w->close();
+    emit closeWaiting();
     enableStyleButtons();
     hideAll();
     pressed=false;
@@ -118,7 +118,7 @@ void directory::success(){
 void directory::failure(const QString& toPrint){
     enableStyleButtons();
     //if(this->lastChoice != createNewSource)
-        w->close();
+    emit closeWaiting();
     pressed=false;
     if(toPrint=="-1"){
         errorConnectionLogout();
@@ -341,7 +341,7 @@ void directory::deleteSource()
        //DA RIMUOVERE
        #ifndef DISPATCHER_ON
        enableStyleButtons();
-       w->close();
+       emit closeWaiting();
        pressed=false;
        bool msg=true;
        if(msg)
@@ -416,7 +416,7 @@ void directory::on_pushButton_3_clicked()
     // DA ELIMINARE
     enableStyleButtons();
     pressed=false;
-    w->close();
+    emit closeWaiting();
     std::string id="1"; //PER ESEMPIO
 
     if(id!="-1")
@@ -539,9 +539,11 @@ void directory::disableStyleButtons()
 void directory::waitingFunction()
 {
    hideAll();
-   w = new class waiting(this);
-   w->move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w->rect().center());
-   w->show();
+   class waiting w(this);
+   w.move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w.rect().center());
+   QObject::connect(this, SIGNAL(closeWaiting()), &w, SLOT(close()));
+   w.show();
+
 }
 
 void directory::hideAll()
@@ -658,7 +660,7 @@ void directory::on_pushButton_4_clicked()
     cl.createNewSource(this->path,curResName.toStdString());
     #else
     // DA RIMUOVERE
-    w->close();
+    emit closeWaiting();
     enableStyleButtons();
     pressed=false;
     std::string id="1"; //PER ESEMPIO
@@ -792,7 +794,7 @@ void directory::on_okButton_clicked()
          cl.renameResource(this->path, sId, curResName.toStdString());
          #else
          enableStyleButtons();
-         w->close();
+         emit closeWaiting();
          pressed=false;
          items->setText(curResName);
          ui->myListWidget->currentItem()->setSelected(false);
@@ -930,7 +932,7 @@ void directory::on_OkPriv_clicked()
     hideAll();
     enableStyleButtons();
     pressed=false;
-    w->close();
+    emit closeWaiting();
     Symposium::document d;
     notepad* notepadWindow= new notepad(nullptr,priv,privOpen,path,d,0, *this);
     notepadWindow->setWindowTitle(curResName);

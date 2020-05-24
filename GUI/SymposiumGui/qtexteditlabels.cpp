@@ -22,7 +22,7 @@ void qtexteditlabels::scroll()
     j=0;
     int block=this->textCursor().blockNumber();
     int column=this->textCursor().positionInBlock();
-    for(auto it:cursors)
+    for(const auto& it:cursors)
         {
         if(it.first==thisUserSiteId)
         {
@@ -54,7 +54,6 @@ void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, 
     int blockThisUser=this->textCursor().blockNumber();
     int columnThisUser=this->textCursor().positionInBlock();
     changePosition(block, collumn);
-    i=0;
     QLabel *labelReverseName=labels.find(siteId)->second.first;
     QLabel *labelName=labels.find(siteId)->second.second;
     showLabel(labelReverseName, labelName);
@@ -85,7 +84,7 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
 
             #ifdef DISPATCHER_ON
-            Color c=cl->getColor(documentId,it.first->getSiteId());
+            Symposium::Color c=cl->getColor(documentId,it.first->getSiteId());
             QString str=QString::fromStdString(c.rgb_hex_string());
             #else
             QString str="#ff0000";
@@ -127,8 +126,9 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
 
             #ifdef DISPATCHER_ON
-            Color c=cl->getColor(documentId,it.first->getSiteId());
-            QString str=QString::fromStdString(c.rgb_hex_string());
+            Symposium::Color c=cl->getColor(documentId,it.first->getSiteId());
+            std::string colorHex(c.rgb_hex_string());
+            QString str=QString::fromStdString(colorHex);
             #else
             QString str="#ff0000";
             #endif
@@ -183,7 +183,7 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     QLabel *labelNameReverse=new QLabel(nameLabelReverse, this);
 
     #ifdef DISPATCHER_ON
-    Color c=cl->getColor(documentId,it.first->getSiteId());
+    Symposium::Color c=cl->getColor(documentId, siteId);
     QString str=QString::fromStdString(c.rgb_hex_string());
     #else
     QString str="#ff0000";
@@ -196,7 +196,6 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
 
     labelNameReverse->setAttribute(Qt::WA_TranslucentBackground);
     newLabel->setAttribute(Qt::WA_TranslucentBackground);
-    i=0;
     showLabel(labelNameReverse, newLabel);
 
     changePosition(blockThisUser, columnThisUser);
@@ -238,7 +237,7 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
             #ifdef DISPATCHER_ON
             int column=cursor.positionInBlock();
             int block= cursor.blockNumber();
-            cl->moveMyCursor(int documentId, int block, int column);
+            cl->moveMyCursor(documentId,block,column);
             #endif
         }
     }
@@ -265,9 +264,9 @@ void qtexteditlabels::setThisUserPrivilege(Symposium::privilege priv)
     this->priv=priv;
 }
 
-void qtexteditlabels::translateCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users)
+void qtexteditlabels::translateCursors(const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> >& users)
 {
-    for(auto it:users)
+    for(const auto& it:users)
     {
         if(it.second.p!=Symposium::privilege::readOnly)
         {

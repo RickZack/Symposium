@@ -98,6 +98,7 @@ public:
 
     signals:
     void resNameChanged(Symposium::uint_positive_cnt::type resId, const QString& newName);
+    void closeWaiting();
 
 public slots:
     void enableButtonsAfter();
@@ -179,8 +180,6 @@ private:
     Symposium::uint_positive_cnt::type curResId;    /**< resId of the currently selected resource, for an action has been requested */
     QString curResName;                             /**< resName of the currently selected resource, for an action has been requested */
 
-
-    waiting *w;
     //TODO: spiegare come è usato, a cosa serve
     bool pressed=false;
 
