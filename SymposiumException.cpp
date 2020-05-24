@@ -62,7 +62,8 @@ SymServerException::SymServerException(SymServerExceptionCodes exceptionCode, co
 const char* userException::userErrors[]={"Too short password", "Too long password",
                                          "You don't use any alphabetic character for password", "You don't use any number for password",
                                          "You don't use any special character for password", "You can choose a nickname",
-                                         "You don't have any privilege to this file anymore", "You cannot upgrade this privilege"};
+                                         "You don't have any privilege to this file anymore", "You cannot upgrade this privilege",
+                                         "Inserted link is not correct"};
 
 userException::userException(userExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :

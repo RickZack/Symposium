@@ -148,12 +148,21 @@ user::newDirectory(const std::string &resName, const std::string &resPath, uint_
 
 std::pair<int, std::shared_ptr<file>>
 user::accessFile(const std::string &absolutePath, const std::string &destPath, const std::string &destName,
-                 privilege reqPriv) const {    std::string pathAdd;
+                 privilege reqPriv) const {
+    std::string pathAdd;
     std::string idAdd;
 
     std::shared_ptr<directory> root1=this->home->getRoot();
 
-    tie(pathAdd, idAdd)= filesystem::separate(absolutePath); //separate the path and the id of file which the user want
+    std::size_t found = absolutePath.find_last_of("/\\");//find the last number which represent the id
+    if(found==std::string::npos || absolutePath=="./")//if there isn't any "/" it means that I'm, alredy in the correct directory and the path represent only id
+    {
+        throw userException(userException::LinkNoCorrect, UnpackFileLineFunction());
+    }
+    pathAdd.append(absolutePath,0, found); //path to the directory of the current user
+    auto it=absolutePath.begin();
+    std::advance(it, found+1);
+    idAdd.append(it,absolutePath.end());
 
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
 
