@@ -152,7 +152,7 @@ private:
     std::string pathToFile;
     Symposium::privilege priv;
     Symposium::privilege privOpen;
-    bool insertOthCh=false;
+    bool NotRefreshLabels=false;                                           /**< indicates whether a refresh of users' labels may be needed */
     bool highActivated=false;
     QColor colPos;
     bool okPaste=false;

@@ -604,7 +604,7 @@ void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 }
 
 void notepad::fillTextEdit(){
-    insertOthCh=true;
+    NotRefreshLabels=true;
     QTextCharFormat chFormat;
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
@@ -659,13 +659,13 @@ void notepad::fillTextEdit(){
 
   }
 
-    insertOthCh=false;
+    NotRefreshLabels=false;
 
 }
 
 void notepad::fixAlignment(){
     /* save in the alignmentStyle the vector that defines for each row its style */
-    insertOthCh=true;
+    NotRefreshLabels=true;
     std::vector<std::pair<Symposium::alignType,unsigned>> alignmentStyle;
     #ifdef DISPATCHER_ON
     alignmentStyle=this->doc.getAlignmentStyle();
@@ -710,7 +710,7 @@ void notepad::fixAlignment(){
             //this->textStyle(style.second);}
       }
     ui->textEdit->changePosition(row,column);
-    insertOthCh=false;
+    NotRefreshLabels=false;
 
 }
 
@@ -873,18 +873,26 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCharFormat format = cursor.charFormat();
     QString testo=event->text();
     int row, column;
+    NotRefreshLabels=true;
 
-    if(event->key()==Qt::Key_Backspace)
+    if(event->matches(QKeySequence::Paste)){
+        this->okPaste=true;
+        const QMimeData *md = QApplication::clipboard()->mimeData();
+        this->dim=md->text().length();
+        return;
+    }
+    else if(event->key()==Qt::Key_Backspace){
         return handleDeleteKey();
-    else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+V")) // Control_V action
-        return;
-    else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+C")) // Control_C action
-        return;
-    else if(isAKeyToIgnore(event))
+    }
+    else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+V")
+            || QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+C")
+            || isAKeyToIgnore(event)) // Control_V action, Control_C action or key to ignore
     {
-        event->ignore();
-        return;}
-    else{ //carattere alfabetico
+        // if key-down, key-up, ecc. are pressed, we may need to update cursors' labels
+        NotRefreshLabels=false;
+        return;
+    }
+    else{ // alphabetic character to process
         row=cursor.blockNumber();
         column=cursor.positionInBlock();
     }
@@ -892,28 +900,30 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
      this->sendSymbolToInsert(row,column,testo,format);
 }
 
-bool notepad::eventFilter(QObject *obj, QEvent *event)
-{
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-    if (event->type() == QEvent::KeyPress)
-    {
-           qDebug() << "key " << keyEvent->key() << "from" << obj;
-           if(obj->objectName()=="textEdit"){
-               if(keyEvent->matches(QKeySequence::Paste)){
-                   this->okPaste=true;
-                   const QMimeData *md = QApplication::clipboard()->mimeData();
-                   this->dim=md->text().length();
-               }
-               handleTextEditKeyPress(keyEvent);
-           }
+bool notepad::eventFilter(QObject *obj, QEvent *event){
+    // Keyboard key has been pressed, can be a character to insert
+    if(event->type() == QEvent::KeyPress){
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        qDebug() << "key " << keyEvent->key() << "from" << obj;
+        if(obj->objectName()=="textEdit"){
+            handleTextEditKeyPress(keyEvent);
+        }
     }
+    // after cursor has been moved, the labels need traslation
     else if(event->type()== QEvent::KeyRelease)
     {
+        NotRefreshLabels=true;
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         if(isAKeyToIgnore(keyEvent))
             event->ignore();
         else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C"))
             ui->textEdit->translateCursors(doc.getActiveUsers());
     }
+    // pressing a mouse button means that probably we need to move cursor's label
+    else if (event->type()==QEvent::MouseButtonPress || event->type()==QEvent::MouseButtonDblClick){
+        NotRefreshLabels=false;
+    }
+    event->accept(); //prevent processing in the parent
     return QObject::eventFilter(obj, event);
 }
 
@@ -1173,7 +1183,7 @@ void notepad::changeCursorPos()
 
 void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positive_cnt::type siteId, const std::pair<unsigned,unsigned>& indexes){
 
-    insertOthCh=true;
+    NotRefreshLabels=true;
     // take the position in which the character has to be added.
     int row=indexes.first;
     int column=indexes.second;
@@ -1230,7 +1240,7 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     ui->textEdit->changePosition(siteId,row,column++);
     ui->textEdit->changePosition(actBlock,actColm);
 
-    insertOthCh=false;
+    NotRefreshLabels=false;
 
     #ifdef DISPATCHER_ON
     this->numChars=this->doc.getNumchar();
@@ -1246,7 +1256,7 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
 
 void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigned, unsigned>& indexes){
 
-    insertOthCh=true;
+    NotRefreshLabels=true;
 
     //take the position of the character
     int row=indexes.first;
@@ -1302,12 +1312,12 @@ void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigne
 
     // go back to the starting position
     ui->textEdit->changePosition(actBlock,actColm);
-    insertOthCh=false;
+    NotRefreshLabels=false;
 }
 
 void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposium::uint_positive_cnt::type siteId){
 
-    insertOthCh=true;
+    NotRefreshLabels=true;
 
     // the position of the character to delete
     int block=indexes.first;
@@ -1332,7 +1342,7 @@ void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposi
     ui->textEdit->changePosition(actBlock,actColm);
 
 
-    insertOthCh=false;
+    NotRefreshLabels=false;
     #ifdef DISPATCHER_ON
     this->numChars=this->doc.getNumchar();
     this->labelChars=std::to_string(this->numChars);
@@ -1350,7 +1360,7 @@ void notepad::on_textEdit_cursorPositionChanged()
 
     QTextCursor cc=ui->textEdit->textCursor();
     QTextCharFormat ch=ui->textEdit->currentCharFormat();
-     if(insertOthCh==false){
+     if(NotRefreshLabels == false){
         #ifdef DISPATCHER_ON
         ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
         #else
@@ -1382,7 +1392,7 @@ void notepad::on_textEdit_cursorPositionChanged()
 
 void notepad::colorText(){
     std::vector<std::vector<Symposium::symbol>> symbols;
-    insertOthCh=true;
+    NotRefreshLabels=true;
     #ifdef DISPATCHER_ON
     symbols=this->doc.getSymbols();
     #else
@@ -1427,7 +1437,7 @@ void notepad::colorText(){
                   pi++;
                   if (pi==pend)
                   {
-                      insertOthCh=false;
+                      NotRefreshLabels=false;
                       return;
                   }
 
@@ -1438,11 +1448,11 @@ void notepad::colorText(){
         }
     }
     ui->textEdit->changePosition(row,column);
-    insertOthCh=false;
+    NotRefreshLabels=false;
  }
 
 void notepad::uncolorText(){
-    insertOthCh=true;
+    NotRefreshLabels=true;
     QTextCursor curs=ui->textEdit->textCursor();
     /* store the initial position of the cursor */
     int row=curs.blockNumber();
@@ -1463,12 +1473,12 @@ void notepad::uncolorText(){
       pi++;
       if (pi==pf)
       {
-          insertOthCh=false;
+          NotRefreshLabels=false;
           return;
       }
       }
      ui->textEdit->changePosition(row,column);
-     insertOthCh=false;
+    NotRefreshLabels=false;
 }
 
 
