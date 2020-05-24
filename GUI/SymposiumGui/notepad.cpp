@@ -759,7 +759,13 @@ void notepad::inactiveLink()
 
 void notepad::activeAlwaysLink()
 {
-    activealwayslink* alwayslinkwindow = new activealwayslink(this, fileId, pathToFile, cl.getUser(), *this);
+    std::string percorso = pathToFile;
+    std::string path;
+    //cancelliamo il '.' iniziale
+    percorso.erase(0,1);
+    //costruiamo il percorso assoluto da passare ad activealwayslink
+    path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + percorso + std::to_string(fileId);
+    activealwayslink* alwayslinkwindow = new activealwayslink(this, fileId, pathToFile, path, cl.getUser(), *this);
     goToWindow(*alwayslinkwindow);
 }
 

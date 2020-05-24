@@ -47,7 +47,7 @@ choosedir::~choosedir()
 void choosedir::treeGenerate(std::string str, int count)
 {
     std::string name;
-    std::string path="/";
+    std::string path="./";
     std::string pathUser="/home/";
     std::string type;
     int indent=0;

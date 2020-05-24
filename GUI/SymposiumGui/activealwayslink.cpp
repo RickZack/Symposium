@@ -4,10 +4,10 @@
 #include <QMovie>
 #include "onoff_networkinteraction.h"
 
-activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, Symposium::user us, SymWinInterface& si) :
+activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    ui(new Ui::activealwayslink),  fileId(fileId), pathFile(pathFile), us(us)
+    ui(new Ui::activealwayslink),  fileId(fileId), pathFile(pathFile), pathAssoluto(pathAssoluto), us(us)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -51,7 +51,7 @@ void activealwayslink::successLink()
     enableButtons();
     enableStyleButtons();
     backToParent();
-    successlinks link(parentWidget(), 1, QString::fromStdString(pathFile), "", "", us, privilegeToGrant);
+    successlinks link(parentWidget(), 1, QString::fromStdString(pathAssoluto), "", "", us, privilegeToGrant);
     link.exec();
 }
 

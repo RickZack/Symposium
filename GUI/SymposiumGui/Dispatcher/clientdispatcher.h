@@ -175,6 +175,12 @@ namespace Symposium{
         void verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes);
         Color getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID);
 
+
+        /**
+         * @brief method to provide the ID of logged user's home directory
+         */
+        uint_positive_cnt::type getHomeIDofCurrentUser();
+
         /**
          * @brief method to provide the current user to the GUI
          */

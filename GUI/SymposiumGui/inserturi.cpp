@@ -218,7 +218,7 @@ void inserturi::on_add_clicked()
                 disableStyleButtons();
                 title=ui->name->text();
                 #ifdef DISPATCHER_ON
-                cl.openNewSource(resourceId, privilege, path, ui->name->text().toStdString());
+                cl.openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
                 #endif
             }
         }

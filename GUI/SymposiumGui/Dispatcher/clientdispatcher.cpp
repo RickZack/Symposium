@@ -239,11 +239,12 @@ void clientdispatcher::openSource(const std::string &path, const std::string &na
     }
 }
 
-void clientdispatcher::openNewSource(const std::string &resourceId, privilege reqPriv, const std::string &destPath, const std::string& destName) {
-    std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.openNewSource(resourceId,reqPriv,destPath,destName));
+void clientdispatcher::openNewSource(const std::string &absolutePath, privilege reqPriv, const std::string &destPath, const std::string& destName) {
+    qDebug() << "resourceID: " << QString::fromStdString(absolutePath) << ", destPath: " << QString::fromStdString(destPath) << ", destName: " << QString::fromStdString(destName);
+    std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.openNewSource(absolutePath,reqPriv,destPath,destName));
     try {
         //inviamo il messaggio
-        sendMessage(mess, std::stoi(resourceId));
+        sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
@@ -542,6 +543,10 @@ std::unordered_map<std::string, privilege> clientdispatcher::allUser(uint_positi
 
 const user& clientdispatcher::getUser(){
     return this->client.userData();
+}
+
+uint_positive_cnt::type clientdispatcher::getHomeIDofCurrentUser(){
+    return this->client.userData().getHome()->getId();
 }
 
 std::string clientdispatcher::showHome(){
