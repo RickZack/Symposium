@@ -115,7 +115,8 @@ SymServer::openNewSource(const std::string &opener, const std::string &absoluteP
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& target=getRegistered(opener);
 
-    std::pair<int, std::shared_ptr<file>> fileReq=target.accessFile(absolutePath, destPath, destName);
+    std::pair<int, std::shared_ptr<file>> fileReq= target.accessFile(absolutePath, destPath, destName,
+                                                                     reqPriv);
     handleUserState(opener, fileReq.second->getDoc().getId());
     document& docReq=fileReq.second->access(target, reqPriv);
     workingDoc[opener].push_front(&docReq);

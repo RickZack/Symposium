@@ -146,7 +146,9 @@ user::newDirectory(const std::string &resName, const std::string &resPath, uint_
 
 
 
-std::pair<int, std::shared_ptr<file>> user::accessFile(const std::string &absolutePath, const std::string &destPath, const std::string &destName ) const {    std::string pathAdd;
+std::pair<int, std::shared_ptr<file>>
+user::accessFile(const std::string &absolutePath, const std::string &destPath, const std::string &destName,
+                 privilege reqPriv) const {    std::string pathAdd;
     std::string idAdd;
 
     std::shared_ptr<directory> root1=this->home->getRoot();
@@ -155,14 +157,11 @@ std::pair<int, std::shared_ptr<file>> user::accessFile(const std::string &absolu
 
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
 
-    privilege priv=fi->getUserPrivilege(this->getUsername());
-    if(priv==privilege::none)
+    privilege obtainedPriv=fi->getSharingPolicy().getShare(reqPriv);
+    if(obtainedPriv == privilege::none)
         throw userException(userException::noPriv, UnpackFileLineFunction());
 
-    privilege priv2=fi->getSharingPolicy().getShare(priv);
-    if(priv2==privilege::none)
-        throw userException(userException::noPriv, UnpackFileLineFunction());
-
+    fi->setUserPrivilege(username, obtainedPriv);
     std::shared_ptr<symlink> sym= home->addLink(destPath, destName, pathAdd, idAdd);
     return std::make_pair(sym->getId(), fi);
 }

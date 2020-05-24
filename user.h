@@ -151,7 +151,8 @@ namespace Symposium {
          * @return the file just added
          */
         virtual std::pair<int, std::shared_ptr<file>>
-        accessFile(const std::string &absolutePath, const std::string &destPath, const std::string &destName = "") const;
+        accessFile(const std::string &absolutePath, const std::string &destPath, const std::string &destName,
+                   privilege reqPriv) const;
 
         /**
          * @brief open a @link file file @endlink already present in the user's filesystem

@@ -132,11 +132,11 @@ TEST_F(UserTest, callAccessFile){
      */
     std::shared_ptr<class symlink> returned(new Symposium::symlink("sym1", "./1", "4"));
     EXPECT_CALL(*Root, getFile("1", "4")).WillOnce(::testing::Return(dummyFile));
-    EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
     EXPECT_CALL(*dummyFile, getSharingPolicy()).WillOnce(::testing::ReturnRef(um));
+    EXPECT_CALL(*dummyFile, setUserPrivilege(u->getUsername(), privilege::modify));
     EXPECT_CALL(*homeDir, addLink("/2", "sym1", "1", "4",0)).WillOnce(::testing::Return(returned));
 
-    u->accessFile("./1/4", "/2", "sym1");
+    u->accessFile("./1/4", "/2", "sym1", privilege::modify);
 }
 
 TEST(userTest, makeNewFileMock){

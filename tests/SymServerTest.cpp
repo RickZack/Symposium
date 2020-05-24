@@ -55,7 +55,7 @@ struct SymServerUserMock: public user{
                                                                                                        iconPath, siteId,
                                                                                                        home) {};
     SymServerUserMock(const SymServerUserMock& other): user(other){};
-    MOCK_CONST_METHOD3(accessFile,  std::pair<int, std::shared_ptr<file>>(const std::string &resId, const std::string &path,  const std::string &fileName));
+    MOCK_CONST_METHOD4(accessFile,  std::pair<int, std::shared_ptr<file>>(const std::string &resId, const std::string &path,  const std::string &fileName, privilege));
     MOCK_CONST_METHOD3(openFile, std::shared_ptr<file>(const std::string &path,  const std::string &fileName, privilege accessMode));
     MOCK_CONST_METHOD3(newFile, std::shared_ptr<file>(const std::string& fileName, const std::string& pathFromHome, uint_positive_cnt::type));
     MOCK_CONST_METHOD3(newDirectory, std::shared_ptr<directory>(const std::string& dirName, const std::string& pathFromHome, uint_positive_cnt::type id));
@@ -428,10 +428,10 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
      */
     void setStageForAccessedDoc(SymServerUserMock& userWhoOpens){
         auto& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
-        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
-        EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName, privilege::owner)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
+        EXPECT_CALL(*fileToReturn, access(target, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
         auto ret= server.openNewSource(target.getUsername(), filePath + "/" + fileName, "./", fileName,
-                                       uri::getDefaultPrivilege(), 0);
+                                       privilege::owner, 0);
         ASSERT_TRUE(server.userIsWorkingOnDocument(target, doc, privilege::owner));
         justInserted=&target;
     }
@@ -462,7 +462,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     void makeAnotherUserToHavePrivilege(privilege priv){
         //anotherUser adds the file to its filesystem and closes the document
         auto& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(anotherUserUsername));
-        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
+        EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName, priv)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
         EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
         auto ret2= server.openNewSource(anotherUserUsername, filePath + "/" + fileName, "./", fileName, priv, 0);
     }
@@ -594,7 +594,7 @@ TEST_F(SymServerTestFilesystemFunctionality, removeUserClosesOpenedDocuments){
 TEST_F(SymServerTestFilesystemFunctionality, openNewSourceAccessesTheFileAndGenerateCorrectResponse){
     server.forceSiteIdForResId(&doc, anotherUser);
     auto& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
-    EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
+    EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName, defaultPrivilege)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
     EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
     auto f= server.openNewSource(loggedUserUsername, filePath + "/" + fileName, "./", fileName, defaultPrivilege, msId);
     EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
