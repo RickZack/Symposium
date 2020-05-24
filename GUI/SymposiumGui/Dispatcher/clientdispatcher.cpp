@@ -174,6 +174,7 @@ void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageT
         std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         TimerStart(tempo);
         qDebug() << "Sended to server: " << QString::fromStdString(ofs.str());
+        this->socket.waitForBytesWritten();
     }
 }
 
