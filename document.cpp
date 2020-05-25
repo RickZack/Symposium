@@ -629,7 +629,7 @@ unsigned document::findInsertInLine(const symbol &ch, const std::vector<symbol> 
     }
 
     while(left+1<right){
-        mid=floor(left-(right-left)/2);
+        mid=floor(left+(right-left)/2);
 
         if(ch==vector[mid]){
             ind=mid; return ind;
