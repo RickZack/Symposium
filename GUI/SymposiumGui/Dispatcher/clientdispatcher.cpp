@@ -44,6 +44,7 @@ clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), appIsClos
 {
     this->client.setClientDispatcher(this);
     connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::TimerExpired);
+    this->userIsLogged = false;
 }
 
 int clientdispatcher::run(int argc, char **argv){
@@ -68,6 +69,8 @@ void clientdispatcher::openConnection(){
         this->socket.connectToHost(svAddress, svPort);
         //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
         connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
+        //quando il socket si sconnette, chiamiamo il metodo connectionLost()
+        connect(&(this->socket), SIGNAL(disconnected()), this, SLOT(connectionLost()));
         qDebug() << "Connection Successful";
     }
 }
@@ -108,6 +111,11 @@ void clientdispatcher::readyRead(){
              */
             if(!appIsClosing)
                 mes->invokeMethod(this->client);
+            if(mes->getAction()==msgType::login){
+                this->userIsLogged = true;
+            }else if(mes->getAction()==msgType::logout){
+                this->userIsLogged = false;
+            }
         } catch (messageException& e) {
             //eccezione di insuccesso dell'operazione
 
@@ -124,7 +132,7 @@ void clientdispatcher::readyRead(){
 
 }
 
-void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageToSend, uint_positive_cnt::type resourceId){
+void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageToSend){
     std::stringstream ofs;
     boost::archive::text_oarchive oa(ofs);
     QDataStream uscita(&(this->socket));
@@ -141,8 +149,12 @@ void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageT
         std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         TimerStart(tempo);
         qDebug() << "Sended to server: " << QString::fromStdString(ofs.str());
-        //this->socket.waitForBytesWritten();
     }
+}
+
+void clientdispatcher::connectionLost(){
+    if(!appIsClosing)
+        this->winmanager.activeWindow().failure("-1");
 }
 
 void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend){
@@ -157,6 +169,7 @@ void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend){
 }
 
 void clientdispatcher::signUp(const std::string &username, const std::string &pwd, const std::string &nickname, const std::string &iconPath){
+    this->userIsLogged = false;
     this->userpwd = pwd;
     this->username = username;
     std::shared_ptr<signUpMessage> mess = std::make_shared<signUpMessage>(this->client.signUp(username,pwd,nickname,iconPath));
@@ -175,6 +188,7 @@ void clientdispatcher::signUp(const std::string &username, const std::string &pw
 }
 
 void clientdispatcher::logIn(const std::string &username, const std::string &pwd) {
+    this->userIsLogged = false;
     std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.logIn(username,pwd));
     //Colleghiamo il client al server
     this->openConnection();
@@ -251,7 +265,7 @@ void clientdispatcher::localInsert(uint_positive_cnt::type resourceId, const sym
     std::shared_ptr<symbolMessage> mess = std::make_shared<symbolMessage>(this->client.localInsert(resourceId,newSym,index));
     try {
         //inviamo il messaggio
-        sendMessage(mess, resourceId);
+        sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
@@ -264,7 +278,7 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
     std::shared_ptr<symbolMessage> mess = std::make_shared<symbolMessage>(this->client.localRemove(resourceId,indexes));
     try {
         //inviamo il messaggio
-        sendMessage(mess, resourceId);
+        sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
@@ -354,7 +368,7 @@ void clientdispatcher::closeSource(uint_positive_cnt::type resourceId) {
     std::shared_ptr<updateDocMessage> mess = std::make_shared<updateDocMessage>(this->client.closeSource(resourceId));
     try {
         //inviamo il messaggio
-        sendMessage(mess, resourceId);
+        sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
@@ -417,7 +431,7 @@ void clientdispatcher::moveMyCursor(uint_positive_cnt::type resId, int block, in
     std::shared_ptr<cursorMessage> mess = std::make_shared<cursorMessage>(this->client.updateCursorPos(resId, block, column));
     try {
         //inviamo il messaggio
-        sendMessage(mess, resId);
+        sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
@@ -525,22 +539,12 @@ std::string clientdispatcher::showDir(bool recursive){
     return this->client.showDir(recursive);
 }
 
-void clientdispatcher::setOnlineUser(onlineusers *ou){
-    this->finestraOnlineUser = ou;
-    this->currentWindow = 13;
-}
-
-void clientdispatcher::setAllUser(alluser *au){
-    this->finestraAllUser = au;
-    this->currentWindow = 14;
-}
-
 void clientdispatcher::TimerExpired(){
     this->timer.stop();
     qDebug() << "Timer scaduto\n";
-    //chiudiamo la connessione
-    this->closeApp();
     //dobbiamo notificare alla GUI.
+    if(this->userIsLogged)
+        logout();
     this->winmanager.activeWindow().failure("-1");
 }
 

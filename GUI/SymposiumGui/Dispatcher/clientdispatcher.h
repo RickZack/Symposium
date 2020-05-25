@@ -87,17 +87,12 @@ namespace Symposium{
         uint_positive_cnt::type openFileID;
         // ELENCO DEI PUNTATORI A FINESTRA CHE SARRANNO POI DA ELIMINARE
 
-        //sigin* finestraLogin;                           //1
-        //signup* finestraSignup;                         //2
+
         inserturi* finestraInsertUri;                   //3
-        //home* finestraHome;                             //4
-        //deleteAccount* finestraEliminaAccount;          //5
         choosedir* finestraSceltaDir;                   //6
-        //changeUserInfo* finestraModificaUser;           //7
         activecounterlink* finestraActiveCounterLink;   //8
         activetimerlink* finestraActiveTimerLink;       //9
         activealwayslink* finestraActiveAlwaysLink;     //10
-        //::directory* finestraDirectory;                 //12
         onlineusers* finestraOnlineUser;                //13
         alluser* finestraAllUser;                       //14
         activenonlink* finestraActiveNonLink;           //15
@@ -105,6 +100,7 @@ namespace Symposium{
 
         // FINE ELENCO PUNTATORI ALLE FINESTRE
         bool appIsClosing;
+        bool userIsLogged;
     public:
         clientdispatcher(QObject *parent = nullptr);
 
@@ -118,7 +114,7 @@ namespace Symposium{
          * @brief send on the socket the message to deliver it to the server
          * @param MessageToSend pointer to the message to be sent
          */
-        void sendMessage(const std::shared_ptr<clientMessage> MessageToSend, uint_positive_cnt::type resourceId = 0);
+        void sendMessage(const std::shared_ptr<clientMessage> MessageToSend);
 
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
@@ -234,10 +230,6 @@ namespace Symposium{
 
         uint_positive_cnt::type getOpenFileID();
 
-        void setOnlineUser(onlineusers *ou);
-
-        void setAllUser(alluser *au);
-
         void stopTimer();
 
         void updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID);
@@ -252,6 +244,7 @@ namespace Symposium{
     public slots:
         void readyRead();
         void TimerExpired();
+        void connectionLost();
     };
 }
 

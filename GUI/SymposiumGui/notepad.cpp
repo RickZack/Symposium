@@ -292,7 +292,17 @@ notepad::~notepad()
     #endif
 }
 
+void notepad::failure(const QString &toPrint){
+    errorConnectionLogout();
+}
 
+void notepad::errorConnectionLogout()
+{
+    errorlogout errorLog(this);
+    int ret=errorLog.exec();
+    if(ret==0)
+        backToMainWin();
+}
 
 
 void notepad::moveUserCursor(Symposium::uint_positive_cnt::type siteID, unsigned block, unsigned column)

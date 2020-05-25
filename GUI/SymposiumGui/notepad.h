@@ -42,7 +42,9 @@ public:
 
     //Not used at the moment
     void success() override{}
-    void failure(const QString&) override{}
+
+    void failure(const QString&) override;
+
     Symposium::uint_positive_cnt::type getId() override;
 
     void setClientDispatcher(Symposium::clientdispatcher *cl);
@@ -85,6 +87,12 @@ public:
     void showLabels();
 
     void setreadonly();
+
+    /**
+     * @brief called by clientdispatcher when there is some error with connection and perform logout of the page
+     */
+    void errorConnectionLogout();
+
     /**
      * @brief fixAlignment to fix for each row the alignment stile
      */
