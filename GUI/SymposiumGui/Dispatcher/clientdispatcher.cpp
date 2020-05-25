@@ -74,87 +74,54 @@ void clientdispatcher::openConnection(){
 
 void clientdispatcher::readyRead(){
     //questa funzione viene chiamata quando il server ci ha inviato qualcosa
-    //stream di stringa che conterrà i dati che abbiamo ricevuto, prima di essere de-serializzati
-    std::stringstream accumulo;
+
     //creiamo la variabile che conterra il puntatore al messaggio ricevuto dal socket
     std::shared_ptr<serverMessage> mes;
     //creiamo il QByteArray che conterrà ciò che riceviamo dal socket
     QByteArray byteArray;
     //associamo il datastream al socket
     QDataStream in(&(this->socket));
-    //facciamo partire la transazione
-    in.startTransaction();
-    //leggiamo i dati ricevuti
-    in >> byteArray;
-    //controlliamo se ci sono stati errori
-    if (!in.commitTransaction()){
-        //errore di ricezione
-    }
-    //eseguiamo la conversione in stringa
-    std::string ricevuto(byteArray.constData(), byteArray.length());
-    //inseriamo quanto ricevuto nel stringstream
-    accumulo << ricevuto;
-    //deserializziamo il messaggio ricevuto
-    boost::archive::text_iarchive ia(accumulo);
-    ia >> mes;
-    try {
-        /*
-         * When the app is closing no need to notify the user with action's outcome.
-         * Can be dangerous to do so because is case of logout a success() invocation is expected to happen
-         */
-        if(!appIsClosing)
-            mes->invokeMethod(this->client);
-    } catch (messageException& e) {
-        //eccezione di insuccesso dell'operazione
-
-        this->winmanager.activeWindow().failure(QString::fromStdString(mes->getErrDescr()));
-        this->userpwd="";
-
-    } catch (SymClientException& e){
-        //eccezione di relatedMessage non trovato
-
-        //DA VEDERE CHE MESSAGGIO DEVE DARE SULLA FINESTRA
-
-        switch(currentWindow){
-        case 1:{
-            //this->finestraLogin->errorSignIn();
-            break;
-        }case 2:{
-            //this->finestraSignup->errorSignUp("eccezione");
-            break;
-        }case 3:{
-            //this->finestraInsertUri->unsuccessInsert();
-            break;
-        }case 5:{
-            //this->finestraEliminaAccount->errorDeleteUser();
-            break;
-        }case 7:{
-            //this->finestraModificaUser->errorEditUser();
-            break;
-        }case 8:{
-            //this->finestraActiveCounterLink->unsuccessLink();
-            break;
-        }case 9:{
-            //this->finestraActiveTimerLink->unsuccessLink();
-            break;
-        }case 10:{
-            //this->finestraActiveAlwaysLink->unsuccessLink();
-            break;
-        }case 12:{
-            //this->finestraDirectory->failureActionDirectory();
-            break;
-        }case 13:{
-            //this->finestraOnlineUser->errorEditPrivilege();
-            break;
-        }case 14:{
-            //this->finestraAllUser->errorEditPrivilege();
-            break;
-        }case 15:{
-            //this->finestraActiveNonLink->unsuccessLink();
-            break;
+    //vediamo quanti byte sono disponibili per la lettura
+    while(this->socket.bytesAvailable()){
+        qDebug() << "Bytes da leggere: " << this->socket.bytesAvailable();
+        //stream di stringa che conterrà i dati che abbiamo ricevuto, prima di essere de-serializzati
+        std::stringstream accumulo;
+        //facciamo partire la transazione
+        in.startTransaction();
+        //leggiamo i dati ricevuti
+        in >> byteArray;
+        //controlliamo se ci sono stati errori
+        if (!in.commitTransaction()){
+            //errore di ricezione
         }
+        //eseguiamo la conversione in stringa
+        std::string ricevuto(byteArray.constData(), byteArray.length());
+        //inseriamo quanto ricevuto nel stringstream
+        accumulo << ricevuto;
+        //deserializziamo il messaggio ricevuto
+        boost::archive::text_iarchive ia(accumulo);
+        ia >> mes;
+        try {
+            /*
+             * When the app is closing no need to notify the user with action's outcome.
+             * Can be dangerous to do so because is case of logout a success() invocation is expected to happen
+             */
+            if(!appIsClosing)
+                mes->invokeMethod(this->client);
+        } catch (messageException& e) {
+            //eccezione di insuccesso dell'operazione
+
+            this->winmanager.activeWindow().failure(QString::fromStdString(mes->getErrDescr()));
+            this->userpwd="";
+
+        } catch (SymClientException& e){
+            //eccezione di relatedMessage non trovato
+
+            //DA VEDERE CHE MESSAGGIO DEVE DARE SULLA FINESTRA
+
         }
     }
+
 }
 
 void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageToSend, uint_positive_cnt::type resourceId){
@@ -174,7 +141,7 @@ void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageT
         std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         TimerStart(tempo);
         qDebug() << "Sended to server: " << QString::fromStdString(ofs.str());
-        this->socket.waitForBytesWritten();
+        //this->socket.waitForBytesWritten();
     }
 }
 

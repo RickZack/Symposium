@@ -85,7 +85,7 @@ void ServerDispatcher::incomingConnection(qintptr socketDescriptor){
 void ServerDispatcher::readyRead(){
     //questa funzione viene chiamata quando un qualche client ha inviato qualcosa
     //stream di stringa che conterrà i dati che abbiamo ricevuto, prima di essere de-serializzati
-    std::stringstream accumulo;
+
     //creiamo il QByteArray che conterrà ciò che riceviamo dal socket
     QByteArray byteArray;
     //creiamo la variabile che conterra il puntatore al messaggio ricevuto dal socket
@@ -94,46 +94,53 @@ void ServerDispatcher::readyRead(){
     QTcpSocket* readSocket = qobject_cast<QTcpSocket*>(sender());
     //associamo il datastream al socket che ha ricevuto dei dati
     QDataStream in(readSocket);
-    //facciamo partire la transazione
-    in.startTransaction();
-    //leggiamo i dati ricevuti
-    in >> byteArray;
-    //controlliamo se ci sono stati errori
-    if (!in.commitTransaction()){
-        //errore di ricezione
-    }
-    //eseguiamo la conversione in stringa
-    std::string ricevuto(byteArray.constData(), byteArray.length());
-    //inseriamo quanto ricevuto nel stringstream
-    accumulo << ricevuto;
-    //deserializziamo il messaggio ricevuto
-    boost::archive::text_iarchive ia(accumulo);
-    ia >> da;
-    try {
-        da->invokeMethod(this->server);
-        if((da->getAction()==msgType::login) || (da->getAction()==msgType::registration)){
-            Connected_SymUser.insert(this->server.getSiteIdOfUser(da->getActionOwner().first), readSocket->socketDescriptor());
-            qDebug() << "User inserted in Connected_SymUser. Users in queue: " << Connected_SymUser.size();
-            //aggiungiamo al nome del socket il siteID dell'utente
-            readSocket->setObjectName(QString::number(readSocket->socketDescriptor()) + "-" + QString::number(this->server.getSiteIdOfUser(da->getActionOwner().first)));
+    //vediamo quanti byte sono disponibili per la lettura
+    while(readSocket->bytesAvailable()){
+        qDebug() << "Bytes da leggere: " << readSocket->bytesAvailable();
+        std::stringstream accumulo;
+        std::string ricevuto;
+
+        //facciamo partire la transazione
+        in.startTransaction();
+        //leggiamo i dati ricevuti
+        in >> byteArray;
+        //controlliamo se ci sono stati errori
+        if (!in.commitTransaction()){
+            //errore di ricezione
         }
-        controlMessageQueue();
-    } catch (SymposiumException& e) {
-        qDebug() << "Action from socketdescriptor " <<  readSocket->socketDescriptor() << " FAILED. Send notification error.";
-        //costruiamo il messaggio di fallimento
-        std::shared_ptr<serverMessage> er(new serverMessage(da->getAction(), msgOutcome::failure, da->getMsgId()));
-        er->setErrDescr(e.getErrorCodeMsg());
-        //inviamo il messaggio
+        //eseguiamo la conversione in stringa
+        ricevuto = byteArray.constData();
+        //inseriamo quanto ricevuto nel stringstream
+        accumulo << ricevuto;
+        //deserializziamo il messaggio ricevuto
+        boost::archive::text_iarchive ia(accumulo);
+        ia >> da;
+        qDebug() << "Ricevuto da socketdescriptor " << readSocket->socketDescriptor() << ": " << QString::fromStdString(accumulo.str());
         try {
-            sendMessage(er,readSocket);
-            qDebug() << "Message error sended to socketdescriptor: " << readSocket->socketDescriptor() ;
-        } catch (sendFailure) {
-            //impossibile inviare
+            da->invokeMethod(this->server);
+            if((da->getAction()==msgType::login) || (da->getAction()==msgType::registration)){
+                Connected_SymUser.insert(this->server.getSiteIdOfUser(da->getActionOwner().first), readSocket->socketDescriptor());
+                qDebug() << "User inserted in Connected_SymUser. Users in queue: " << Connected_SymUser.size();
+                //aggiungiamo al nome del socket il siteID dell'utente
+                readSocket->setObjectName(QString::number(readSocket->socketDescriptor()) + "-" + QString::number(this->server.getSiteIdOfUser(da->getActionOwner().first)));
+            }
+            controlMessageQueue();
+        } catch (SymposiumException& e) {
+            qDebug() << "Action from socketdescriptor " <<  readSocket->socketDescriptor() << " FAILED. Send notification error.";
+            //costruiamo il messaggio di fallimento
+            std::shared_ptr<serverMessage> er(new serverMessage(da->getAction(), msgOutcome::failure, da->getMsgId()));
+            er->setErrDescr(e.getErrorCodeMsg());
+            //inviamo il messaggio
+            try {
+                sendMessage(er,readSocket);
+                qDebug() << "Message error sended to socketdescriptor: " << readSocket->socketDescriptor() ;
+            } catch (sendFailure) {
+                //impossibile inviare
 
-            // COSA FACCIAMO??
+                // COSA FACCIAMO??
+            }
         }
     }
-
 }
 
 void ServerDispatcher::clientDisconnected(){
