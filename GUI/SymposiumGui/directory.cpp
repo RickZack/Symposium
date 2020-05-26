@@ -889,6 +889,17 @@ void directory::openSelectedSource(){
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
              std::string id=idPriv.first;
              std::string initialPriv=idPriv.second;
+             this->showPrivilegeButtons();
+             // set the old Privilege
+             if (this->initialPriv=="modify"){
+                 priv= Symposium::privilege::modify;
+             }
+             else if(this->initialPriv=="readOnly"){
+                 priv= Symposium::privilege::readOnly;
+             }
+             else{
+                 priv= Symposium::privilege::owner;
+             }
 
          }
     qDebug() << "str: " << QString::fromStdString(str) << " path: " << QString::fromStdString(path);
