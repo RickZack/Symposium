@@ -682,23 +682,10 @@ void directory::on_pushButton_4_clicked()
 }
 
 notepad* directory::successNewSource(){
-    std::string temp;
-    std::size_t found;
+
     QString name= ui->name_2->text();
     ui->name_2->clear();
-    if(this->openFolders == 0){
-        this->str = cl.showHome();
-    }else{
-        temp = this->path;
-        temp.erase(temp.end()-1);
-        found=temp.find_last_of("/");
-        temp.erase(found+1,temp.size());
-        this->str = cl.getStr(this->actualId, temp);
-    }
-    this->str = manipulationPath(this->str);
-    ui->myListWidget->clear();
-    this->count=number_elements(str);
-    listGenerate(str,count);
+
     //open the newly created document
     notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
     nw->setWindowTitle(curResName);
@@ -992,6 +979,21 @@ void directory::hidePrivilegeButtons(){
 void directory::showEvent(QShowEvent *event)
 {
     QWidget::showEvent( event );
+    std::string temp;
+    std::size_t found;
+    if(this->openFolders == 0){
+        this->str = cl.showHome();
+    }else{
+        temp = this->path;
+        temp.erase(temp.end()-1);
+        found=temp.find_last_of("/");
+        temp.erase(found+1,temp.size());
+        this->str = cl.getStr(this->actualId, temp);
+    }
+    this->str = manipulationPath(this->str);
+    ui->myListWidget->clear();
+    this->count=number_elements(str);
+    listGenerate(str,count);
 }
 
 void directory::on_okButton_3_clicked()
