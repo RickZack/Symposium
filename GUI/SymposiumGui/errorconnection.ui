@@ -11,29 +11,46 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Error</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:rgb(249, 247, 241);</string>
   </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>40</y>
-     <width>321</width>
-     <height>41</height>
+     <x>75</x>
+     <y>0</y>
+     <width>400</width>
+     <height>81</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 18pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+   </property>
    <property name="text">
-    <string>Check your internet connection, there is some problem!</string>
+    <string>Check your internet connection,
+there is some problem!</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>222</x>
      <y>110</y>
-     <width>93</width>
-     <height>28</height>
+     <width>105</width>
+     <height>35</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
    </property>
    <property name="text">
     <string>OK</string>
