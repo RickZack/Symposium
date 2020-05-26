@@ -978,6 +978,11 @@ void directory::hidePrivilegeButtons(){
     ui->cancPriv->hide();
 }
 
+void directory::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent( event );
+}
+
 void directory::on_okButton_3_clicked()
 {
     hideAll();

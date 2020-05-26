@@ -319,6 +319,8 @@ private:
      * @brief hidePrivilegeButtons hide the buttons referring the privilege
      */
     void hidePrivilegeButtons();
+
+    void showEvent( QShowEvent* event ) override;
 };
 
 

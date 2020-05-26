@@ -244,7 +244,7 @@ void inserturi::successInsert()
     int ret=notWindow.exec();
     if(ret==0)
     {
-         notepad* notepadWindow= new notepad(nullptr,privilege,privilege,pathLink,cl.getOpenDocument(),cl.getOpenFileID(), *this);
+         notepad* notepadWindow= new notepad(nullptr,privilege,privilege,pathLink,cl.getOpenDocument(),cl.getOpenFileID(), *this, true);
          notepadWindow->setWindowTitle(title);
          goToWindow(*notepadWindow);
          notepadWindow->showLabels();
