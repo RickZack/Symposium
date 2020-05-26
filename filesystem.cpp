@@ -358,7 +358,7 @@ std::shared_ptr<file> directory::getFile(const std::string &resPath, const std::
         std::string pathRes;
         std::string idRes;
         tie(pathRes, idRes)= separate(pathSym);
-        return getFile(pathRes, idRes);
+        return this->root->getFile(pathRes, idRes);
     }
     throw filesystemException(filesystemException::noGetFile, UnpackFileLineFunction());
 }

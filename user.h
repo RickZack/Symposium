@@ -69,6 +69,7 @@ namespace Symposium {
         static constexpr char noChar[] ="1234567890?!$+-/.,@ˆ_ ";
         static constexpr char noNum[] ="abcdefghijklmnopqrstuvwxyz?!$+-/.,@ˆ_ ";
         static constexpr char noSpecialChar[] ="abcdefghijklmnopqrstuvwxyz1234567890 ";
+        static bool HideParamOnSer;
 
         friend class boost::serialization::access;
         template<class Archive>
@@ -220,6 +221,8 @@ namespace Symposium {
          * @return the constructed copy
          */
         user makeCopyNoPwd() const;
+
+        static void hideAuthParams(const std::function<void(void)>& op);
         /**
          * @param pass the password to control
          * @return true if the @pass don't have any alphabetic character and false if it does

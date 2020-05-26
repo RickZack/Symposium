@@ -43,10 +43,15 @@ using namespace Symposium;
 
 BOOST_CLASS_EXPORT(Symposium::user)
 
+bool user::HideParamOnSer=false;
+
 template<class Archive>
 void user::serialize(Archive &ar, const unsigned int){
-    //TODO: save home
-    ar & username & pwdHash & hashSalt & siteId & nickname & iconPath & home;
+    std::string empty;
+    if(HideParamOnSer)
+        ar & username & empty & empty & siteId & nickname & iconPath & home;
+    else
+        ar & username & pwdHash & hashSalt & siteId & nickname & iconPath & home;
 };
 
 user::user(const std::string &username, const std::string &pwd, const std::string &nickname,
@@ -296,4 +301,10 @@ user user::makeCopyNoPwd() const {
     copy.pwdHash.clear();
     copy.hashSalt.clear();
     return copy;
+}
+
+void user::hideAuthParams(const std::function<void(void)> &op) {
+    user::HideParamOnSer=true;
+    op();
+    user::HideParamOnSer=false;
 }
