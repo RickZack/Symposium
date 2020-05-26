@@ -874,8 +874,9 @@ void directory::openSelectedSource(){
          }else{
              ui->myListWidget->setFixedWidth(270);
              std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
-             std::string id=idPriv.first;
-             std::string initialPriv=idPriv.second;
+             curResName=QString::fromStdString(nameSource);
+             this->selectedId=idPriv.first;
+             this->initialPriv=idPriv.second;
              this->showPrivilegeButtons();
              // set the old Privilege
              if (this->initialPriv=="modify"){
@@ -924,7 +925,7 @@ void directory::on_OkPriv_clicked()
         privOpen= Symposium::privilege::owner;
     waitingFunction();
     #ifdef DISPATCHER_ON
-    cl.openSource(this->path,this->selectedId,this->priv);
+    cl.openSource(this->path,this->selectedId,privOpen);
     #else
     priv=Symposium::privilege::owner;
     hideAll();

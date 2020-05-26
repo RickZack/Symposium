@@ -26,7 +26,7 @@ class activenonlink : public QDialog, public SymModalWinInterface
     Q_OBJECT
 
 public:
-    explicit activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si);
+    explicit activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, SymWinInterface& si);
     /**
      * @brief called by clientdispatcher when there is some error to deactivate link
      * @param errorMess the messagge to show
@@ -67,7 +67,8 @@ private:
     Ui::activenonlink *ui;
     Symposium::uri u;
     std::string pathFile;
-    Symposium::uint_positive_cnt::type documentId;
+    std::string pathAssoluto;
+    Symposium::uint_positive_cnt::type fileId;
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

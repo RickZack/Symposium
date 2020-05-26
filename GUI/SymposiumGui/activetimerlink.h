@@ -31,7 +31,7 @@ class activetimerlink : public QDialog, public SymModalWinInterface
     Q_OBJECT
 
 public:
-    explicit activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si);
+    explicit activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si);
 
     void success() override;
     void failure(const QString& toPrint) override;
@@ -83,10 +83,11 @@ public slots:
 private:
     Ui::activetimerlink *ui;
     std::string pathFile;
+    std::string pathAssoluto;
     Symposium::privilege privilegeToGrant;
     Symposium::uri u;
     std::string time;
-    Symposium::uint_positive_cnt::type documentId;
+    Symposium::uint_positive_cnt::type fileId;
     Symposium::user us;
     /**
      * @brief disable all buttons present so user cannot perform any operation

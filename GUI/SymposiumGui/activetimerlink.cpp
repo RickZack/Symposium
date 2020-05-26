@@ -3,10 +3,10 @@
 #include "onoff_networkinteraction.h"
 #include "Dispatcher/clientdispatcher.h"
 
-activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si) :
+activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    ui(new Ui::activetimerlink), pathFile(pathFile), documentId(documentId), us(us)
+    ui(new Ui::activetimerlink), pathFile(pathFile), pathAssoluto(pathAssoluto), fileId(fileId), us(us)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -51,7 +51,7 @@ void activetimerlink::successLink()
     enableButtons();
     enableStyleButtons();
     backToParent();
-    successlinks link(parentWidget(), 4, QString::fromStdString(pathFile), "", QString::fromStdString(time), us, privilegeToGrant);
+    successlinks link(parentWidget(), 4, QString::fromStdString(pathAssoluto), "", QString::fromStdString(time), us, privilegeToGrant);
     link.exec();
 }
 
@@ -88,7 +88,7 @@ void activetimerlink::on_ok_clicked()
         disableButtons();
         disableStyleButtons();
         #ifdef DISPATCHER_ON
-        cl.shareResource(pathFile, std::to_string(documentId), u);
+        cl.shareResource(pathFile, std::to_string(fileId), u);
         #else
         successLink();
         #endif

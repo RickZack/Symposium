@@ -4,10 +4,10 @@
 #include <QMovie>
 #include "onoff_networkinteraction.h"
 
-activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si) :
+activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    ui(new Ui::activecounterlink), pathFile(pathFile), documentId(documentId), us(us)
+    ui(new Ui::activecounterlink), pathFile(pathFile), pathAssoluto(pathAssoluto), fileId(fileId), us(us)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -50,7 +50,7 @@ void activecounterlink::successLink()
     enableButtons();
     enableStyleButtons();
     backToParent();
-    successlinks link(parentWidget(), 2, QString::fromStdString(pathFile), QString::number(numCounter), "", us, privilegeToGrant);
+    successlinks link(parentWidget(), 2, QString::fromStdString(pathAssoluto), QString::number(numCounter), "", us, privilegeToGrant);
     link.exec();
 }
 
@@ -81,7 +81,7 @@ void activecounterlink::on_ok_clicked()
     {
         u.activateCount(numCounter, privilegeToGrant);
         #ifdef DISPATCHER_ON
-        cl.shareResource(pathFile, std::to_string(documentId), u);
+        cl.shareResource(pathFile, std::to_string(fileId), u);
         #endif
         waiting();
         disableButtons();

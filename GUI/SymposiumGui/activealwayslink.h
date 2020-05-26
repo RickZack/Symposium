@@ -26,7 +26,7 @@ class activealwayslink : public QDialog, public SymModalWinInterface
     Q_OBJECT
 
 public:
-    explicit activealwayslink(QWidget *parent,  Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto,Symposium::user us, SymWinInterface& si);
+    explicit activealwayslink(QWidget *parent,  Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si);
 
     void success() override;
     void failure(const QString& toPrint) override;

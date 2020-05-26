@@ -761,33 +761,39 @@ void notepad::visualizeAllUsers()
     goToWindow(*alluserWindow);
 }
 
+std::string notepad::constructAbsolutePath(){
+    std::string percorso = pathToFile;
+    std::string path;
+    //cancelliamo il '.' iniziale
+    percorso.erase(0,1);
+    //costruiamo il percorso assoluto
+    path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + percorso + std::to_string(fileId);
+    return path;
+}
+
+
 void notepad::inactiveLink()
 {
-    activenonlink* nonlinkwindow = new activenonlink(this, documentId, pathToFile, *this);
+
+    activenonlink* nonlinkwindow = new activenonlink(this, fileId, pathToFile, constructAbsolutePath(), *this);
     goToWindow(*nonlinkwindow);
 }
 
 void notepad::activeAlwaysLink()
 {
-    std::string percorso = pathToFile;
-    std::string path;
-    //cancelliamo il '.' iniziale
-    percorso.erase(0,1);
-    //costruiamo il percorso assoluto da passare ad activealwayslink
-    path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + percorso + std::to_string(fileId);
-    activealwayslink* alwayslinkwindow = new activealwayslink(this, fileId, pathToFile, path, cl.getUser(), *this);
+    activealwayslink* alwayslinkwindow = new activealwayslink(this, fileId, pathToFile, constructAbsolutePath(), cl.getUser(), *this);
     goToWindow(*alwayslinkwindow);
 }
 
 void notepad::timerLink()
 {
-    activetimerlink* timerlinkwindow = new activetimerlink(this, documentId, pathToFile, cl.getUser(), *this);
+    activetimerlink* timerlinkwindow = new activetimerlink(this, fileId, pathToFile, constructAbsolutePath(), cl.getUser(), *this);
     goToWindow(*timerlinkwindow);
 }
 
 void notepad::counterLink()
 {
-    activecounterlink* counterlinkwindow = new activecounterlink(this, documentId, pathToFile, cl.getUser(), *this);
+    activecounterlink* counterlinkwindow = new activecounterlink(this, fileId, pathToFile, constructAbsolutePath(), cl.getUser(), *this);
     goToWindow(*counterlinkwindow);
 }
 

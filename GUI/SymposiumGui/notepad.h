@@ -182,6 +182,7 @@ private:
     bool isAKeyToIgnore(QKeyEvent* event);
     void handleTextEditKeyPress(QKeyEvent* event);
     void handleDeleteKey();
+    std::string constructAbsolutePath();
 
     /**
      * @brief contV_action to handle with the CONTROL-C CONTROL-V actions

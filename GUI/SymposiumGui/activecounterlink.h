@@ -26,7 +26,7 @@ class activecounterlink : public QDialog, public SymModalWinInterface
     Q_OBJECT
 
 public:
-    explicit activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, Symposium::user us, SymWinInterface& si);
+    explicit activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si);
 
     void success() override;
     void failure(const QString& toPrint) override;
@@ -78,10 +78,11 @@ private slots:
 private:
     Ui::activecounterlink *ui;
     std::string pathFile;
+    std::string pathAssoluto;
     Symposium::privilege privilegeToGrant;
     unsigned int numCounter;
     Symposium::uri u;
-    Symposium::uint_positive_cnt::type documentId;
+    Symposium::uint_positive_cnt::type fileId;
     Symposium::user us;
 
     /**

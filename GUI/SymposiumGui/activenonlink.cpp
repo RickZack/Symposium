@@ -3,10 +3,10 @@
 #include "Dispatcher/clientdispatcher.h"
 #include "onoff_networkinteraction.h"
 
-activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type documentId, std::string pathFile, SymWinInterface& si) :
+activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    ui(new Ui::activenonlink), pathFile(pathFile), documentId(documentId)
+    ui(new Ui::activenonlink), pathFile(pathFile), pathAssoluto(pathAssoluto), fileId(fileId)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -48,7 +48,7 @@ void activenonlink::successLink()
     enableButtons();
     enableStyleButtons();
     backToParent();
-    successlinks link(parentWidget(), 3, QString::fromStdString(pathFile), "", "", Symposium::user(), Symposium::privilege());
+    successlinks link(parentWidget(), 3, QString::fromStdString(pathAssoluto), "", "", Symposium::user(), Symposium::privilege());
     link.exec();
 }
 
@@ -78,7 +78,7 @@ void activenonlink::on_ok_clicked()
     disableStyleButtons();
     u.deactivate();
     #ifdef DISPATCHER_ON
-    cl.shareResource(pathFile, std::to_string(documentId), u);
+    cl.shareResource(pathFile, std::to_string(fileId), u);
     #else
     success();
     #endif
