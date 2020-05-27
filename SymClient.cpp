@@ -368,6 +368,8 @@ void SymClient::removeActiveUser(uint_positive_cnt::type docId, user &targetUser
     this->dispatcher->removeUserCursor(target.getSiteId(),docId);
     #endif
     removeUsersOnDocument(target.getUsername());
+    //rimuoviamo l'utente dalla mappa userColors
+    this->userColors.erase(std::make_pair(target.getSiteId(), docId));
 }
 
 const user& SymClient::getLoggedUser() const{
