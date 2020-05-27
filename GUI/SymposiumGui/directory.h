@@ -184,6 +184,7 @@ private:
     //TODO: spiegare come è usato, a cosa serve
     bool pressed=false;
 
+
     /**
      * @brief openFolders this variable is used to say that a window has been opened and to enable/disable the BACK button
      */
@@ -237,9 +238,15 @@ private:
     std::string nameSource;
 
     /**
-     * @brief oldName is the old name of the source that has to be renamed
+     * @brief fixedOldName is the name without possible spaces that a source has BEFORE the rename operation
      */
-    std::string oldName;
+    std::string fixedOldName;
+
+    /**
+     * @brief fixedName is the new name modified with non printable characters
+     */
+    std::string fixedName;
+
 
 
     /**
@@ -256,26 +263,6 @@ private:
      * @return the string without \n
      */
     std::string generateString(std::string& list);
-
-    /**
-     * @brief directory::searchForId extracts the id of the selected directory
-     * @param word the name of the selected directory
-     * @param str the initial string
-     * @param count the # of elements inside the string
-     * @return id
-     */
-    std::string searchForId(std::string word,std::string list,int count);
-
-
-    /**
-     * @brief directory::searchForPriv extracts the id and priv of the selected file/symlink
-     * @param word the name of the selected source
-     * @param str the initial string
-     * @param count the # of elements inside the string
-     * @return <id,priv>
-     */
-    std::pair<std::string,std::string> searchForPriv(std::string word,std::string list, int count);
-
 
     /**
      * @brief directory::openWindow shows the scenario of a folder, opened starting from another one.
@@ -338,6 +325,12 @@ private:
      * @param list the list of all the elements inside a directory
      */
     void populateMap(std::string list);
+
+    /**
+     * @brief fixNameSource fix the name chosen by the user for his source, substituing the space with a no printable character
+     * @param nameSource the name chosen by the user
+     */
+    std::string fixNameSource(const std::string nameSource);
 };
 
 

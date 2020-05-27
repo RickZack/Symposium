@@ -20,17 +20,13 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     #ifdef DISPATCHER_ON
     list=cl.showHome();
     path = "./";
-    qDebug() << "prima della manipolazione str: " << QString::fromStdString(list);
     list = manipulationPath(list);
-    qDebug()<<"Dopo la manipolazione str"<<QString::fromStdString(list);
     this->populateMap(list);
     #else
     list="directory 1 Folder1\n file 9 Folder1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
     this->populateMap(list);
     #endif
     this->count=number_elements(list);
-    qDebug()<<"contatore elementi"<<count;
-    qDebug() << "Numero elementi: " << QString::fromStdString(list);
     listGenerate(list, count);
 
     ui->back_button->setDisabled(true);
@@ -54,19 +50,15 @@ void directory::populateMap(std::string list){
        std::string privilege="none";
        for(size_t i=0;i<count;i++){
            type=separate_word(list);
-           qDebug()<<"Tipo"<<QString::fromStdString(type);
            id=separate_word(list);
-           qDebug()<<"Id"<<QString::fromStdString(id);
            name = separate_word(list);
            if(type=="directory") {
                auto it=name.find('\n');
                name.erase(it);
-                qDebug()<<"Nome"<<QString::fromStdString(name);
            }else {
                privilege = separate_word(list);
                auto it = privilege.find('\n');
                privilege.erase(it);
-               qDebug()<<"Privilegio"<<QString::fromStdString(privilege);
            }
            ids.insert({name,{id,privilege}});
            privilege="none";
@@ -76,6 +68,7 @@ void directory::populateMap(std::string list){
 
 
 std::string directory::manipulationPath(std::string& s){
+
     std::string result;
     std::string estratta;
     std::size_t found;
@@ -112,6 +105,7 @@ std::string directory::manipulationPath(std::string& s){
     found = result.find_last_of(" ");
     dim_s = result.size();
     result.erase(found, dim_s);
+    qDebug()<<"Stringa finale"<<QString::fromStdString(result);
     return result;
 }
 
@@ -176,6 +170,12 @@ void directory::listGenerate(std::string str_first, int count)
         if(word=="directory")
         {
             word=separate_word(str);
+            // substitute the non-printable character with the space one
+            for(size_t i=0;i<word.size();i++){
+                if(word[i]==0x1F)
+                   word.replace(i,1,1,' ');
+            }
+
             QListWidgetItem *item=new QListWidgetItem(QIcon(":/icon/folder.png"), QString::fromStdString(word));
             countDir++;
             v.setValue(countDir);
@@ -190,6 +190,11 @@ void directory::listGenerate(std::string str_first, int count)
         else if(word=="file")
         {
             word=separate_word(str);
+            for(size_t i=0;i<word.size();i++){
+                if(word[i]==0x1F)
+                   word.replace(i,1,1,' ');
+
+            }
             QListWidgetItem *item=new QListWidgetItem(QIcon(":/icon/file.png"), QString::fromStdString(word));
             v.setValue(-1);
             item->setData(Qt::UserRole,v);
@@ -200,6 +205,11 @@ void directory::listGenerate(std::string str_first, int count)
         else
         {
             word=separate_word(str);
+            for(size_t i=0;i<word.size();i++){
+                if(word[i]==0x1F)
+                   word.replace(i,1,1,' ');
+            }
+
             QListWidgetItem *item=new QListWidgetItem(QIcon(":/icon/link.png"), QString::fromStdString(word));
             v.setValue(-1);
             item->setData(Qt::UserRole,v);
@@ -211,65 +221,6 @@ void directory::listGenerate(std::string str_first, int count)
 }
 
 
-// SI PUO CANCELLARE
-std::string directory::searchForId(std::string word,std::string str,int count)
-{
-    std::string id_to_return, id, name, priv;
-
-    for(int i=0;i<count;i++){
-
-        std::string type=separate_word(str);
-        if(type=="directory"){
-        id=separate_word(str);
-        name=separate_word(str);
-        name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
-            if(name==word){
-                id_to_return=id;
-                i=count;
-            }
-        }
-        else{
-            //is a file or symlink
-            id=separate_word(str);
-            name=separate_word(str);
-            priv=separate_word(str);
-            if(name==word){
-                id_to_return=id;
-                i=count;
-            }
-        }
-}
-   return id_to_return;
-}
-
-//SI PUO CANCELLARE
-std::pair<std::string,std::string> directory::searchForPriv(std::string word,std::string str,int count)
-{
-    std::string priv_to_return;
-    std::string id_to_return;
-    std::pair<std::string, std::string> idPriv;
-    for(int i=0;i<count;i++){
-
-            std::string type=separate_word(str);
-            if(type=="directory"){
-                std::string id=separate_word(str);
-                std::string name=separate_word(str);
-            }else{
-                std::string id=separate_word(str);
-                std::string name=separate_word(str);
-                std::string priv=separate_word(str);
-                if(name==word){
-                    priv.erase(std::remove(priv.begin(), priv.end(), '\n'), priv.end());
-                    priv_to_return=priv;
-                    id_to_return=id;
-                    i=count;
-                }
-           }
-       }
-
-    idPriv=std::make_pair(id_to_return, priv_to_return);
-    return idPriv;
-}
 
 std::string directory::separate_word(std::string& string)
 {
@@ -336,7 +287,7 @@ void directory::openWindow(const std::string& str1){
     ui->back_button->show();
 }
 
-void directory::contextMenuEvent(QContextMenuEvent *event)
+void directory::contextMenuEvent(QContextMenuEvent *)
 {
         QMenu submenu;
         QString style="QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}";
@@ -364,17 +315,6 @@ void directory::deleteSource()
        // estract from the map the id of the source that I want to remove
        auto it=this->ids.find(nameSource);
        id=it->second.first;
-
-       //std::string typeSource=items->whatsThis().toStdString();
-
-       /*
-       if(typeSource=="directory"){
-            id=searchForId(nameSource,str,count);
-       }else{
-           std::pair<std::string,std::string> idPriv=searchForPriv(nameSource,str,count);
-           id=idPriv.first;
-       }
-       */
        waitingFunction();
        #ifdef DISPATCHER_ON
        cl.removeResource(path,id);
@@ -451,9 +391,14 @@ void directory::on_pushButton_3_clicked()
     pressed=true;
     QString name= ui->name->text();
     waitingFunction();
-    std::string nameFolder=name.toStdString();
+    std::string nameFolder=name.toStdString();                       /** < name folder with possible spaces */
+    std::string fixedName=this->fixNameSource(name.toStdString());   /** < name folder without possible spaces */
     #ifdef DISPATCHER_ON
-    cl.createNewDir(path,nameFolder);
+    int numVal=this->ids.count(fixedName);
+    if(numVal==0){
+        cl.createNewDir(path,fixedName);
+    }else
+        this->failureActionDirectory("You already have an element with this name");
     #else
     // anche questo da eliminare
     ui->name->setText(" ");
@@ -501,6 +446,7 @@ void directory::successCreate(){
         temp.erase(found+1,temp.size());
         this->list = cl.getStr(this->actualId, temp);
     }
+
     this->list = manipulationPath(this->list);
     ui->myListWidget->clear();
     int count=number_elements(list);
@@ -583,6 +529,8 @@ void directory::disableStyleButtons()
         break;}
     case remove:{
         break;}
+    default:
+        break;
     }
 }
 
@@ -705,10 +653,15 @@ void directory::on_pushButton_4_clicked()
     lastChoice = createNewSource;
     disableStyleButtons();
     pressed=true;
-    this->curResName = ui->name_2->text();
+    this->curResName =ui->name_2->text();                                                              /** < name with possible spaces */
+    std::string fixedName=this->fixNameSource(curResName.toStdString());           /** < name without possible spaces */
     waitingFunction();
     #ifdef DISPATCHER_ON
-    cl.createNewSource(this->path,curResName.toStdString());
+    int numVal=this->ids.count(fixedName);
+    if(numVal==0)
+        cl.createNewSource(this->path,fixedName);
+    else
+        this->failureActionDirectory("You already have an element with this name");
     #else
     // DA RIMUOVERE
     emit closeWaiting();
@@ -824,18 +777,22 @@ void directory::on_okButton_clicked()
     lastChoice = rename;
     disableStyleButtons();
     pressed=true;
-    curResName=ui->renameLabel->text();
+    this->curResName =ui->renameLabel->text();                              /** < name with possible spaces */
+    fixedName=this->fixNameSource(curResName.toStdString());                /** < name without possible spaces */
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
-         oldName=items->text().toStdString();
-         auto it=this->ids.find(oldName);
+         std:: string oldName=items->text().toStdString();
+         fixedOldName= this->fixNameSource(oldName);
+         auto it=this->ids.find(fixedOldName);
          std::string id=it->second.first;
-
-          /*std::string sId=searchForId(oldName, str, count); */
          curResId=std::stoul(id);
          waitingFunction();
          #ifdef DISPATCHER_ON
-         cl.renameResource(this->path, id, curResName.toStdString());
+         int numVal=this->ids.count(fixedName);
+         if(numVal==0)
+            cl.renameResource(this->path, id, fixedName);
+         else
+             this->failureActionDirectory("You already have an element with this name");
          #else
          enableStyleButtons();
          emit closeWaiting();
@@ -851,13 +808,13 @@ void directory::on_okButton_clicked()
 void directory::successRename(){
     hideAll();
     // update the map
-    auto it=this->ids.find(oldName);
+    auto it=this->ids.find(fixedOldName);
     std::string id=it->second.first;
     std::string priv=it->second.second;
     this->ids.erase(it);
-    this->ids.insert(it,{curResName.toStdString(),{id,priv}});
+    this->ids.insert(it,{fixedName,{id,priv}});
 
-    //aggiorniamo la stringa del contenuto in modo che ci sia il nuovo nome della directory
+    //update the list in such a way that the new name of directory appears
     if(this->actualId=="0"){
         list = cl.showHome();
         list = manipulationPath(list);
@@ -896,16 +853,15 @@ void directory::openSelectedSource(){
     foreach(QListWidgetItem *items, selectedItem){
          QString value= items->whatsThis();
          std::string nameSource=items->text().toStdString();
+         fixedName=this->fixNameSource(nameSource);
          // dermine the path of the folders in which I enter.
          if(value=="directory")
          {
 
              this->previousId=this->actualId;
-             qDebug()<<"Previous Id"<<QString::fromStdString(this->previousId);
-             //this->actualId=searchForId(nameSource,str,count);
-             auto it=this->ids.find(nameSource);
+             //auto it=this->ids.find(nameSource);
+             auto it=this->ids.find(fixedName);
              this->actualId=it->second.first;
-             qDebug()<<"Actual Id"<<QString::fromStdString(this->actualId);
              this->openFolders++;
 
              // open the folder Window
@@ -921,26 +877,15 @@ void directory::openSelectedSource(){
              this->populateMap(str1);
              #endif
              ui->pathPlainEdit->setPlainText(ui->pathPlainEdit->toPlainText()+QString::fromStdString(nameSource)+'/');
-
-
-         /*
-             #ifdef DISPATCHER_ON
-             str=cl.getStr(this->actualId, this->path);
-             str = manipulationPath(str);
-             path+=actualId+'/';
-             #else
-             std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
-             #endif
-             ui->pathPlainEdit->setPlainText(ui->pathPlainEdit->toPlainText()+QString::fromStdString(nameSource)+'/');
-             */
              this->openWindow(list);
 
          }else{
               ui->myListWidget->setFixedWidth(270);
-              auto it=this->ids.find(nameSource);
+              auto it=this->ids.find(fixedName);
               this->selectedId=it->second.first;
               this->initialPriv=it->second.second;
               curResName=QString::fromStdString(nameSource);
+
               // The user has to choose the privilege:
               this->showPrivilegeButtons();
               // set the old Privilege
@@ -950,49 +895,8 @@ void directory::openSelectedSource(){
                   priv= Symposium::privilege::readOnly;
               else
                   priv= Symposium::privilege::owner;
-
-
-         /*else if(value=="file")
-
-             // id and path e privilegio con cui apre
-         {
-             ui->myListWidget->setFixedWidth(270);
-             std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
-             curResName=QString::fromStdString(nameSource);
-             this->selectedId=idPriv.first;
-             this->initialPriv=idPriv.second;
-             // The user has to choose the privilege:
-             this->showPrivilegeButtons();
-             // set the old Privilege
-             if (this->initialPriv=="modify"){
-                 priv= Symposium::privilege::modify;
-             }
-             else if(this->initialPriv=="readOnly"){
-                 priv= Symposium::privilege::readOnly;
-             }
-             else{
-                 priv= Symposium::privilege::owner;
-             }
-         }else{
-             ui->myListWidget->setFixedWidth(270);
-             std::pair<std::string,std::string> idPriv= searchForPriv(nameSource,str,count);
-             curResName=QString::fromStdString(nameSource);
-             this->selectedId=idPriv.first;
-             this->initialPriv=idPriv.second;
-             this->showPrivilegeButtons();
-             // set the old Privilege
-             if (this->initialPriv=="modify"){
-                 priv= Symposium::privilege::modify;
-             }
-             else if(this->initialPriv=="readOnly"){
-                 priv= Symposium::privilege::readOnly;
-             }
-             else{
-                 priv= Symposium::privilege::owner;
-             }
-*/
          }
-    qDebug() << "str: " << QString::fromStdString(list) << " path: " << QString::fromStdString(path);
+
  }// foreach
 
 }
@@ -1107,3 +1011,14 @@ void directory::on_okButton_4_clicked()
 {
     hideAll();
 }
+
+std::string directory::fixNameSource(const std::string nameSource){
+    std::string newName=nameSource;
+    for(size_t i=0;i<nameSource.size();i++){
+        if(nameSource[i]==' '){
+            newName.replace(i,1,1,0x1F);
+        }
+    }
+    return newName;
+}
+
