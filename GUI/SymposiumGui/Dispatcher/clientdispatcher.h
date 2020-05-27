@@ -60,11 +60,7 @@ class chrono;
 
 
 
-const int TEMPOATTESA = 180000;       //Tempo per cui si attende risposta dal server, in millisecondi
-
-const std::string TIMERSCADUTO = "Unable to receive response from server. Please, check your connection and login again.";
-
-const std::string IMPOSSINVIARE = "Unable to contact the server. Please, check your connection and login again.";
+const int TEMPOATTESA = 180000;                                 /**< Time the client waits for a response from the server, in milliseconds  */
 
 namespace Symposium{
 
@@ -73,41 +69,38 @@ namespace Symposium{
         Q_OBJECT
 
     private:
-        SymClient client;
-        QTcpSocket socket;
-        QHostAddress svAddress = QHostAddress("127.0.0.1");
-        quint16 svPort = 1234;
-        int currentWindow = 0;                          //variabile che dice qual è la finestra attiva
-        QTimer timer;
-        SymWinManager winmanager;                       //gestore finestre
-        std::queue<std::chrono::milliseconds> attese;
-        std::string userpwd;
-        std::string username;
-        uint_positive_cnt::type openDocumentID;
-        uint_positive_cnt::type openFileID;
-        // ELENCO DEI PUNTATORI A FINESTRA CHE SARRANNO POI DA ELIMINARE
-
-
-        inserturi* finestraInsertUri;                   //3
-        choosedir* finestraSceltaDir;                   //6
-        activecounterlink* finestraActiveCounterLink;   //8
-        activetimerlink* finestraActiveTimerLink;       //9
-        activealwayslink* finestraActiveAlwaysLink;     //10
-        onlineusers* finestraOnlineUser;                //13
-        alluser* finestraAllUser;                       //14
-        activenonlink* finestraActiveNonLink;           //15
-        choosepriv* finestraChoosePriv;                 //16
-
-        // FINE ELENCO PUNTATORI ALLE FINESTRE
-        bool appIsClosing;
-        bool userIsLogged;
+        SymClient client;                                       /**< variable that model this client  */
+        QTcpSocket socket;                                      /**< socket used to communicated with server  */
+        QHostAddress svAddress = QHostAddress("127.0.0.1");     /**< variable to contain the IP address of the server  */
+        quint16 svPort = 1234;                                  /**< variable to contain the port of the server  */
+        QTimer timer;                                           /**< timer used to wait a response from the server  */
+        SymWinManager winmanager;                               /**< GUI windows manager  */
+        std::queue<std::chrono::milliseconds> attese;           /**< queue to contain the time of sending messages  */
+        std::string userpwd;                                    /**< variable to contain the password that user inserted in signin or signup window  */
+        std::string username;                                   /**< variable to contain the username that user inserted in signin or signup window  */
+        uint_positive_cnt::type openDocumentID;                 /**< variable to contain the id of document that client want to open or has just created  */
+        uint_positive_cnt::type openFileID;                     /**< variable to contain the id of file that client want to open or has just created  */
+        bool appIsClosing;                                      /**< this variable is true if the application will close, false otherwise  */
+        bool userIsLogged;                                      /**< this variable is true if the user is logged in, false otherwise  */
     public:
         clientdispatcher(QObject *parent = nullptr);
 
+        /**
+         * @brief this method is invoke from the main to started the application
+         * @param argc passed from the main function
+         * @param argv passed from the main function
+         */
         int run(int argc, char **argv);
 
+        /**
+         * @brief start the @ref timer if it is not already start, otherwise insert the @ref timeToSend into queue @ref attese
+         * @param timeToSend
+         */
         void TimerStart(std::chrono::milliseconds timeToSend);
 
+        /**
+         * @brief it establish a connection between this client and Symposium server, if there isn't one yet
+         */
         void openConnection();
 
         /**
@@ -132,9 +125,17 @@ namespace Symposium{
          */
         void logIn(const std::string &username, const std::string &pwd);
 
+        /**
+         * @brief when this client do a signup that end succesfully, the system do an automatic login thanks this method
+         */
         void autologIn();
 
-
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param path the path of the file to open, relative to user's home directory
+         * @param name the id of the file to open
+         * @param reqPriv the privilege requested opening the file
+         */
         void openSource(const std::string &path, const std::string &name, privilege reqPriv);
 
         /**
@@ -147,6 +148,8 @@ namespace Symposium{
 
         /**
          * @brief it provides the list of online users on the current document
+         * @param documentID the document's ID which on you want online users
+         * @return forward list to contain a pair with user reference and @ref sessionData, contained into document
          */
         const std::forward_list<std::pair<const user *, sessionData>> onlineUser(uint_positive_cnt::type documentID);
 
@@ -214,8 +217,6 @@ namespace Symposium{
 
 
         void successEditPrivilege();
-
-        void successShareResource(std::string path);
 
         /**
          * @brief closes all the notepads, set the state to closing and closes the Qt application

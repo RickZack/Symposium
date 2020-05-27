@@ -54,9 +54,6 @@ int clientdispatcher::run(int argc, char **argv){
     MainWindow w(nullptr, this->winmanager, *this);
     (this->winmanager).setActive(w);
     w.show();
-    //notepad notepadWindow(nullptr, 2, Symposium::privilege::owner, Symposium::privilege::owner, "",this->tp,w);
-    //notepadWindow.show();
-    //notepadWindow.showLabels();
     return a.exec();
 }
 
@@ -67,11 +64,17 @@ void clientdispatcher::openConnection(){
         this->socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
         //connettiamo il socket all'indirizzo del server
         this->socket.connectToHost(svAddress, svPort);
-        //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
-        connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
-        //quando il socket si sconnette, chiamiamo il metodo connectionLost()
-        connect(&(this->socket), SIGNAL(disconnected()), this, SLOT(connectionLost()));
-        qDebug() << "Connection Successful";
+        //controlliamo se la connessione è andata a buon fine
+        if(!this->socket.waitForConnected()){
+            this->winmanager.activeWindow().failure("-1");
+        }else{
+            //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
+            connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
+            //quando il socket si sconnette, chiamiamo il metodo connectionLost()
+            connect(&(this->socket), SIGNAL(disconnected()), this, SLOT(connectionLost()));
+            qDebug() << "Connection Successful";
+        }
+
     }
 }
 
@@ -313,11 +316,8 @@ void clientdispatcher::editPrivilege(const std::string &targetUser, std::string 
         sendMessage(mess);
     } catch (clientdispatcher::sendFailure) {
         this->closeApp();
-        if(this->currentWindow==13){
-            this->finestraOnlineUser->errorConnectionLogout();
-        }else{
-            this->finestraAllUser->errorConnectionLogout();
-        }
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -329,15 +329,8 @@ void clientdispatcher::shareResource(const std::string &resPath, const std::stri
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
-        if(this->currentWindow==8){
-            this->finestraActiveCounterLink->errorConnectionLogout();
-        }else if(this->currentWindow==9){
-            this->finestraActiveTimerLink->errorConnectionLogout();
-        }else if(this->currentWindow==10){
-            this->finestraActiveAlwaysLink->errorConnectionLogout();
-        }else{
-            this->finestraActiveNonLink->errorConnectionLogout();
-        }
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -484,22 +477,10 @@ void clientdispatcher::successAction(){
 }
 
 void clientdispatcher::successEditPrivilege(){
-    if(this->currentWindow==13){
+    /*if(this->currentWindow==13){
        this->finestraOnlineUser->successEditPrivilege();
     }else{
        this->finestraAllUser->successEditPrivilege();
-    }
-}
-
-void clientdispatcher::successShareResource(std::string path){
-    /*if(this->currentWindow==8){
-        this->finestraActiveCounterLink->successLink(path);
-    }else if(this->currentWindow==9){
-        this->finestraActiveTimerLink->successLink(path);
-    }else if(this->currentWindow==10){
-        this->finestraActiveAlwaysLink->successLink(path);
-    }else{
-        this->finestraActiveNonLink->successLink(path);
     }*/
 }
 
