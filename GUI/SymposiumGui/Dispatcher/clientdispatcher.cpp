@@ -158,13 +158,16 @@ void clientdispatcher::connectionLost(){
 }
 
 void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend){
-    if(this->timer.isActive()){
-        //timer già attivo, quindi inseriamo in coda
-        attese.push(timeToSend);
-    }else{
-        std::chrono::milliseconds difftemp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - timeToSend;
-        int numero = TEMPOATTESA - difftemp.count();
-        this->timer.start(numero);
+    //se chiudiamo l'applicazione non impostiamo il timer in quanto inutile
+    if(this->appIsClosing==false){
+        if(this->timer.isActive()){
+            //timer già attivo, quindi inseriamo in coda
+            attese.push(timeToSend);
+        }else{
+            std::chrono::milliseconds difftemp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - timeToSend;
+            int numero = TEMPOATTESA - difftemp.count();
+            this->timer.start(numero);
+        }
     }
 }
 
@@ -404,14 +407,16 @@ void clientdispatcher::removeUser(const std::string &pwd) {
 }
 
 void clientdispatcher::logout() {
-    std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.logout());
-    try {
-        //inviamo il messaggio
-        sendMessage(mess);
-    } catch (clientdispatcher::sendFailure) {
-        //errore nell'invio del messaggio
-        //dobbiamo notificare alla GUI
-        this->winmanager.activeWindow().failure("-1");
+    if(this->userIsLogged){
+        std::shared_ptr<clientMessage> mess = std::make_shared<clientMessage>(this->client.logout());
+        try {
+            //inviamo il messaggio
+            sendMessage(mess);
+        } catch (clientdispatcher::sendFailure) {
+            //errore nell'invio del messaggio
+            //dobbiamo notificare alla GUI
+            this->winmanager.activeWindow().failure("-1");
+        }
     }
 }
 
