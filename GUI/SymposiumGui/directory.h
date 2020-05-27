@@ -47,7 +47,7 @@ public:
     void failure(const QString& toPrint) override;
 
     ~directory();
-    void listGenerate(std::string str, int count);
+    void listGenerate(std::string list, int count);
 
 
 
@@ -176,10 +176,11 @@ private:
     /*
      * Variables related to success()
      */
-    action lastChoice;                              /**< indicates the last action requested to the server */
-    Symposium::uint_positive_cnt::type curResId;    /**< resId of the currently selected resource, for an action has been requested */
-    QString curResName;                             /**< resName of the currently selected resource, for an action has been requested */
+    action lastChoice;                                                  /**< indicates the last action requested to the server */
+    Symposium::uint_positive_cnt::type curResId;                        /**< resId of the currently selected resource, for an action has been requested */
+    QString curResName;                                                 /**< resName of the currently selected resource, for an action has been requested */
 
+    std::map<std::string,std::pair<std::string,std::string>> ids;       /**< contains for all the elements inside a folder, the correspondent id */
     //TODO: spiegare come è usato, a cosa serve
     bool pressed=false;
 
@@ -207,7 +208,7 @@ private:
     /**
      * @brief str is a string that contains the list of all the files
      */
-    std::string str;
+    std::string list;
 
     int countDir;
     /**
@@ -230,6 +231,16 @@ private:
     Symposium::privilege privOpen=Symposium::privilege::none;
     std::string initialPriv;
 
+    /**
+     * @brief nameSource is the name of the source of the selected item
+     */
+    std::string nameSource;
+
+    /**
+     * @brief oldName is the old name of the source that has to be renamed
+     */
+    std::string oldName;
+
 
     /**
      * @brief directory::number_elements counts the number of element inside the @e string
@@ -244,7 +255,7 @@ private:
      * @param string that shows all the info about the sources
      * @return the string without \n
      */
-    std::string generateString(std::string& str);
+    std::string generateString(std::string& list);
 
     /**
      * @brief directory::searchForId extracts the id of the selected directory
@@ -253,7 +264,7 @@ private:
      * @param count the # of elements inside the string
      * @return id
      */
-    std::string searchForId(std::string word,std::string str,int count);
+    std::string searchForId(std::string word,std::string list,int count);
 
 
     /**
@@ -263,7 +274,7 @@ private:
      * @param count the # of elements inside the string
      * @return <id,priv>
      */
-    std::pair<std::string,std::string> searchForPriv(std::string word,std::string str, int count);
+    std::pair<std::string,std::string> searchForPriv(std::string word,std::string list, int count);
 
 
     /**
@@ -321,6 +332,12 @@ private:
     void hidePrivilegeButtons();
 
     void showEvent( QShowEvent* event ) override;
+
+    /**
+     * @brief populateMap
+     * @param list the list of all the elements inside a directory
+     */
+    void populateMap(std::string list);
 };
 
 

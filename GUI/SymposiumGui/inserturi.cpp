@@ -248,7 +248,6 @@ void inserturi::successInsert()
          notepadWindow->setWindowTitle(title);
          goToWindow(*notepadWindow);
          notepadWindow->showLabels();
-         notepadWindow->fixAlignment();
          if(privilege==Symposium::privilege::readOnly)
              notepadWindow->setreadonly();
     }
