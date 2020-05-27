@@ -344,6 +344,9 @@ void SymClient::addActiveUser(uint_positive_cnt::type docId, user &targetUser, p
     //salviamo l'utente ricevuto
     auto& target = addUsersOnDocument(targetUser);
     getActiveDocumentbyID(docId)->access(target, Priv);
+    auto f=getFilebyDocumentID(docId);
+    if(f->getUserPrivilege(target.getUsername())==privilege::none)
+        f->setUserPrivilege(target.getUsername(), Priv);
     //recuperiamo il generatore di colore associato al documento
     colorGen c = getColorGeneratorbyDocumentiID(docId);
     //generiamo un colore per il nuovo utente
@@ -351,7 +354,7 @@ void SymClient::addActiveUser(uint_positive_cnt::type docId, user &targetUser, p
     //inseriamolo nella mappa
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
                                     (std::make_pair(target.getSiteId(), docId), std::make_pair(target, *col)));
-    //dobbiamo aggiungiamo il cursore alla GUI, se necessario
+    //dobbiamo aggiungere il cursore alla GUI, se necessario
     #ifdef DISPATCHER_ON
     if(Priv!=privilege::readOnly){
         this->dispatcher->addUserCursor(target.getSiteId(),target.getUsername(),docId);

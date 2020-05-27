@@ -287,6 +287,8 @@ SymServer::removeResource(const std::string &remover, const std::string &resPath
     if(!userIsActive(remover))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& actionU=getRegistered(remover);
+    std::shared_ptr<file> fileReq= actionU.openFile(resPath, resId, uri::getDefaultPrivilege());
+    handleUserState(remover, fileReq->getDoc().getId());
     auto res=actionU.removeResource(resPath, resId);
 
     generateSimpleResponse(actionU.getSiteId(), msgType::removeRes, respMsgId);

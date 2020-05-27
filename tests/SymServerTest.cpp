@@ -70,6 +70,9 @@ struct SymServerUserMock: public user{
 
 struct SymServerFileMock: public file{
     SymServerFileMock() : file("test", 0) {}
+    void forceContent(const document& d){
+        const_cast<document&>(this->getDoc())=d;
+    }
     MOCK_METHOD2(access, document&(const user &targetUser, privilege accessMode));
 };
 
@@ -421,6 +424,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         server.login("mario", "a123@bty!!", 0);
         msId=rand()+1;
         justInserted=nullptr;
+        fileToReturn->forceContent(doc);
     };
 
     /*
@@ -946,6 +950,8 @@ TEST_F(SymServerTestFilesystemFunctionality, renameResourceByUnloggedUser){
 
 TEST_F(SymServerTestFilesystemFunctionality, removeResourceCallsResourceFileOnUserAndGenerateCorrectResponse){
     setStageForAccessedDoc(loggedUser);
+    makeLoggedUserNotWorkingOnDoc();
+    EXPECT_CALL(*justInserted, openFile(filePath, fileName, uri::getDefaultPrivilege())).WillOnce(testing::Return(fileToReturn));
     EXPECT_CALL(*justInserted, removeResource(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
     auto ret= server.removeResource(loggedUserUsername, filePath, fileName, msId);
     EXPECT_EQ(fileToReturn, ret);
@@ -961,6 +967,13 @@ TEST_F(SymServerTestFilesystemFunctionality, removeResourceByUnloggedUser){
      * Cases in which, for an error, the operation goes wrong, so an exception is raised, are to be handled
      * externally, in the module that controls the connection
      */
+}
+
+// Added on 27/05/2020, after bug found on removing resource from the GUI
+TEST_F(SymServerTestFilesystemFunctionality, removeResourceThrowsOnOpenedDoc){
+    setStageForAccessedDoc(loggedUser);
+    EXPECT_CALL(*justInserted, openFile(filePath, fileName, uri::getDefaultPrivilege())).WillOnce(testing::Return(fileToReturn));
+    EXPECT_THROW(server.removeResource(loggedUserUsername, filePath, fileName, 0), SymServerException);
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, mapSiteIdToUserCallsRetrieveSiteIdsOnDocAndGenerateCorrectResponse){

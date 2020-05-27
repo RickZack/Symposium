@@ -290,11 +290,12 @@ namespace Symposium {
         void deleteFromStrategy(const std::string &userName);
 
         /**
-         * @brief substitute this file with the one pass as the parametr
-         *  @param replace the file to replace with
+         * @brief substitute this file with the one pass as the parameter
+         * @param replace the file to replace with
+         * @warning the content of @e replaced is moved into this
          */
 
-        void replacement(const std::shared_ptr<file> replace);
+        void replacement(std::shared_ptr<file> replace);
 
         /**
          * @brief invoke @ref AccessStrategy::validateAction

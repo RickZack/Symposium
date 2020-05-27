@@ -244,9 +244,9 @@ bool file::validateAction(const std::string &userName, privilege priv) {
 }
 
 
-void file::replacement(const std::shared_ptr<file> replace){
+void file::replacement(std::shared_ptr<file> replace){
     this->doc=replace->doc;
-    this->sharingPolicy=replace->sharingPolicy;
+    this->sharingPolicy=std::move(replace->sharingPolicy);
     this->strategy=std::move(replace->strategy);
 }
 
