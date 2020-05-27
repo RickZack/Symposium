@@ -40,7 +40,7 @@
 
 using namespace Symposium;
 
-SymClient::SymClient(): loggedUser("username", "P@assW0rd!!", "noempty", "", 0, nullptr),
+SymClient::SymClient(): loggedUser("username", "P@assW0rd!!", "noempty", "", 0, nullptr), usersOnDocuments(),
                         activeFile(), activeDoc(), userColors(), unanswered(){
     document::doLoadAndStore=false;
 }
@@ -75,10 +75,6 @@ void SymClient::logIn(const user &logged) {
     #ifdef DISPATCHER_ON
     //notifichiamo alla gui il successo
     this->dispatcher->successAction();
-    /*if(this->dispatcher->isAutoLogin())
-        this->dispatcher->successSignUp();
-    else
-        this->dispatcher->successLogin();*/
     #endif
 }
 
@@ -345,32 +341,59 @@ void SymClient::setUserColors(uint_positive_cnt::type docId, const std::map<uint
 }
 
 void SymClient::addActiveUser(uint_positive_cnt::type docId, user &targetUser, privilege Priv) {
-    getActiveDocumentbyID(docId)->access(targetUser, Priv);
+    //salviamo l'utente ricevuto
+    auto& target = addUsersOnDocument(targetUser);
+    getActiveDocumentbyID(docId)->access(target, Priv);
     //recuperiamo il generatore di colore associato al documento
     colorGen c = getColorGeneratorbyDocumentiID(docId);
     //generiamo un colore per il nuovo utente
     std::shared_ptr<Color> col (new Color(c()));
     //inseriamolo nella mappa
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
-                                    (std::make_pair(targetUser.getSiteId(), docId), std::make_pair(targetUser, *col)));
+                                    (std::make_pair(target.getSiteId(), docId), std::make_pair(target, *col)));
     //dobbiamo aggiungiamo il cursore alla GUI, se necessario
     #ifdef DISPATCHER_ON
     if(Priv!=privilege::readOnly){
-        this->dispatcher->addUserCursor(targetUser.getSiteId(),targetUser.getUsername(),docId);
+        this->dispatcher->addUserCursor(target.getSiteId(),target.getUsername(),docId);
     }
     #endif
 }
 
 void SymClient::removeActiveUser(uint_positive_cnt::type docId, user &targetUser) {
-    getActiveDocumentbyID(docId)->close(targetUser);
+    //recuperiamo l'utente dalla lista
+    auto& target = getUsersOnDocument(targetUser.getUsername());
+    getActiveDocumentbyID(docId)->close(target);
     //dobbiamo rimuovere il cursore dalla GUI, se il cursore non era presente, la GUI non fa niente
     #ifdef DISPATCHER_ON
-    this->dispatcher->removeUserCursor(targetUser.getSiteId(),docId);
+    this->dispatcher->removeUserCursor(target.getSiteId(),docId);
     #endif
+    removeUsersOnDocument(target.getUsername());
 }
 
 const user& SymClient::getLoggedUser() const{
     return loggedUser;
+}
+
+const user& SymClient::addUsersOnDocument(const user &toInsert){
+    if(this->usersOnDocuments.count(toInsert.getUsername())==0){
+        this->usersOnDocuments.insert({toInsert.getUsername(),std::make_pair(toInsert,1)});
+    }else{
+        int c = ++(this->usersOnDocuments.at(toInsert.getUsername()).second);
+        this->usersOnDocuments[toInsert.getUsername()].second = c;
+    }
+    return usersOnDocuments.at(toInsert.getUsername()).first;
+}
+
+const user& SymClient::getUsersOnDocument(const std::string &username){
+    return this->usersOnDocuments[username].first;
+}
+
+void SymClient::removeUsersOnDocument(const std::string &username){
+    int c = this->usersOnDocuments[username].second;
+    if(c == 1)
+        this->usersOnDocuments.erase(username);
+    else
+        this->usersOnDocuments[username].second = --c;
 }
 
 std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMessage& smex) {

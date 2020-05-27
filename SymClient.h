@@ -59,12 +59,13 @@ namespace Symposium {
 
     class SymClient {
     protected:
-        user loggedUser;                                                          /**< logged user and its data */
-        std::forward_list<std::shared_ptr<file>> activeFile;                      /**< list of active documents */
-        std::forward_list<std::pair<document *, colorGen> > activeDoc;            /**< list of files the active documents are related to */
+        user loggedUser;                                                                                                /**< users map with whom we have open documents in common, with counter for each user  */
+        std::map<std::string, std::pair<const user, int>> usersOnDocuments;                                             /**< active users, indexed by username */
+        std::forward_list<std::shared_ptr<file>> activeFile;                                                            /**< list of active documents */
+        std::forward_list<std::pair<document *, colorGen>> activeDoc;                                                   /**< list of files the active documents are related to */
         std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> userColors;       /**< map {siteId, documentId}->{user, color}  */
-        clientdispatcher* dispatcher;                                             /**< pointer to client dispatcher */
-        std::forward_list<std::shared_ptr<clientMessage>> unanswered;             /**< messages sent by client that have not been received an answer */
+        clientdispatcher* dispatcher;                                                                                   /**< pointer to client dispatcher */
+        std::forward_list<std::shared_ptr<clientMessage>> unanswered;                                                   /**< messages sent by client that have not been received an answer */
 
         /*
          * Use this function to access to loggedUser, because it allows the tests to work with a mock class
@@ -582,6 +583,12 @@ namespace Symposium {
              * calls setLoggedUser, passing the user object transmitted by the user
              */
         virtual void setLoggedUser(const user &loggedUser);
+
+        const user& addUsersOnDocument(const user& toInsert);
+
+        const user& getUsersOnDocument(const std::string &username);
+
+        void removeUsersOnDocument(const std::string &username);
     };
 }
 #endif //SYMPOSIUM_SYMCLIENT_H

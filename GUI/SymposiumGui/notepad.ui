@@ -389,14 +389,18 @@ border-radius:15px;</string>
    <widget class="QLabel" name="labelChars">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>0</x>
       <y>520</y>
-      <width>191</width>
+      <width>801</width>
       <height>16</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+    </property>
     <property name="text">
-     <string>Total Chars:</string>
+     <string>  Total Chars:</string>
     </property>
    </widget>
   </widget>
@@ -436,7 +440,6 @@ border-radius:15px;</string>
    <addaction name="menuEdit"/>
    <addaction name="menuFormat"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
@@ -476,6 +479,7 @@ border-radius:15px;</string>
    <addaction name="separator"/>
    <addaction name="actionColorText"/>
   </widget>
+  <widget class="QStatusBar" name="statusbar"/>
   <action name="Export_PDF">
    <property name="icon">
     <iconset resource="resources.qrc">

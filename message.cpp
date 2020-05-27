@@ -420,8 +420,10 @@ template<class Archive>
 void sendResMessage::serialize(Archive &ar, const unsigned int)
 {
     // save/load base class information
-    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
-    ar & symId & resource;
+    user::hideAuthParams([&](){
+        ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+        ar & symId & resource;
+    });
 }
 
 void sendResMessage::invokeMethod(SymClient &client) {
@@ -450,7 +452,7 @@ void sendResMessage::invokeMethod(SymClient &client) {
             {
                 std::shared_ptr <file> f= std::dynamic_pointer_cast<file>(resource);
                 client.openNewSource(mex2->getResourceId(), resource->getUserPrivilege(mex2->getActionOwner().first),
-                        mex2->getPath(), mex2->getName(), resource->getId(), f);
+                        mex2->getPath(), mex2->getName(), symId, f);
             }
            break;
         }

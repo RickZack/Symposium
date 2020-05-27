@@ -634,8 +634,8 @@ TEST_F(serverMessageTest, sendResMsgTestCallsOpenNewSource){
     cm= new askResMessage(msgType::openNewRes, {clientMessageTest::username, ""}, clientMessageTest::resPath, clientMessageTest::resId, clientMessageTest::absPath, uri::getDefaultPrivilege(), 0);
     std::shared_ptr<filesystem> dummyFile(new file("file", 1));
     dummyFile->setUserPrivilege(clientMessageTest::username, uri::getDefaultPrivilege());
-    m=new sendResMessage(msgType::openNewRes, msgOutcome::success, dummyFile);
-    EXPECT_CALL(client, openNewSource(clientMessageTest::absPath, uri::getDefaultPrivilege(), clientMessageTest::resPath, clientMessageTest::resId, dummyFile->getId(), std::dynamic_pointer_cast<file>(dummyFile)));
+    m=new sendResMessage(msgType::openNewRes, msgOutcome::success, dummyFile, 10);
+    EXPECT_CALL(client, openNewSource(clientMessageTest::absPath, uri::getDefaultPrivilege(), clientMessageTest::resPath, clientMessageTest::resId, 10, std::dynamic_pointer_cast<file>(dummyFile)));
     EXPECT_CALL(client, retrieveRelatedMessage(*m)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(cm)));
 
     m->invokeMethod(client);

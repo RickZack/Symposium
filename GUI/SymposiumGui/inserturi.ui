@@ -254,11 +254,16 @@ color: rgb(58, 80, 116); </string>
   <widget class="QLabel" name="linkError">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>90</x>
      <y>590</y>
-     <width>431</width>
+     <width>470</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+color: red; 
+text-align:center;</string>
    </property>
    <property name="text">
     <string/>
