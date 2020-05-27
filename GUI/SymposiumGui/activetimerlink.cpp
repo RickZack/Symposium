@@ -13,7 +13,10 @@ activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    ui->time->setDateTime(QDateTime::currentDateTime());
+    QDateTime dateNow=QDateTime::currentDateTime();
+
+    ui->time->setDateTime(dateNow);
+    ui->time->setMinimumDateTime(dateNow);
     ui->writer->click();
     privilegeToGrant=Symposium::privilege::modify;
     enableButtons();
@@ -73,28 +76,19 @@ activetimerlink::~activetimerlink()
 void activetimerlink::on_ok_clicked()
 {
     QDateTime date=ui->time->dateTime();
-    QDateTime dateNow=QDateTime::currentDateTime();
-    if(date>dateNow)
-    {
-        std::tm tm = {};
-        std::chrono::system_clock::time_point endTime;
-        time=date.toString().toStdString();
-        std::stringstream ss(time);
-        ss >> std::get_time(&tm, "%b %d %Y %H:%M:%S");
-        endTime=std::chrono::system_clock::from_time_t(std::mktime(&tm));
 
-        u.activateTimer(endTime, privilegeToGrant);
-        waiting();
-        disableButtons();
-        disableStyleButtons();
-        #ifdef DISPATCHER_ON
-        cl.shareResource(pathFile, std::to_string(fileId), u);
-        #else
-        successLink();
-        #endif
-    }
-    else
-      unsuccessLink("You have to choose time in the future non in the past!");
+    std::chrono::milliseconds fromEpoch{date.toMSecsSinceEpoch()};
+    std::chrono::system_clock::time_point endTime{fromEpoch};
+
+    u.activateTimer(endTime, privilegeToGrant);
+    waiting();
+    disableButtons();
+    disableStyleButtons();
+    #ifdef DISPATCHER_ON
+    cl.shareResource(pathFile, std::to_string(fileId), u);
+    #else
+    successLink();
+    #endif
 
 }
 

@@ -895,7 +895,10 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
         column=cursor.positionInBlock();
     }
 
-     this->sendSymbolToInsert(row,column,testo,format);
+    this->sendSymbolToInsert(row,column,testo,format);
+    QColor lightColor=format.foreground().color();
+    lightColor.setAlpha(180);
+    ui->textEdit->setTextColor(lightColor);
 }
 
 bool notepad::eventFilter(QObject *obj, QEvent *event){
@@ -1303,15 +1306,15 @@ void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigne
 
     // delete the character and replace it with the same that has a defined Color
 
-    curs.setCharFormat(ch_format);
+    //curs.setCharFormat(ch_format);
 
-    /*
+
     curs.deleteChar();
     wchar_t symch=sym.getCh();
     QString ch;
     ch[0]=symch;
     curs.insertText(ch,ch_format);
-    */
+
 
     // go back to the starting position
     ui->textEdit->changePosition(actBlock,actColm);
