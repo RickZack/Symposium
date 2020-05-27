@@ -90,7 +90,7 @@ QScrollBar::sub-line:vertical {
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); 
 background-color:white;
 border-color: rgb(58, 80, 116);</string>
@@ -108,7 +108,7 @@ border-color: rgb(58, 80, 116);</string>
     <property name="styleSheet">
      <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 13pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -142,11 +142,11 @@ color: rgb(58, 80, 116); </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font:14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the name for new folder:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the name:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_3">
@@ -274,7 +274,7 @@ color: rgb(58, 80, 116); </string>
     </property>
     <property name="styleSheet">
      <string notr="true">color: rgb(58, 80, 116); 
-font: 12pt &quot;Baskerville Old Face&quot;;</string>
+font: 13pt &quot;Baskerville Old Face&quot;;</string>
     </property>
     <property name="text">
      <string>Go back</string>
@@ -297,11 +297,11 @@ font: 12pt &quot;Baskerville Old Face&quot;;</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the name for new document:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the name:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="name_2">
@@ -316,7 +316,7 @@ color: rgb(58, 80, 116); </string>
     <property name="styleSheet">
      <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 13pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -335,7 +335,7 @@ border-color: rgb(58, 80, 116); </string>
     <property name="styleSheet">
      <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -443,34 +443,17 @@ color: rgb(58, 80, 116); </string>
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Attention: folder will be create in the current folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="ownerButton">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>280</y>
-      <width>97</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
-color: rgb(58, 80, 116); </string>
-    </property>
-    <property name="text">
-     <string>Owner</string>
-    </property>
-   </widget>
    <widget class="QRadioButton" name="readerButton">
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>305</y>
+      <y>300</y>
       <width>97</width>
       <height>20</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
@@ -487,7 +470,7 @@ color: rgb(58, 80, 116); </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
@@ -498,7 +481,7 @@ color: rgb(58, 80, 116); </string>
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>190</y>
+      <y>220</y>
       <width>381</width>
       <height>81</height>
      </rect>
@@ -609,7 +592,7 @@ border-radius:15px;</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font: 13pt &quot;Baskerville Old Face&quot;;
 color: red; 
 text-align:center;</string>
     </property>
@@ -635,7 +618,7 @@ border: 1px solid;
 background-color:white;
 border-color: rgb(58, 80, 116);
 color: rgb(58, 80, 116);
-font: 10pt &quot;Baskerville Old Face&quot;;
+font: 13pt &quot;Baskerville Old Face&quot;;
 }</string>
     </property>
     <property name="verticalScrollBarPolicy">

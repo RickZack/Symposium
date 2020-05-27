@@ -33,7 +33,7 @@
    <property name="styleSheet">
     <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -91,7 +91,7 @@ border-radius:15px;</string>
    <property name="styleSheet">
     <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -200,7 +200,7 @@ color: rgb(58, 80, 116); </string>
    <property name="styleSheet">
     <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -220,7 +220,7 @@ border-color: rgb(58, 80, 116); </string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); 
 text-decoration: underline;
 text-align: center;</string>
@@ -358,12 +358,12 @@ font: 18pt &quot;Lucida Calligraphy&quot;;</string>
     <rect>
      <x>189</x>
      <y>320</y>
-     <width>191</width>
+     <width>221</width>
      <height>16</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 9pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
@@ -380,7 +380,7 @@ color: rgb(58, 80, 116); </string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 9pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">

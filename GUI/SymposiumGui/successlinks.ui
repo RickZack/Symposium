@@ -23,12 +23,14 @@ QScrollBar:horizontal {
 border-color:rgb(58, 80, 116);
 border-width: 1px;
 border-style: solid;
+border-radius:50px;
 background-color: rgb(240, 240, 240);
 height:10px;
-margin: 0px 0px 0px 0px;
+margin: 0px 5px -2px 5px;
 }
 QScrollBar::handle:horizontal {
 background-color: rgb(58, 80, 116);
+border-radius:15px;
 min-width: 25px;
 }
 QScrollBar::add-line:horizontal {
@@ -223,7 +225,7 @@ color: rgb(58, 80, 116);</string>
    <property name="geometry">
     <rect>
      <x>183</x>
-     <y>80</y>
+     <y>83</y>
      <width>370</width>
      <height>41</height>
     </rect>
@@ -231,7 +233,10 @@ color: rgb(58, 80, 116);</string>
    <property name="styleSheet">
     <string notr="true">QPlainTextEdit{
 background-color:rgb(249, 247, 241);
-border: none;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); 
 color: rgb(58, 80, 116);
 font: 12pt &quot;Baskerville Old Face&quot;;
 }</string>

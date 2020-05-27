@@ -133,7 +133,7 @@ border-radius:15px;</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); 
 background-color:white;
 border-color: rgb(58, 80, 116);

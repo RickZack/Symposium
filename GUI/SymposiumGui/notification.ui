@@ -45,13 +45,13 @@ border-radius:15px;</string>
      <x>37</x>
      <y>30</y>
      <width>482</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">
     <string notr="true">border: none;
 color: rgb(58, 80, 116); 
-font:12pt &quot;Baskerville Old Face&quot;;
+font:14pt &quot;Baskerville Old Face&quot;;
 text-align: center;</string>
    </property>
    <property name="text">

@@ -78,8 +78,8 @@ QScrollBar::sub-line:vertical {
     <rect>
      <x>50</x>
      <y>410</y>
-     <width>221</width>
-     <height>164</height>
+     <width>249</width>
+     <height>176</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="layout">
@@ -97,7 +97,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="owner">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -108,7 +108,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="modify">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -119,7 +119,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="reader">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -130,7 +130,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="none">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -261,14 +261,14 @@ of all users who have access to this file</string>
   <widget class="QLabel" name="notification">
    <property name="geometry">
     <rect>
-     <x>110</x>
+     <x>105</x>
      <y>610</y>
-     <width>350</width>
+     <width>365</width>
      <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116);</string>
    </property>
    <property name="text">
@@ -288,7 +288,7 @@ color: rgb(58, 80, 116);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 13pt &quot;Baskerville Old Face&quot;;
 color: red; 
 text-align:center;</string>
    </property>

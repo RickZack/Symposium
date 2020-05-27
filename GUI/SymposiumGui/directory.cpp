@@ -31,6 +31,7 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
 
     ui->back_button->setDisabled(true);
     ui->back_button->hide();
+    ui->writerButton->click();
 
     ui->actionHome->setIcon(QIcon(":/icon/home.png"));
 
@@ -907,7 +908,6 @@ void directory::showPrivilegeButtons(){
     ui->privilegeLine->show();
     ui->writerButton->show();
     ui->readerButton->show();
-    ui->ownerButton->show();
     lastChoice=openSource;
 
 }
@@ -927,8 +927,6 @@ void directory::on_OkPriv_clicked()
         privOpen= Symposium::privilege::modify;
     else if(ui->readerButton->isChecked())
         privOpen= Symposium::privilege::readOnly;
-    else
-        privOpen= Symposium::privilege::owner;
     waitingFunction();
     #ifdef DISPATCHER_ON
     cl.openSource(this->path,this->selectedId,privOpen);
@@ -976,7 +974,6 @@ void directory::hidePrivilegeButtons(){
     ui->privilegeLine->hide();
     ui->writerButton->hide();
     ui->readerButton->hide();
-    ui->ownerButton->hide();
     ui->OkPriv->hide();
     ui->cancPriv->hide();
 }

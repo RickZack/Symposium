@@ -32,6 +32,7 @@
    <property name="styleSheet">
     <string notr="true">QDateTimeEdit {
 border: 1px solid;
+font-size: 14px;
 background-color:white;
 border-color: rgb(58, 80, 116);
 color: rgb(58, 80, 116);
@@ -128,17 +129,31 @@ border-radius:15px;</string>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>180</y>
-     <width>151</width>
-     <height>121</height>
+     <x>220</x>
+     <y>150</y>
+     <width>235</width>
+     <height>139</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <widget class="QLabel" name="label">
+      <property name="styleSheet">
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
+      </property>
+      <property name="text">
+       <string>Choose privilege to grant:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QRadioButton" name="owner">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -149,7 +164,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="writer">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -160,7 +175,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="reader">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -203,18 +218,19 @@ color: rgb(58, 80, 116); </string>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>30</y>
-     <width>450</width>
-     <height>35</height>
+     <x>30</x>
+     <y>20</y>
+     <width>600</width>
+     <height>61</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 16pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116);</string>
    </property>
    <property name="text">
-    <string>Choose the time until you want the link to be available</string>
+    <string>Choose the time until wich you
+ want the link to be available</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
@@ -226,36 +242,16 @@ color: rgb(58, 80, 116);</string>
      <x>40</x>
      <y>340</y>
      <width>590</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 13pt &quot;Baskerville Old Face&quot;;
 color: red; 
 text-align:center;</string>
    </property>
    <property name="text">
     <string/>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>234</x>
-     <y>140</y>
-     <width>202</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
-color: rgb(58, 80, 116); </string>
-   </property>
-   <property name="text">
-    <string>Choose privilege to grant:</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

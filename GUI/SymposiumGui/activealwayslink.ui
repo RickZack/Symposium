@@ -26,7 +26,7 @@
      <x>49</x>
      <y>20</y>
      <width>572</width>
-     <height>61</height>
+     <height>71</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -41,7 +41,7 @@ color: rgb(58, 80, 116);
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;If you are sure to share this file with another users without any limits choose the privilege to grant:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Baskerville Old Face'; font-size:15pt;&quot;&gt;If you are sure to share this file with other users without limits, you can choose the privilege to grant:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QWidget" name="verticalLayoutWidget">
@@ -57,7 +57,7 @@ p, li { white-space: pre-wrap; }
     <item>
      <widget class="QRadioButton" name="owner">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -68,7 +68,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="writer">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -79,7 +79,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="reader">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -163,11 +163,11 @@ color: rgb(58, 80, 116);</string>
      <x>40</x>
      <y>270</y>
      <width>590</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 13pt &quot;Baskerville Old Face&quot;;
 color: red; 
 text-align:center;</string>
    </property>

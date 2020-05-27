@@ -23,18 +23,18 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>125</x>
-     <y>30</y>
-     <width>420</width>
+     <x>35</x>
+     <y>20</y>
+     <width>600</width>
      <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 16pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116);</string>
    </property>
    <property name="text">
-    <string>Are you sure you want to disable all links?</string>
+    <string>Are you sure you want to disable the sharing with link?</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
@@ -82,7 +82,7 @@ border-radius:15px;</string>
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>80</y>
+     <y>100</y>
      <width>61</width>
      <height>61</height>
     </rect>
@@ -95,7 +95,7 @@ border-radius:15px;</string>
    <property name="geometry">
     <rect>
      <x>280</x>
-     <y>100</y>
+     <y>120</y>
      <width>81</width>
      <height>30</height>
     </rect>
@@ -112,7 +112,7 @@ color: rgb(58, 80, 116);</string>
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>110</y>
+     <y>115</y>
      <width>590</width>
      <height>21</height>
     </rect>
@@ -124,6 +124,28 @@ text-align:center;</string>
    </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="errorMess_2">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>50</y>
+     <width>590</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+color: red; 
+text-align:center;</string>
+   </property>
+   <property name="text">
+    <string>If you want to change the privileges of users who already shared
+ the document, please go to “Sharing Policy → Change Privilege”</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

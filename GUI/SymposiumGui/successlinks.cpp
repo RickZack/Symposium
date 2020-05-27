@@ -83,5 +83,9 @@ void successlinks::on_pushButton_clicked()
     QString emailAddr("");
     QString subject("Symposium - invitation to collaborate");
     QString body("You have a new invitation to collaborate.\n\n"+user+" decided to share with you a file with the privilege "+privilege+" on Symposium.\nYou can access it pasting the following resource identifier: "+str+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.");
+    if(caseLink==2)
+        body="You have a new invitation to collaborate.\n\n"+user+" decided to share with you and other "+numShares+" shares a file with the privilege "+privilege+" on Symposium.\n The link will be available until "+time+".\nYou can access it pasting the following resource identifier: "+str+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.";
+    if(caseLink==4)
+        body="You have a new invitation to collaborate.\n\n"+user+" decided to share with you a file with the privilege "+privilege+" on Symposium.\n The link will be available until "+time+".\nYou can access it pasting the following resource identifier: "+str+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.";
     QDesktopServices::openUrl(QUrl("mailto:"+emailAddr+"?subject="+subject+"&body="+body, QUrl::TolerantMode));
 }

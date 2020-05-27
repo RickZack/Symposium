@@ -229,13 +229,16 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     }
     if(priv==Symposium::privilege::owner)
     {
-        QMenu *userMenu=menuBar()->addMenu(tr("Users' privilege"));
-        userMenu->addAction(tr("Show all users"), this, &notepad::visualizeAllUsers);
-        QMenu *shareMenu=menuBar()->addMenu(tr("Share File"));
+        QMenu *shareMenu=menuBar()->addMenu(tr("Sharing Policy"));
         shareMenu->addAction(tr("Disable links"), this, &notepad::inactiveLink);
         shareMenu->addAction(tr("Enable links"), this, &notepad::activeAlwaysLink);
         shareMenu->addAction(tr("Timer links"), this, &notepad::timerLink);
         shareMenu->addAction(tr("Number links"), this, &notepad::counterLink);
+        shareMenu->addAction(tr("Change Privilege"), this, &notepad::visualizeAllUsers);
+    }
+    else {
+        QMenu *usersMenu=menuBar()->addMenu(tr("Users"));
+        usersMenu->addAction(tr("All users"), this, &notepad::visualizeAllUsers);
     }
 
     ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));

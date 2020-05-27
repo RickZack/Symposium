@@ -44,7 +44,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="reader">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -55,7 +55,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="writer">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -66,7 +66,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QRadioButton" name="owner">
       <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
@@ -77,7 +77,7 @@ color: rgb(58, 80, 116); </string>
     <item>
      <widget class="QPushButton" name="dir">
       <property name="styleSheet">
-       <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+       <string notr="true">font: 12pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); 
 text-decoration: underline;
 text-align: left;
@@ -142,7 +142,7 @@ border-radius:15px;</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 18pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 20pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
@@ -206,7 +206,7 @@ text-align:center;</string>
    <property name="styleSheet">
     <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 13pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -257,11 +257,11 @@ color: rgb(58, 80, 116); </string>
      <x>90</x>
      <y>590</y>
      <width>470</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 13pt &quot;Baskerville Old Face&quot;;
 color: red; 
 text-align:center;</string>
    </property>
@@ -331,7 +331,7 @@ font: 18pt &quot;Lucida Calligraphy&quot;;</string>
    <property name="styleSheet">
     <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;

@@ -28,11 +28,14 @@
    <property name="styleSheet">
     <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
 border-color: rgb(58, 80, 116); </string>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
   <widget class="QLineEdit" name="password">
@@ -47,7 +50,7 @@ border-color: rgb(58, 80, 116); </string>
    <property name="styleSheet">
     <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -184,14 +187,14 @@ color: rgb(58, 80, 116);</string>
   <widget class="QLabel" name="tryAgain">
    <property name="geometry">
     <rect>
-     <x>144</x>
+     <x>100</x>
      <y>371</y>
-     <width>382</width>
+     <width>500</width>
      <height>20</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 13pt &quot;Baskerville Old Face&quot;;
 color: red; 
 text-align:center;</string>
    </property>

@@ -73,7 +73,7 @@ QScrollBar::sub-line:vertical {
 QMenuBar {
     background-color: white;
     spacing: 3px;
-	font: 10pt &quot;Baskerville Old Face&quot;;
+	font: 13pt &quot;Baskerville Old Face&quot;;
 	color: rgb(58, 80, 116); 
 }
 QMenuBar::item {
@@ -90,7 +90,7 @@ QMenuBar::item:pressed {
 QMenu {
     background-color: white; 
     border: 1px solid  rgb(58, 80, 116);
-	font: 10pt &quot;Baskerville Old Face&quot;;
+	font: 13pt &quot;Baskerville Old Face&quot;;
 	color: rgb(58, 80, 116);
 }
 
@@ -147,6 +147,7 @@ border-color: rgb(58, 80, 116);</string>
        <property name="styleSheet">
         <string notr="true">QComboBox {
 border: 1px solid;
+font: 11pt &quot;Baskerville Old Face&quot;;
 background-color:white;
 border-color: rgb(58, 80, 116);
 color: rgb(58, 80, 116);
@@ -183,8 +184,11 @@ QComboBox QAbstractItemView {
        </property>
        <property name="font">
         <font>
-         <family>Times New Roman</family>
-         <pointsize>10</pointsize>
+         <family>Baskerville Old Face</family>
+         <pointsize>11</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
         </font>
        </property>
        <property name="toolTip">
@@ -193,6 +197,7 @@ QComboBox QAbstractItemView {
        <property name="styleSheet">
         <string notr="true">QComboBox {
 border: 1px solid;
+font: 11pt &quot;Baskerville Old Face&quot;;
 background-color:white;
 border-color: rgb(58, 80, 116);
 color: rgb(58, 80, 116);
@@ -235,6 +240,7 @@ QComboBox QAbstractItemView {
        <property name="styleSheet">
         <string notr="true">QComboBox {
 border: 1px solid;
+font: 11pt &quot;Baskerville Old Face&quot;;
 background-color:white;
 border-color: rgb(58, 80, 116);
 color: rgb(58, 80, 116);
@@ -396,11 +402,11 @@ border-radius:15px;</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
-     <string>  Total Chars:</string>
+     <string>  Total chars:</string>
     </property>
    </widget>
   </widget>
@@ -410,7 +416,7 @@ color: rgb(58, 80, 116); </string>
      <x>0</x>
      <y>0</y>
      <width>811</width>
-     <height>22</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">

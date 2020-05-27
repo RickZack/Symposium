@@ -120,7 +120,7 @@ color: rgb(58, 80, 116);</string>
    <property name="styleSheet">
     <string notr="true">background-color: white;
 color: rgb(58, 80, 116); 
-font: 11pt &quot;Baskerville Old Face&quot;;
+font: 14pt &quot;Baskerville Old Face&quot;;
 border-radius:15px;
 border-width: 1px; 
 border-style: solid;
@@ -140,7 +140,7 @@ border-color: rgb(58, 80, 116); </string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: red; </string>
    </property>
    <property name="text">
