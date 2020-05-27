@@ -53,7 +53,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
 {
     ui->setupUi(this);
     setMinimumSize(800, 600);
-
+    ui->statusbar->addWidget(ui->labelChars);
 
     qApp->installEventFilter(this);
 
@@ -499,7 +499,7 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
 
         int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
         QTextCharFormat fmt;
-        fmt.setFontWeight(headingLevel ? QFont::Bold : QFont::Normal);
+        //fmt.setFontWeight(headingLevel ? QFont::Bold : QFont::Normal);
         fmt.setProperty(QTextFormat::FontSizeAdjustment, sizeAdjustment);
         cursor.select(QTextCursor::LineUnderCursor);
         cursor.mergeCharFormat(fmt);
@@ -615,6 +615,8 @@ void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 
 void notepad::fillTextEdit(){
     NotRefreshLabels=true;
+    /* save in the alignmentStyle the vector that defines for each row its style */
+    NotRefreshLabels=true;
     QTextCharFormat chFormat;
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
@@ -623,8 +625,10 @@ void notepad::fillTextEdit(){
     /* save in symbols all the symbols contained in the document */
     #ifdef DISPATCHER_ON
     auto& symbols= this->doc.getSymbols();
+    auto alignmentStyle=this->doc.getAlignmentStyle();
     #else
     auto& symbols= this->documentoProva.getSymbols();
+    auto alignmentStyle=this->documentoProva.getAlignmentStyle();
     #endif
     if(symbols[0][0].getCh()==emptyChar){
         QColor black=Qt::black;
@@ -634,7 +638,17 @@ void notepad::fillTextEdit(){
         return;
     }
     else{
+        unsigned valStyle=20;
+        auto valAlign=Symposium::alignType::emptyAlignment;
     for(size_t i=0;i<symbols.size();i++){
+        auto style=alignmentStyle[i];
+       if(valStyle!=style.second && i<alignmentStyle.size()){
+            this->textStyle(style.second);
+            valStyle=style.second;
+        }if(valAlign!=style.first && i<alignmentStyle.size()){
+           this->fixAlignment(style.first);
+           valAlign=style.first;
+       }
         for(size_t j=0;j<symbols[i].size();j++){
             int column=j;
             //extract the symbol
@@ -666,63 +680,30 @@ void notepad::fillTextEdit(){
             }
          }
     }
-
   }
 
     NotRefreshLabels=false;
 
 }
 
-void notepad::fixAlignment(){
-    /* save in the alignmentStyle the vector that defines for each row its style */
-    NotRefreshLabels=true;
-    std::vector<std::pair<Symposium::alignType,unsigned>> alignmentStyle;
-    #ifdef DISPATCHER_ON
-    alignmentStyle=this->doc.getAlignmentStyle();
-    #else
-    alignmentStyle= this->documentoProva.getAlignmentStyle();
-    #endif
-    QTextCursor curs=ui->textEdit->textCursor();
 
-    /* store the initial position of the cursor */
-    int row=curs.blockNumber();
-    int column=curs.positionInBlock();
-
-    for(size_t i=0;i<alignmentStyle.size();i++){
-        std::pair<Symposium::alignType,unsigned> style=alignmentStyle[i];
-        curs.movePosition(QTextCursor::Start);
-        curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,i);
-        ui->textEdit->setTextCursor(curs);
-        if(style.first==Symposium::alignType::left){
-            this->textAlign(ui->actionAlignTextLeft);
-            this->textStyle(style.second);
-            ui->actionAlignTextLeft->setChecked(true);
-            ui->styleBox->setEditText(ui->styleBox->itemText(style.second));
-
-        }else if(style.first==Symposium::alignType::right){
-             this->textAlign(ui->actionAlignTextRight);
-             this->textStyle(style.second);
-             ui->styleBox->setEditText(ui->styleBox->itemText(style.second));
-             ui->actionAlignTextRight->setChecked(true);
-        }else if(style.first==Symposium::alignType::center){
-             this->textAlign(ui->actionAlignCenter);
-             this->textStyle(style.second);
-             ui->styleBox->setEditText(ui->styleBox->itemText(style.second));
-             ui->actionAlignCenter->setChecked(true);
-        }else if (style.first==Symposium::alignType::justify){
-             this->textAlign(ui->actionAlignTextJustify);
-             this->textStyle(style.second);
-             ui->styleBox->setEditText(ui->styleBox->itemText(style.second));
-             ui->actionAlignTextJustify->setChecked(true);
+void notepad::fixAlignment(Symposium::alignType align){
+    if(align==Symposium::alignType::left){
+       this->textAlign(ui->actionAlignTextLeft);
+       ui->actionAlignTextLeft->setChecked(true);
+     }else if(align==Symposium::alignType::right){
+        this->textAlign(ui->actionAlignTextRight);
+        ui->actionAlignTextRight->setChecked(true);
+     }else if(align==Symposium::alignType::center){
+        this->textAlign(ui->actionAlignCenter);
+        ui->actionAlignCenter->setChecked(true);
+     }else if (align==Symposium::alignType::justify){
+        this->textAlign(ui->actionAlignTextJustify);
+        ui->actionAlignTextJustify->setChecked(true);
         }
-        /*else{
-            this->textAlign(ui->actionAlignTextLeft); /**< default alignment in the case the vector is initialized w/ emptyAlignment */
-            //this->textStyle(style.second);}
-      }
-    ui->textEdit->changePosition(row,column);
-    NotRefreshLabels=false;
+   }
 
-}
+
 
 void notepad::visualizeAllUsers()
 {
@@ -887,8 +868,9 @@ bool notepad::isAKeyToIgnore(QKeyEvent* event){
 void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCursor cursor= ui->textEdit->textCursor();
     QTextCharFormat format = cursor.charFormat();
+    qDebug()<<"Colore"<<format.foreground();
     QString testo=event->text();
-    int row, column;
+    unsigned row, column;
     NotRefreshLabels=true;
 
     if(event->matches(QKeySequence::Paste)){
@@ -948,7 +930,7 @@ void notepad::handleDeleteKey(){
     QTextCursor cursor= ui->textEdit->textCursor();
     /* handle the delete of a selected text*/
     if(cursor.hasSelection()){
-       int start,end,row_start,row_end,dim,numLines;
+        unsigned start,end,row_start,row_end,dim,numLines;
         start=cursor.selectionStart();
         end=cursor.selectionEnd();
         cursor.setPosition(start,QTextCursor::MoveAnchor);
@@ -1032,7 +1014,7 @@ void notepad::handleDeleteKey(){
     }
 }
 
-void notepad::deleteMultipleLines(int sR,int eR,int c,int sL,bool lines){
+void notepad::deleteMultipleLines(unsigned sR,unsigned eR,unsigned c,unsigned sL,bool lines){
     QTextCursor cursor;
     int length;
     qDebug()<<"start Row"<<sR;
@@ -1068,7 +1050,7 @@ void notepad::deleteMultipleLines(int sR,int eR,int c,int sL,bool lines){
     }
 }
 
-void notepad::sendSymbolToInsert(int row, int column,QString text, QTextCharFormat format){
+void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTextCharFormat format){
 
     std::wstring str=text.toStdWString();
     wchar_t ch=str[0];
@@ -1320,15 +1302,26 @@ void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigne
     curs.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
 
     // delete the character and replace it with the same that has a defined Color
+
+    curs.setCharFormat(ch_format);
+
+    /*
     curs.deleteChar();
     wchar_t symch=sym.getCh();
     QString ch;
     ch[0]=symch;
     curs.insertText(ch,ch_format);
+    */
 
     // go back to the starting position
     ui->textEdit->changePosition(actBlock,actColm);
     NotRefreshLabels=false;
+    QColor lightCol=qCol;
+    lightCol.setAlpha(180);
+    this->colPos=lightCol;
+    ui->textEdit->setTextColor(lightCol);
+    this->colorChanged(this->colPos);
+    qDebug()<<"Colore verify"<<lightCol;
 }
 
 void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposium::uint_positive_cnt::type siteId){
@@ -1517,7 +1510,7 @@ void notepad::on_actionhighlight_triggered()
     }
 }
 
-int notepad::countCharsInLine(int line)const {
+int notepad::countCharsInLine(const unsigned line)const {
   std::vector<std::vector<Symposium::symbol>> symbols;
     #ifdef DISPATCHER_ON
     symbols=this->doc.getSymbols();

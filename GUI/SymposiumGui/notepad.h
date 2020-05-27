@@ -80,9 +80,9 @@ public:
      * @brief closeEvent closes the window
      * @param event
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
 
-    void resizeEvent(QResizeEvent *event);
+    void resizeEvent(QResizeEvent *event) override;
 
     void showLabels();
 
@@ -96,10 +96,10 @@ public:
     /**
      * @brief fixAlignment to fix for each row the alignment stile
      */
-    void fixAlignment();
+    void fixAlignment(Symposium::alignType align);
 
 protected:
-    bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
     void on_actionPaste_triggered();
@@ -114,21 +114,13 @@ private slots:
     void currentCharFormatChanged(const QTextCharFormat &format);
     void on_textEdit_cursorPositionChanged();
     void on_actionhighlight_triggered();
-
     void on_actionBoldFont_triggered();
     void on_actionItalicFont_triggered();
-
-
     void on_actionUnderlineFont_triggered();
-
     void on_actionAlignTextLeft_triggered();
-
     void on_actionAlignCenter_triggered();
-
     void on_actionAlignTextRight_triggered();
-
     void on_actionAlignTextJustify_triggered();
-
     void on_actionColorText_triggered();
 
     //void on_comboBox_activated(int index);
@@ -136,15 +128,10 @@ private slots:
     //void on_fontComboBox_activated(const QString &arg1);
 
     void on_textEdit_textChanged();
-
     void on_hideUsers_clicked();
-
     void on_showUsers_clicked();
-
     bool event(QEvent *e) override;
-
     void on_pushButton_clicked();
-
     void modifyWinTitle(Symposium::uint_positive_cnt::type resId, const QString& newName);
 
 private:
@@ -160,11 +147,11 @@ private:
     std::string pathToFile;
     Symposium::privilege priv;
     Symposium::privilege privOpen;
-    bool NotRefreshLabels=false;                                           /**< indicates whether a refresh of users' labels may be needed */
+    bool NotRefreshLabels=false;                                        /**< indicates whether a refresh of users' labels may be needed */
     bool highActivated=false;
     QColor colPos;
     bool okPaste=false;
-    int dim;
+    unsigned dim;                                                       /**< to understand the dimension of the pasted string (Useful for ctrl+C,ctrl+V options) */
     Symposium::alignType alignment=Symposium::alignType::left;          /**< to set the alignment type for the style */
     unsigned indexStyle;                                                /**< to set the index for the style */                                                              
     unsigned numChars;                                                  /**< to save the numChars contained in the document */
@@ -172,7 +159,6 @@ private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void colorChanged(const QColor &c);
     void fontChanged(const QFont &f);
-
     void visualizeAllUsers();
     void inactiveLink();
     void activeAlwaysLink();
@@ -215,7 +201,7 @@ private:
      * @param text: the character inserted into the document
      * @param format: the format of the character inserted into the document
      */
-    void sendSymbolToInsert(int row, int column, QString text, QTextCharFormat format);
+    void sendSymbolToInsert(unsigned row, unsigned column, QString text, QTextCharFormat format);
 
     /**
      * @brief deleteMultipleLines to handle the elimination of multiple lines by selection
@@ -225,14 +211,14 @@ private:
      * @param sL: the dimension of the selection
      * @param lines: a boolen to declare if the last line has been deleted or not
      */
-    void deleteMultipleLines(int sR, int eR, int c, int sL, bool lines);
+    void deleteMultipleLines(unsigned sR, unsigned eR, unsigned c, unsigned sL, bool lines);
 
     /**
      * @brief countCharsInLine: counts the number of the chars in a line
      * @param line: index of the line
      * @return number of chars
      */
-    int countCharsInLine(int line) const;
+    int countCharsInLine(const unsigned line) const;
     void insertusers();
 
     /**
