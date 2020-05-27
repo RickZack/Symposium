@@ -355,15 +355,19 @@ void clientdispatcher::renameResource(const std::string &resPath, const std::str
 }
 
 void clientdispatcher::removeResource(const std::string &resPath, const std::string &resName) {
-    std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.removeResource(resPath,resName));
-    try {
-        //inviamo il messaggio
-        sendMessage(mess);
-    } catch (clientdispatcher::sendFailure) {
-        //errore nell'invio del messaggio
-        this->closeApp();
-        //dobbiamo notificare alla GUI
-        this->winmanager.activeWindow().failure("-1");
+    if(this->client.controlFileIsActive(std::stoi(resName))){
+        failureRemovedResource();
+    }else{
+        std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.removeResource(resPath,resName));
+        try {
+            //inviamo il messaggio
+            sendMessage(mess);
+        } catch (clientdispatcher::sendFailure) {
+            //errore nell'invio del messaggio
+            this->closeApp();
+            //dobbiamo notificare alla GUI
+            this->winmanager.activeWindow().failure("-1");
+        }
     }
 }
 
@@ -551,6 +555,10 @@ void clientdispatcher::TimerExpired(){
     if(this->userIsLogged)
         logout();
     this->winmanager.activeWindow().failure("-1");
+}
+
+void clientdispatcher::failureRemovedResource(){
+    this->winmanager.activeWindow().failure("You need to close the document first");
 }
 
 clientdispatcher::~clientdispatcher() {

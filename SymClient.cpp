@@ -86,17 +86,17 @@ askResMessage SymClient::openSource(const std::string &resPath, const std::strin
 
 void SymClient::openSource(const std::string &resPath, const std::string &resId, const std::shared_ptr<file> fileAsked,
                            privilege reqPriv) {
-    document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
     auto p=getLoggedUser().openFile(resPath, resId, reqPriv);
     p->replacement(fileAsked);
-    activeFile.push_front(fileAsked);
+    document& doc = p->access(this->getLoggedUser(), reqPriv);
+    activeFile.push_front(p);
     colorGen c;
     activeDoc.push_front({&doc, c});
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),fileAsked->getId());
+    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),p->getId());
     #endif
 }
 
@@ -368,6 +368,8 @@ void SymClient::removeActiveUser(uint_positive_cnt::type docId, user &targetUser
     this->dispatcher->removeUserCursor(target.getSiteId(),docId);
     #endif
     removeUsersOnDocument(target.getUsername());
+    //rimuoviamo l'utente dalla mappa userColors
+    this->userColors.erase(std::make_pair(target.getSiteId(), docId));
 }
 
 const user& SymClient::getLoggedUser() const{
@@ -449,6 +451,14 @@ document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
             return it.first;
     }
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
+}
+
+bool SymClient::controlFileIsActive(uint_positive_cnt::type id){
+    for (std::shared_ptr<file> it:this->activeFile){
+        if((it->getId() == id))
+            return true;
+    }
+    return false;
 }
 
 const document& SymClient::getActiveDocumenttoOpenbyID(uint_positive_cnt::type id){

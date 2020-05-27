@@ -553,6 +553,8 @@ namespace Symposium {
 
         const document& getActiveDocumenttoOpenbyID(uint_positive_cnt::type id);
 
+        bool controlFileIsActive(uint_positive_cnt::type id);
+
     private:
         /**
          * @brief get the document with specified ID
