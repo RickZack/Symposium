@@ -129,7 +129,7 @@ namespace Symposium {
          * @return the pointer to the file just created
          */
         virtual std::shared_ptr<file>
-        newFile(const std::string &resName, const std::string &resPath= ".", uint_positive_cnt::type idToAssign= 0) const;
+        newFile(const std::string &resName, const std::string &resPath= "./", uint_positive_cnt::type idToAssign= 0) const;
 
         /**
          * @brief creates a new directory named @e dirName in @e pathFromHome
@@ -139,7 +139,7 @@ namespace Symposium {
          */
 
         virtual std::shared_ptr<directory>
-        newDirectory(const std::string &resName, const std::string &resPath = ".", uint_positive_cnt::type idToAssign= 0) const;
+        newDirectory(const std::string &resName, const std::string &resPath = "./", uint_positive_cnt::type idToAssign= 0) const;
 
         /**
          * @brief adds a link to the resource for which the user has been granted a privilege

@@ -116,7 +116,7 @@ struct UserTest: ::testing::Test{
         ::testing::Mock::AllowLeak(dummyFile.get());
         ::testing::Mock::AllowLeak(Dir.get());
         ::testing::Mock::AllowLeak(Root.get());
-        ::testing::Mock::AllowLeak(dummyFile.get()->getStrategy().get());
+        ::testing::Mock::AllowLeak(dummyFile->getStrategy().get());
     }
 };
 
@@ -199,7 +199,7 @@ TEST_F(UserTest, accessFileIllegalFile){
     EXPECT_CALL(*dummyFile, getSharingPolicy()).WillOnce(::testing::ReturnRef(dummyFile->policyMocked));
     EXPECT_CALL(dummyFile->policyMocked, getShare(requested)).WillOnce(::testing::Return(requested));
     EXPECT_CALL(*dummyFile, setUserPrivilege(u->getUsername(), requested));
-    EXPECT_CALL(*static_cast<StrategyMock*>((dummyFile->getStrategy().get())), getPrivilege(u->getUsername())).WillOnce(::testing::Return(requested));
+    EXPECT_CALL(*dynamic_cast<StrategyMock*>((dummyFile->getStrategy().get())), getPrivilege(u->getUsername())).WillOnce(::testing::Return(requested));
     ON_CALL(*homeDir, addLink(::testing::_, ::testing::_, ::testing::_, ::testing::_, ::testing::_)).WillByDefault(throwEx());
     EXPECT_THROW(u->accessFile("./"+std::to_string(homeDir->getId())+"/5", "./3", "link", requested), userException); //object in user's filesystem
 }
@@ -249,7 +249,7 @@ TEST_F(UserTest, callShowDir)
 TEST_F(UserTest, callOpenFile)
 {
     document expected;
-    EXPECT_CALL(*homeDir, getFile(".", "dummyFile"));
+    EXPECT_CALL(*homeDir, getFile("./", "dummyFile"));
     u->openFile("./", "dummyFile", uri::getDefaultPrivilege());
 }
 
@@ -258,7 +258,7 @@ TEST_F(UserTest, callShareResource){
     uri ur;
     //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
-    EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(dummyFile));
+    EXPECT_CALL(*homeDir, getFile("./", "dummyFile")).WillOnce(::testing::Return(dummyFile));
     EXPECT_CALL(*dummyFile, setSharingPolicy(u->getUsername(), ur));
     u->shareResource("./", "dummyFile", ur);
 }
