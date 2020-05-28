@@ -68,27 +68,27 @@ struct uriMock: public uri{
     virtual ~uriMock() override = default;
 };
 
+struct StrategyMock: public RMOAccess{
+    MOCK_CONST_METHOD1(getPrivilege, privilege(const std::string&));
+};
+
 
 struct fileMock: public file{
     uriMock policyMocked;
 
-    fileMock(): file("dummy", 0), policyMocked(uri::getDefaultPrivilege()) {};
+    fileMock(): file("dummy", 0), policyMocked(uri::getDefaultPrivilege()) {
+        strategy=std::make_unique<StrategyMock>();
+    };
     MOCK_METHOD2(setUserPrivilege, privilege(const std::string&, privilege));
     MOCK_METHOD2(setSharingPolicy, uri(const std::string&, const uri& newSharingPrefs));
     MOCK_CONST_METHOD1(getUserPrivilege, privilege(const std::string&));
     MOCK_METHOD0(getSharingPolicy, uri&());
     MOCK_METHOD2(validateAction, bool(const std::string&, privilege));
-    void setMockPolicy(privilege privilege) {
-        policyMocked.activateAlways(privilege);
+    std::unique_ptr<AccessStrategy>& getStrategy(){
+        return strategy;
     }
 
     virtual ~fileMock() override= default;
-};
-
-struct dummyFunctional{
-    bool operator()(){
-        return true;
-    }
 };
 
 struct UserTest: ::testing::Test{
@@ -97,7 +97,6 @@ struct UserTest: ::testing::Test{
     std::shared_ptr<::testing::NiceMock<dirMock>> Dir;
     std::shared_ptr<::testing::NiceMock<dirMock>> Root;
     std::shared_ptr<::testing::NiceMock<fileMock>> dummyFile;
-    static dummyFunctional dummyFunc;
 
     UserTest(){
         homeDir=std::make_shared<::testing::NiceMock<dirMock>>();
@@ -117,6 +116,7 @@ struct UserTest: ::testing::Test{
         ::testing::Mock::AllowLeak(dummyFile.get());
         ::testing::Mock::AllowLeak(Dir.get());
         ::testing::Mock::AllowLeak(Root.get());
+        ::testing::Mock::AllowLeak(dummyFile.get()->getStrategy().get());
     }
 };
 
@@ -144,7 +144,7 @@ TEST(userTest, makeNewFileMock){
     std::shared_ptr<directory> home(dir);
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     file *created= new file("ciao", 0);
-    EXPECT_CALL(*dir, addFile(".", "ciao",0)).WillOnce(::testing::Return(std::shared_ptr<file>(created)));
+    EXPECT_CALL(*dir, addFile("./", "ciao",0)).WillOnce(::testing::Return(std::shared_ptr<file>(created)));
     u1.newFile("ciao");
 }
 
@@ -157,27 +157,76 @@ TEST(userTest, makeNewDirMock){
     u1.newDirectory("ciao", "./");
 }
 
-TEST_F(UserTest, callEditPrivilege){
-    testing::InSequence forceOrder; //force function call order in EXPECT_CALL
-    //This user is not useful, no function will be called on it, a mock is not necessary for this
-    user otherUser("otherUser", "AP@ssw0rd!", "noempty", "", 0, nullptr);
-    //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
-    //directory object, so any call to the methods overriden by dirMock is handled by the test suite
-    EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(dummyFile));
-    EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(privilege::owner));
-    EXPECT_CALL(*dummyFile, setUserPrivilege(otherUser.getUsername(), privilege::owner));
-    u->editPrivilege(otherUser.getUsername(), ".", "dummyFile", privilege::owner);
+
+ACTION(throwEx){
+    throw std::exception();
 }
 
-/*TEST_F(UserTest, callChangePrivilege){
-    testing::InSequence forceOrder; //force function call order in EXPECT_CALL
-    //homeDir is a mock for a directory object: the user in the fixture is initialized with this object and not with a
-    //directory object, so any call to the methods overriden by dirMock is handled by the test suite
-    //user otherUser("otherUser", "", "", "", 0, std::shared_ptr<directory>());
-    EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(std::shared_ptr<file>(dummyFile)));
-    EXPECT_CALL(*dummyFile, setUserPrivilege(u->getUsername(), privilege::owner));
-    u->changePrivilege(".", "dummyFile", privilege::owner);
-}*/
+TEST_F(UserTest, accessFileStandardCase){
+    privilege requested=privilege::readOnly;
+    std::shared_ptr<Symposium::symlink> dummySym=std::make_shared<Symposium::symlink>("link", "./1", "2", 0);
+    EXPECT_CALL(*Root, getFile("./1", "2")).WillOnce(::testing::Return(dummyFile));
+    EXPECT_CALL(*dummyFile, getSharingPolicy()).WillOnce(::testing::ReturnRef(dummyFile->policyMocked));
+    EXPECT_CALL(dummyFile->policyMocked, getShare(requested)).WillOnce(::testing::Return(requested));
+    EXPECT_CALL(*dummyFile, setUserPrivilege(u->getUsername(), requested));
+    EXPECT_CALL(*homeDir, addLink("./3", "link", "./1", "2", 0)).WillOnce(::testing::Return(dummySym));
+    u->accessFile("./1/2", "./3", "link", requested);
+}
+
+
+TEST_F(UserTest, accessFileAskingForNoPrivilege){
+    privilege requested=privilege::none;
+    ON_CALL(*Root, getFile("./1", "2")).WillByDefault(throwEx());
+    EXPECT_THROW(u->accessFile("./1/2", "./3", "link", requested), userException);
+}
+
+TEST_F(UserTest, accessFileIllegalAbsolutePathSyntaxError){
+    privilege requested=privilege::readOnly;
+    ON_CALL(*Root, getFile(::testing::_, ::testing::_)).WillByDefault(throwEx());
+
+    EXPECT_THROW(u->accessFile("./1/2/", "./3", "link", requested), userException); //just syntax error
+}
+
+TEST_F(UserTest, accessFileIllegalAbsolutePathForbiddenDirectory){
+    privilege requested=privilege::readOnly;
+    ON_CALL(*Root, getFile(::testing::_, ::testing::_)).WillByDefault(throwEx());
+    EXPECT_THROW(u->accessFile("./1", "./3", "link", requested), userException); //forbidden directory
+}
+
+TEST_F(UserTest, accessFileIllegalFile){
+    privilege requested=privilege::readOnly;
+    EXPECT_CALL(*Root, getFile("./"+std::to_string(homeDir->getId()), "5")).WillOnce(::testing::Return(dummyFile));
+    EXPECT_CALL(*dummyFile, getSharingPolicy()).WillOnce(::testing::ReturnRef(dummyFile->policyMocked));
+    EXPECT_CALL(dummyFile->policyMocked, getShare(requested)).WillOnce(::testing::Return(requested));
+    EXPECT_CALL(*dummyFile, setUserPrivilege(u->getUsername(), requested));
+    EXPECT_CALL(*static_cast<StrategyMock*>((dummyFile->getStrategy().get())), getPrivilege(u->getUsername())).WillOnce(::testing::Return(requested));
+    ON_CALL(*homeDir, addLink(::testing::_, ::testing::_, ::testing::_, ::testing::_, ::testing::_)).WillByDefault(throwEx());
+    EXPECT_THROW(u->accessFile("./"+std::to_string(homeDir->getId())+"/5", "./3", "link", requested), userException); //object in user's filesystem
+}
+
+TEST_F(UserTest, editPrivilegeLegalCase){
+    privilege requested=privilege::modify;
+    EXPECT_CALL(*homeDir, getFile("./", "2")).WillOnce(::testing::Return(dummyFile));
+    EXPECT_CALL(*dummyFile, validateAction(u->getUsername(), privilege::owner)).WillOnce(::testing::Return(true));
+
+    u->editPrivilege("anotherUser", "./", "2", requested);
+}
+
+TEST_F(UserTest, editPrivilegeFromNotOwner){
+    privilege requested=privilege::modify;
+    EXPECT_CALL(*homeDir, getFile("./", "2")).WillOnce(::testing::Return(dummyFile));
+    EXPECT_CALL(*dummyFile, validateAction(u->getUsername(), privilege::owner)).WillOnce(::testing::Return(false));
+
+    EXPECT_THROW(u->editPrivilege("anotherUser", "./", "2", requested), userException);
+}
+
+TEST_F(UserTest, editPrivilegeFromNotOwnerUpgradePrivilege){
+    privilege requested=privilege::owner;
+    EXPECT_CALL(*homeDir, getFile("./", "2")).WillOnce(::testing::Return(dummyFile));
+    EXPECT_CALL(*dummyFile, validateAction(u->getUsername(), privilege::owner)).WillOnce(::testing::Return(false));
+
+    EXPECT_THROW(u->editPrivilege(u->getUsername(), "./", "2", requested), userException);
+}
 
 TEST_F(UserTest, callRemoveResource)
 {
@@ -201,7 +250,7 @@ TEST_F(UserTest, callOpenFile)
 {
     document expected;
     EXPECT_CALL(*homeDir, getFile(".", "dummyFile"));
-    u->openFile(".", "dummyFile", uri::getDefaultPrivilege());
+    u->openFile("./", "dummyFile", uri::getDefaultPrivilege());
 }
 
 TEST_F(UserTest, callShareResource){
@@ -211,7 +260,7 @@ TEST_F(UserTest, callShareResource){
     //directory object, so any call to the methods overriden by dirMock is handled by the test suite
     EXPECT_CALL(*homeDir, getFile(".", "dummyFile")).WillOnce(::testing::Return(dummyFile));
     EXPECT_CALL(*dummyFile, setSharingPolicy(u->getUsername(), ur));
-    u->shareResource(".", "dummyFile", ur);
+    u->shareResource("./", "dummyFile", ur);
 }
 
 /*
@@ -390,7 +439,7 @@ TEST_F(UserTestRobust, newDirUsesCorrectlyIdToAssign){
     user u1("username", "AP@ssw0rd!", "noempty", "", 0, home);
     directory *created=new dirMock("ciao");
     EXPECT_CALL(*dir, addDirectory("ciao", id)).WillOnce(::testing::Return(std::shared_ptr<directory>(created)));
-    u1.newDirectory("ciao", ".", id);
+    u1.newDirectory("ciao", "./", id);
 }
 
 struct userSerialization: ::testing::Test{
