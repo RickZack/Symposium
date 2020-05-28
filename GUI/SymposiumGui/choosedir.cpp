@@ -89,7 +89,7 @@ void choosedir::treeGenerate(std::string str, int count)
         }
         else if(spaces<indent)
         {
-            for(int i=1; i<=indent-spaces; i++)
+            for(int i=0; i<=indent-spaces; i++)
             {
                 listOfFathers.pop();
             }
