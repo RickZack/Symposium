@@ -86,7 +86,7 @@ private:
     std::string pathAssoluto;
     Symposium::privilege privilegeToGrant;
     Symposium::uri u;
-    std::string time;
+    QString time;
     Symposium::uint_positive_cnt::type fileId;
     Symposium::user us;
     /**

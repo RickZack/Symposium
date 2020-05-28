@@ -54,7 +54,7 @@ void activetimerlink::successLink()
     enableButtons();
     enableStyleButtons();
     backToParent();
-    successlinks link(parentWidget(), 4, QString::fromStdString(pathAssoluto), "", QString::fromStdString(time), us, privilegeToGrant);
+    successlinks link(parentWidget(), 4, QString::fromStdString(pathAssoluto), "", time, us, privilegeToGrant);
     link.exec();
 }
 
@@ -76,6 +76,7 @@ activetimerlink::~activetimerlink()
 void activetimerlink::on_ok_clicked()
 {
     QDateTime date=ui->time->dateTime();
+    time=date.toString();
 
     std::chrono::milliseconds fromEpoch{date.toMSecsSinceEpoch()};
     std::chrono::system_clock::time_point endTime{fromEpoch};

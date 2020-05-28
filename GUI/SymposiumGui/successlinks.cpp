@@ -2,9 +2,9 @@
 #include "ui_successlinks.h"
 
 
-successlinks::successlinks(QWidget *parent, int caseLink, QString str, QString numShares, QString time, Symposium::user us, Symposium::privilege priv) :
+successlinks::successlinks(QWidget *parent, int caseLink, QString link, QString numShares, QString time, Symposium::user us, Symposium::privilege priv) :
     QDialog(parent),
-    ui(new Ui::successlinks), caseLink(caseLink), str(str), numShares(numShares), time(time), us(us), priv(priv)
+    ui(new Ui::successlinks), caseLink(caseLink), link(link), numShares(numShares), time(time), us(us), priv(priv)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -20,7 +20,7 @@ successlinks::successlinks(QWidget *parent, int caseLink, QString str, QString n
         noshare();
     else if(caseLink==4)
         timeshare();
-    ui->pathPlainEdit->setPlainText(str);
+    ui->pathPlainEdit->setPlainText(link);
     ui->pathPlainEdit->setLineWrapMode(QPlainTextEdit::LineWrapMode::NoWrap);
 }
 
@@ -82,10 +82,10 @@ void successlinks::on_pushButton_clicked()
     QString privilege(QString::fromStdString(privString.str()));
     QString emailAddr("");
     QString subject("Symposium - invitation to collaborate");
-    QString body("You have a new invitation to collaborate.\n\n"+user+" decided to share with you a file with the privilege "+privilege+" on Symposium.\nYou can access it pasting the following resource identifier: "+str+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.");
+    QString body("You have a new invitation to collaborate.\n\n"+user+" decided to share with you a file with the privilege "+privilege+" on Symposium.\nYou can access it pasting the following resource identifier: "+link+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.");
     if(caseLink==2)
-        body="You have a new invitation to collaborate.\n\n"+user+" decided to share with you and other "+numShares+" shares a file with the privilege "+privilege+" on Symposium.\n The link will be available until "+time+".\nYou can access it pasting the following resource identifier: "+str+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.";
+        body="You have a new invitation to collaborate.\n\n"+user+" decided to share with you and other "+numShares+" shares a file with the privilege "+privilege+" on Symposium.\nYou can access it pasting the following resource identifier: "+link+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.";
     if(caseLink==4)
-        body="You have a new invitation to collaborate.\n\n"+user+" decided to share with you a file with the privilege "+privilege+" on Symposium.\n The link will be available until "+time+".\nYou can access it pasting the following resource identifier: "+str+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.";
+        body="You have a new invitation to collaborate.\n\n"+user+" decided to share with you a file with the privilege "+privilege+" on Symposium.\n The link will be available until "+time+".\nYou can access it pasting the following resource identifier: "+link+"\n\n\n\nThis email has been automatically generated using Symposium.\nSymposium is a open source, real-time, client-server collaborative text editor that uses Conflict-Free Replicated Data Types (CRDT) to make sure all users stay in-sync.";
     QDesktopServices::openUrl(QUrl("mailto:"+emailAddr+"?subject="+subject+"&body="+body, QUrl::TolerantMode));
 }

@@ -16,7 +16,7 @@ class successlinks : public QDialog
     Q_OBJECT
 
 public:
-    explicit successlinks(QWidget *parent, int caseLink, QString str, QString numShares, QString time, Symposium::user us, Symposium::privilege priv);
+    explicit successlinks(QWidget *parent, int caseLink, QString link, QString numShares, QString time, Symposium::user us, Symposium::privilege priv);
     ~successlinks();
 
 private slots:
@@ -27,7 +27,7 @@ private slots:
 private:
     Ui::successlinks *ui;
     int caseLink;
-    QString str;
+    QString link;
     QString numShares;
     QString time;
     Symposium::user us;

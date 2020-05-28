@@ -113,6 +113,26 @@ void choosedir::treeGenerate(std::string str, int count)
             }
             father=listOfFathers.top();
         }
+        else
+        {
+            if(type=="directory")
+            {
+                listOfFathers.pop();
+                std::size_t found = path.find_last_of("/");
+                path.erase(found, path.size());
+                found = path.find_last_of("/");
+                path.erase(found, path.size());
+                path=path+"/";
+                found=pathUser.find_last_of("/");
+                pathUser.erase(found, pathUser.size());
+                found=pathUser.find_last_of("/");
+                pathUser.erase(found, pathUser.size());
+                pathUser=pathUser+"/";
+                father=listOfFathers.top();
+                path=path+id+"/";
+                pathUser=pathUser+name+"/";
+            }
+        }
 
 
 
