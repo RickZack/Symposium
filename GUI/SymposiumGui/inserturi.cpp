@@ -54,7 +54,7 @@ std::string inserturi::manipulationPath(std::string& s){
     if(dim_s == 0)
         return s;
     //add space between directory
-    while(dim_s != 0){
+    while(dim_s != 0  && s!=" "){
         foundn = s.find_first_of("\n");
         estratta = s.substr(0,foundn+1);
         //delete start space

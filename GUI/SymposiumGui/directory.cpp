@@ -318,7 +318,13 @@ void directory::deleteSource()
        id=it->second.first;
        waitingFunction();
        #ifdef DISPATCHER_ON
-       cl.removeResource(path,id);
+       std::string pathToSend=path;
+       if(pathToSend!="./")
+       {
+           std::size_t found = pathToSend.find_last_of("/");
+           pathToSend.erase(found, pathToSend.size());
+       }
+       cl.removeResource(pathToSend,id);
        #endif
 
        //-------------------------------------------------------------------
@@ -396,8 +402,14 @@ void directory::on_pushButton_3_clicked()
     std::string fixedName=this->fixNameSource(name.toStdString());   /** < name folder without possible spaces */
     #ifdef DISPATCHER_ON
     int numVal=this->ids.count(fixedName);
+    std::string pathToSend=path;
+    if(pathToSend!="./")
+    {
+        std::size_t found = pathToSend.find_last_of("/");
+        pathToSend.erase(found, pathToSend.size());
+    }
     if(numVal==0){
-        cl.createNewDir(path,fixedName);
+        cl.createNewDir(pathToSend,fixedName);
     }else
         this->failureActionDirectory("You already have an element with this name");
     #else
@@ -659,8 +671,14 @@ void directory::on_pushButton_4_clicked()
     waitingFunction();
     #ifdef DISPATCHER_ON
     int numVal=this->ids.count(fixedName);
+    std::string pathToSend=path;
+    if(pathToSend!="./")
+    {
+        std::size_t found = pathToSend.find_last_of("/");
+        pathToSend.erase(found, pathToSend.size());
+    }
     if(numVal==0)
-        cl.createNewSource(this->path,fixedName);
+        cl.createNewSource(pathToSend,fixedName);
     else
         this->failureActionDirectory("You already have an element with this name");
     #else
@@ -691,8 +709,15 @@ notepad* directory::successNewSource(){
     QString name= ui->name_2->text();
     ui->name_2->clear();
 
+    std::string pathToSend=path;
+    if(pathToSend!="./")
+    {
+        std::size_t found = pathToSend.find_last_of("/");
+        pathToSend.erase(found, pathToSend.size());
+    }
+
     //open the newly created document
-    notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
+    notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,pathToSend,cl.getOpenDocument(), cl.getOpenFileID(), *this);
     nw->setWindowTitle(curResName);
     goToWindow(*nw);
     nw->showLabels();
@@ -790,8 +815,14 @@ void directory::on_okButton_clicked()
          waitingFunction();
          #ifdef DISPATCHER_ON
          int numVal=this->ids.count(fixedName);
+         std::string pathToSend=path;
+         if(pathToSend!="./")
+         {
+             std::size_t found = pathToSend.find_last_of("/");
+             pathToSend.erase(found, pathToSend.size());
+         }
          if(numVal==0)
-            cl.renameResource(this->path, id, fixedName);
+            cl.renameResource(pathToSend, id, fixedName);
          else
              this->failureActionDirectory("You already have an element with this name");
          #else
@@ -947,7 +978,13 @@ void directory::on_OkPriv_clicked()
 }
 
 void directory::successOpen(){
-    notepad* notepadWindow= new notepad(nullptr,priv,privOpen,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
+    std::string pathToSend=path;
+    if(pathToSend!="./")
+    {
+        std::size_t found = pathToSend.find_last_of("/");
+        pathToSend.erase(found, pathToSend.size());
+    }
+    notepad* notepadWindow= new notepad(nullptr,priv,privOpen,pathToSend,cl.getOpenDocument(), cl.getOpenFileID(), *this);
     //TODO: sarebbe meglio passare al costruttore le informazioni al costruttore e nella classe notepad chiamare le varie
     // setTitle, showLabels, ecc..
     notepadWindow->setWindowTitle(curResName);

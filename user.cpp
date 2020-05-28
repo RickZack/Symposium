@@ -99,11 +99,6 @@ const std::string &user::getIconPath() const {
     return iconPath;
 }
 
-void user::setPwd(const std::string &pwd) {
-    hashSalt=saltGenerate();
-    pwdHash=sha256(pwd+hashSalt);
-}
-
 void user::setNickname(const std::string &nickname) {
     user::nickname = nickname;
 }
@@ -128,6 +123,9 @@ std::string user::showDir(bool recursive) const {
 
 std::shared_ptr<file> user::newFile(const std::string &resName, const std::string &resPath, uint_positive_cnt::type idToAssign) const {
 
+    if(!correctFormatResPath(resPath))
+        throw userException(userException::path, UnpackFileLineFunction());
+
     std::shared_ptr<file> newF= home->addFile(resPath, resName, idToAssign);
     newF->setUserPrivilege(this->getUsername(), privilege::owner);
     return newF;
@@ -136,6 +134,8 @@ std::shared_ptr<file> user::newFile(const std::string &resName, const std::strin
 
 std::shared_ptr<directory>
 user::newDirectory(const std::string &resName, const std::string &resPath, uint_positive_cnt::type idToAssign) const{
+    if(!correctFormatResPath(resPath))
+        throw userException(userException::path, UnpackFileLineFunction());
     std::shared_ptr<directory> newDir;
     std::string pathToDir;
     std::string idDir;
@@ -159,6 +159,12 @@ user::accessFile(const std::string &absolutePath, const std::string &destPath, c
 
     std::shared_ptr<directory> root1=this->home->getRoot();
 
+    if(!correctFormatResPath(destPath))
+        throw userException(userException::path, UnpackFileLineFunction());
+
+    if(!correctFormatAbsolutePath(absolutePath))
+        throw userException(userException::pathForLink, UnpackFileLineFunction());
+
     std::size_t found = absolutePath.find_last_of("/\\");//find the last number which represent the id
     if(found==std::string::npos || absolutePath=="./")//if there isn't any "/" it means that I'm, alredy in the correct directory and the path represent only id
     {
@@ -171,6 +177,9 @@ user::accessFile(const std::string &absolutePath, const std::string &destPath, c
 
     std::shared_ptr<file> fi=root1->getFile(pathAdd, idAdd);
 
+    if(fi->getUserPrivilege(getUsername())!=privilege::none)
+        throw userException(userException::haveLink, UnpackFileLineFunction());
+
     privilege obtainedPriv=fi->getSharingPolicy().getShare(reqPriv);
     if(obtainedPriv == privilege::none)
         throw userException(userException::noPriv, UnpackFileLineFunction());
@@ -182,6 +191,8 @@ user::accessFile(const std::string &absolutePath, const std::string &destPath, c
 
 //FIXME: al chiamante serve avere indietro il file e il documento aperto, potremmo tornare un pair
 std::shared_ptr<file> user::openFile(const std::string &resPath, const std::string &resId, privilege) const {
+    if(!correctFormatResPath(resPath))
+        throw userException(userException::path, UnpackFileLineFunction());
     auto f=home->getFile(resPath, resId);
     //FIXME: perchè abbiamo commentato questa linea?
     // In origine volevo solo avere indietro il file al posto del documento
@@ -191,9 +202,11 @@ std::shared_ptr<file> user::openFile(const std::string &resPath, const std::stri
 
 privilege user::editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resId,
                               privilege newPrivilege) const {
+    if(!correctFormatResPath(resPath))
+        throw userException(userException::path, UnpackFileLineFunction());
     std::shared_ptr<file> newF=home->getFile(resPath, resId);
     privilege newP;
-    if((this->username!=otherUser && newF->getUserPrivilege(this->username)==privilege::owner) ||
+    if((this->username!=otherUser && newF->validateAction(this->username, privilege::owner) )||
         (this->username==otherUser && newF->validateAction(this->username, newPrivilege)))
         newP=newF->setUserPrivilege(otherUser, newPrivilege);
     else
@@ -201,21 +214,14 @@ privilege user::editPrivilege(const std::string &otherUser, const std::string &r
     return newP;
 }
 
-/*privilege user::changePrivilege(const std::string &resPath, const std::string &resName, privilege newPrivilege) const {
-    std::shared_ptr<file> newF=home->getFile(resPath, resName);
-    privilege newP;
-    newP=newF->setUserPrivilege(username, newPrivilege);
-    return newP;
-}*/
-
 std::shared_ptr<filesystem> user::shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs) const {
+    if(!correctFormatResPath(resPath))
+        throw userException(userException::path, UnpackFileLineFunction());
     std::shared_ptr<file> newF=home->getFile(resPath, resId);
     uri u;
     u=newF->setSharingPolicy(username, newPrefs);
     return std::dynamic_pointer_cast<filesystem>(newF);
 }
-
-
 
 bool user::operator==(const user &rhs) const {
     return this->username == rhs.username;
@@ -250,12 +256,16 @@ const std::string &user::getPwdHash() const {
 
 std::shared_ptr<filesystem>
 user::renameResource(const std::string &resPath, const std::string &resId, const std::string &newName) const {
+    if(!correctFormatResPath(resPath))
+        throw userException(userException::path, UnpackFileLineFunction());
     std::shared_ptr<filesystem> object=home->get(resPath, resId);
     home->setName(resPath, resId, newName);
     return object;
 }
 
 std::shared_ptr<filesystem> user::removeResource(const std::string &resPath, const std::string &resId) const {
+    if(!correctFormatResPath(resPath))
+        throw userException(userException::path, UnpackFileLineFunction());
     std::shared_ptr<filesystem> object=home->remove(*this, resPath, resId);
     return object;
 }
@@ -307,4 +317,15 @@ void user::hideAuthParams(const std::function<void(void)> &op) {
     user::HideParamOnSer=true;
     op();
     user::HideParamOnSer=false;
+}
+
+bool user::correctFormatResPath(const std::string &path) {
+    std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
+    std::regex pathPattern2{R"(\.\/)"};
+    return !path.empty() && (std::regex_match(path, pathPattern) || std::regex_match(path, pathPattern2));
+}
+
+bool user::correctFormatAbsolutePath(const std::string &path) {
+    std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
+    return !path.empty() && std::regex_match(path, pathPattern);
 }

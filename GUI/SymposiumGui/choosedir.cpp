@@ -74,7 +74,7 @@ void choosedir::treeGenerate(std::string str, int count)
             father=fatherAbs;
             if(type=="directory")
             {
-                path="/"+id+"/";
+                path="./"+id;
                 pathUser="/home/"+name+"/";
             }
         }
@@ -83,7 +83,7 @@ void choosedir::treeGenerate(std::string str, int count)
             father=listOfFathers.top();
             if(type=="directory")
             {
-                path=path+id+"/";
+                path=path+"/"+id;
                 pathUser=pathUser+name+"/";
             }
         }
@@ -100,16 +100,13 @@ void choosedir::treeGenerate(std::string str, int count)
                 {
                     std::size_t found = path.find_last_of("/");
                     path.erase(found, path.size());
-                    found = path.find_last_of("/");
-                    path.erase(found, path.size());
-                    path=path+"/";
                     found=pathUser.find_last_of("/");
                     pathUser.erase(found, pathUser.size());
                     found=pathUser.find_last_of("/");
                     pathUser.erase(found, pathUser.size());
                     pathUser=pathUser+"/";
                 }
-                path=path+id+"/";
+                path=path+"/"+id;
                 pathUser=pathUser+name+"/";
             }
         }
@@ -120,16 +117,13 @@ void choosedir::treeGenerate(std::string str, int count)
                 listOfFathers.pop();
                 std::size_t found = path.find_last_of("/");
                 path.erase(found, path.size());
-                found = path.find_last_of("/");
-                path.erase(found, path.size());
-                path=path+"/";
                 found=pathUser.find_last_of("/");
                 pathUser.erase(found, pathUser.size());
                 found=pathUser.find_last_of("/");
                 pathUser.erase(found, pathUser.size());
                 pathUser=pathUser+"/";
                 father=listOfFathers.top();
-                path=path+id+"/";
+                path=path+"/"+id;
                 pathUser=pathUser+name+"/";
             }
         }
