@@ -64,6 +64,9 @@ void directory::populateMap(std::string list){
            ids.insert({name,{id,privilege}});
            privilege="none";
     }
+
+       for(auto i:ids)
+               qDebug()<<"Mappa "<<QString::fromStdString(i.first)<<"Nome "<<QString::fromStdString(i.second.first)<<"Id "<<QString::fromStdString(i.second.second)<<"Privilegio ";
 }
 
 
@@ -655,7 +658,7 @@ void directory::on_pushButton_4_clicked()
     disableStyleButtons();
     pressed=true;
     this->curResName =ui->name_2->text();                                                              /** < name with possible spaces */
-    std::string fixedName=this->fixNameSource(curResName.toStdString());           /** < name without possible spaces */
+    fixedName=this->fixNameSource(curResName.toStdString());           /** < name without possible spaces */
     waitingFunction();
     #ifdef DISPATCHER_ON
     int numVal=this->ids.count(fixedName);
@@ -690,7 +693,6 @@ notepad* directory::successNewSource(){
 
     QString name= ui->name_2->text();
     ui->name_2->clear();
-
     //open the newly created document
     notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,path,cl.getOpenDocument(), cl.getOpenFileID(), *this);
     nw->setWindowTitle(curResName);
@@ -855,6 +857,7 @@ void directory::openSelectedSource(){
          QString value= items->whatsThis();
          std::string nameSource=items->text().toStdString();
          fixedName=this->fixNameSource(nameSource);
+         qDebug()<<"Fixed Name"<<QString::fromStdString(fixedName);
          // dermine the path of the folders in which I enter.
          if(value=="directory")
          {
@@ -884,6 +887,7 @@ void directory::openSelectedSource(){
               ui->myListWidget->setFixedWidth(270);
               auto it=this->ids.find(fixedName);
               this->selectedId=it->second.first;
+              qDebug()<<"Id of the selected source"<<QString::fromStdString(this->selectedId);
               this->initialPriv=it->second.second;
               curResName=QString::fromStdString(nameSource);
 
