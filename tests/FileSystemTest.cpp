@@ -500,7 +500,7 @@ TEST_F(FileSystemTestSharing, printDirectoryRecursive){
      * way, we expect sym1 (that should point to file1) to return its name and the privilege that the user holds
      * on [file1] (not on the symlink itself, that doesn't make much sense).
      */
-    res<<username<<" "<<"directory "<<dir1->getId()<<" "<<"dir1\n "<<"file "<<file1->getId()<<"  file1 "<<privilege::owner<<"\n "<<"symlink "<<sym2->getId()<<"  sym2 "<<uri::getDefaultPrivilege()<<"\n";
+    res<<username<<" "<<"directory "<<dir1->getId()<<" "<<"dir1\n"<<"file "<<file1->getId()<<"  file1 "<<privilege::owner<<"\n "<<"symlink "<<sym2->getId()<<"  sym2 "<<uri::getDefaultPrivilege()<<"\n ";
     EXPECT_EQ(res.str(), directory::getRoot()->getDir("./", "1")->print(username, true, 0));
 }
 //FIXME: review the following tests

@@ -89,10 +89,11 @@ void choosedir::treeGenerate(std::string str, int count)
         }
         else if(spaces<indent)
         {
-            for(int i=0; i<=indent-spaces; i++)
+            for(int i=1; i<=indent-spaces; i++)
             {
                 listOfFathers.pop();
             }
+            father=listOfFathers.top();
             if(type=="directory")
             {
                 for(int i=0; i<=indent-spaces; i++)
@@ -111,7 +112,6 @@ void choosedir::treeGenerate(std::string str, int count)
                 path=path+id+"/";
                 pathUser=pathUser+name+"/";
             }
-            father=listOfFathers.top();
         }
         else
         {
@@ -157,6 +157,7 @@ void choosedir::treeGenerate(std::string str, int count)
             item->setText(2, "");
             father->addChild(item);
             std::string word=separate_word(str);
+            indent=spaces;
         }
         else
         {
@@ -167,6 +168,7 @@ void choosedir::treeGenerate(std::string str, int count)
             item->setText(2, "");
             father->addChild(item);
             std::string word=separate_word(str);
+            indent=spaces;
         }
     }
 
@@ -211,8 +213,8 @@ int choosedir::number_elements(std::string& string)
     int count=0;
     for(size_t i = 0; i < string.size(); i++)
       if(string[i] == '\n')
-          count++;
-    string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
+      {count++; string[i]=' ';}
+    //string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
     return count;
 }
 
