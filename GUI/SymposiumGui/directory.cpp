@@ -312,7 +312,7 @@ void directory::deleteSource()
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
    foreach(QListWidgetItem *items, item){
-       nameSource=items->text().toStdString();
+       nameSource=fixNameSource(items->text().toStdString());
        // estract from the map the id of the source that I want to remove
        auto it=this->ids.find(nameSource);
        id=it->second.first;
@@ -844,7 +844,7 @@ void directory::successRename(){
     std::string id=it->second.first;
     std::string priv=it->second.second;
     this->ids.erase(it);
-    this->ids.insert(it,{fixedName,{id,priv}});
+    this->ids.insert({fixedName,{id,priv}});
 
     //update the list in such a way that the new name of directory appears
     if(this->actualId=="0"){
