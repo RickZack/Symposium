@@ -624,18 +624,14 @@ void notepad::fillTextEdit(){
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
     QString ch;
+    //std::vector<std::vector<Symposium::symbol>> symbols;
     /* save in symbols all the symbols contained in the document */
     #ifdef DISPATCHER_ON
     auto& symbols= this->doc.getSymbols();
-    qDebug()<<"dimensione simboli"<<symbols.size();
-    qDebug()<< doc.toText();
     auto alignmentStyle=this->doc.getAlignmentStyle();
-    qDebug()<<"dimensione alignemtn"<<alignmentStyle.size();
     #else
     auto& symbols= this->documentoProva.getSymbols();
-    qDebug()<<"dimensione simboli"<<symbols.size();
     auto alignmentStyle=this->documentoProva.getAlignmentStyle();
-
     #endif
     if(symbols[0][0].getCh()==emptyChar){
         QColor black=Qt::black;
@@ -647,15 +643,21 @@ void notepad::fillTextEdit(){
     else{
         unsigned valStyle=20;
         auto valAlign=Symposium::alignType::emptyAlignment;
+<<<<<<< HEAD
         for(size_t i=0;i<symbols.size();i++){
 
         auto style=alignmentStyle[i];
         if(style.first!=Symposium::alignType::emptyAlignment && i<alignmentStyle.size()){
             qDebug()<<"I quando è minore"<<i;
        if(valStyle!=style.second){
+=======
+    for(size_t i=0;i<symbols.size();i++){
+        auto style=alignmentStyle[i];
+       if(valStyle!=style.second && i<alignmentStyle.size()){
+>>>>>>> parent of 3b3186d... push directory
             this->textStyle(style.second);
             valStyle=style.second;
-        }if(valAlign!=style.first){
+        }if(valAlign!=style.first && i<alignmentStyle.size()){
            this->fixAlignment(style.first);
            valAlign=style.first;
        }
@@ -1086,10 +1088,9 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
     Symposium::Color myCol(red,green,blue);
     Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
 
-    qDebug()<<"indice"<<this->indexStyle;
     // set the alignment values to zero default value
-    //this->indexStyle=0;
-    //this->alignment=Symposium::alignType::left;
+    this->indexStyle=0;
+    this->alignment=Symposium::alignType::left;
     std::vector<int> pos;
 
 
