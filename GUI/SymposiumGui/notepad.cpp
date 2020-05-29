@@ -648,8 +648,10 @@ void notepad::fillTextEdit(){
         unsigned valStyle=20;
         auto valAlign=Symposium::alignType::emptyAlignment;
         for(size_t i=0;i<symbols.size();i++){
+
         auto style=alignmentStyle[i];
-        qDebug()<<style.second;
+        if(style.first!=Symposium::alignType::emptyAlignment && i<alignmentStyle.size()){
+            qDebug()<<"I quando è minore"<<i;
        if(valStyle!=style.second){
             this->textStyle(style.second);
             valStyle=style.second;
@@ -657,6 +659,8 @@ void notepad::fillTextEdit(){
            this->fixAlignment(style.first);
            valAlign=style.first;
        }
+       }
+        qDebug()<<"I quando è maggior"<<i;
         for(size_t j=0;j<symbols[i].size();j++){
             int column=j;
             //extract the symbol
@@ -688,6 +692,7 @@ void notepad::fillTextEdit(){
             }
          }
     }
+
   }
 
     NotRefreshLabels=false;

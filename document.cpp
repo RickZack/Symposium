@@ -35,7 +35,7 @@
 #include <cmath>
 #include <fstream>
 #include <boost/archive/text_iarchive.hpp>
-//#include "QDebug"
+#include "QDebug"
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
@@ -116,7 +116,7 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
     /* resize the symbols vector*/
     if(i0>=symbols.size()){
         symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
-
+        alignmentStyle.resize((i0 + 1)*mult_fac,std::pair(alignType::emptyAlignment,0));
 }
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     if(i1>=symbols[i0].size()){
@@ -124,10 +124,13 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
     }
 
     /* resize the alignmentStyle vector */
-    if(i0>=alignmentStyle.size()){
-        alignmentStyle.resize((i0+1)*mult_fac,std::pair(alignType::emptyAlignment,0));
-    }
 
+
+/*
+    if(i0>=alignmentStyle.size()){
+        alignmentStyle.resize((i0 + 1)*mult_fac,std::pair(alignType::emptyAlignment,0));
+    }
+*/
 }
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
@@ -148,10 +151,14 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     /* set the alignmentStyle vector */
     std::pair<alignType,unsigned> styleValues;
     styleValues={charFormat.type,charFormat.indexStyle};
-    if(alignmentStyle[i0].first==alignType::emptyAlignment){
-      alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
-    }
+    // I'm inserting a symbol in a free position
 
+    /*
+    if(alignmentStyle[i0].first==alignType::emptyAlignment || toInsert.getCh()=='\r'){
+       alignmentStyle[i0]=styleValues;
+    }else
+         alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
+         */
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
 
@@ -165,14 +172,24 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end());
         symbols.push_back(std::vector<symbol>(1,emptySymbol));
+         //alignmentStyle[i0]=styleValues;
+        alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
+        alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
+        alignmentStyle.push_back(std::pair(alignType::emptyAlignment,0));
+        alignmentStyle.resize(symbols.size(),std::pair(alignType::emptyAlignment,0));
         }
     }else{
         // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
-    //()<<"Simboli"<<toText();
-    //qDebug()<<"Posizioni"<<newSymb.getPos();
+    //alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
+    alignmentStyle[i0]=styleValues;
+    alignmentStyle.resize(symbols.size(),std::pair(alignType::emptyAlignment,0));
+
+    qDebug()<<"Dimensione stile"<<alignmentStyle.size();
+    qDebug()<<"Dimensione simboli"<<symbols.size();
+
     return newSymb;
 
 }
