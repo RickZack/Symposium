@@ -108,8 +108,9 @@ add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SYMPOSIUM_CLIENT}
         )
 
 # Files and headers for SymposiumServer target: this is the executable that will run the server
-message(${CORE_FILES})
-add_executable(SymposiumServer GUI/SymposiumGui/Dispatcher/mainServer.cpp ${SYMPOSIUM_SERVER} GUI/SymposiumGui/onoff_networkinteraction.h)
+add_executable(SymposiumServer GUI/SymposiumGui/Dispatcher/mainServer.cpp ${SYMPOSIUM_SERVER} GUI/SymposiumGui/onoff_networkinteraction.h
+        GUI/SymposiumGui/Dispatcher/gui_symserver.h GUI/SymposiumGui/Dispatcher/gui_symserver.ui GUI/SymposiumGui/Dispatcher/gui_symserver.cpp
+        )
 
 # Linking Google Test libraries for SymposiumTest target
 target_link_libraries(SymposiumTest gtest gtest_main gmock gmock_main)
