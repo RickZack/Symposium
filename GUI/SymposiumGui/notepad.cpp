@@ -55,7 +55,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     setMinimumSize(800, 600);
     ui->statusbar->addWidget(ui->labelChars);
 
-    qApp->installEventFilter(this);
+    ui->textEdit->installEventFilter(this);
 
     QActionGroup *alignGroup= new QActionGroup(this);
     alignGroup->addAction(ui->actionAlignCenter);
