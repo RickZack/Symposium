@@ -255,7 +255,7 @@ namespace Symposium {
          * @param path the path to check
          * @return true if the path is correct otherwise return false
          */
-        static bool correctFormatAbsolutePath(const std::string& path);
+        static bool correctFormatAbsolutePathWithId(const std::string& path);
 
 
 

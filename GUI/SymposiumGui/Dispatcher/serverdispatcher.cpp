@@ -39,17 +39,14 @@ ServerDispatcher::ServerDispatcher(){
     this->server = SymServer(false,false);
 }
 
-void ServerDispatcher::startServer()
-{
-    int port = 1234;
-
-    if(!this->listen(QHostAddress::Any, port))
+int ServerDispatcher::startServer(QHostAddress indirizzo, int porta){
+    if(!this->listen(indirizzo, porta))
     {
-        qDebug() << "Could not start server";
-    }
-    else
-    {
-        qDebug() << "Listening to port " << port << "...";
+        qDebug() << "Error to starting server";
+        return -1;
+    }else{
+        qDebug() << "Listening to IP " << indirizzo.toString() << " port " << porta;
+        return 0;
     }
 }
 

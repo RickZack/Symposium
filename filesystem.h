@@ -186,6 +186,12 @@ namespace Symposium {
 
         bool moreOwner(const std::string &username);
 
+        /**
+         * @brief check if the resource is available to remove operation
+         * @return true is the remove operation is possible, false otherwise
+         */
+        virtual bool isReadyToRemove() const=0;
+
         bool operator==(const filesystem &rhs) const;
 
         bool operator!=(const filesystem &rhs) const;
@@ -306,6 +312,12 @@ namespace Symposium {
 
         virtual bool validateAction(const std::string &userName, privilege priv);
 
+        /**
+         * @brief check if the resource is available to remove operation, so no users working on document
+         * @return true is the remove operation is possible, false otherwise
+         */
+        virtual bool isReadyToRemove() const override;
+
         bool operator==(const file &rhs) const;
 
         bool operator!=(const file &rhs) const;
@@ -360,6 +372,12 @@ namespace Symposium {
          * privileges granted to @e targetUser for the file pointed by the symlink
          */
         virtual std::string print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const override;
+
+        /**
+         * @brief the remove operation of link is always possible
+         * @return true
+         */
+        virtual bool isReadyToRemove() const override;
 
 
         virtual ~symlink() override=default;
@@ -450,6 +468,13 @@ namespace Symposium {
          * @return a string containing the representation
          */
         virtual std::string print(const std::string &targetUser, bool recursive = true, unsigned int indent = 0) const override;
+
+        /**
+         * @brief check if all resources in the directory is available to remove operation
+         * @return true is the remove operation is possible, false otherwise
+         */
+        virtual bool isReadyToRemove() const override;
+
         virtual ~directory() override= default;
 
         /**

@@ -1,5 +1,6 @@
 #include <iostream>
-//#include <conio.h>
+#include <QApplication>
+#include "gui_symserver.h"
 
 #include "serverdispatcher.h"
 
@@ -7,12 +8,14 @@
 
 int main(int argc, char *argv[]) {
 
-    QCoreApplication a(argc, argv);
+    QApplication a(argc, argv);
 
-        //creiamo un server e facciamolo partire
-        Symposium::ServerDispatcher server;
+    GUI_SymServer w(nullptr);
+    w.show();
+    //creiamo un server e facciamolo partire
+    //Symposium::ServerDispatcher server;
 
-        server.startServer();
+    //server.startServer();
 
-        return a.exec();
+    return a.exec();
 }

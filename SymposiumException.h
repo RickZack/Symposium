@@ -96,7 +96,7 @@ namespace Symposium{
          * @brief Specific error codes for @ref userException. They are used as indexes to the error table string
          */
         enum userExceptionCodes{shortPwd=0, longPwd, noCharPwd, noNumPwd, noSpecialCharPwd, nickname, noPriv,
-                noPermissionToChange, LinkNoCorrect, haveLink, path, pathForLink};
+                noPermissionToChange, LinkNoCorrect, haveLink, path, pathForLink, minPriv};
 
         explicit userException(userExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~userException()=default;
@@ -109,7 +109,7 @@ namespace Symposium{
          * @brief Specific error codes for @ref filesystemException. They are used as indexes to the error table string
          */
         enum filesystemExceptionCodes{objSha=0, pathEmpty, pathNvalid, changePriv, notOwn, noPermission, noGet, noGetDir,
-                noGetFile, sameName, notOnlyOwn, someError};
+                noGetFile, sameName, notOnlyOwn, someoneWork, notOwnDelete};
 
         explicit filesystemException(filesystemExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~filesystemException()=default;
