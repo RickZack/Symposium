@@ -76,17 +76,12 @@ struct StrategyMock: public RMOAccess{
 struct fileMock: public file{
     uriMock policyMocked;
 
-    fileMock(): file("dummy", 0), policyMocked(uri::getDefaultPrivilege()) {
-        strategy=std::make_unique<StrategyMock>();
-    };
+    fileMock(): file("dummy", 0), policyMocked(uri::getDefaultPrivilege()) {    };
     MOCK_METHOD2(setUserPrivilege, privilege(const std::string&, privilege));
     MOCK_METHOD2(setSharingPolicy, uri(const std::string&, const uri& newSharingPrefs));
     MOCK_CONST_METHOD1(getUserPrivilege, privilege(const std::string&));
     MOCK_METHOD0(getSharingPolicy, uri&());
     MOCK_METHOD2(validateAction, bool(const std::string&, privilege));
-    std::unique_ptr<AccessStrategy>& getStrategy(){
-        return strategy;
-    }
 
     virtual ~fileMock() override= default;
 };
@@ -107,16 +102,14 @@ struct UserTest: ::testing::Test{
         u=new user("username", "AP@ssw0rd!", "noempty", "", 0, homeDir);
 
     }
-    ~UserTest(){
-        if(u!= nullptr) {
+    ~UserTest() {
+        if (u != nullptr) {
             delete u;
-            u=nullptr;
+            u = nullptr;
         }
+
         ::testing::Mock::AllowLeak(homeDir.get());
         ::testing::Mock::AllowLeak(dummyFile.get());
-        ::testing::Mock::AllowLeak(Dir.get());
-        ::testing::Mock::AllowLeak(Root.get());
-        ::testing::Mock::AllowLeak(dummyFile->getStrategy().get());
     }
 };
 
@@ -196,11 +189,8 @@ TEST_F(UserTest, accessFileIllegalAbsolutePathForbiddenDirectory){
 TEST_F(UserTest, accessFileIllegalFile){
     privilege requested=privilege::readOnly;
     EXPECT_CALL(*Root, getFile("./"+std::to_string(homeDir->getId()), "5")).WillOnce(::testing::Return(dummyFile));
-    EXPECT_CALL(*dummyFile, getSharingPolicy()).WillOnce(::testing::ReturnRef(dummyFile->policyMocked));
-    EXPECT_CALL(dummyFile->policyMocked, getShare(requested)).WillOnce(::testing::Return(requested));
-    EXPECT_CALL(*dummyFile, setUserPrivilege(u->getUsername(), requested));
-    EXPECT_CALL(*dynamic_cast<StrategyMock*>((dummyFile->getStrategy().get())), getPrivilege(u->getUsername())).WillOnce(::testing::Return(requested));
-    ON_CALL(*homeDir, addLink(::testing::_, ::testing::_, ::testing::_, ::testing::_, ::testing::_)).WillByDefault(throwEx());
+    EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(privilege::none));
+    ON_CALL(dummyFile->policyMocked, getShare(requested)).WillByDefault(throwEx());
     EXPECT_THROW(u->accessFile("./"+std::to_string(homeDir->getId())+"/5", "./3", "link", requested), userException); //object in user's filesystem
 }
 
