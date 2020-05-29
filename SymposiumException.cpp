@@ -64,7 +64,8 @@ const char* userException::userErrors[]={"Too short password", "Too long passwor
                                          "You don't use any special character for password", "You can choose a nickname",
                                          "You don't have any privilege to this file anymore", "You cannot upgrade this privilege",
                                          "Inserted link is not correct", "You already have the access to this file",
-                                         "The path for new resource is not correct", "The link isn't correct, check it and try again"};
+                                         "The path for new resource is not correct", "The link isn't correct, check it and try again",
+                                         "You have to have reader privilege as a minimum privilege"};
 
 userException::userException(userExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
@@ -77,7 +78,7 @@ const char* filesystemException::filesystemErrors[]={"Object is not shareable", 
                                                      "You have not permission to access this file in this mode", "The element has not been found with get",
                                                      "Directory are you searching for, is not present", "File are you searching for, is not present",
                                                      "You already have an element with the same name", "You are not the only owner of this file, so you cannot delete it",
-                                                     "You have some error while you trying to delete your symlink"};
+                                                     "It is not possible to delete:someone is working on document", "Ask an owner to delete this file, you cannot do it"};
 
 filesystemException::filesystemException(filesystemExceptionCodes exceptionCode, const char *file, int line,
                              const char *func) :

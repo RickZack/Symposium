@@ -65,11 +65,8 @@
         <file>cartelle/writer_icon.jpg</file>
         <file>cartelle/color_icon.png</file>
         <file>avatar/unknown.png</file>
-        <file>Dispatcher/TestClient/mainClient.cpp</file>
-        <file>Dispatcher/TestServer/mainServer.cpp</file>
         <file>Dispatcher/clientdispatcher.cpp</file>
         <file>Dispatcher/clientdispatcher.h</file>
-        <file>Dispatcher/mainClient.cpp</file>
         <file>Dispatcher/mainServer.cpp</file>
         <file>Dispatcher/serverdispatcher.cpp</file>
         <file>Dispatcher/serverdispatcher.h</file>
@@ -173,5 +170,6 @@
         <file>icon/goback.png</file>
         <file>icon/left-and-right-arrows.png</file>
         <file>icon/left-arrow.png</file>
+        <file>icon/logo_server_GUI.png</file>
     </qresource>
 </RCC>

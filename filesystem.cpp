@@ -259,6 +259,10 @@ bool file::operator!=(const file &rhs) const {
     return !(rhs == *this);
 }
 
+bool file::isReadyToRemove() const {
+    return doc.getActiveUsers().empty();
+}
+
 directory::directory(const std::string &name, const uint_positive_cnt::type &idToAssign) : filesystem(name, idToAssign) {
 
     strategy=std::make_unique<TrivialAccess>();
@@ -460,6 +464,10 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
     if(obj->resType()==resourceType::file)//if the object to remove is the file
     {
         std::shared_ptr<file> f=std::dynamic_pointer_cast<file>(obj);
+        if(!f->isReadyToRemove())
+            throw filesystemException(filesystemException::someoneWork, UnpackFileLineFunction());
+        if(!f->validateAction(targetUser.getUsername(), privilege::owner))
+            throw filesystemException(filesystemException::notOwnDelete, UnpackFileLineFunction());
         if(f->moreOwner(targetUser.getUsername()))//check if targetUser is the only user, only in this case the file can be deleted
             throw filesystemException(filesystemException::notOnlyOwn, UnpackFileLineFunction());
         auto it=std::find_if(contained.begin(), contained.end(),
@@ -476,7 +484,10 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
         std::string idFile;
         tie(pathFile, idFile)= separate(s->getPath());//need to have a pointer for the file and not a symlink in order to operate on file strategy
         std::shared_ptr<file> f=getRoot()->getFile(pathFile, idFile);
-        f->deleteFromStrategy(targetUser.getUsername());
+        if(!f->moreOwner(targetUser.getUsername()))
+            getRoot()->remove(targetUser, pathFile, idFile);
+        else
+            f->deleteFromStrategy(targetUser.getUsername());
         auto it=std::find_if(contained.begin(), contained.end(),
                              [idRem, s](std::shared_ptr<filesystem> i){return i->getId()==s->getId();});
 
@@ -484,6 +495,8 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
         return obj;
     }
     std::shared_ptr<directory> d=std::dynamic_pointer_cast<directory>(obj);//otherwise the object is a directory
+    if(!d->isReadyToRemove())
+        throw filesystemException(filesystemException::someoneWork, UnpackFileLineFunction());
     for(auto iterator: d->contained)
     {
         std::shared_ptr<filesystem> rem=d->remove(targetUser, "", std::to_string(iterator->getId()));//call remove recursively in order to remove any object in the directory
@@ -528,6 +541,12 @@ std::string directory::print(const std::string &targetUser, bool recursive, unsi
     return result;
 }
 
+bool directory::isReadyToRemove() const {
+    for(auto element:contained)
+        return element->isReadyToRemove();
+    return true;
+}
+
 
 Symposium::symlink::symlink(const std::string &symName, const std::string &absPathWithoutId, const std::string &resId,
                             uint_positive_cnt::type idToAssign) : filesystem(symName, idToAssign), absPathWithoutId(absPathWithoutId), resId(resId) {
@@ -563,5 +582,9 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool, unsig
     if(indent>0)
         spaces.insert(spaces.begin(), indent, ' ');
     return typeres.str()+" "+std::to_string(getId())+" "+spaces+name+" " + priv.str();
+}
+
+bool Symposium::symlink::isReadyToRemove() const {
+    return true;
 }
 

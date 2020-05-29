@@ -162,8 +162,11 @@ user::accessFile(const std::string &absolutePath, const std::string &destPath, c
     if(!correctFormatResPath(destPath))
         throw userException(userException::path, UnpackFileLineFunction());
 
-    if(!correctFormatAbsolutePath(absolutePath))
+    if(!correctFormatAbsolutePathWithId(absolutePath))
         throw userException(userException::pathForLink, UnpackFileLineFunction());
+
+    if(reqPriv==privilege::none)
+        throw userException(userException::minPriv, UnpackFileLineFunction());
 
     std::size_t found = absolutePath.find_last_of("/\\");//find the last number which represent the id
     if(found==std::string::npos || absolutePath=="./")//if there isn't any "/" it means that I'm, alredy in the correct directory and the path represent only id
@@ -325,7 +328,7 @@ bool user::correctFormatResPath(const std::string &path) {
     return !path.empty() && (std::regex_match(path, pathPattern) || std::regex_match(path, pathPattern2));
 }
 
-bool user::correctFormatAbsolutePath(const std::string &path) {
-    std::regex pathPattern{R"(\.(\/[a-zA-Z0-9]+)+)"};
+bool user::correctFormatAbsolutePathWithId(const std::string &path) {
+    std::regex pathPattern{R"(\.\/[a-zA-Z0-9]+(\/[a-zA-Z0-9]+)+)"};
     return !path.empty() && std::regex_match(path, pathPattern);
 }
