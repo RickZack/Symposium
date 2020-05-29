@@ -1078,8 +1078,8 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
     Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
 
     // set the alignment values to zero default value
-    this->indexStyle=0;
-    this->alignment=Symposium::alignType::left;
+    //this->indexStyle=0;
+    //this->alignment=Symposium::alignType::left;
     std::vector<int> pos;
 
 
@@ -1141,8 +1141,8 @@ void notepad::contV_action(){
         struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
 
         // set the alignment values to zero default value
-        this->indexStyle=0;
-        this->alignment=Symposium::alignType::left;
+        //this->indexStyle=0;
+        //this->alignment=Symposium::alignType::left;
 
         std::vector<int> pos;
 #ifdef DISPATCHER_ON
