@@ -624,7 +624,6 @@ void notepad::fillTextEdit(){
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
     QString ch;
-    //std::vector<std::vector<Symposium::symbol>> symbols;
     /* save in symbols all the symbols contained in the document */
     #ifdef DISPATCHER_ON
     auto& symbols= this->doc.getSymbols();
@@ -643,26 +642,17 @@ void notepad::fillTextEdit(){
     else{
         unsigned valStyle=20;
         auto valAlign=Symposium::alignType::emptyAlignment;
-<<<<<<< HEAD
         for(size_t i=0;i<symbols.size();i++){
-
         auto style=alignmentStyle[i];
         if(style.first!=Symposium::alignType::emptyAlignment && i<alignmentStyle.size()){
-            qDebug()<<"I quando è minore"<<i;
-       if(valStyle!=style.second){
-=======
-    for(size_t i=0;i<symbols.size();i++){
-        auto style=alignmentStyle[i];
-       if(valStyle!=style.second && i<alignmentStyle.size()){
->>>>>>> parent of 3b3186d... push directory
-            this->textStyle(style.second);
-            valStyle=style.second;
-        }if(valAlign!=style.first && i<alignmentStyle.size()){
-           this->fixAlignment(style.first);
-           valAlign=style.first;
+            if(valStyle!=style.second){
+                this->textStyle(style.second);
+                 valStyle=style.second;
+             }if(valAlign!=style.first){
+                 this->fixAlignment(style.first);
+                 valAlign=style.first;
+                }
        }
-       }
-        qDebug()<<"I quando è maggior"<<i;
         for(size_t j=0;j<symbols[i].size();j++){
             int column=j;
             //extract the symbol
@@ -672,7 +662,7 @@ void notepad::fillTextEdit(){
             //estract the character
             QTextCharFormat chFormat;
             Symposium::format format=sym.getCharFormat();
-             //estract the information about the font/color
+            //estract the information about the font/color
             QFont font;
             font.setFamily(QString::fromStdString(format.familyType));
             font.setBold(format.isBold);
@@ -693,8 +683,7 @@ void notepad::fillTextEdit(){
              this->currentCharFormatChanged(chFormat);
             }
          }
-    }
-
+        }
   }
 
     NotRefreshLabels=false;
@@ -1134,6 +1123,8 @@ void notepad::contV_action(){
         qDebug()<<"Column"<<column;
         std::string str=charact.toStdString();
         wchar_t ch=str[0];
+        if(ch=='\n')
+            ch='\r';
         const std::pair<int, int> indexes={row,column};
         QTextCharFormat format = curs.charFormat();
         QFont font= format.font();

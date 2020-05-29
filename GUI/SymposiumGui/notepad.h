@@ -141,7 +141,7 @@ private:
     Symposium::uint_positive_cnt::type fileId;
     Symposium::user us;
     const Symposium::document& doc;
-    static constexpr wchar_t  emptyChar='~';
+    static constexpr wchar_t  emptyChar=0x1F;
     bool showUsers=true;
 
     std::string pathToFile;

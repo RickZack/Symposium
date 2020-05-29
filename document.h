@@ -84,7 +84,8 @@ namespace Symposium {
         bool loaded;
 
         static const std::string basePath;
-        static constexpr wchar_t  emptyChar='~';
+        //static constexpr wchar_t  emptyChar='~';
+        static constexpr wchar_t  emptyChar=0x1F;
         static bool serializeFull;
 
         friend class boost::serialization::access;
