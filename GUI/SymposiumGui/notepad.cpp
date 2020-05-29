@@ -923,12 +923,12 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
             event->ignore();
         else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C"))
             ui->textEdit->translateCursors(doc.getActiveUsers());
+        NotRefreshLabels=false;
     }
     // pressing a mouse button means that probably we need to move cursor's label
     else if (event->type()==QEvent::MouseButtonPress || event->type()==QEvent::MouseButtonDblClick){
         NotRefreshLabels=false;
     }
-    event->accept(); //prevent processing in the parent
     return QObject::eventFilter(obj, event);
 }
 
