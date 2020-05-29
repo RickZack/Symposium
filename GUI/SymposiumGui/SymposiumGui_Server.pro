@@ -30,6 +30,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++17
 
 SOURCES += \
+        Dispatcher/gui_symserver.cpp \
         waiting.cpp \
         about.cpp \
         activealwayslink.cpp \
@@ -80,6 +81,7 @@ SOURCES += \
         winmanager.cpp
 
 HEADERS += \
+        Dispatcher/gui_symserver.h \
         onoff_networkinteraction.h \
         waiting.h \
         about.h \
@@ -133,6 +135,7 @@ HEADERS += \
         winmanager.h
 
 FORMS += \
+        Dispatcher/gui_symserver.ui \
         waiting.ui \
         about.ui \
         activealwayslink.ui \

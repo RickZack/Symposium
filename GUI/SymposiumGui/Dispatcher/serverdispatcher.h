@@ -65,7 +65,7 @@
             /**
              * @brief constructs a server to receive connections request
              */
-            void startServer();
+            int startServer(QHostAddress indirizzo, int porta);
             void sendMessage(const std::shared_ptr<serverMessage> MessageToSend, uint_positive_cnt::type siteID);
 
         protected:
