@@ -74,7 +74,7 @@ void choosedir::treeGenerate(std::string str, int count)
             father=fatherAbs;
             if(type=="directory")
             {
-                path="/"+id+"/";
+                path="./"+id;
                 pathUser="/home/"+name+"/";
             }
         }
@@ -83,7 +83,7 @@ void choosedir::treeGenerate(std::string str, int count)
             father=listOfFathers.top();
             if(type=="directory")
             {
-                path=path+id+"/";
+                path=path+"/"+id;
                 pathUser=pathUser+name+"/";
             }
         }
@@ -93,25 +93,22 @@ void choosedir::treeGenerate(std::string str, int count)
             {
                 listOfFathers.pop();
             }
+            father=listOfFathers.top();
             if(type=="directory")
             {
                 for(int i=0; i<=indent-spaces; i++)
                 {
                     std::size_t found = path.find_last_of("/");
                     path.erase(found, path.size());
-                    found = path.find_last_of("/");
-                    path.erase(found, path.size());
-                    path=path+"/";
                     found=pathUser.find_last_of("/");
                     pathUser.erase(found, pathUser.size());
                     found=pathUser.find_last_of("/");
                     pathUser.erase(found, pathUser.size());
                     pathUser=pathUser+"/";
                 }
-                path=path+id+"/";
+                path=path+"/"+id;
                 pathUser=pathUser+name+"/";
             }
-            father=listOfFathers.top();
         }
         else
         {
@@ -120,16 +117,13 @@ void choosedir::treeGenerate(std::string str, int count)
                 listOfFathers.pop();
                 std::size_t found = path.find_last_of("/");
                 path.erase(found, path.size());
-                found = path.find_last_of("/");
-                path.erase(found, path.size());
-                path=path+"/";
                 found=pathUser.find_last_of("/");
                 pathUser.erase(found, pathUser.size());
                 found=pathUser.find_last_of("/");
                 pathUser.erase(found, pathUser.size());
                 pathUser=pathUser+"/";
                 father=listOfFathers.top();
-                path=path+id+"/";
+                path=path+"/"+id;
                 pathUser=pathUser+name+"/";
             }
         }
@@ -157,6 +151,7 @@ void choosedir::treeGenerate(std::string str, int count)
             item->setText(2, "");
             father->addChild(item);
             std::string word=separate_word(str);
+            indent=spaces;
         }
         else
         {
@@ -167,6 +162,7 @@ void choosedir::treeGenerate(std::string str, int count)
             item->setText(2, "");
             father->addChild(item);
             std::string word=separate_word(str);
+            indent=spaces;
         }
     }
 
@@ -211,8 +207,8 @@ int choosedir::number_elements(std::string& string)
     int count=0;
     for(size_t i = 0; i < string.size(); i++)
       if(string[i] == '\n')
-          count++;
-    string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
+      {count++; string[i]=' ';}
+    //string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
     return count;
 }
 

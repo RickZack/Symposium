@@ -92,6 +92,25 @@ TEST_F(RMOAccessTest, AskingForHigherPrivilegeReturnFalse){
     }
 }
 
+//Added on 28/05/2020, after changing in file deletion policies
+TEST_F(RMOAccessTest, moreOwnerReturnsFalse){
+    s->setPrivilege(u, privilege::owner);
+    EXPECT_FALSE(s->moreOwner(u)); // num of owners=1 and u is the only one
+}
+
+TEST_F(RMOAccessTest, moreOwnerReturnsTrueIfMoreOwners){
+    s->setPrivilege(u, privilege::owner);
+    s->setPrivilege("anotherUser", privilege::owner);
+    EXPECT_TRUE(s->moreOwner(u)); // num of owners=2,  u is not the only one
+}
+
+TEST_F(RMOAccessTest, moreOwnerReturnsTrueIfMoreOwnersButUserIsNotOwner){
+    s->setPrivilege(u, privilege::modify);
+    s->setPrivilege("anotherUser", privilege::owner);
+    s->setPrivilege("againAnotherUser", privilege::owner);
+    EXPECT_TRUE(s->moreOwner(u)); // num of owners=2, u is not owner
+}
+
 struct TrivialAccessTest : testing::Test {
     AccessStrategy *s;
     user aUser;

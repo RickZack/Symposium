@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <forward_list>
 #include "symwininterface.h"
+#include "onoff_networkinteraction.h"
 
 #include "../../document.h"
 #include "../../privilege.h"

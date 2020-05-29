@@ -93,7 +93,7 @@ bool RMOAccess::moreOwner(std::string username) const
         }
     }
 
-    return ((i > 1)&&own);
+    return !((i==1) && own);
 }
 
 std::unordered_map<std::string, privilege> RMOAccess::getPermission() const

@@ -22,12 +22,30 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uin
     ui->tree->setColumnWidth(0, 300);
     ui->notification->hide();
     ui->errorMess->hide();
-    privelege=Symposium::privilege::owner;
     ui->waiting->hide();
     ui->gif->hide();
     QMovie *movie = new QMovie(":/icon/ajax-loader.gif");
     ui->gif->setMovie(movie);
     movie->start();
+
+    if(privelege==Symposium::privilege::readOnly)
+    {
+        ui->button->setDisabled(true);
+        ui->owner->hide();
+        ui->owner->setDisabled(true);
+        ui->reader->hide();
+        ui->reader->setDisabled(true);
+        ui->modify->hide();
+        ui->modify->setDisabled(true);
+        ui->none->hide();
+        ui->none->setDisabled(true);
+        ui->button->hide();
+        ui->label->hide();
+        ui->button_2->move(185, 670);
+        ui->label_2->setText("Here you can see all users\nwho have access to this file");
+        ui->tree->resize(470, 530);
+        ui->button_2->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+    }
 }
 
 void alluser::success(){
@@ -50,8 +68,8 @@ void alluser::successEditPrivilege()
     ui->notification->show();
     enableButtons();
     #ifdef DISPATCHER_ON
-    onlineUsers=cl->allUser(documentID);
-    users=cl->allUser(documentID);
+    onlineUsers=cl.onlineUser(documentID);
+    users=cl.allUser(documentID);
     #endif
     ui->tree->clear();
     insertusers();
@@ -154,6 +172,7 @@ void alluser::enableButtons()
 void alluser::on_tree_itemClicked(QTreeWidgetItem *item, int)
 {
     username=item->text(0).toStdString();
+    ui->modify->click();
 }
 
 void alluser::on_button_clicked()
@@ -183,7 +202,7 @@ void alluser::on_button_clicked()
        ui->errorMess->hide();
        disableButtons();
        #ifdef DISPATCHER_ON
-       cl->editPrivilege(username, pathFile, newPrivelege, documentID);
+       cl.editPrivilege(username, pathFile, newPrivelege, documentID);
        #endif
     }
 }

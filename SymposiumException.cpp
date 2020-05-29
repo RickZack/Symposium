@@ -63,7 +63,8 @@ const char* userException::userErrors[]={"Too short password", "Too long passwor
                                          "You don't use any alphabetic character for password", "You don't use any number for password",
                                          "You don't use any special character for password", "You can choose a nickname",
                                          "You don't have any privilege to this file anymore", "You cannot upgrade this privilege",
-                                         "Inserted link is not correct"};
+                                         "Inserted link is not correct", "You already have the access to this file",
+                                         "The path for new resource is not correct", "The link isn't correct, check it and try again"};
 
 userException::userException(userExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :

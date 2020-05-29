@@ -221,16 +221,16 @@ void file::deleteFromStrategy(const std::string &userName)
 }
 
 std::string file::print(const std::string &targetUser, bool, unsigned int indent) const {
-    std::string ritorno;
-    if (indent>0)
-        ritorno.insert(0, indent, ' '); //first need to insert indent
     std::ostringstream typeres;
     typeres<<resType(); //then the typer of the resource
     std::ostringstream priv;
     if(getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";
     priv<<getUserPrivilege(targetUser); //the privilege
-    return typeres.str()+" "+std::to_string(getId())+" "+ritorno+name + " " + priv.str();
+    std::string spaces = "";
+    if(indent>0)
+        spaces.insert(spaces.begin(), indent, ' ');
+    return typeres.str()+" "+std::to_string(getId())+" "+spaces+name+" " + priv.str();
 }
 
 
@@ -515,16 +515,14 @@ std::string directory::print(const std::string &targetUser, bool recursive, unsi
                 std::ostringstream typeres;
                 typeres<<dir->resType();
                 std::string spaces = "";
-                if(result.size()>=indent)
-                    spaces.insert(result.end(), indent, ' ');
-                else
-                    spaces.push_back(' ');
+                if(indent>0)
+                    spaces.insert(spaces.begin(), indent, ' ');
                 result=result+typeres.str()+" "+std::to_string(it->getId())+" "+spaces+dir->name+"\n";
                 if(recursive)
                     result+=dir->print(targetUser, recursive, indent+1);
             }
             else
-                result+=" "+it->print(targetUser, recursive, indent)+"\n";
+                result+=it->print(targetUser, recursive, indent)+"\n ";
         }
 
     return result;
@@ -558,14 +556,12 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool, unsig
     std::ostringstream priv;
     std::ostringstream typeres;
     typeres<<resType();
-    std::string ritorno;
     priv<<file->getUserPrivilege(targetUser);
     if(file->getUserPrivilege(targetUser)==privilege::none)
         return name+" You no longer have the possibility to access the file in any mode";
-    if (indent>0)
-    {
-        ritorno.insert(0, indent, ' ');
-    }
-    return typeres.str()+" "+std::to_string(getId())+" "+ritorno+name + " " + priv.str();
+    std::string spaces = "";
+    if(indent>0)
+        spaces.insert(spaces.begin(), indent, ' ');
+    return typeres.str()+" "+std::to_string(getId())+" "+spaces+name+" " + priv.str();
 }
 

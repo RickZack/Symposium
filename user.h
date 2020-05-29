@@ -99,8 +99,6 @@ namespace Symposium {
 
         const std::string &getPwdHash() const;
 
-        void setPwd(const std::string &pwd);
-
         void setNickname(const std::string &nickname);
 
         void setSiteId(uint_positive_cnt::type siteId);
@@ -131,7 +129,7 @@ namespace Symposium {
          * @return the pointer to the file just created
          */
         virtual std::shared_ptr<file>
-        newFile(const std::string &resName, const std::string &resPath= ".", uint_positive_cnt::type idToAssign= 0) const;
+        newFile(const std::string &resName, const std::string &resPath= "./", uint_positive_cnt::type idToAssign= 0) const;
 
         /**
          * @brief creates a new directory named @e dirName in @e pathFromHome
@@ -141,7 +139,7 @@ namespace Symposium {
          */
 
         virtual std::shared_ptr<directory>
-        newDirectory(const std::string &resName, const std::string &resPath = ".", uint_positive_cnt::type idToAssign= 0) const;
+        newDirectory(const std::string &resName, const std::string &resPath = "./", uint_positive_cnt::type idToAssign= 0) const;
 
         /**
          * @brief adds a link to the resource for which the user has been granted a privilege
@@ -246,6 +244,18 @@ namespace Symposium {
          * @return salt
          */
         static std::string saltGenerate();
+        /**
+         * @brief check if the relative path passed as argument is correct
+         * @param path the path to check
+         * @return true if the path is correct otherwise return false
+         */
+        static bool correctFormatResPath(const std::string& path);
+        /**
+         * @brief check if the absolute path passed as argument is correct
+         * @param path the path to check
+         * @return true if the path is correct otherwise return false
+         */
+        static bool correctFormatAbsolutePath(const std::string& path);
 
 
 
