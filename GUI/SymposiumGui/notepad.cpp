@@ -26,6 +26,7 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QShortcut>
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
 #if QT_CONFIG(printer)
@@ -54,6 +55,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     ui->setupUi(this);
     setMinimumSize(800, 600);
     ui->statusbar->addWidget(ui->labelChars);
+    ui->textEdit->setContextMenuPolicy(Qt::NoContextMenu);
 
     ui->textEdit->installEventFilter(this);
 
@@ -883,7 +885,7 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
         this->dim=md->text().length();
         return;
     }
-    else if(event->key()==Qt::Key_Backspace){
+    else if(event->key()==Qt::Key_Backspace || event->key()==Qt::Key_Delete){
         return handleDeleteKey();
     }
     else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+V")
@@ -1061,25 +1063,19 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
 
     std::wstring str=text.toStdWString();
     wchar_t ch=str[0];
-    const std::pair<int, int> indexes={row,column};
+    const std::pair<unsigned, unsigned> indexes={row,column};
     QColor col=format.foreground().color();
-
     QFont font= format.font();
     bool isBold= font.bold();
     bool isUnderlined=font.underline();
     bool isItalic=font.italic();
     unsigned size=font.pointSize();
     std::string fontFamily=font.family().toStdString();
-    QColor colC=format.foreground().color();
     int blue=col.blue();
     int red=col.red();
     int green=col.green();
     Symposium::Color myCol(red,green,blue);
     Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
-
-    // set the alignment values to zero default value
-    //this->indexStyle=0;
-    //this->alignment=Symposium::alignType::left;
     std::vector<int> pos;
 
 
@@ -1098,75 +1094,61 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
 #endif
-    this->colPos=colC;
+    this->colPos=col;
 }
 
 void notepad::contV_action(){
     QTextCursor curs=ui->textEdit->textCursor();
     int posAct= curs.position();
-    qDebug()<<"PosAct"<<posAct;
     int posTmp=posAct-this->dim;
-    qDebug()<<"PosTmp"<<posTmp;
-    qDebug()<<"Dimensione"<<this->dim;
-    int count=0;
+    unsigned int count=0;
+    int previousC=0, column=0,row;
 
     while(count!=this->dim){
         curs.setPosition(posTmp);
         curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
-        //ui->textEdit->setTextCursor(curs);
-        QString charact=curs.selectedText();
-        qDebug()<<"charact"<<charact;
-        int column=curs.positionInBlock();
-        column= column-1;
-        int row= curs.blockNumber();
-        qDebug()<<"row"<<row;
-        qDebug()<<"Column"<<column;
-        std::string str=charact.toStdString();
-        wchar_t ch=str[0];
-        if(ch=='\n')
-            ch='\r';
-        const std::pair<int, int> indexes={row,column};
-        QTextCharFormat format = curs.charFormat();
-        QFont font= format.font();
-        unsigned size=font.pointSize();
-        bool isBold= font.bold();
-        bool isUnderlined=font.underline();
-        bool isItalic=font.italic();
-        std::string fontFamily=font.family().toStdString();
-        QColor col=format.foreground().color();
-        int blue=col.blue();
-        int red=col.red();
-        int green=col.green();
-        Symposium::Color myCol(red,green,blue);
-        struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
-
-        // set the alignment values to zero default value
-        //this->indexStyle=0;
-        //this->alignment=Symposium::alignType::left;
-
-        std::vector<int> pos;
-#ifdef DISPATCHER_ON
-        Symposium::symbol sym(ch,cl.getUser().getSiteId(),1,pos,false);
-        sym.setCharFormat(charFormat);
-        cl.localInsert(this->documentId,sym,indexes);
-        this->numChars=this->doc.getNumchar();
-        this->labelChars=std::to_string(this->numChars);
-        ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-
-#else
-        Symposium::symbol sym(ch,1,1,pos,false);
-        sym.setCharFormat(charFormat);
-        this->documentoProva.localInsert(indexes,sym);
-        this->numChars=this->documentoProva.getNumchar();
-        this->labelChars=std::to_string(this->numChars);
-        ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-
-
-#endif
-        count++;posTmp++;
-
-    }
+        previousC=column; column=curs.positionInBlock()-1;
+        /* I'm changing the line*/
+        if(column==-1){
+            const std::pair<unsigned int, unsigned int> indexes={curs.blockNumber()-1,previousC+1};
+            this->sendEnterSymbol(indexes);
+            count++;posTmp++;
+         }else{
+            row= curs.blockNumber();
+            QString charact=curs.selectedText();
+            QTextCharFormat format = curs.charFormat();
+            this->sendSymbolToInsert(row,column,charact,format);
+            count++;posTmp++;
+        } // else
+  }
     this->okPaste=false;
+}
+
+void notepad::sendEnterSymbol(const std::pair<unsigned int, unsigned int> indexes){
+    NotRefreshLabels=true;
+    QTextCursor curs=ui->textEdit->textCursor();
+    ui->textEdit->changePosition(indexes.first,indexes.second);
+
+    /* set the char format */
+    QTextCharFormat format = curs.charFormat();
+    QFont font= format.font();
+    unsigned size=font.pointSize();
+    bool isBold= font.bold();
+    bool isUnderlined=font.underline();
+    bool isItalic=font.italic();
+    std::string fontFamily=font.family().toStdString();
+    QColor col=format.foreground().color();
+    int blue=col.blue();
+    int red=col.red();
+    int green=col.green();
+    Symposium::Color myCol(red,green,blue);
+    struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
+    std::vector<int> pos;
+    Symposium::symbol sym('\r',cl.getUser().getSiteId(),1,pos,false);
+    sym.setCharFormat(charFormat);
+
+    /* send the symbol */
+    cl.localInsert(this->documentId,sym,indexes);
 }
 
 void notepad::addCursor()
@@ -1648,5 +1630,20 @@ void notepad::setreadonly()
 void notepad::modifyWinTitle(Symposium::uint_positive_cnt::type resId, const QString& newName) {
     if(fileId==resId)
         this->setWindowTitle(newName);
+}
+
+void notepad::contextMenuEvent(QContextMenuEvent *){
+    QMenu submenu;
+    QString style="QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}";
+    submenu.setStyleSheet(style);
+    submenu.addAction(tr("Copy"),this,&notepad::on_actionCopy_triggered);
+    submenu.addSeparator();
+    submenu.addAction(tr("Cut"),this,&notepad::on_actionCut_triggered);
+    submenu.addSeparator();
+    submenu.addAction(tr("Paste"),this,&notepad::on_actionPaste_triggered);
+    submenu.addSeparator();
+    QPoint globalPos=ui->textEdit->cursor().pos();
+    submenu.exec(globalPos);
+
 }
 

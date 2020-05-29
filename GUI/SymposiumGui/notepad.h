@@ -98,6 +98,7 @@ public:
      */
     void fixAlignment(Symposium::alignType align);
 
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -225,6 +226,9 @@ private:
      * @brief uncolorText to restore the default background color
      */
     void uncolorText();
+
+    void contextMenuEvent(QContextMenuEvent *event) override;
+    void sendEnterSymbol(const std::pair<unsigned int, unsigned int> indexes);
 };
 
 #endif // NOTEPAD_H
