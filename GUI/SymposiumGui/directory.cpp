@@ -963,7 +963,13 @@ void directory::on_OkPriv_clicked()
         privOpen= Symposium::privilege::readOnly;
     waitingFunction();
     #ifdef DISPATCHER_ON
-    cl.openSource(this->path,this->selectedId,privOpen);
+    std::string pathToSend=path;
+    if(pathToSend!="./")
+    {
+        std::size_t found = pathToSend.find_last_of("/");
+        pathToSend.erase(found, pathToSend.size());
+    }
+    cl.openSource(pathToSend,this->selectedId,privOpen);
     #else
     priv=Symposium::privilege::owner;
     hideAll();
