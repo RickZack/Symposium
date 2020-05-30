@@ -26,7 +26,7 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QMimeData>
-#include <QShortcut>
+
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
 #if QT_CONFIG(printer)
@@ -410,6 +410,7 @@ void notepad::on_actionAlignTextLeft_triggered()
     textAlign(ui->actionAlignTextLeft);
     this->alignment=Symposium::alignType::left;
     ui->textEdit->scroll();
+
 }
 
 void notepad::on_actionAlignCenter_triggered()
@@ -437,25 +438,35 @@ void notepad::on_actionAlignTextJustify_triggered()
 void notepad::on_actionBoldFont_triggered()
 {
     QTextCharFormat fmt;
+    QTextCursor cursor=ui->textEdit->textCursor();
     fmt.setFontWeight(ui->actionBoldFont->isChecked() ? QFont::Bold : QFont::Normal);
     ui->textEdit->mergeCurrentCharFormat(fmt);
+    if(cursor.hasSelection())
+        this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
+
     //mergeFormatOnWordOrSelection(fmt);
 }
 
 void notepad::on_actionItalicFont_triggered()
 {
     QTextCharFormat fmt;
+    QTextCursor cursor= ui->textEdit->textCursor();
     fmt.setFontItalic(ui->actionItalicFont->isChecked());
     ui->textEdit->mergeCurrentCharFormat(fmt);
-    //mergeFormatOnWordOrSelection(fmt);
+    if(cursor.hasSelection())
+        this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
+
 }
 
 void notepad::on_actionUnderlineFont_triggered()
 {
     QTextCharFormat fmt;
+    QTextCursor cursor= ui->textEdit->textCursor();
     fmt.setFontUnderline(ui->actionUnderlineFont->isChecked());
     ui->textEdit->mergeCurrentCharFormat(fmt);
-   // mergeFormatOnWordOrSelection(fmt);
+    if(cursor.hasSelection())
+        this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
+
 }
 
 
@@ -528,6 +539,9 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
     this->indexStyle=styleIndex;
     ui->textEdit->scroll();
     return style;
+    if(cursor.hasSelection()){
+        this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
+    }
 }
 
 
@@ -541,6 +555,45 @@ void notepad::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
     ui->textEdit->mergeCurrentCharFormat(format);
 
 }
+
+void notepad::handleChangeFormat(unsigned int i, unsigned int f){
+
+      NotRefreshLabels=true;
+      QTextCursor curs=ui->textEdit->textCursor();
+      QTextCharFormat format;
+      QString character;
+      unsigned int count=0;
+      unsigned dimSelection=f-i;
+      int prCol=0,col=0,row=0;
+      while(count!=dimSelection){
+        curs.setPosition(i);
+        curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
+        prCol=col; col=curs.positionInBlock()-1;
+        if(col!=-1){ // nomore chars on the line but selection has not ended
+           //col=prCol;
+           //row=curs.blockNumber()-1;
+           /* extract the format information */
+           //ui->textEdit->changePosition(row,col);
+           //format=curs.charFormat();
+           //col=prCol+1;
+           //character='\r';
+
+          //}else{
+           prCol=col;
+           row=curs.blockNumber();
+           ui->textEdit->changePosition(row,col);
+           format=curs.charFormat();
+           character=curs.selectedText();
+  //}
+
+            cl.localRemove(this->documentId,{row,col});
+            this->sendSymbolToInsert(row,col,character,format);
+        }
+            count++; i++;
+      } //while
+
+    }
+
 
 
 void notepad::textColor()
@@ -557,26 +610,35 @@ void notepad::textColor()
     lightCol.setAlpha(180);
     this->colPos=lightCol;
     ui->textEdit->setTextColor(lightCol);
-
+    QTextCursor c=ui->textEdit->textCursor();
+    if(c.hasSelection())
+        this->handleChangeFormat(c.selectionStart(),c.selectionEnd());
 }
 
 void notepad::textFamily(const QString &f)
 {
     QTextCharFormat fmt;
+    QTextCursor cursor=ui->textEdit->textCursor();
     fmt.setFontFamily(f);
     //mergeFormatOnWordOrSelection(fmt);
     ui->textEdit->mergeCurrentCharFormat(fmt);
+    if(cursor.hasSelection())
+        this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
 }
 
 void notepad::textSize(const QString &p)
 {
     qreal pointSize = p.toFloat();
+    QTextCursor cursor=ui->textEdit->textCursor();
     if (p.toFloat() > 0) {
         QTextCharFormat fmt;
         fmt.setFontPointSize(pointSize);
         //mergeFormatOnWordOrSelection(fmt);
          ui->textEdit->mergeCurrentCharFormat(fmt);
+         if(cursor.hasSelection())
+             this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
     }
+
 }
 
 void notepad::textAlign(QAction *a)
@@ -589,6 +651,10 @@ void notepad::textAlign(QAction *a)
         ui->textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
     else if (a == ui->actionAlignTextJustify)
         ui->textEdit->setAlignment(Qt::AlignJustify);
+    QTextCursor cursor=ui->textEdit->textCursor();
+    if(cursor.hasSelection())
+        this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
+
 }
 
 void notepad::colorChanged(const QColor &c)
@@ -596,8 +662,6 @@ void notepad::colorChanged(const QColor &c)
     QPixmap pix(64, 64);
     pix.fill(c);
     ui->actionColorText->setIcon(pix);
-    //ui->textEdit->setTextColor(c);
-
 }
 
 void notepad::fontChanged(const QFont &f)
@@ -607,15 +671,12 @@ void notepad::fontChanged(const QFont &f)
     ui->actionBoldFont->setChecked(f.bold());
     ui->actionItalicFont->setChecked(f.italic());
     ui->actionUnderlineFont->setChecked(f.underline());
-
 }
 
 void notepad::currentCharFormatChanged(const QTextCharFormat &format)
 {
     fontChanged(format.font());
     colorChanged(format.foreground().color());
-
-
 }
 
 void notepad::fillTextEdit(){
@@ -1417,7 +1478,7 @@ void notepad::colorText(){
             }else{
                 #ifdef DISPATCHER_ON
                 Symposium::Color colHigh=cl.getColor(this->documentId,siteId);
-                QColor userCol=static_cast<QColor>(colHigh);
+                userCol=static_cast<QColor>(colHigh);
                 #else
                 if(siteId==1){
                     userCol=Qt::yellow;
@@ -1646,4 +1707,6 @@ void notepad::contextMenuEvent(QContextMenuEvent *){
     submenu.exec(globalPos);
 
 }
+
+
 

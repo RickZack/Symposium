@@ -99,6 +99,8 @@ public:
     void fixAlignment(Symposium::alignType align);
 
 
+
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -229,6 +231,7 @@ private:
 
     void contextMenuEvent(QContextMenuEvent *event) override;
     void sendEnterSymbol(const std::pair<unsigned int, unsigned int> indexes);
+    void handleChangeFormat(unsigned int i, unsigned int f);
 };
 
 #endif // NOTEPAD_H

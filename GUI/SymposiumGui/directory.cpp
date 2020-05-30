@@ -402,6 +402,9 @@ void directory::on_pushButton_3_clicked()
     QString name= ui->name->text();
     waitingFunction();
     std::string nameFolder=name.toStdString();                       /** < name folder with possible spaces */
+    if(nameFolder==" "){
+        this->failureActionDirectory("The inserted name is not correct. Please try again");
+    }
     std::string fixedName=this->fixNameSource(name.toStdString());   /** < name folder without possible spaces */
     #ifdef DISPATCHER_ON
     int numVal=this->ids.count(fixedName);
@@ -670,6 +673,9 @@ void directory::on_pushButton_4_clicked()
     disableStyleButtons();
     pressed=true;
     this->curResName =ui->name_2->text();                                                              /** < name with possible spaces */
+    if(curResName.toStdString()==" "){
+        this->failureActionDirectory("The inserted name is not correct. Please try again");
+    }
     std::string fixedName=this->fixNameSource(curResName.toStdString());           /** < name without possible spaces */
     waitingFunction();
     #ifdef DISPATCHER_ON
@@ -807,6 +813,9 @@ void directory::on_okButton_clicked()
     disableStyleButtons();
     pressed=true;
     this->curResName =ui->renameLabel->text();                              /** < name with possible spaces */
+    if(curResName.toStdString()==" "){
+        this->failureActionDirectory("The inserted name is not correct. Please try again");
+    }
     fixedName=this->fixNameSource(curResName.toStdString());                /** < name without possible spaces */
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){

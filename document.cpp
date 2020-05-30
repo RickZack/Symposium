@@ -123,14 +123,6 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
        symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
     }
 
-    /* resize the alignmentStyle vector */
-
-
-/*
-    if(i0>=alignmentStyle.size()){
-        alignmentStyle.resize((i0 + 1)*mult_fac,std::pair(alignType::emptyAlignment,0));
-    }
-*/
 }
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
@@ -151,14 +143,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     /* set the alignmentStyle vector */
     std::pair<alignType,unsigned> styleValues;
     styleValues={charFormat.type,charFormat.indexStyle};
-    // I'm inserting a symbol in a free position
 
-    /*
-    if(alignmentStyle[i0].first==alignType::emptyAlignment || toInsert.getCh()=='\r'){
-       alignmentStyle[i0]=styleValues;
-    }else
-         alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
-         */
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
 
@@ -172,7 +157,6 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end());
         symbols.push_back(std::vector<symbol>(1,emptySymbol));
-         //alignmentStyle[i0]=styleValues;
         alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
         alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
         alignmentStyle.push_back(std::pair(alignType::emptyAlignment,0));
@@ -183,12 +167,8 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
-    //alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
     alignmentStyle[i0]=styleValues;
     alignmentStyle.resize(symbols.size(),std::pair(alignType::emptyAlignment,0));
-
-    qDebug()<<"Dimensione stile"<<alignmentStyle.size();
-    qDebug()<<"Dimensione simboli"<<symbols.size();
 
     return newSymb;
 
@@ -197,19 +177,19 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
 
 symbol document::generatePosition(const std::pair<unsigned int, unsigned int> indexes, const symbol &toInsert){
     std::vector<int> posBefore;
-    int siteIdB;
+    //int siteIdB=0;
     symbol symB=findPosBefore(indexes);
     if(symB!=emptySymbol){
         posBefore=symB.getPos();
-        siteIdB=symB.getSiteId();
+        //siteIdB=symB.getSiteId();
     }
 
     std::vector <int> posAfter;
-    int siteIdA;
+    //int siteIdA;
     symbol symA=findPosAfter(indexes);
     if(symA!=emptySymbol){
         posAfter=symA.getPos();
-        siteIdA=symB.getSiteId();
+        //siteIdA=symB.getSiteId();
     }
 
     int level=0;
@@ -222,8 +202,8 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
 
 
 symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> &indexes) const {
-    int line=indexes.first;
-    int ch=indexes.second;
+    unsigned int line=indexes.first;
+    unsigned ch=indexes.second;
     assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
 
@@ -305,7 +285,7 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
     }
 
     if(id2-id1>1){
-        unsigned newDigit= generateIdBetween(id1,id2,boundaryStrategy);
+        unsigned int newDigit= generateIdBetween(id1,id2,boundaryStrategy);
         newPos.push_back(newDigit);
         return newPos;
     }else if(id2-id1==1){
@@ -315,7 +295,7 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
             pos1.erase(pos1.begin());
         }
         std::vector<int> pos2;
-        return generatePosBetween(pos1, pos2, newPos, level+1 , /*siteIdB, siteIdA*/ b,a);
+        return generatePosBetween(pos1, pos2, newPos, level+1 , b,a);
 
     }else if(id1==id2){
         if(b.getSiteId()<a.getSiteId()){
@@ -340,17 +320,18 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
             }
             return generatePosBetween(pos1, pos2, newPos, level + 1,b,a);
         }
+    return std::vector<int>();
 }
 
 
-char document::retrieveStrategy(int level){
+char document::retrieveStrategy(unsigned int level){
 
-   int sizeSC=strategyCache.size();
+   unsigned int sizeSC=strategyCache.size();
    if(level<sizeSC){
         return strategyCache[level];
     }
 
-    int value=rand()%2;
+    unsigned value=rand()%2;
     switch (strategy){
         case 'p': strategy='+'; break;
         case 'm': strategy='-'; break;
@@ -692,6 +673,7 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     if(symbol>lastChar){
         i0=-1; i1=-1; ind={i0,i1}; return ind;
     }
+
 
     // binary search
     while(minLine+1<maxLine){

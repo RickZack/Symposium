@@ -323,7 +323,7 @@ namespace Symposium {
          * @param level
          * @return
          */
-        char retrieveStrategy(int level);
+        char retrieveStrategy(unsigned int level);
 
         /**
          * @brief updateOtherCursorPos to update the position of the cursors different from mine in the document
