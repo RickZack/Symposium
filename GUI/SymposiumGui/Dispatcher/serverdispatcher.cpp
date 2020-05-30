@@ -102,16 +102,22 @@ void ServerDispatcher::readyRead(){
         //leggiamo i dati ricevuti
         in >> byteArray;
         //controlliamo se ci sono stati errori
-        if (!in.commitTransaction()){
+        if ((!in.commitTransaction()) && (in.status()!=QDataStream::Ok)){
             //errore di ricezione
+            readSocket->flush();
+            return;
         }
         //eseguiamo la conversione in stringa
         ricevuto = byteArray.constData();
         //inseriamo quanto ricevuto nel stringstream
         accumulo << ricevuto;
-        //deserializziamo il messaggio ricevuto
-        boost::archive::text_iarchive ia(accumulo);
-        ia >> da;
+        try {
+            //deserializziamo il messaggio ricevuto
+            boost::archive::text_iarchive ia(accumulo);
+            ia >> da;
+        } catch (boost::archive::archive_exception b) {
+            qDebug() << "Deserialization ERROR: " << b.what();
+        }
         qDebug() << "Ricevuto da socketdescriptor " << readSocket->socketDescriptor() << ": " << QString::fromStdString(accumulo.str());
         try {
             da->invokeMethod(this->server);

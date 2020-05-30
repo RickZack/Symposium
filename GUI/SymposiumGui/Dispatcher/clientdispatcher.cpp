@@ -97,16 +97,23 @@ void clientdispatcher::readyRead(){
         //leggiamo i dati ricevuti
         in >> byteArray;
         //controlliamo se ci sono stati errori
-        if (!in.commitTransaction()){
+        if ((!in.commitTransaction()) && (in.status()!=QDataStream::Ok)){
             //errore di ricezione
+            this->socket.flush();
+            return;
         }
         //eseguiamo la conversione in stringa
         std::string ricevuto(byteArray.constData(), byteArray.length());
         //inseriamo quanto ricevuto nel stringstream
         accumulo << ricevuto;
-        //deserializziamo il messaggio ricevuto
-        boost::archive::text_iarchive ia(accumulo);
-        ia >> mes;
+        try {
+            //deserializziamo il messaggio ricevuto
+            boost::archive::text_iarchive ia(accumulo);
+            ia >> mes;
+        } catch (boost::archive::archive_exception b) {
+            qDebug() << "Deserialization ERROR: " << b.what();
+        }
+
         try {
             /*
              * When the app is closing no need to notify the user with action's outcome.

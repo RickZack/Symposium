@@ -1,5 +1,6 @@
 #include <iostream>
 #include <QApplication>
+#include <QFontDatabase>
 #include "gui_symserver.h"
 
 #include "serverdispatcher.h"
@@ -9,6 +10,8 @@
 int main(int argc, char *argv[]) {
 
     QApplication a(argc, argv);
+    QFontDatabase database;
+    database.addApplicationFont(":/resources/font/baskvil.TTF");
 
     GUI_SymServer w(nullptr);
     w.show();
