@@ -166,13 +166,19 @@ TEST_F(UserTest, accessFileStandardCase){
     u->accessFile("./1/2", "./3", "link", requested);
 }
 
-
+/*
+ * Test explanation: makes no sense to create a link with no privilege,
+ * would cause an error when accessing the file
+ */
 TEST_F(UserTest, accessFileAskingForNoPrivilege){
     privilege requested=privilege::none;
     ON_CALL(*Root, getFile("./1", "2")).WillByDefault(throwEx());
     EXPECT_THROW(u->accessFile("./1/2", "./3", "link", requested), userException);
 }
 
+/*
+ * Test explanation: the absolute path of the link is ill-formed
+ */
 TEST_F(UserTest, accessFileIllegalAbsolutePathSyntaxError){
     privilege requested=privilege::readOnly;
     ON_CALL(*Root, getFile(::testing::_, ::testing::_)).WillByDefault(throwEx());
@@ -180,16 +186,22 @@ TEST_F(UserTest, accessFileIllegalAbsolutePathSyntaxError){
     EXPECT_THROW(u->accessFile("./1/2/", "./3", "link", requested), userException); //just syntax error
 }
 
+/*
+ * Test explanation: cannot create a link to something that is directly into the root
+ */
 TEST_F(UserTest, accessFileIllegalAbsolutePathForbiddenDirectory){
     privilege requested=privilege::readOnly;
     ON_CALL(*Root, getFile(::testing::_, ::testing::_)).WillByDefault(throwEx());
     EXPECT_THROW(u->accessFile("./1", "./3", "link", requested), userException); //forbidden directory
 }
 
-TEST_F(UserTest, accessFileIllegalFile){
+/*
+ * Test explanation: it's forbidden to create a second link to already accessed resource
+ */
+TEST_F(UserTest, accessFileNoLinkToAlreadyAccessed){
     privilege requested=privilege::readOnly;
     EXPECT_CALL(*Root, getFile("./"+std::to_string(homeDir->getId()), "5")).WillOnce(::testing::Return(dummyFile));
-    EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(privilege::none));
+    EXPECT_CALL(*dummyFile, getUserPrivilege(u->getUsername())).WillOnce(::testing::Return(privilege::readOnly));
     ON_CALL(dummyFile->policyMocked, getShare(requested)).WillByDefault(throwEx());
     EXPECT_THROW(u->accessFile("./"+std::to_string(homeDir->getId())+"/5", "./3", "link", requested), userException); //object in user's filesystem
 }
@@ -202,6 +214,9 @@ TEST_F(UserTest, editPrivilegeLegalCase){
     u->editPrivilege("anotherUser", "./", "2", requested);
 }
 
+/*
+ * Test explanation (following two): only users who own the resource can modify privileges on it
+ */
 TEST_F(UserTest, editPrivilegeFromNotOwner){
     privilege requested=privilege::modify;
     EXPECT_CALL(*homeDir, getFile("./", "2")).WillOnce(::testing::Return(dummyFile));
