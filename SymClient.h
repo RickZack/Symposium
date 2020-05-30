@@ -361,7 +361,7 @@ namespace Symposium {
 
         /**
          * @brief constructs a @ref askResMessage to send to the server to ask to remove a resource
-         * @param resPath the relative path to the user's @e home directory where to create the file
+         * @param resPath the relative path to the user's @e home directory where to delete the file
          * @param resId the resource's id
          * @return a properly constructed @ref askResMessage to send to the server
          *

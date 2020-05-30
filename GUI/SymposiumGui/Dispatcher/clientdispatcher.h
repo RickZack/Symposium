@@ -153,27 +153,142 @@ namespace Symposium{
          */
         const std::forward_list<std::pair<const user *, sessionData>> onlineUser(uint_positive_cnt::type documentID);
 
+        /**
+         * @brief it provides the list of all users on the document that has @ref documentID
+         * @param documentID the document's ID which on you want all users
+         * @return the list of all users
+         */
         std::unordered_map<std::string, privilege> allUser(uint_positive_cnt::type documentID);
 
-
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param path the path of the file to create, relative to user's home directory
+         * @param name the name of the file to create
+         */
         void createNewSource(const std::string &path, const std::string &name);
-        void createNewDir(const std::string &path, const std::string &name);
-        void localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<int, int> &index);
-        void localRemove(uint_positive_cnt::type resourceId, const std::pair<int, int> indexes);
-        void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index);
-        void remoteRemove(uint_positive_cnt::type resourceId, uint_positive_cnt::type siteId, std::pair<int, int> indexes);
-        void editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, uint_positive_cnt::type documentID);
-        void shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
-        void renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
-        void removeResource(const std::string &resPath, const std::string &resName);
-        void closeSource(uint_positive_cnt::type resourceId);
-        void moveMyCursor(uint_positive_cnt::type resId, int block, int column);
-        void addUserCursor(uint_positive_cnt::type siteID, std::string username, uint_positive_cnt::type resourceID);
-        void moveUserCursor(uint_positive_cnt::type resId, int block, int column, uint_positive_cnt::type siteId);
-        void removeUserCursor(uint_positive_cnt::type siteID, uint_positive_cnt::type resourceID);
-        void verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes);
-        Color getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID);
 
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param path the path of the directory to create, relative to user's home directory
+         * @param name the name of the directory to create
+         */
+        void createNewDir(const std::string &path, const std::string &name);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resourceId the document ID of the deletion refers to
+         * @param newSym the symbol to insert
+         * @param index the indexes of the symbol to insert
+         */
+        void localInsert(uint_positive_cnt::type resourceId, const symbol &newSym, const std::pair<int, int> &index);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resourceId the document ID of the deletion refers to
+         * @param index the indexes of the symbol to delete
+         */
+        void localRemove(uint_positive_cnt::type resourceId, const std::pair<int, int> indexes);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resourceId the document ID the insertion refers to
+         * @param siteId the site id of the user performing the insertion
+         * @param index the indexes of the symbol to insert
+         */
+        void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resourceId the document ID the deletion refers to
+         * @param siteId the site id of the user performing the insertion
+         * @param index the indexes of the symbol to insert
+         */
+        void remoteRemove(uint_positive_cnt::type resourceId, uint_positive_cnt::type siteId, std::pair<int, int> indexes);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param targetUser the user whose privilege has to be modified
+         * @param resPath the relative path of the resource
+         * @param newPrivilege the new privilege to be granted to @e targetUser
+         * @param documentID the id of the document
+         */
+        void editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, uint_positive_cnt::type documentID);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resPath the relative path of the resource
+         * @param resName the id of the resource
+         * @param newPrefs new sharing preferences to set the resource to
+         */
+        void shareResource(const std::string &resPath, const std::string &resName, const uri &newPrefs);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resPath the relative path to the user's @e home directory where to create the file
+         * @param resName the resource's id
+         * @param newName the new resource's name
+         */
+        void renameResource(const std::string &resPath, const std::string &resName, const std::string &newName);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resPath the relative path to the user's @e home directory where to delete the file
+         * @param resName the resource's id
+         */
+        void removeResource(const std::string &resPath, const std::string &resName);
+
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resourceId document ID that to be closed
+         */
+        void closeSource(uint_positive_cnt::type resourceId);
+
+        /**
+         * @brief invoke the method @ref updateCursorPos in Symclient and send to the server the message that @ref SymClient's method create
+         * @param resId the id of the document
+         * @param block X coordinate of the new position of cursor
+         * @param column Y coordinate of the new position of cursor
+         */
+        void moveMyCursor(uint_positive_cnt::type resId, int block, int column);
+
+        /**
+         * @brief invoke the corrisponding method on the correct notepad GUI to add a new cursor
+         * @param siteID the id of the user to be add his cursor
+         * @param username the username of the user to be add his cursor
+         * @param resourceID the ID of the document to add the cursor to
+         */
+        void addUserCursor(uint_positive_cnt::type siteID, std::string username, uint_positive_cnt::type resourceID);
+
+        /**
+         * @brief invoke the corrisponding method on the correct notepad GUI to move the cursor
+         * @param resId the ID of the document to move the cursor to
+         * @param block X coordinate of the new position of cursor
+         * @param column Y coordinate of the new position of cursor
+         * @param siteId the id of the user to be move his cursor
+         */
+        void moveUserCursor(uint_positive_cnt::type resId, int block, int column, uint_positive_cnt::type siteId);
+
+        /**
+         * @brief invoke the corrisponding method on the correct notepad GUI to remove the cursor
+         * @param resourceID the ID of the document to remove the cursor to
+         * @param siteId the id of the user to remove his cursor
+         */
+        void removeUserCursor(uint_positive_cnt::type siteID, uint_positive_cnt::type resourceID);
+
+        /**
+         * @brief invoke the corrisponding method on the correct notepad GUI to verify the symbol
+         * @param resId the ID of the document to verify symbol
+         * @param newSym the symbol to verify
+         * @param indexes the indexes of the symbol to verify
+         */
+        void verifySymbol(uint_positive_cnt::type resId, const symbol &newSym, std::pair<int, int> indexes);
+
+        /**
+         * @brief it provides the color to assign to user
+         * @param documentID the ID of the document
+         * @param siteId the id of the user
+         */
+        Color getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID);
 
         /**
          * @brief method to provide the ID of logged user's home directory
@@ -206,12 +321,14 @@ namespace Symposium{
 
         /**
          * @brief it provides a string with all file that in user's root directory
+         * @return the string of content of the user's home
          */
         std::string showHome();
 
         /**
          * @brief it provides a string with all file of the user
          * @param recursive boolean parameter, true for obtain all files in all directory of the user
+         * @return the string of the content
          */
         std::string showDir(bool recursive);
 
@@ -223,18 +340,46 @@ namespace Symposium{
          */
         void closeApp();
 
+        /**
+         * @brief signal the success of operation to the GUI
+         */
         void successAction();
 
+        /**
+         * @brief it provides the content of requested directory
+         * @param ID_Cartella the id of directory
+         * @param path the path of the directory
+         * @return the string of directory's content
+         */
         std::string getStr(std::string ID_Cartella, std::string path);
 
+        /**
+         * @brief it provides the GUI with the document that has the same ID of @ref openDocumentID
+         * @return the document to open
+         */
         const document& getOpenDocument();
 
+        /**
+         * @brief it provides the GUI the ID of file that contain the document that has the same ID of openDocumentID
+         * @return the id of the file that contain the document to be open
+         */
         uint_positive_cnt::type getOpenFileID();
 
+        /**
+         * @brief it stop the timer when server has reply. If the queue @ref attese is not empty, it start a new timer
+         */
         void stopTimer();
 
+        /**
+         * @brief it sets @ref openFileID and @ref openDocumentID of requested document from the user and signal the success to the GUI
+         * @param docID the id of requested document
+         * @param fileID the id of file that contain the requested document
+         */
         void updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID);
 
+        /**
+         * @brief it signals to the GUI that it is not possible to remove a resource because it is open
+         */
         void failureRemovedResource();
 
         ~clientdispatcher() override;
