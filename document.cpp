@@ -376,6 +376,15 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     this->updateCursorPos(siteId,i0,i1);
 
     symbols[i0].erase(symbols[i0].begin()+i1);
+    if(symbols[i0].empty()){
+        size_t i=i0;
+        while(symbols[i][0]!=emptySymbol){
+            symbols.emplace(symbols.begin()+i,symbols[i+1].begin(),symbols[i+1].end());
+            i++;
+        }
+        symbols.erase(symbols.begin()+i,symbols.end());
+
+    }
     if(i1==0 && symbols[0][0]==emptySymbol)
         alignmentStyle.erase(alignmentStyle.begin()+i0);
     return sym;
