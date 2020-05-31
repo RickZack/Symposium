@@ -65,8 +65,14 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     alignGroup->addAction(ui->actionAlignTextRight);
     alignGroup->addAction(ui->actionAlignTextJustify);
 
+    // Set default alignment
     ui->actionAlignTextLeft->setChecked(true);
+    this->alignment=Symposium::alignType::left;
+
     addStyleFormat();
+    // Set default style
+    this->textStyle(0); //=Standard
+
 
     connect(ui->fontComboBox, QOverload<const QString &>::of(&QComboBox::activated), this, &notepad::textFamily);
     ui->fontComboBox->activated("Times New Roman");
@@ -538,10 +544,12 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
     // set the style index
     this->indexStyle=styleIndex;
     ui->textEdit->scroll();
-    return style;
+    /*
     if(cursor.hasSelection()){
         this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
     }
+     */
+    return style;
 }
 
 
@@ -684,7 +692,7 @@ void notepad::fillTextEdit(){
     auto& symbols= this->documentoProva.getSymbols();
     auto alignmentStyle=this->documentoProva.getAlignmentStyle();
     #endif
-    if(symbols[0][0].getCh()==emptyChar){
+    if(symbols[0][0].getCh()==Symposium::document::emptyChar){
         QColor black=Qt::black;
         black.setAlpha(160);
         ui->textEdit->setTextColor(black);
@@ -693,51 +701,56 @@ void notepad::fillTextEdit(){
     }
     else{
         unsigned valStyle=20;
-        auto valAlign=Symposium::alignType::emptyAlignment;
-        for(size_t i=0;i<symbols.size();i++){
-        auto style=alignmentStyle[i];
-        if(style.first!=Symposium::alignType::emptyAlignment && i<alignmentStyle.size()){
+        auto valAlign=Symposium::alignType::left;
+        for(size_t i=0; i<symbols.size() && symbols[i][0].getCh()!=Symposium::document::emptyChar;i++){
+            auto style=alignmentStyle[i];
+            this->fixAlignment(style.first);
             if(valStyle!=style.second){
                 this->textStyle(style.second);
-                 valStyle=style.second;
-             }if(valAlign!=style.first){
-                 this->fixAlignment(style.first);
-                 valAlign=style.first;
-                }
-       }
-        for(size_t j=0;j<symbols[i].size();j++){
-            int column=j;
-            //extract the symbol
-            Symposium::symbol sym=symbols[i][j];
-            ch=sym.getCh();
-            if(ch!=emptyChar){
-            //estract the character
-            QTextCharFormat chFormat;
-            Symposium::format format=sym.getCharFormat();
-            //estract the information about the font/color
-            QFont font;
-            font.setFamily(QString::fromStdString(format.familyType));
-            font.setBold(format.isBold);
-            font.setUnderline(format.isUnderlined);
-            font.setItalic(format.isItalic);
-            font.setPointSize(format.size);
-            Symposium::Color col=format.col;
-            //conversion from Color to QColor
-            qCol=static_cast<QColor>(col);
-            if(!sym.isVerified())
-               {
-                 qCol.setAlpha(160);
-                }
-             chFormat.setFont(font); chFormat.setForeground(qCol);
-             // go to the position of the character
-             ui->textEdit->changePosition(i,column);
-             curs.insertText(ch,chFormat);
-             this->currentCharFormatChanged(chFormat);
+                valStyle=style.second;
             }
-         }
+    /*
+            if(style.first!=Symposium::alignType::left){
+                if(valStyle!=style.second){
+                    this->textStyle(style.second);
+                     valStyle=style.second;
+                 }if(valAlign!=style.first){
+                     this->fixAlignment(style.first);
+                     valAlign=style.first;
+                    }
+           }
+    */
+            for(size_t j=0;j<symbols[i].size();j++){
+                //extract the symbol
+                Symposium::symbol sym=symbols[i][j];
+                ch=sym.getCh();
+                if(ch!=Symposium::document::emptyChar){
+                //estract the character
+                QTextCharFormat chFormat;
+                Symposium::format format=sym.getCharFormat();
+                //estract the information about the font/color
+                QFont font;
+                font.setFamily(QString::fromStdString(format.familyType));
+                font.setBold(format.isBold);
+                font.setUnderline(format.isUnderlined);
+                font.setItalic(format.isItalic);
+                font.setPointSize(format.size);
+                Symposium::Color col=format.col;
+                //conversion from Color to QColor
+                qCol=static_cast<QColor>(col);
+                if(!sym.isVerified())
+                   {
+                     qCol.setAlpha(160);
+                    }
+                 chFormat.setFont(font); chFormat.setForeground(qCol);
+                 // go to the position of the character
+                 ui->textEdit->changePosition(i,static_cast<int>(j));
+                 curs.insertText(ch,chFormat);
+                 this->currentCharFormatChanged(chFormat);
+                }
+             }
         }
   }
-
     NotRefreshLabels=false;
 
 }
@@ -919,7 +932,7 @@ bool notepad::isAKeyToIgnore(QKeyEvent* event){
             event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
             event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
             event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
-            event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier& event->text()!="\u0016";
+            event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->matches(QKeySequence::Undo);
 }
 void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCursor cursor= ui->textEdit->textCursor();
@@ -973,7 +986,7 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
     {
         NotRefreshLabels=true;
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if(isAKeyToIgnore(keyEvent))
+        if(isAKeyToIgnore(keyEvent) || keyEvent->matches(QKeySequence::Undo))
             event->ignore();
         else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C"))
             ui->textEdit->translateCursors(doc.getActiveUsers());
@@ -1430,7 +1443,7 @@ void notepad::colorText(){
     QColor userCol;
     for(size_t i=0; i<symbols.size();i++){
         for(size_t j=0;j<symbols[i].size();j++){
-            if(symbols[i][j].getSiteId()==symbols[i][j+1].getSiteId() && symbols[i][j].getCh()!=emptyChar){
+            if(symbols[i][j].getSiteId()==symbols[i][j+1].getSiteId() && symbols[i][j].getCh()!=Symposium::document::emptyChar){
                 siteId=symbols[i][j].getSiteId();
                 pf++;
             }else{
@@ -1529,7 +1542,7 @@ int notepad::countCharsInLine(const unsigned line)const {
     #endif
     int ch=0;
     for(size_t i=0;i<symbols[line].size();i++){
-        if(symbols[line][i].getCh()!=emptyChar)
+        if(symbols[line][i].getCh()!=Symposium::document::emptyChar)
             ch++;
     }
     return ch;

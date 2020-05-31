@@ -35,7 +35,6 @@
 #include <cmath>
 #include <fstream>
 #include <boost/archive/text_iarchive.hpp>
-#include "QDebug"
 
 using namespace Symposium;
 uint_positive_cnt document::idCounter;
@@ -78,10 +77,12 @@ const std::vector<std::pair<alignType, unsigned int>> & document::getAlignmentSt
 }
 
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)),
-    alignmentStyle(1,std::pair(alignType::emptyAlignment,0))
+    alignmentStyle(1,std::pair(alignType::left,0))
 {
-    id=idCounter;
-    idCounter++;
+    if(id==0){
+        this->id=idCounter;
+        idCounter++;
+    }
     this->numchar=0;
 }
 
@@ -116,7 +117,7 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
     /* resize the symbols vector*/
     if(i0>=symbols.size()){
         symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
-        alignmentStyle.resize((i0 + 1)*mult_fac,std::pair(alignType::emptyAlignment,0));
+        alignmentStyle.resize((i0 + 1)*mult_fac,std::pair(alignType::left,0));
 }
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     if(i1>=symbols[i0].size()){
@@ -152,6 +153,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
         symbol checkSym=symbols[i0][i1];
         if(checkSym.getCh()=='\r'){
+            alignmentStyle[i0]=styleValues;
             return newSymb;
     }else{
         symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
@@ -159,8 +161,8 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         symbols.push_back(std::vector<symbol>(1,emptySymbol));
         alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
         alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
-        alignmentStyle.push_back(std::pair(alignType::emptyAlignment,0));
-        alignmentStyle.resize(symbols.size(),std::pair(alignType::emptyAlignment,0));
+        alignmentStyle.push_back(std::pair(alignType::left,0));
+        //alignmentStyle.resize(symbols.size(),std::pair(alignType::left,0));
         }
     }else{
         // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
@@ -168,7 +170,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     alignmentStyle[i0]=styleValues;
-    alignmentStyle.resize(symbols.size(),std::pair(alignType::emptyAlignment,0));
+    //alignmentStyle.resize(symbols.size(),std::pair(alignType::left,0));
 
     return newSymb;
 
@@ -380,13 +382,17 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
         size_t i=i0;
         while(symbols[i][0]!=emptySymbol){
             symbols.emplace(symbols.begin()+i,symbols[i+1].begin(),symbols[i+1].end());
+            alignmentStyle.emplace(alignmentStyle.begin()+i, alignmentStyle[i+1]);
             i++;
         }
         symbols.erase(symbols.begin()+i,symbols.end());
+        alignmentStyle.erase(alignmentStyle.begin()+i, alignmentStyle.end());
 
     }
+    /*
     if(i1==0 && symbols[0][0]==emptySymbol)
         alignmentStyle.erase(alignmentStyle.begin()+i0);
+        */
     return sym;
 
 }
@@ -414,9 +420,12 @@ std::pair<unsigned, unsigned> document::remoteInsert(uint_positive_cnt::type sit
     format charFormat=toInsert.getCharFormat();
     std::pair<alignType,unsigned> styleValues;
     styleValues={charFormat.type,charFormat.indexStyle};
-    if(alignmentStyle[i0].first==alignType::emptyAlignment){
+    /*
+    if(alignmentStyle[i0].first==alignType::left){
       alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
     }
+    */
+    alignmentStyle[i0]=styleValues;
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
 
@@ -435,9 +444,10 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
          symbols[i0].erase(symbols[i0].begin()+i1);
     else
         return std::pair<unsigned int, unsigned int>();
-
+/*
     if(i1==0 && symbols[0][0]==emptySymbol)
         alignmentStyle.erase(alignmentStyle.begin()+i0);
+*/
     return pos;
 }
 
@@ -497,7 +507,7 @@ bool document::load() {
     if(input.good()){
         try {
             boost::archive::text_iarchive ia(input);
-            document temp;
+            document temp(0);
             ia>>temp;
             *this=std::move(temp);
             return true;

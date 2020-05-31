@@ -46,8 +46,7 @@ enum class alignType{
     left,                           /**< to declare that the row has a left alignment */
     right,                          /**< to declare that the row has a right alignment */
     center,                         /**< to declare that the row has a center alignment */
-    justify,                        /**< to declare that the row has a justified alignment */
-    emptyAlignment
+    justify                        /**< to declare that the row has a justified alignment */
 };
 
     struct format{
@@ -65,7 +64,7 @@ enum class alignType{
         alignType type;                 /**< to set the kind of alignment of the text **/
 
 
-        format():format("", false, false, false, 12,Color(0,0,0),0,alignType::emptyAlignment){}
+        format():format("", false, false, false, 12,Color(0,0,0),0,alignType::left){}
         format(const std::string& ft, bool bold, bool underline, bool italic, unsigned size, Color col,unsigned indexStyle, alignType type):
         familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), size(size),col(col),indexStyle(indexStyle), type(type){}
 
