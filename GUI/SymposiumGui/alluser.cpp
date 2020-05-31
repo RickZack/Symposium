@@ -16,9 +16,11 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uin
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     insertusers();
-    ui->tree->setColumnCount(2);
+    ui->tree->setColumnCount(3);
     ui->tree->headerItem()->setText(0, "user:");
     ui->tree->headerItem()->setText(1, "privilege:");
+    ui->tree->headerItem()->setText(2, "username");
+    ui->tree->setColumnHidden(2, true);
     ui->tree->setColumnWidth(0, 300);
     ui->notification->hide();
     ui->errorMess->hide();
@@ -125,6 +127,7 @@ void alluser::insertusers()
                 item->setText(1, QString::fromStdString(priv.str()));
             }
         }
+        item->setText(2, QString::fromStdString(it.first->getUsername()));
         ui->tree->addTopLevelItem(item);
     }
 
@@ -147,6 +150,7 @@ void alluser::insertusers()
                 std::ostringstream priv;
                 priv<<it.second;
                 item->setText(1, QString::fromStdString(priv.str()));
+                item->setText(2, QString::fromStdString(it.first));
                 ui->tree->addTopLevelItem(item);
             }
         }
@@ -171,7 +175,7 @@ void alluser::enableButtons()
 
 void alluser::on_tree_itemClicked(QTreeWidgetItem *item, int)
 {
-    username=item->text(0).toStdString();
+    username=item->text(2).toStdString();
     ui->modify->click();
 }
 
