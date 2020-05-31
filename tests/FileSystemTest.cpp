@@ -28,6 +28,7 @@
  * Created on 22 agosto 2019, 13.38
  */
 
+#include <memory>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <gtest/gtest.h>
@@ -35,13 +36,11 @@
 #include <cstdlib>
 #include "../filesystem.h"
 #include "../user.h"
-#include "../document.h"
-#include "../uri.h"
-#include "../AccessStrategy.h"
-#include "../symbol.h"
 
-#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/shared_ptr.hpp> //NOLINT
 
+#pragma clang diagnostic ignored "cert-err58-cpp" //NOLINT
+#pragma clang diagnostic ignored "cert-msc50-cpp" //NOLINT
 
 using namespace Symposium;
 
@@ -62,7 +61,7 @@ struct RMOAccessMock: public RMOAccess{
 };
 
 struct directoryAccesser: public directory{ //only to access the protected members of directory from tests
-    directoryAccesser(const std::string &name) : directory(name) {};
+    explicit directoryAccesser(const std::string &name) : directory(name) {};
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
@@ -71,11 +70,11 @@ struct directoryAccesser: public directory{ //only to access the protected membe
      * resets all the parameters to the ones predefined when the filesystem is originally created
      */
     void resetFreshFilesystem(){
-        auto r= static_cast<directoryAccesser*>(this->root.get());
+        auto r= static_cast<directoryAccesser*>(this->root.get()); //NOLINT
         if(r){
             //r->idCounter=0;
             r->contained.clear();
-            this->root.reset(); //the static object is now free (root removed)
+            this->root.reset(); //the static object is now free (root removed) NOLINT
             //Note:: r is not valid at this point
         }
     }
@@ -83,7 +82,7 @@ struct directoryAccesser: public directory{ //only to access the protected membe
 };
 
 struct fileAccesser: public file{ //only to access the protected members of directory from tests
-    fileAccesser(const std::string &name) : file(name, 0) {};
+    explicit fileAccesser(const std::string &name) : file(name, 0) {};
     /*
      * Used in tests when we want to set expectations on the strategy object, that normally
      * is an internal detail of file
@@ -117,7 +116,7 @@ struct fileAccesser: public file{ //only to access the protected members of dire
 };
 
 struct symlinkAccesser: public symlink{ //only to access the protected members of directory from tests
-    symlinkAccesser(const std::string &name) : symlink(name, "./dir/dir2", "fakesym") {};
+    explicit symlinkAccesser(const std::string &name) : symlink(name, "./dir/dir2", "fakesym") {};
     AccessStrategy* getStrategy(){
         return strategy.get();
     }
@@ -180,7 +179,7 @@ struct FileSystemTestSharing: ::testing::Test{
     //users
     static const user u;
     static const user anotherUser;
-    static const user anotherUser2;
+    [[maybe_unused]] static const user anotherUser2;
 
     //data used for user initialization
     static const std::string iconPath;
@@ -193,8 +192,8 @@ struct FileSystemTestSharing: ::testing::Test{
     static const std::string filename;
 
     //pointers to filesystem objects created in the tests
-    std::shared_ptr<directory> anotherUser2_d;
-    std::shared_ptr<directory> anotherUser_d;
+    std::shared_ptr<directory> anotherUser2_d; //NOLINT
+    std::shared_ptr<directory> anotherUser_d; //NOLINT
     std::shared_ptr<directory> aUser_d;
     std::shared_ptr<directory> dir1;
     std::shared_ptr<file> file1;
@@ -206,14 +205,14 @@ struct FileSystemTestSharing: ::testing::Test{
     FileSystemTestSharing():dir("dir"), f(filename), sym("link"){};
 
 
-    ::testing::AssertionResult getRootIsImplemented(const char* m_expr, std::shared_ptr<directory> root){
-        if(root.get()== nullptr || directory::getRoot()!=root)
+    static ::testing::AssertionResult getRootIsImplemented(const char*, const std::shared_ptr<directory>& root){
+        if(root== nullptr || directory::getRoot()!=root)
             return ::testing::AssertionFailure()<<"Unable to run this test since directory::getRoot() is not correctly implemented yet";
         return ::testing::AssertionSuccess();
     }
 
     void verifySetPrivilegeOnFile(privilege toAssign=privilege::owner){
-        RMOAccessMock* dummyStrategy=new RMOAccessMock();
+        auto* dummyStrategy=new RMOAccessMock();
         f.setDummyStrategy(dummyStrategy);
         EXPECT_CALL(*dummyStrategy, setPrivilege(username, toAssign)).WillOnce(::testing::Return(toAssign));
         f.setUserPrivilege(username, toAssign);
@@ -299,7 +298,7 @@ struct FileSystemTestSharing: ::testing::Test{
         //std::shared_ptr<file> ret=std::dynamic_pointer_cast<file>(directory::getRoot()->get("./1/2/", std::to_string(file1->getId())));
     }
 
-    virtual ~FileSystemTestSharing(){
+    ~FileSystemTestSharing() override{
         //release the content of root directory and the root itself, so all the trees constructed are destroyed
         dir.resetFreshFilesystem();
     }
@@ -315,12 +314,12 @@ const std::string FileSystemTestSharing::nickname="nickname";
 const std::string FileSystemTestSharing::path="./dir1/dir2";
 const std::string FileSystemTestSharing::filename="file1";
 const user FileSystemTestSharing::u(username, pwd, nickname, iconPath, 0, nullptr);
-const user FileSystemTestSharing::anotherUser2(anotherUsername2, pwd, nickname, iconPath, 0, nullptr);
+[[maybe_unused]] const user FileSystemTestSharing::anotherUser2(anotherUsername2, pwd, nickname, iconPath, 0, nullptr);
 const user FileSystemTestSharing::anotherUser(anotherUsername, pwd, nickname, iconPath, 0, nullptr);
 
 
 TEST_F(FileSystemTestSharing, setUserPrivilegeOnFileCallsStrategy) {
-    RMOAccessMock* dummyStrategy=new RMOAccessMock();
+    auto* dummyStrategy=new RMOAccessMock();
     f.setDummyStrategy(dummyStrategy);
     EXPECT_CALL(*dummyStrategy, setPrivilege(username, privilege::owner));
     f.setUserPrivilege(username, privilege::owner);
@@ -470,7 +469,7 @@ TEST_F(FileSystemTestSharing, accessOnFile){
     *       -file1
     */
     ASSERT_NO_FATAL_FAILURE(constructTree1());
-    fileAccesser* dummy=new fileAccesser("dummyFile");
+    auto* dummy=new fileAccesser("dummyFile");
     EXPECT_CALL(dir, getFile("./1/7", std::to_string(file1->getId()))).WillOnce(::testing::Return(std::shared_ptr<file>(dummy)));
     EXPECT_CALL(*dummy, access(u,privilege::readOnly)).WillOnce(::testing::ReturnRef(d));
     //EXPECT_CALL(d, access(u, privilege::readOnly));
@@ -529,9 +528,9 @@ TEST_F(FileSystemTestSharing, removeFileLegalCase){
      *       -file1
      */
     //Remove file1, should not throw
-    EXPECT_NO_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file1->getId())));
+    EXPECT_NO_THROW(directory::getRoot()->remove(u, "./1/7", std::to_string(file1->getId())));
     //Try to remove again file1, should throw
-    EXPECT_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file1->getId())), filesystemException);
+    EXPECT_THROW(directory::getRoot()->remove(u, "./1/7", std::to_string(file1->getId())), filesystemException);
 }
 
 TEST_F(FileSystemTestSharing, removeFileNotRemoveFileWithMoreOwners){
@@ -572,9 +571,9 @@ TEST_F(FileSystemTestSharing, removeFileNotRemoveFileIfUserActiveOnIt){
     //file1 has one owner (username) and one writer (anotherUsername). Just set "anotherUser" active and make "u" delete the file
     file1->access(anotherUser, privilege::modify);
     //Remove file1, should throw because "anotherUser" is active on it
-    EXPECT_THROW(directory::getRoot()->remove(u, "/1/7", std::to_string(file1->getId())), filesystemException);
+    EXPECT_THROW(directory::getRoot()->remove(u, "./1/7", std::to_string(file1->getId())), filesystemException);
     //file1 must be still there
-    EXPECT_NO_THROW(directory::getRoot()->get("/1/7", std::to_string(file1->getId())));
+    EXPECT_NO_THROW(directory::getRoot()->get("./1/7", std::to_string(file1->getId())));
 }
 
 TEST_F(FileSystemTestSharing, removeFileRemoveIfNoMoreOwners){
@@ -618,8 +617,8 @@ TEST_F(FileSystemTestSharing, removeSymlinkNotRemoveFilePointedIfHasMoreOwners){
 
     //Now a call from user "aUser" should delete the symlink but not the file itself (because anotherUser is also an owner)
     directory::getRoot()->remove(u, "./1/7", std::to_string(sym2->getId()));
-    EXPECT_THROW(directory::getRoot()->get("/1/7", std::to_string(sym2->getId())), filesystemException); //sym2 removed
-    EXPECT_NO_THROW(directory::getRoot()->get("/2", std::to_string(file2->getId()))); //file2 still there
+    EXPECT_THROW(directory::getRoot()->get("./1/7", std::to_string(sym2->getId())), filesystemException); //sym2 removed
+    EXPECT_NO_THROW(directory::getRoot()->get("./2", std::to_string(file2->getId()))); //file2 still there
     EXPECT_EQ(privilege::none,file2->getUserPrivilege(username));
 }
 
@@ -645,8 +644,8 @@ TEST_F(FileSystemTestSharing, removeSymlinkNotRemoveFilePointedIfHasUsersActive)
 
     //Now a call from user "aUser" should delete the symlink but not the file itself (because anotherUser is active on it)
     directory::getRoot()->remove(u, "./1/7", std::to_string(sym2->getId()));
-    EXPECT_THROW(directory::getRoot()->get("/1/7", std::to_string(sym2->getId())), filesystemException); //sym2 removed
-    EXPECT_NO_THROW(directory::getRoot()->get("/2", std::to_string(file2->getId()))); //file2 still there
+    EXPECT_THROW(directory::getRoot()->get("./1/7", std::to_string(sym2->getId())), filesystemException); //sym2 removed
+    EXPECT_NO_THROW(directory::getRoot()->get("./2", std::to_string(file2->getId()))); //file2 still there
     EXPECT_EQ(privilege::none,file2->getUserPrivilege(username));
 }
 
@@ -671,8 +670,30 @@ TEST_F(FileSystemTestSharing, removeSymlinkRemoveSymlinkAndFilePointedIfHasThisO
     //Now a call from user "aUser" should delete the symlink and the file itself
     //(because anotherUser is no more an owner and no one is active on the file)
     directory::getRoot()->remove(u, "./1/7", std::to_string(sym2->getId()));
-    EXPECT_THROW(directory::getRoot()->get("/1/7", std::to_string(sym2->getId())), filesystemException); //sym2 not found
-    EXPECT_THROW(directory::getRoot()->get("/2", std::to_string(file2->getId())), filesystemException); //file2 not found
+    EXPECT_THROW(directory::getRoot()->get("./1/7", std::to_string(sym2->getId())), filesystemException); //sym2 not found
+    EXPECT_THROW(directory::getRoot()->get("./2", std::to_string(file2->getId())), filesystemException); //file2 not found
+}
+
+TEST_F(FileSystemTestSharing, removeSymlinkRemoveSymlinkIfFilePointedHasBeenDeleted){
+    ASSERT_NO_FATAL_FAILURE(constructTree3()); //set the following tree
+    /*
+     * Create a tree like this:
+     * -/ (root directory)
+     *   -anotherUser (another user's directory) (id=2)
+     *     -file2
+     *     -sym1
+     *   -aUser (user's directory) (id=1)
+     *     -dir1 (id=7)
+     *       -sym2
+     *       -file1
+     */
+
+    // "anotherUser" deletes his file, this is legal
+    EXPECT_NO_THROW(directory::getRoot()->remove(anotherUser, "./2", std::to_string(file2->getId())));
+    //Now a call from user "aUser" should delete the symlink and not throw if file pointed has not been found
+    //(because already deleted by "anotherUser)
+    EXPECT_NO_THROW(directory::getRoot()->remove(u, "./1/7", std::to_string(sym2->getId())));
+    EXPECT_THROW(directory::getRoot()->get("./2", std::to_string(sym2->getId())), filesystemException); //sym2 must be deleted by remove
 }
 
 TEST_F(FileSystemTestSharing, removeDirectoryRemovesIfNoOneActiveOnContainedElements){
@@ -761,8 +782,7 @@ struct filesystemSerialization: ::testing::Test{
     std::shared_ptr<filesystem> toStore, toLoad;
     std::stringstream stream;
 
-    filesystemSerialization(){
-    }
+    filesystemSerialization()= default;
     void storeFilesystemObj(std::shared_ptr<filesystem> &as){
         boost::archive::text_oarchive oa(stream);
         oa<<as;
@@ -772,13 +792,12 @@ struct filesystemSerialization: ::testing::Test{
         boost::archive::text_iarchive ia(stream);
         ia>>as;
     }
-    ~filesystemSerialization() override{
-    }
+    ~filesystemSerialization() override= default;
 };
 
 TEST_F(filesystemSerialization, file){
-    toStore=std::shared_ptr<file>(new file("filename", 0));
-    toLoad=std::shared_ptr<file>(new file("filename", 0));
+    toStore=std::make_shared<file>("filename", 0);
+    toLoad=std::make_shared<file>("filename", 0);
     ASSERT_NE(*dynamic_cast<file*>(toStore.get()), *dynamic_cast<file*>(toLoad.get()));
     storeFilesystemObj(toStore);
     loadFilesystemObj(toLoad);
@@ -795,8 +814,8 @@ TEST_F(filesystemSerialization, directory){
 }
 
 TEST_F(filesystemSerialization, symlink){
-    toStore=std::shared_ptr<Symposium::symlink>(new Symposium::symlink("name", "./path", "filename"));
-    toLoad=std::shared_ptr<Symposium::symlink>(new Symposium::symlink("name2", "./path", "filename"));
+    toStore=std::make_shared<Symposium::symlink>("name", "./path", "filename");
+    toLoad=std::make_shared<Symposium::symlink>("name2", "./path", "filename");
     ASSERT_NE(*dynamic_cast<Symposium::symlink*>(toStore.get()), *dynamic_cast<Symposium::symlink*>(toLoad.get()));
     storeFilesystemObj(toStore);
     loadFilesystemObj(toLoad);
