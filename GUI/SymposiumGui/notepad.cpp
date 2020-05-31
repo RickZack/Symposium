@@ -570,24 +570,13 @@ void notepad::handleChangeFormat(unsigned int i, unsigned int f){
         curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
         prCol=col; col=curs.positionInBlock()-1;
         if(col!=-1){ // nomore chars on the line but selection has not ended
-           //col=prCol;
-           //row=curs.blockNumber()-1;
-           /* extract the format information */
-           //ui->textEdit->changePosition(row,col);
-           //format=curs.charFormat();
-           //col=prCol+1;
-           //character='\r';
-
-          //}else{
            prCol=col;
            row=curs.blockNumber();
            ui->textEdit->changePosition(row,col);
            format=curs.charFormat();
            character=curs.selectedText();
-  //}
-
-            cl.localRemove(this->documentId,{row,col});
-            this->sendSymbolToInsert(row,col,character,format);
+           cl.localRemove(this->documentId,{row,col});
+           this->sendSymbolToInsert(row,col,character,format);
         }
             count++; i++;
       } //while
@@ -928,7 +917,7 @@ bool notepad::isAKeyToIgnore(QKeyEvent* event){
             event->key()==Qt::Key_F7 ||event->key()==Qt::Key_F8 ||event->key()==Qt::Key_F9 ||event->key()==Qt::Key_F10 ||
             event->key()==Qt::Key_F11 || event->key()==Qt::Key_F12 || event->key()==Qt::Key_Menu ||
             event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
-            event->key()==Qt::Key_Tab || event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
+            event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
             event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
             event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->modifiers() & Qt::ControlModifier& event->text()!="\u0016";
 }
@@ -937,6 +926,7 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCharFormat format = cursor.charFormat();
     qDebug()<<"Colore"<<format.foreground();
     QString testo=event->text();
+    qDebug()<<"Testo"<<testo;
     unsigned row, column;
     NotRefreshLabels=true;
 
@@ -960,6 +950,7 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     else{ // alphabetic character to process
         row=cursor.blockNumber();
         column=cursor.positionInBlock();
+
     }
 
     this->sendSymbolToInsert(row,column,testo,format);
@@ -998,89 +989,45 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
 void notepad::handleDeleteKey(){
     int row, col;
     QTextCursor cursor= ui->textEdit->textCursor();
-    /* handle the delete of a selected text*/
-    if(cursor.hasSelection()){
-        unsigned start,end,row_start,row_end,dim,numLines;
-        start=cursor.selectionStart();
-        end=cursor.selectionEnd();
-        cursor.setPosition(start,QTextCursor::MoveAnchor);
-        row_start=cursor.blockNumber();
-        col=cursor.positionInBlock();
-        cursor.setPosition(end,QTextCursor::MoveAnchor);
-        row_end=cursor.blockNumber();
-        dim=end-start;
-        qDebug()<<"Start"<<row_start;
-        qDebug()<<"end"<<row_end;
-        qDebug()<<"Dimensione"<<end-start;
+    /* delete a single character */
+    if(!cursor.hasSelection()){
+        row=cursor.blockNumber();
+        col=cursor.positionInBlock()-1;
+        qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
+           if(col<0 && row>0){ // handle remove of '\r' in preceding line
+               row=cursor.blockNumber()-1;
+               cursor.movePosition(QTextCursor::PreviousBlock);
+               cursor.movePosition(QTextCursor::EndOfBlock);
+               col=cursor.positionInBlock();
+               //Now restore the cursor position
+               cursor.movePosition(QTextCursor::NextBlock);
+               cursor.movePosition(QTextCursor::StartOfBlock);
+           }
+           else if(col<0) //deleting from an empty document, discard the action
+               return;
+           cl.localRemove(this->documentId,{row,col});
+    }/* Handle the elimination of a selected text */
+    else
+    {
+        unsigned int i=cursor.selectionStart();
+        unsigned int f=cursor.selectionEnd();
+        cursor.setPosition(i);
+        cursor.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
+        int col=0,row=0,colToSend=cursor.positionInBlock()-1;
+        while(i!=f){
+          cursor.setPosition(i);
+          cursor.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
+          col=cursor.positionInBlock()-1; row=cursor.blockNumber();
+          if(col==-1){
+              /* I'm at the end of the line */
+              row=row-1;
+              col=colToSend;
+              colToSend=0;
 
-
-        /* I'm on the same line*/
-        if(row_start==row_end){
-            while(dim>0){
-                #ifdef DISPATCHER_ON
-                cl.localRemove(this->documentId,{row_start,col});
-                this->numChars=this->doc.getNumchar();
-                this->labelChars=std::to_string(this->numChars);
-                ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
-                #else
-                this->documentoProva.localRemove({row_start,col},1);
-                this->numChars=this->documentoProva.getNumchar();
-                this->labelChars=std::to_string(this->numChars);
-                ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-                #endif
-                dim--;
-            }
-
-        }else{
-            /*I'm deleting multiple lines*/
-            #ifdef DISPATCHER_ON
-            numLines=this->doc.countsNumLines();
-            #else
-            numLines=documentoProva.countsNumLines();
-            #endif
-            qDebug()<<"NumLines"<<numLines;
-            dim=row_end-row_start;
-            /*I'm deleting also the last line: I have to delete also the enter character */
-            if(row_end==numLines-1){
-                deleteMultipleLines(row_start,row_end,col,dim+1,true);
-            }else{/*I'm not deleting the last line: in the previous line we have to maintain the enter character*/
-                deleteMultipleLines(row_start,row_end,col,dim+1,false);
-            }
+          }
+          cl.localRemove(this->documentId,{row,colToSend});
+          i++;
         }
-        //qDebug()<<"Caratteri"<<this->documentoProva.toText();
-        return;
- }else{
-    row=cursor.blockNumber();
-    col=cursor.positionInBlock()-1;
-    qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
-    if(col<0 && row>0){ // handle remove of '\r' in preceding line
-        row=cursor.blockNumber()-1;
-        cursor.movePosition(QTextCursor::PreviousBlock);
-        cursor.movePosition(QTextCursor::EndOfBlock);
-        col=cursor.positionInBlock();
-        //Now restore the cursor position
-        cursor.movePosition(QTextCursor::NextBlock);
-        cursor.movePosition(QTextCursor::StartOfBlock);
-    }
-    else if(col<0) //deleting from an empty document, discard the action
-        return;
-    #ifdef DISPATCHER_ON
-    cl.localRemove(this->documentId,{row,col});
-    this->numChars=this->doc.getNumchar();
-    this->labelChars=std::to_string(this->numChars);
-    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-    #else
-    documentoProva.localRemove({row, col}, 1 /*dummy site id*/);
-    this->numChars=this->documentoProva.getNumchar();
-    this->labelChars=std::to_string(this->numChars);
-    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-    #endif
-    if(row==0 && col==0){
-        QColor black=Qt::black;
-        black.setAlpha(160);
-        ui->textEdit->setTextColor(black);
-        ui->textEdit->setText("");
-     }
     }
 }
 
@@ -1164,23 +1111,34 @@ void notepad::contV_action(){
     int posTmp=posAct-this->dim;
     unsigned int count=0;
     int previousC=0, column=0,row;
+    QString charact; QTextCharFormat format;
 
     while(count!=this->dim){
         curs.setPosition(posTmp);
         curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
-        previousC=column; column=curs.positionInBlock()-1;
+        previousC=column; column=curs.positionInBlock()-1;        
         /* I'm changing the line*/
         if(column==-1){
-            const std::pair<unsigned int, unsigned int> indexes={curs.blockNumber()-1,previousC+1};
-            this->sendEnterSymbol(indexes);
-            count++;posTmp++;
+            row=curs.blockNumber()-1;
+            column=previousC+1;
+            charact="\r";
+            NotRefreshLabels=true;
+            ui->textEdit->changePosition(row,previousC);
+            format=curs.charFormat();
+            NotRefreshLabels=false;
+            //const std::pair<unsigned int, unsigned int> indexes={curs.blockNumber()-1,previousC+1};
+            //this->sendEnterSymbol(indexes);
+            //count++;posTmp++;
          }else{
             row= curs.blockNumber();
-            QString charact=curs.selectedText();
-            QTextCharFormat format = curs.charFormat();
-            this->sendSymbolToInsert(row,column,charact,format);
-            count++;posTmp++;
+            charact=curs.selectedText();
+            format=curs.charFormat();
+            //QTextCharFormat format = curs.charFormat();
+            //this->sendSymbolToInsert(row,column,charact,format);
+            //count++;posTmp++;
         } // else
+        this->sendSymbolToInsert(row,column,charact,format);
+        count++;posTmp++;
   }
     this->okPaste=false;
 }
