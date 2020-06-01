@@ -45,16 +45,16 @@ bool document::doLoadAndStore=true;
 
 
 #define UnpackFileLineFunction()  __FILE__, __LINE__, __PRETTY_FUNCTION__
-
+//TODO: this function is only for debug, will be removed. It's ok to throw if something goes wrong
 void assertIndexes(bool(*predicate)(unsigned toCheck, unsigned reference),
                    unsigned toCheck,unsigned reference,
                    const char* file, int line, const char* func){
     if(!predicate(toCheck, reference)){
-        //std::stringstream err;
-        std::cout<<"toCheck is: "<<toCheck;
-        std::cout<< "reference is: " << reference;
-        std::cout<<file<<", line "<<line<<" "<<func;
-        //throw std::out_of_range(err.str());
+        std::stringstream err;
+        err<<"toCheck is: "<<toCheck;
+        err<< "reference is: " << reference;
+        err<<file<<", line "<<line<<" "<<func;
+        throw std::out_of_range(err.str());
     }
 }
 
@@ -245,7 +245,6 @@ symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> &index
     symbol sym=emptySymbol;
     if(numChars==0 || ch==numChars)                 /**< there are no chars in line or no chars after the current pos, there is no a pos-after*/
         return sym;
-
     else if(ch<numChars-1){                         /**< there is a pos-after */
         assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
         assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
@@ -665,17 +664,18 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     //if the struct is empty or char is less than first char
     auto firstSymbol=symbols[0][0];
     if(symbols.empty()||symbol<firstSymbol){
-        throw "Error indices";
+        throw "Error indices"; //FIXME: this case shouldn't appear in our cases, but if you want to throw must follow guidelines for SymposiumException (video on drive)
 
     }
 
     // counts the number of chars in the last line
+    //FIXME: must be unsigned
     int chars=this->countCharsInLine(maxLine);
     auto lastChar=lastLine[chars-1];
 
     //char is greater than all existing chars(insert at end)
     if(symbol>lastChar){
-        throw "Error indices";
+        throw "Error indices"; //FIXME: this case shouldn't appear in our cases, but if you want to throw must follow guidelines for SymposiumException (video on drive)
     }
 
 
@@ -697,9 +697,12 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 
     // Check between min and max line
     minCurrentLine=symbols[minLine];
+    //FIXME: must be unsigned
     int min_charsInLine=this->countCharsInLine(minLine);
     auto minLastSymbol=minCurrentLine[min_charsInLine-1];
     maxCurrentLine=symbols[maxLine];
+    //FIXME: must be unsigned
+
     int max_charsInLine=this->countCharsInLine(maxLine);
     auto maxLastSymbol=maxCurrentLine[max_charsInLine-1];
 
@@ -716,6 +719,7 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 }
 
 unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symbol> &vector, unsigned int dimLine) const {
+    //FIXME: must be unsigned, all of these
     int left=0;
     int right=dimLine-1;
     int mid;
@@ -744,7 +748,7 @@ unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symb
     else if(sym==vector[right]){
         return right;
     }else
-        throw "Error in Search";
+        throw "Error in Search"; //FIXME: this case shouldn't appear in our cases, but if you want to throw must follow guidelines for SymposiumException (video on drive)
 
 }
 
