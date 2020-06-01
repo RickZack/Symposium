@@ -332,9 +332,6 @@ namespace Symposium{
          */
         std::string showDir(bool recursive);
 
-
-        void successEditPrivilege();
-
         /**
          * @brief closes all the notepads, set the state to closing and closes the Qt application
          */

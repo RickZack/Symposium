@@ -819,12 +819,17 @@ void notepad::visualizeAllUsers()
 }
 
 std::string notepad::constructAbsolutePath(){
-    std::string percorso = pathToFile;
     std::string path;
-    //cancelliamo il '.' iniziale
-    percorso.erase(0,1);
-    //costruiamo il percorso assoluto
-    path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + percorso + '/' + std::to_string(fileId);
+    if(pathToFile == "./"){
+        //costruiamo il percorso assoluto
+        path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + '/' + std::to_string(fileId);
+    }else{
+        std::string percorso = pathToFile;
+        //cancelliamo il './' iniziale
+        percorso.erase(0,2);
+        //costruiamo il percorso assoluto
+        path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + '/' + percorso + '/' + std::to_string(fileId);
+    }
     return path;
 }
 
@@ -977,6 +982,7 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QColor lightColor=format.foreground().color();
     lightColor.setAlpha(180);
     ui->textEdit->setTextColor(lightColor);
+    ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
 }
 
 bool notepad::eventFilter(QObject *obj, QEvent *event){

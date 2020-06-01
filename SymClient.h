@@ -591,6 +591,8 @@ namespace Symposium {
         const user& getUsersOnDocument(const std::string &username);
 
         void removeUsersOnDocument(const std::string &username);
+
+        void assignUsersColor(colorGen& c, document& d);
     };
 }
 #endif //SYMPOSIUM_SYMCLIENT_H
