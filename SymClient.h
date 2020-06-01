@@ -568,7 +568,7 @@ namespace Symposium {
          * @param id the document the colorGen is required for
          * @return the colorGen associated with specified document
          */
-        colorGen getColorGeneratorbyDocumentiID(uint_positive_cnt::type id);
+        colorGen & getColorGeneratorbyDocumentiID(uint_positive_cnt::type id);
 
         /**
          * @brief get the file that content the document with specified ID

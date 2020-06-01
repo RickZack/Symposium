@@ -91,9 +91,9 @@ void SymClient::openSource(const std::string &resPath, const std::string &resId,
     document& doc = p->access(this->getLoggedUser(), reqPriv);
     activeFile.push_front(p);
     colorGen c;
-    activeDoc.push_front({&doc, c});
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
+    activeDoc.push_front({&doc, c});
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
     this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),p->getId());
@@ -116,10 +116,10 @@ void SymClient::openNewSource(const std::string &absolutePath, privilege reqPriv
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
     colorGen c;
-    activeDoc.push_front({&doc,c});
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
                                     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
-	//notifichiamo alla gui il successo
+    activeDoc.push_front({&doc,c});
+    //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
     this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),fileAsked->getId());
     #endif
@@ -138,9 +138,9 @@ void SymClient::createNewSource(const std::string &resPath, const std::string &r
     document& docReq = file->access(this->getLoggedUser(), privilege::owner);
     activeFile.push_front(file);
     colorGen c;
-    activeDoc.push_front({&docReq,c});
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
                                     (std::make_pair(this->getLoggedUser().getSiteId(),docReq.getId()),std::make_pair(this->getLoggedUser(),c())));
+    activeDoc.push_front({&docReq,c});
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
     this->dispatcher->updateRequestDocFileandSuccess(docReq.getId(),file->getId());
@@ -208,7 +208,7 @@ privilege SymClient::editPrivilege(const std::string &targetUser, const std::str
     privilege* p = new privilege(this->getLoggedUser().editPrivilege(targetUser, resPath, resId, newPrivilege));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->successEditPrivilege();
+    this->dispatcher->successAction();
     #endif
     return *p;
 }
@@ -348,12 +348,11 @@ void SymClient::addActiveUser(uint_positive_cnt::type docId, user &targetUser, p
     if(f->getUserPrivilege(target.getUsername())==privilege::none)
         f->setUserPrivilege(target.getUsername(), Priv);
     //recuperiamo il generatore di colore associato al documento
-    colorGen c = getColorGeneratorbyDocumentiID(docId);
+    colorGen& c = getColorGeneratorbyDocumentiID(docId);
     //generiamo un colore per il nuovo utente
-    std::shared_ptr<Color> col (new Color(c()));
     //inseriamolo nella mappa
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
-                                    (std::make_pair(target.getSiteId(), docId), std::make_pair(target, *col)));
+                                    (std::make_pair(target.getSiteId(), docId), std::make_pair(target, c())));
     //dobbiamo aggiungere il cursore alla GUI, se necessario
     #ifdef DISPATCHER_ON
     if(Priv!=privilege::readOnly){
@@ -472,12 +471,11 @@ const document& SymClient::getActiveDocumenttoOpenbyID(uint_positive_cnt::type i
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
 }
 
-colorGen SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
-    for (std::pair<document*, colorGen> it:this->activeDoc){
+colorGen & SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
+    for (auto& it:this->activeDoc){
         if((it.first->getId() == id))
             return (it.second);
     }
-    return colorGen();
 }
 
 const user& SymClient::userData(){

@@ -587,8 +587,9 @@ TEST_F(SymClientTest, mapSiteIdToUserConstructsGoodMessageAndInsertInUnanswered)
 
 TEST_F(SymClientTest, setUserColorsAssignesDifferentColorToUsers){
     //correctness of mapping has already been verified on SymServer class, here we don't care about the wrong mapping
+    setStageForOpenedDoc();
     std::map<uint_positive_cnt::type, user> sampleMapping({{0, userReceived},{1, userReceived}});
-    client.setUserColors(1, sampleMapping);
+    client.setUserColors(docInUserFilesystem.getId(), sampleMapping);
     EXPECT_TRUE(everyUserHasDifferentColor());
 }
 
