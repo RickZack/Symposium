@@ -42,6 +42,11 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+    ui->myListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->myListWidget, SIGNAL(customContextMenuRequested(const QPoint &)),
+            this, SLOT(ProvideContextMenu(const QPoint &)));
+    ui->toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 }
 
 
@@ -291,20 +296,23 @@ void directory::openWindow(const std::string& str1){
     ui->back_button->show();
 }
 
-void directory::contextMenuEvent(QContextMenuEvent *)
+void directory::ProvideContextMenu(const QPoint &pos)
 {
-        QMenu submenu;
-        QString style="QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}";
-        submenu.setStyleSheet(style);
-        submenu.addAction(tr("Open"),this,&directory::openSelectedSource);
-        submenu.addSeparator();
-        submenu.addAction(tr("Delete"),this,&directory::deleteSource);
-        submenu.addSeparator();
-        submenu.addAction(tr("Rename"),this,&directory::renameSource);
-        QPoint globalPos=ui->myListWidget->cursor().pos();
-        submenu.exec(globalPos);
-    }
+    QPoint item = ui->myListWidget->mapToGlobal(pos);
 
+    QMenu submenu;
+    QString style="QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}";
+    submenu.setStyleSheet(style);
+    submenu.addAction(tr("Open"),this,&directory::openSelectedSource);
+    submenu.addSeparator();
+    submenu.addAction(tr("Delete"),this,&directory::deleteSource);
+    submenu.addSeparator();
+    submenu.addAction(tr("Rename"),this,&directory::renameSource);
+
+    QListWidgetItem* itemAtPos=ui->myListWidget->itemAt(pos);
+    if(itemAtPos!=nullptr)
+        submenu.exec(item);
+}
 
 //acts when the user clicks on the button "DELETE"
 void directory::deleteSource()
@@ -1073,4 +1081,6 @@ std::string directory::fixNameSource(const std::string nameSource){
     }
     return newName;
 }
+
+
 

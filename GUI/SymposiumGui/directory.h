@@ -104,6 +104,8 @@ public slots:
     void enableButtonsAfter();
 private slots:
 
+    void ProvideContextMenu(const QPoint &);
+
     /**
      * @brief directory::on_actionHome_triggered opens the home window
      */
@@ -273,7 +275,7 @@ private:
     void openWindow(const std::string& str1);
 
 
-    void contextMenuEvent(QContextMenuEvent *event) override;
+    //void contextMenuEvent(QContextMenuEvent *event) override;
 
     std::string manipulationPath(std::string& s);
 
