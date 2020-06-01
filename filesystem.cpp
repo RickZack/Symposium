@@ -497,10 +497,15 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
     std::shared_ptr<directory> d=std::dynamic_pointer_cast<directory>(obj);//otherwise the object is a directory
     if(!d->isReadyToRemove())
         throw filesystemException(filesystemException::someoneWork, UnpackFileLineFunction());
+    while(!d->contained.empty()){
+        const auto& toRemove=d->contained.back();
+        d->remove(targetUser, "", std::to_string(toRemove->getId()));//call remove recursively in order to remove any object in the directory
+    }
+    /*
     for(auto iterator: d->contained)
     {
         std::shared_ptr<filesystem> rem=d->remove(targetUser, "", std::to_string(iterator->getId()));//call remove recursively in order to remove any object in the directory
-    }
+    }*/
     auto it=std::find_if(contained.begin(), contained.end(),
                          [idRem, d](std::shared_ptr<filesystem> i){return i->getId()==d->getId();});
 

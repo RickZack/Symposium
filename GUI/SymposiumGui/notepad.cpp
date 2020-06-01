@@ -936,15 +936,12 @@ void notepad::showLabels()
 }
 
 bool notepad::isAKeyToIgnore(QKeyEvent* event){
-    return event->key()==Qt::Key_CapsLock || event->key()==Qt::Key_Shift || event->key()==Qt::Key_Control
-            ||event->key()==Qt::Key_Alt || event->key()==Qt::Key_Escape || event->key()==Qt::Key_F1 ||event->key()==Qt::Key_F2 ||
-            event->key()==Qt::Key_F3 ||event->key()==Qt::Key_F4 ||event->key()==Qt::Key_F5 ||event->key()==Qt::Key_F6 ||
-            event->key()==Qt::Key_F7 ||event->key()==Qt::Key_F8 ||event->key()==Qt::Key_F9 ||event->key()==Qt::Key_F10 ||
-            event->key()==Qt::Key_F11 || event->key()==Qt::Key_F12 || event->key()==Qt::Key_Menu ||
-            event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
-            event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
-            event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
-            event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown;
+    QString c=event->text();
+    auto ch=c[0];
+    bool accepted= (ch.isPunct() || ch.isSpace() || ch.isLetterOrNumber() || event->matches(QKeySequence::Copy)
+                    || event->matches(QKeySequence::Paste) || event->matches(QKeySequence::Cut) || event->matches(QKeySequence::SelectAll)
+                    || event->matches(QKeySequence::Delete) || event->key()==Qt::Key_Backspace);
+    return !accepted || QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+K");
 }
 void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCursor cursor= ui->textEdit->textCursor();
@@ -999,7 +996,7 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
     {
         NotRefreshLabels=true;
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if(isAKeyToIgnore(keyEvent) || !keyEvent->matches(QKeySequence::Cut) ||!keyEvent->matches(QKeySequence::Paste) ||!keyEvent->matches(QKeySequence::Copy) )
+        if(isAKeyToIgnore(keyEvent))
             event->ignore();
         else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C"))
             ui->textEdit->translateCursors(doc.getActiveUsers());
