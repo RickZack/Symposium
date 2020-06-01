@@ -263,7 +263,7 @@ namespace Symposium {
          * @param vector line in which the symbol is searched
          * @return the index in the line at which the symbol is
          */
-        unsigned findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const;
+        unsigned int findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const;
 
         /**
          * @brief it searches for the position of a symbol in order to find it and eliminate it
@@ -316,7 +316,7 @@ namespace Symposium {
          * @param boundaryStrategy
          * @return
          */
-        unsigned generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const;
+        unsigned int generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const;
 
         /**
          * @brief it modifies the @e strategy parameter

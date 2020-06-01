@@ -130,8 +130,8 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
 
     if(toInsert.getCh()!='\r')
         this->numchar++;
-    int i0=indexes.first;
-    int i1=indexes.second;
+    unsigned int i0=indexes.first;
+    unsigned int i1=indexes.second;
     checkIndex(i0,i1);
 
     /* handle the position of the following cursors */
@@ -179,7 +179,6 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
 
 symbol document::generatePosition(const std::pair<unsigned int, unsigned int> indexes, const symbol &toInsert){
     std::vector<int> posBefore;
-    //int siteIdB=0;
     symbol symB=findPosBefore(indexes);
     if(symB!=emptySymbol){
         posBefore=symB.getPos();
@@ -187,11 +186,9 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
     }
 
     std::vector <int> posAfter;
-    //int siteIdA;
     symbol symA=findPosAfter(indexes);
     if(symA!=emptySymbol){
         posAfter=symA.getPos();
-        //siteIdA=symB.getSiteId();
     }
 
     int level=0;
@@ -205,23 +202,21 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
 
 symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> &indexes) const {
     unsigned int line=indexes.first;
-    unsigned ch=indexes.second;
+    unsigned int ch=indexes.second;
     assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
     assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
 
-    // I don't have position before the considered one
-    // FIRST LIMIT CASE
+    /* I don't have position before the considered one */
+    /* FIRST LIMIT CASE - I'm at the beginning of the symbols */
     if(ch==0 && line==0){
         symbol sym=emptySymbol;
         return sym;
     }
-        // SECOND LIMIT CASE: I have to change line
+        /* SECOND LIMIT CASE: I have to watch to the previous line */
     else if(ch==0 && line!=0){
-        line=line-1;
+        line=line-1;                            /**< line is !=0 -> line-1 can't be a negative number */
         assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
-
-       ch=countCharsInLine(line)-1;
-       std::cout<<"Ch"<<ch;
+        ch=countCharsInLine(line)-1;            /**< in a previous line w.r.t the one in which I am, I have at least '\r' character */
         assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
 
     }else{
@@ -244,22 +239,19 @@ unsigned int document::countCharsInLine(unsigned int line)const {
 
 
 symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> &indexes) const {
-    int line=indexes.first;
-    int ch=indexes.second;
-    int numChars=countCharsInLine(line);
+    unsigned int line=indexes.first;
+    unsigned int ch=indexes.second;
+    unsigned int numChars=countCharsInLine(line);   /**< it could be zero */
     symbol sym=emptySymbol;
+    if(numChars==0 || ch==numChars)                 /**< there are no chars in line or no chars after the current pos, there is no a pos-after*/
+        return sym;
 
-
-    if(ch<numChars-1){
+    else if(ch<numChars-1){                         /**< there is a pos-after */
         assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
         assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
-       sym=symbols[line][ch];
+        sym=symbols[line][ch];
 
 
-    }else if(ch+1<(int)symbols[line].size() && symbols[line][ch+1]==emptySymbol){
-        assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
-        assertIndexes(included,ch+1,symbols[line].size(),UnpackFileLineFunction());
-         sym=symbols[line][ch];
     }
         return sym;
     }
@@ -271,9 +263,9 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
                              const symbol &b, const symbol &a) {
 
     /* change 2 to any other number to change base multiplication */
-    int base=pow(2,level)*32;
+    unsigned int base=pow(2,level)*32;
     char boundaryStrategy= retrieveStrategy(level);
-    int id1,id2;
+    unsigned int id1,id2;
 
     if(posBefore.empty()){
         id1=0;
@@ -346,7 +338,7 @@ char document::retrieveStrategy(unsigned int level){
 }
 
 
-unsigned document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const {
+unsigned int document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const {
     uint_positive_cnt::type boundary=10;
     if((id2-id1)<boundary){
         id1+=1;
@@ -389,11 +381,11 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
 
 
 
-std::pair<unsigned, unsigned> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
+std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
 
     if(toInsert.getCh()!='\r')
         this->numchar++;
-    std::pair<unsigned,unsigned> indexes=findInsertIndex(toInsert);
+    std::pair<unsigned int,unsigned int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
     // I have to handle the position of the following cursors
@@ -546,24 +538,24 @@ unsigned int document::countsNumLines() const{
 std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &symbol) const {
     std::pair<int,int> ind;
     std::vector<Symposium::symbol> lastLine;
-    int maxLine;
-    int i0=0; int i1=0;
-    int minLine=0;
-    int totalLines=countsNumLines();
+    unsigned int maxLine=0;
+    unsigned int i0=0; unsigned int i1=0;
+    unsigned int minLine=0;
+    unsigned int totalLines=countsNumLines();
     if(totalLines!=0){
         maxLine= totalLines-1;
         lastLine= symbols[maxLine];
     }
 
-    int midLine=0;int charIdx=0;
+    unsigned int midLine=0;unsigned int charIdx=0;
     std::vector<Symposium::symbol> maxCurrentLine;
     std::vector<Symposium::symbol> minCurrentLine;
     std::vector<Symposium::symbol> currentLine;
 
 
     // check if struct is empty or char is less than first char
-    if(totalLines==0 || symbol<symbols[0][0]){ind={0,0}; return ind;}
-    int numCharsInLine=countCharsInLine(maxLine);
+    if(totalLines==0 || symbol<=symbols[0][0]){ind={0,0}; return ind;}
+    unsigned int numCharsInLine=countCharsInLine(maxLine);
     auto lastSymbol=lastLine[numCharsInLine-1];
 
     //char is greater than all existing chars (insert and end)
@@ -571,15 +563,17 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
         return findEndPosition(totalLines,lastSymbol);
     }
 
+
     //binary search
     while(minLine+1<maxLine){
         midLine=floor(minLine+(maxLine-minLine)/2);
         currentLine=symbols[midLine];
-        int numCharsInLine=countCharsInLine(midLine);
+        unsigned int numCharsInLine=countCharsInLine(midLine);
         lastSymbol=currentLine[numCharsInLine-1];
 
         if(symbol==lastSymbol){
-            i0=midLine; i1=countCharsInLine(midLine)-1;
+            i0=midLine; i1=numCharsInLine-1;
+            return{i0,i1};
         } else if(symbol<lastSymbol){
             maxLine=midLine;
         } else{
@@ -606,28 +600,29 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
         return ind;
     }
 
+
 }
 
 std::pair<unsigned int, unsigned int>
 document::findEndPosition(unsigned int lines, const symbol &lastSymbol) const {
-    std::pair<int,int> ind;
+    std::pair<unsigned int,unsigned int> ind;
     if(lastSymbol.getCh()=='\r'){
         ind={lines,0};
     }else{
-        int numCharsinLine=countCharsInLine(lines-1);
+        unsigned int numCharsinLine=countCharsInLine(lines-1);
         ind={lines-1,numCharsinLine};
     }
     return ind;
 }
 
 
-unsigned document::findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const {
-    unsigned ind=0;
-    int left=0;
-    int right= countCharsInLine(line)-1;
+unsigned int document::findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const {
+    unsigned int ind=0;
+    unsigned int left=0;
+    unsigned right=countCharsInLine(line)-1;
     int mid;
 
-    if(ch<vector[left]){
+    if(vector[0]==emptySymbol || ch<vector[left]){
         ind=left;
         return ind;
     } else if(ch>vector[right]){
@@ -656,14 +651,13 @@ unsigned document::findInsertInLine(const symbol &ch, const std::vector<symbol> 
 }
 
 std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbol) const {
-    std::pair<int,int> ind;
-    int i0=0; int i1=0;
-    int minLine=0;
-    int totalLines=this->countsNumLines();
-    int maxLine= totalLines-1;
+    std::pair<unsigned int,unsigned int> ind;
+    unsigned int minLine=0;
+    unsigned int totalLines=this->countsNumLines();
+    unsigned int maxLine= totalLines-1;
     std::vector<Symposium::symbol> lastLine= symbols[maxLine];
 
-    int midLine=0;int charIdx=0;
+    unsigned int midLine=0,charIdx=0;
     std::vector<Symposium::symbol> maxCurrentLine;
     std::vector<Symposium::symbol> minCurrentLine;
     std::vector<Symposium::symbol> currentLine;
@@ -671,7 +665,8 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     //if the struct is empty or char is less than first char
     auto firstSymbol=symbols[0][0];
     if(symbols.empty()||symbol<firstSymbol){
-        i0=-1; i1=-1; ind={i0,i1}; return ind;
+        throw "Error indices";
+
     }
 
     // counts the number of chars in the last line
@@ -680,7 +675,7 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 
     //char is greater than all existing chars(insert at end)
     if(symbol>lastChar){
-        i0=-1; i1=-1; ind={i0,i1}; return ind;
+        throw "Error indices";
     }
 
 
@@ -746,9 +741,10 @@ unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symb
         return left;
     }
 
-    else{
+    else if(sym==vector[right]){
         return right;
-    }
+    }else
+        throw "Error in Search";
 
 }
 
