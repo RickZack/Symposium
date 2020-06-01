@@ -540,15 +540,11 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
     }
 
     cursor.endEditBlock();
+    ui->textEdit->setFocus();
 
     // set the style index
     this->indexStyle=styleIndex;
     ui->textEdit->scroll();
-    /*
-    if(cursor.hasSelection()){
-        this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
-    }
-     */
     return style;
 }
 
@@ -572,7 +568,7 @@ void notepad::handleChangeFormat(unsigned int i, unsigned int f){
       QString character;
       unsigned int count=0;
       unsigned dimSelection=f-i;
-      int prCol=0,col=0,row=0;
+      int prCol,col,row;
       while(count!=dimSelection){
         curs.setPosition(i);
         curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
@@ -621,6 +617,7 @@ void notepad::textFamily(const QString &f)
     ui->textEdit->mergeCurrentCharFormat(fmt);
     if(cursor.hasSelection())
         this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
+    ui->textEdit->setFocus();
 }
 
 void notepad::textSize(const QString &p)
@@ -634,7 +631,9 @@ void notepad::textSize(const QString &p)
          ui->textEdit->mergeCurrentCharFormat(fmt);
          if(cursor.hasSelection())
              this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
+
     }
+    ui->textEdit->setFocus();
 
 }
 
@@ -806,9 +805,17 @@ void notepad::visualizeAllUsers()
     #else
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     std::unordered_map<std::string, Symposium::privilege> users=cl.allUser(documentId);
+    if(pathToFile == "./"){
+          alluser *alluserWindow = new alluser(this,  priv, fileId, cl.getUser(), pathToFile + std::to_string(cl.getHomeIDofCurrentUser()), onlineUsers, users, *this);
+          goToWindow(*alluserWindow);
+      }else{
+          std::string path = pathToFile;
+          path.erase(0,2);
+          alluser *alluserWindow = new alluser(this,  priv, fileId, cl.getUser(), "./" + std::to_string(cl.getHomeIDofCurrentUser()) + "/" + path, onlineUsers, users, *this);
+          goToWindow(*alluserWindow);
+      }
     #endif
-    alluser* alluserWindow = new alluser(this,  priv, documentId, cl.getUser(), pathToFile, onlineUsers, users, *this);
-    goToWindow(*alluserWindow);
+
 }
 
 std::string notepad::constructAbsolutePath(){
@@ -817,7 +824,7 @@ std::string notepad::constructAbsolutePath(){
     //cancelliamo il '.' iniziale
     percorso.erase(0,1);
     //costruiamo il percorso assoluto
-    path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + percorso + std::to_string(fileId);
+    path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + percorso + '/' + std::to_string(fileId);
     return path;
 }
 
@@ -932,7 +939,7 @@ bool notepad::isAKeyToIgnore(QKeyEvent* event){
             event->key()==Qt::Key_Pause || event->key()==Qt::Key_Insert ||event->key()==Qt::Key_AltGr ||
             event->key()==Qt::Key_Up || event->key()==Qt::Key_Down ||
             event->key()==Qt::Key_Delete || event->key()==Qt::Key_NumLock || event->key()==Qt::Key_Left ||
-            event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown || event->matches(QKeySequence::Undo);
+            event->key()==Qt::Key_Right || event->key()==Qt::Key_Meta ||event->key()==Qt::Key_unknown;
 }
 void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QTextCursor cursor= ui->textEdit->textCursor();
@@ -986,7 +993,7 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
     {
         NotRefreshLabels=true;
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if(isAKeyToIgnore(keyEvent) || keyEvent->matches(QKeySequence::Undo))
+        if(isAKeyToIgnore(keyEvent) || !keyEvent->matches(QKeySequence::Cut) ||!keyEvent->matches(QKeySequence::Paste) ||!keyEvent->matches(QKeySequence::Copy) )
             event->ignore();
         else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C"))
             ui->textEdit->translateCursors(doc.getActiveUsers());
@@ -1026,59 +1033,39 @@ void notepad::handleDeleteKey(){
         unsigned int f=cursor.selectionEnd();
         cursor.setPosition(i);
         cursor.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
-        int col=0,row=0,colToSend=cursor.positionInBlock()-1;
+        int colToSend=cursor.positionInBlock()-1; row=cursor.blockNumber();
         while(i!=f){
           cursor.setPosition(i);
           cursor.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
-          col=cursor.positionInBlock()-1; row=cursor.blockNumber();
+          col=cursor.positionInBlock()-1;
           if(col==-1){
               /* I'm at the end of the line */
-              row=row-1;
               col=colToSend;
               colToSend=0;
-
           }
           cl.localRemove(this->documentId,{row,colToSend});
           i++;
         }
     }
-}
-
-void notepad::deleteMultipleLines(unsigned sR,unsigned eR,unsigned c,unsigned sL,bool lines){
-    QTextCursor cursor;
-    int length;
-    qDebug()<<"start Row"<<sR;
-    qDebug()<<"endRow"<<eR;
-    qDebug()<<"SelectedLines"<<sL;
-    while(sR<=eR){
-        cursor.setPosition(sR,QTextCursor::MoveAnchor);
-      if(lines==true){
-        length=countCharsInLine(sR)-c;
-      }else{
-          if(sL==1){
-             length=countCharsInLine(sR)-c;
-          }else{
-          length=countCharsInLine(sR)-1-c;}
-      }
-        while(length>0){
-            #ifdef DISPATCHER_ON
-            cl.localRemove(this->documentId,{sR,c});
-            this->numChars=this->doc.getNumchar();
-            this->labelChars=std::to_string(this->numChars);
-            ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-            std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
-            ui->textEdit->translateCursors(onlineUsers);
-            #else
-            this->documentoProva.localRemove({sR,c},1);
-            this->numChars=this->documentoProva.getNumchar();
-            this->labelChars=std::to_string(this->numChars);
-            ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-            #endif
-            length--;
+    this->numChars=this->doc.getNumchar();
+    this->labelChars=std::to_string(this->numChars);
+    ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
+    /*
+    if(row==0 && col==0){
+           QColor black=Qt::black;
+           black.setAlpha(160);
+           ui->textEdit->setTextColor(black);
+           ui->textEdit->setText("");
         }
-        sR++;c=0;sL--;
+        */
+    if(row==0 && col==0){
+        QColor lightColor=Qt::black;
+        lightColor.setAlpha(180);
+        ui->textEdit->setTextColor(lightColor);
     }
-}
+
+ }
+
 
 void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTextCharFormat format){
 
@@ -1129,7 +1116,7 @@ void notepad::contV_action(){
     while(count!=this->dim){
         curs.setPosition(posTmp);
         curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
-        previousC=column; column=curs.positionInBlock()-1;        
+        previousC=column; column=curs.positionInBlock()-1;
         /* I'm changing the line*/
         if(column==-1){
             row=curs.blockNumber()-1;
@@ -1139,16 +1126,10 @@ void notepad::contV_action(){
             ui->textEdit->changePosition(row,previousC);
             format=curs.charFormat();
             NotRefreshLabels=false;
-            //const std::pair<unsigned int, unsigned int> indexes={curs.blockNumber()-1,previousC+1};
-            //this->sendEnterSymbol(indexes);
-            //count++;posTmp++;
          }else{
             row= curs.blockNumber();
             charact=curs.selectedText();
             format=curs.charFormat();
-            //QTextCharFormat format = curs.charFormat();
-            //this->sendSymbolToInsert(row,column,charact,format);
-            //count++;posTmp++;
         } // else
         this->sendSymbolToInsert(row,column,charact,format);
         count++;posTmp++;
@@ -1156,39 +1137,11 @@ void notepad::contV_action(){
     this->okPaste=false;
 }
 
-void notepad::sendEnterSymbol(const std::pair<unsigned int, unsigned int> indexes){
-    NotRefreshLabels=true;
-    QTextCursor curs=ui->textEdit->textCursor();
-    ui->textEdit->changePosition(indexes.first,indexes.second);
-
-    /* set the char format */
-    QTextCharFormat format = curs.charFormat();
-    QFont font= format.font();
-    unsigned size=font.pointSize();
-    bool isBold= font.bold();
-    bool isUnderlined=font.underline();
-    bool isItalic=font.italic();
-    std::string fontFamily=font.family().toStdString();
-    QColor col=format.foreground().color();
-    int blue=col.blue();
-    int red=col.red();
-    int green=col.green();
-    Symposium::Color myCol(red,green,blue);
-    struct Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
-    std::vector<int> pos;
-    Symposium::symbol sym('\r',cl.getUser().getSiteId(),1,pos,false);
-    sym.setCharFormat(charFormat);
-
-    /* send the symbol */
-    cl.localInsert(this->documentId,sym,indexes);
-}
 
 void notepad::addCursor()
 {
     ui->textEdit->addUser(4, "Tizio");
 }
-
-
 
 void notepad::removeCursor()
 {
@@ -1200,7 +1153,6 @@ void notepad::changeCursorPos()
 {
     ui->textEdit->changePosition(4, 1, 1);
 }
-
 
 void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positive_cnt::type siteId, const std::pair<unsigned,unsigned>& indexes){
 

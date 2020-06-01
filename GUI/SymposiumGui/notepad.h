@@ -205,15 +205,6 @@ private:
      */
     void sendSymbolToInsert(unsigned row, unsigned column, QString text, QTextCharFormat format);
 
-    /**
-     * @brief deleteMultipleLines to handle the elimination of multiple lines by selection
-     * @param sR: the starting row index of the selection
-     * @param eR: the ending row index of the selection
-     * @param c:  the starting column index of the selection
-     * @param sL: the dimension of the selection
-     * @param lines: a boolen to declare if the last line has been deleted or not
-     */
-    void deleteMultipleLines(unsigned sR, unsigned eR, unsigned c, unsigned sL, bool lines);
 
     /**
      * @brief countCharsInLine: counts the number of the chars in a line
@@ -229,7 +220,7 @@ private:
     void uncolorText();
 
     void contextMenuEvent(QContextMenuEvent *event) override;
-    void sendEnterSymbol(const std::pair<unsigned int, unsigned int> indexes);
+
     void handleChangeFormat(unsigned int i, unsigned int f);
 };
 

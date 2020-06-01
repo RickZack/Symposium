@@ -379,20 +379,10 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
 
     symbols[i0].erase(symbols[i0].begin()+i1);
     if(symbols[i0].empty()){
-        size_t i=i0;
-        while(symbols[i][0]!=emptySymbol){
-            symbols.emplace(symbols.begin()+i,symbols[i+1].begin(),symbols[i+1].end());
-            alignmentStyle.emplace(alignmentStyle.begin()+i, alignmentStyle[i+1]);
-            i++;
-        }
-        symbols.erase(symbols.begin()+i,symbols.end());
-        alignmentStyle.erase(alignmentStyle.begin()+i, alignmentStyle.end());
-
+        symbols.erase(symbols.begin()+i0);
+        alignmentStyle.erase(alignmentStyle.begin()+i0, alignmentStyle.end());
     }
-    /*
-    if(i1==0 && symbols[0][0]==emptySymbol)
-        alignmentStyle.erase(alignmentStyle.begin()+i0);
-        */
+
     return sym;
 
 }
