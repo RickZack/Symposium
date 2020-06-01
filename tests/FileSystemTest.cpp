@@ -506,7 +506,14 @@ TEST_F(FileSystemTestSharing, printDirectoryRecursive){
 /*
  * Deletion policies
  * The creator of the file hasn't to remain owner of the file for its entire file.
- * A call to remove on a symlink deletes the symlink and tries to remove also the file pointed
+ * A call to remove on a symlink deletes the symlink and the file pointed if:
+ *          + the user is the only owner of the file and no user is active on it;
+ * A call to remove on a symlink deletes the symlink but not the file pointed if:
+ *          + the file pointed has more owners and the user is one of them;
+ *                                         or
+ *          + the user is not an owner of the file pointed;
+ * A call to remove on a symlink fails without removing the symlink if:
+ *          + the user is the only owner but some other user is active on the file pointed;
  * A file can be removed if and only if:
  *          + It has only an owner, and it is the user who is removing the file;
  *          + At the moment of deletion, no user is active on it;
@@ -622,7 +629,7 @@ TEST_F(FileSystemTestSharing, removeSymlinkNotRemoveFilePointedIfHasMoreOwners){
     EXPECT_EQ(privilege::none,file2->getUserPrivilege(username));
 }
 
-TEST_F(FileSystemTestSharing, removeSymlinkNotRemoveFilePointedIfHasUsersActive){
+TEST_F(FileSystemTestSharing, removeSymlinkNotRemoveSymlinkAndFilePointedIfHasUsersActive){
     ASSERT_NO_FATAL_FAILURE(constructTree3()); //set the following tree
     /*
      * Create a tree like this:
@@ -643,10 +650,10 @@ TEST_F(FileSystemTestSharing, removeSymlinkNotRemoveFilePointedIfHasUsersActive)
     file2->access(anotherUser, uri::getDefaultPrivilege());
 
     //Now a call from user "aUser" should delete the symlink but not the file itself (because anotherUser is active on it)
-    directory::getRoot()->remove(u, "./1/7", std::to_string(sym2->getId()));
-    EXPECT_THROW(directory::getRoot()->get("./1/7", std::to_string(sym2->getId())), filesystemException); //sym2 removed
+    EXPECT_THROW(directory::getRoot()->remove(u, "./1/7", std::to_string(sym2->getId())), filesystemException);
+    EXPECT_NO_THROW(directory::getRoot()->get("./1/7", std::to_string(sym2->getId()))); //sym2 removed
     EXPECT_NO_THROW(directory::getRoot()->get("./2", std::to_string(file2->getId()))); //file2 still there
-    EXPECT_EQ(privilege::none,file2->getUserPrivilege(username));
+    EXPECT_EQ(privilege::owner,file2->getUserPrivilege(username));
 }
 
 TEST_F(FileSystemTestSharing, removeSymlinkRemoveSymlinkAndFilePointedIfHasThisOnlyOwner){
