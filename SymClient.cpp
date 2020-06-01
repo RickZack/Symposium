@@ -91,6 +91,17 @@ void SymClient::openSource(const std::string &resPath, const std::string &resId,
     document& doc = p->access(this->getLoggedUser(), reqPriv);
     activeFile.push_front(p);
     colorGen c;
+    //inserire nella mappa userColor gli utenti che sono già online
+    std::forward_list<std::pair<const user *, sessionData>> l = doc.getActiveUsers();
+    std::forward_list<std::pair<const user *, sessionData>>::iterator it = l.begin();
+    while(it!=l.end()){
+        if(it->first->getSiteId() != this->getLoggedUser().getSiteId()){
+            this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
+            (std::make_pair(it->first->getSiteId(),doc.getId()),std::make_pair(*it->first,c())));
+            addUsersOnDocument(*it->first);
+        }
+        it++;
+    }
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
     activeDoc.push_front({&doc, c});
@@ -369,9 +380,9 @@ void SymClient::removeActiveUser(uint_positive_cnt::type docId, user &targetUser
     #ifdef DISPATCHER_ON
     this->dispatcher->removeUserCursor(target.getSiteId(),docId);
     #endif
-    removeUsersOnDocument(target.getUsername());
     //rimuoviamo l'utente dalla mappa userColors
     this->userColors.erase(std::make_pair(target.getSiteId(), docId));
+    removeUsersOnDocument(target.getUsername());
 }
 
 const user& SymClient::getLoggedUser() const{

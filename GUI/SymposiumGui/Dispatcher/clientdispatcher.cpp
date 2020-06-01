@@ -427,12 +427,13 @@ void clientdispatcher::logout() {
 updateDocMessage clientdispatcher::mapSiteIdToUser(const document &currentDoc) {
     std::shared_ptr<updateDocMessage> mess = std::make_shared<updateDocMessage>(this->client.mapSiteIdToUser(currentDoc));
     try {
+        //inviamo il messaggio
         sendMessage(mess);
-        //facciamo partire il timer
-
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
-
+        this->closeApp();
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
     }
 }
 
@@ -481,14 +482,6 @@ void clientdispatcher::stopTimer(){
 void clientdispatcher::successAction(){
     this->winmanager.activeWindow().success();
     this->userpwd = "";
-}
-
-void clientdispatcher::successEditPrivilege(){
-    /*if(this->currentWindow==13){
-       this->finestraOnlineUser->successEditPrivilege();
-    }else{
-       this->finestraAllUser->successEditPrivilege();
-    }*/
 }
 
 

@@ -977,6 +977,7 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     QColor lightColor=format.foreground().color();
     lightColor.setAlpha(180);
     ui->textEdit->setTextColor(lightColor);
+    ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
 }
 
 bool notepad::eventFilter(QObject *obj, QEvent *event){
