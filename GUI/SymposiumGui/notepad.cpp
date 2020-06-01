@@ -822,7 +822,7 @@ std::string notepad::constructAbsolutePath(){
     std::string percorso = pathToFile;
     std::string path;
     //cancelliamo il '.' iniziale
-    percorso.erase(0,1);
+    percorso.erase(0,2);
     //costruiamo il percorso assoluto
     path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + percorso + '/' + std::to_string(fileId);
     return path;

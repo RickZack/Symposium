@@ -91,17 +91,8 @@ void SymClient::openSource(const std::string &resPath, const std::string &resId,
     document& doc = p->access(this->getLoggedUser(), reqPriv);
     activeFile.push_front(p);
     colorGen c;
-    //inserire nella mappa userColor gli utenti che sono già online
-    std::forward_list<std::pair<const user *, sessionData>> l = doc.getActiveUsers();
-    std::forward_list<std::pair<const user *, sessionData>>::iterator it = l.begin();
-    while(it!=l.end()){
-        if(it->first->getSiteId() != this->getLoggedUser().getSiteId()){
-            this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
-            (std::make_pair(it->first->getSiteId(),doc.getId()),std::make_pair(*it->first,c())));
-            addUsersOnDocument(*it->first);
-        }
-        it++;
-    }
+    //inseriamo nella mappa userColor gli utenti che sono già online sul documento
+    assignUsersColor(c,doc);
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
     activeDoc.push_front({&doc, c});
@@ -127,6 +118,8 @@ void SymClient::openNewSource(const std::string &absolutePath, privilege reqPriv
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
     colorGen c;
+    //inseriamo nella mappa userColor gli utenti che sono già online sul documento
+    assignUsersColor(c,doc);
     this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
                                     (std::make_pair(this->getLoggedUser().getSiteId(),doc.getId()),std::make_pair(this->getLoggedUser(),c())));
     activeDoc.push_front({&doc,c});
@@ -486,6 +479,19 @@ colorGen & SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id)
     for (auto& it:this->activeDoc){
         if((it.first->getId() == id))
             return (it.second);
+    }
+}
+
+void SymClient::assignUsersColor(colorGen& c, document& d){
+    std::forward_list<std::pair<const user *, sessionData>> l = d.getActiveUsers();
+    std::forward_list<std::pair<const user *, sessionData>>::iterator it = l.begin();
+    while(it!=l.end()){
+        if(it->first->getSiteId() != this->getLoggedUser().getSiteId()){
+            this->userColors.insert(std::pair<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>
+            (std::make_pair(it->first->getSiteId(),d.getId()),std::make_pair(*it->first,c())));
+            addUsersOnDocument(*it->first);
+        }
+        it++;
     }
 }
 
