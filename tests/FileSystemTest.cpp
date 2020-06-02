@@ -734,7 +734,7 @@ TEST_F(FileSystemTestSharing, removeDirectoryNotRemovesIfSomeoneActiveOnContaine
      *       -file1
      */
     //make someone active on file2
-    file2->access(anotherUser, privilege::modify);
+    file1->access(anotherUser, privilege::modify);
     EXPECT_THROW(directory::getRoot()->remove(u, "./1", "7"), filesystemException);
 
     //dir1 and its content must be still there
