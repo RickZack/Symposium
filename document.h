@@ -165,7 +165,7 @@ namespace Symposium {
          * @param toRemove symbol to remove
          * @return the position of the removed symbol
          */
-        virtual std::pair<unsigned int, unsigned int> remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove);
+        virtual std::pair<int, int> remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove);
 
         /**
          * @brief set a symbol inside the document as verified
@@ -270,7 +270,7 @@ namespace Symposium {
          * @param symbol the symbol to search
          * @return the position of @e symbol
          */
-        std::pair<unsigned int, unsigned int> findPosition(const symbol &symbol) const;
+        std::pair<int, int> findPosition(const symbol &symbol) const;
 
         /**
          * @brief findIndexInLine searches the position in a line for the symbol that has to be deleted throught the RemoteDelete operation

@@ -182,7 +182,6 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
     symbol symB=findPosBefore(indexes);
     if(symB!=emptySymbol){
         posBefore=symB.getPos();
-        //siteIdB=symB.getSiteId();
     }
 
     std::vector <int> posAfter;
@@ -357,8 +356,8 @@ unsigned int document::generateIdBetween(uint_positive_cnt::type id1, uint_posit
 
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId) {
 
-    int i0=indexes.first;
-    int i1=indexes.second;
+    unsigned int i0=indexes.first;
+    unsigned int i1=indexes.second;
     //checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
     if(sym.getCh()!='\r')
@@ -401,11 +400,6 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     format charFormat=toInsert.getCharFormat();
     std::pair<alignType,unsigned> styleValues;
     styleValues={charFormat.type,charFormat.indexStyle};
-    /*
-    if(alignmentStyle[i0].first==alignType::left){
-      alignmentStyle.insert(alignmentStyle.begin()+i0,styleValues);
-    }
-    */
     alignmentStyle[i0]=styleValues;
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
     return indexes;
@@ -413,7 +407,7 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
 }
 
 
-std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
+std::pair<int,int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
     if(toRemove.getCh()!='\r')
         this->numchar--;
     std::pair<int,int> pos=findPosition(toRemove);
@@ -535,7 +529,7 @@ unsigned int document::countsNumLines() const{
 
 
 std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &symbol) const {
-    std::pair<int,int> ind;
+    std::pair<unsigned int,unsigned int> ind;
     std::vector<Symposium::symbol> lastLine;
     unsigned int maxLine=0;
     unsigned int i0=0; unsigned int i1=0;
@@ -649,8 +643,9 @@ unsigned int document::findInsertInLine(const symbol &ch, const std::vector<symb
 
 }
 
-std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbol) const {
-    std::pair<unsigned int,unsigned int> ind;
+/* It can't be an std::pair<unsigned, unsigned> because I need a {-1,-1} to indicate a limit case */
+std::pair<int,int> document::findPosition(const symbol &symbol) const {
+    std::pair<int,int> ind;
     unsigned int minLine=0;
     unsigned int totalLines=this->countsNumLines();
     unsigned int maxLine= totalLines-1;
@@ -664,18 +659,16 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
     //if the struct is empty or char is less than first char
     auto firstSymbol=symbols[0][0];
     if(symbols.empty()||symbol<firstSymbol){
-        throw "Error indices"; //FIXME: this case shouldn't appear in our cases, but if you want to throw must follow guidelines for SymposiumException (video on drive)
-
+        return {-1,-1};
     }
 
     // counts the number of chars in the last line
-    //FIXME: must be unsigned
-    int chars=this->countCharsInLine(maxLine);
+    unsigned int chars=this->countCharsInLine(maxLine);
     auto lastChar=lastLine[chars-1];
 
     //char is greater than all existing chars(insert at end)
     if(symbol>lastChar){
-        throw "Error indices"; //FIXME: this case shouldn't appear in our cases, but if you want to throw must follow guidelines for SymposiumException (video on drive)
+        return {-1,-1};
     }
 
 
@@ -697,13 +690,11 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 
     // Check between min and max line
     minCurrentLine=symbols[minLine];
-    //FIXME: must be unsigned
-    int min_charsInLine=this->countCharsInLine(minLine);
+    unsigned int min_charsInLine=this->countCharsInLine(minLine);
     auto minLastSymbol=minCurrentLine[min_charsInLine-1];
     maxCurrentLine=symbols[maxLine];
-    //FIXME: must be unsigned
 
-    int max_charsInLine=this->countCharsInLine(maxLine);
+    unsigned int max_charsInLine=this->countCharsInLine(maxLine);
     auto maxLastSymbol=maxCurrentLine[max_charsInLine-1];
 
     if(symbol<=minLastSymbol){
@@ -720,9 +711,9 @@ std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbo
 
 unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symbol> &vector, unsigned int dimLine) const {
     //FIXME: must be unsigned, all of these
-    int left=0;
-    int right=dimLine-1;
-    int mid;
+    unsigned int left=0;
+    unsigned int right=dimLine-1;
+    unsigned int mid;
 
     if(vector[0]==emptySymbol || sym < vector[left]){
         return left;
@@ -741,15 +732,14 @@ unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symb
         }
     }
 
+
     if(sym == vector[left]){
         return left;
     }
 
-    else if(sym==vector[right]){
+    else{
         return right;
-    }else
-        throw "Error in Search"; //FIXME: this case shouldn't appear in our cases, but if you want to throw must follow guidelines for SymposiumException (video on drive)
-
+    }
 }
 
 void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol) {
