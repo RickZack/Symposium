@@ -165,7 +165,7 @@ namespace Symposium {
          * @param toRemove symbol to remove
          * @return the position of the removed symbol
          */
-        virtual std::pair<int, int> remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove);
+        virtual std::pair<unsigned int, unsigned int> remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove);
 
         /**
          * @brief set a symbol inside the document as verified

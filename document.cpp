@@ -32,6 +32,7 @@
 #include "document.h"
 #include "symbol.h"
 #include "user.h"
+#include "SymposiumException.h"
 #include <cmath>
 #include <fstream>
 #include <boost/archive/text_iarchive.hpp>
@@ -158,10 +159,10 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     }else{
         symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end());
-        symbols.push_back(std::vector<symbol>(1,emptySymbol));
+        symbols.emplace_back(1,emptySymbol);
         alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
         alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
-        alignmentStyle.push_back(std::pair(alignType::left,0));
+        alignmentStyle.emplace_back(std::pair(alignType::left,0));
         //alignmentStyle.resize(symbols.size(),std::pair(alignType::left,0));
         }
     }else{
@@ -229,8 +230,8 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> &inde
 
 unsigned int document::countCharsInLine(unsigned int line)const {
     unsigned ch=0;
-    for(size_t i=0;i<symbols[line].size();i++){
-        if(symbols[line][i]!=emptySymbol)
+    for(const auto & i : symbols[line]){
+        if(i!=emptySymbol)
             ch++;
     }
     return ch;
@@ -280,7 +281,8 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
         unsigned int newDigit= generateIdBetween(id1,id2,boundaryStrategy);
         newPos.push_back(newDigit);
         return newPos;
-    }else if(id2-id1==1){
+    }
+    else if(id2-id1==1){
         newPos.push_back(id1);
         std::vector<int> pos1=posBefore;
         if(!pos1.empty()){
@@ -289,7 +291,8 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
         std::vector<int> pos2;
         return generatePosBetween(pos1, pos2, newPos, level+1 , b,a);
 
-    }else if(id1==id2){
+    }
+    else if(id1==id2){
         if(b.getSiteId()<a.getSiteId()){
             newPos.push_back(id1);
             std::vector<int> pos1=posBefore;
@@ -299,19 +302,24 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
             std::vector<int> pos2;
             return generatePosBetween(pos1, pos2, newPos, level + 1,b,a);
 
-        }else
+        }
+        else if(b.getSiteId()==a.getSiteId()){
             newPos.push_back(id1);
-            std::vector<int> pos1=posBefore;
-            if(!pos1.empty()){
+            std::vector<int> pos1 = posBefore;
+            if (!pos1.empty()) {
                 pos1.erase(pos1.begin());
             }
             //pos2.slice(1)
-            std::vector<int> pos2=posAfter;
-            if(!pos2.empty()){
+            std::vector<int> pos2 = posAfter;
+            if (!pos2.empty()) {
                 pos2.erase(pos2.begin());
             }
-            return generatePosBetween(pos1, pos2, newPos, level + 1,b,a);
+            return generatePosBetween(pos1, pos2, newPos, level + 1, b, a);
         }
+        else{
+            throw documentException(documentException::documentExceptionCodes::fixPositionSorting, UnpackFileLineFunction());
+        }
+    }
     return std::vector<int>();
 }
 
@@ -407,7 +415,7 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
 }
 
 
-std::pair<int,int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
+std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
     if(toRemove.getCh()!='\r')
         this->numchar--;
     std::pair<int,int> pos=findPosition(toRemove);
@@ -643,7 +651,6 @@ unsigned int document::findInsertInLine(const symbol &ch, const std::vector<symb
 
 }
 
-/* It can't be an std::pair<unsigned, unsigned> because I need a {-1,-1} to indicate a limit case */
 std::pair<int,int> document::findPosition(const symbol &symbol) const {
     std::pair<int,int> ind;
     unsigned int minLine=0;
@@ -659,7 +666,7 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
     //if the struct is empty or char is less than first char
     auto firstSymbol=symbols[0][0];
     if(symbols.empty()||symbol<firstSymbol){
-        return {-1,-1};
+        throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
     }
 
     // counts the number of chars in the last line
@@ -668,7 +675,7 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
 
     //char is greater than all existing chars(insert at end)
     if(symbol>lastChar){
-        return {-1,-1};
+        throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
     }
 
 
@@ -710,7 +717,6 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
 }
 
 unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symbol> &vector, unsigned int dimLine) const {
-    //FIXME: must be unsigned, all of these
     unsigned int left=0;
     unsigned int right=dimLine-1;
     unsigned int mid;
@@ -737,9 +743,11 @@ unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symb
         return left;
     }
 
-    else{
+    else if(sym==vector[right]){
         return right;
-    }
+    }else
+        throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
+
 }
 
 void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol) {

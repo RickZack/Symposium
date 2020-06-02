@@ -106,3 +106,9 @@ const char* clientdispatcherException::clientdispatcherErrors[]={"The action of 
 clientdispatcherException::clientdispatcherException(clientdispatcherExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
         SymposiumException(file, line, func, clientdispatcherErrors[static_cast<int>(exceptionCode)]){};
+
+const char* documentException::documentErrors[]={"Error in finding the position to insert the symbol to", "Fix Position Sorting"};
+
+documentException::documentException(documentExceptionCodes exceptionCode, const char *file,
+                                     int line, const char *func) :
+    SymposiumException(file, line, func, documentErrors[static_cast<int>(exceptionCode)]){};

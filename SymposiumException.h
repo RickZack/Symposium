@@ -151,6 +151,16 @@ namespace Symposium{
         virtual ~clientdispatcherException()=default;
     };
 
+    class documentException : public SymposiumException {
+        static const char* documentErrors[];
+    public:
+
+        enum documentExceptionCodes{InsertPositionNotFound=0, fixPositionSorting};
+
+        explicit documentException(documentExceptionCodes exceptionCode, const char *file, int line, const char *func);
+        virtual ~documentException()=default;
+    };
+
 
 }
 

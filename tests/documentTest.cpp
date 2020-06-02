@@ -254,26 +254,30 @@ updatePos updates2[]={
 };
 INSTANTIATE_TEST_SUITE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCursor, testing::ValuesIn(updates2));
 
-TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrder){
-    Insertion input=GetParam();
-    d.remoteInsert(1, input.s1);
-    d.remoteRemove(1, input.s2);
+
+TEST_F(documentTest, RemovalPosOrder){
+    symbol s1('c', 1, 1, {1}, false);
+    symbol s2('c', 1, 1, {1}, false);
+    d.remoteInsert(1, s1);
+    d.remoteRemove(1, s2);
 
     ASSERT_FALSE(d.getSymbols().empty());
-
-    EXPECT_EQ(input.expected[0], d.getSymbols().front()[0]);
+    EXPECT_EQ(document::emptySymbol, d.getSymbols().front()[0]);
 }
-Insertion inserts2[]={
-        Insertion(symbol('c', 1, 1, {1}, false), symbol('c', 1, 1, {1}, false),
-                  {document::emptySymbol}),
 
+TEST_P(docRemoteRemoveSymbolTest, RemovalPosOrderErrors){
+    Insertion input=GetParam();
+    d.remoteInsert(1, input.s1);
+    EXPECT_THROW(d.remoteRemove(1, input.s2), documentException);
+}
+Insertion inserts3[]={
         Insertion(symbol('c', 1, 1, {1}, false), symbol('b', 1, 1, {1}, false),
                   {symbol('c', 1, 1, {1}, false)}),
 
         Insertion(symbol('c', 1, 1, {1}, false), symbol('c', 1, 1, {1, 2}, false),
                   {symbol('c', 1, 1, {1}, false)}),
 };
-INSTANTIATE_TEST_SUITE_P(RemoveRemoteSymbols, docRemoteRemoveSymbolTest, testing::ValuesIn(inserts2));
+INSTANTIATE_TEST_SUITE_P(RemoveRemoteSymbolsErrors, docRemoteRemoveSymbolTest, testing::ValuesIn(inserts3));
 
 TEST_F(documentTest, canRetrieveSiteIds){
     std::pair<int, int> i1={0,0}, i2={0,1}, i3={0,2};
