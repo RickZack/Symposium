@@ -45,6 +45,7 @@ clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), appIsClos
     this->client.setClientDispatcher(this);
     connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::TimerExpired);
     this->userIsLogged = false;
+    this->connectionClosed = true;
 }
 
 int clientdispatcher::run(int argc, char **argv){
@@ -55,6 +56,15 @@ int clientdispatcher::run(int argc, char **argv){
     (this->winmanager).setActive(w);
     w.show();
     return a.exec();
+}
+
+void clientdispatcher::setServerAddress(std::string address, std::string port){
+    this->svAddress = QHostAddress(QString::fromStdString(address));
+    this->svPort = std::stoi(port);
+}
+
+std::pair<std::string, std::string> clientdispatcher::getServerAddress(){
+    return (std::make_pair<std::string, std::string>(this->svAddress.toString().toStdString(), std::to_string(this->svPort)));
 }
 
 void clientdispatcher::openConnection(){
@@ -68,6 +78,7 @@ void clientdispatcher::openConnection(){
         if(!this->socket.waitForConnected()){
             this->winmanager.activeWindow().failure("-1");
         }else{
+            this->connectionClosed = false;
             //quando riceviamo qualcosa eseguiamo la funzione di lettura (readyRead)
             connect(&(this->socket), &QIODevice::readyRead, this, &clientdispatcher::readyRead);
             //quando il socket si sconnette, chiamiamo il metodo connectionLost()
@@ -128,7 +139,6 @@ void clientdispatcher::readyRead(){
             }
         } catch (messageException& e) {
             //eccezione di insuccesso dell'operazione
-
             this->winmanager.activeWindow().failure(QString::fromStdString(mes->getErrDescr()));
             this->userpwd="";
 
@@ -153,7 +163,7 @@ void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageT
     //inviamo il messaggio
     uscita << byteArray;
     if (uscita.status() != QDataStream::Ok){
-        if(!appIsClosing)
+        if(!appIsClosing && !connectionClosed)
             throw sendFailure();
     }else{
         std::chrono::milliseconds tempo = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
@@ -163,8 +173,10 @@ void clientdispatcher::sendMessage(const std::shared_ptr<clientMessage> MessageT
 }
 
 void clientdispatcher::connectionLost(){
-    if(!appIsClosing)
+    if(!appIsClosing){
+        this->connectionClosed = true;
         this->winmanager.activeWindow().failure("-1");
+    }
 }
 
 void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend){
@@ -424,7 +436,7 @@ void clientdispatcher::logout() {
     }
 }
 
-updateDocMessage clientdispatcher::mapSiteIdToUser(const document &currentDoc) {
+void clientdispatcher::mapSiteIdToUser(const document &currentDoc) {
     std::shared_ptr<updateDocMessage> mess = std::make_shared<updateDocMessage>(this->client.mapSiteIdToUser(currentDoc));
     try {
         //inviamo il messaggio
@@ -497,6 +509,10 @@ const document& clientdispatcher::getOpenDocument(){
 
 uint_positive_cnt::type clientdispatcher::getOpenFileID(){
     return this->openFileID;
+}
+
+privilege clientdispatcher::getMyPrivilegeOnFileOpen(){
+    return this->client.getActiveFiletoOpenbyID(this->openFileID).getUserPrivilege(this->getUser().getUsername());
 }
 
 void clientdispatcher::closeApp(){

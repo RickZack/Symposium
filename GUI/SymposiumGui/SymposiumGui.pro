@@ -67,6 +67,7 @@ SOURCES += \
         notepad.cpp \
         notification.cpp \
         onlineusers.cpp \
+        option.cpp \
         qtexteditlabels.cpp \
         sigin.cpp \
         signup.cpp \
@@ -120,6 +121,7 @@ HEADERS += \
         notepad.h \
         notification.h \
         onlineusers.h \
+        option.h \
         qtexteditlabels.h \
         sigin.h \
         signup.h \
@@ -156,6 +158,7 @@ FORMS += \
         notepad.ui \
         notification.ui \
         onlineusers.ui \
+        option.ui \
         sigin.ui \
         signup.ui \
         successlinks.ui \

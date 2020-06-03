@@ -240,17 +240,35 @@ void inserturi::successInsert()
     enableButtons();
     ui->lineEdit->setText("");
     ui->name->setText("");
-    notification notWindow(this, "Link has been successfully created!");
-    int ret=notWindow.exec();
-    if(ret==0)
-    {
-         notepad* notepadWindow= new notepad(nullptr,privilege,privilege,pathLink,cl.getOpenDocument(),cl.getOpenFileID(), *this, true);
-         notepadWindow->setWindowTitle(title);
-         goToWindow(*notepadWindow);
-         notepadWindow->showLabels();
-         if(privilege==Symposium::privilege::readOnly)
-             notepadWindow->setreadonly();
+
+    //check if the privilege granted is the same requested by the user
+    if(privilege == cl.getMyPrivilegeOnFileOpen()){
+        notification notWindow(this, "Link has been successfully created!");
+        int ret=notWindow.exec();
+        if(ret==0)
+        {
+             notepad* notepadWindow= new notepad(nullptr,privilege,privilege,pathLink,cl.getOpenDocument(),cl.getOpenFileID(), *this, true);
+             notepadWindow->setWindowTitle(title);
+             goToWindow(*notepadWindow);
+             notepadWindow->showLabels();
+             if(privilege==Symposium::privilege::readOnly)
+                 notepadWindow->setreadonly();
+        }
+    }else{
+        notification notWindow(this, "You don't have permission to open the file with the selected privilege. The file was added with the highest privilege level assigned by the owner.");
+        int ret=notWindow.exec();
+        if(ret==0)
+        {
+             notepad* notepadWindow= new notepad(nullptr,privilege,privilege,pathLink,cl.getOpenDocument(),cl.getOpenFileID(), *this, true);
+             notepadWindow->setWindowTitle(title);
+             goToWindow(*notepadWindow);
+             notepadWindow->showLabels();
+             if(privilege==Symposium::privilege::readOnly)
+                 notepadWindow->setreadonly();
+        }
     }
+
+
 }
 
 void inserturi::on_cancel_clicked()

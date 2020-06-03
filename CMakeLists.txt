@@ -13,7 +13,7 @@ if(WIN32)
     endif (CMAKE_COMPILER_IS_MINGW)
     #set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/minGW73_64/lib/cmake")
     #set(CMAKE_PREFIX_PATH "D:/akimo/app/Qt/5.12.2/mingw73_64/lib/cmake")
-    #set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/mingw73_64/lib/cmake")
+    set(CMAKE_PREFIX_PATH "C:/Qt/5.12.2/mingw73_64/lib/cmake")
 else()
     set(CMAKE_PREFIX_PATH "/home/riccardo/Qt/5.12.3/gcc_64/lib/cmake")
 endif(WIN32)
@@ -105,6 +105,7 @@ add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SYMPOSIUM_CLIENT}
         GUI/SymposiumGui/winmanager.cpp GUI/SymposiumGui/winmanager.h
         GUI/SymposiumGui/symwininterface.h GUI/SymposiumGui/symwininterface.cpp
         GUI/SymposiumGui/onoff_networkinteraction.h
+        GUI/SymposiumGui/option.h GUI/SymposiumGui/option.cpp GUI/SymposiumGui/option.ui
         )
 
 # Files and headers for SymposiumServer target: this is the executable that will run the server

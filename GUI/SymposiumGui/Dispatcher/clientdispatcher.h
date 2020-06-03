@@ -82,6 +82,7 @@ namespace Symposium{
         uint_positive_cnt::type openFileID;                     /**< variable to contain the id of file that client want to open or has just created  */
         bool appIsClosing;                                      /**< this variable is true if the application will close, false otherwise  */
         bool userIsLogged;                                      /**< this variable is true if the user is logged in, false otherwise  */
+        bool connectionClosed;
     public:
         clientdispatcher(QObject *parent = nullptr);
 
@@ -91,6 +92,10 @@ namespace Symposium{
          * @param argv passed from the main function
          */
         int run(int argc, char **argv);
+
+        void setServerAddress(std::string address, std::string port);
+
+        std::pair<std::string, std::string> getServerAddress();
 
         /**
          * @brief start the @ref timer if it is not already start, otherwise insert the @ref timeToSend into queue @ref attese
@@ -317,7 +322,7 @@ namespace Symposium{
         void logout();
 
 
-        updateDocMessage mapSiteIdToUser(const document &currentDoc);
+        void mapSiteIdToUser(const document &currentDoc);
 
         /**
          * @brief it provides a string with all file that in user's root directory
@@ -361,6 +366,8 @@ namespace Symposium{
          * @return the id of the file that contain the document to be open
          */
         uint_positive_cnt::type getOpenFileID();
+
+        privilege getMyPrivilegeOnFileOpen();
 
         /**
          * @brief it stop the timer when server has reply. If the queue @ref attese is not empty, it start a new timer
