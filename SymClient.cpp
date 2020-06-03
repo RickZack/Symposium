@@ -475,6 +475,14 @@ const document& SymClient::getActiveDocumenttoOpenbyID(uint_positive_cnt::type i
     throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
 }
 
+const file& SymClient::getActiveFiletoOpenbyID(uint_positive_cnt::type id){
+    for (std::shared_ptr<file> it:this->activeFile){
+        if((it->getId() == id))
+            return *it;
+    }
+    throw SymClientException(SymClientException::noActiveFile, UnpackFileLineFunction());
+}
+
 colorGen & SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
     for (auto& it:this->activeDoc){
         if((it.first->getId() == id))

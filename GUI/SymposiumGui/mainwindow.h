@@ -59,6 +59,8 @@ private slots:
      */
     void on_exitBut_clicked();
 
+    void on_Button_opt_clicked();
+
 private:
     Ui::MainWindow *ui;
     /**

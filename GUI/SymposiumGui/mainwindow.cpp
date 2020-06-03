@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "Dispatcher/clientdispatcher.h"
 #include "QDebug"
+#include "option.h"
 
 MainWindow::MainWindow(QWidget *parent, SymWinManager& m, Symposium::clientdispatcher& p) :
     QMainWindow(parent),
@@ -90,4 +91,10 @@ void MainWindow::on_exitBut_clicked()
     int ret=ex.exec();
     if(ret==0)
         enableStyleButtons();
+}
+
+void MainWindow::on_Button_opt_clicked()
+{
+    Option* o = new Option(nullptr, &cl);
+    o->show();
 }

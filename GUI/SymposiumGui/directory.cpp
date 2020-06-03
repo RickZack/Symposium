@@ -941,9 +941,9 @@ void directory::openSelectedSource(){
               // The user has to choose the privilege:
               this->showPrivilegeButtons();
               // set the old Privilege
-              if (this->initialPriv=="modify")
+              if (this->initialPriv=="writer")
                   priv= Symposium::privilege::modify;
-              else if(this->initialPriv=="readOnly")
+              else if(this->initialPriv=="reader")
                   priv= Symposium::privilege::readOnly;
               else
                   priv= Symposium::privilege::owner;

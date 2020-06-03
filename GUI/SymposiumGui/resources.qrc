@@ -171,5 +171,6 @@
         <file>icon/left-and-right-arrows.png</file>
         <file>icon/left-arrow.png</file>
         <file>icon/logo_server_GUI.png</file>
+        <file>icon/option.png</file>
     </qresource>
 </RCC>

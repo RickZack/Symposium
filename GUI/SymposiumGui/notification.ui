@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>556</width>
-    <height>130</height>
+    <height>163</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,8 +23,8 @@
   <widget class="QPushButton" name="ok">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>70</y>
+     <x>220</x>
+     <y>120</y>
      <width>121</width>
      <height>31</height>
     </rect>
@@ -43,9 +43,9 @@ border-radius:15px;</string>
    <property name="geometry">
     <rect>
      <x>37</x>
-     <y>30</y>
+     <y>20</y>
      <width>482</width>
-     <height>30</height>
+     <height>81</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -59,6 +59,9 @@ text-align: center;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>
