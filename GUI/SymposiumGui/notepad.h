@@ -41,7 +41,7 @@ public:
     explicit notepad(QWidget *parent,Symposium::privilege priv,Symposium::privilege privOpen,std::string pathToFile,const Symposium::document& doc, Symposium::uint_positive_cnt::type fileID, SymWinInterface& si, bool parentIsTransient=false);
 
     //Not used at the moment
-    void success() override{}
+    void success() override;
 
     void failure(const QString&) override;
 
@@ -203,9 +203,10 @@ private:
      * @param text: the character inserted into the document
      * @param format: the format of the character inserted into the document
      */
+public:
     void sendSymbolToInsert(unsigned row, unsigned column, QString text, QTextCharFormat format);
 
-
+private:
     /**
      * @brief countCharsInLine: counts the number of the chars in a line
      * @param line: index of the line

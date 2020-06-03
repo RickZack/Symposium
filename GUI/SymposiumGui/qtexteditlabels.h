@@ -105,6 +105,7 @@ public:
     void translateCursors(const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>>& users);
     int j=0;
 
+    void insertFromMimeData(const QMimeData *source) override;
 private:
 
     Symposium::uint_positive_cnt::type thisUserSiteId=1;

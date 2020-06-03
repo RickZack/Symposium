@@ -152,20 +152,24 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     if(toInsert.getCh()=='\r'){
         // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0+1,0)
         this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
-        symbol checkSym=symbols[i0][i1];
-        if(checkSym.getCh()=='\r'){
-            alignmentStyle[i0]=styleValues;
-            return newSymb;
-    }else{
+
+
+        //Need to adjust rows content: take the portion that will be after the '\r'
+        //and copy to a new line, then erase from the line
         symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
-        symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end());
-        symbols.emplace_back(1,emptySymbol);
+        symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end()-1);
+        //symbols.emplace_back(1,emptySymbol);
         alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
         alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
-        alignmentStyle.emplace_back(std::pair(alignType::left,0));
+        //alignmentStyle.emplace_back(std::pair(alignType::left,0));
         //alignmentStyle.resize(symbols.size(),std::pair(alignType::left,0));
+        if(i1>0 && symbols[i0][i1-1].getCh()=='\r'){
+            i0+=1;
+            i1=0;
         }
-    }else{
+
+    }
+    else{
         // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
     }
@@ -317,7 +321,9 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
             return generatePosBetween(pos1, pos2, newPos, level + 1, b, a);
         }
         else{
-            throw documentException(documentException::documentExceptionCodes::fixPositionSorting, UnpackFileLineFunction());
+            //throw documentException(documentException::documentExceptionCodes::fixPositionSorting, UnpackFileLineFunction());
+            throw std::exception();
+
         }
     }
     return std::vector<int>();
@@ -370,13 +376,21 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     symbol sym=symbols[i0][i1];
     if(sym.getCh()!='\r')
         this->numchar--;
+    else if(sym.getCh()==emptyChar)
+        this->numchar++;
     //taking into account the position of the cursor.
 
     this->updateOtherCursorPos(siteId,i0,i1,sym,false);
     this->updateCursorPos(siteId,i0,i1);
 
     symbols[i0].erase(symbols[i0].begin()+i1);
-    if(symbols[i0].empty()){
+    unsigned lines=countsNumLines();
+    if((sym.getCh()=='\r') && i0+1<lines){ //removing a newline means copying the contents of new row into current
+        unsigned charsToMove=countCharsInLine(i0+1);
+        symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
+        symbols.erase(symbols.begin()+i0+1);
+    }
+    else if(symbols[i0].empty()){
         symbols.erase(symbols.begin()+i0);
         alignmentStyle.erase(alignmentStyle.begin()+i0, alignmentStyle.end());
     }
@@ -398,6 +412,13 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     this->updateOtherCursorPos(siteId,i0,i1,toInsert,true);
     if(toInsert.getCh()=='\r'){
         this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
+        //Need to adjust rows content: take the portion that will be after the '\r'
+        //and copy to a new line, then erase from the line
+        symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
+        symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end()-1);
+        //symbols.emplace_back(1,emptySymbol);
+        alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
+        alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
     }
     else{
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
@@ -408,25 +429,34 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     format charFormat=toInsert.getCharFormat();
     std::pair<alignType,unsigned> styleValues;
     styleValues={charFormat.type,charFormat.indexStyle};
-    alignmentStyle[i0]=styleValues;
     symbols[i0].insert(symbols[i0].begin()+i1,toInsert);
+    alignmentStyle[i0]=styleValues;
     return indexes;
 
 }
 
 
 std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
-    if(toRemove.getCh()!='\r')
+    if(toRemove.getCh()!='\r' )
         this->numchar--;
-    std::pair<int,int> pos=findPosition(toRemove);
+    std::pair<int,int> pos=findPosition(toRemove); //throws if not found
     int i0=pos.first;
     int i1=pos.second;
     this->updateOtherCursorPos(siteId,i0,i1,toRemove,false);
     this->updateCursorPos(siteId,i0,i1);
-    if(i0!=-1 && i1!=-1 && symbols[i0][i1]==toRemove)
-         symbols[i0].erase(symbols[i0].begin()+i1);
-    else
-        return std::pair<unsigned int, unsigned int>();
+
+    symbols[i0].erase(symbols[i0].begin()+i1);
+    unsigned lines=countsNumLines();
+    if(toRemove.getCh()=='\r' && i0+1<lines){ //removing a newline means copying the contents of new row into current
+        unsigned charsToMove=countCharsInLine(i0+1);
+        symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
+        symbols.erase(symbols.begin()+i0+1);
+    }
+    else if(symbols[i0].empty()){
+        symbols.erase(symbols.begin()+i0);
+        alignmentStyle.erase(alignmentStyle.begin()+i0, alignmentStyle.end());
+    }
+
 /*
     if(i1==0 && symbols[0][0]==emptySymbol)
         alignmentStyle.erase(alignmentStyle.begin()+i0);
@@ -666,7 +696,8 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
     //if the struct is empty or char is less than first char
     auto firstSymbol=symbols[0][0];
     if(symbols.empty()||symbol<firstSymbol){
-        throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
+ //       throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
+        throw std::exception();
     }
 
     // counts the number of chars in the last line
@@ -675,7 +706,9 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
 
     //char is greater than all existing chars(insert at end)
     if(symbol>lastChar){
-        throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
+        //throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
+        throw std::exception();
+
     }
 
 
@@ -746,7 +779,9 @@ unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symb
     else if(sym==vector[right]){
         return right;
     }else
-        throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
+        //throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
+        throw std::exception();
+
 
 }
 
@@ -764,7 +799,7 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsign
                                     const symbol &symb, bool ins) {
     for(auto& i: activeUsers){
         // On the same line, there are cursors with different siteId
-        if(symb.getCh()!='\r' && i.second.row==newRow && i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
+        if((symb.getCh()!='\r') && i.second.row==newRow && i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
             // The action is to insert a character
             if(ins){
                 i.second.col+=1;

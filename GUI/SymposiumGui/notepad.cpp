@@ -54,6 +54,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
 {
     ui->setupUi(this);
     setMinimumSize(800, 600);
+    //ui->textEdit->setParent(this);
     ui->statusbar->addWidget(ui->labelChars);
     ui->textEdit->setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -72,6 +73,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     addStyleFormat();
     // Set default style
     this->textStyle(0); //=Standard
+
 
 
     connect(ui->fontComboBox, QOverload<const QString &>::of(&QComboBox::activated), this, &notepad::textFamily);
@@ -279,6 +281,10 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
 
     setFocusPolicy(Qt::StrongFocus);
     setAttribute( Qt::WA_DeleteOnClose );
+
+    QColor black(Qt::GlobalColor::black);
+    black.setAlpha(220);
+    colorChanged(black);
 }
 
 template<>
@@ -408,6 +414,8 @@ void notepad::addStyleFormat()
 void notepad::on_actionColorText_triggered()
 {
   textColor();
+  ui->textEdit->setFocus();
+
 }
 
 
@@ -416,7 +424,7 @@ void notepad::on_actionAlignTextLeft_triggered()
     textAlign(ui->actionAlignTextLeft);
     this->alignment=Symposium::alignType::left;
     ui->textEdit->scroll();
-
+    ui->textEdit->setFocus();
 }
 
 void notepad::on_actionAlignCenter_triggered()
@@ -424,6 +432,7 @@ void notepad::on_actionAlignCenter_triggered()
     textAlign(ui->actionAlignCenter);
     this->alignment=Symposium::alignType::center;
     ui->textEdit->scroll();
+    ui->textEdit->setFocus();
 }
 
 
@@ -432,6 +441,8 @@ void notepad::on_actionAlignTextRight_triggered()
    textAlign(ui->actionAlignTextRight);
    this->alignment=Symposium::alignType::right;
    ui->textEdit->scroll();
+   ui->textEdit->setFocus();
+
 }
 
 void notepad::on_actionAlignTextJustify_triggered()
@@ -439,6 +450,7 @@ void notepad::on_actionAlignTextJustify_triggered()
     textAlign(ui->actionAlignTextJustify);
     this->alignment=Symposium::alignType::left;
     ui->textEdit->scroll();
+    ui->textEdit->setFocus();
 }
 
 void notepad::on_actionBoldFont_triggered()
@@ -451,6 +463,8 @@ void notepad::on_actionBoldFont_triggered()
         this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
 
     //mergeFormatOnWordOrSelection(fmt);
+    ui->textEdit->setFocus();
+
 }
 
 void notepad::on_actionItalicFont_triggered()
@@ -461,7 +475,7 @@ void notepad::on_actionItalicFont_triggered()
     ui->textEdit->mergeCurrentCharFormat(fmt);
     if(cursor.hasSelection())
         this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
-
+    ui->textEdit->setFocus();
 }
 
 void notepad::on_actionUnderlineFont_triggered()
@@ -472,7 +486,7 @@ void notepad::on_actionUnderlineFont_triggered()
     ui->textEdit->mergeCurrentCharFormat(fmt);
     if(cursor.hasSelection())
         this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
-
+    ui->textEdit->setFocus();
 }
 
 
@@ -628,7 +642,10 @@ void notepad::textSize(const QString &p)
         QTextCharFormat fmt;
         fmt.setFontPointSize(pointSize);
         //mergeFormatOnWordOrSelection(fmt);
-         ui->textEdit->mergeCurrentCharFormat(fmt);
+        ui->textEdit->mergeCurrentCharFormat(fmt);
+        QColor lightColor=fmt.foreground().color();
+        lightColor.setAlpha(180);
+        ui->textEdit->setTextColor(lightColor);
          if(cursor.hasSelection())
              this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
 
@@ -693,7 +710,7 @@ void notepad::fillTextEdit(){
     #endif
     if(symbols[0][0].getCh()==Symposium::document::emptyChar){
         QColor black=Qt::black;
-        black.setAlpha(160);
+        black.setAlpha(180);
         ui->textEdit->setTextColor(black);
         ui->textEdit->setText("");
         return;
@@ -952,6 +969,10 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     unsigned row, column;
     NotRefreshLabels=true;
 
+    QColor lightColor=format.foreground().color();
+    lightColor.setAlpha(180);
+    ui->textEdit->setTextColor(lightColor);
+
     if(event->matches(QKeySequence::Paste)){
         this->okPaste=true;
         const QMimeData *md = QApplication::clipboard()->mimeData();
@@ -976,9 +997,6 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     }
 
     this->sendSymbolToInsert(row,column,testo,format);
-    QColor lightColor=format.foreground().color();
-    lightColor.setAlpha(180);
-    ui->textEdit->setTextColor(lightColor);
     ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
 }
 
@@ -1032,22 +1050,28 @@ void notepad::handleDeleteKey(){
     }/* Handle the elimination of a selected text */
     else
     {
-        unsigned int i=cursor.selectionStart();
-        unsigned int f=cursor.selectionEnd();
-        cursor.setPosition(i);
-        cursor.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
-        int colToSend=cursor.positionInBlock()-1; row=cursor.blockNumber();
-        while(i!=f){
-          cursor.setPosition(i);
-          cursor.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
-          col=cursor.positionInBlock()-1;
-          if(col==-1){
-              /* I'm at the end of the line */
-              col=colToSend;
-              colToSend=0;
-          }
-          cl.localRemove(this->documentId,{row,colToSend});
-          i++;
+        int start=cursor.selectionStart();
+        int end=cursor.selectionEnd();
+
+        cursor.setPosition(start, QTextCursor::KeepAnchor);
+        int startBlock= cursor.blockNumber();
+        int startCol= cursor.positionInBlock();
+
+        cursor.setPosition(end, QTextCursor::KeepAnchor);
+        int endBlock= cursor.blockNumber();
+        int endCol= cursor.positionInBlock();
+
+        while(!(startBlock==endBlock && startCol==endCol)) {
+            if(endCol==0) {
+                cursor.movePosition(QTextCursor::PreviousBlock, QTextCursor::KeepAnchor);
+                cursor.movePosition(QTextCursor::EndOfBlock,QTextCursor::KeepAnchor);
+            }
+            else
+                cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+            endBlock=cursor.blockNumber();
+            endCol=cursor.positionInBlock();
+            cl.localRemove(this->doc.getId(),{endBlock,endCol});
+
         }
     }
     this->numChars=this->doc.getNumchar();
@@ -1061,11 +1085,13 @@ void notepad::handleDeleteKey(){
            ui->textEdit->setText("");
         }
         */
+    /*
     if(row==0 && col==0){
         QColor lightColor=Qt::black;
         lightColor.setAlpha(180);
         ui->textEdit->setTextColor(lightColor);
     }
+     */
 
  }
 
@@ -1109,6 +1135,7 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
 }
 
 void notepad::contV_action(){
+
     QTextCursor curs=ui->textEdit->textCursor();
     int posAct= curs.position();
     int posTmp=posAct-this->dim;
@@ -1120,7 +1147,7 @@ void notepad::contV_action(){
         curs.setPosition(posTmp);
         curs.movePosition(QTextCursor::Right,QTextCursor::KeepAnchor);
         previousC=column; column=curs.positionInBlock()-1;
-        /* I'm changing the line*/
+        // I'm changing the line
         if(column==-1){
             row=curs.blockNumber()-1;
             column=previousC+1;
@@ -1378,7 +1405,35 @@ void notepad::on_textEdit_cursorPositionChanged()
 }
 
 void notepad::colorText(){
-    std::vector<std::vector<Symposium::symbol>> symbols;
+
+    NotRefreshLabels=true;
+
+    auto& symbols=doc.getSymbols();
+    QTextCursor curs=ui->textEdit->textCursor();
+
+    //Starting position to restore
+    int initRow=curs.blockNumber();
+    int initCol=curs.positionInBlock();
+
+    //Start from the beginning
+    curs.movePosition(QTextCursor::Start);
+    for(auto& row:symbols){
+        for(auto& sym:row){
+            Symposium::Color colHigh=cl.getColor(doc.getId(),sym.getSiteId());
+            QColor userCol=static_cast<QColor>(colHigh);
+            userCol.setAlpha(180);
+            curs.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+            QTextCharFormat format=curs.charFormat();
+            format.setBackground(userCol);
+            curs.setCharFormat(format);
+            //Release the anchor
+            curs.movePosition(QTextCursor::PreviousCharacter);
+            curs.movePosition(QTextCursor::NextCharacter);
+        }
+    }
+    ui->textEdit->changePosition(initRow,initCol);
+    NotRefreshLabels=false;
+/*    std::vector<std::vector<Symposium::symbol>> symbols;
     NotRefreshLabels=true;
     #ifdef DISPATCHER_ON
     symbols=this->doc.getSymbols();
@@ -1387,7 +1442,7 @@ void notepad::colorText(){
     #endif
     QTextCursor curs=ui->textEdit->textCursor();
 
-    /* store the initial position of the cursor */
+    *//* store the initial position of the cursor *//*
     int row=curs.blockNumber();
     int column=curs.positionInBlock();
 
@@ -1435,13 +1490,32 @@ void notepad::colorText(){
         }
     }
     ui->textEdit->changePosition(row,column);
-    NotRefreshLabels=false;
+    NotRefreshLabels=false;*/
  }
 
 void notepad::uncolorText(){
     NotRefreshLabels=true;
+
+    auto& symbols=doc.getSymbols();
     QTextCursor curs=ui->textEdit->textCursor();
-    /* store the initial position of the cursor */
+
+    //Starting position to restore
+    int initRow=curs.blockNumber();
+    int initCol=curs.positionInBlock();
+
+    //Select the whole doc
+    curs.movePosition(QTextCursor::Start);
+    curs.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+    QTextCharFormat format=curs.charFormat();
+    QColor white(Qt::GlobalColor::white);
+    format.setBackground(white);
+    curs.setCharFormat(format);
+
+    ui->textEdit->changePosition(initRow,initCol);
+    NotRefreshLabels=false;
+/*    NotRefreshLabels=true;
+    QTextCursor curs=ui->textEdit->textCursor();
+    *//* store the initial position of the cursor *//*
     int row=curs.blockNumber();
     int column=curs.positionInBlock();
     curs.movePosition(QTextCursor::Start);
@@ -1465,7 +1539,7 @@ void notepad::uncolorText(){
       }
       }
      ui->textEdit->changePosition(row,column);
-    NotRefreshLabels=false;
+    NotRefreshLabels=false;*/
 }
 
 
@@ -1478,7 +1552,7 @@ void notepad::on_actionhighlight_triggered()
     if(highActivated==false){
         this->highActivated=true;
         ui->actionhighlight->setChecked(true);
-        this->colorText();
+        cl.mapSiteIdToUser(doc);
     }
     else{
         this->highActivated=false;
@@ -1632,6 +1706,10 @@ void notepad::contextMenuEvent(QContextMenuEvent *){
     QPoint globalPos=ui->textEdit->cursor().pos();
     submenu.exec(globalPos);
 
+}
+
+void notepad::success() {
+    colorText();
 }
 
 
