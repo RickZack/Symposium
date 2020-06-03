@@ -188,9 +188,10 @@ namespace Symposium {
 
         /**
          * @brief check if the resource is available to remove operation
+         * @param username the user who wants to perform the operation
          * @return true is the remove operation is possible, false otherwise
          */
-        virtual bool isReadyToRemove() const=0;
+        virtual bool isReadyToRemove(const std::string &username) const=0;
 
         bool operator==(const filesystem &rhs) const;
 
@@ -314,9 +315,10 @@ namespace Symposium {
 
         /**
          * @brief check if the resource is available to remove operation, so no users working on document
+         * @param username the user who wants to perform the operation
          * @return true is the remove operation is possible, false otherwise
          */
-        virtual bool isReadyToRemove() const override;
+        virtual bool isReadyToRemove(const std::string &username) const override;
 
         bool operator==(const file &rhs) const;
 
@@ -374,10 +376,13 @@ namespace Symposium {
         virtual std::string print(const std::string &targetUser, bool recursive = false, unsigned int indent = 0) const override;
 
         /**
-         * @brief the remove operation of link is always possible
-         * @return true
+         * @brief the remove operation is possible if: the user is not only owner of the file pointed,
+         *        or the user has lower privilege then owner or if the user is the only owner of the file pointed
+         *        this method has to check that the file pointed doesn't have any active user
+         * @param username the user who wants to perform the operation
+         * @return true if the operation is possible, false otherwise
          */
-        virtual bool isReadyToRemove() const override;
+        virtual bool isReadyToRemove(const std::string &username) const override;
 
 
         virtual ~symlink() override=default;
@@ -449,7 +454,21 @@ namespace Symposium {
          *
          * Removes a file, a symlink or a directory from the current directory. The parameter
          * @e targetUser is used to authenticate the action in case of the target resource @e resName
-         * is a file
+         * is a file.
+         * The directory is remove if all resources are available for deletion
+         * <table>
+         * <caption id="multi_row">Removing policy for file and symlink</caption>
+         * <tr><th>Resource type<th>Privilege of user who perform action<th>Other User Privilege<th> Active user in the moment of action <th> Result of the operation
+         *  <tr><td rowspan="4">File
+         *  <td rowspan="3">owner<td>owner <td> Yes/No <td> File will not be deleted because there are other users with the privilege owner
+         *  <tr><td rowspan="2">readOnly, modify <td>Yes <td> File will not be deleted because there are other users working on it
+         *  <tr><td>No<td> File will be deleted
+         *  <tr><td>readOnly, modify<td>owner, readOnly, modify <td> Yes/No <td> File will not be deleted because there is at least one owner of this document
+         *  <tr><td rowspan="4">Symlink<td  rowspan="3">Owner <td>Owner <td>Yes/No <td>Symlink will be deleted and the user will no longer have access to the file pointed
+         *  <tr><td rowspan="2">readOnly, Modify<td>Yes<td>Symlink and the file pointed will not be deleted because there are other users working on the file pointed
+         *  <tr> <td>No<td>Symlink and the file pointed will be deleted because there are other users working on the file pointed
+         *  <tr><td>readOnly, Modify<td> Owner, ReadOnly, modify <td> Yes/No <td>Symlink will be deleted but the file pointed will not
+         *  </table>
          */
         virtual std::shared_ptr<filesystem>
         remove(const user &targetUser, const std::string &resPath, const std::string &resId);
@@ -471,9 +490,10 @@ namespace Symposium {
 
         /**
          * @brief check if all resources in the directory is available to remove operation
+         * @param username the user who wants to perform the operation
          * @return true is the remove operation is possible, false otherwise
          */
-        virtual bool isReadyToRemove() const override;
+        virtual bool isReadyToRemove(const std::string &username) const override;
 
         virtual ~directory() override= default;
 

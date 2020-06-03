@@ -505,7 +505,7 @@ TEST_F(FileSystemTestSharing, printDirectoryRecursive){
 
 /*
  * Deletion policies
- * The creator of the file hasn't to remain owner of the file for its entire file.
+ * The creator of the file hasn't to remain owner of the file for its entire life.
  * A call to remove on a symlink deletes the symlink and the file pointed if:
  *          + the user is the only owner of the file and no user is active on it;
  * A call to remove on a symlink deletes the symlink but not the file pointed if:
@@ -758,12 +758,12 @@ TEST_F(FileSystemTestSharing, removeDirectoryNotRemovesIfMoreOwnersOnContainedEl
      */
     //make "u" an owner fo file2
     file2->setUserPrivilege(username, privilege::owner);
-    EXPECT_THROW(directory::getRoot()->remove(anotherUser, "./1", "2"), filesystemException);
+    EXPECT_THROW(directory::getRoot()->remove(anotherUser, "./", "2"), filesystemException);
 
     //anotherUser dir and contained elements should not be deleted, because deletion of file2 caused an error
-    EXPECT_NO_THROW(directory::getRoot()->get("./1", "2"));
-    EXPECT_NO_THROW(directory::getRoot()->get("./1/2", std::to_string(file2->getId())));
-    EXPECT_NO_THROW(directory::getRoot()->get("./1/2", std::to_string(sym1->getId())));
+    EXPECT_NO_THROW(directory::getRoot()->get("./", "2"));
+    EXPECT_NO_THROW(directory::getRoot()->get("./2", std::to_string(file2->getId())));
+    EXPECT_NO_THROW(directory::getRoot()->get("./2", std::to_string(sym1->getId())));
 }
 
 
