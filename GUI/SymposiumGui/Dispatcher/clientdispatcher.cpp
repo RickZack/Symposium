@@ -91,7 +91,8 @@ void clientdispatcher::openConnection(){
 
 void clientdispatcher::readyRead(){
     //questa funzione viene chiamata quando il server ci ha inviato qualcosa
-
+    //creiamo la variabile che conta quanti messaggi sono processati nel ciclo
+    int messageProcessed = 0;
     //creiamo la variabile che conterra il puntatore al messaggio ricevuto dal socket
     std::shared_ptr<serverMessage> mes;
     //creiamo il QByteArray che conterrà ciò che riceviamo dal socket
@@ -100,7 +101,14 @@ void clientdispatcher::readyRead(){
     QDataStream in(&(this->socket));
     //vediamo quanti byte sono disponibili per la lettura
     while(this->socket.bytesAvailable()){
-        qDebug() << "Bytes da leggere: " << this->socket.bytesAvailable();
+        //se i messaggi già processati sono più di 20, usciamo ed emettiamo il segnale
+        //per poi rientrare nella readyRead
+        if(messageProcessed > 20){
+            qDebug() << "Numero massimo di pacchetti processato;";
+            emit readyRead();
+            return;
+        }
+        qDebug() << "Pacchetto " << messageProcessed+1 << " - Bytes da leggere: " << this->socket.bytesAvailable();
         //stream di stringa che conterrà i dati che abbiamo ricevuto, prima di essere de-serializzati
         std::stringstream accumulo;
         //facciamo partire la transazione
@@ -148,6 +156,7 @@ void clientdispatcher::readyRead(){
             //DA VEDERE CHE MESSAGGIO DEVE DARE SULLA FINESTRA
 
         }
+        messageProcessed++;
     }
 
 }
@@ -527,6 +536,10 @@ const std::forward_list<std::pair<const user *, sessionData>> clientdispatcher::
 
 std::unordered_map<std::string, privilege> clientdispatcher::allUser(uint_positive_cnt::type documentID){
     return (this->client.allUsersonDocument(documentID));
+}
+
+void clientdispatcher::successSetUserColors(uint_positive_cnt::type docID){
+    this->winmanager.getNotepad(docID).success();
 }
 
 const user& clientdispatcher::getUser(){

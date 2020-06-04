@@ -386,6 +386,8 @@ namespace Symposium{
          */
         void failureRemovedResource();
 
+        void successSetUserColors(uint_positive_cnt::type docID);
+
         ~clientdispatcher() override;
 
     private:
