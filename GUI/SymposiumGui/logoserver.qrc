@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>icon/logo_server_GUI.png</file>
+        <file>icon/down-arrow.png</file>
+    </qresource>
+</RCC>

@@ -7,20 +7,32 @@
     <x>0</x>
     <y>0</y>
     <width>473</width>
-    <height>134</height>
+    <height>243</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:rgb(249, 247, 241);</string>
+  </property>
   <widget class="QLineEdit" name="SV_Address">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>40</y>
-     <width>113</width>
-     <height>20</height>
+     <x>190</x>
+     <y>30</y>
+     <width>201</width>
+     <height>33</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string/>
@@ -29,11 +41,20 @@
   <widget class="QLineEdit" name="SV_Port">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>70</y>
-     <width>113</width>
-     <height>20</height>
+     <x>190</x>
+     <y>90</y>
+     <width>201</width>
+     <height>33</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;
+color: rgb(58, 80, 116); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;
+border-width: 1px; 
+border-style: solid;
+border-color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string/>
@@ -42,11 +63,15 @@
   <widget class="QLabel" name="label_SV_Address">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>40</y>
-     <width>81</width>
-     <height>21</height>
+     <x>50</x>
+     <y>30</y>
+     <width>131</width>
+     <height>33</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string>Server address</string>
@@ -55,11 +80,15 @@
   <widget class="QLabel" name="label_SV_Port">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>70</y>
-     <width>71</width>
-     <height>16</height>
+     <x>70</x>
+     <y>90</y>
+     <width>101</width>
+     <height>33</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
+color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string>Server port</string>
@@ -68,27 +97,39 @@
   <widget class="QPushButton" name="OK_button">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>100</y>
-     <width>75</width>
-     <height>23</height>
+     <x>80</x>
+     <y>160</y>
+     <width>105</width>
+     <height>35</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+   </property>
    <property name="text">
-    <string>OK</string>
+    <string>Ok</string>
    </property>
   </widget>
   <widget class="QPushButton" name="Cancel_button">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>100</y>
-     <width>75</width>
-     <height>23</height>
+     <x>288</x>
+     <y>160</y>
+     <width>105</width>
+     <height>35</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);
+color: rgb(249, 247, 241); 
+font: 14pt &quot;Baskerville Old Face&quot;;
+border-radius:15px;</string>
+   </property>
    <property name="text">
-    <string>Cancel</string>
+    <string>Go back</string>
    </property>
   </widget>
  </widget>

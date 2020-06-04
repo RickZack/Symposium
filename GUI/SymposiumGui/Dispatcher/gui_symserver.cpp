@@ -10,7 +10,7 @@ GUI_SymServer::GUI_SymServer(QWidget *parent) :
 
     setFixedSize(size());
 
-    QPixmap pix(":/icon/logo_server_GUI.png");
+    QPixmap pix(":/icon/icon/logo_server_GUI.png");
     int w = ui->label->width();
     int h = ui->label->height();
     ui->label->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
