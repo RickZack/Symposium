@@ -288,33 +288,43 @@ void qtexteditlabels::translateCursors(const std::forward_list<std::pair<const S
 void qtexteditlabels::insertFromMimeData(const QMimeData *source) {
     QTextCursor cursor = textCursor();
     QTextCharFormat fmt=cursor.charFormat();
-    QColor curCol = this->textColor();
+    QColor curCol = fmt.foreground().color();
     QColor lighter = curCol;
     lighter.setAlpha(180);
     this->setTextColor(lighter);
-/*
-    notepad* n= dynamic_cast<notepad*>(this->parent());
+
     int row=cursor.blockNumber();
     int col=cursor.positionInBlock();
 
     if (source->hasText()) {
-        QString text = source->text();
-        for (auto &x : text) {
+        QString sourceText = source->text();
+        QString toInsert;
+        qDebug()<<"Text in input: "<<sourceText;
+
+
+        for(auto& x:sourceText){
             if (x == '\n' || x == "\u2028" || x == "\u2029") {
                 x = '\r';
+            }
+            else if(!x.isPrint()){
+                continue;
+            }
+            toInsert.push_back(x);
+        }
+        cursor.insertText(toInsert, fmt);
+        for (auto& x : toInsert) {
+            qDebug()<<"pasting "<<x<<" in pos: ["<<row<<", "<<col<<"]";
+            if (x == '\r') {
+                n->sendSymbolToInsert(row, col, QString(x), fmt);
                 row++;
                 col=0;
             }
-            else if ((x.isLetterOrNumber() || x.isSpace() || x.isPunct())){
+            else{
+                n->sendSymbolToInsert(row, col, QString(x), fmt);
                 col++;
             }
-            n->sendSymbolToInsert(row, col, QString(x), fmt);
         }
-        cursor.insertText(text);
     } else
         return;
-        */
-    QTextEdit::insertFromMimeData(source);
-
-
+    //QTextEdit::insertFromMimeData(source);
 }

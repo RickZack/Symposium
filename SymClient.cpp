@@ -427,7 +427,16 @@ void SymClient::setClientDispatcher(clientdispatcher *cl){
 void SymClient::verifySymbol(uint_positive_cnt::type docId, const symbol &sym) {
     document* d = this->getActiveDocumentbyID(docId);
     //Il metodo in verifySymbol mi deve restituire il pair delle coordinate (già detto a Martina che farà la modifica)
-    std::pair<unsigned int, unsigned int> p = d->verifySymbol(sym);
+    std::pair<unsigned int, unsigned int> p;
+    try {
+        p = d->verifySymbol(sym);
+    }
+    catch(const documentException&){
+        return;
+    }
+    catch(const std::exception&){ //FIXME: for debug only, must catch only documentException
+        return;
+    }
     //notifichiamo alla GUI
     #ifdef DISPATCHER_ON
     this->dispatcher->verifySymbol(docId, sym, p);

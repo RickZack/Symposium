@@ -54,7 +54,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
 {
     ui->setupUi(this);
     setMinimumSize(800, 600);
-    //ui->textEdit->setParent(this);
+    ui->textEdit->setNotepad(this);
     ui->statusbar->addWidget(ui->labelChars);
     ui->textEdit->setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -375,6 +375,9 @@ void notepad::on_actionCut_triggered()
 
 void notepad::on_actionPaste_triggered()
 {
+    QColor lightColor=ui->textEdit->textCursor().charFormat().foreground().color();
+    lightColor.setAlpha(180);
+    ui->textEdit->setTextColor(lightColor);
     ui->textEdit->paste();
     this->okPaste=true;
     const QMimeData *md = QApplication::clipboard()->mimeData();
@@ -1120,6 +1123,7 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
     Symposium::symbol sym(ch,cl.getUser().getSiteId(),1,pos,false);
     sym.setCharFormat(charFormat);
     cl.localInsert(this->documentId,sym,indexes);
+    qDebug()<<"Just sent: "<<sym.getCh()<<" in position ["<<indexes.first<<", "<<indexes.second<<"]";
     this->numChars=this->doc.getNumchar();
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
@@ -1135,7 +1139,7 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
 }
 
 void notepad::contV_action(){
-
+/*
     QTextCursor curs=ui->textEdit->textCursor();
     int posAct= curs.position();
     int posTmp=posAct-this->dim;
@@ -1163,7 +1167,7 @@ void notepad::contV_action(){
         } // else
         this->sendSymbolToInsert(row,column,charact,format);
         count++;posTmp++;
-  }
+  }*/
     this->okPaste=false;
 }
 

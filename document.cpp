@@ -119,7 +119,7 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
     if(i0>=symbols.size()){
         symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
         alignmentStyle.resize((i0 + 1)*mult_fac,std::pair(alignType::left,0));
-}
+    }
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     if(i1>=symbols[i0].size()){
        symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
@@ -160,7 +160,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end()-1);
         //symbols.emplace_back(1,emptySymbol);
         alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
-        alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
+        //alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
         //alignmentStyle.emplace_back(std::pair(alignType::left,0));
         //alignmentStyle.resize(symbols.size(),std::pair(alignType::left,0));
         if(i1>0 && symbols[i0][i1-1].getCh()=='\r'){
@@ -376,7 +376,7 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     symbol sym=symbols[i0][i1];
     if(sym.getCh()!='\r')
         this->numchar--;
-    else if(sym.getCh()==emptyChar)
+    else if(sym.getCh()==emptyChar) //FIXME: should never delete emptyChar
         this->numchar++;
     //taking into account the position of the cursor.
 
@@ -389,10 +389,11 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
         unsigned charsToMove=countCharsInLine(i0+1);
         symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
         symbols.erase(symbols.begin()+i0+1);
+        alignmentStyle.erase(alignmentStyle.begin()+i0+1);
     }
-    else if(symbols[i0].empty()){
+    else if(symbols.size()>1 && symbols[i0].size()==1 && symbols[i0][0].getCh()==emptyChar){ //FIXME: should never be empty, at least there is emptyChar
         symbols.erase(symbols.begin()+i0);
-        alignmentStyle.erase(alignmentStyle.begin()+i0, alignmentStyle.end());
+        alignmentStyle.erase(alignmentStyle.begin()+i0);
     }
 
     return sym;
@@ -418,7 +419,7 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end()-1);
         //symbols.emplace_back(1,emptySymbol);
         alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
-        alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
+        //alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
     }
     else{
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
@@ -452,9 +453,9 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
         symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
         symbols.erase(symbols.begin()+i0+1);
     }
-    else if(symbols[i0].empty()){
+    else if(symbols.size()>1 && symbols[i0].size()==1 && symbols[i0][0].getCh()==emptyChar){ //FIXME: should never be empty, at least there is emptyChar
         symbols.erase(symbols.begin()+i0);
-        alignmentStyle.erase(alignmentStyle.begin()+i0, alignmentStyle.end());
+        alignmentStyle.erase(alignmentStyle.begin()+i0);
     }
 
 /*
@@ -833,6 +834,7 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsign
 }
 
 std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVerify) {
+    /*
     std::pair<unsigned int,unsigned int> indexes;
     for(size_t i=0;i<symbols.size();i++){
         for(size_t j=0;j<symbols[i].size();j++){
@@ -842,6 +844,10 @@ std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVer
             }
         }
     }
+    return indexes;
+    */
+    auto indexes=findPosition(toVerify);
+    symbols[indexes.first][indexes.second].setVerified();
     return indexes;
 }
 

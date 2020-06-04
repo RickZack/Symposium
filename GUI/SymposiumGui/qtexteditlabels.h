@@ -9,6 +9,7 @@
 #include "../../Color.h"
 #include "../../document.h"
 #include "../../Symposium.h"
+#include "notepad.h"
 
 namespace Symposium{
 class clientdispatcher;
@@ -21,7 +22,9 @@ public:
     {
         this->setUndoRedoEnabled(false);
     }
-
+    void setNotepad(notepad* n){
+        this->n=n;
+    }
     /**
      * @brief rewrite scrollContentsBy of the parent TextEdit class
      */
@@ -115,6 +118,7 @@ private:
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> users;
     Symposium::clientdispatcher *cl;
     Symposium::privilege priv;
+    notepad* n;
 };
 
 #endif // QTEXTEDITLABELS_H
