@@ -274,9 +274,9 @@ std::string SymClient::showDir(bool recursive) const {
 
 updateDocMessage SymClient::closeSource(uint_positive_cnt::type docId) {
     document* d = getActiveDocumentbyID(docId);
+    d->close(this->getLoggedUser());
     activeFile.remove_if([docId](const std::shared_ptr<file>& it){return (it->getDoc().getId() == docId);});
     activeDoc.remove_if([&](auto that){return that.first==d;});
-    d->close(this->getLoggedUser());
     std::shared_ptr<updateDocMessage> mess (new updateDocMessage(msgType::closeRes, {SymClient::getLoggedUser().getUsername(), ""}, docId));
     unanswered.push_front(mess);
     return *mess;

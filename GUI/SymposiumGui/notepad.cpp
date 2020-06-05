@@ -1301,6 +1301,7 @@ void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigne
         Symposium::Color colHigh=cl.getColor(this->documentId,sym.getSiteId());
         QColor colUser;
         colUser=static_cast<QColor>(colHigh);
+        colUser.setAlpha(180);
         ch_format.setBackground(colUser);
     }
 #endif
@@ -1398,6 +1399,7 @@ void notepad::on_textEdit_cursorPositionChanged()
     #ifdef DISPATCHER_ON
     Symposium::Color colHigh=cl.getColor(this->documentId,cl.getUser().getSiteId());
     QColor userCol=static_cast<QColor>(colHigh);
+    userCol.setAlpha(180);
     #else
     QColor userCol=Qt::yellow;
     userCol.setAlpha(160);
