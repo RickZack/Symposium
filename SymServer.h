@@ -148,7 +148,7 @@
           *
           * When a client asks for a document for which the user has no privilege with @ref askResMessage, the server
           * checks that the file in @e resourceId is available and then that the file is shareable.
-          * Under these conditions, the server adds the @e opener to the subset of users who have @e reqPriv privilege,
+          * Under these conditions, the server adds the @e opener to the subset of users who have some privilege,
           * adds a @ref symlink to the file in @e destPath named @e destName and send the document inside a @ref sendResMessage
           * If the operation succeed, the server sends a @ref updateActiveMessage to the clients working on the document
           * and send back to the client a @ref sendResMessage with the symlink just created

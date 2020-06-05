@@ -74,6 +74,7 @@ struct SymServerFileMock: public file{
         const_cast<document&>(this->getDoc())=d;
     }
     MOCK_METHOD2(access, document&(const user &targetUser, privilege accessMode));
+    MOCK_CONST_METHOD1(getUserPrivilege, privilege(const std::string&));
 };
 
 struct SymServerDocMock: public document{
@@ -433,6 +434,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
     void setStageForAccessedDoc(SymServerUserMock& userWhoOpens){
         auto& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
         EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName, privilege::owner)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
+        EXPECT_CALL(*fileToReturn, getUserPrivilege(target.getUsername())).WillOnce(::testing::Return(privilege::owner));
         EXPECT_CALL(*fileToReturn, access(target, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
         auto ret= server.openNewSource(target.getUsername(), filePath + "/" + fileName, "./", fileName,
                                        privilege::owner, 0);
@@ -467,6 +469,7 @@ struct SymServerTestFilesystemFunctionality : testing::Test {
         //anotherUser adds the file to its filesystem and closes the document
         auto& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(anotherUserUsername));
         EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName, priv)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
+        EXPECT_CALL(*fileToReturn, getUserPrivilege(target.getUsername())).WillOnce(::testing::Return(priv));
         EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
         auto ret2= server.openNewSource(anotherUserUsername, filePath + "/" + fileName, "./", fileName, priv, 0);
     }
@@ -599,7 +602,8 @@ TEST_F(SymServerTestFilesystemFunctionality, openNewSourceAccessesTheFileAndGene
     server.forceSiteIdForResId(&doc, anotherUser);
     auto& target= dynamic_cast<SymServerUserMock&>(server.getRegistered(loggedUserUsername));
     EXPECT_CALL(target, accessFile(filePath + "/" + fileName, "./", fileName, defaultPrivilege)).WillOnce(::testing::Return(std::pair<int, std::shared_ptr<file>>(0, fileToReturn)));
-    EXPECT_CALL(*fileToReturn, access(target, uri::getDefaultPrivilege())).WillOnce(::testing::ReturnRef(doc));
+    EXPECT_CALL(*fileToReturn, getUserPrivilege(loggedUserUsername)).WillOnce(::testing::Return(defaultPrivilege));
+    EXPECT_CALL(*fileToReturn, access(target, defaultPrivilege)).WillOnce(::testing::ReturnRef(doc));
     auto f= server.openNewSource(loggedUserUsername, filePath + "/" + fileName, "./", fileName, defaultPrivilege, msId);
     EXPECT_TRUE(server.userIsWorkingOnDocument(loggedUser, doc, defaultPrivilege));
 

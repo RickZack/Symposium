@@ -343,7 +343,9 @@ void SymClient::setUserColors(uint_positive_cnt::type docId, const std::map<uint
         it++;
     }
     //notifichiamo il successo alla GUI
+    #ifdef DISPATCHER_ON
     this->dispatcher->successSetUserColors(docId);
+    #endif
 }
 
 void SymClient::addActiveUser(uint_positive_cnt::type docId, user &targetUser, privilege Priv) {

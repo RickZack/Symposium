@@ -118,12 +118,13 @@ SymServer::openNewSource(const std::string &opener, const std::string &absoluteP
     std::pair<int, std::shared_ptr<file>> fileReq= target.accessFile(absolutePath, destPath, destName,
                                                                      reqPriv);
     handleUserState(opener, fileReq.second->getDoc().getId());
-    document& docReq=fileReq.second->access(target, reqPriv);
+    privilege granted=fileReq.second->getUserPrivilege(opener);
+    document& docReq=fileReq.second->access(target, granted);
     workingDoc[opener].push_front(&docReq);
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
 
     //Propagation to other clients
-    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner, respMsgId);
+    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), granted, respMsgId);
     auto siteIdToSend= siteIdsFor(docReq.getId(), target.getSiteId());
     insertMessageForSiteIds(siteIdToSend, toSend);
 
