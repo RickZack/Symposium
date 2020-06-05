@@ -62,6 +62,8 @@ class chrono;
 
 const int TEMPOATTESA = 180000;                                 /**< Time the client waits for a response from the server, in milliseconds  */
 
+const int TEMPOMAXREADYREAD = 250;
+
 namespace Symposium{
 
     class clientdispatcher : public QObject
@@ -74,6 +76,7 @@ namespace Symposium{
         QHostAddress svAddress = QHostAddress("127.0.0.1");     /**< variable to contain the IP address of the server  */
         quint16 svPort = 1234;                                  /**< variable to contain the port of the server  */
         QTimer timer;                                           /**< timer used to wait a response from the server  */
+        QTimer timer_to_read;
         SymWinManager winmanager;                               /**< GUI windows manager  */
         std::queue<std::chrono::milliseconds> attese;           /**< queue to contain the time of sending messages  */
         std::string userpwd;                                    /**< variable to contain the password that user inserted in signin or signup window  */
@@ -399,6 +402,7 @@ namespace Symposium{
         void readyRead();
         void TimerExpired();
         void connectionLost();
+        void continueReadyRead();
     };
 }
 

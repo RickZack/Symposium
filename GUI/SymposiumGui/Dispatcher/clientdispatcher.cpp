@@ -44,6 +44,7 @@ clientdispatcher::clientdispatcher(QObject *parent) : QObject(parent), appIsClos
 {
     this->client.setClientDispatcher(this);
     connect(&(this->timer), &QTimer::timeout, this, &clientdispatcher::TimerExpired);
+    connect(&(this->timer_to_read), &QTimer::timeout, this, &clientdispatcher::continueReadyRead);
     this->userIsLogged = false;
     this->connectionClosed = true;
 }
@@ -105,7 +106,7 @@ void clientdispatcher::readyRead(){
         //per poi rientrare nella readyRead
         if(messageProcessed > 20){
             qDebug() << "Numero massimo di pacchetti processato;";
-            emit readyRead();
+            this->timer_to_read.start(TEMPOMAXREADYREAD);
             return;
         }
         qDebug() << "Pacchetto " << messageProcessed+1 << " - Bytes da leggere: " << this->socket.bytesAvailable();
@@ -186,6 +187,11 @@ void clientdispatcher::connectionLost(){
         this->connectionClosed = true;
         this->winmanager.activeWindow().failure("-1");
     }
+}
+
+void clientdispatcher::continueReadyRead(){
+    this->timer_to_read.stop();
+    emit readyRead();
 }
 
 void clientdispatcher::TimerStart(std::chrono::milliseconds timeToSend){
