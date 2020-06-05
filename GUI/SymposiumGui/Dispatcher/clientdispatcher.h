@@ -61,8 +61,7 @@ class chrono;
 
 
 const int TEMPOATTESA = 180000;                                 /**< Time the client waits for a response from the server, in milliseconds  */
-
-const int TEMPOMAXREADYREAD = 250;
+const int TEMPOMAXREADYREAD = 250;                              /**< Waiting time after processing 20 consecutive messages, in milliseconds  */
 
 namespace Symposium{
 
@@ -76,7 +75,7 @@ namespace Symposium{
         QHostAddress svAddress = QHostAddress("127.0.0.1");     /**< variable to contain the IP address of the server  */
         quint16 svPort = 1234;                                  /**< variable to contain the port of the server  */
         QTimer timer;                                           /**< timer used to wait a response from the server  */
-        QTimer timer_to_read;
+        QTimer timer_to_read;                                   /**< timer used to call the readyRead method in case of many packages to manage   */
         SymWinManager winmanager;                               /**< GUI windows manager  */
         std::queue<std::chrono::milliseconds> attese;           /**< queue to contain the time of sending messages  */
         std::string userpwd;                                    /**< variable to contain the password that user inserted in signin or signup window  */
@@ -198,7 +197,7 @@ namespace Symposium{
         void localRemove(uint_positive_cnt::type resourceId, const std::pair<int, int> indexes);
 
         /**
-         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @brief it used to insert the symbol located at the @ref index position from the correct notepad GUI window
          * @param resourceId the document ID the insertion refers to
          * @param siteId the site id of the user performing the insertion
          * @param index the indexes of the symbol to insert
@@ -206,7 +205,7 @@ namespace Symposium{
         void remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index);
 
         /**
-         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @brief it used to remove the symbol located at the @ref indexes position from the correct notepad GUI window
          * @param resourceId the document ID the deletion refers to
          * @param siteId the site id of the user performing the insertion
          * @param index the indexes of the symbol to insert
@@ -324,7 +323,9 @@ namespace Symposium{
          */
         void logout();
 
-
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         */
         void mapSiteIdToUser(const document &currentDoc);
 
         /**
@@ -370,6 +371,10 @@ namespace Symposium{
          */
         uint_positive_cnt::type getOpenFileID();
 
+        /**
+         * @brief it provides the GUI the user's privilege on the file to be open
+         * @return the user's privilege on the file that contain the document to be open
+         */
         privilege getMyPrivilegeOnFileOpen();
 
         /**
@@ -389,6 +394,9 @@ namespace Symposium{
          */
         void failureRemovedResource();
 
+        /**
+         * @brief it used to notify the success of setUserColors to the GUI
+         */
         void successSetUserColors(uint_positive_cnt::type docID);
 
         ~clientdispatcher() override;
@@ -399,9 +407,25 @@ namespace Symposium{
     class sendFailure : public std::exception {};
 
     public slots:
+
+        /**
+         * @brief method that manages the reception of messages from the server
+         */
         void readyRead();
+
+        /**
+         * @brief method invoked when the response from the server did not arrive within the @ref TEMPOATTESA
+         */
         void TimerExpired();
+
+        /**
+         * @brief disconnects when the connection to the server is lost
+         */
         void connectionLost();
+
+        /**
+         * @brief calls the readyRead method when the timer @ref timer_to_read expires
+         */
         void continueReadyRead();
     };
 }
