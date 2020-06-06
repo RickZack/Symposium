@@ -103,6 +103,7 @@ public:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
+    void alignmentChanged(Qt::Alignment a);
 
 private slots:
     void on_actionPaste_triggered();
@@ -169,7 +170,7 @@ private:
     void restoreCursorPos();
     bool isAKeyToIgnore(QKeyEvent* event);
     void handleTextEditKeyPress(QKeyEvent* event);
-    void handleDeleteKey();
+    void handleDeleteKey(QKeyEvent *event);
     std::string constructAbsolutePath();
 
     /**

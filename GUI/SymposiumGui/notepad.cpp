@@ -48,6 +48,21 @@ const QString rsrcPath = ":/resources/images/win";
 
 #include "Dispatcher/clientdispatcher.h"
 
+Symposium::alignType fromQTextAlignment(Qt::Alignment curAl){
+    switch(curAl) {
+        case Qt::AlignLeft:
+            return Symposium::alignType::left;
+        case Qt::AlignRight:
+            return Symposium::alignType::right;
+        case Qt::AlignHCenter:
+            return Symposium::alignType::center;
+        case Qt::AlignJustify:
+            return Symposium::alignType::justify;
+        default:
+            return Symposium::alignType::left;
+    }
+}
+
 notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privilege privOpen,std::string pathToFile,const Symposium::document& doc, Symposium::uint_positive_cnt::type fileID, SymWinInterface& si, bool parentIsTransient) :
     QMainWindow(parent),
     SymNotepadWinInterface (si, isQWidget::isQwidgetType(*this), parentIsTransient), pathToFile(pathToFile), priv(priv), privOpen(privOpen),doc(doc), fileId(fileID), ui(new Ui::notepad)
@@ -58,7 +73,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     ui->statusbar->addWidget(ui->labelChars);
     ui->textEdit->setContextMenuPolicy(Qt::NoContextMenu);
 
-    ui->textEdit->installEventFilter(this);
+
 
     QActionGroup *alignGroup= new QActionGroup(this);
     alignGroup->addAction(ui->actionAlignCenter);
@@ -237,7 +252,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
         ui->actionCopy->setDisabled(true);
         ui->actionCopy->setVisible(false);
     }
-    if(priv==Symposium::privilege::owner)
+    else if(priv==Symposium::privilege::owner)
     {
         QMenu *shareMenu=menuBar()->addMenu(tr("Sharing Policy"));
         shareMenu->addAction(tr("Disable links"), this, &notepad::inactiveLink);
@@ -245,10 +260,12 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
         shareMenu->addAction(tr("Timer links"), this, &notepad::timerLink);
         shareMenu->addAction(tr("Number links"), this, &notepad::counterLink);
         shareMenu->addAction(tr("Change Privilege"), this, &notepad::visualizeAllUsers);
+        ui->textEdit->installEventFilter(this);
     }
     else {
         QMenu *usersMenu=menuBar()->addMenu(tr("Users"));
         usersMenu->addAction(tr("All users"), this, &notepad::visualizeAllUsers);
+        ui->textEdit->installEventFilter(this);
     }
 
     ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));
@@ -964,6 +981,7 @@ bool notepad::isAKeyToIgnore(QKeyEvent* event){
     return !accepted || QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+K");
 }
 void notepad::handleTextEditKeyPress(QKeyEvent* event){
+
     QTextCursor cursor= ui->textEdit->textCursor();
     QTextCharFormat format = cursor.charFormat();
     qDebug()<<"Colore"<<format.foreground();
@@ -971,6 +989,12 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     qDebug()<<"Testo"<<testo;
     unsigned row, column;
     NotRefreshLabels=true;
+
+    if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+C")
+       || isAKeyToIgnore(event) || QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+A")){
+        NotRefreshLabels=false;
+        return;
+    }
 
     QColor lightColor=format.foreground().color();
     lightColor.setAlpha(180);
@@ -982,11 +1006,10 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
         this->dim=md->text().length();
         return;
     }
-    else if(event->key()==Qt::Key_Backspace || event->key()==Qt::Key_Delete){
-        return handleDeleteKey();
+    else if(event->key()==Qt::Key_Backspace || event->key()==Qt::Key_Delete || event->matches(QKeySequence::Cut)){
+        return handleDeleteKey(event);
     }
     else if(QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+V")
-            || QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+C")
             || isAKeyToIgnore(event)) // Control_V action, Control_C action or key to ignore
     {
         // if key-down, key-up, ecc. are pressed, we may need to update cursors' labels
@@ -1019,7 +1042,10 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         if(isAKeyToIgnore(keyEvent))
             event->ignore();
-        else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C"))
+        else if(QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) == QKeySequence("Ctrl+A"))
+            ui->textEdit->moveCursorLabelToEnd();
+        else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C")
+                && QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+A"))
             ui->textEdit->translateCursors(doc.getActiveUsers());
         NotRefreshLabels=false;
     }
@@ -1030,26 +1056,37 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
     return QObject::eventFilter(obj, event);
 }
 
-void notepad::handleDeleteKey(){
+void notepad::handleDeleteKey(QKeyEvent *event) {
     int row, col;
     QTextCursor cursor= ui->textEdit->textCursor();
     /* delete a single character */
     if(!cursor.hasSelection()){
-        row=cursor.blockNumber();
-        col=cursor.positionInBlock()-1;
-        qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
-           if(col<0 && row>0){ // handle remove of '\r' in preceding line
-               row=cursor.blockNumber()-1;
-               cursor.movePosition(QTextCursor::PreviousBlock);
-               cursor.movePosition(QTextCursor::EndOfBlock);
-               col=cursor.positionInBlock();
-               //Now restore the cursor position
-               cursor.movePosition(QTextCursor::NextBlock);
-               cursor.movePosition(QTextCursor::StartOfBlock);
-           }
-           else if(col<0) //deleting from an empty document, discard the action
-               return;
-           cl.localRemove(this->documentId,{row,col});
+        if(event->key()==Qt::Key_Backspace){
+            row=cursor.blockNumber();
+            col=cursor.positionInBlock()-1;
+            qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
+            if(col<0 && row>0){ // handle remove of '\r' in preceding line
+                row=cursor.blockNumber()-1;
+                cursor.movePosition(QTextCursor::PreviousBlock);
+                cursor.movePosition(QTextCursor::EndOfBlock);
+                col=cursor.positionInBlock();
+                //Now restore the cursor position
+                cursor.movePosition(QTextCursor::NextBlock);
+                cursor.movePosition(QTextCursor::StartOfBlock);
+            }
+            else if(col<0) //deleting from an empty document, discard the action
+                return;
+        }
+        else{ //canc has been pressed
+            if(cursor.atEnd()){
+                return;
+            }
+            row=cursor.blockNumber();
+            col=cursor.positionInBlock();
+            qDebug()<<"handleDeleteKey (canc): row="<<row<<" col="<<col;
+        }
+        cl.localRemove(this->documentId,{row,col});
+
     }/* Handle the elimination of a selected text */
     else
     {
@@ -1376,7 +1413,6 @@ void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposi
 
 void notepad::on_textEdit_cursorPositionChanged()
 {
-
     QTextCursor cc=ui->textEdit->textCursor();
     QTextCharFormat ch=ui->textEdit->currentCharFormat();
      if(NotRefreshLabels == false){
@@ -1405,9 +1441,73 @@ void notepad::on_textEdit_cursorPositionChanged()
     userCol.setAlpha(160);
     #endif
 
-    if(this->highActivated){ui->textEdit->setTextBackgroundColor(userCol);
+    if(this->highActivated){
+        ui->textEdit->setTextBackgroundColor(userCol);
+    }
+
+    auto* textEdit=ui->textEdit;
+    auto* comboStyle=ui->styleBox;
+    if(!ui->textEdit->textCursor().hasSelection())
+        alignmentChanged(textEdit->alignment());
+    QTextList *list = textEdit->textCursor().currentList();
+    if (list) {
+        switch (list->format().style()) {
+            case QTextListFormat::ListDisc:
+                comboStyle->setCurrentIndex(1);
+                break;
+            case QTextListFormat::ListCircle:
+                comboStyle->setCurrentIndex(2);
+                break;
+            case QTextListFormat::ListSquare:
+                comboStyle->setCurrentIndex(3);
+                break;
+            case QTextListFormat::ListDecimal:
+                comboStyle->setCurrentIndex(4);
+                break;
+            case QTextListFormat::ListLowerAlpha:
+                comboStyle->setCurrentIndex(5);
+                break;
+            case QTextListFormat::ListUpperAlpha:
+                comboStyle->setCurrentIndex(6);
+                break;
+            case QTextListFormat::ListLowerRoman:
+                comboStyle->setCurrentIndex(7);
+                break;
+            case QTextListFormat::ListUpperRoman:
+                comboStyle->setCurrentIndex(8);
+                break;
+            default:
+                comboStyle->setCurrentIndex(-1);
+                break;
+        }
+    } else {
+        int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
+        comboStyle->setCurrentIndex(headingLevel ? headingLevel + 8 : 0);
+    }
+
+    this->indexStyle=this->ui->styleBox->currentIndex();
+    //this->alignment=fromQTextAlignment(ui->textEdit->alignment());
 }
 
+void notepad::alignmentChanged(Qt::Alignment a)
+{
+    if (a & Qt::AlignLeft) {
+        ui->actionAlignTextLeft->setChecked(true);
+        this->textAlign(ui->actionAlignTextLeft);
+    }
+        else if (a & Qt::AlignHCenter) {
+        ui->actionAlignCenter->setChecked(true);
+        this->textAlign(ui->actionAlignCenter);
+
+    }
+    else if (a & Qt::AlignRight) {
+        ui->actionAlignTextRight->setChecked(true);
+        this->textAlign(ui->actionAlignTextRight);
+    }
+        else if (a & Qt::AlignJustify) {
+        ui->actionAlignTextJustify->setChecked(true);
+        this->textAlign(ui->actionAlignTextJustify);
+    }
 }
 
 void notepad::colorText(){

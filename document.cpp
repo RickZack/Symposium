@@ -78,7 +78,7 @@ const std::vector<std::pair<alignType, unsigned int>> & document::getAlignmentSt
 }
 
 document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<symbol>(1, emptySymbol)),
-    alignmentStyle(1,std::pair(alignType::left,0))
+                                                 alignmentStyle(1,std::pair(alignType::left,0))
 {
     if(id==0){
         this->id=idCounter;
@@ -122,7 +122,7 @@ void document::checkIndex(unsigned int i0, unsigned int i1) {
     }
     assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
     if(i1>=symbols[i0].size()){
-       symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
+        symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
     }
 
 }
@@ -249,15 +249,15 @@ symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> &index
     symbol sym=emptySymbol;
     if(numChars==0 || ch==numChars)                 /**< there are no chars in line or no chars after the current pos, there is no a pos-after*/
         return sym;
-    else if(ch<numChars-1){                         /**< there is a pos-after */
+    else if(ch<numChars){                         /**< there is a pos-after */
         assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
         assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
         sym=symbols[line][ch];
 
 
     }
-        return sym;
-    }
+    return sym;
+}
 
 
 
@@ -275,7 +275,7 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
     }else{
         id1=posBefore[0];
     }
-     if(posAfter.empty()){
+    if(posAfter.empty()){
         id2=base;
     }else{
         id2=posAfter[0];
@@ -286,54 +286,31 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
         newPos.push_back(newDigit);
         return newPos;
     }
-    else if(id2-id1==1){
+    else if(id2-id1<=1){
         newPos.push_back(id1);
-        std::vector<int> pos1=posBefore;
-        if(!pos1.empty()){
+        std::vector<int> pos1 = posBefore;
+        if (!pos1.empty()) {
             pos1.erase(pos1.begin());
         }
-        std::vector<int> pos2;
-        return generatePosBetween(pos1, pos2, newPos, level+1 , b,a);
+        //pos2.slice(1)
+        std::vector<int> pos2 = posAfter;
+        if (!pos2.empty()) {
+            pos2.erase(pos2.begin());
+        }
+        return generatePosBetween(pos1, pos2, newPos, level + 1, b, a);
 
     }
-    else if(id1==id2){
-        if(b.getSiteId()<a.getSiteId()){
-            newPos.push_back(id1);
-            std::vector<int> pos1=posBefore;
-            if(!pos1.empty()){
-                 pos1.erase(pos1.begin());
-            }
-            std::vector<int> pos2;
-            return generatePosBetween(pos1, pos2, newPos, level + 1,b,a);
-
-        }
-        else if(b.getSiteId()==a.getSiteId()){
-            newPos.push_back(id1);
-            std::vector<int> pos1 = posBefore;
-            if (!pos1.empty()) {
-                pos1.erase(pos1.begin());
-            }
-            //pos2.slice(1)
-            std::vector<int> pos2 = posAfter;
-            if (!pos2.empty()) {
-                pos2.erase(pos2.begin());
-            }
-            return generatePosBetween(pos1, pos2, newPos, level + 1, b, a);
-        }
-        else{
+    else{
             //throw documentException(documentException::documentExceptionCodes::fixPositionSorting, UnpackFileLineFunction());
             throw std::exception();
-
         }
-    }
-    return std::vector<int>();
 }
 
 
 char document::retrieveStrategy(unsigned int level){
 
-   unsigned int sizeSC=strategyCache.size();
-   if(level<sizeSC){
+    unsigned int sizeSC=strategyCache.size();
+    if(level<sizeSC){
         return strategyCache[level];
     }
 
@@ -344,7 +321,8 @@ char document::retrieveStrategy(unsigned int level){
         case 'r': strategy=value==0? '+':'-';break;
         default: strategy=(level%2)==0 ?'+':'-'; break;
     }
-    strategyCache.insert(strategyCache.begin()+level,strategy);
+    strategyCache.resize(std::max<unsigned>(strategyCache.size(), level+1));
+    strategyCache[level]=strategy;
     return strategy;
 
 }
@@ -362,8 +340,11 @@ unsigned int document::generateIdBetween(uint_positive_cnt::type id1, uint_posit
             id2=id1+boundary;
         }
     }
-
-    return floor(rand()%(id2-id1))+id1;
+    double value=(double) rand() / (RAND_MAX);
+    unsigned val= floor(value*(id2-id1))+id1;
+    if(val==id1 || val==id2)
+        val=(id1+id2)/2;
+    return val;
 
 
 }
@@ -477,7 +458,7 @@ std::wstring document::toText() const {
         }
     }
     str=str1.str();
-   return str;
+    return str;
 }
 
 void document::close(const user &noLongerActive) {
@@ -535,10 +516,11 @@ bool document::load() {
 
 std::set<uint_positive_cnt::type> document::retrieveSiteIds() const{
     std::set<uint_positive_cnt::type> siteIds;
-    std::set<uint_positive_cnt::type>::iterator it=siteIds.begin();
-    for(size_t i=0;i<symbols.size();i++){
-        for(size_t j=0;j<symbols[i].size();j++){
-            siteIds.insert(it,symbols[i][j].getSiteId());
+    auto it=siteIds.begin();
+    for(const auto & symbol : symbols){
+        for(const auto & sym : symbol){
+            if(sym.getCh()==emptyChar) break;
+            siteIds.insert(it,sym.getSiteId());
             it++;
         }
     }
@@ -697,7 +679,7 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
     //if the struct is empty or char is less than first char
     auto firstSymbol=symbols[0][0];
     if(symbols.empty()||symbol<firstSymbol){
- //       throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
+        //       throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
         throw std::exception();
     }
 
@@ -787,13 +769,13 @@ unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symb
 }
 
 void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol) {
-   for(auto& i: activeUsers){
-       if(i.first->getSiteId()==targetSiteId){
-           i.second.row=newRow;
-           i.second.col=newCol;
-           break;
-       }
-   }
+    for(auto& i: activeUsers){
+        if(i.first->getSiteId()==targetSiteId){
+            i.second.row=newRow;
+            i.second.col=newCol;
+            break;
+        }
+    }
 }
 
 void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol,
@@ -813,16 +795,16 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsign
             // inserting the \r character
             if(ins){
                 // There are different cursor on the same line: they have to change the row index and the column index
-               if(i.second.row==newRow){
-                   if(i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
-                   i.second.row+=1;
-                   i.second.col=i.second.col-newCol;
-                   }
-               }else
-                   // there are different cursors on different lines: they have to change only the row index
-                   if(i.first->getSiteId()!=targetSiteId){
-                   i.second.row+=1;
-                   }
+                if(i.second.row==newRow){
+                    if(i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
+                        i.second.row+=1;
+                        i.second.col=i.second.col-newCol;
+                    }
+                }else
+                    // there are different cursors on different lines: they have to change only the row index
+                if(i.first->getSiteId()!=targetSiteId){
+                    i.second.row+=1;
+                }
                 // deleting the \r character
             }else{
                 i.second.row-=1;

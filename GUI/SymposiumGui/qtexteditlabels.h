@@ -109,6 +109,8 @@ public:
     int j=0;
 
     void insertFromMimeData(const QMimeData *source) override;
+
+    void moveCursorLabelToEnd();
 private:
 
     Symposium::uint_positive_cnt::type thisUserSiteId=1;

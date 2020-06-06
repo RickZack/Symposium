@@ -219,6 +219,7 @@ void qtexteditlabels::removeUser(Symposium::uint_positive_cnt::type siteId)
 
 void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type siteId)
 {
+    if(isReadOnly()) return;
     if(j==1)
     {
         if(priv!=Symposium::privilege::readOnly)
@@ -286,6 +287,7 @@ void qtexteditlabels::translateCursors(const std::forward_list<std::pair<const S
 }
 
 void qtexteditlabels::insertFromMimeData(const QMimeData *source) {
+    if(isReadOnly()) return;
     QTextCursor cursor = textCursor();
     QTextCharFormat fmt=cursor.charFormat();
     QColor curCol = fmt.foreground().color();
@@ -326,5 +328,11 @@ void qtexteditlabels::insertFromMimeData(const QMimeData *source) {
         }
     } else
         return;
-    //QTextEdit::insertFromMimeData(source);
+}
+
+void qtexteditlabels::moveCursorLabelToEnd() {
+    if(this->isReadOnly()) return;
+    this->textCursor().movePosition(QTextCursor::End);
+    thisUserChangePosition(thisUserSiteId);
+    QTextEdit::selectAll();
 }
