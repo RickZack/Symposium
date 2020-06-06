@@ -1508,16 +1508,18 @@ void notepad::colorText(){
     curs.movePosition(QTextCursor::Start);
     for(auto& row:symbols){
         for(auto& sym:row){
-            Symposium::Color colHigh=cl.getColor(doc.getId(),sym.getSiteId());
-            QColor userCol=static_cast<QColor>(colHigh);
-            userCol.setAlpha(alphaValue);
-            curs.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
-            QTextCharFormat format=curs.charFormat();
-            format.setBackground(userCol);
-            curs.setCharFormat(format);
-            //Release the anchor
-            curs.movePosition(QTextCursor::PreviousCharacter);
-            curs.movePosition(QTextCursor::NextCharacter);
+            if(sym.getSiteId() != 0){
+                Symposium::Color colHigh=cl.getColor(doc.getId(),sym.getSiteId());
+                QColor userCol=static_cast<QColor>(colHigh);
+                userCol.setAlpha(alphaValue);
+                curs.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+                QTextCharFormat format=curs.charFormat();
+                format.setBackground(userCol);
+                curs.setCharFormat(format);
+                //Release the anchor
+                curs.movePosition(QTextCursor::PreviousCharacter);
+                curs.movePosition(QTextCursor::NextCharacter);
+            }
         }
     }
     ui->textEdit->changePosition(initRow,initCol);
