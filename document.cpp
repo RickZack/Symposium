@@ -45,33 +45,6 @@ bool document::serializeFull=true;
 bool document::doLoadAndStore=true;
 
 
-#define UnpackFileLineFunction()  __FILE__, __LINE__, __PRETTY_FUNCTION__
-//TODO: this function is only for debug, will be removed. It's ok to throw if something goes wrong
-void assertIndexes(bool(*predicate)(unsigned toCheck, unsigned reference),
-                   unsigned toCheck,unsigned reference,
-                   const char* file, int line, const char* func){
-    if(!predicate(toCheck, reference)){
-        std::stringstream err;
-        err<<"toCheck is: "<<toCheck;
-        err<< "reference is: " << reference;
-        err<<file<<", line "<<line<<" "<<func;
-        throw std::out_of_range(err.str());
-    }
-}
-
-/**
- * @brief check if one pair of indexes is included in another
- * @param toCheck the pair to be tested
- * @param reference the other pair @ref toCheck is to be compared to
- * @return result of check
- */
-bool included(unsigned ind0, unsigned ind){
-    return ind0<ind;
-}
-
-
-
-
 const std::vector<std::pair<alignType, unsigned int>> & document::getAlignmentStyle() const
 {
     return alignmentStyle;
@@ -85,6 +58,7 @@ document::document(uint_positive_cnt::type id) : id(id), symbols(1, std::vector<
         idCounter++;
     }
     this->numchar=0;
+    loaded=false;
 }
 
 uint_positive_cnt::type document::getId() const {
@@ -104,7 +78,10 @@ unsigned int document::getNumchar() const {
 }
 
 document & document::access(const user &newActive, privilege accessPriv) {
-    if(!loaded) loaded=load();
+    if(!loaded) {
+        load();
+        loaded=true;
+    }
     if(std::find_if(activeUsers.begin(), activeUsers.end(), [&](auto p){return p.first->getSiteId()==newActive.getSiteId();})==activeUsers.end()) {
         std::pair<const user *, sessionData> p{&newActive, accessPriv};
         activeUsers.push_front(p);
@@ -112,28 +89,13 @@ document & document::access(const user &newActive, privilege accessPriv) {
     return *this;
 }
 
-
-void document::checkIndex(unsigned int i0, unsigned int i1) {
-    int mult_fac=2;
-    /* resize the symbols vector*/
-    if(i0>=symbols.size()){
-        symbols.resize((i0 + 1)*mult_fac, std::vector<symbol>(1,emptySymbol));
-        alignmentStyle.resize((i0 + 1)*mult_fac,std::pair(alignType::left,0));
-    }
-    assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
-    if(i1>=symbols[i0].size()){
-        symbols[i0].resize((i1 + 1)*mult_fac, emptySymbol);
-    }
-
-}
-
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
 
     if(toInsert.getCh()!='\r')
         this->numchar++;
+    checkIndexes(indexes);
     unsigned int i0=indexes.first;
     unsigned int i1=indexes.second;
-    checkIndex(i0,i1);
 
     /* handle the position of the following cursors */
     this->updateOtherCursorPos(toInsert.getSiteId(),i0,i1,toInsert,true);
@@ -146,9 +108,6 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     std::pair<alignType,unsigned> styleValues;
     styleValues={charFormat.type,charFormat.indexStyle};
 
-    assertIndexes(included,i0,symbols.size(),UnpackFileLineFunction());
-    assertIndexes(included,i1,symbols[i0].size(),UnpackFileLineFunction());
-
     if(toInsert.getCh()=='\r'){
         // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0+1,0)
         this->updateCursorPos(toInsert.getSiteId(),i0+1,0);
@@ -158,16 +117,9 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
         //and copy to a new line, then erase from the line
         symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end()-1);
-        //symbols.emplace_back(1,emptySymbol);
         alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
-        //alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
-        //alignmentStyle.emplace_back(std::pair(alignType::left,0));
-        //alignmentStyle.resize(symbols.size(),std::pair(alignType::left,0));
-        if(i1>0 && symbols[i0][i1-1].getCh()=='\r'){
-            i0+=1;
-            i1=0;
-        }
-
+        if(i1>0 && symbols[i0][i1-1].getCh()=='\r')
+            throw documentException(documentException::docExceptionCodes::insertingAfterNewLine, UnpackFileLineFunction());
     }
     else{
         // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
@@ -175,10 +127,8 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     alignmentStyle[i0]=styleValues;
-    //alignmentStyle.resize(symbols.size(),std::pair(alignType::left,0));
 
     return newSymb;
-
 }
 
 
@@ -205,10 +155,9 @@ symbol document::generatePosition(const std::pair<unsigned int, unsigned int> in
 
 
 symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> &indexes) const {
+    checkIndexes(indexes);
     unsigned int line=indexes.first;
     unsigned int ch=indexes.second;
-    assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
-    assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
 
     /* I don't have position before the considered one */
     /* FIRST LIMIT CASE - I'm at the beginning of the symbols */
@@ -216,14 +165,12 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> &inde
         symbol sym=emptySymbol;
         return sym;
     }
-        /* SECOND LIMIT CASE: I have to watch to the previous line */
+    /* SECOND LIMIT CASE: I have to watch to the previous line */
     else if(ch==0 && line!=0){
         line=line-1;                            /**< line is !=0 -> line-1 can't be a negative number */
-        assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
         ch=countCharsInLine(line)-1;            /**< in a previous line w.r.t the one in which I am, I have at least '\r' character */
-        assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
-
-    }else{
+    }
+    else{
         ch=ch-1;
     }
 
@@ -243,6 +190,7 @@ unsigned int document::countCharsInLine(unsigned int line)const {
 
 
 symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> &indexes) const {
+    checkIndexes(indexes);
     unsigned int line=indexes.first;
     unsigned int ch=indexes.second;
     unsigned int numChars=countCharsInLine(line);   /**< it could be zero */
@@ -250,11 +198,7 @@ symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> &index
     if(numChars==0 || ch==numChars)                 /**< there are no chars in line or no chars after the current pos, there is no a pos-after*/
         return sym;
     else if(ch<numChars){                         /**< there is a pos-after */
-        assertIndexes(included,line,symbols.size(),UnpackFileLineFunction());
-        assertIndexes(included,ch,symbols[line].size(),UnpackFileLineFunction());
         sym=symbols[line][ch];
-
-
     }
     return sym;
 }
@@ -266,7 +210,7 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
                              const symbol &b, const symbol &a) {
 
     /* change 2 to any other number to change base multiplication */
-    unsigned int base=pow(2,level)*32;
+    unsigned int base= static_cast<unsigned>(pow(2,level))*32;
     char boundaryStrategy= retrieveStrategy(level);
     unsigned int id1,id2;
 
@@ -301,8 +245,7 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
 
     }
     else{
-            //throw documentException(documentException::documentExceptionCodes::fixPositionSorting, UnpackFileLineFunction());
-            throw std::exception();
+            throw documentException(documentException::docExceptionCodes::fixPositionSorting, UnpackFileLineFunction());
         }
 }
 
@@ -324,11 +267,10 @@ char document::retrieveStrategy(unsigned int level){
     strategyCache.resize(std::max<unsigned>(strategyCache.size(), level+1));
     strategyCache[level]=strategy;
     return strategy;
-
 }
 
 
-unsigned int document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const {
+unsigned int document::generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) {
     uint_positive_cnt::type boundary=10;
     if((id2-id1)<boundary){
         id1+=1;
@@ -341,50 +283,39 @@ unsigned int document::generateIdBetween(uint_positive_cnt::type id1, uint_posit
         }
     }
     double value=(double) rand() / (RAND_MAX);
-    unsigned val= floor(value*(id2-id1))+id1;
+    unsigned val= static_cast<unsigned>(floor(value*(id2-id1)))+id1;
     if(val==id1 || val==id2)
         val=(id1+id2)/2;
     return val;
-
-
 }
 
 symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexes, uint_positive_cnt::type siteId) {
-
+    checkIndexes(indexes);
     unsigned int i0=indexes.first;
     unsigned int i1=indexes.second;
-    //checkIndex(i0,i1);
     symbol sym=symbols[i0][i1];
     if(sym.getCh()!='\r')
         this->numchar--;
-    else if(sym.getCh()==emptyChar) //FIXME: should never delete emptyChar
-        this->numchar++;
-    //taking into account the position of the cursor.
+    else if(sym.getCh()==emptyChar)
+        throw documentException(documentException::docExceptionCodes::deletingEmptyChar, UnpackFileLineFunction());
 
+    //taking into account the position of the cursor.
     this->updateOtherCursorPos(siteId,i0,i1,sym,false);
     this->updateCursorPos(siteId,i0,i1);
 
-    symbols[i0].erase(symbols[i0].begin()+i1);
     unsigned lines=countsNumLines();
+    symbols[i0].erase(symbols[i0].begin()+i1);
     if((sym.getCh()=='\r') && i0+1<lines){ //removing a newline means copying the contents of new row into current
         unsigned charsToMove=countCharsInLine(i0+1);
         symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
         symbols.erase(symbols.begin()+i0+1);
         alignmentStyle.erase(alignmentStyle.begin()+i0+1);
     }
-    else if(symbols.size()>1 && symbols[i0].size()==1 && symbols[i0][0].getCh()==emptyChar){ //FIXME: should never be empty, at least there is emptyChar
-        symbols.erase(symbols.begin()+i0);
-        alignmentStyle.erase(alignmentStyle.begin()+i0);
-    }
 
     return sym;
-
 }
 
-
-
 std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
-
     if(toInsert.getCh()!='\r')
         this->numchar++;
     std::pair<unsigned int,unsigned int> indexes=findInsertIndex(toInsert);
@@ -398,14 +329,11 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
         //and copy to a new line, then erase from the line
         symbols.emplace(symbols.begin()+i0+1,symbols[i0].begin()+i1,symbols[i0].end());
         symbols[i0].erase(symbols[i0].begin()+i1,symbols[i0].end()-1);
-        //symbols.emplace_back(1,emptySymbol);
         alignmentStyle.emplace(alignmentStyle.begin()+i0+1,alignmentStyle[i0]);
-        //alignmentStyle.erase(alignmentStyle.begin()+i0+1,alignmentStyle.end());
     }
     else{
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
     }
-    checkIndex(i0,i1);
 
     /* set the alignmentStyle vector */
     format charFormat=toInsert.getCharFormat();
@@ -421,40 +349,31 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
 std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
     if(toRemove.getCh()!='\r' )
         this->numchar--;
-    std::pair<int,int> pos=findPosition(toRemove); //throws if not found
+    std::pair<unsigned, unsigned> pos=findPosition(toRemove); //throws if not found
     int i0=pos.first;
     int i1=pos.second;
     this->updateOtherCursorPos(siteId,i0,i1,toRemove,false);
     this->updateCursorPos(siteId,i0,i1);
 
-    symbols[i0].erase(symbols[i0].begin()+i1);
     unsigned lines=countsNumLines();
+    symbols[i0].erase(symbols[i0].begin()+i1);
     if(toRemove.getCh()=='\r' && i0+1<lines){ //removing a newline means copying the contents of new row into current
         unsigned charsToMove=countCharsInLine(i0+1);
         symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
         symbols.erase(symbols.begin()+i0+1);
     }
-    else if(symbols.size()>1 && symbols[i0].size()==1 && symbols[i0][0].getCh()==emptyChar){ //FIXME: should never be empty, at least there is emptyChar
-        symbols.erase(symbols.begin()+i0);
-        alignmentStyle.erase(alignmentStyle.begin()+i0);
-    }
 
-/*
-    if(i1==0 && symbols[0][0]==emptySymbol)
-        alignmentStyle.erase(alignmentStyle.begin()+i0);
-*/
     return pos;
 }
 
 std::wstring document::toText() const {
     std::wstring str;
     std::wostringstream str1;
-    for (size_t i=0;i<symbols.size();i++) {
-        for (size_t j = 0; j < symbols[i].size(); j++) {
-            wchar_t value = symbols[i][j].getCh();
+    for (const auto & symbol : symbols) {
+        for (const auto & j : symbol) {
+            wchar_t value = j.getCh();
             if (value != emptyChar)
                 str1.put(value);
-
         }
     }
     str=str1.str();
@@ -478,8 +397,7 @@ void document::close(const user &noLongerActive) {
 
 
 void document::store() const {
-    if(!doLoadAndStore) return;
-    document::serializeFull=true; //this is public attribute, just to be sure that here saving is complete
+    if(!doLoadAndStore || !loaded) return;
     std::string storePath=basePath+std::to_string(id)+".dat";
     std::ofstream out{storePath, std::ios::out | std::ios::trunc};
     if(out.good()) {
@@ -502,7 +420,7 @@ bool document::load() {
     if(input.good()){
         try {
             boost::archive::text_iarchive ia(input);
-            document temp(0);
+            document temp(1);
             ia>>temp;
             *this=std::move(temp);
             return true;
@@ -664,7 +582,7 @@ unsigned int document::findInsertInLine(const symbol &ch, const std::vector<symb
 
 }
 
-std::pair<int,int> document::findPosition(const symbol &symbol) const {
+std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbol) const {
     std::pair<int,int> ind;
     unsigned int minLine=0;
     unsigned int totalLines=this->countsNumLines();
@@ -679,8 +597,7 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
     //if the struct is empty or char is less than first char
     auto firstSymbol=symbols[0][0];
     if(symbols.empty()||symbol<firstSymbol){
-        //       throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
-        throw std::exception();
+        throw documentException(documentException::docExceptionCodes::positionNotFound, UnpackFileLineFunction());
     }
 
     // counts the number of chars in the last line
@@ -689,9 +606,7 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
 
     //char is greater than all existing chars(insert at end)
     if(symbol>lastChar){
-        //throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
-        throw std::exception();
-
+        throw documentException(documentException::docExceptionCodes::positionNotFound, UnpackFileLineFunction());
     }
 
 
@@ -729,7 +644,6 @@ std::pair<int,int> document::findPosition(const symbol &symbol) const {
         ind={maxLine,charIdx};
         return ind;
     }
-
 }
 
 unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symbol> &vector, unsigned int dimLine) const {
@@ -762,8 +676,7 @@ unsigned int document::findIndexInLine(const symbol &sym, const std::vector<symb
     else if(sym==vector[right]){
         return right;
     }else
-        //throw documentException(documentException::documentExceptionCodes::InsertPositionNotFound, UnpackFileLineFunction());
-        throw std::exception();
+        throw documentException(documentException::docExceptionCodes::positionNotFound, UnpackFileLineFunction());
 
 
 }
@@ -816,18 +729,6 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsign
 }
 
 std::pair<unsigned int, unsigned int> document::verifySymbol(const symbol &toVerify) {
-    /*
-    std::pair<unsigned int,unsigned int> indexes;
-    for(size_t i=0;i<symbols.size();i++){
-        for(size_t j=0;j<symbols[i].size();j++){
-            if(symbols[i][j]==toVerify){
-                symbols[i][j].setVerified();
-                indexes={i,j};
-            }
-        }
-    }
-    return indexes;
-    */
     auto indexes=findPosition(toVerify);
     symbols[indexes.first][indexes.second].setVerified();
     return indexes;
@@ -837,4 +738,11 @@ void document::doLightSerializing(const std::function<void(void)> &op) {
     document::serializeFull=false;
     op();
     document::serializeFull=true;
+}
+
+void document::checkIndexes(const std::pair<unsigned int, unsigned int> &toAccess) const {
+    unsigned row, col;
+    std::tie(row, col)=toAccess;
+    if(row>=symbols.size() || col>=symbols[row].size())
+        throw documentException(documentException::docExceptionCodes::outOfBounds, UnpackFileLineFunction());
 }

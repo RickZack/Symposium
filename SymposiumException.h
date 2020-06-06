@@ -155,9 +155,9 @@ namespace Symposium{
         static const char* documentErrors[];
     public:
 
-        enum documentExceptionCodes{InsertPositionNotFound=0, fixPositionSorting};
+        enum docExceptionCodes{positionNotFound=0, fixPositionSorting, outOfBounds, deletingEmptyChar, insertingAfterNewLine};
 
-        explicit documentException(documentExceptionCodes exceptionCode, const char *file, int line, const char *func);
+        explicit documentException(docExceptionCodes exceptionCode, const char *file, int line, const char *func);
         virtual ~documentException()=default;
     };
 

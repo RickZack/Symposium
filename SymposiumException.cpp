@@ -108,8 +108,9 @@ clientdispatcherException::clientdispatcherException(clientdispatcherExceptionCo
                                        const char *func) :
         SymposiumException(file, line, func, clientdispatcherErrors[static_cast<int>(exceptionCode)]){};
 
-const char* documentException::documentErrors[]={"Error in finding the position to insert the symbol to", "Fix Position Sorting"};
+const char* documentException::documentErrors[]={"Error in finding the position of the symbol searched", "Fix Position Sorting", "trying to access index of of bounds",
+                                                 "Logic error, trying to delete line delimiter emptyChar", "Logic error, trying to insert in the same line after a newline character"};
 
-documentException::documentException(documentExceptionCodes exceptionCode, const char *file,
+documentException::documentException(docExceptionCodes exceptionCode, const char *file,
                                      int line, const char *func) :
     SymposiumException(file, line, func, documentErrors[static_cast<int>(exceptionCode)]){};

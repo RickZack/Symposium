@@ -84,7 +84,6 @@ namespace Symposium {
         bool loaded;
 
         static const std::string basePath;
-        //static constexpr wchar_t  emptyChar='~';
         static bool serializeFull;
 
         friend class boost::serialization::access;
@@ -221,14 +220,6 @@ namespace Symposium {
          */
         virtual std::set<uint_positive_cnt::type> retrieveSiteIds() const;
 
-        /**
-         * @brief it checks if the index i0 and i1 are coherent with the capacity of @e symbols
-         * @param i0 the first index to check
-         * @param i1 the second index to check
-         */
-        void checkIndex(unsigned int i0, unsigned int i1);
-
-
         const std::vector<std::pair<alignType, unsigned int>> & getAlignmentStyle() const;
 
     private:
@@ -270,7 +261,7 @@ namespace Symposium {
          * @param symbol the symbol to search
          * @return the position of @e symbol
          */
-        std::pair<int, int> findPosition(const symbol &symbol) const;
+        std::pair<unsigned int, unsigned int> findPosition(const symbol &symbol) const;
 
         /**
          * @brief findIndexInLine searches the position in a line for the symbol that has to be deleted throught the RemoteDelete operation
@@ -316,7 +307,7 @@ namespace Symposium {
          * @param boundaryStrategy
          * @return
          */
-        unsigned int generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) const;
+        static unsigned int generateIdBetween(uint_positive_cnt::type id1, uint_positive_cnt::type id2, char boundaryStrategy) ;
 
         /**
          * @brief it modifies the @e strategy parameter
@@ -334,6 +325,12 @@ namespace Symposium {
          * @param ins     to understand if the action is an insertion or a remove
          */
         void updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol, const symbol &symb, bool ins);
+
+        /**
+         * @brief check that the indexes passed as parameter are valid
+         * @param toAccess the indexes of the symbol that it's going to be accessed
+         */
+        void checkIndexes(const std::pair<unsigned int, unsigned int> &toAccess) const;
 
 
     };
