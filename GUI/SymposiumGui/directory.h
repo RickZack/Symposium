@@ -36,6 +36,7 @@ class directory : public QMainWindow, public SymChildWinInterface
         rename,
         createNewSource,
         openSource,
+        openSymlink,
         noAction
     };
 
@@ -249,6 +250,11 @@ private:
      */
     std::string fixedName;
 
+    /**
+     * @brief value to indicate if the source is a file/directory/symlink
+     */
+    QString value;
+
 
 
     /**
@@ -333,6 +339,9 @@ private:
      * @param nameSource the name chosen by the user
      */
     std::string fixNameSource(const std::string nameSource);
+
+
+    void handleFailureSymlink();
 };
 
 
