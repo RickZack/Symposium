@@ -300,15 +300,15 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     setAttribute( Qt::WA_DeleteOnClose );
 
     QColor black(Qt::GlobalColor::black);
-    black.setAlpha(220);
+    black.setAlpha(alphaValue);
     colorChanged(black);
 }
 
 template<>
 Symposium::Color::operator QColor() const{
-    uint8_t r,g,b;
-    std::tie(r,g,b)= this->getRgb();
-    return QColor(r,g,b);
+    uint8_t red,green,blue;
+    std::tie(red,green,blue)= this->getRgb();
+    return QColor(red,green,blue);
 }
 
 
@@ -393,7 +393,7 @@ void notepad::on_actionCut_triggered()
 void notepad::on_actionPaste_triggered()
 {
     QColor lightColor=ui->textEdit->textCursor().charFormat().foreground().color();
-    lightColor.setAlpha(180);
+    lightColor.setAlpha(alphaValue);
     ui->textEdit->setTextColor(lightColor);
     ui->textEdit->paste();
     this->okPaste=true;
@@ -634,7 +634,7 @@ void notepad::textColor()
 
     //set a lighter color
     QColor lightCol=col;
-    lightCol.setAlpha(180);
+    lightCol.setAlpha(alphaValue);
     this->colPos=lightCol;
     ui->textEdit->setTextColor(lightCol);
     QTextCursor c=ui->textEdit->textCursor();
@@ -664,7 +664,7 @@ void notepad::textSize(const QString &p)
         //mergeFormatOnWordOrSelection(fmt);
         ui->textEdit->mergeCurrentCharFormat(fmt);
         QColor lightColor=fmt.foreground().color();
-        lightColor.setAlpha(180);
+        lightColor.setAlpha(alphaValue);
         ui->textEdit->setTextColor(lightColor);
          if(cursor.hasSelection())
              this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
@@ -730,7 +730,7 @@ void notepad::fillTextEdit(){
     #endif
     if(symbols[0][0].getCh()==Symposium::document::emptyChar){
         QColor black=Qt::black;
-        black.setAlpha(180);
+        black.setAlpha(alphaValue);
         ui->textEdit->setTextColor(black);
         ui->textEdit->setText("");
         return;
@@ -776,7 +776,7 @@ void notepad::fillTextEdit(){
                 qCol=static_cast<QColor>(col);
                 if(!sym.isVerified())
                    {
-                     qCol.setAlpha(160);
+                     qCol.setAlpha(alphaValue);
                     }
                  chFormat.setFont(font); chFormat.setForeground(qCol);
                  // go to the position of the character
@@ -975,7 +975,7 @@ void notepad::showLabels()
 bool notepad::isAKeyToIgnore(QKeyEvent* event){
     QString c=event->text();
     auto ch=c[0];
-    bool accepted= (ch.isPunct() || ch.isSpace() || ch.isLetterOrNumber() || event->matches(QKeySequence::Copy)
+    bool accepted= (ch.isPrint() || ch.isPunct() || ch.isSpace() || event->matches(QKeySequence::Copy)
                     || event->matches(QKeySequence::Paste) || event->matches(QKeySequence::Cut) || event->matches(QKeySequence::SelectAll)
                     || event->matches(QKeySequence::Delete) || event->key()==Qt::Key_Backspace);
     return !accepted || QKeySequence(event->key()+int(event->modifiers())) == QKeySequence("Ctrl+K");
@@ -997,7 +997,7 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     }
 
     QColor lightColor=format.foreground().color();
-    lightColor.setAlpha(180);
+    lightColor.setAlpha(alphaValue);
     ui->textEdit->setTextColor(lightColor);
 
     if(event->matches(QKeySequence::Paste)){
@@ -1117,21 +1117,6 @@ void notepad::handleDeleteKey(QKeyEvent *event) {
     this->numChars=this->doc.getNumchar();
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
-    /*
-    if(row==0 && col==0){
-           QColor black=Qt::black;
-           black.setAlpha(160);
-           ui->textEdit->setTextColor(black);
-           ui->textEdit->setText("");
-        }
-        */
-    /*
-    if(row==0 && col==0){
-        QColor lightColor=Qt::black;
-        lightColor.setAlpha(180);
-        ui->textEdit->setTextColor(lightColor);
-    }
-     */
 
  }
 
@@ -1338,7 +1323,7 @@ void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigne
         Symposium::Color colHigh=cl.getColor(this->documentId,sym.getSiteId());
         QColor colUser;
         colUser=static_cast<QColor>(colHigh);
-        colUser.setAlpha(180);
+        colUser.setAlpha(alphaValue);
         ch_format.setBackground(colUser);
     }
 #endif
@@ -1364,7 +1349,7 @@ void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigne
     ui->textEdit->changePosition(actBlock,actColm);
     NotRefreshLabels=false;
     QColor lightCol=qCol;
-    lightCol.setAlpha(180);
+    lightCol.setAlpha(alphaValue);
     this->colPos=lightCol;
     ui->textEdit->setTextColor(lightCol);
     this->colorChanged(this->colPos);
@@ -1424,7 +1409,6 @@ void notepad::on_textEdit_cursorPositionChanged()
      }
 
      if(!cc.hasSelection()){
-
         QColor newCol=ch.foreground().color();
         newCol.setAlpha(255);
         fontChanged(ch.font());
@@ -1435,7 +1419,7 @@ void notepad::on_textEdit_cursorPositionChanged()
     #ifdef DISPATCHER_ON
     Symposium::Color colHigh=cl.getColor(this->documentId,cl.getUser().getSiteId());
     QColor userCol=static_cast<QColor>(colHigh);
-    userCol.setAlpha(180);
+    userCol.setAlpha(alphaValue);
     #else
     QColor userCol=Qt::yellow;
     userCol.setAlpha(160);
@@ -1486,7 +1470,6 @@ void notepad::on_textEdit_cursorPositionChanged()
     }
 
     this->indexStyle=this->ui->styleBox->currentIndex();
-    //this->alignment=fromQTextAlignment(ui->textEdit->alignment());
 }
 
 void notepad::alignmentChanged(Qt::Alignment a)
@@ -1527,7 +1510,7 @@ void notepad::colorText(){
         for(auto& sym:row){
             Symposium::Color colHigh=cl.getColor(doc.getId(),sym.getSiteId());
             QColor userCol=static_cast<QColor>(colHigh);
-            userCol.setAlpha(180);
+            userCol.setAlpha(alphaValue);
             curs.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
             QTextCharFormat format=curs.charFormat();
             format.setBackground(userCol);
@@ -1539,64 +1522,6 @@ void notepad::colorText(){
     }
     ui->textEdit->changePosition(initRow,initCol);
     NotRefreshLabels=false;
-/*    std::vector<std::vector<Symposium::symbol>> symbols;
-    NotRefreshLabels=true;
-    #ifdef DISPATCHER_ON
-    symbols=this->doc.getSymbols();
-    #else
-    symbols= this->documentoProva.getSymbols();
-    #endif
-    QTextCursor curs=ui->textEdit->textCursor();
-
-    *//* store the initial position of the cursor *//*
-    int row=curs.blockNumber();
-    int column=curs.positionInBlock();
-
-    int pi=0,pf=0,siteId;
-    curs.movePosition(QTextCursor::End);
-    int pend=curs.position();
-    curs.movePosition(QTextCursor::Start);
-    QColor userCol;
-    for(size_t i=0; i<symbols.size();i++){
-        for(size_t j=0;j<symbols[i].size();j++){
-            if(symbols[i][j].getSiteId()==symbols[i][j+1].getSiteId() && symbols[i][j].getCh()!=Symposium::document::emptyChar){
-                siteId=symbols[i][j].getSiteId();
-                pf++;
-            }else{
-                #ifdef DISPATCHER_ON
-                Symposium::Color colHigh=cl.getColor(this->documentId,siteId);
-                userCol=static_cast<QColor>(colHigh);
-                #else
-                if(siteId==1){
-                    userCol=Qt::yellow;
-                    userCol.setAlpha(160);
-                }else{
-                    userCol=Qt::blue;
-                    userCol.setAlpha(160);
-                }
-                #endif
-                while(pi!=pf){
-                  curs.setPosition(pi,QTextCursor::MoveAnchor);
-                  curs.setPosition(pi+1,QTextCursor::KeepAnchor);
-                  QTextCharFormat format=curs.charFormat();
-                  format.setBackground(userCol);
-                  curs.setCharFormat(format);
-                  curs.setPosition(pi+1);
-                  pi++;
-                  if (pi==pend)
-                  {
-                      NotRefreshLabels=false;
-                      return;
-                  }
-
-                }
-                pi=pf;
-                pf+=1;
-            }
-        }
-    }
-    ui->textEdit->changePosition(row,column);
-    NotRefreshLabels=false;*/
  }
 
 void notepad::uncolorText(){
@@ -1619,33 +1544,6 @@ void notepad::uncolorText(){
 
     ui->textEdit->changePosition(initRow,initCol);
     NotRefreshLabels=false;
-/*    NotRefreshLabels=true;
-    QTextCursor curs=ui->textEdit->textCursor();
-    *//* store the initial position of the cursor *//*
-    int row=curs.blockNumber();
-    int column=curs.positionInBlock();
-    curs.movePosition(QTextCursor::Start);
-    int pi=curs.position();
-    curs.movePosition(QTextCursor::End);
-    int pf=curs.position();
-    curs.movePosition(QTextCursor::Start);
-    while(pi!=pf){
-      curs.setPosition(pi,QTextCursor::MoveAnchor);
-      curs.setPosition(pi+1,QTextCursor::KeepAnchor);
-      QTextCharFormat format=curs.charFormat();
-      QColor defCol(255,255,255);
-      format.setBackground(defCol);
-      curs.setCharFormat(format);
-      curs.setPosition(pi+1);
-      pi++;
-      if (pi==pf)
-      {
-          NotRefreshLabels=false;
-          return;
-      }
-      }
-     ui->textEdit->changePosition(row,column);
-    NotRefreshLabels=false;*/
 }
 
 
@@ -1702,7 +1600,7 @@ void notepad::insertusers()
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);
     #endif
-    for(auto it:onlineUsers)
+    for(const auto& it:onlineUsers)
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
         item->setIcon(0, QIcon(QString::fromStdString(it.first->getIconPath())));

@@ -138,6 +138,9 @@ private slots:
     void on_pushButton_clicked();
     void modifyWinTitle(Symposium::uint_positive_cnt::type resId, const QString& newName);
 
+public:
+    static constexpr unsigned alphaValue=160; /**< value used as soften color for insertion and highlight*/
+
 private:
     Ui::notepad *ui;
     QString mFilename;

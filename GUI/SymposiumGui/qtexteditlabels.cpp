@@ -69,7 +69,7 @@ void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, 
 void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId)
 {
     j=0;
-    for(auto it:users)
+    for(const auto& it:users)
     {
         if(it.first->getSiteId()!=siteId && it.second.p!=Symposium::privilege::readOnly)
         {
@@ -118,7 +118,7 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
     int column=0;
     thisUserSiteId=siteId;
     //-----------------------------------------------------------------------------------------------------------------PARTE DA CANCELLARE PER ELIMINARE IL CURSORE VISIBILE CON LA LABEL
-    for(auto it:users)
+    for(const auto& it:users)
     {
         if(it.first->getSiteId()==siteId && priv!=Symposium::privilege::readOnly)
         {
@@ -292,7 +292,7 @@ void qtexteditlabels::insertFromMimeData(const QMimeData *source) {
     QTextCharFormat fmt=cursor.charFormat();
     QColor curCol = fmt.foreground().color();
     QColor lighter = curCol;
-    lighter.setAlpha(180);
+    lighter.setAlpha(notepad::alphaValue);
     this->setTextColor(lighter);
 
     int row=cursor.blockNumber();
