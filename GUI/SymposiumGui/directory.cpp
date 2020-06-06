@@ -144,9 +144,11 @@ void directory::success(){
     }case openSource:{
         successOpen();
         break;
-    }
-        default:
-            break;
+    }case openSymlink:{
+        successOpen();
+        break;
+    }default:
+        break;
     }
     lastChoice=noAction;
 }
@@ -156,6 +158,11 @@ void directory::failure(const QString& toPrint){
     //if(this->lastChoice != createNewSource)
     emit closeWaiting();
     pressed=false;
+    if(lastChoice==openSymlink){
+        handleFailureSymlink();
+    }else if(lastChoice==openSource){
+        QMessageBox::critical(this,tr("Error Message"),tr("This source has been deleted. It will not appear on your FileSystem starting from your next login"));
+    }
     if(toPrint=="-1"){
         errorConnectionLogout();
     }else{
@@ -163,6 +170,25 @@ void directory::failure(const QString& toPrint){
     }
 }
 
+void directory::handleFailureSymlink(){
+    QMessageBox::critical(this,tr("Error Message"),tr("This source has been deleted by its owner. You are nomore allowed to use it. It will be deleted from your personal FileSystem"));
+    //if(QMessageBox::Ok)
+    lastChoice = remove;
+    disableStyleButtons();
+    pressed=true;
+    // estract from the map the id of the source that I want to remove
+    auto it=this->ids.find(this->fixedName);
+    id=it->second.first;
+    waitingFunction();
+    std::string pathToSend=path;
+    if(pathToSend!="./")
+    {
+        std::size_t found = pathToSend.find_last_of("/");
+        pathToSend.erase(found, pathToSend.size());
+    }
+    cl.removeResource(pathToSend,id);
+
+}
 
 void directory::listGenerate(std::string str_first, int count)
 {
@@ -317,15 +343,17 @@ void directory::ProvideContextMenu(const QPoint &pos)
 //acts when the user clicks on the button "DELETE"
 void directory::deleteSource()
 {
+    // dove ho eliminato
    lastChoice = remove;
    disableStyleButtons();
    pressed=true;
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
    foreach(QListWidgetItem *items, item){
-       nameSource=fixNameSource(items->text().toStdString());
+       nameSource=items->text().toStdString();
+       this->fixedName=fixNameSource(nameSource);
        // estract from the map the id of the source that I want to remove
-       auto it=this->ids.find(nameSource);
+       auto it=this->ids.find(fixedName);
        id=it->second.first;
        waitingFunction();
        #ifdef DISPATCHER_ON
@@ -374,7 +402,7 @@ void directory::deleteSource()
 
 void directory::successRemove(){
     // update the map
-    auto it=this->ids.find(nameSource);
+    auto it=this->ids.find(fixedName);
     this->ids.erase(it);
     QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, item){
@@ -413,7 +441,7 @@ void directory::on_pushButton_3_clicked()
     if(nameFolder==" "){
         this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
-    std::string fixedName=this->fixNameSource(name.toStdString());   /** < name folder without possible spaces */
+    this->fixedName=this->fixNameSource(name.toStdString());   /** < name folder without possible spaces */
     #ifdef DISPATCHER_ON
     int numVal=this->ids.count(fixedName);
     std::string pathToSend=path;
@@ -526,6 +554,12 @@ void directory::enableStyleButtons()
         ui->OkPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         ui->cancPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         break;}
+    case openSymlink:{
+        //open buttons
+        ui->OkPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->cancPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;
+    }
     case remove:{
         break;}
     }
@@ -554,6 +588,12 @@ void directory::disableStyleButtons()
         ui->OkPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         ui->cancPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         break;}
+    case openSymlink:{
+        //open buttons
+        ui->OkPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->cancPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;
+    }
     case remove:{
         break;}
     default:
@@ -903,9 +943,9 @@ void directory::openSelectedSource(){
     // I have to distinguish if the selected item is a DOCUMENT, a FOLDER or a SYMLINK
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, selectedItem){
-         QString value= items->whatsThis();
-         std::string nameSource=items->text().toStdString();
-         fixedName=this->fixNameSource(nameSource);
+         this->value= items->whatsThis();
+         this->nameSource=items->text().toStdString();
+         this->fixedName=this->fixNameSource(nameSource);
          // dermine the path of the folders in which I enter.
          if(value=="directory")
          {
@@ -959,7 +999,11 @@ void directory::showPrivilegeButtons(){
     ui->privilegeLine->show();
     ui->writerButton->show();
     ui->readerButton->show();
-    lastChoice=openSource;
+    //lastChoice=openSource;
+    if(this->value=="file")
+        lastChoice=openSource;
+    else
+        lastChoice=openSymlink;
 
 }
 
@@ -971,7 +1015,12 @@ void directory::on_okButton_2_clicked()
 
 void directory::on_OkPriv_clicked()
 {
-    lastChoice = openSource;
+    //lastChoice = openSource;
+    if(this->value=="file")
+        lastChoice=openSource;
+    else {
+        lastChoice=openSymlink;
+    }
     disableStyleButtons();
     pressed=true;
     if(ui->writerButton->isChecked())
