@@ -31,7 +31,7 @@
 #define SCREENINTERFACE_H
 #include<QString>
 #include<QWidget>
-#include <symbol.h>
+#include "../../symbol.h"
 //#include "../../counter.h"
 #include "../../Symposium.h"
 

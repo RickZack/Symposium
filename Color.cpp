@@ -58,7 +58,7 @@ colorGen::colorGen() {
 Color colorGen::operator()() {
     token+=grc;
     token=fmod(token, 1);
-    return Color(hsv_to_rbg(token, 0.5, 0.95));
+    return Color(hsv_to_rbg(token, 0.9, 0.95));
 }
 
 Color colorGen::hsv_to_rbg(double h, double s, double v) {
