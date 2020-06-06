@@ -462,6 +462,10 @@ namespace Symposium {
          */
         updateDocMessage mapSiteIdToUser(const document &currentDoc);
 
+        void localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& oldLineStyle, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
+
+        void remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
+
         /**
          * @brief assign to each user working on the same document on which @e loggedUser is working a unique color
          * @param docId the identified of the document the mapping was requested for

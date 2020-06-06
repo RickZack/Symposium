@@ -795,6 +795,45 @@
 
      };
 
+     class editLineStyleMessage: public clientMessage, public serverMessage{
+         friend class boost::serialization::access;
+         template<class Archive>
+         void serialize(Archive &ar, unsigned int);
+         std::pair<alignType, unsigned> oldLineStyle;
+         std::pair<alignType, unsigned> newLineStyle;
+         uint_positive_cnt::type docId;
+         unsigned row;
+     public:
+        editLineStyleMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
+                             const std::pair<alignType, unsigned>& oldLineStyle, const std::pair<alignType, unsigned>& newLineStyle, uint_positive_cnt::type docId,
+                             unsigned row, uint_positive_cnt::type msgId);
+
+        /**
+         * @brief Notify the server that the alignment and/or the index style of a paragraph has been changed
+         * @param server the server the user is active on
+         */
+         void invokeMethod(SymServer &server) override;
+
+         /**
+          * @brief propagate the update alignment and/or the index style to other clients working on the same resource
+          * @param client the client on which propagate the change
+          */
+         void invokeMethod(SymClient &client) override;
+
+         /**
+          * @brief confirm the changing of alignment and/or the index style made by a client or abort it
+          * @param client the client which sent the message
+          *
+          * Depending on the value of @e result, the @e invokeMethod ask for different actions on the client:
+          * <ul>
+          * <li> <em> result=msgOutcome::success </em>: calls nothing
+          * <li> <em> result=msgOutcome::failure </em>: calls @ref SymClient::changeLineStyle with @e oldLineStyle as parameter
+          * </ul>
+          */
+
+         void completeAction(SymClient &client, msgOutcome serverResult) override;
+     };
+
 
 
  }

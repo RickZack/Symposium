@@ -580,3 +580,14 @@ void clientdispatcher::failureRemovedResource(){
 clientdispatcher::~clientdispatcher() {
     logout();
 }
+
+void clientdispatcher::localEditLineStyle(uint_positive_cnt::type docId,
+                                          const std::pair<alignType, unsigned int> &oldLineStyle,
+                                          const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
+//TODO: implement
+}
+
+void clientdispatcher::remoteEditLineStyle(uint_positive_cnt::type docId,
+                                           const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
+//TODO: implement
+}

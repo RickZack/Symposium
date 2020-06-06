@@ -77,6 +77,13 @@ public:
     void verifySymbol(const Symposium::symbol& sym, const std::pair<unsigned, unsigned>& indexes) override;
 
     /**
+     * @brief update the alignment and/or the indexStyle of the document's block @e row
+     * @param newLineStyle new alignment and indexStyle to apply
+     * @param row the row to apply @e newLineStyle to
+     */
+    void editLineStyle(const std::pair<Symposium::alignType, unsigned int> &newLineStyle, unsigned int row) override;
+
+    /**
      * @brief closeEvent closes the window
      * @param event
      */
@@ -216,7 +223,7 @@ private:
      * @param line: index of the line
      * @return number of chars
      */
-    int countCharsInLine(const unsigned line) const;
+    unsigned int countCharsInLine(const unsigned line) const;
     void insertusers();
 
     /**

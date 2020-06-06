@@ -561,3 +561,15 @@ SymClient::getUserColors() const {
     return userColors;
 }
 
+void
+SymClient::localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &oldLineStyle,
+                              const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
+//TODO: implement
+}
+
+void
+SymClient::remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &newLineStyle,
+                               unsigned int row) {
+//TODO: implement
+}
+

@@ -328,6 +328,9 @@ namespace Symposium{
          */
         void mapSiteIdToUser(const document &currentDoc);
 
+        void localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& oldLineStyle, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
+
+        void remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
         /**
          * @brief it provides a string with all file that in user's root directory
          * @return the string of content of the user's home

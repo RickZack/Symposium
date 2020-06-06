@@ -1566,19 +1566,8 @@ void notepad::on_actionhighlight_triggered()
     }
 }
 
-int notepad::countCharsInLine(const unsigned line)const {
-  std::vector<std::vector<Symposium::symbol>> symbols;
-    #ifdef DISPATCHER_ON
-    symbols=this->doc.getSymbols();
-    #else
-    symbols= this->documentoProva.getSymbols();
-    #endif
-    int ch=0;
-    for(size_t i=0;i<symbols[line].size();i++){
-        if(symbols[line][i].getCh()!=Symposium::document::emptyChar)
-            ch++;
-    }
-    return ch;
+unsigned int notepad::countCharsInLine(const unsigned line)const {
+    return this->doc.countCharsInLine(line);
 }
 
 void notepad::insertusers()
@@ -1714,6 +1703,10 @@ void notepad::contextMenuEvent(QContextMenuEvent *){
 
 void notepad::success() {
     colorText();
+}
+
+void notepad::editLineStyle(const std::pair<Symposium::alignType, unsigned int> &newLineStyle, unsigned int row) {
+//TODO: implement
 }
 
 

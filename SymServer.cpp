@@ -574,5 +574,10 @@ void SymServer::hardLogout(uint_positive_cnt::type siteId) {
     }
 }
 
+void SymServer::editLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &newLineStyle,
+                              unsigned int row, uint_positive_cnt::type respMsgId) {
+//TODO: implement
+}
+
 
 

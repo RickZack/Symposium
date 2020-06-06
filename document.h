@@ -183,6 +183,13 @@ namespace Symposium {
         virtual void updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol);
 
         /**
+         * @brief update the alignment and/or the indexStyle of the document's paragraph @e row
+         * @param newLineStyle new alignment and indexStyle to apply
+         * @param row the row to apply @e newLineStyle to
+         */
+        void editLineStyle(const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
+
+        /**
          * @brief give a representation of the document ad sequence of wide characters
          * @return a string of wide characters with the document's content
          */

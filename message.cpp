@@ -906,3 +906,29 @@ unsigned int cursorMessage::getCol() const {
 }
 
 BOOST_CLASS_EXPORT(Symposium::cursorMessage)
+
+editLineStyleMessage::editLineStyleMessage(msgType action, const std::pair<std::string, std::string> &actionOwner,
+                                           msgOutcome result, const std::pair<alignType, unsigned int>& oldLineStyle,
+                                           const std::pair<alignType, unsigned int>& newLineStyle, uint_positive_cnt::type docId,
+                                           unsigned row, uint_positive_cnt::type msgId) :
+
+                                           message(msgId), clientMessage(actionOwner, msgId),
+                                           serverMessage(result, msgId), oldLineStyle(oldLineStyle), newLineStyle(newLineStyle),
+                                           row(row), docId(docId)
+                                           {
+if(action!=msgType::editLineStyle)
+    throw messageException(messageException::action, UnpackFileLineFunction());
+this->action=action;
+}
+
+void editLineStyleMessage::invokeMethod(SymServer &server) {
+    //TODO: implement!
+}
+
+void editLineStyleMessage::invokeMethod(SymClient &client) {
+    //TODO: implement!
+}
+
+void editLineStyleMessage::completeAction(SymClient &client, msgOutcome serverResult) {
+    //TODO: implement!
+}

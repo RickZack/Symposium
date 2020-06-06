@@ -359,6 +359,14 @@
          //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
          /**
+          * @brief edit the alignment and/or indexStyle of the document's paragraph @e row inside one of the documents he's working on
+          * @param docId the identifier of the document whose paragraph has to be edited
+          * @param newLineStyle new alignment and indexStyle to apply
+          * @param row the row to apply @e newLineStyle to
+          */
+         void editLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& newLineStyle, unsigned row, uint_positive_cnt::type respMsgId);
+
+         /**
           * @brief extract a message from the message queue associated with an user
           * @return a pair containing the siteId of the user the message is to send to and the message itself
           */

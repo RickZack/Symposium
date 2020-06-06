@@ -746,3 +746,7 @@ void document::checkIndexes(const std::pair<unsigned int, unsigned int> &toAcces
     if(row>=symbols.size() || col>=symbols[row].size())
         throw documentException(documentException::docExceptionCodes::outOfBounds, UnpackFileLineFunction());
 }
+
+void document::editLineStyle(const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
+//TODO: implement
+}
