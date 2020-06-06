@@ -35,8 +35,8 @@ class directory : public QMainWindow, public SymChildWinInterface
         remove,
         rename,
         createNewSource,
-        openSource,
-        openSymlink,
+        openSource,         /**< to indicate that a file */
+        openSymlink,        /**< to indicate a symlink */
         noAction
     };
 

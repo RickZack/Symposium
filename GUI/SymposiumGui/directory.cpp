@@ -350,9 +350,10 @@ void directory::deleteSource()
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
    foreach(QListWidgetItem *items, item){
-       nameSource=fixNameSource(items->text().toStdString());
+       nameSource=items->text().toStdString();
+       this->fixedName=fixNameSource(nameSource);
        // estract from the map the id of the source that I want to remove
-       auto it=this->ids.find(nameSource);
+       auto it=this->ids.find(fixedName);
        id=it->second.first;
        waitingFunction();
        #ifdef DISPATCHER_ON
@@ -401,7 +402,7 @@ void directory::deleteSource()
 
 void directory::successRemove(){
     // update the map
-    auto it=this->ids.find(nameSource);
+    auto it=this->ids.find(fixedName);
     this->ids.erase(it);
     QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
     foreach(QListWidgetItem *items, item){
@@ -553,6 +554,12 @@ void directory::enableStyleButtons()
         ui->OkPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         ui->cancPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         break;}
+    case openSymlink:{
+        //open buttons
+        ui->OkPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->cancPriv->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 grey);color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;
+    }
     case remove:{
         break;}
     }
@@ -581,6 +588,12 @@ void directory::disableStyleButtons()
         ui->OkPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         ui->cancPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
         break;}
+    case openSymlink:{
+        //open buttons
+        ui->OkPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        ui->cancPriv->setStyleSheet("background-color: grey;color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
+        break;
+    }
     case remove:{
         break;}
     default:
