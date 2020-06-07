@@ -553,7 +553,20 @@ Color SymClient::colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::t
     if(mp != this->userColors.end())
         return mp->second.second;
     else
-        throw SymClientException(SymClientException::nocolorOfUser, UnpackFileLineFunction());
+        return Color(82,82,82);
+}
+
+Color SymClient::colorOfUserbyUsername(uint_positive_cnt::type resId, std::string& username) {
+    std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>::iterator mp = this->userColors.begin();
+    while (mp != this->userColors.end()){
+        if(mp->first.second == resId){
+            if(mp->second.first.getUsername()==username){
+                return mp->second.second;
+            }
+        }
+        mp++;
+    }
+    return Color(82,82,82);
 }
 
 const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &

@@ -548,6 +548,8 @@ namespace Symposium {
          */
         Color colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::type siteId);
 
+        Color colorOfUserbyUsername(uint_positive_cnt::type resId, std::string& username);
+
         /**
          * @brief returns the map {siteId, documentId}->{user, color}
          * @return the map specified
