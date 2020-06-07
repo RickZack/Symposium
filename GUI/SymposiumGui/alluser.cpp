@@ -5,10 +5,10 @@
 
 alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile,
                  std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers,
-                 std::unordered_map<std::string, Symposium::privilege> users, SymWinInterface& si) :
+                 std::unordered_map<std::string, Symposium::privilege> users, Symposium::uint_positive_cnt::type fileID, SymWinInterface& si) :
     QDialog(parent),
     SymModalWinInterface (si, isQDialog::isQDialogType(*this)),
-    privelege(privelege), us(user), pathFile(pathFile),  documentID(documentID),  ui(new Ui::alluser), onlineUsers(onlineUsers), users(users)
+    privelege(privelege), us(user), pathFile(pathFile),  documentID(documentID), fileID(fileID), ui(new Ui::alluser), onlineUsers(onlineUsers), users(users)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -224,7 +224,7 @@ void alluser::on_button_clicked()
        ui->errorMess->hide();
        disableButtons();
        #ifdef DISPATCHER_ON
-       cl.editPrivilege(username, pathFile, newPrivelege, documentID);
+       cl.editPrivilege(username, pathFile, newPrivelege, fileID);
        #endif
     }
 }

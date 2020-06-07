@@ -297,6 +297,11 @@ namespace Symposium{
          */
         Color getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID);
 
+        /**
+         * @brief it provides the color to assign to user
+         * @param documentID the ID of the document
+         * @param username the username of the user
+         */
         Color getColorbyUsername(uint_positive_cnt::type documentID, const std::string& username);
 
         /**

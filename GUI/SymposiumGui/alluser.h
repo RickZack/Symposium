@@ -34,11 +34,12 @@ public:
     explicit alluser(QWidget *parent, Symposium::privilege privelege,
                         Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile,
                      std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers,
-                     std::unordered_map<std::string, Symposium::privilege> users, SymWinInterface& si);
+                     std::unordered_map<std::string, Symposium::privilege> users, Symposium::uint_positive_cnt::type fileID, SymWinInterface& si);
     Symposium::privilege privelege;
     Symposium::user us;
     std::string pathFile;
     Symposium::uint_positive_cnt::type documentID;
+    Symposium::uint_positive_cnt::type fileID;
 
     void success() override;
 
