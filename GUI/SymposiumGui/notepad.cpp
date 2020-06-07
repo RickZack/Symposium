@@ -844,12 +844,12 @@ void notepad::visualizeAllUsers()
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     std::unordered_map<std::string, Symposium::privilege> users=cl.allUser(documentId);
     if(pathToFile == "./"){
-          alluser *alluserWindow = new alluser(this,  priv, documentId, cl.getUser(), pathToFile + std::to_string(cl.getHomeIDofCurrentUser()), onlineUsers, users, *this);
+          alluser *alluserWindow = new alluser(this,  priv, documentId, cl.getUser(), pathToFile + std::to_string(cl.getHomeIDofCurrentUser()), onlineUsers, users, fileId, *this);
           goToWindow(*alluserWindow);
       }else{
           std::string path = pathToFile;
           path.erase(0,2);
-          alluser *alluserWindow = new alluser(this,  priv, documentId, cl.getUser(), "./" + std::to_string(cl.getHomeIDofCurrentUser()) + "/" + path, onlineUsers, users, *this);
+          alluser *alluserWindow = new alluser(this,  priv, documentId, cl.getUser(), "./" + std::to_string(cl.getHomeIDofCurrentUser()) + "/" + path, onlineUsers, users, fileId, *this);
           goToWindow(*alluserWindow);
       }
     #endif
