@@ -345,8 +345,6 @@ void directory::deleteSource()
 {
     // dove ho eliminato
    lastChoice = remove;
-   disableStyleButtons();
-   pressed=true;
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
    foreach(QListWidgetItem *items, item){
@@ -355,7 +353,6 @@ void directory::deleteSource()
        // estract from the map the id of the source that I want to remove
        auto it=this->ids.find(fixedName);
        id=it->second.first;
-       waitingFunction();
        #ifdef DISPATCHER_ON
        std::string pathToSend=path;
        if(pathToSend!="./")
@@ -363,6 +360,9 @@ void directory::deleteSource()
            std::size_t found = pathToSend.find_last_of("/");
            pathToSend.erase(found, pathToSend.size());
        }
+       waitingFunction();
+       disableStyleButtons();
+       pressed=true;
        cl.removeResource(pathToSend,id);
        #endif
 
@@ -433,10 +433,7 @@ void directory::failureActionDirectory(const QString& msg){
 void directory::on_pushButton_3_clicked()
 {
     lastChoice = createFolder;
-    disableStyleButtons();
-    pressed=true;
     QString name= ui->name->text();
-    waitingFunction();
     std::string nameFolder=name.toStdString();                       /** < name folder with possible spaces */
     if(nameFolder==" "){
         this->failureActionDirectory("The inserted name is not correct. Please try again");
@@ -451,6 +448,9 @@ void directory::on_pushButton_3_clicked()
         pathToSend.erase(found, pathToSend.size());
     }
     if(numVal==0){
+        disableStyleButtons();
+        waitingFunction();
+        pressed=true;
         cl.createNewDir(pathToSend,fixedName);
     }else
         this->failureActionDirectory("You already have an element with this name");
@@ -605,11 +605,10 @@ void directory::disableStyleButtons()
 void directory::waitingFunction()
 {
    hideAll();
-   class waiting w(this);
-   w.move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w.rect().center());
-   QObject::connect(this, SIGNAL(closeWaiting()), &w, SLOT(close()));
-   w.show();
-
+   waiting* w = new waiting(this);
+   w->move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w->rect().center());
+   QObject::connect(this, SIGNAL(closeWaiting()), w, SLOT(close()));
+   w->show();
 }
 
 void directory::hideAll()
@@ -718,14 +717,11 @@ void directory::showRename()
 void directory::on_pushButton_4_clicked()
 {
     lastChoice = createNewSource;
-    disableStyleButtons();
-    pressed=true;
     this->curResName =ui->name_2->text();                                                              /** < name with possible spaces */
     if(curResName.toStdString()==" "){
         this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
     std::string fixedName=this->fixNameSource(curResName.toStdString());           /** < name without possible spaces */
-    waitingFunction();
     #ifdef DISPATCHER_ON
     int numVal=this->ids.count(fixedName);
     std::string pathToSend=path;
@@ -735,7 +731,12 @@ void directory::on_pushButton_4_clicked()
         pathToSend.erase(found, pathToSend.size());
     }
     if(numVal==0)
+    {
+        pressed=true;
+        waitingFunction();
+        disableStyleButtons();
         cl.createNewSource(pathToSend,fixedName);
+    }
     else
         this->failureActionDirectory("You already have an element with this name");
     #else
@@ -858,8 +859,6 @@ void directory::renameSource()
 void directory::on_okButton_clicked()
 {
     lastChoice = rename;
-    disableStyleButtons();
-    pressed=true;
     this->curResName =ui->renameLabel->text();                              /** < name with possible spaces */
     if(curResName.toStdString()==" "){
         this->failureActionDirectory("The inserted name is not correct. Please try again");
@@ -872,7 +871,6 @@ void directory::on_okButton_clicked()
          auto it=this->ids.find(fixedOldName);
          std::string id=it->second.first;
          curResId=std::stoul(id);
-         waitingFunction();
          #ifdef DISPATCHER_ON
          int numVal=this->ids.count(fixedName);
          std::string pathToSend=path;
@@ -882,7 +880,12 @@ void directory::on_okButton_clicked()
              pathToSend.erase(found, pathToSend.size());
          }
          if(numVal==0)
-            cl.renameResource(pathToSend, id, fixedName);
+         {
+             pressed=true;
+             waitingFunction();
+             disableStyleButtons();
+             cl.renameResource(pathToSend, id, fixedName);
+         }
          else
              this->failureActionDirectory("You already have an element with this name");
          #else

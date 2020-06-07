@@ -286,7 +286,8 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
 
     ui->textEdit->setCursorWidth(3);
 
-    ui->tree->setColumnCount(1);
+    ui->tree->setColumnCount(2);
+    ui->tree->setColumnWidth(0, 1);
     ui->tree->header()->setVisible(false);
     insertusers();
     ui->tree->header()->setStretchLastSection(false);
@@ -843,12 +844,12 @@ void notepad::visualizeAllUsers()
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers=cl.onlineUser(documentId);
     std::unordered_map<std::string, Symposium::privilege> users=cl.allUser(documentId);
     if(pathToFile == "./"){
-          alluser *alluserWindow = new alluser(this,  priv, fileId, cl.getUser(), pathToFile + std::to_string(cl.getHomeIDofCurrentUser()), onlineUsers, users, *this);
+          alluser *alluserWindow = new alluser(this,  priv, documentId, cl.getUser(), pathToFile + std::to_string(cl.getHomeIDofCurrentUser()), onlineUsers, users, *this);
           goToWindow(*alluserWindow);
       }else{
           std::string path = pathToFile;
           path.erase(0,2);
-          alluser *alluserWindow = new alluser(this,  priv, fileId, cl.getUser(), "./" + std::to_string(cl.getHomeIDofCurrentUser()) + "/" + path, onlineUsers, users, *this);
+          alluser *alluserWindow = new alluser(this,  priv, documentId, cl.getUser(), "./" + std::to_string(cl.getHomeIDofCurrentUser()) + "/" + path, onlineUsers, users, *this);
           goToWindow(*alluserWindow);
       }
     #endif
@@ -1594,11 +1595,15 @@ void notepad::insertusers()
     for(const auto& it:onlineUsers)
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
-        item->setIcon(0, QIcon(QString::fromStdString(it.first->getIconPath())));
+        item->setIcon(1, QIcon(QString::fromStdString(it.first->getIconPath())));
         if(cl.getUser().getUsername()==it.first->getUsername())
-            item->setText(0, "(you)");
+            item->setText(1, "(you)");
         else
-            item->setText(0, QString::fromStdString(it.first->getUsername()));
+            item->setText(1, QString::fromStdString(it.first->getUsername()));
+        Symposium::Color colHigh=cl.getColor(documentId,it.first->getSiteId());
+        QColor colUser;
+        colUser=static_cast<QColor>(colHigh);
+        item->setBackgroundColor(0,colUser);
         ui->tree->addTopLevelItem(item);
         count++;
     }
@@ -1688,7 +1693,19 @@ void notepad::modifyWinTitle(Symposium::uint_positive_cnt::type resId, const QSt
         this->setWindowTitle(newName);
 }
 
-void notepad::contextMenuEvent(QContextMenuEvent *){
+void notepad::success() {
+    colorText();
+}
+
+void notepad::editLineStyle(const std::pair<Symposium::alignType, unsigned int> &newLineStyle, unsigned int row) {
+//TODO: implement
+}
+
+
+
+
+void notepad::on_textEdit_customContextMenuRequested(const QPoint &pos)
+{
     QMenu submenu;
     QString style="QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}";
     submenu.setStyleSheet(style);
@@ -1700,16 +1717,4 @@ void notepad::contextMenuEvent(QContextMenuEvent *){
     submenu.addSeparator();
     QPoint globalPos=ui->textEdit->cursor().pos();
     submenu.exec(globalPos);
-
 }
-
-void notepad::success() {
-    colorText();
-}
-
-void notepad::editLineStyle(const std::pair<Symposium::alignType, unsigned int> &newLineStyle, unsigned int row) {
-//TODO: implement
-}
-
-
-

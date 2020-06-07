@@ -343,6 +343,10 @@ Color clientdispatcher::getColor(uint_positive_cnt::type documentID, uint_positi
     return this->client.colorOfUser(documentID, siteID);
 }
 
+Color clientdispatcher::getColorbyUsername(uint_positive_cnt::type documentID, const std::string& username){
+    return this->client.colorOfUserbyUsername(documentID, username);
+}
+
 void clientdispatcher::editPrivilege(const std::string &targetUser, std::string &resPath, privilege newPrivilege, uint_positive_cnt::type documentID) {
     std::shared_ptr<privMessage> mess = std::make_shared<privMessage>(this->client.editPrivilege(targetUser,resPath, std::to_string(documentID), newPrivilege));
     try {

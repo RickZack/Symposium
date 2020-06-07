@@ -98,6 +98,8 @@ private:
     Ui::alluser *ui;
     Symposium::privilege newPrivelege;
     std::string username;
+    QString usernameToChange;
+    QString privToChange;
     std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData>> onlineUsers;
     std::unordered_map<std::string, Symposium::privilege> users;
 
