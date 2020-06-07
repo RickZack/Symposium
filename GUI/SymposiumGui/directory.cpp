@@ -605,11 +605,10 @@ void directory::disableStyleButtons()
 void directory::waitingFunction()
 {
    hideAll();
-   class waiting w(this);
-   w.move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w.rect().center());
-   QObject::connect(this, SIGNAL(closeWaiting()), &w, SLOT(close()));
-   w.show();
-
+   waiting* w = new waiting(this);
+   w->move(this->window()->frameGeometry().topLeft()+this->window()->rect().center()-w->rect().center());
+   QObject::connect(this, SIGNAL(closeWaiting()), w, SLOT(close()));
+   w->show();
 }
 
 void directory::hideAll()
