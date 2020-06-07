@@ -556,7 +556,7 @@ Color SymClient::colorOfUser(uint_positive_cnt::type resId, uint_positive_cnt::t
         return Color(82,82,82);
 }
 
-Color SymClient::colorOfUserbyUsername(uint_positive_cnt::type resId, std::string& username) {
+Color SymClient::colorOfUserbyUsername(uint_positive_cnt::type resId, const std::string& username) {
     std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>>::iterator mp = this->userColors.begin();
     while (mp != this->userColors.end()){
         if(mp->first.second == resId){
