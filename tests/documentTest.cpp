@@ -319,6 +319,23 @@ TEST_F(documentTest, updateCursorPosNoThrowIfNoExistingUser){
     EXPECT_NO_THROW(d.updateCursorPos(someUser.getSiteId()+1, 10, 20));
 }
 
+TEST_F(documentTest, editLineStyleChangeStyle){
+    user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    d.access(someUser, privilege ::modify);
+    auto oldStyle=d.getAlignmentStyle()[0];
+    std::pair<alignType, unsigned> newStyle{alignType::right, 1};
+    ASSERT_NE(oldStyle, newStyle)<<"New style must be different than oldStyle in test";
+    d.editLineStyle(newStyle, 0);
+    EXPECT_EQ(newStyle, d.getAlignmentStyle()[0]);
+}
+
+TEST_F(documentTest, editLineStyleChangeStyleThrowsOnInvalidIndexes){
+    user someUser("username", "AP@ssw0rd!", "noempty", "", 0, nullptr);
+    d.access(someUser, privilege ::modify);
+    std::pair<alignType, unsigned> newStyle{alignType::right, 1};
+    EXPECT_THROW(d.editLineStyle(newStyle, rand()%1000+1), documentException);
+}
+
 struct documentSerializationTest: ::testing::Test{
     document d1, d2;
     std::stringstream stream;

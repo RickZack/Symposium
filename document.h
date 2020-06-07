@@ -187,7 +187,7 @@ namespace Symposium {
          * @param newLineStyle new alignment and indexStyle to apply
          * @param row the row to apply @e newLineStyle to
          */
-        void editLineStyle(const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
+        virtual void editLineStyle(const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
 
         /**
          * @brief give a representation of the document ad sequence of wide characters

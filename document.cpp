@@ -748,5 +748,6 @@ void document::checkIndexes(const std::pair<unsigned int, unsigned int> &toAcces
 }
 
 void document::editLineStyle(const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
-//TODO: implement
+    checkIndexes({row, 0});
+    alignmentStyle[row]=newLineStyle;
 }

@@ -574,9 +574,22 @@ void SymServer::hardLogout(uint_positive_cnt::type siteId) {
     }
 }
 
-void SymServer::editLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &newLineStyle,
-                              unsigned int row, uint_positive_cnt::type respMsgId) {
-//TODO: implement
+void SymServer::editLineStyle(const std::string &actionUser, uint_positive_cnt::type docId,
+                              const std::pair<alignType, unsigned> &newLineStyle, unsigned row,
+                              const editLineStyleMessage &editMsg) {
+    if(!userIsActive(actionUser))
+        throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
+    std::pair<bool, document*> docRetrieved=userIsWorkingOnDocument(actionUser, docId);
+    user& actionU=getRegistered(actionUser);
+    if(!docRetrieved.first)
+        throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
+    docRetrieved.second->editLineStyle(newLineStyle, row);
+
+    auto toSend=new editLineStyleMessage(editMsg);
+    toSend->clearAuthParam();
+
+    insertMessageForSiteIds(siteIdsFor(docId, actionU.getSiteId()), std::shared_ptr<serverMessage>(toSend));
+    generateSimpleResponse(actionU.getSiteId(), msgType::editLineStyle, editMsg.getMsgId());
 }
 
 

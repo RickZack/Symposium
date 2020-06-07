@@ -364,7 +364,9 @@
           * @param newLineStyle new alignment and indexStyle to apply
           * @param row the row to apply @e newLineStyle to
           */
-         void editLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& newLineStyle, unsigned row, uint_positive_cnt::type respMsgId);
+         void editLineStyle(const std::string &actionUser, uint_positive_cnt::type docId,
+                            const std::pair<alignType, unsigned> &newLineStyle, unsigned row,
+                            const editLineStyleMessage &editMsg);
 
          /**
           * @brief extract a message from the message queue associated with an user

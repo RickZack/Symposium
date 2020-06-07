@@ -86,6 +86,7 @@ struct SymServerDocMock: public document{
     MOCK_CONST_METHOD0(retrieveSiteIds, std::set<uint_positive_cnt::type>());
 
     MOCK_METHOD3(updateCursorPos, void(unsigned, unsigned, unsigned));
+    MOCK_METHOD2(editLineStyle, void(const std::pair<alignType, unsigned>&, unsigned));
 };
 
 /*
@@ -699,6 +700,8 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteInsertOfUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteInsertOnDocumentNotOpened){
+    setStageForAccessedDoc(loggedUser);
+    makeLoggedUserNotWorkingOnDoc();
     symbol toInsert('a', 0, 0, {}, false);
     symbolMessage received(msgType::insertSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, loggedUser.getSiteId(), doc.getId(), toInsert);
     EXPECT_THROW(server.remoteInsert(loggedUserUsername, doc.getId(), received), SymServerException);
@@ -752,6 +755,8 @@ TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveOfUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, remoteRemoveOnDocumentNotOpened){
+    setStageForAccessedDoc(loggedUser);
+    makeLoggedUserNotWorkingOnDoc();
     symbol toRemove('a', 0, 0, {}, false);
     symbolMessage received(msgType::removeSymbol, {loggedUserUsername, loggedUserPwd}, msgOutcome::success, 0, doc.getId(), toRemove);
     EXPECT_THROW(server.remoteInsert(loggedUserUsername, doc.getId(), received), SymServerException);
@@ -1058,9 +1063,52 @@ TEST_F(SymServerTestFilesystemFunctionality, updateCursorOfUnloggedUser){
 }
 
 TEST_F(SymServerTestFilesystemFunctionality, updateCursorOnDocumentNotOpened){
+    setStageForAccessedDoc(loggedUser);
+    makeLoggedUserNotWorkingOnDoc();
     unsigned int row=rand()%1000, col=rand()%1000;
     cursorMessage received(msgType::updateCursor, {loggedUserUsername, {}}, msgOutcome::success, loggedUser.getSiteId(), doc.getId(), row, col);
     EXPECT_THROW(server.updateCursorPos(loggedUserUsername, doc.getId(), received), SymServerException);
+    /*
+     * Cases in which, for an error, the operation goes wrong, so an exception is raised, are to be handled
+     * externally, in the module that controls the connection
+     */
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, editLineStyleCallsEditLineStyleOnDocAndPropagateChanges){
+    setStageForOpenedDocForLoggedUser();
+    std::initializer_list<uint_positive_cnt::type> siteIds{anotherUser.getSiteId()};
+    server.forceSiteIdForResId(&doc, anotherUser);
+    int row=rand()%1000;
+    std::pair<alignType, unsigned> oldStyle{alignType::left, 0}, newStyle{alignType::right, 1};
+
+    editLineStyleMessage received(msgType::editLineStyle, {{loggedUserUsername}, {}}, msgOutcome::success, oldStyle, newStyle, doc.getId(), row, msId);
+
+    editLineStyleMessage toSend(msgType::editLineStyle, {{}, {}}, msgOutcome::success, oldStyle, newStyle, doc.getId(), row, msId);
+    EXPECT_CALL(doc, editLineStyle(newStyle, row));
+    server.editLineStyle(loggedUserUsername, doc.getId(), newStyle, row, received);
+
+
+    ASSERT_NO_FATAL_FAILURE(messageAssociatedWithRightUsers(siteIds, toSend, {loggedUser.getSiteId()}));
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, editLineStyleCallsEditLineStyleOfUnloggedUser){
+    int row=rand()%1000;
+    std::pair<alignType, unsigned> oldStyle{alignType::left, 0}, newStyle{alignType::right, 1};
+    editLineStyleMessage received(msgType::editLineStyle, {{loggedUserUsername}, {}}, msgOutcome::success, oldStyle, newStyle, doc.getId(), row, msId);
+    EXPECT_THROW(server.editLineStyle(loggedUserUsername, doc.getId(), newStyle, row, received), SymServerException);
+    /*
+     * Cases in which, for an error, the operation goes wrong, so an exception is raised, are to be handled
+     * externally, in the module that controls the connection
+     */
+}
+
+TEST_F(SymServerTestFilesystemFunctionality, editLineStyleOnDocumentNotOpened){
+    setStageForAccessedDoc(loggedUser);
+    makeLoggedUserNotWorkingOnDoc();
+    int row=rand()%1000;
+    std::pair<alignType, unsigned> oldStyle{alignType::left, 0}, newStyle{alignType::right, 1};
+    editLineStyleMessage received(msgType::editLineStyle, {{loggedUserUsername}, {}}, msgOutcome::success, oldStyle, newStyle, doc.getId(), row, msId);
+    EXPECT_THROW(server.editLineStyle(loggedUserUsername, doc.getId(), newStyle, row, received), SymServerException);
     /*
      * Cases in which, for an error, the operation goes wrong, so an exception is raised, are to be handled
      * externally, in the module that controls the connection
