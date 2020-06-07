@@ -117,6 +117,28 @@ void ServerDispatcher::readyRead(){
             ia >> da;
         } catch (boost::archive::archive_exception b) {
             qDebug() << "Deserialization ERROR: " << b.what();
+            qDebug() << "Connection to socketdescriptor " << readSocket->socketDescriptor() << " will be closed";
+            //eseguiamo lo split per scollegare il client
+            QStringList ls = readSocket->objectName().split("-");
+            //recuperiamo il siteID dell'utente associato al socket
+            int stID = ls[1].toUInt();
+            //dobbiamo controllare se era loggato oppure no
+            if(stID != 0){
+                //utente loggato, quindi eseguiamo l'hard logout
+                this->server.hardLogout(stID);
+                //eliminiamo l'utente dalla mappa Connected_SymUser
+                this->Connected_SymUser.remove(stID);
+                qDebug() << "Logged User DELETED from Symposium online users";
+            }
+            //disconnettiamo il client
+            readSocket->disconnectFromHost();
+            //eliminiamo l'utente dalla mappa Connected_Clients
+            this->Connected_Clients.remove(readSocket->socketDescriptor());
+            qDebug() << "Socket DELETED from connected clients";
+            qDebug() << "Symposium users online: " << this->Connected_SymUser.size();
+            qDebug() << "Connected clients: " << this->Connected_Clients.size();
+            qDebug() << "--- FINE METODO CLIENTDISCONNECTED ---";
+            return;
         }
         qDebug() << "Ricevuto da socketdescriptor " << readSocket->socketDescriptor() << ": " << QString::fromStdString(accumulo.str());
         try {
