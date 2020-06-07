@@ -218,7 +218,8 @@ void inserturi::on_add_clicked()
                 disableStyleButtons();
                 title=ui->name->text();
                 #ifdef DISPATCHER_ON
-                cl.openNewSource(pathLink, privilege, path, ui->name->text().toStdString());
+                std::string nameToSend=directory::fixNameSource(ui->name->text().toStdString());
+                cl.openNewSource(pathLink, privilege, path, nameToSend);
                 #endif
             }
         }

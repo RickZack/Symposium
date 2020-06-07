@@ -162,6 +162,9 @@ border-color: rgb(58, 80, 116);
    <property name="indentation">
     <number>0</number>
    </property>
+   <attribute name="headerMinimumSectionSize">
+    <number>4</number>
+   </attribute>
    <column>
     <property name="text">
      <string notr="true">1</string>

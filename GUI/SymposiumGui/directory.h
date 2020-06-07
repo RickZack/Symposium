@@ -97,6 +97,12 @@ public:
      */
     void successOpen();
 
+    /**
+     * @brief fixNameSource fix the name chosen by the user for his source, substituing the space with a no printable character
+     * @param nameSource the name chosen by the user
+     */
+    static std::string fixNameSource(const std::string nameSource);
+
     signals:
     void resNameChanged(Symposium::uint_positive_cnt::type resId, const QString& newName);
     void closeWaiting();
@@ -333,12 +339,6 @@ private:
      * @param list the list of all the elements inside a directory
      */
     void populateMap(std::string list);
-
-    /**
-     * @brief fixNameSource fix the name chosen by the user for his source, substituing the space with a no printable character
-     * @param nameSource the name chosen by the user
-     */
-    std::string fixNameSource(const std::string nameSource);
 
 
     void handleFailureSymlink();

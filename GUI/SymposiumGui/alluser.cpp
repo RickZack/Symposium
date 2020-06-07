@@ -16,12 +16,14 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uin
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     insertusers();
-    ui->tree->setColumnCount(3);
-    ui->tree->headerItem()->setText(0, "user:");
-    ui->tree->headerItem()->setText(1, "privilege:");
-    ui->tree->headerItem()->setText(2, "username");
-    ui->tree->setColumnHidden(2, true);
-    ui->tree->setColumnWidth(0, 300);
+    ui->tree->setColumnCount(4);
+    ui->tree->headerItem()->setText(0, "");
+    ui->tree->headerItem()->setText(1, "user:");
+    ui->tree->headerItem()->setText(2, "privilege:");
+    ui->tree->headerItem()->setText(3, "username");
+    ui->tree->setColumnHidden(3, true);
+    ui->tree->setColumnWidth(1, 300);
+    ui->tree->setColumnWidth(0, 4);
     ui->notification->hide();
     ui->errorMess->hide();
     ui->waiting->hide();
@@ -73,8 +75,15 @@ void alluser::successEditPrivilege()
     onlineUsers=cl.onlineUser(documentID);
     users=cl.allUser(documentID);
     #endif
-    ui->tree->clear();
-    insertusers();
+    QList<QTreeWidgetItem*> selectedItems= ui->tree->selectedItems();
+    foreach(QTreeWidgetItem *item, selectedItems){
+        if(privToChange!="none")
+        {
+            item->setText(2, privToChange);
+        }
+        else
+            delete item;
+    }
 
 
 }
@@ -112,11 +121,11 @@ void alluser::insertusers()
     for(auto it:onlineUsers)
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
-        item->setIcon(0, QIcon(QString::fromStdString(it.first->getIconPath())));
+        item->setIcon(1, QIcon(QString::fromStdString(it.first->getIconPath())));
         if(us.getUsername()==it.first->getUsername())
-            item->setText(0, "(you)");
+            item->setText(1, "(you)");
         else
-            item->setText(0, QString::fromStdString(it.first->getUsername()));
+            item->setText(1, QString::fromStdString(it.first->getUsername()));
 
         for(auto it2:users)
         {
@@ -124,10 +133,14 @@ void alluser::insertusers()
             {
                 std::ostringstream priv;
                 priv<<it2.second;
-                item->setText(1, QString::fromStdString(priv.str()));
+                item->setText(2, QString::fromStdString(priv.str()));
             }
         }
-        item->setText(2, QString::fromStdString(it.first->getUsername()));
+        item->setText(3, QString::fromStdString(it.first->getUsername()));
+        Symposium::Color colHigh=cl.getColor(documentID,it.first->getSiteId());
+        QColor colUser;
+        colUser=static_cast<QColor>(colHigh);
+        item->setBackgroundColor(0,colUser);
         ui->tree->addTopLevelItem(item);
     }
 
@@ -145,12 +158,16 @@ void alluser::insertusers()
             if(it.second!=Symposium::privilege::none)
             {
                 QTreeWidgetItem *item=new QTreeWidgetItem();
-                item->setIcon(0, QIcon(":/icon/offline.png"));
-                item->setText(0, QString::fromStdString(it.first)+" (offline)");
+                Symposium::Color colHigh=cl.getColorbyUsername(documentID,it.first);
+                QColor colUser;
+                colUser=static_cast<QColor>(colHigh);
+                item->setBackgroundColor(0,colUser);
+                item->setIcon(1, QIcon(":/icon/offline.png"));
+                item->setText(1, QString::fromStdString(it.first)+" (offline)");
                 std::ostringstream priv;
                 priv<<it.second;
-                item->setText(1, QString::fromStdString(priv.str()));
-                item->setText(2, QString::fromStdString(it.first));
+                item->setText(2, QString::fromStdString(priv.str()));
+                item->setText(3, QString::fromStdString(it.first));
                 ui->tree->addTopLevelItem(item);
             }
         }
@@ -175,7 +192,8 @@ void alluser::enableButtons()
 
 void alluser::on_tree_itemClicked(QTreeWidgetItem *item, int)
 {
-    username=item->text(2).toStdString();
+    username=item->text(3).toStdString();
+    usernameToChange=item->text(3);
     ui->modify->click();
 }
 
@@ -214,21 +232,25 @@ void alluser::on_button_clicked()
 void alluser::on_owner_clicked()
 {
     newPrivelege=Symposium::privilege::owner;
+    privToChange="owner";
 }
 
 void alluser::on_modify_clicked()
 {
     newPrivelege=Symposium::privilege::modify;
+    privToChange="writer";
 }
 
 void alluser::on_reader_clicked()
 {
     newPrivelege=Symposium::privilege::readOnly;
+    privToChange="reader";
 }
 
 void alluser::on_none_clicked()
 {
     newPrivelege=Symposium::privilege::none;
+    privToChange="none";
 }
 
 void alluser::on_button_2_clicked()
