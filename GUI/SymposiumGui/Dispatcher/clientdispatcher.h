@@ -297,7 +297,7 @@ namespace Symposium{
          */
         Color getColor(uint_positive_cnt::type documentID, uint_positive_cnt::type siteID);
 
-        Color getColorbyUsername(uint_positive_cnt::type documentID, std::string& username);
+        Color getColorbyUsername(uint_positive_cnt::type documentID, const std::string& username);
 
         /**
          * @brief method to provide the ID of logged user's home directory

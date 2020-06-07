@@ -343,7 +343,7 @@ Color clientdispatcher::getColor(uint_positive_cnt::type documentID, uint_positi
     return this->client.colorOfUser(documentID, siteID);
 }
 
-Color clientdispatcher::getColorbyUsername(uint_positive_cnt::type documentID, std::string& username){
+Color clientdispatcher::getColorbyUsername(uint_positive_cnt::type documentID, const std::string& username){
     return this->client.colorOfUserbyUsername(documentID, username);
 }
 
