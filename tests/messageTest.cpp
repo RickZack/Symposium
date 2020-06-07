@@ -169,6 +169,8 @@ INSTANTIATE_TEST_SUITE_P(AllButRegistrationFromFirstGroup, signUpMsgForbiddenAct
 INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, signUpMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(editStyle, signUpMsgForbiddenActions, testing::Values(msgType::editLineStyle));
+
 
 
 struct updateDocMsgForbiddenActions: simpleMsgTypeTest {};
@@ -181,6 +183,8 @@ INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, updateDocMsgForbiddenActions, tes
 INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, updateDocMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_SUITE_P(AllButMapChangesFromThirdGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
 INSTANTIATE_TEST_SUITE_P(AllButCloseResFromFourthGroup, updateDocMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-2)));
+INSTANTIATE_TEST_SUITE_P(editStyle, updateDocMsgForbiddenActions, testing::Values(msgType::editLineStyle));
+
 
 struct loginMsgForbiddenActions: signUpMsgForbiddenActions {};
 TEST_P(loginMsgForbiddenActions, loginThrowExceptionInConstruction) {
@@ -191,6 +195,7 @@ INSTANTIATE_TEST_SUITE_P(AllButRegistrationAndLoginFromFirstGroup, loginMsgForbi
 INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, loginMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(editStyle, loginMsgForbiddenActions, testing::Values(msgType::editLineStyle));
 
 
 struct mapMsgForbiddenActions: simpleMsgTypeTest {};
@@ -202,6 +207,8 @@ INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, mapMsgForbiddenActions, testing::
 INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_SUITE_P(AllButMapChangesFromThirdGroup, mapMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin()+1, thirdGroup.end())));
 INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, mapMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(editStyle, mapMsgForbiddenActions, testing::Values(msgType::editLineStyle));
+
 
 struct sendResMsgForbiddenActions: simpleMsgTypeTest {
     std::shared_ptr<filesystem> f;
@@ -216,6 +223,7 @@ INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, sendResMsgForbiddenActions, testi
 INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, sendResMsgForbiddenActions, testing::ValuesIn(fourthGroup));
 INSTANTIATE_TEST_SUITE_P(changeResNameAndRemove, sendResMsgForbiddenActions, testing::Values(msgType::changeResName, msgType::removeRes));
+INSTANTIATE_TEST_SUITE_P(editStyle, sendResMsgForbiddenActions, testing::Values(msgType::editLineStyle));
 
 
 struct updateActiveMsgForbiddenActions: signUpMsgForbiddenActions {};
@@ -227,6 +235,7 @@ INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, updateActiveMsgForbiddenActions, 
 INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, updateActiveMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_SUITE_P(OnlyCloseResFromFourthGroup, updateActiveMsgForbiddenActions, testing::Values(msgType::closeRes));
+INSTANTIATE_TEST_SUITE_P(editStyle, updateActiveMsgForbiddenActions, testing::Values(msgType::editLineStyle));
 
 
 struct privMsgForbiddenActions: simpleMsgTypeTest {};
@@ -241,6 +250,7 @@ std::vector<msgType> ThirdWtChangePriv(thirdGroup);
 [[maybe_unused]] auto res=ThirdWtChangePriv.erase(ThirdWtChangePriv.begin()+1);
 INSTANTIATE_TEST_SUITE_P(AllButChangePrivilgesFromThirdGroup, privMsgForbiddenActions, testing::ValuesIn(ThirdWtChangePriv));
 INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, privMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(editStyle, privMsgForbiddenActions, testing::Values(msgType::editLineStyle));
 
 struct symbolMsgForbiddenActions: simpleMsgTypeTest {
     symbol s;
@@ -254,6 +264,8 @@ INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, symbolMsgForbiddenActions, testin
 INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_SUITE_P(AllButSymInsRemFromThirdGroup, symbolMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(thirdGroup.begin(), thirdGroup.end()-2)));
 INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, symbolMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(editStyle, symbolMsgForbiddenActions, testing::Values(msgType::editLineStyle));
+
 
 struct uriMsgForbiddenActions: simpleMsgTypeTest {};
 TEST_P(uriMsgForbiddenActions, uriThrowExceptionInConstruction) {
@@ -267,6 +279,8 @@ std::vector<msgType> ThirdWtShareRes(thirdGroup);
 [[maybe_unused]] auto res2=ThirdWtShareRes.erase(ThirdWtShareRes.begin()+2);
 INSTANTIATE_TEST_SUITE_P(AllButShareResFromThirdGroup, uriMsgForbiddenActions, testing::ValuesIn(ThirdWtShareRes));
 INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, uriMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(editStyle, uriMsgForbiddenActions, testing::Values(msgType::editLineStyle));
+
 
 struct userDataMsgForbiddenActions: signUpMsgForbiddenActions {};
 TEST_P(userDataMsgForbiddenActions, userDataThrowExceptionInConstruction) {
@@ -279,6 +293,8 @@ INSTANTIATE_TEST_SUITE_P(FirstWtChangeUserData, userDataMsgForbiddenActions, tes
 INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_SUITE_P(thirdGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_SUITE_P(fourthGroupMsgTypeSet, userDataMsgForbiddenActions, testing::ValuesIn(fourthGroup));
+INSTANTIATE_TEST_SUITE_P(editStyle, userDataMsgForbiddenActions, testing::Values(msgType::editLineStyle));
+
 
 //Added on 17/03/2020, after introduction of cursorMessage
 struct cursorMsgForbiddenActions: simpleMsgTypeTest {};
@@ -290,6 +306,7 @@ INSTANTIATE_TEST_SUITE_P(firstGroupMsgTypeSet, cursorMsgForbiddenActions, testin
 INSTANTIATE_TEST_SUITE_P(secondGroupMsgTypeSet, cursorMsgForbiddenActions, testing::ValuesIn(secondGroup));
 INSTANTIATE_TEST_SUITE_P(AllButSymInsRemFromThirdGroup, cursorMsgForbiddenActions, testing::ValuesIn(thirdGroup));
 INSTANTIATE_TEST_SUITE_P(allButCursorUpdateFromFourthGroup, cursorMsgForbiddenActions, testing::ValuesIn(std::vector<msgType>(fourthGroup.begin(), fourthGroup.end()-1)));
+INSTANTIATE_TEST_SUITE_P(editStyle, cursorMsgForbiddenActions, testing::Values(msgType::editLineStyle));
 
 //After bug found 11/12/2019: not only we need to throw when an action is illegal, but we do need to NOT
 //throw when it's legal! The following test should assure complete coverage for this consistency check
@@ -409,6 +426,7 @@ public:
     MOCK_METHOD3(editUser, const user&(const std::string&, user&, uint_positive_cnt::type));
     MOCK_METHOD3(closeSource, void(const std::string&, uint_positive_cnt::type, uint_positive_cnt::type));
     MOCK_METHOD3(updateCursorPos, void(const std::string&, uint_positive_cnt::type, const cursorMessage&));
+    MOCK_METHOD5(editLineStyle, void(const std::string &, uint_positive_cnt::type, const std::pair<alignType, unsigned>&, unsigned, const editLineStyleMessage &));
 };
 
 struct clientMessageTest: public testing::Test{
@@ -543,6 +561,8 @@ public:
     MOCK_METHOD4(updateCursorPos, void(uint_positive_cnt::type, uint_positive_cnt::type, unsigned int, unsigned int));
     MOCK_METHOD1(signUp, void(const user&));
     MOCK_METHOD1(logIn, void(const user&));
+    MOCK_METHOD3(remoteEditLineStyle, void(uint_positive_cnt::type, const std::pair<alignType, unsigned>&, unsigned));
+
 };
 
 struct serverMessageTest: public testing::Test{
@@ -954,6 +974,64 @@ TEST_F(DoubleEndMessageTest, cursorMessageCallsUpdateCursorOnOtherClient){
     fromServer->invokeMethod(client);
 }
 
+//Added on 7/06/2020, after introduction on editLineStyleMessage
+TEST_F(DoubleEndMessageTest, editLineStyleMsgCallsEditLineStyleOnSuccess){
+    unsigned int row=rand()%1000;
+    std::pair<alignType, unsigned> oldStyle{alignType::left, 0}, newStyle{alignType::right, 0};
+    fromClient=new editLineStyleMessage(msgType::editLineStyle,{username, {}}, msgOutcome::success, oldStyle, newStyle, resourceId, row);
+    //editLineStyleMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
+    auto* fc= static_cast<editLineStyleMessage*>(fromClient);
+    EXPECT_CALL(server, editLineStyle(username, resourceId, newStyle, row, *fc));
+    fromClient->invokeMethod(server);
+
+    fromServer= new serverMessage(msgType::editLineStyle, msgOutcome::success, fromClient->getMsgId());
+    //client uses the message previously sent to the server to retrieve the parameters for the required action:
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
+    //We expect no other function to be called when the outcome is positive, the line alignment/style ha slaready been changed
+
+    fromServer->invokeMethod(client);
+
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
+
+}
+
+TEST_F(DoubleEndMessageTest, editLineStyleMsgCallRemoteEditLineStyletOnFailure){
+    unsigned int row=rand()%1000;
+    std::pair<alignType, unsigned> oldStyle{alignType::left, 0}, newStyle{alignType::right, 0};
+    fromClient=new editLineStyleMessage(msgType::editLineStyle,{username, {}}, msgOutcome::success, oldStyle, newStyle, resourceId, row);
+    //editLineStyleMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
+    auto* fc= static_cast<editLineStyleMessage*>(fromClient);
+    EXPECT_CALL(server, editLineStyle(username, resourceId, newStyle, row, *fc));
+    fromClient->invokeMethod(server);
+
+    //Suppose now that the user return a failure
+    fromServer= new serverMessage(msgType::editLineStyle, msgOutcome::failure, fromClient->getMsgId());
+    //client uses the message previously sent to the server to retrieve the parameters for the required action:
+    EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
+    //We expect remoteEditLineStyle to be called by fromClient when the outcome is negative, so that the editing done in advance is annulled
+    EXPECT_CALL(client, remoteEditLineStyle(resourceId, oldStyle, row));
+    //when a serverMessage is received, a related message from the client is searched and completeAction() called
+    //the retrived clientMessage has all the data needed to perform the action required
+    fromServer->invokeMethod(client);
+
+    fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
+
+}
+
+TEST_F(DoubleEndMessageTest, editLineStyleMsgCallsRemoteRemoveOnOtherClient){
+    unsigned int row=rand()%1000;
+    std::pair<alignType, unsigned> oldStyle{alignType::left, 0}, newStyle{alignType::right, 0};
+    fromClient=new editLineStyleMessage(msgType::editLineStyle,{username, {}}, msgOutcome::success, oldStyle, newStyle, resourceId, row);
+    //editLineStyleMessage::invokeMethod() pass itself to server function. To do this in test we need a cast
+    auto* fc= static_cast<editLineStyleMessage*>(fromClient);
+    EXPECT_CALL(server, editLineStyle(username, resourceId, newStyle, row, *fc));
+    fromClient->invokeMethod(server);
+
+    fromServer=new editLineStyleMessage(msgType::editLineStyle,{username, {}}, msgOutcome::success, oldStyle, newStyle, resourceId, row);
+    EXPECT_CALL(client, remoteEditLineStyle(resourceId, newStyle, row));
+    fromServer->invokeMethod(client);
+}
+
 struct messageSerialization: public testing::Test{
     std::unique_ptr<message> toStore, toLoad;
     std::stringstream stream;
@@ -1099,4 +1177,14 @@ TEST_F(messageSerialization, cursorMessage){
     storeMessage(toStore);
     loadMessage(toLoad);
     EXPECT_EQ(*dynamic_cast<cursorMessage*>(toStore.get()), *dynamic_cast<cursorMessage*>(toLoad.get()));
+}
+
+TEST_F(messageSerialization, editLineStyleMessage){
+    std::pair<alignType, unsigned> arg1{alignType::left, 0}, arg2{alignType::right, 1};
+    toStore=std::make_unique<editLineStyleMessage>(msgType::editLineStyle, std::pair{"",""},msgOutcome ::success, arg1, arg1, 0,0,10);
+    toLoad=std::make_unique<editLineStyleMessage>(msgType::editLineStyle, std::pair{"",""},msgOutcome ::success, arg2, arg2, 1,2,10);
+    ASSERT_NE(*dynamic_cast<editLineStyleMessage*>(toStore.get()), *dynamic_cast<editLineStyleMessage*>(toLoad.get()));
+    storeMessage(toStore);
+    loadMessage(toLoad);
+    EXPECT_EQ(*dynamic_cast<editLineStyleMessage*>(toStore.get()), *dynamic_cast<editLineStyleMessage*>(toLoad.get()));
 }

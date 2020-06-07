@@ -799,6 +799,9 @@
          friend class boost::serialization::access;
          template<class Archive>
          void serialize(Archive &ar, unsigned int);
+         //Needed for boost::serialization
+         editLineStyleMessage():serverMessage(msgOutcome::success, 1){}
+
          std::pair<alignType, unsigned> oldLineStyle;
          std::pair<alignType, unsigned> newLineStyle;
          uint_positive_cnt::type docId;
@@ -806,7 +809,7 @@
      public:
         editLineStyleMessage(msgType action, const std::pair<std::string, std::string> &actionOwner, msgOutcome result,
                              const std::pair<alignType, unsigned>& oldLineStyle, const std::pair<alignType, unsigned>& newLineStyle, uint_positive_cnt::type docId,
-                             unsigned row, uint_positive_cnt::type msgId);
+                             unsigned row, uint_positive_cnt::type msgId=0);
 
         /**
          * @brief Notify the server that the alignment and/or the index style of a paragraph has been changed
@@ -832,6 +835,10 @@
           */
 
          void completeAction(SymClient &client, msgOutcome serverResult) override;
+
+         bool operator==(const editLineStyleMessage &rhs) const;
+
+         bool operator!=(const editLineStyleMessage &rhs) const;
      };
 
 

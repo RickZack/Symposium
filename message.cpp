@@ -921,14 +921,39 @@ if(action!=msgType::editLineStyle)
 this->action=action;
 }
 
+template<class Archive>
+void editLineStyleMessage::serialize(Archive &ar, const unsigned int)
+{
+    // save/load base class information
+    ar & boost::serialization::base_object<Symposium::clientMessage>(*this);
+    ar & boost::serialization::base_object<Symposium::serverMessage>(*this);
+    ar & oldLineStyle & newLineStyle & row & docId & row;
+}
+BOOST_CLASS_EXPORT(Symposium::editLineStyleMessage)
+
+
 void editLineStyleMessage::invokeMethod(SymServer &server) {
-    //TODO: implement!
+    server.editLineStyle(getActionOwner().first, docId, newLineStyle, row, *this);
 }
 
 void editLineStyleMessage::invokeMethod(SymClient &client) {
-    //TODO: implement!
+    client.remoteEditLineStyle(docId, newLineStyle, row);
 }
 
 void editLineStyleMessage::completeAction(SymClient &client, msgOutcome serverResult) {
-    //TODO: implement!
+    if(serverResult==msgOutcome::failure)
+        client.remoteEditLineStyle(docId, oldLineStyle, row);
+}
+
+bool editLineStyleMessage::operator==(const editLineStyleMessage &rhs) const {
+    return static_cast<const Symposium::clientMessage &>(*this) == static_cast<const Symposium::clientMessage &>(rhs) &&
+           static_cast<const Symposium::serverMessage &>(*this) == static_cast<const Symposium::serverMessage &>(rhs) &&
+           oldLineStyle == rhs.oldLineStyle &&
+           newLineStyle == rhs.newLineStyle &&
+           docId == rhs.docId &&
+           row == rhs.row;
+}
+
+bool editLineStyleMessage::operator!=(const editLineStyleMessage &rhs) const {
+    return !(rhs == *this);
 }

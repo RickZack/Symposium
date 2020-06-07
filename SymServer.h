@@ -364,7 +364,7 @@
           * @param newLineStyle new alignment and indexStyle to apply
           * @param row the row to apply @e newLineStyle to
           */
-         void editLineStyle(const std::string &actionUser, uint_positive_cnt::type docId,
+         virtual void editLineStyle(const std::string &actionUser, uint_positive_cnt::type docId,
                             const std::pair<alignType, unsigned> &newLineStyle, unsigned row,
                             const editLineStyleMessage &editMsg);
 
