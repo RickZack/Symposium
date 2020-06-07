@@ -1250,6 +1250,7 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
         Symposium::Color colHigh=cl.getColor(this->documentId,sym.getSiteId());
         QColor colUser;
         colUser=static_cast<QColor>(colHigh);
+        colUser.setAlpha(alphaValue);
         ch_format.setBackground(colUser);
     }
 #endif
