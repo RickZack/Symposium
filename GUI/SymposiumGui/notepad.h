@@ -145,8 +145,6 @@ private slots:
     void on_pushButton_clicked();
     void modifyWinTitle(Symposium::uint_positive_cnt::type resId, const QString& newName);
 
-    void on_textEdit_customContextMenuRequested(const QPoint &pos);
-
 public:
     static constexpr unsigned alphaValue=50; /**< value used as soften color for insertion and highlight*/
 
@@ -232,6 +230,8 @@ private:
      * @brief uncolorText to restore the default background color
      */
     void uncolorText();
+
+     void contextMenuEvent(QContextMenuEvent *event) override;
 
     void handleChangeFormat(unsigned int i, unsigned int f);
 };

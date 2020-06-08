@@ -1593,6 +1593,7 @@ void notepad::insertusers()
     onlineUsers.push_front(p2);
     onlineUsers.push_front(p3);
     #endif
+    ui->tree->setIconSize(QSize(30,30));
     for(const auto& it:onlineUsers)
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
@@ -1705,7 +1706,7 @@ void notepad::editLineStyle(const std::pair<Symposium::alignType, unsigned int> 
 
 
 
-void notepad::on_textEdit_customContextMenuRequested(const QPoint &pos)
+void notepad::contextMenuEvent(QContextMenuEvent *)
 {
     QMenu submenu;
     QString style="QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}";
