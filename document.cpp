@@ -162,11 +162,10 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> &inde
     /* I don't have position before the considered one */
     /* FIRST LIMIT CASE - I'm at the beginning of the symbols */
     if(ch==0 && line==0){
-        symbol sym=emptySymbol;
-        return sym;
+        return emptySymbol;
     }
     /* SECOND LIMIT CASE: I have to watch to the previous line */
-    else if(ch==0 && line!=0){
+    else if(ch==0){
         line=line-1;                            /**< line is !=0 -> line-1 can't be a negative number */
         ch=countCharsInLine(line)-1;            /**< in a previous line w.r.t the one in which I am, I have at least '\r' character */
     }
@@ -174,8 +173,7 @@ symbol document::findPosBefore(const std::pair<unsigned int, unsigned int> &inde
         ch=ch-1;
     }
 
-    symbol sym=symbols[line][ch];
-    return sym;
+    return symbols[line][ch];
 }
 
 
@@ -200,6 +198,12 @@ symbol document::findPosAfter(const std::pair<unsigned int, unsigned int> &index
     else if(ch<numChars){                         /**< there is a pos-after */
         sym=symbols[line][ch];
     }
+    /*
+     * Here there is a dead end: condition to get here is numChars>0 && ch!=numChars && ch>=numChars,
+     * that simplifies in numChars>0 && ch>numChars. Now ch>numChars is negated by checkIndex:
+     * with current invariants, symbols[line].size()==numChars-1, so verifying ch<symbols[line].size() means
+     * that ch<numChars-1.
+     */
     return sym;
 }
 
@@ -244,9 +248,8 @@ document::generatePosBetween(const std::vector<int> &posBefore, const std::vecto
         return generatePosBetween(pos1, pos2, newPos, level + 1, b, a);
 
     }
-    else{
-            throw documentException(documentException::docExceptionCodes::fixPositionSorting, UnpackFileLineFunction());
-        }
+    else
+        throw documentException(documentException::docExceptionCodes::fixPositionSorting, UnpackFileLineFunction());
 }
 
 
@@ -381,7 +384,7 @@ std::wstring document::toText() const {
 }
 
 void document::close(const user &noLongerActive) {
-    for(auto p:activeUsers) {
+    for(const auto& p:activeUsers) {
         user old_User = *p.first;
         if (old_User == noLongerActive) {
             activeUsers.remove(p);
@@ -471,7 +474,7 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
     std::pair<unsigned int,unsigned int> ind;
     std::vector<Symposium::symbol> lastLine;
     unsigned int maxLine=0;
-    unsigned int i0=0; unsigned int i1=0;
+    unsigned int i0=0, i1=0;
     unsigned int minLine=0;
     unsigned int totalLines=countsNumLines();
     if(totalLines!=0){
@@ -486,7 +489,10 @@ std::pair<unsigned int, unsigned int> document::findInsertIndex(const symbol &sy
 
 
     // check if struct is empty or char is less than first char
-    if(totalLines==0 || symbol<=symbols[0][0]){ind={0,0}; return ind;}
+    if(totalLines==0 || symbol<=symbols[0][0]){
+        ind={0,0};
+        return ind;
+    }
     unsigned int numCharsInLine=countCharsInLine(maxLine);
     auto lastSymbol=lastLine[numCharsInLine-1];
 
@@ -547,7 +553,12 @@ document::findEndPosition(unsigned int lines, const symbol &lastSymbol) const {
     return ind;
 }
 
-
+/*
+ * right countCharsInLine could return 0 under error conditions determined by timing of concurrent operations,
+ * e.g. when inserting before a character from a client that has already been removed by another client, but that
+ * client has not this information yet. So server side, if that character we insert before is the only one,
+ * the number of chars in line is 0. It's ok not to check because of the control on vector[0] in the first if.
+ */
 unsigned int document::findInsertInLine(const symbol &ch, const std::vector<symbol> &vector, unsigned int line) const {
     unsigned int ind=0;
     unsigned int left=0;
@@ -581,11 +592,17 @@ unsigned int document::findInsertInLine(const symbol &ch, const std::vector<symb
     }
 
 }
-
+/*
+ * Under concurrent removal something really bas can happen: the very same character can be issued
+ * to be removed two times server side, bacause two clients asked for deletion at the same time.
+ * Therefore, the number of lines containig at least one symbol can be 0, access to vector must be protected.
+ */
 std::pair<unsigned int, unsigned int> document::findPosition(const symbol &symbol) const {
     std::pair<int,int> ind;
     unsigned int minLine=0;
     unsigned int totalLines=this->countsNumLines();
+    if(totalLines<1)
+        throw documentException(documentException::docExceptionCodes::positionNotFound, UnpackFileLineFunction());
     unsigned int maxLine= totalLines-1;
     std::vector<Symposium::symbol> lastLine= symbols[maxLine];
 
@@ -694,8 +711,10 @@ void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned in
 void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol,
                                     const symbol &symb, bool ins) {
     for(auto& i: activeUsers){
+        if(i.second.row<newRow || (i.second.row==newRow && i.second.col<=newCol))
+            continue;
         // On the same line, there are cursors with different siteId
-        if((symb.getCh()!='\r') && i.second.row==newRow && i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
+        if(symb.getCh()!='\r'){
             // The action is to insert a character
             if(ins){
                 i.second.col+=1;
@@ -704,18 +723,15 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsign
             }
 
         } // I'm changing the line
-        else if(symb.getCh()=='\r'){
+        else{
             // inserting the \r character
             if(ins){
                 // There are different cursor on the same line: they have to change the row index and the column index
-                if(i.second.row==newRow){
-                    if(i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
-                        i.second.row+=1;
-                        i.second.col=i.second.col-newCol;
-                    }
-                }else
+                if(i.second.row==newRow && i.second.col>newCol){
+                    i.second.row+=1;
+                    i.second.col=i.second.col-newCol;
+                }else{
                     // there are different cursors on different lines: they have to change only the row index
-                if(i.first->getSiteId()!=targetSiteId){
                     i.second.row+=1;
                 }
                 // deleting the \r character
@@ -723,7 +739,6 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsign
                 i.second.row-=1;
                 i.second.col=i.second.col+newCol;
             }
-
         }
     }
 }

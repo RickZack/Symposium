@@ -162,7 +162,7 @@ private:
     Symposium::privilege privOpen;
     bool NotRefreshLabels=false;                                        /**< indicates whether a refresh of users' labels may be needed */
     bool highActivated=false;
-    QColor colPos;
+    QColor colPos;                                                      /**< indicates the color the text to insert */
     bool okPaste=false;
     unsigned dim;                                                       /**< to understand the dimension of the pasted string (Useful for ctrl+C,ctrl+V options) */
     Symposium::alignType alignment=Symposium::alignType::left;          /**< to set the alignment type for the style */

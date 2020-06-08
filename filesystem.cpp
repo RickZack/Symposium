@@ -581,11 +581,17 @@ std::string Symposium::symlink::getPath() {
 }
 
 std::string Symposium::symlink::print(const std::string &targetUser, bool, unsigned int indent) const {
-    std::shared_ptr<file> file=directory::getRoot()->getFile(absPathWithoutId, resId);
+    //std::shared_ptr<file> file=directory::getRoot()->getFile(absPathWithoutId, resId);
     std::ostringstream priv;
     std::ostringstream typeres;
     typeres<<resType();
-    priv<<file->getUserPrivilege(targetUser);
+    try {
+       std::shared_ptr<file> file=directory::getRoot()->getFile(absPathWithoutId, resId);
+       priv<<file->getUserPrivilege(targetUser);
+    } catch (filesystemException) {
+        priv<<privilege::none;
+    }
+    //priv<<file->getUserPrivilege(targetUser);
     std::string spaces = "";
     if(indent>0)
         spaces.insert(spaces.begin(), indent, ' ');

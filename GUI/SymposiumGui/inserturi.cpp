@@ -256,6 +256,7 @@ void inserturi::successInsert()
                  notepadWindow->setreadonly();
         }
     }else{
+        privilege = cl.getMyPrivilegeOnFileOpen();
         notification notWindow(this, "You don't have permission to open the file with the selected privilege. The file was added with the highest privilege level assigned by the owner.");
         int ret=notWindow.exec();
         if(ret==0)

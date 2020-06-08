@@ -21,6 +21,7 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     list=cl.showHome();
     path = "./";
     list = manipulationPath(list);
+    qDebug()<<"Lista attuale"<<QString::fromStdString(list);
     this->populateMap(list);
     #else
     list="directory 1 Folder1\n file 9 Folder1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
@@ -158,10 +159,15 @@ void directory::failure(const QString& toPrint){
     //if(this->lastChoice != createNewSource)
     emit closeWaiting();
     pressed=false;
-    if(lastChoice==openSymlink){
+    const char*  msg="The element has not been found with get";
+    QByteArray ba=toPrint.toLocal8Bit();
+    const char* msgPrint=ba.data();
+    int ret=strcmp(msg,msgPrint);
+    if(lastChoice==openSymlink && ret==0 ){
         handleFailureSymlink();
-    }else if(lastChoice==openSource){
-        QMessageBox::critical(this,tr("Error Message"),tr("This source has been deleted. It will not appear on your FileSystem starting from your next login"));
+    }else if(lastChoice==openSource && ret==0){
+        QString err_msg="Source deleted by owner:no present at next login";
+       this->failureActionDirectory(err_msg);
     }
     if(toPrint=="-1"){
         errorConnectionLogout();
@@ -171,23 +177,26 @@ void directory::failure(const QString& toPrint){
 }
 
 void directory::handleFailureSymlink(){
-    QMessageBox::critical(this,tr("Error Message"),tr("This source has been deleted by its owner. You are nomore allowed to use it. It will be deleted from your personal FileSystem"));
-    //if(QMessageBox::Ok)
+
     lastChoice = remove;
     disableStyleButtons();
     pressed=true;
-    // estract from the map the id of the source that I want to remove
-    auto it=this->ids.find(this->fixedName);
-    id=it->second.first;
-    waitingFunction();
-    std::string pathToSend=path;
-    if(pathToSend!="./")
-    {
-        std::size_t found = pathToSend.find_last_of("/");
-        pathToSend.erase(found, pathToSend.size());
+    QString msg="The source has been deleted by its owner. You are nomore allowed to use it. It will be removed from your FileSystem";
+    notification notWind(this,msg);
+    int ans=notWind.exec();
+    if(ans==0){
+        // estract from the map the id of the source that I want to remove
+        auto it=this->ids.find(this->fixedName);
+        id=it->second.first;
+        waitingFunction();
+        std::string pathToSend=path;
+        if(pathToSend!="./")
+        {
+            std::size_t found = pathToSend.find_last_of("/");
+            pathToSend.erase(found, pathToSend.size());
+        }
+        cl.removeResource(pathToSend,id);
     }
-    cl.removeResource(pathToSend,id);
-
 }
 
 void directory::listGenerate(std::string str_first, int count)
@@ -434,9 +443,8 @@ void directory::on_pushButton_3_clicked()
 {
     lastChoice = createFolder;
     QString name= ui->name->text();
-    std::string nameFolder=name.toStdString();                       /** < name folder with possible spaces */
-    if(nameFolder==" "){
-        this->failureActionDirectory("The inserted name is not correct. Please try again");
+    if(name.isEmpty()){
+        return this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
     this->fixedName=this->fixNameSource(name.toStdString());   /** < name folder without possible spaces */
     #ifdef DISPATCHER_ON
@@ -718,8 +726,8 @@ void directory::on_pushButton_4_clicked()
 {
     lastChoice = createNewSource;
     this->curResName =ui->name_2->text();                                                              /** < name with possible spaces */
-    if(curResName.toStdString()==" "){
-        this->failureActionDirectory("The inserted name is not correct. Please try again");
+    if(curResName.isEmpty()){
+        return this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
     std::string fixedName=this->fixNameSource(curResName.toStdString());           /** < name without possible spaces */
     #ifdef DISPATCHER_ON
@@ -860,8 +868,8 @@ void directory::on_okButton_clicked()
 {
     lastChoice = rename;
     this->curResName =ui->renameLabel->text();                              /** < name with possible spaces */
-    if(curResName.toStdString()==" "){
-        this->failureActionDirectory("The inserted name is not correct. Please try again");
+    if(curResName.isEmpty()){
+        return this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
     fixedName=this->fixNameSource(curResName.toStdString());                /** < name without possible spaces */
     QList<QListWidgetItem*> selectedItem= ui->myListWidget->selectedItems();
