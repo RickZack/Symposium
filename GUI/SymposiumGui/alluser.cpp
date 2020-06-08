@@ -21,6 +21,7 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uin
     ui->tree->headerItem()->setText(1, "user:");
     ui->tree->headerItem()->setText(2, "privilege:");
     ui->tree->headerItem()->setText(3, "username");
+    ui->tree->setIconSize(QSize(30,30));
     ui->tree->setColumnHidden(3, true);
     ui->tree->setColumnWidth(1, 300);
     ui->tree->setColumnWidth(0, 4);
