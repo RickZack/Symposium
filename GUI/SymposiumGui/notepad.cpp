@@ -819,6 +819,7 @@ void notepad::fixAlignment(){
             ui->actionAlignTextJustify->setChecked(true);
         }
     }
+    ui->textEdit->scroll();
     NotRefreshLabels=false;
     ui->textEdit->changePosition(0,0);
 
