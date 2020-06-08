@@ -219,10 +219,8 @@ void file::deleteFromStrategy(const std::string &userName)
 
 std::string file::print(const std::string &targetUser, bool, unsigned int indent) const {
     std::ostringstream typeres;
-    typeres<<resType(); //then the typer of the resource
+    typeres<<resType(); //then the type of the resource
     std::ostringstream priv;
-    if(getUserPrivilege(targetUser)==privilege::none)
-        return name+" You no longer have the possibility to access the file in any mode";
     priv<<getUserPrivilege(targetUser); //the privilege
     std::string spaces = "";
     if(indent>0)
@@ -588,8 +586,6 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool, unsig
     std::ostringstream typeres;
     typeres<<resType();
     priv<<file->getUserPrivilege(targetUser);
-    if(file->getUserPrivilege(targetUser)==privilege::none)
-        return name+" You no longer have the possibility to access the file in any mode";
     std::string spaces = "";
     if(indent>0)
         spaces.insert(spaces.begin(), indent, ' ');
