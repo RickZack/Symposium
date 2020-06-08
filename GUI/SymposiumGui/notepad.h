@@ -103,7 +103,7 @@ public:
     /**
      * @brief fixAlignment to fix for each row the alignment stile
      */
-    void fixAlignment(Symposium::alignType align);
+    void fixAlignment();
 
 
 

@@ -52,15 +52,19 @@ void qtexteditlabels::changePosition(int block, int collumn)
 void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, int block, int collumn)
 {
     j=0;
-    int blockThisUser=this->textCursor().blockNumber();
-    int columnThisUser=this->textCursor().positionInBlock();
-    changePosition(block, collumn);
-    QLabel *labelReverseName=labels.find(siteId)->second.first;
-    QLabel *labelName=labels.find(siteId)->second.second;
-    showLabel(labelReverseName, labelName);
-    cursors.find(siteId)->second.first=block;
-    cursors.find(siteId)->second.second=collumn;
-    changePosition(blockThisUser, columnThisUser);
+    auto pairlabels=labels.find(siteId);
+    if(pairlabels!=labels.end())
+    {
+        int blockThisUser=this->textCursor().blockNumber();
+        int columnThisUser=this->textCursor().positionInBlock();
+        changePosition(block, collumn);
+        QLabel *labelReverseName=pairlabels->second.first;
+        QLabel *labelName=pairlabels->second.second;
+        showLabel(labelReverseName, labelName);
+        cursors.find(siteId)->second.first=block;
+        cursors.find(siteId)->second.second=collumn;
+        changePosition(blockThisUser, columnThisUser);
+    }
     j=1;
 }
 

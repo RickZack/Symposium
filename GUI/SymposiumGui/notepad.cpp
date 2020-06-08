@@ -251,8 +251,11 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
         ui->actionPaste->setVisible(false);
         ui->actionCopy->setDisabled(true);
         ui->actionCopy->setVisible(false);
+        setreadonly();
     }
-    else if(priv==Symposium::privilege::owner)
+    else
+        ui->textEdit->installEventFilter(this);
+    if(priv==Symposium::privilege::owner)
     {
         QMenu *shareMenu=menuBar()->addMenu(tr("Sharing Policy"));
         shareMenu->addAction(tr("Disable links"), this, &notepad::inactiveLink);
@@ -260,12 +263,10 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
         shareMenu->addAction(tr("Timer links"), this, &notepad::timerLink);
         shareMenu->addAction(tr("Number links"), this, &notepad::counterLink);
         shareMenu->addAction(tr("Change Privilege"), this, &notepad::visualizeAllUsers);
-        ui->textEdit->installEventFilter(this);
     }
     else {
         QMenu *usersMenu=menuBar()->addMenu(tr("Users"));
         usersMenu->addAction(tr("All users"), this, &notepad::visualizeAllUsers);
-        ui->textEdit->installEventFilter(this);
     }
 
     ui->actionhighlight->setIcon(QIcon(":/resources/cartelle/color_icon"));
@@ -741,7 +742,6 @@ void notepad::fillTextEdit(){
         auto valAlign=Symposium::alignType::left;
         for(size_t i=0; i<symbols.size() && symbols[i][0].getCh()!=Symposium::document::emptyChar;i++){
             auto style=alignmentStyle[i];
-            this->fixAlignment(style.first);
             if(valStyle!=style.second){
                 this->textStyle(style.second);
                 valStyle=style.second;
@@ -793,21 +793,34 @@ void notepad::fillTextEdit(){
 }
 
 
-void notepad::fixAlignment(Symposium::alignType align){
-    if(align==Symposium::alignType::left){
-       this->textAlign(ui->actionAlignTextLeft);
-       ui->actionAlignTextLeft->setChecked(true);
-     }else if(align==Symposium::alignType::right){
-        this->textAlign(ui->actionAlignTextRight);
-        ui->actionAlignTextRight->setChecked(true);
-     }else if(align==Symposium::alignType::center){
-        this->textAlign(ui->actionAlignCenter);
-        ui->actionAlignCenter->setChecked(true);
-     }else if (align==Symposium::alignType::justify){
-        this->textAlign(ui->actionAlignTextJustify);
-        ui->actionAlignTextJustify->setChecked(true);
+void notepad::fixAlignment(){
+    NotRefreshLabels=true;
+    auto alignmentStyle=this->doc.getAlignmentStyle();
+    auto& symbols= this->doc.getSymbols();
+    QTextCursor curs=ui->textEdit->textCursor();
+    for(size_t i=0; i<alignmentStyle.size();i++)
+    {
+        ui->textEdit->changePosition(i,0);
+        auto style=alignmentStyle[i];
+        Symposium::alignType align=style.first;
+        if(align==Symposium::alignType::left){
+            this->textAlign(ui->actionAlignTextLeft);
+            ui->actionAlignTextLeft->setChecked(true);
+        }else if(align==Symposium::alignType::right){
+            this->textAlign(ui->actionAlignTextRight);
+            ui->actionAlignTextRight->setChecked(true);
+        }else if(align==Symposium::alignType::center){
+            this->textAlign(ui->actionAlignCenter);
+            ui->actionAlignCenter->setChecked(true);
+        }else if (align==Symposium::alignType::justify){
+            this->textAlign(ui->actionAlignTextJustify);
+            ui->actionAlignTextJustify->setChecked(true);
         }
-   }
+    }
+    NotRefreshLabels=false;
+    ui->textEdit->changePosition(0,0);
+
+}
 
 
 
