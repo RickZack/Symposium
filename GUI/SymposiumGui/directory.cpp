@@ -443,7 +443,7 @@ void directory::on_pushButton_3_clicked()
 {
     lastChoice = createFolder;
     QString name= ui->name->text();
-    if(name.isEmpty()){
+    if(name.isEmpty() || name== " "){
         return this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
     this->fixedName=this->fixNameSource(name.toStdString());   /** < name folder without possible spaces */
@@ -726,7 +726,7 @@ void directory::on_pushButton_4_clicked()
 {
     lastChoice = createNewSource;
     this->curResName =ui->name_2->text();                                                              /** < name with possible spaces */
-    if(curResName.isEmpty()){
+    if(curResName.isEmpty() || curResName==" "){
         return this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
     std::string fixedName=this->fixNameSource(curResName.toStdString());           /** < name without possible spaces */
@@ -787,6 +787,7 @@ notepad* directory::successNewSource(){
     nw->setWindowTitle(curResName);
     goToWindow(*nw);
     nw->showLabels();
+    nw->fixAlignment();
     //To make notepad's title change when renaming the file
     QObject::connect(this, SIGNAL(resNameChanged(Symposium::uint_positive_cnt::type, const QString&)), nw, SLOT(modifyWinTitle(Symposium::uint_positive_cnt::type, const QString&)));
     return nw;
@@ -868,7 +869,7 @@ void directory::on_okButton_clicked()
 {
     lastChoice = rename;
     this->curResName =ui->renameLabel->text();                              /** < name with possible spaces */
-    if(curResName.isEmpty()){
+    if(curResName.isEmpty() || curResName==" "){
         return this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
     fixedName=this->fixNameSource(curResName.toStdString());                /** < name without possible spaces */
@@ -1077,8 +1078,7 @@ void directory::successOpen(){
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
     //TODO: ad esempio la setreadonly potrebbe essere chiamata da notepad, ed essere quinid un afunzione privata
-    if(privOpen==Symposium::privilege::readOnly)
-        notepadWindow->setreadonly();
+    notepadWindow->fixAlignment();
     //To make notepad's title change when renaming the file
     QObject::connect(this, SIGNAL(resNameChanged(Symposium::uint_positive_cnt::type, const QString&)), notepadWindow, SLOT(modifyWinTitle(Symposium::uint_positive_cnt::type, const QString&)));
 }

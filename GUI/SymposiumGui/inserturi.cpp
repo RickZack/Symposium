@@ -252,8 +252,7 @@ void inserturi::successInsert()
              notepadWindow->setWindowTitle(title);
              goToWindow(*notepadWindow);
              notepadWindow->showLabels();
-             if(privilege==Symposium::privilege::readOnly)
-                 notepadWindow->setreadonly();
+             notepadWindow->fixAlignment();
         }
     }else{
         privilege = cl.getMyPrivilegeOnFileOpen();
@@ -265,8 +264,7 @@ void inserturi::successInsert()
              notepadWindow->setWindowTitle(title);
              goToWindow(*notepadWindow);
              notepadWindow->showLabels();
-             if(privilege==Symposium::privilege::readOnly)
-                 notepadWindow->setreadonly();
+             notepadWindow->fixAlignment();
         }
     }
 

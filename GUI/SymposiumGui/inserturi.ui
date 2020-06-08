@@ -155,7 +155,7 @@ color: rgb(58, 80, 116); </string>
   <widget class="QLabel" name="dirEmpty">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>100</x>
      <y>590</y>
      <width>470</width>
      <height>20</height>
@@ -176,7 +176,7 @@ text-align:center;</string>
   <widget class="QLabel" name="formatError">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>100</x>
      <y>590</y>
      <width>470</width>
      <height>20</height>
@@ -216,7 +216,7 @@ border-color: rgb(58, 80, 116); </string>
   <widget class="QLabel" name="nameError">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>100</x>
      <y>590</y>
      <width>470</width>
      <height>16</height>
@@ -254,7 +254,7 @@ color: rgb(58, 80, 116); </string>
   <widget class="QLabel" name="linkError">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>100</x>
      <y>590</y>
      <width>470</width>
      <height>30</height>
