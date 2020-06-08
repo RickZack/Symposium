@@ -1024,7 +1024,6 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     }
 
     this->sendSymbolToInsert(row,column,testo,format);
-    ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
 }
 
 bool notepad::eventFilter(QObject *obj, QEvent *event){
@@ -1277,7 +1276,8 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     this->numChars=this->doc.getNumchar();
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: " + QString::fromStdString(this->labelChars));
-    #else
+    ui->textEdit->translateCursors(doc.getActiveUsers());
+#else
     this->numChars=this->documentoProva.getNumchar();
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
@@ -1534,10 +1534,31 @@ void notepad::uncolorText(){
     auto& symbols=doc.getSymbols();
     QTextCursor curs=ui->textEdit->textCursor();
 
+
     //Starting position to restore
     int initRow=curs.blockNumber();
     int initCol=curs.positionInBlock();
 
+    //color to set
+    QColor white(Qt::GlobalColor::white);
+
+    //Start from the beginning
+    curs.movePosition(QTextCursor::Start);
+    for(auto& row:symbols){
+        for(auto& sym:row){
+            if(sym.getSiteId() != 0){
+                curs.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+                QTextCharFormat format=curs.charFormat();
+                format.setBackground(white);
+                curs.setCharFormat(format);
+                //Release the anchor
+                curs.movePosition(QTextCursor::PreviousCharacter);
+                curs.movePosition(QTextCursor::NextCharacter);
+            }
+        }
+    }
+
+    /*
     //Select the whole doc
     curs.movePosition(QTextCursor::Start);
     curs.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
@@ -1545,7 +1566,7 @@ void notepad::uncolorText(){
     QColor white(Qt::GlobalColor::white);
     format.setBackground(white);
     curs.setCharFormat(format);
-
+*/
     ui->textEdit->changePosition(initRow,initCol);
     NotRefreshLabels=false;
 }

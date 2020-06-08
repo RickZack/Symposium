@@ -521,6 +521,8 @@ const user& SymClient::userData(){
 }
 
 cursorMessage SymClient::updateCursorPos(uint_positive_cnt::type docId, unsigned int row, unsigned int col) {
+    document* d = getActiveDocumentbyID(docId);
+    d->updateCursorPos(getLoggedUser().getSiteId(),row,col);
     std::shared_ptr<cursorMessage> mess (new cursorMessage(msgType::updateCursor, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, this->getLoggedUser().getSiteId(), docId, row, col));
     this->unanswered.push_front(mess);
     return *mess;
