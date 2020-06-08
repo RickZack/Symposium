@@ -300,9 +300,8 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     setFocusPolicy(Qt::StrongFocus);
     setAttribute( Qt::WA_DeleteOnClose );
 
-    QColor black(Qt::GlobalColor::black);
-    black.setAlpha(alphaValue);
-    colorChanged(black);
+    this->colPos = Qt::GlobalColor::black;
+    colorChanged(this->colPos);
 }
 
 template<>
@@ -629,14 +628,17 @@ void notepad::textColor()
     QColor col = QColorDialog::getColor(ui->textEdit->textColor(), this);
     if (!col.isValid())
         return;
-    QTextCharFormat fmt;
-    fmt.setForeground(col);
+    //QTextCharFormat fmt;
+    //fmt.setForeground(col);
+
+    //set the new color
+    this->colPos = col;
     colorChanged(col);
 
     //set a lighter color
     QColor lightCol=col;
     lightCol.setAlpha(alphaValue);
-    this->colPos=lightCol;
+    //this->colPos=lightCol;
     ui->textEdit->setTextColor(lightCol);
     QTextCursor c=ui->textEdit->textCursor();
     if(c.hasSelection())
@@ -985,9 +987,9 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
 
     QTextCursor cursor= ui->textEdit->textCursor();
     QTextCharFormat format = cursor.charFormat();
-    qDebug()<<"Colore"<<format.foreground();
+    qDebug()<<"Colore "<<this->colPos;
     QString testo=event->text();
-    qDebug()<<"Testo"<<testo;
+    qDebug()<<"Testo "<<testo;
     unsigned row, column;
     NotRefreshLabels=true;
 
@@ -997,7 +999,9 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
         return;
     }
 
-    QColor lightColor=format.foreground().color();
+    QColor lightColor=this->colPos;
+
+    // set the light color to insert the non verified symbol
     lightColor.setAlpha(alphaValue);
     ui->textEdit->setTextColor(lightColor);
 
@@ -1127,16 +1131,18 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
     std::wstring str=text.toStdWString();
     wchar_t ch=str[0];
     const std::pair<unsigned, unsigned> indexes={row,column};
-    QColor col=format.foreground().color();
+    //QColor col=format.foreground().color();
     QFont font= format.font();
     bool isBold= font.bold();
     bool isUnderlined=font.underline();
     bool isItalic=font.italic();
     unsigned size=font.pointSize();
     std::string fontFamily=font.family().toStdString();
-    int blue=col.blue();
-    int red=col.red();
-    int green=col.green();
+
+    //set color text
+    int blue=this->colPos.blue();
+    int red=this->colPos.red();
+    int green=this->colPos.green();
     Symposium::Color myCol(red,green,blue);
     Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
     std::vector<int> pos;
@@ -1158,7 +1164,7 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
 #endif
-    this->colPos=col;
+    //this->colPos=col;
 }
 
 void notepad::contV_action(){
@@ -1350,9 +1356,10 @@ void notepad::verifySymbol(const Symposium::symbol& sym, const std::pair<unsigne
     // go back to the starting position
     ui->textEdit->changePosition(actBlock,actColm);
     NotRefreshLabels=false;
-    QColor lightCol=qCol;
+
+    //set the color to write
+    QColor lightCol=colPos;
     lightCol.setAlpha(alphaValue);
-    this->colPos=lightCol;
     ui->textEdit->setTextColor(lightCol);
     this->colorChanged(this->colPos);
     qDebug()<<"Colore verify"<<lightCol;
@@ -1410,13 +1417,13 @@ void notepad::on_textEdit_cursorPositionChanged()
         #endif
      }
 
-     if(!cc.hasSelection()){
+     /*if(!cc.hasSelection()){
         QColor newCol=ch.foreground().color();
         newCol.setAlpha(255);
         fontChanged(ch.font());
         colorChanged(newCol);
         this->currentCharFormatChanged(ch);
-}
+}*/
 
     #ifdef DISPATCHER_ON
     Symposium::Color colHigh=cl.getColor(this->documentId,cl.getUser().getSiteId());
