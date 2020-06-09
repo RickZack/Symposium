@@ -98,7 +98,7 @@ SymServer::openSource(const std::string &opener, const std::string &resPath, con
     resIdToSiteId[docReq.getId()].push_front(target.getSiteId());
 
     //Propagation to other clients
-    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), privilege::owner, respMsgId);
+    auto toSend=std::make_shared<updateActiveMessage>(msgType::addActiveUser, msgOutcome::success, target.makeCopyNoPwd(), docReq.getId(), reqPriv, respMsgId);
     auto siteIdToSend= siteIdsFor(docReq.getId(), target.getSiteId());
     insertMessageForSiteIds(siteIdToSend, toSend);
 

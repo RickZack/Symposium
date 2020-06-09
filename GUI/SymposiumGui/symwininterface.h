@@ -190,6 +190,7 @@ struct SymNotepadWinInterface: public SymChildWinInterface{
 
     virtual void moveUserCursor(Symposium::uint_positive_cnt::type siteID, unsigned block, unsigned column)=0;
     virtual void addUserCursor(Symposium::uint_positive_cnt::type siteID, const std::string& username)=0;
+    virtual void insertusers()=0;
     virtual void removeUserCursor(Symposium::uint_positive_cnt::type siteID)=0;
 
     virtual void editLineStyle(const std::pair<Symposium::alignType, unsigned>& newLineStyle, unsigned row)=0;

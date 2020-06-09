@@ -266,6 +266,8 @@ namespace Symposium{
          */
         void addUserCursor(uint_positive_cnt::type siteID, std::string username, uint_positive_cnt::type resourceID);
 
+        void addUserReadOnly(uint_positive_cnt::type resourceID);
+
         /**
          * @brief invoke the corrisponding method on the correct notepad GUI to move the cursor
          * @param resId the ID of the document to move the cursor to
