@@ -326,7 +326,7 @@ border-color: rgb(58, 80, 116); </string>
    <widget class="QLineEdit" name="renameLabel">
     <property name="geometry">
      <rect>
-      <x>451</x>
+      <x>465</x>
       <y>220</y>
       <width>151</width>
       <height>31</height>
@@ -352,7 +352,7 @@ border-color: rgb(58, 80, 116); </string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 10pt &quot;Baskerville Old Face&quot;;
+     <string notr="true">font: 14pt &quot;Baskerville Old Face&quot;;
 color: rgb(58, 80, 116); </string>
     </property>
     <property name="text">
@@ -641,7 +641,7 @@ font: 13pt &quot;Baskerville Old Face&quot;;
      <x>0</x>
      <y>0</y>
      <width>714</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

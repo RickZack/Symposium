@@ -21,6 +21,7 @@ public:
     qtexteditlabels(QWidget* a):QTextEdit(a)
     {
         this->setUndoRedoEnabled(false);
+        this->setAcceptDrops(false);
     }
     void setNotepad(notepad* n){
         this->n=n;

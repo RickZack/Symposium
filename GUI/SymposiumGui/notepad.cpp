@@ -1065,6 +1065,11 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
         else if (QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+C")
                 && QKeySequence(keyEvent->key()+int(keyEvent->modifiers())) != QKeySequence("Ctrl+A"))
             ui->textEdit->translateCursors(doc.getActiveUsers());
+        if(this->pressCanc) {
+            QKeyEvent *fake_canc = new QKeyEvent(QKeyEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier, "");
+            QApplication::sendEvent(ui->textEdit, fake_canc);
+            this->pressCanc=false;
+        }
         NotRefreshLabels=false;
     }
     // pressing a mouse button means that probably we need to move cursor's label
@@ -1076,6 +1081,7 @@ bool notepad::eventFilter(QObject *obj, QEvent *event){
 
 void notepad::handleDeleteKey(QKeyEvent *event) {
     int row, col;
+    bool fakeCanc=this->pressCanc;
     QTextCursor cursor= ui->textEdit->textCursor();
     /* delete a single character */
     if(!cursor.hasSelection()){
@@ -1083,6 +1089,8 @@ void notepad::handleDeleteKey(QKeyEvent *event) {
             row=cursor.blockNumber();
             col=cursor.positionInBlock()-1;
             qDebug()<<"handleDeleteKey: row="<<row<<" col="<<col;
+            if((this->indexStyle>0 && this->indexStyle<9) && col==-1)
+                this->pressCanc=true;
             if(col<0 && row>0){ // handle remove of '\r' in preceding line
                 row=cursor.blockNumber()-1;
                 cursor.movePosition(QTextCursor::PreviousBlock);
@@ -1103,7 +1111,8 @@ void notepad::handleDeleteKey(QKeyEvent *event) {
             col=cursor.positionInBlock();
             qDebug()<<"handleDeleteKey (canc): row="<<row<<" col="<<col;
         }
-        cl.localRemove(this->documentId,{row,col});
+        if(!fakeCanc)
+            cl.localRemove(this->documentId,{row,col});
 
     }/* Handle the elimination of a selected text */
     else

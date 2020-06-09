@@ -156,6 +156,7 @@ private:
     Symposium::user us;
     const Symposium::document& doc;
     bool showUsers=true;
+    bool pressCanc=false;
 
     std::string pathToFile;
     Symposium::privilege priv;
