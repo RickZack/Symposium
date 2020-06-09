@@ -366,7 +366,7 @@ void SymClient::addActiveUser(uint_positive_cnt::type docId, user &targetUser, p
     if(Priv!=privilege::readOnly){
         this->dispatcher->addUserCursor(target.getSiteId(),target.getUsername(),docId);
     }else{
-        this->dispatcher->addUserReadOnly(target.getSiteId());
+        this->dispatcher->addUserReadOnly(docId);
     }
     #endif
 }
