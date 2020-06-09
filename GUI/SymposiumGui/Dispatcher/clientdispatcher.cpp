@@ -489,6 +489,10 @@ void clientdispatcher::addUserCursor(uint_positive_cnt::type siteID, std::string
     this->winmanager.getNotepad(resourceID).addUserCursor(siteID,username);
 }
 
+void clientdispatcher::addUserReadOnly(uint_positive_cnt::type resourceID){
+    this->winmanager.getNotepad(resourceID).insertusers();
+}
+
 void clientdispatcher::removeUserCursor(uint_positive_cnt::type siteID, uint_positive_cnt::type resourceID){
     this->winmanager.getNotepad(resourceID).removeUserCursor(siteID);
 }

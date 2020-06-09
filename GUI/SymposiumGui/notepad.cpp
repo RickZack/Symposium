@@ -71,9 +71,17 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     setMinimumSize(800, 600);
     ui->textEdit->setNotepad(this);
     ui->statusbar->addWidget(ui->labelChars);
-    ui->textEdit->setContextMenuPolicy(Qt::NoContextMenu);
-
-
+    ui->textEdit->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->textEdit,&QWidget::customContextMenuRequested,this,&notepad::showTextEditContextMenu);
+    m_textEditContextMenu=new QMenu(this);
+    const auto stylesheet= QStringLiteral("QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}");
+    m_textEditContextMenu->setStyleSheet(stylesheet);
+    m_textEditContextMenu->addAction(tr("Copy"),this,&notepad::on_actionCopy_triggered);
+    m_textEditContextMenu->addSeparator();
+    m_textEditContextMenu->addAction(tr("Cut"),this,&notepad::on_actionCut_triggered);
+    m_textEditContextMenu->addSeparator();
+    m_textEditContextMenu->addAction(tr("Paste"),this,&notepad::on_actionPaste_triggered);
+    m_textEditContextMenu->addSeparator();
 
     QActionGroup *alignGroup= new QActionGroup(this);
     alignGroup->addAction(ui->actionAlignCenter);
@@ -349,12 +357,18 @@ void notepad::removeUserCursor(Symposium::uint_positive_cnt::type siteID)
 {
     ui->textEdit->removeUser(siteID);
     insertusers();
+    if(highActivated==true){
+        cl.mapSiteIdToUser(doc);
+    }
 }
 
 void notepad::addUserCursor(Symposium::uint_positive_cnt::type siteID, const std::string& username)
 {
     ui->textEdit->addUser(siteID, username);
     insertusers();
+    if(highActivated==true){
+        cl.mapSiteIdToUser(doc);
+    }
 }
 
 
@@ -1246,6 +1260,8 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     int row=indexes.first;
     int column=indexes.second;
 
+    auto styles=this->doc.getAlignmentStyle()[row];
+
     QTextCursor curs=ui->textEdit->textCursor();
     // take the position of the actual cursor
     int actBlock=curs.blockNumber();
@@ -1295,6 +1311,23 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     wchar_t symch=sym.getCh();
     QString ch;
     ch[0]=symch;
+    if(row == 0)
+        this->textStyle(styles.second);
+    else if(this->doc.getAlignmentStyle()[row-1] != this->doc.getAlignmentStyle()[row])
+        this->textStyle(styles.second);
+
+    //set alignament
+    ui->textEdit->changePosition(row,0);
+    Symposium::alignType align=styles.first;
+    if(align==Symposium::alignType::left){
+        this->textAlign(ui->actionAlignTextLeft);
+    }else if(align==Symposium::alignType::right){
+        this->textAlign(ui->actionAlignTextRight);
+    }else if(align==Symposium::alignType::center){
+        this->textAlign(ui->actionAlignCenter);
+    }else if (align==Symposium::alignType::justify){
+        this->textAlign(ui->actionAlignTextJustify);
+    }
     curs.insertText(ch,ch_format);
     ui->textEdit->changePosition(siteId,row,column++);
     ui->textEdit->changePosition(actBlock,actColm);
@@ -1425,6 +1458,7 @@ void notepad::remoteDelete(const std::pair<unsigned, unsigned>& indexes, Symposi
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
     #endif
+    ui->textEdit->translateCursors(doc.getActiveUsers());
 }
 
 
@@ -1754,20 +1788,6 @@ void notepad::editLineStyle(const std::pair<Symposium::alignType, unsigned int> 
 //TODO: implement
 }
 
-
-
-
-void notepad::contextMenuEvent(QContextMenuEvent *)
-{
-    QMenu submenu;
-    QString style="QMenu {border-radius:15px; background-color: white;margin: 2px; border: 1px solid rgb(58, 80, 116); color:  rgb(58, 80, 116);}QMenu::separator {height: 2px;background: rgb(58, 80, 116);margin-left: 10px;margin-right: 5px;}";
-    submenu.setStyleSheet(style);
-    submenu.addAction(tr("Copy"),this,&notepad::on_actionCopy_triggered);
-    submenu.addSeparator();
-    submenu.addAction(tr("Cut"),this,&notepad::on_actionCut_triggered);
-    submenu.addSeparator();
-    submenu.addAction(tr("Paste"),this,&notepad::on_actionPaste_triggered);
-    submenu.addSeparator();
-    QPoint globalPos=ui->textEdit->cursor().pos();
-    submenu.exec(globalPos);
+void notepad::showTextEditContextMenu(const QPoint &pos){
+    m_textEditContextMenu->popup(ui->textEdit->mapToGlobal(pos));
 }
