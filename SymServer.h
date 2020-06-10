@@ -503,6 +503,9 @@
           * @param action the msgType of the received clientMessage
           */
          void generateSimpleResponse(unsigned int recvSiteId, msgType action, uint_positive_cnt::type respMsgId);
+
+         static std::pair<std::string, std::string>
+         fromLocalPathToGlobal(const user &actionU, const std::string &resPath, const std::string &resId);
      };
  }
 

@@ -222,7 +222,11 @@ SymServer::editPrivilege(const std::string &actionUser, const std::string &targe
 
     std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(actionUser), actionU.getSiteId());
 
-    auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, std::to_string(docId), targetUser, privilege::readOnly, respMsgId);
+    //TODO: should work, it's not tested!
+    // must give an absolute path, containing also the fileId
+    std::string absPath, realId;
+    std::tie(absPath, realId)= fromLocalPathToGlobal(actionU, resPath, resId);
+    auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, absPath+"/"+realId, targetUser, privilege::readOnly, respMsgId);
     insertMessageForSiteIds(setSiteIds, toSend);
 
     generateSimpleResponse(actionU.getSiteId(), msgType::changePrivileges, respMsgId);
@@ -259,8 +263,12 @@ SymServer::shareResource(const std::string &actionUser, const std::string &resPa
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& actionU=getRegistered(actionUser);
     auto res= actionU.shareResource(resPath, resId, newPrefs);
+    //TODO: split
+    std::string absPath, realId;
+    std::tie(absPath, realId)= fromLocalPathToGlobal(actionU, resPath, resId);
 
-    auto toSend=std::make_shared<uriMessage>(msgType::shareRes, make_pair(actionUser, ""), msgOutcome ::success, resPath, resId, newPrefs, respMsgId);
+
+    auto toSend=std::make_shared<uriMessage>(msgType::shareRes, make_pair(actionUser, ""), msgOutcome ::success, absPath, realId, newPrefs, respMsgId);
     int docId= std::dynamic_pointer_cast<file>(res)->getDoc().getId();
 
     std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdsFor(docId, actionU.getSiteId());
@@ -590,6 +598,24 @@ void SymServer::editLineStyle(const std::string &actionUser, uint_positive_cnt::
 
     insertMessageForSiteIds(siteIdsFor(docId, actionU.getSiteId()), std::shared_ptr<serverMessage>(toSend));
     generateSimpleResponse(actionU.getSiteId(), msgType::editLineStyle, editMsg.getMsgId());
+}
+
+std::pair<std::string, std::string>
+SymServer::fromLocalPathToGlobal(const user &actionU, const std::string &resPath, const std::string &resId) {
+    auto res=actionU.getHome()->get(resPath, resId);
+    std::string absPath;
+    std::string id;
+    if(res->resType()==resourceType::symlink){
+        auto sym=std::dynamic_pointer_cast<symlink>(res);
+        absPath=sym->getPath();
+        id=sym->getResId();
+    }
+    else{
+        absPath="./"+std::to_string(actionU.getHome()->getId());
+        absPath.insert(absPath.end(), resPath.begin()+2, resPath.end()); //do not copy the initial "./" from resPath
+        id=resId;
+    }
+    return {absPath, id};
 }
 
 

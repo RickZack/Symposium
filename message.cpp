@@ -503,20 +503,12 @@ void privMessage::invokeMethod(SymServer &server) {
 }
 void privMessage::invokeMethod(SymClient &client) {
 
-    std::string path1;
-    std::string name1;
-    tie(path1, name1) = directory::separateFirst(resourceId);
+    std::string path, id;
+    std::tie(path, id)=directory::separate(resourceId);
 
-    std::string path2;
-    std::string nameRes;
-    tie(path2, nameRes) = filesystem::separate(path1);
+    std::string completePath="./"+path;
 
-    std::string pathRes="./";
-    pathRes.append(path2);
-
-    client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege,false);
-
-
+    client.editPrivilege(targetUser,completePath,id,newPrivilege,false);
 }
 
 void privMessage::completeAction(SymClient &client, msgOutcome serverResult) {
@@ -679,13 +671,13 @@ void uriMessage::invokeMethod(SymServer &server) {
 }
 
 void uriMessage::invokeMethod(SymClient &client) {
-    client.shareResource(path,name,sharingPrefs,false);
+    client.shareResource(getActionOwner().first, path, name, sharingPrefs, false);
 }
 
 
 void uriMessage::completeAction(SymClient &client, msgOutcome serverResult) {
     if(serverResult==msgOutcome::success)
-        client.shareResource(path,name,sharingPrefs,true);
+        client.shareResource(getActionOwner().first, path, name, sharingPrefs, true);
     else
         throw messageException(messageException::notSucc, UnpackFileLineFunction());
 }

@@ -352,6 +352,8 @@ namespace Symposium {
 
         std::string getPath();
 
+        const std::string &getResId() const;
+
         resourceType resType() const override;
 
         /**

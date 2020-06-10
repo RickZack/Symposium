@@ -325,7 +325,10 @@ namespace Symposium {
          * the method @e invokeMethod calls with msgRcv=false. This parameter msgRcv is used only to distinguish method signatures
          * of this method and the one that returns a uriMessage.
          */
-        virtual std::shared_ptr<filesystem> shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs, bool msgRcv);
+        virtual std::shared_ptr<filesystem>
+        shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resId,
+                      const uri &newPrefs,
+                      bool msgRcv);
 
         /**
          * @brief constructs a @ref uriMessage to send to the server to ask to change the name of a resource

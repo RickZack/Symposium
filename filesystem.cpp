@@ -612,3 +612,7 @@ bool Symposium::symlink::isReadyToRemove(const std::string &username) const {
     }
 }
 
+const std::string &Symposium::symlink::getResId() const {
+    return resId;
+}
+

@@ -208,28 +208,48 @@ privMessage SymClient::editPrivilege(const std::string &targetUser, const std::s
 }
 
 privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resId,
-                                   privilege newPrivilege, bool) {
-    privilege* p = new privilege(this->getLoggedUser().editPrivilege(targetUser, resPath, resId, newPrivilege));
-    //notifichiamo alla gui il successo
-    #ifdef DISPATCHER_ON
-    this->dispatcher->successAction();
-    #endif
-    return *p;
+                                   privilege newPrivilege, bool msgRcv) {
+    //privilege p=const_cast<file&>(getActiveFiletoOpenbyID(std::stoul(resId))).setUserPrivilege(targetUser, newPrivilege);
+    privilege p;
+    if(msgRcv){
+        p=getLoggedUser().editPrivilege(targetUser, resPath, resId, newPrivilege);
+        //notifichiamo alla gui il successo
+        #ifdef DISPATCHER_ON
+        this->dispatcher->successAction();
+        #endif
+    }
+    else{
+        p=directory::getRoot()->get(resPath, resId)->setUserPrivilege(targetUser, newPrivilege);
+    }
+    return p;
 }
 
-uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs) {    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resId, newPrefs, 0));
+uriMessage SymClient::shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs) {
+    std::shared_ptr<uriMessage> mess (new uriMessage(msgType::shareRes, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, resPath, resId, newPrefs, 0));
     unanswered.push_front(mess);
     return *mess;
 }
 
-std::shared_ptr<filesystem> SymClient::shareResource(const std::string &resPath, const std::string &resId, const uri &newPrefs, bool) {
-    std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resId, newPrefs));
-    //notifichiamo alla gui il successo
-    #ifdef DISPATCHER_ON
-    this->dispatcher->successAction();
-    //this->dispatcher->successShareResource("/" + resPath);
-    #endif
-    return fil;
+std::shared_ptr<filesystem>
+SymClient::shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resId,
+                         const uri &newPrefs,
+                         bool msgRcv) {
+    //std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resId, newPrefs));
+    //const_cast<file&>(getActiveFiletoOpenbyID(std::stoul(resId))).forceUpdateSharingPolicy(newPrefs);
+    std::shared_ptr<filesystem> res;
+    if(msgRcv){
+        res=getLoggedUser().shareResource(resPath, resId, newPrefs);
+        //notifichiamo alla gui il successo
+        #ifdef DISPATCHER_ON
+        this->dispatcher->successAction();
+        #endif
+    }
+    else{
+        res=directory::getRoot()->getFile(resPath, resId);
+        res->setSharingPolicy(actionUser, newPrefs);
+    }
+
+    return res;
 }
 
 askResMessage
