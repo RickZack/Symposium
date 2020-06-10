@@ -465,7 +465,8 @@ namespace Symposium {
          */
         updateDocMessage mapSiteIdToUser(const document &currentDoc);
 
-        void localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& oldLineStyle, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
+        editLineStyleMessage
+        localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& oldLineStyle, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
 
         virtual void remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
 

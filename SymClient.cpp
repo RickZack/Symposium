@@ -598,15 +598,24 @@ SymClient::getUserColors() const {
     return userColors;
 }
 
-void
+editLineStyleMessage
 SymClient::localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &oldLineStyle,
                               const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
-//TODO: implement
+    document* d = getActiveDocumentbyID(docId);
+    d->editLineStyle(newLineStyle, row);
+    std::shared_ptr<editLineStyleMessage> mess (new editLineStyleMessage(msgType::editLineStyle, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, oldLineStyle, newLineStyle, docId, row));
+    this->unanswered.push_front(mess);
+    return *mess;
 }
 
 void
 SymClient::remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &newLineStyle,
                                unsigned int row) {
-//TODO: implement
+    document* d = this->getActiveDocumentbyID(docId);
+    d->editLineStyle(newLineStyle, row);
+    //notifica alla gui
+    #ifdef DISPATCHER_ON
+    this->dispatcher->remoteEditLineStyle(docId, newLineStyle, row);
+    #endif
 }
 

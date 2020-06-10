@@ -592,10 +592,19 @@ clientdispatcher::~clientdispatcher() {
 void clientdispatcher::localEditLineStyle(uint_positive_cnt::type docId,
                                           const std::pair<alignType, unsigned int> &oldLineStyle,
                                           const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
-//TODO: implement
+auto mess=std::make_shared<editLineStyleMessage>(client.localEditLineStyle(docId, oldLineStyle, newLineStyle, row));
+    try {
+        //inviamo il messaggio
+        sendMessage(mess);
+    } catch (clientdispatcher::sendFailure) {
+        //errore nell'invio del messaggio
+        this->closeApp();
+        //dobbiamo notificare alla GUI
+        this->winmanager.activeWindow().failure("-1");
+    }
 }
 
 void clientdispatcher::remoteEditLineStyle(uint_positive_cnt::type docId,
                                            const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
-//TODO: implement
+    winmanager.getNotepad(docId).editLineStyle(newLineStyle, row);
 }
