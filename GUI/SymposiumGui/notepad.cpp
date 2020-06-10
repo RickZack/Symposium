@@ -1158,7 +1158,28 @@ void notepad::handleDeleteKey(QKeyEvent *event) {
     this->numChars=this->doc.getNumchar();
     this->labelChars=std::to_string(this->numChars);
     ui->labelChars->setText("Total Chars: "+QString::fromStdString(this->labelChars));
+    // if I delete all the text, reset the standard format
+        if(this->numChars==0){
+            //reset the standard text style
+            QTextBlockFormat blockFmt = cursor.blockFormat();
+            blockFmt.setHeadingLevel(0);
+            blockFmt.setObjectIndex(-1);
+            cursor.setBlockFormat(blockFmt);
+            ui->styleBox->setCurrentIndex(0);
 
+            // reset the standard format
+            QTextCharFormat fmt; QFont fnt;
+            fnt.setBold(false); fnt.setItalic(false); fnt.setUnderline(false);
+            fnt.setFamily("Times New Roman");
+            this->colPos=Qt::GlobalColor::black;
+            fmt.setForeground(this->colPos);
+            fmt.setFont(fnt);
+            currentCharFormatChanged(fmt);
+
+            // reset the standard alignment
+            ui->actionAlignTextLeft->setChecked(true);
+            ui->textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
+        }
  }
 
 
@@ -1473,6 +1494,9 @@ void notepad::on_textEdit_cursorPositionChanged()
         ui->textEdit->thisUserChangePosition(us.getSiteId());
         #endif
      }
+
+     //fontChanged(ch.font());
+     this->currentCharFormatChanged(ch);
 
      /*if(!cc.hasSelection()){
         QColor newCol=ch.foreground().color();
