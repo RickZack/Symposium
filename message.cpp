@@ -486,20 +486,12 @@ void privMessage::serialize(Archive &ar, const unsigned int)
 }
 
 void privMessage::invokeMethod(SymServer &server) {
-    std::string path1;
-    std::string name1;
-    tie(path1, name1) = directory::separateFirst(resourceId);
+    std::string path, id;
+    std::tie(path, id)=directory::separate(resourceId);
 
-    std::string path2;
-    std::string nameRes;
-    tie(path2, nameRes) = filesystem::separate(path1);
+    std::string completePath="./"+path;
 
-    std::string pathRes="./";
-    pathRes.append(path2);
-
-    server.editPrivilege(getActionOwner().first, targetUser, pathRes, nameRes, newPrivilege, msgId);
-
-
+    server.editPrivilege(getActionOwner().first, targetUser, completePath, id, newPrivilege, msgId);
 }
 void privMessage::invokeMethod(SymClient &client) {
 
@@ -512,19 +504,13 @@ void privMessage::invokeMethod(SymClient &client) {
 }
 
 void privMessage::completeAction(SymClient &client, msgOutcome serverResult) {
-    std::string path1;
-    std::string name1;
-    tie(path1, name1) = directory::separateFirst(resourceId);
+    std::string path, id;
+    std::tie(path, id)=directory::separate(resourceId);
 
-    std::string path2;
-    std::string nameRes;
-    tie(path2, nameRes) = filesystem::separate(path1);
-
-    std::string pathRes="./";
-    pathRes.append(path2);
+    std::string completePath="./"+path;
 
     if(serverResult==msgOutcome::success){
-        client.editPrivilege(targetUser,pathRes,nameRes,newPrivilege, true);
+        client.editPrivilege(targetUser,completePath,id,newPrivilege, true);
     }
     else
         throw messageException(messageException::notSucc, UnpackFileLineFunction());

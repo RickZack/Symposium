@@ -551,7 +551,7 @@ public:
     MOCK_METHOD5(editPrivilege, privilege(const std::string&, const std::string&, const std::string&, privilege, bool));
     MOCK_METHOD3(remoteInsert, void(uint_positive_cnt::type, uint_positive_cnt::type, const symbol&));
     MOCK_METHOD3(remoteRemove, void(uint_positive_cnt::type, uint_positive_cnt::type, const symbol&));
-    MOCK_METHOD4(shareResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const uri&, bool msgRcv));
+    MOCK_METHOD5(shareResource, std::shared_ptr<filesystem>(const std::string&, const std::string&, const std::string&, const uri&, bool msgRcv));
     MOCK_METHOD2(editUser, const user(user&, bool));
     MOCK_METHOD2(verifySymbol, void(uint_positive_cnt::type, const symbol&));
     MOCK_METHOD1(retrieveRelatedMessage, std::shared_ptr<clientMessage>(const serverMessage&));
@@ -740,8 +740,9 @@ struct DoubleEndMessageTest: public testing::Test{
     /*
      * Example data for messages and invocations
      */
-    static const std::string path;
-    static const std::string name;
+    static const std::string relPath;
+    static const std::string absPath;
+    static const std::string rId;
     static const std::string resId;
     static const std::string username;
     static const std::string pwd;
@@ -759,23 +760,24 @@ struct DoubleEndMessageTest: public testing::Test{
         delete fromClient;
     }
 };
-const std::string DoubleEndMessageTest::path="./dir1/dir2";
-const std::string DoubleEndMessageTest::name="somefile";
-const std::string DoubleEndMessageTest::resId=".mario/dir1/dir2/somefile";
+const std::string DoubleEndMessageTest::relPath="./3/4";
+const std::string DoubleEndMessageTest::rId="5";
+const std::string DoubleEndMessageTest::absPath="./2/3/4";
+const std::string DoubleEndMessageTest::resId="./2/3/4/5";
 const std::string DoubleEndMessageTest::username="mario";
 const std::string DoubleEndMessageTest::pwd="AP@ssw0rd!";
 const std::string DoubleEndMessageTest::anotherUsername="lucio";
 const int DoubleEndMessageTest::resourceId=10;
 
 TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilege){
-    fromClient=new privMessage(msgType::changePrivileges,{username, {}}, msgOutcome::success, resId, anotherUsername, uri::getDefaultPrivilege());
-    EXPECT_CALL(server, editPrivilege(username, anotherUsername, path, name, uri::getDefaultPrivilege(), fromClient->getMsgId())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
+    fromClient=new privMessage(msgType::changePrivileges, {username, {}}, msgOutcome::success, relPath + "/" + rId, anotherUsername, uri::getDefaultPrivilege());
+    EXPECT_CALL(server, editPrivilege(username, anotherUsername, relPath, rId, uri::getDefaultPrivilege(), fromClient->getMsgId())).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::changePrivileges, msgOutcome::success, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
-    EXPECT_CALL(client, editPrivilege(anotherUsername, path, name, uri::getDefaultPrivilege(), true));
+    EXPECT_CALL(client, editPrivilege(anotherUsername, relPath, rId, uri::getDefaultPrivilege(), true));
     //when a serverMessage is received, a related message from the client is searched and completeAction() called
     //the retrived clientMessage has all the data needed to perform the action required
     fromServer->invokeMethod(client);
@@ -788,7 +790,7 @@ TEST_F(DoubleEndMessageTest, privMsgCallsEditPrivilegeOnOtherClient){
 
     //the message from client is forwarded to the other client, but the password is cleaned
     fromServer=new privMessage(msgType::changePrivileges,{username, {}}, msgOutcome::success, resId, anotherUsername, uri::getDefaultPrivilege());
-    EXPECT_CALL(client, editPrivilege(anotherUsername, path, name, uri::getDefaultPrivilege(), false));
+    EXPECT_CALL(client, editPrivilege(anotherUsername, absPath, rId, uri::getDefaultPrivilege(), false));
     fromServer->invokeMethod(client);
 }
 
@@ -894,32 +896,32 @@ TEST_F(DoubleEndMessageTest, symbolMsgCallsRemoteRemoveOnOtherClient){
     fromServer->invokeMethod(client);
 }
 
-TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemove){
-    fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path, name,
+TEST_F(DoubleEndMessageTest, uriMsgCallsShareResource){
+    fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, relPath, rId,
                                dummyUri);
     auto* fc= static_cast<uriMessage*>(fromClient);
-    EXPECT_CALL(server, shareResource(username, path, name, dummyUri, fromClient->getMsgId()));
+    EXPECT_CALL(server, shareResource(username, relPath, rId, dummyUri, fromClient->getMsgId()));
     fromClient->invokeMethod(server);
 
     fromServer= new serverMessage(msgType::shareRes, msgOutcome::success, fromClient->getMsgId());
     //client uses the message previously sent to the server to retrieve the parameters for the required action:
     EXPECT_CALL(client, retrieveRelatedMessage(*fromServer)).WillOnce(::testing::Return(std::shared_ptr<clientMessage>(fromClient)));
-    EXPECT_CALL(client, shareResource(path, name, fc->getSharingPrefs(), true));
+    EXPECT_CALL(client, shareResource(username, relPath, rId, fc->getSharingPrefs(), true));
     fromServer->invokeMethod(client);
 
     fromClient=nullptr; //avoid double deletion, object pointed by fromClient is now owned by the shared_ptr
 }
 
-TEST_F(DoubleEndMessageTest, uriMsgCallsRemoteRemoveOnOtherClient){
-    fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path,
-                               name,
+TEST_F(DoubleEndMessageTest, uriMsgCallsShareResourceOnOtherClient){
+    fromClient= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, relPath,
+                               rId,
                                dummyUri);
     auto* fc= static_cast<uriMessage*>(fromClient);
 
     //the message from client is forwarded to the other client, but the password is cleaned
-    fromServer= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, path, name,
+    fromServer= new uriMessage(msgType::shareRes, {username, {}}, msgOutcome::success, relPath, rId,
                                dummyUri, fc->getMsgId());
-    EXPECT_CALL(client, shareResource(path, name, fc->getSharingPrefs(), false));
+    EXPECT_CALL(client, shareResource(username, relPath, rId, fc->getSharingPrefs(), false));
     fromServer->invokeMethod(client);
 }
 

@@ -42,6 +42,7 @@ using namespace Symposium;
 struct SymServerdirMock : public directory{
     explicit SymServerdirMock(const std::string &name) : directory(name) {};
     MOCK_METHOD2(addDirectory, std::shared_ptr<directory>(const std::string &name, uint_positive_cnt::type idToAssign));
+    MOCK_METHOD2(get, std::shared_ptr<filesystem>(const std::string&, const std::string&));
     MOCK_METHOD2(getFile, std::shared_ptr<file>(const std::string&, const std::string&));
     MOCK_METHOD2(getDir, std::shared_ptr<directory>(const std::string &path, const std::string &name));
     MOCK_METHOD3(remove, std::shared_ptr<filesystem>(const user &targetUser, const std::string &path, const std::string &resName));
@@ -811,6 +812,9 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUs
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
 
+    //For transforming the path from local to global
+    EXPECT_CALL(*userDir, get(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
+
     server.editPrivilege(loggedUserUsername, anotherUserUsername, filePath,
                          fileName, privilege::readOnly, msId);
     privMessage toSend(received);
@@ -837,6 +841,8 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeCallsEditPrivilegeOnUs
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
 
+    //For transforming the path from local to global
+    EXPECT_CALL(*userDir, get(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
     server.editPrivilege(loggedUserUsername, anotherUserUsername, filePath,
                          fileName, privilege::readOnly, msId);
 
@@ -856,6 +862,10 @@ TEST_F(SymServerTestFilesystemFunctionality, editPrivilegeClosesDocumentIfNotPre
     EXPECT_CALL(*fileToReturn, access(loggedUser, privilege::owner)).WillOnce(::testing::ReturnRef(doc));
     EXPECT_CALL(*justInserted, editPrivilege(anotherUserUsername, filePath, fileName, privilege::readOnly));
     EXPECT_CALL(doc, close(loggedUser));
+
+    //For transforming the path from local to global
+    EXPECT_CALL(*userDir, get(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
+
     server.editPrivilege(loggedUserUsername, anotherUserUsername, filePath,
                          fileName, privilege::readOnly, 0);
 }
@@ -903,6 +913,8 @@ TEST_F(SymServerTestFilesystemFunctionality, shareResourceCallsShareResourceOnUs
     toSend.clearAuthParam();
     server.forceSiteIdForResId(&(fileToReturn->getDoc()), anotherUser);
     EXPECT_CALL(*justInserted, shareResource(filePath, fileName, newPref)).WillOnce(::testing::Return(fileToReturn));
+    //For transforming the path from local to global
+    EXPECT_CALL(*userDir, get(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
     auto file= server.shareResource(loggedUserUsername, filePath, fileName, newPref, msId);
     /*
      * A message is supposed to be inserted in the queue corresponding to the file's document
@@ -922,6 +934,8 @@ TEST_F(SymServerTestFilesystemFunctionality, shareResourceCallsShareResourceOnUs
     uriMessage received(msgType::shareRes, {loggedUserUsername, loggedUserPwd}, msgOutcome ::success, filePath, fileName, newPref, msId);
     server.forceSiteIdForResId(&(fileToReturn->getDoc()), anotherUser);
     EXPECT_CALL(*justInserted, shareResource(filePath, fileName, newPref)).WillOnce(::testing::Return(fileToReturn));
+    //For transforming the path from local to global
+    EXPECT_CALL(*userDir, get(filePath, fileName)).WillOnce(::testing::Return(fileToReturn));
     auto file= server.shareResource(loggedUserUsername, filePath, fileName, newPref, msId);
 
     //send response (confirmation)

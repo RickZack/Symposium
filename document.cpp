@@ -711,10 +711,8 @@ void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned in
 void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol,
                                     const symbol &symb, bool ins) {
     for(auto& i: activeUsers){
-        if(i.second.row!=newRow || (i.second.row==newRow && i.second.col<=newCol))
-            continue;
         // On the same line, there are cursors with different siteId
-        if(symb.getCh()!='\r'){
+        if((symb.getCh()!='\r') && i.second.row==newRow && i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
             // The action is to insert a character
             if(ins){
                 i.second.col+=1;
@@ -723,15 +721,18 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsign
             }
 
         } // I'm changing the line
-        else{
+        else if(symb.getCh()=='\r'){
             // inserting the \r character
             if(ins){
                 // There are different cursor on the same line: they have to change the row index and the column index
-                if(i.second.row==newRow && i.second.col>newCol){
-                    i.second.row+=1;
-                    i.second.col=i.second.col-newCol;
-                }else{
+                if(i.second.row==newRow){
+                    if(i.second.col>newCol && i.first->getSiteId()!=targetSiteId){
+                        i.second.row+=1;
+                        i.second.col=i.second.col-newCol;
+                    }
+                }else
                     // there are different cursors on different lines: they have to change only the row index
+                if(i.first->getSiteId()!=targetSiteId){
                     i.second.row+=1;
                 }
                 // deleting the \r character
@@ -739,6 +740,7 @@ void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsign
                 i.second.row-=1;
                 i.second.col=i.second.col+newCol;
             }
+
         }
     }
 }
