@@ -404,7 +404,8 @@ void notepad::on_actionCopy_triggered()
 
 void notepad::on_actionCut_triggered()
 {
-    ui->textEdit->cut();
+    auto *fake_cut = new QKeyEvent(QKeyEvent::KeyPress, Qt::Key_X, Qt::ControlModifier, "");
+    QApplication::sendEvent(ui->textEdit, fake_cut);
 }
 
 void notepad::on_actionPaste_triggered()

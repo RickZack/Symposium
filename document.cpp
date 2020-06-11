@@ -711,7 +711,7 @@ void document::updateCursorPos(uint_positive_cnt::type targetSiteId, unsigned in
 void document::updateOtherCursorPos(uint_positive_cnt::type targetSiteId, unsigned int newRow, unsigned int newCol,
                                     const symbol &symb, bool ins) {
     for(auto& i: activeUsers){
-        if(i.second.row<newRow || (i.second.row==newRow && i.second.col<=newCol))
+        if(i.second.row!=newRow || (i.second.row==newRow && i.second.col<=newCol))
             continue;
         // On the same line, there are cursors with different siteId
         if(symb.getCh()!='\r'){
