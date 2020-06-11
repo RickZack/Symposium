@@ -623,8 +623,8 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
         //fmt.setFontWeight(headingLevel ? QFont::Bold : QFont::Normal);
         fmt.setProperty(QTextFormat::FontSizeAdjustment, sizeAdjustment);
         cursor.select(QTextCursor::LineUnderCursor);
-        cursor.mergeCharFormat(fmt);
-        ui->textEdit->mergeCurrentCharFormat(fmt);
+        //cursor.mergeCharFormat(fmt);
+        //ui->textEdit->mergeCurrentCharFormat(fmt);
     } else {
         QTextListFormat listFmt;
         if (cursor.currentList()) {
@@ -745,6 +745,50 @@ void notepad::textSize(const QString &p)
     }
     ui->textEdit->setFocus();
 
+    if(this->indexStyle != 0){
+        //siamo all'interno di un elenco
+
+        QTextListFormat::Style style = QTextListFormat::ListStyleUndefined;
+
+        switch (indexStyle) {
+        case 1:
+            style = QTextListFormat::ListDisc;
+            break;
+        case 2:
+            style = QTextListFormat::ListCircle;
+            break;
+        case 3:
+            style = QTextListFormat::ListSquare;
+            break;
+        case 4:
+            style = QTextListFormat::ListDecimal;
+            break;
+        case 5:
+            style = QTextListFormat::ListLowerAlpha;
+            break;
+        case 6:
+            style = QTextListFormat::ListUpperAlpha;
+            break;
+        case 7:
+            style = QTextListFormat::ListLowerRoman;
+            break;
+        case 8:
+            style = QTextListFormat::ListUpperRoman;
+            break;
+        default:
+            break;
+        }
+
+        QTextBlockFormat blockFmt = cursor.blockFormat();
+        if(pointSize <= 16){
+           blockFmt.setIndent(1);
+        }else if(pointSize <= 28){
+            blockFmt.setIndent(2);
+        }else{
+           blockFmt.setIndent(3);
+        }
+        cursor.setBlockFormat(blockFmt);
+    }
 }
 
 void notepad::textAlign(QAction *a)
