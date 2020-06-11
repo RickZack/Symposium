@@ -366,11 +366,22 @@ void notepad::removeUserCursor(Symposium::uint_positive_cnt::type siteID)
 
 void notepad::addUserCursor(Symposium::uint_positive_cnt::type siteID, const std::string& username)
 {
+    int block=ui->textEdit->textCursor().blockNumber();
+    int column=ui->textEdit->textCursor().positionInBlock();
+    NotRefreshLabels=true;
+    ui->textEdit->changePosition(0,0);
+    Qt::Alignment old=ui->textEdit->alignment();
+    ui->textEdit->setAlignment(Qt::AlignLeft);
+    ui->textEdit->scroll();
     ui->textEdit->addUser(siteID, username);
     insertusers();
     if(highActivated==true){
         cl.mapSiteIdToUser(doc);
     }
+    ui->textEdit->setAlignment(old);
+    ui->textEdit->scroll();
+    ui->textEdit->changePosition(block, column);
+    NotRefreshLabels=false;
 }
 
 
