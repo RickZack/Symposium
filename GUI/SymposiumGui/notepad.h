@@ -158,6 +158,7 @@ private:
     const Symposium::document& doc;
     bool showUsers=true;
     bool pressCanc=false;
+    bool styleSend=false;
     QMenu *m_textEditContextMenu;
 
     std::string pathToFile;

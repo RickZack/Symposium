@@ -93,6 +93,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
     ui->actionAlignTextLeft->setChecked(true);
     this->alignment=Symposium::alignType::left;
 
+
     addStyleFormat();
     // Set default style
     this->textStyle(0); //=Standard
@@ -311,6 +312,7 @@ notepad::notepad(QWidget *parent, Symposium::privilege priv, Symposium::privileg
 
     this->colPos = Qt::GlobalColor::black;
     colorChanged(this->colPos);
+    this->styleSend=true;
 }
 
 template<>
@@ -456,35 +458,83 @@ void notepad::on_actionColorText_triggered()
 
 void notepad::on_actionAlignTextLeft_triggered()
 {
+    std::pair<Symposium::alignType, unsigned int> oldLineStyle(this->alignment, this->indexStyle);
+
+    QTextCursor cursor=ui->textEdit->textCursor();
+    unsigned int row=static_cast<unsigned int>(cursor.blockNumber());
+
     textAlign(ui->actionAlignTextLeft);
     this->alignment=Symposium::alignType::left;
+
+    std::pair<Symposium::alignType, unsigned int> newLineStyle(this->alignment, this->indexStyle);
+
     ui->textEdit->scroll();
+
+    if(styleSend)
+        cl.localEditLineStyle(documentId, oldLineStyle, newLineStyle, row);
+
     ui->textEdit->setFocus();
 }
 
 void notepad::on_actionAlignCenter_triggered()
 {
+    std::pair<Symposium::alignType, unsigned int> oldLineStyle(this->alignment, this->indexStyle);
+
+    QTextCursor cursor=ui->textEdit->textCursor();
+    unsigned int row=static_cast<unsigned int>(cursor.blockNumber());
+
     textAlign(ui->actionAlignCenter);
     this->alignment=Symposium::alignType::center;
+
+    std::pair<Symposium::alignType, unsigned int> newLineStyle(this->alignment, this->indexStyle);
+
     ui->textEdit->scroll();
+
+    if(styleSend)
+        cl.localEditLineStyle(documentId, oldLineStyle, newLineStyle, row);
+
     ui->textEdit->setFocus();
 }
 
 
 void notepad::on_actionAlignTextRight_triggered()
 {
+    std::pair<Symposium::alignType, unsigned int> oldLineStyle(this->alignment, this->indexStyle);
+
+    QTextCursor cursor=ui->textEdit->textCursor();
+    unsigned int row=static_cast<unsigned int>(cursor.blockNumber());
+
    textAlign(ui->actionAlignTextRight);
    this->alignment=Symposium::alignType::right;
+
+   std::pair<Symposium::alignType, unsigned int> newLineStyle(this->alignment, this->indexStyle);
+
    ui->textEdit->scroll();
+
+   if(styleSend)
+       cl.localEditLineStyle(documentId, oldLineStyle, newLineStyle, row);
+
    ui->textEdit->setFocus();
 
 }
 
 void notepad::on_actionAlignTextJustify_triggered()
 {
+    std::pair<Symposium::alignType, unsigned int> oldLineStyle(this->alignment, this->indexStyle);
+
+    QTextCursor cursor=ui->textEdit->textCursor();
+    unsigned int row=static_cast<unsigned int>(cursor.blockNumber());
+
     textAlign(ui->actionAlignTextJustify);
     this->alignment=Symposium::alignType::left;
+
+    std::pair<Symposium::alignType, unsigned int> newLineStyle(this->alignment, this->indexStyle);
+
     ui->textEdit->scroll();
+
+    if(styleSend)
+        cl.localEditLineStyle(documentId, oldLineStyle, newLineStyle, row);
+
     ui->textEdit->setFocus();
 }
 
@@ -592,7 +642,12 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
     ui->textEdit->setFocus();
 
     // set the style index
+    std::pair<Symposium::alignType, unsigned int> oldLineStyle(this->alignment, this->indexStyle);
     this->indexStyle=styleIndex;
+    std::pair<Symposium::alignType, unsigned int> newLineStyle(this->alignment, this->indexStyle);
+    unsigned int row=static_cast<unsigned int>(cursor.blockNumber());
+    if(styleSend)
+        cl.localEditLineStyle(documentId, oldLineStyle, newLineStyle, row);
     ui->textEdit->scroll();
     return style;
 }
@@ -734,6 +789,7 @@ void notepad::fillTextEdit(){
     NotRefreshLabels=true;
     /* save in the alignmentStyle the vector that defines for each row its style */
     NotRefreshLabels=true;
+    styleSend=false;
     QTextCharFormat chFormat;
     QColor qCol;
     QTextCursor curs=ui->textEdit->textCursor();
@@ -804,6 +860,7 @@ void notepad::fillTextEdit(){
              }
         }
   }
+    styleSend=true;
     NotRefreshLabels=false;
 
 }
@@ -811,6 +868,7 @@ void notepad::fillTextEdit(){
 
 void notepad::fixAlignment(){
     NotRefreshLabels=true;
+    styleSend=false;
     auto alignmentStyle=this->doc.getAlignmentStyle();
     auto& symbols= this->doc.getSymbols();
     QTextCursor curs=ui->textEdit->textCursor();
@@ -834,6 +892,7 @@ void notepad::fixAlignment(){
         }
     }
     ui->textEdit->scroll();
+    styleSend=true;
     NotRefreshLabels=false;
     ui->textEdit->changePosition(0,0);
 
@@ -1332,6 +1391,7 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     wchar_t symch=sym.getCh();
     QString ch;
     ch[0]=symch;
+    styleSend=false;
     if(row == 0)
         this->textStyle(styles.second);
     else if(this->doc.getAlignmentStyle()[row-1] != this->doc.getAlignmentStyle()[row])
@@ -1349,6 +1409,7 @@ void notepad::remoteInsert(const Symposium::symbol& sym, Symposium::uint_positiv
     }else if (align==Symposium::alignType::justify){
         this->textAlign(ui->actionAlignTextJustify);
     }
+    styleSend=true;
     curs.insertText(ch,ch_format);
     ui->textEdit->changePosition(siteId,row,column++);
     ui->textEdit->changePosition(actBlock,actColm);
@@ -1809,7 +1870,33 @@ void notepad::success() {
 }
 
 void notepad::editLineStyle(const std::pair<Symposium::alignType, unsigned int> &newLineStyle, unsigned int row) {
-//TODO: implement
+    NotRefreshLabels=true;
+    QTextCursor curs=ui->textEdit->textCursor();
+    //Starting position to restore
+    int initRow=curs.blockNumber();
+    int initCol=curs.positionInBlock();
+
+    //Position where we want to change the alignment or style
+    curs.movePosition(QTextCursor::Start);
+    curs.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor,row);
+    ui->textEdit->setTextCursor(curs);
+
+    //Change alignment
+    if (newLineStyle.first == Symposium::alignType::left)
+        ui->textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
+    else if (newLineStyle.first == Symposium::alignType::center)
+        ui->textEdit->setAlignment(Qt::AlignHCenter);
+    else if (newLineStyle.first == Symposium::alignType::right)
+        ui->textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
+    else if (newLineStyle.first == Symposium::alignType::justify)
+        ui->textEdit->setAlignment(Qt::AlignJustify);
+
+    styleSend=false;
+    textStyle(static_cast<int>(newLineStyle.second));
+    styleSend=true;
+    //Restore position
+    ui->textEdit->changePosition(initRow,initCol);
+    NotRefreshLabels=false;
 }
 
 void notepad::showTextEditContextMenu(const QPoint &pos){
