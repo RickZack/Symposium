@@ -1047,7 +1047,10 @@ void directory::on_OkPriv_clicked()
         std::size_t found = pathToSend.find_last_of("/");
         pathToSend.erase(found, pathToSend.size());
     }
-    cl.openSource(pathToSend,this->selectedId,privOpen);
+    if(lastChoice==openSource)
+        cl.openSource(pathToSend, this->selectedId,privOpen, false);
+    else
+        cl.openSource(pathToSend, this->selectedId,privOpen, true);
     #else
     priv=Symposium::privilege::owner;
     hideAll();

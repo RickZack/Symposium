@@ -244,7 +244,8 @@ void file::replacement(std::shared_ptr<file> replace){
     std::swap(this->doc, replace->doc);
     //this->doc.swap(replace->doc);
     this->sharingPolicy=std::move(replace->sharingPolicy);
-    this->strategy=std::move(replace->strategy);
+    std::swap(this->strategy, replace->strategy);
+    //this->strategy=std::move(replace->strategy);
 }
 
 bool file::operator==(const file &rhs) const {

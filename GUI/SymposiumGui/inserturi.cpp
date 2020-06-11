@@ -248,7 +248,7 @@ void inserturi::successInsert()
         int ret=notWindow.exec();
         if(ret==0)
         {
-             notepad* notepadWindow= new notepad(nullptr,privilege,privilege,pathLink,cl.getOpenDocument(),cl.getOpenFileID(), *this, true);
+             notepad* notepadWindow= new notepad(nullptr,privilege,privilege,path,cl.getOpenDocument(),cl.getSymlinkID(), *this, true);
              notepadWindow->setWindowTitle(title);
              goToWindow(*notepadWindow);
              notepadWindow->showLabels();
@@ -260,7 +260,7 @@ void inserturi::successInsert()
         int ret=notWindow.exec();
         if(ret==0)
         {
-             notepad* notepadWindow= new notepad(nullptr,privilege,privilege,pathLink,cl.getOpenDocument(),cl.getOpenFileID(), *this, true);
+             notepad* notepadWindow= new notepad(nullptr,privilege,privilege,path,cl.getOpenDocument(),cl.getSymlinkID(), *this, true);
              notepadWindow->setWindowTitle(title);
              goToWindow(*notepadWindow);
              notepadWindow->showLabels();

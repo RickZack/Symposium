@@ -480,7 +480,7 @@ TEST_F(SymClientTest, shareResourceCallsShareResourceOnUser){
     setStageForLoggedUser();
     SymClientUserMock& logUser= dynamic_cast<SymClientUserMock &>(client.getLoggedUser());
     EXPECT_CALL(logUser, shareResource(resPath, resId, newPreferences));
-    client.shareResource(std::__cxx11::string(), resPath, resId, newPreferences, true);
+    client.shareResource(std::string(), resPath, resId, newPreferences, true);
 }
 
 TEST_F(SymClientTest, renameResourceConstructsGoodMessageAndInsertInUnanswered){

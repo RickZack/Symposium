@@ -248,11 +248,14 @@ void clientdispatcher::autologIn(){
     logIn(this->username, this->userpwd);
 }
 
-void clientdispatcher::openSource(const std::string &path, const std::string &name, privilege reqPriv) {
+void clientdispatcher::openSource(const std::string &path, const std::string &name, privilege reqPriv, bool isSymlink) {
     std::shared_ptr<askResMessage> mess = std::make_shared<askResMessage>(this->client.openSource(path,name,reqPriv));
     try {
         //inviamo il messaggio
         sendMessage(mess);
+        this->isSymlink = isSymlink;
+        if(isSymlink)
+            this->openFileID = std::stoi(name);
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
@@ -520,14 +523,20 @@ void clientdispatcher::successAction(){
 }
 
 
-void clientdispatcher::updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID){
+void clientdispatcher::updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID, uint_positive_cnt::type symlinkID){
     this->openDocumentID = docID;
-    this->openFileID = fileID;
+    this->symlinkID = symlinkID;
+    if(!this->isSymlink)
+        this->openFileID = fileID;
     this->successAction();
 }
 
 const document& clientdispatcher::getOpenDocument(){
     return this->client.getActiveDocumenttoOpenbyID(this->openDocumentID);
+}
+
+uint_positive_cnt::type clientdispatcher::getSymlinkID(){
+    return this->symlinkID;
 }
 
 uint_positive_cnt::type clientdispatcher::getOpenFileID(){

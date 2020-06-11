@@ -49,7 +49,7 @@ void choosepriv::on_pushButton_clicked(){
 
     // qui chiamo il metodo in cui gli passo il path e il privilege
     #ifdef DISPATCHER_ON
-    cl->openSource(this->path,this->idSource,this->priv);
+    cl->openSource(this->path,this->idSource,this->priv, true);
     #else
     /*notepadWindow= new notepad(this,std::stol(this->idSource),priv,privOpen,path);
     notepadWindow->show();

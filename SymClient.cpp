@@ -98,7 +98,7 @@ void SymClient::openSource(const std::string &resPath, const std::string &resId,
     activeDoc.push_front({&doc, c});
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),p->getId());
+    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),p->getId(), 0);
     #endif
 }
 
@@ -125,7 +125,8 @@ void SymClient::openNewSource(const std::string &absolutePath, privilege reqPriv
     activeDoc.push_front({&doc,c});
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),fileAsked->getId());
+    qDebug() << "ID Symlink: " << idToAssign;
+    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),fileAsked->getId(), idToAssign);
     #endif
 }
 
@@ -147,7 +148,7 @@ void SymClient::createNewSource(const std::string &resPath, const std::string &r
     activeDoc.push_front({&docReq,c});
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocFileandSuccess(docReq.getId(),file->getId());
+    this->dispatcher->updateRequestDocFileandSuccess(docReq.getId(),file->getId(), 0);
     #endif
 }
 
@@ -245,7 +246,9 @@ SymClient::shareResource(const std::string &actionUser, const std::string &resPa
         #endif
     }
     else{
-        res=directory::getRoot()->getFile(resPath, resId);
+        std::string temp = resPath;
+        temp.erase(temp.find_last_of("/"), temp.size());
+        res=directory::getRoot()->getFile(temp, resId);
         res->setSharingPolicy(actionUser, newPrefs);
     }
 

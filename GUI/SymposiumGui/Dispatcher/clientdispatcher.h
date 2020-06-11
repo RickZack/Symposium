@@ -85,6 +85,8 @@ namespace Symposium{
         bool appIsClosing;                                      /**< this variable is true if the application will close, false otherwise  */
         bool userIsLogged;                                      /**< this variable is true if the user is logged in, false otherwise  */
         bool connectionClosed;
+        bool isSymlink;
+        uint_positive_cnt::type symlinkID;
     public:
         clientdispatcher(QObject *parent = nullptr);
 
@@ -143,7 +145,7 @@ namespace Symposium{
          * @param name the id of the file to open
          * @param reqPriv the privilege requested opening the file
          */
-        void openSource(const std::string &path, const std::string &name, privilege reqPriv);
+        void openSource(const std::string &path, const std::string &name, privilege reqPriv, bool isSymlink);
 
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
@@ -316,6 +318,8 @@ namespace Symposium{
          */
         const user& getUser();
 
+        uint_positive_cnt::type getSymlinkID();
+
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
          * @param newUserData the user with new data
@@ -398,8 +402,9 @@ namespace Symposium{
          * @brief it sets @ref openFileID and @ref openDocumentID of requested document from the user and signal the success to the GUI
          * @param docID the id of requested document
          * @param fileID the id of file that contain the requested document
+         * @param symlinkID the id of symlink, if it is a symlink, set to 0 otherwise
          */
-        void updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID);
+        void updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID, uint_positive_cnt::type symlinkID);
 
         /**
          * @brief it signals to the GUI that it is not possible to remove a resource because it is open
