@@ -694,6 +694,7 @@ void notepad::handleChangeFormat(unsigned int i, unsigned int f){
            row=curs.blockNumber();
            ui->textEdit->changePosition(row,col);
            format=curs.charFormat();
+           QColor c = format.foreground().color();
            character=curs.selectedText();
            cl.localRemove(this->documentId,{row,col});
            this->sendSymbolToInsert(row,col,character,format);
@@ -748,10 +749,10 @@ void notepad::textSize(const QString &p)
         fmt.setFontPointSize(pointSize);
         //mergeFormatOnWordOrSelection(fmt);
         ui->textEdit->mergeCurrentCharFormat(fmt);
-        QColor lightColor=fmt.foreground().color();
+        /*QColor lightColor=fmt.foreground().color();
         lightColor.setAlpha(alphaValue);
-        ui->textEdit->setTextColor(lightColor);
-         if(cursor.hasSelection())
+        ui->textEdit->setTextColor(lightColor);*/
+        if(cursor.hasSelection())
              this->handleChangeFormat(cursor.selectionStart(),cursor.selectionEnd());
 
     }
@@ -1130,6 +1131,7 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
 
     QTextCursor cursor= ui->textEdit->textCursor();
     QTextCharFormat format = cursor.charFormat();
+    format.setForeground(this->colPos);
     qDebug()<<"Colore "<<this->colPos;
     QString testo=event->text();
     qDebug()<<"Testo "<<testo;
@@ -1303,7 +1305,7 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
     std::wstring str=text.toStdWString();
     wchar_t ch=str[0];
     const std::pair<unsigned, unsigned> indexes={row,column};
-    //QColor col=format.foreground().color();
+    QColor col=format.foreground().color();
     QFont font= format.font();
     bool isBold= font.bold();
     bool isUnderlined=font.underline();
@@ -1312,9 +1314,9 @@ void notepad::sendSymbolToInsert(unsigned row, unsigned column,QString text, QTe
     std::string fontFamily=font.family().toStdString();
 
     //set color text
-    int blue=this->colPos.blue();
-    int red=this->colPos.red();
-    int green=this->colPos.green();
+    int blue=col.blue();
+    int red=col.red();
+    int green=col.green();
     Symposium::Color myCol(red,green,blue);
     Symposium::format charFormat={fontFamily,isBold,isUnderlined,isItalic,size,myCol,this->indexStyle,this->alignment/*this->type*/};
     std::vector<int> pos;
