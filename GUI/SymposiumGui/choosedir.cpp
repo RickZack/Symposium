@@ -37,6 +37,7 @@ choosedir::choosedir(QWidget *parent, std::string pathDir) :
     connect(ui->cancel, SIGNAL(clicked()), parent, SLOT(enableButtonsAfter()));
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
     setAttribute( Qt::WA_DeleteOnClose );
+    ui->dirEmpty->hide();
 }
 
 choosedir::~choosedir()
@@ -174,6 +175,7 @@ void choosedir::treeGenerate(std::string str, int count)
 
 void choosedir::on_tree_itemClicked(QTreeWidgetItem *item, int column)
 {
+    ui->dirEmpty->hide();
     QString pathUser;
     if(column==2)
         pathUser=item->text(column);
@@ -214,9 +216,9 @@ int choosedir::number_elements(std::string& string)
 
 void choosedir::on_choose_clicked()
 {
+    ui->dirEmpty->hide();
     if(nameOfDir=="")
-        QMessageBox::information(parentWidget(),
-                                 tr("Choose Directory"), tr("Your need to choose a directory"), QMessageBox::Ok);
+        ui->dirEmpty->show();
     else
         this->close();
 }

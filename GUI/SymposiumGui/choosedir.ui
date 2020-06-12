@@ -88,8 +88,8 @@ border:none;</string>
   <widget class="QPushButton" name="choose">
    <property name="geometry">
     <rect>
-     <x>95</x>
-     <y>450</y>
+     <x>90</x>
+     <y>470</y>
      <width>105</width>
      <height>35</height>
     </rect>
@@ -107,8 +107,8 @@ border-radius:15px;</string>
   <widget class="QPushButton" name="cancel">
    <property name="geometry">
     <rect>
-     <x>475</x>
-     <y>450</y>
+     <x>470</x>
+     <y>470</y>
      <width>105</width>
      <height>35</height>
     </rect>
@@ -215,6 +215,27 @@ color: rgb(58, 80, 116); </string>
    </property>
    <property name="text">
     <string>Choose the directory where you want to save the file</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="dirEmpty">
+   <property name="geometry">
+    <rect>
+     <x>95</x>
+     <y>430</y>
+     <width>480</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 11pt &quot;Baskerville Old Face&quot;;
+color: red; 
+text-align:center;</string>
+   </property>
+   <property name="text">
+    <string>You have to choose the directory where save the reference to link</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
