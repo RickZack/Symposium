@@ -33,7 +33,7 @@ alluser::alluser(QWidget *parent, Symposium::privilege privelege, Symposium::uin
     ui->gif->setMovie(movie);
     movie->start();
 
-    if(privelege==Symposium::privilege::readOnly)
+    if(privelege!=Symposium::privilege::owner)
     {
         ui->button->setDisabled(true);
         ui->owner->hide();
