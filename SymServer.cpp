@@ -608,6 +608,7 @@ SymServer::fromLocalPathToGlobal(const user &actionU, const std::string &resPath
     if(res->resType()==resourceType::symlink){
         auto sym=std::dynamic_pointer_cast<symlink>(res);
         absPath=sym->getPath();
+        absPath.erase(absPath.find_last_of("/"), absPath.size());
         id=sym->getResId();
     }
     else{

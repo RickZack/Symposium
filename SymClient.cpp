@@ -203,7 +203,13 @@ void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resId,
                                      privilege newPrivilege) {
-    std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, resPath + "/" + resId, targetUser, newPrivilege));
+    std::string path;
+    if(resPath=="./")
+        path = resPath + resId;
+    else
+        path = resPath + "/" + resId;
+
+    std::shared_ptr<privMessage> mess (new privMessage(msgType::changePrivileges, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, path, targetUser, newPrivilege));
     unanswered.push_front(mess);
     return *mess;
 }
@@ -237,6 +243,7 @@ SymClient::shareResource(const std::string &actionUser, const std::string &resPa
                          bool msgRcv) {
     //std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resId, newPrefs));
     //const_cast<file&>(getActiveFiletoOpenbyID(std::stoul(resId))).forceUpdateSharingPolicy(newPrefs);
+    qDebug() << "SHARERESOURCE --> resPath: " << QString::fromStdString(resPath) << " resId: " << QString::fromStdString(resId);
     std::shared_ptr<filesystem> res;
     if(msgRcv){
         res=getLoggedUser().shareResource(resPath, resId, newPrefs);
@@ -246,9 +253,7 @@ SymClient::shareResource(const std::string &actionUser, const std::string &resPa
         #endif
     }
     else{
-        std::string temp = resPath;
-        temp.erase(temp.find_last_of("/"), temp.size());
-        res=directory::getRoot()->getFile(temp, resId);
+        res=directory::getRoot()->getFile(resPath, resId);
         res->setSharingPolicy(actionUser, newPrefs);
     }
 

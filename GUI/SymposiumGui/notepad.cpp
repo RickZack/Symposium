@@ -702,6 +702,10 @@ void notepad::handleChangeFormat(unsigned int i, unsigned int f){
             count++; i++;
       } //while
 
+      ui->textEdit->changePosition(row,++col);
+      ui->textEdit->thisUserChangePosition(cl.getUser().getSiteId());
+      NotRefreshLabels=false;
+
     }
 
 
@@ -1169,10 +1173,19 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
         return;
     }
     else{ // alphabetic character to process
+
+        if(cursor.hasSelection()){
+            int pos = cursor.position();
+            handleDeleteKey(event);
+            cursor.setPosition(pos);
+        }
+
+
         row=cursor.blockNumber();
         column=cursor.positionInBlock();
 
     }
+
 
     this->sendSymbolToInsert(row,column,testo,format);
 }
@@ -1620,6 +1633,7 @@ void notepad::on_textEdit_cursorPositionChanged()
      }
 
      //fontChanged(ch.font());
+     this->colPos = ch.foreground().color();
      this->currentCharFormatChanged(ch);
 
      /*if(!cc.hasSelection()){
