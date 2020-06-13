@@ -250,6 +250,7 @@ void inserturi::successInsert()
         {
              notepad* notepadWindow= new notepad(nullptr,privilege,privilege,path,cl.getOpenDocument(),cl.getSymlinkID(), *this, true);
              notepadWindow->setWindowTitle(title);
+             notepadWindow->setSharingPath(pathLink);
              goToWindow(*notepadWindow);
              notepadWindow->showLabels();
              notepadWindow->fixAlignment();
@@ -262,6 +263,7 @@ void inserturi::successInsert()
         {
              notepad* notepadWindow= new notepad(nullptr,privilege,privilege,path,cl.getOpenDocument(),cl.getSymlinkID(), *this, true);
              notepadWindow->setWindowTitle(title);
+             notepadWindow->setSharingPath(pathLink);
              goToWindow(*notepadWindow);
              notepadWindow->showLabels();
              notepadWindow->fixAlignment();

@@ -226,7 +226,7 @@ SymServer::editPrivilege(const std::string &actionUser, const std::string &targe
     // must give an absolute path, containing also the fileId
     std::string absPath, realId;
     std::tie(absPath, realId)= fromLocalPathToGlobal(actionU, resPath, resId);
-    auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, absPath+"/"+realId, targetUser, privilege::readOnly, respMsgId);
+    auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, absPath+"/"+realId, targetUser, newPrivilege, respMsgId);
     insertMessageForSiteIds(setSiteIds, toSend);
 
     generateSimpleResponse(actionU.getSiteId(), msgType::changePrivileges, respMsgId);

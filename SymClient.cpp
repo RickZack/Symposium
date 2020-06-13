@@ -228,7 +228,12 @@ privilege SymClient::editPrivilege(const std::string &targetUser, const std::str
         #endif
     }
     else{
-        p=directory::getRoot()->get(resPath, resId)->setUserPrivilege(targetUser, newPrivilege);
+        std::string pathRemain, id;
+        std::tie(pathRemain, id)=directory::separateFirst(resPath);
+        if(std::to_string(getLoggedUser().getHome()->getId())==id)
+            p=getLoggedUser().getHome()->getFile("./"+pathRemain, resId)->setUserPrivilege(targetUser, newPrivilege);
+        else
+            p=directory::getRoot()->getFile(resPath, resId)->setUserPrivilege(targetUser, newPrivilege);
     }
     return p;
 }
@@ -255,7 +260,12 @@ SymClient::shareResource(const std::string &actionUser, const std::string &resPa
         #endif
     }
     else{
-        res=directory::getRoot()->getFile(resPath, resId);
+        std::string pathRemain, id;
+        std::tie(pathRemain, id)=directory::separateFirst(resPath);
+        if(std::to_string(getLoggedUser().getHome()->getId())==id)
+            res=getLoggedUser().getHome()->getFile("./"+pathRemain, resId);
+        else
+            res=directory::getRoot()->getFile(resPath, resId);
         res->setSharingPolicy(actionUser, newPrefs);
     }
 

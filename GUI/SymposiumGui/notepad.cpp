@@ -1008,44 +1008,29 @@ void notepad::visualizeAllUsers()
 
 }
 
-std::string notepad::constructAbsolutePath(){
-    std::string path;
-    if(pathToFile == "./"){
-        //costruiamo il percorso assoluto
-        path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + '/' + std::to_string(fileId);
-    }else{
-        std::string percorso = pathToFile;
-        //cancelliamo il './' iniziale
-        percorso.erase(0,2);
-        //costruiamo il percorso assoluto
-        path = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + '/' + percorso + '/' + std::to_string(fileId);
-    }
-    return path;
-}
-
 
 void notepad::inactiveLink()
 {
 
-    activenonlink* nonlinkwindow = new activenonlink(this, fileId, pathToFile, constructAbsolutePath(), *this);
+    activenonlink* nonlinkwindow = new activenonlink(this, fileId, pathToFile, sharingPath, *this);
     goToWindow(*nonlinkwindow);
 }
 
 void notepad::activeAlwaysLink()
 {
-    activealwayslink* alwayslinkwindow = new activealwayslink(this, fileId, pathToFile, constructAbsolutePath(), cl.getUser(), *this);
+    activealwayslink* alwayslinkwindow = new activealwayslink(this, fileId, pathToFile, sharingPath, cl.getUser(), *this);
     goToWindow(*alwayslinkwindow);
 }
 
 void notepad::timerLink()
 {
-    activetimerlink* timerlinkwindow = new activetimerlink(this, fileId, pathToFile, constructAbsolutePath(), cl.getUser(), *this);
+    activetimerlink* timerlinkwindow = new activetimerlink(this, fileId, pathToFile, sharingPath, cl.getUser(), *this);
     goToWindow(*timerlinkwindow);
 }
 
 void notepad::counterLink()
 {
-    activecounterlink* counterlinkwindow = new activecounterlink(this, fileId, pathToFile, constructAbsolutePath(), cl.getUser(), *this);
+    activecounterlink* counterlinkwindow = new activecounterlink(this, fileId, pathToFile, sharingPath, cl.getUser(), *this);
     goToWindow(*counterlinkwindow);
 }
 
@@ -1985,4 +1970,8 @@ void notepad::editLineStyle(const std::pair<Symposium::alignType, unsigned int> 
 
 void notepad::showTextEditContextMenu(const QPoint &pos){
     m_textEditContextMenu->popup(ui->textEdit->mapToGlobal(pos));
+}
+
+void notepad::setSharingPath(const std::string &sharingPath) {
+    notepad::sharingPath = sharingPath;
 }

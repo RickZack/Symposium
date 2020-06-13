@@ -105,7 +105,7 @@ public:
      */
     void fixAlignment();
 
-
+    void setSharingPath(const std::string &sharingPath);
 
 
 protected:
@@ -173,6 +173,8 @@ private:
     unsigned indexStyle;                                                /**< to set the index for the style */                                                              
     unsigned numChars;                                                  /**< to save the numChars contained in the document */
     std::string labelChars;                                             /**< to convert the @numChars into a string*/
+    std::string sharingPath;
+
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void colorChanged(const QColor &c);
     void fontChanged(const QFont &f);
@@ -185,7 +187,6 @@ private:
     bool isAKeyToIgnore(QKeyEvent* event);
     void handleTextEditKeyPress(QKeyEvent* event);
     void handleDeleteKey(QKeyEvent *event);
-    std::string constructAbsolutePath();
 
     /**
      * @brief contV_action to handle with the CONTROL-C CONTROL-V actions

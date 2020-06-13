@@ -4,6 +4,7 @@
 #include "Dispatcher/clientdispatcher.h"
 #include <ostream>
 #include "onoff_networkinteraction.h"
+#include "../../filesystem.h"
 
 
 directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
@@ -785,6 +786,15 @@ notepad* directory::successNewSource(){
     //open the newly created document
     notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,pathToSend,cl.getOpenDocument(), cl.getNewFileID(), *this);
     nw->setWindowTitle(curResName);
+
+
+    std::string percorso = pathToSend;
+    //cancelliamo il './' iniziale
+    percorso.erase(0,2);
+    //costruiamo il percorso assoluto
+    std::string sharingPath = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + '/' + percorso+std::to_string(cl.getNewFileID());
+    nw->setSharingPath(sharingPath);
+
     goToWindow(*nw);
     nw->showLabels();
     nw->fixAlignment();
@@ -1075,12 +1085,22 @@ void directory::successOpen(){
         pathToSend.erase(found, pathToSend.size());
     }
     notepad* notepadWindow= new notepad(nullptr,priv,privOpen,pathToSend,cl.getOpenDocument(), std::stoi(this->selectedId), *this);
-    //TODO: sarebbe meglio passare al costruttore le informazioni al costruttore e nella classe notepad chiamare le varie
-    // setTitle, showLabels, ecc..
     notepadWindow->setWindowTitle(curResName);
+    std::shared_ptr<Symposium::filesystem> element=cl.getUser().getHome()->get(pathToSend, selectedId);
+    if(element->resType()==Symposium::resourceType::symlink){
+        auto sym=std::dynamic_pointer_cast<Symposium::symlink>(element);
+        notepadWindow->setSharingPath(sym->getPath());
+    }
+    else{
+        std::string percorso = path;
+        //cancelliamo il './' iniziale
+        percorso.erase(0,2);
+        //costruiamo il percorso assoluto
+        std::string sharingPath = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + '/' + percorso +selectedId;
+        notepadWindow->setSharingPath(sharingPath);
+    }
     goToWindow(*notepadWindow);
     notepadWindow->showLabels();
-    //TODO: ad esempio la setreadonly potrebbe essere chiamata da notepad, ed essere quinid un afunzione privata
     notepadWindow->fixAlignment();
     //To make notepad's title change when renaming the file
     QObject::connect(this, SIGNAL(resNameChanged(Symposium::uint_positive_cnt::type, const QString&)), notepadWindow, SLOT(modifyWinTitle(Symposium::uint_positive_cnt::type, const QString&)));
