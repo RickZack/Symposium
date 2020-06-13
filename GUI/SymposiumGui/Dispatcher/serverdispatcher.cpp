@@ -34,11 +34,6 @@
 using namespace Symposium;
 
 
-ServerDispatcher::ServerDispatcher(){
-    //settiamo i booleani entrambe a false per non effettuare il salvataggio degli utente e il loro recupero
-    this->server = SymServer(false,false);
-}
-
 int ServerDispatcher::startServer(QHostAddress indirizzo, int porta){
     if(!this->listen(indirizzo, porta))
     {

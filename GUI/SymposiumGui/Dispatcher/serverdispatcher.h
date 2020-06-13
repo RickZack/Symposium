@@ -60,7 +60,7 @@
 
 
         public:
-            ServerDispatcher();
+            ServerDispatcher()=default;
 
             /**
              * @brief constructs a server to receive connections request

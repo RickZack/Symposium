@@ -400,7 +400,9 @@ bool SymServer::userIsValid(const user &toCheck) noexcept {
 SymServer::SymServer(bool loading, bool storing) : loadData(loading), storeData(storing){
     bool loaded=false;
     if(loadData)
-        loaded=load();
+        document::doLightSerializing([&](){
+            loaded=load();
+        });
     if(!loaded)
         rootDir=directory::getRoot();
 }
@@ -554,6 +556,7 @@ bool SymServer::load() {
             boost::archive::text_iarchive ia(input);
             ia>>temp;
             *this=std::move(temp);
+            storeData=true; loadData=true; //they were overwritten by moving temp into *this
             return true;
         }
         catch(std::exception& e) {
