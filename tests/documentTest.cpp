@@ -249,8 +249,6 @@ updatePos updates2[]={
         updatePos{symbol('b', 1, 1, {2}, true), symbol('a', 0, 1, {1}, true), {0,1}, {0,1}},
         //1) removal of the second symbol affects the other user's cursor: a|(0)b|(1) ->|(0)b|(1)
         updatePos{symbol('a', 0, 1, {1}, true), symbol('b', 1, 1, {2}, true), {0,0}, {0,1}},
-        //2) removal of "new line" character: \r|(1)b|(0) -> |(1)b|(0)
-        updatePos{symbol('\r', 1, 1, {1}, true), symbol('a', 0, 1, {2}, true), {0,1}, {0,0}},
 };
 INSTANTIATE_TEST_SUITE_P(TwoSymbolsFromDifferentSiteIds, docRemoteRemoveUpdateCursor, testing::ValuesIn(updates2));
 
