@@ -54,7 +54,7 @@ std::shared_ptr<directory> directory::root;
 
 template<class Archive>
 void filesystem::serialize(Archive &ar, const unsigned int){
-    ar & id & name & sharingPolicy & strategy;
+    ar & id & name & sharingPolicy & strategy & idCounter;
 };
 
 template<class Archive>
