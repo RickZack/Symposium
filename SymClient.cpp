@@ -171,7 +171,10 @@ void SymClient::createNewDir(const std::string &resPath, const std::string &resN
 
 symbolMessage SymClient::localInsert(uint_positive_cnt::type docId, const symbol &newSym, const std::pair<unsigned int, unsigned int> &index) {
     document* d = this->getActiveDocumentbyID(docId);
-    symbol sym=d->localInsert(index, const_cast<symbol &>(newSym));
+    symbol sym=document::emptySymbol;
+    bool ok=handleDocException([&](){
+        sym=d->localInsert(index, const_cast<symbol &>(newSym));
+    });
     std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), docId, sym));
     this->unanswered.push_front(mess);
     return *mess;
@@ -637,5 +640,15 @@ SymClient::remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<al
     #ifdef DISPATCHER_ON
     this->dispatcher->remoteEditLineStyle(docId, newLineStyle, row);
     #endif
+}
+
+bool SymClient::handleDocException(const std::function<void(void)> &op) {
+    try{
+        op();
+    }
+    catch(...){
+        return false;
+    }
+    return true;
 }
 

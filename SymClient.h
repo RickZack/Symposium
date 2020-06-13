@@ -605,6 +605,8 @@ namespace Symposium {
         void removeUsersOnDocument(const std::string &username);
 
         void assignUsersColor(colorGen& c, document& d);
+
+        bool handleDocException(const std::function<void(void)>& op);
     };
 }
 #endif //SYMPOSIUM_SYMCLIENT_H
