@@ -1175,7 +1175,7 @@ void notepad::handleTextEditKeyPress(QKeyEvent* event){
     else{ // alphabetic character to process
 
         if(cursor.hasSelection()){
-            int pos = cursor.position();
+            int pos = cursor.selectionStart();
             handleDeleteKey(event);
             cursor.setPosition(pos);
         }

@@ -81,11 +81,12 @@ namespace Symposium{
         std::string userpwd;                                    /**< variable to contain the password that user inserted in signin or signup window  */
         std::string username;                                   /**< variable to contain the username that user inserted in signin or signup window  */
         uint_positive_cnt::type openDocumentID;                 /**< variable to contain the id of document that client want to open or has just created  */
-        uint_positive_cnt::type openFileID;                     /**< variable to contain the id of file that client want to open or has just created  */
+        uint_positive_cnt::type newFileID;                      /**< variable to contain the id of file that client has just created  */
+        uint_positive_cnt::type SymFileID;
         bool appIsClosing;                                      /**< this variable is true if the application will close, false otherwise  */
         bool userIsLogged;                                      /**< this variable is true if the user is logged in, false otherwise  */
         bool connectionClosed;
-        bool isSymlink;
+        //bool isSymlink;
         uint_positive_cnt::type symlinkID;
     public:
         clientdispatcher(QObject *parent = nullptr);
@@ -382,10 +383,14 @@ namespace Symposium{
         const document& getOpenDocument();
 
         /**
-         * @brief it provides the GUI the ID of file that contain the document that has the same ID of openDocumentID
-         * @return the id of the file that contain the document to be open
+         * @brief it provides the GUI the ID of new file
+         * @return the id of the new file
          */
-        uint_positive_cnt::type getOpenFileID();
+        uint_positive_cnt::type getNewFileID();
+
+        void setNewFileID(uint_positive_cnt::type newID);
+
+        void setSymlinkID(uint_positive_cnt::type symlinkID, uint_positive_cnt::type fileID);
 
         /**
          * @brief it provides the GUI the user's privilege on the file to be open
@@ -401,10 +406,8 @@ namespace Symposium{
         /**
          * @brief it sets @ref openFileID and @ref openDocumentID of requested document from the user and signal the success to the GUI
          * @param docID the id of requested document
-         * @param fileID the id of file that contain the requested document
-         * @param symlinkID the id of symlink, if it is a symlink, set to 0 otherwise
          */
-        void updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID, uint_positive_cnt::type symlinkID);
+        void updateRequestDocandSuccess(uint_positive_cnt::type docID);
 
         /**
          * @brief it signals to the GUI that it is not possible to remove a resource because it is open

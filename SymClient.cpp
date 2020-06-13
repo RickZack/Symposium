@@ -98,7 +98,7 @@ void SymClient::openSource(const std::string &resPath, const std::string &resId,
     activeDoc.push_front({&doc, c});
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),p->getId(), 0);
+    this->dispatcher->updateRequestDocandSuccess(doc.getId());
     #endif
 }
 
@@ -126,7 +126,8 @@ void SymClient::openNewSource(const std::string &absolutePath, privilege reqPriv
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
     qDebug() << "ID Symlink: " << idToAssign;
-    this->dispatcher->updateRequestDocFileandSuccess(doc.getId(),fileAsked->getId(), idToAssign);
+    this->dispatcher->setSymlinkID(idToAssign, fileAsked->getId());
+    this->dispatcher->updateRequestDocandSuccess(doc.getId());
     #endif
 }
 
@@ -148,7 +149,8 @@ void SymClient::createNewSource(const std::string &resPath, const std::string &r
     activeDoc.push_front({&docReq,c});
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    this->dispatcher->updateRequestDocFileandSuccess(docReq.getId(),file->getId(), 0);
+    this->dispatcher->setNewFileID(file->getId());
+    this->dispatcher->updateRequestDocandSuccess(docReq.getId());
     #endif
 }
 

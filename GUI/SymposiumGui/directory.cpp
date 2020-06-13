@@ -783,7 +783,7 @@ notepad* directory::successNewSource(){
     }
 
     //open the newly created document
-    notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,pathToSend,cl.getOpenDocument(), cl.getOpenFileID(), *this);
+    notepad* nw= new notepad(nullptr,Symposium::privilege::owner,Symposium::privilege::owner,pathToSend,cl.getOpenDocument(), cl.getNewFileID(), *this);
     nw->setWindowTitle(curResName);
     goToWindow(*nw);
     nw->showLabels();
@@ -1074,7 +1074,7 @@ void directory::successOpen(){
         std::size_t found = pathToSend.find_last_of("/");
         pathToSend.erase(found, pathToSend.size());
     }
-    notepad* notepadWindow= new notepad(nullptr,priv,privOpen,pathToSend,cl.getOpenDocument(), cl.getOpenFileID(), *this);
+    notepad* notepadWindow= new notepad(nullptr,priv,privOpen,pathToSend,cl.getOpenDocument(), std::stoi(this->selectedId), *this);
     //TODO: sarebbe meglio passare al costruttore le informazioni al costruttore e nella classe notepad chiamare le varie
     // setTitle, showLabels, ecc..
     notepadWindow->setWindowTitle(curResName);

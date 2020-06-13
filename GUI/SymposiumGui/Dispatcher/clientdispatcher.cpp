@@ -253,9 +253,9 @@ void clientdispatcher::openSource(const std::string &path, const std::string &na
     try {
         //inviamo il messaggio
         sendMessage(mess);
-        this->isSymlink = isSymlink;
+        /*this->isSymlink = isSymlink;
         if(isSymlink)
-            this->openFileID = std::stoi(name);
+            this->openFileID = std::stoi(name);*/
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
@@ -270,6 +270,7 @@ void clientdispatcher::openNewSource(const std::string &absolutePath, privilege 
     try {
         //inviamo il messaggio
         sendMessage(mess);
+        //this->isSymlink = true;
     } catch (clientdispatcher::sendFailure) {
         //errore nell'invio del messaggio
         this->closeApp();
@@ -523,11 +524,8 @@ void clientdispatcher::successAction(){
 }
 
 
-void clientdispatcher::updateRequestDocFileandSuccess(uint_positive_cnt::type docID, uint_positive_cnt::type fileID, uint_positive_cnt::type symlinkID){
+void clientdispatcher::updateRequestDocandSuccess(uint_positive_cnt::type docID){
     this->openDocumentID = docID;
-    this->symlinkID = symlinkID;
-    if(!this->isSymlink)
-        this->openFileID = fileID;
     this->successAction();
 }
 
@@ -535,16 +533,25 @@ const document& clientdispatcher::getOpenDocument(){
     return this->client.getActiveDocumenttoOpenbyID(this->openDocumentID);
 }
 
+void clientdispatcher::setSymlinkID(uint_positive_cnt::type symlinkID, uint_positive_cnt::type fileID){
+    this->symlinkID = symlinkID;
+    this->SymFileID = fileID;
+}
+
 uint_positive_cnt::type clientdispatcher::getSymlinkID(){
     return this->symlinkID;
 }
 
-uint_positive_cnt::type clientdispatcher::getOpenFileID(){
-    return this->openFileID;
+void clientdispatcher::setNewFileID(uint_positive_cnt::type newID){
+    this->newFileID = newID;
+}
+
+uint_positive_cnt::type clientdispatcher::getNewFileID(){
+    return this->newFileID;
 }
 
 privilege clientdispatcher::getMyPrivilegeOnFileOpen(){
-    return this->client.getActiveFiletoOpenbyID(this->openFileID).getUserPrivilege(this->getUser().getUsername());
+    return this->client.getActiveFiletoOpenbyID(this->SymFileID).getUserPrivilege(this->getUser().getUsername());
 }
 
 void clientdispatcher::closeApp(){
