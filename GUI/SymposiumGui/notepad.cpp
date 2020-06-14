@@ -638,7 +638,6 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
         blockFmt.setObjectIndex(-1);
         int headingLevel = styleIndex >= 9 ? styleIndex - 9 + 1 : 0; // H1 to H6, or Standard
         blockFmt.setHeadingLevel(headingLevel);
-        blockFmt.setIndent(0);
         cursor.setBlockFormat(blockFmt);
 
         int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
@@ -653,13 +652,8 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
         if (cursor.currentList()) {
             listFmt = cursor.currentList()->format();
         } else {
-            //listFmt.setIndent(blockFmt.indent() + 1);
-            if(cursor.charFormat().font().pointSize() <= 16)
-                blockFmt.setIndent(1);
-            else if(cursor.charFormat().font().pointSize() <= 28)
-                blockFmt.setIndent(2);
-            else
-                blockFmt.setIndent(3);
+            listFmt.setIndent(blockFmt.indent() + 1);
+            blockFmt.setIndent(0);
 
             cursor.setBlockFormat(blockFmt);
         }
