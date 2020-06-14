@@ -68,6 +68,10 @@ void choosedir::treeGenerate(std::string str, int count)
         id=separate_word(str);
         spaces=0;
         name=separate_word(str);
+        for(size_t i=0;i<name.size();i++){
+            if(name[i]==0x1F)
+               name.replace(i,1,1,' ');
+        }
 
         if(spaces==0)
         {

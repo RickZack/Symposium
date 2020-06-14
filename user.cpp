@@ -77,6 +77,9 @@ user::user(const std::string &username, const std::string &pwd, const std::strin
     else if(nickname.empty())
         throw userException(userException::nickname, UnpackFileLineFunction());
 
+    else if(!noSpaceUsername(username))
+        throw userException(userException::userSpace, UnpackFileLineFunction());
+
     //generating random salt for user
     hashSalt=saltGenerate();
     //saving the password with the use of hash algorithm sha256
@@ -331,4 +334,9 @@ bool user::correctFormatResPath(const std::string &path) {
 bool user::correctFormatAbsolutePathWithId(const std::string &path) {
     std::regex pathPattern{R"(\.\/[a-zA-Z0-9]+(\/[a-zA-Z0-9]+)+)"};
     return !path.empty() && std::regex_match(path, pathPattern);
+}
+
+bool user::noSpaceUsername(const std::string &username) {
+    std::size_t found = username.find(" ");
+    return found == std::string::npos;
 }

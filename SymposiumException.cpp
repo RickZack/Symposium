@@ -65,7 +65,7 @@ const char* userException::userErrors[]={"Too short password", "Too long passwor
                                          "You don't have any privilege to this file anymore", "You cannot upgrade this privilege",
                                          "Inserted link is not correct", "You already have the access to this file",
                                          "The path for new resource is not correct", "The link isn't correct, check it and try again",
-                                         "You have to have reader privilege as a minimum privilege"};
+                                         "You have to have reader privilege as a minimum privilege", "Your username has not contain spaces"};
 
 userException::userException(userExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :

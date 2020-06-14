@@ -109,6 +109,11 @@ void signup::on_signin_clicked()
             ui->errorMess->setText("The password does not meet the requirements");
             ui->errorMess->show();
         }
+      if(!Symposium::user::noSpaceUsername(username.toStdString()))
+        {
+          ui->errorMess->setText("The username must not contain spaces");
+          ui->errorMess->show();
+        }
         else
         {
             disableStyleButtons();
