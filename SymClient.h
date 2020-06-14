@@ -567,6 +567,8 @@ namespace Symposium {
 
         bool controlFileIsActive(uint_positive_cnt::type id);
 
+        bool controlDocumentIsActive(uint_positive_cnt::type id);
+
     private:
         /**
          * @brief get the document with specified ID

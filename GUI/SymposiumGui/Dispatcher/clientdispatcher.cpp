@@ -332,11 +332,7 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
 }
 
 void clientdispatcher::errorOnDocument(uint_positive_cnt::type docID){
-    try{
-        this->winmanager.getNotepad(docID).failure("-2");
-    }catch(...){
-
-    }
+    this->winmanager.getNotepad(docID).failure("-2");
 }
 
 void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index){
@@ -415,6 +411,9 @@ void clientdispatcher::removeResource(const std::string &resPath, const std::str
 }
 
 void clientdispatcher::closeSource(uint_positive_cnt::type resourceId) {
+    if(this->client.controlDocumentIsActive(resourceId) == false){
+        return;
+    }
     std::shared_ptr<updateDocMessage> mess = std::make_shared<updateDocMessage>(this->client.closeSource(resourceId));
     try {
         //inviamo il messaggio

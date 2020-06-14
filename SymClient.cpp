@@ -213,6 +213,7 @@ void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::
         this->dispatcher->remoteInsert(docId,newSym, siteId, p);
         #endif
     }else{
+       this->dispatcher->closeSource(docId);
        this->dispatcher->errorOnDocument(docId);
     }
 }
@@ -231,6 +232,7 @@ void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::
         this->dispatcher->remoteRemove(docId, siteId, p);
         #endif
     }else{
+       this->dispatcher->closeSource(docId);
        this->dispatcher->errorOnDocument(docId);
     }
 }
@@ -446,7 +448,10 @@ void SymClient::addActiveUser(uint_positive_cnt::type docId, user &targetUser, p
 void SymClient::removeActiveUser(uint_positive_cnt::type docId, user &targetUser) {
     //recuperiamo l'utente dalla lista
     auto& target = getUsersOnDocument(targetUser.getUsername());
-    getActiveDocumentbyID(docId)->close(target);
+    document* d = getActiveDocumentbyID(docId);
+    if(d==nullptr)
+        return;
+    d->close(target);
     //dobbiamo rimuovere il cursore dalla GUI, se il cursore non era presente, la GUI non fa niente
     #ifdef DISPATCHER_ON
     this->dispatcher->removeUserCursor(target.getSiteId(),docId);
@@ -517,6 +522,7 @@ void SymClient::verifySymbol(uint_positive_cnt::type docId, const symbol &sym) {
         #endif
         return;
     }else{
+        this->dispatcher->closeSource(docId);
         this->dispatcher->errorOnDocument(docId);
     }
 }
@@ -553,6 +559,14 @@ bool SymClient::controlFileIsActive(uint_positive_cnt::type id){
             return true;
     }
     return false;
+}
+
+bool SymClient::controlDocumentIsActive(uint_positive_cnt::type id){
+    document* d = this->getActiveDocumentbyID(id);
+    if(d == nullptr)
+        return false;
+    else
+        return true;
 }
 
 const document& SymClient::getActiveDocumenttoOpenbyID(uint_positive_cnt::type id){
@@ -683,6 +697,7 @@ SymClient::remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<al
         #endif
         return;
     }else{
+        this->dispatcher->closeSource(docId);
         this->dispatcher->errorOnDocument(docId);
     }
 }
