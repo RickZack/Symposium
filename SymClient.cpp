@@ -201,6 +201,8 @@ symbolMessage SymClient::localRemove(uint_positive_cnt::type docId, const std::p
 
 void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type docId, const symbol &newSym) {
     document* d = this->getActiveDocumentbyID(docId);
+    if(d==nullptr)
+        return;
     std::pair<unsigned int, unsigned int> p;
     bool ok=handleDocException([&](){
         p = d->remoteInsert(siteId, newSym);
@@ -217,6 +219,8 @@ void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::
 
 void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type docId, const symbol &rmSym) {
     document* d = this->getActiveDocumentbyID(docId);
+    if(d==nullptr)
+        return;
     std::pair<unsigned int, unsigned int> p;
     bool ok=handleDocException([&](){
         p = d->remoteRemove(siteId, rmSym);
@@ -500,6 +504,8 @@ void SymClient::setClientDispatcher(clientdispatcher *cl){
 
 void SymClient::verifySymbol(uint_positive_cnt::type docId, const symbol &sym) {
     document* d = this->getActiveDocumentbyID(docId);
+    if(d==nullptr)
+        return;
     std::pair<unsigned int, unsigned int> p;
     bool ok=handleDocException([&](){
         p = d->verifySymbol(sym);
@@ -537,7 +543,8 @@ document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
         if((it.first->getId() == id))
             return it.first;
     }
-    throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
+    //throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
+    return nullptr;
 }
 
 bool SymClient::controlFileIsActive(uint_positive_cnt::type id){
@@ -664,6 +671,8 @@ void
 SymClient::remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &newLineStyle,
                                unsigned int row) {
     document* d = this->getActiveDocumentbyID(docId);
+    if(d==nullptr)
+        return;
     bool ok=handleDocException([&](){
         d->editLineStyle(newLineStyle, row);
     });

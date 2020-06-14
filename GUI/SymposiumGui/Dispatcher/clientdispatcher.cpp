@@ -332,7 +332,11 @@ void clientdispatcher::localRemove(uint_positive_cnt::type resourceId, const std
 }
 
 void clientdispatcher::errorOnDocument(uint_positive_cnt::type docID){
-    this->winmanager.getNotepad(docID).failure("-2");
+    try{
+        this->winmanager.getNotepad(docID).failure("-2");
+    }catch(...){
+
+    }
 }
 
 void clientdispatcher::remoteInsert(uint_positive_cnt::type resourceId, const symbol &newSym, uint_positive_cnt::type siteId, std::pair<unsigned int, unsigned int> index){

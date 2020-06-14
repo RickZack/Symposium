@@ -339,11 +339,10 @@ notepad::~notepad()
 
 void notepad::failure(const QString &toPrint){
     if(toPrint == "-2"){
-        notification notWindow(this, "There is a problem with the current document. Please, login again.");
+        notification notWindow(this, "There is a problem with the current document, so it will close.");
         int ret=notWindow.exec();
         if(ret==0){
-            cl.logout();
-            backToMainWin();
+            backToParent();
         }
     }else{
         errorConnectionLogout();
