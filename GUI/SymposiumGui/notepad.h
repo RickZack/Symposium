@@ -12,6 +12,7 @@
 
 #include "onlineusers.h"
 #include "alluser.h"
+#include "notification.h"
 #include "../../privilege.h"
 #include "activetimerlink.h"
 #include "activecounterlink.h"

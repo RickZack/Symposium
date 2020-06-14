@@ -419,6 +419,8 @@ namespace Symposium{
          */
         void successSetUserColors(uint_positive_cnt::type docID);
 
+        void errorOnDocument(uint_positive_cnt::type docID);
+
         ~clientdispatcher() override;
 
     private:

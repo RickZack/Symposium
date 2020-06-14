@@ -338,7 +338,16 @@ notepad::~notepad()
 }
 
 void notepad::failure(const QString &toPrint){
-    errorConnectionLogout();
+    if(toPrint == "-2"){
+        notification notWindow(this, "There is a problem with the current document. Please, login again.");
+        int ret=notWindow.exec();
+        if(ret==0){
+            cl.logout();
+            backToMainWin();
+        }
+    }else{
+        errorConnectionLogout();
+    }
 }
 
 void notepad::errorConnectionLogout()
@@ -628,6 +637,7 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
         blockFmt.setObjectIndex(-1);
         int headingLevel = styleIndex >= 9 ? styleIndex - 9 + 1 : 0; // H1 to H6, or Standard
         blockFmt.setHeadingLevel(headingLevel);
+        blockFmt.setIndent(0);
         cursor.setBlockFormat(blockFmt);
 
         int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
@@ -642,8 +652,14 @@ QTextListFormat::Style notepad::textStyle(int styleIndex)
         if (cursor.currentList()) {
             listFmt = cursor.currentList()->format();
         } else {
-            listFmt.setIndent(blockFmt.indent() + 1);
-            blockFmt.setIndent(0);
+            //listFmt.setIndent(blockFmt.indent() + 1);
+            if(cursor.charFormat().font().pointSize() <= 16)
+                blockFmt.setIndent(1);
+            else if(cursor.charFormat().font().pointSize() <= 28)
+                blockFmt.setIndent(2);
+            else
+                blockFmt.setIndent(3);
+
             cursor.setBlockFormat(blockFmt);
         }
         listFmt.setStyle(style);
@@ -762,39 +778,8 @@ void notepad::textSize(const QString &p)
     }
     ui->textEdit->setFocus();
 
-    if(this->indexStyle != 0){
+    /*if(this->indexStyle != 0){
         //siamo all'interno di un elenco
-
-        QTextListFormat::Style style = QTextListFormat::ListStyleUndefined;
-
-        switch (indexStyle) {
-        case 1:
-            style = QTextListFormat::ListDisc;
-            break;
-        case 2:
-            style = QTextListFormat::ListCircle;
-            break;
-        case 3:
-            style = QTextListFormat::ListSquare;
-            break;
-        case 4:
-            style = QTextListFormat::ListDecimal;
-            break;
-        case 5:
-            style = QTextListFormat::ListLowerAlpha;
-            break;
-        case 6:
-            style = QTextListFormat::ListUpperAlpha;
-            break;
-        case 7:
-            style = QTextListFormat::ListLowerRoman;
-            break;
-        case 8:
-            style = QTextListFormat::ListUpperRoman;
-            break;
-        default:
-            break;
-        }
 
         QTextBlockFormat blockFmt = cursor.blockFormat();
         if(pointSize <= 16){
@@ -805,7 +790,7 @@ void notepad::textSize(const QString &p)
            blockFmt.setIndent(3);
         }
         cursor.setBlockFormat(blockFmt);
-    }
+    }*/
 }
 
 void notepad::textAlign(QAction *a)

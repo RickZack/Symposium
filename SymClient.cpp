@@ -175,35 +175,60 @@ symbolMessage SymClient::localInsert(uint_positive_cnt::type docId, const symbol
     bool ok=handleDocException([&](){
         sym=d->localInsert(index, const_cast<symbol &>(newSym));
     });
-    std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), docId, sym));
-    this->unanswered.push_front(mess);
-    return *mess;
+    if(ok){
+        std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::insertSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), docId, sym));
+        this->unanswered.push_front(mess);
+        return *mess;
+    }else{
+        this->dispatcher->errorOnDocument(docId);
+    }
 }
 
 symbolMessage SymClient::localRemove(uint_positive_cnt::type docId, const std::pair<unsigned int, unsigned int> &indexes) {
     document* d = this->getActiveDocumentbyID(docId);
-    symbol s = d->localRemove(indexes, getLoggedUser().getSiteId());
-    std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), docId, s));
-    this->unanswered.push_front(mess);
-    return *mess;
+    symbol s=document::emptySymbol;
+    bool ok=handleDocException([&](){
+        s = d->localRemove(indexes, getLoggedUser().getSiteId());
+    });
+    if(ok){
+        std::shared_ptr<symbolMessage> mess (new symbolMessage(msgType::removeSymbol, {SymClient::getLoggedUser().getUsername(), ""}, msgOutcome::success, SymClient::getLoggedUser().getSiteId(), docId, s));
+        this->unanswered.push_front(mess);
+        return *mess;
+    }else{
+        this->dispatcher->errorOnDocument(docId);
+    }
 }
 
 void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::type docId, const symbol &newSym) {
     document* d = this->getActiveDocumentbyID(docId);
-    std::pair<unsigned int, unsigned int> p = d->remoteInsert(siteId, newSym);
-    //notifica alla gui
-    #ifdef DISPATCHER_ON
-    this->dispatcher->remoteInsert(docId,newSym, siteId, p);
-    #endif
+    std::pair<unsigned int, unsigned int> p;
+    bool ok=handleDocException([&](){
+        p = d->remoteInsert(siteId, newSym);
+    });
+    if(ok){
+        //notifica alla gui
+        #ifdef DISPATCHER_ON
+        this->dispatcher->remoteInsert(docId,newSym, siteId, p);
+        #endif
+    }else{
+       this->dispatcher->errorOnDocument(docId);
+    }
 }
 
 void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::type docId, const symbol &rmSym) {
     document* d = this->getActiveDocumentbyID(docId);
-    std::pair<unsigned int, unsigned int> p = d->remoteRemove(siteId, rmSym);
-    //notifica alla gui
-    #ifdef DISPATCHER_ON
-    this->dispatcher->remoteRemove(docId, siteId, p);
-    #endif
+    std::pair<unsigned int, unsigned int> p;
+    bool ok=handleDocException([&](){
+        p = d->remoteRemove(siteId, rmSym);
+    });
+    if(ok){
+        //notifica alla gui
+        #ifdef DISPATCHER_ON
+        this->dispatcher->remoteRemove(docId, siteId, p);
+        #endif
+    }else{
+       this->dispatcher->errorOnDocument(docId);
+    }
 }
 
 privMessage SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resId,
@@ -475,21 +500,19 @@ void SymClient::setClientDispatcher(clientdispatcher *cl){
 
 void SymClient::verifySymbol(uint_positive_cnt::type docId, const symbol &sym) {
     document* d = this->getActiveDocumentbyID(docId);
-    //Il metodo in verifySymbol mi deve restituire il pair delle coordinate (già detto a Martina che farà la modifica)
     std::pair<unsigned int, unsigned int> p;
-    try {
+    bool ok=handleDocException([&](){
         p = d->verifySymbol(sym);
-    }
-    catch(const documentException&){
+    });
+    if(ok){
+        //notifichiamo alla GUI
+        #ifdef DISPATCHER_ON
+        this->dispatcher->verifySymbol(docId, sym, p);
+        #endif
         return;
+    }else{
+        this->dispatcher->errorOnDocument(docId);
     }
-    catch(const std::exception&){ //FIXME: for debug only, must catch only documentException
-        return;
-    }
-    //notifichiamo alla GUI
-    #ifdef DISPATCHER_ON
-    this->dispatcher->verifySymbol(docId, sym, p);
-    #endif
 }
 
 const std::forward_list<std::pair<const user *, sessionData>> SymClient::onlineUsersonDocument(uint_positive_cnt::type documentID){
@@ -625,28 +648,41 @@ editLineStyleMessage
 SymClient::localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &oldLineStyle,
                               const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
     document* d = getActiveDocumentbyID(docId);
-    d->editLineStyle(newLineStyle, row);
-    std::shared_ptr<editLineStyleMessage> mess (new editLineStyleMessage(msgType::editLineStyle, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, oldLineStyle, newLineStyle, docId, row));
-    this->unanswered.push_front(mess);
-    return *mess;
+    bool ok=handleDocException([&](){
+        d->editLineStyle(newLineStyle, row);
+    });
+    if(ok){
+        std::shared_ptr<editLineStyleMessage> mess (new editLineStyleMessage(msgType::editLineStyle, {this->getLoggedUser().getUsername(),""}, msgOutcome::success, oldLineStyle, newLineStyle, docId, row));
+        this->unanswered.push_front(mess);
+        return *mess;
+    }else{
+        this->dispatcher->errorOnDocument(docId);
+    }
 }
 
 void
 SymClient::remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &newLineStyle,
                                unsigned int row) {
     document* d = this->getActiveDocumentbyID(docId);
-    d->editLineStyle(newLineStyle, row);
-    //notifica alla gui
-    #ifdef DISPATCHER_ON
-    this->dispatcher->remoteEditLineStyle(docId, newLineStyle, row);
-    #endif
+    bool ok=handleDocException([&](){
+        d->editLineStyle(newLineStyle, row);
+    });
+    if(ok){
+        //notifica alla gui
+        #ifdef DISPATCHER_ON
+        this->dispatcher->remoteEditLineStyle(docId, newLineStyle, row);
+        #endif
+        return;
+    }else{
+        this->dispatcher->errorOnDocument(docId);
+    }
 }
 
 bool SymClient::handleDocException(const std::function<void(void)> &op) {
     try{
         op();
     }
-    catch(...){
+    catch(documentException& e){
         return false;
     }
     return true;
