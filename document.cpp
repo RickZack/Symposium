@@ -90,9 +90,6 @@ document & document::access(const user &newActive, privilege accessPriv) {
 }
 
 symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexes, symbol &toInsert) {
-
-    if(toInsert.getCh()!='\r')
-        this->numchar++;
     checkIndexes(indexes);
     unsigned int i0=indexes.first;
     unsigned int i1=indexes.second;
@@ -124,6 +121,7 @@ symbol document::localInsert(const std::pair<unsigned int, unsigned int> &indexe
     else{
         // I'm inserting a symbol in the position (i0,i1), but the cursor is moving in the position (i0,i1+1)
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
+        numchar++;
     }
     symbols[i0].insert(symbols[i0].begin()+i1,newSymb);
     alignmentStyle[i0]=styleValues;
@@ -297,9 +295,7 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
     unsigned int i0=indexes.first;
     unsigned int i1=indexes.second;
     symbol sym=symbols[i0][i1];
-    if(sym.getCh()!='\r')
-        this->numchar--;
-    else if(sym.getCh()==emptyChar)
+    if(sym.getCh()==emptyChar)
         throw documentException(documentException::docExceptionCodes::deletingEmptyChar, UnpackFileLineFunction());
 
     //taking into account the position of the cursor.
@@ -308,6 +304,8 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
 
     unsigned lines=countsNumLines();
     symbols[i0].erase(symbols[i0].begin()+i1);
+    if(sym.getCh()!='\r')
+        numchar--;
     if((sym.getCh()=='\r') && i0+1<lines){ //removing a newline means copying the contents of new row into current
         unsigned charsToMove=countCharsInLine(i0+1);
         symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
@@ -319,8 +317,6 @@ symbol document::localRemove(const std::pair<unsigned int, unsigned int> &indexe
 }
 
 std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::type siteId, const symbol &toInsert) {
-    if(toInsert.getCh()!='\r')
-        this->numchar++;
     std::pair<unsigned int,unsigned int> indexes=findInsertIndex(toInsert);
     int i0=indexes.first;
     int i1=indexes.second;
@@ -336,6 +332,7 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
     }
     else{
         this->updateCursorPos(toInsert.getSiteId(),i0,i1+1);
+        numchar++;
     }
 
     /* set the alignmentStyle vector */
@@ -350,8 +347,7 @@ std::pair<unsigned int, unsigned int> document::remoteInsert(uint_positive_cnt::
 
 
 std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::type siteId, const symbol &toRemove) {
-    if(toRemove.getCh()!='\r' )
-        this->numchar--;
+
     std::pair<unsigned, unsigned> pos=findPosition(toRemove); //throws if not found
     int i0=pos.first;
     int i1=pos.second;
@@ -360,6 +356,8 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
 
     unsigned lines=countsNumLines();
     symbols[i0].erase(symbols[i0].begin()+i1);
+    if(toRemove.getCh()!='\r' )
+        numchar--;
     if(toRemove.getCh()=='\r' && i0+1<lines){ //removing a newline means copying the contents of new row into current
         unsigned charsToMove=countCharsInLine(i0+1);
         symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
