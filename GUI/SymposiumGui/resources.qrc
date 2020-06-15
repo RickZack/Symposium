@@ -89,8 +89,6 @@
         <file>changeuserinfo.h</file>
         <file>choosedir.cpp</file>
         <file>choosedir.h</file>
-        <file>choosepriv.cpp</file>
-        <file>choosepriv.h</file>
         <file>deleteaccount.cpp</file>
         <file>deleteaccount.h</file>
         <file>directory.cpp</file>

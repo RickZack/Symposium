@@ -2,7 +2,6 @@
 #include "ui_activecounterlink.h"
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
-#include "onoff_networkinteraction.h"
 
 activecounterlink::activecounterlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si) :
     QDialog(parent),
@@ -80,16 +79,11 @@ void activecounterlink::on_ok_clicked()
     if(numCounter!=0)
     {
         u.activateCount(numCounter, privilegeToGrant);
-        #ifdef DISPATCHER_ON
-        cl.shareResource(pathFile, std::to_string(fileId), u);
-        #endif
         waiting();
         disableButtons();
         disableStyleButtons();
+        cl.shareResource(pathFile, std::to_string(fileId), u);
     }
-    #ifndef DISPATCHER_ON
-    successLink();
-    #endif
 }
 
 void activecounterlink::on_owner_clicked()

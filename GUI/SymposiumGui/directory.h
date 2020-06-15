@@ -11,7 +11,6 @@
 
 
 #include "inserturi.h"
-#include "choosepriv.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
 #include "notepad.h"

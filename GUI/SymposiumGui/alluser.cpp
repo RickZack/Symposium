@@ -72,10 +72,8 @@ void alluser::successEditPrivilege()
     ui->button->setDisabled(false);
     ui->notification->show();
     enableButtons();
-    #ifdef DISPATCHER_ON
     onlineUsers=cl.onlineUser(documentID);
     users=cl.allUser(documentID);
-    #endif
     QList<QTreeWidgetItem*> selectedItems= ui->tree->selectedItems();
     foreach(QTreeWidgetItem *item, selectedItems){
         if(privToChange!="none")
@@ -224,9 +222,7 @@ void alluser::on_button_clicked()
        ui->notification->hide();
        ui->errorMess->hide();
        disableButtons();
-       #ifdef DISPATCHER_ON
        cl.editPrivilege(username, pathFile, newPrivelege, fileID);
-       #endif
     }
 }
 

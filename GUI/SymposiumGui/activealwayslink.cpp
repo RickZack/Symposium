@@ -2,7 +2,6 @@
 #include "ui_activealwayslink.h"
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
-#include "onoff_networkinteraction.h"
 
 activealwayslink::activealwayslink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si) :
     QDialog(parent),
@@ -100,14 +99,7 @@ void activealwayslink::on_ok_clicked()
     waiting();
     disableButtons();
     disableStyleButtons();
-    #ifdef DISPATCHER_ON
     cl.shareResource(pathFile, std::to_string(fileId), u);
-    #else
-
-    //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-    successLink();
-    //---------------------------------------------------------------------------------------------------------------
-    #endif
 }
 
 void activealwayslink::disableButtons()

@@ -3,7 +3,6 @@
 #include "Dispatcher/clientdispatcher.h"
 #include "home.h"
 #include <QMovie>
-#include "onoff_networkinteraction.h"
 
 changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, SymWinInterface& si) :
     QDialog(parent),
@@ -23,24 +22,10 @@ changeUserInfo::changeUserInfo(QWidget *parent, std::string pwd, SymWinInterface
     ui->username->setReadOnly(true);
     hiddenpwd();
 
-    //-----------------------------------------------------PARTE DA DECOMENTARE
-
-    #ifdef DISPATCHER_ON
     us=cl.getUser();
     ui->username->setText(QString::fromStdString(us.getUsername()));
     ui->nickname->setText(QString::fromStdString(us.getNickname()));
     img=us.getIconPath();
-    #endif
-
-
-    //-----------------------------------------------------PARTE DA CANCELLARE
-    #ifndef DISPATCHER_ON
-    ui->username->setText("Mario");
-    ui->nickname->setText("Rossi");
-    img=":/resources/avatar/beaver.png";
-    #endif
-
-    //---------------------------------------------------------------------------
 
     QPixmap pix(QString::fromStdString(img));
     w=ui->img->width();
@@ -109,8 +94,6 @@ void changeUserInfo::confirm_click()
     QString username = ui->username->text();
     QString nickname = ui->nickname->text();
     pressed=true;
-    //------------------------------------------------------------------PARTE DA DECOMMENTARE
-    #ifdef DISPATCHER_ON
     QString imagine = QString::fromStdString(img);
     if(nickname.isEmpty()){
         ui->error->setText("You must have a nickname!");
@@ -123,21 +106,6 @@ void changeUserInfo::confirm_click()
         waiting();
         cl.editUser(usNew);
     }
-    #endif
-    //------------------------------------------------------------------
-
-    //------------------------------------------------------------------PARTE DA CANCELLARE
-    #ifndef DISPATCHER_ON
-    QString stringa="Your information has been successfully modified";
-    hideLabelsError();
-    enableButtons();
-    notification notWindow(this, stringa);
-    int ret=notWindow.exec();
-    if(ret==0)
-        enableStyleButtons();
-    pressed=false;
-    #endif
-    //--------------------------------------------------------------------------
 }
 
 
@@ -232,27 +200,10 @@ void changeUserInfo::on_confirm2_clicked()
         disableButtons();
         disableStyleButtons();
         pressed=true;
-        //------------------------------------------------------------------PARTE DA DECOMENTARE
-        #ifdef DISPATCHER_ON
         QString imagine = QString::fromStdString(img);
         Symposium::user usNew(us.getUsername(), newp1.toStdString(), us.getNickname(), img, us.getSiteId(), us.getHome());
         cl.editUser(usNew);
         pressed=true;
-        #endif
-        //------------------------------------------------------------------
-
-        //------------------------------------------------------------------PARTE DA CANCELLARE
-        #ifndef DISPATCHER_ON
-        hideLabelsError();
-        enableButtons();
-        QString stringa="Your information has been successfully modified";
-        notification notWindow(this, stringa);
-        int ret=notWindow.exec();
-        if(ret==0)
-            enableStyleButtons();
-        backToParent();
-        #endif
-        //--------------------------------------------------------------------------
     }
     else
     {

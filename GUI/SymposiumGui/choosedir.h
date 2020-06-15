@@ -5,10 +5,7 @@
 #include <QTreeWidgetItem>
 #include <algorithm>
 #include <stdlib.h>
-#include <QMessageBox>
 #include <vector>
-
-#include <QDebug>
 #include <stack>
 
 namespace Ui {

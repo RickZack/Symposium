@@ -1,6 +1,5 @@
 #include "activetimerlink.h"
 #include "ui_activetimerlink.h"
-#include "onoff_networkinteraction.h"
 #include "Dispatcher/clientdispatcher.h"
 
 activetimerlink::activetimerlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, Symposium::user us, SymWinInterface& si) :
@@ -85,12 +84,7 @@ void activetimerlink::on_ok_clicked()
     waiting();
     disableButtons();
     disableStyleButtons();
-    #ifdef DISPATCHER_ON
     cl.shareResource(pathFile, std::to_string(fileId), u);
-    #else
-    successLink();
-    #endif
-
 }
 
 void activetimerlink::on_owner_clicked()

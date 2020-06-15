@@ -4,12 +4,8 @@
 #include <QDialog>
 #include <QTreeWidgetItem>
 #include <unordered_map>
-#include <QMessageBox>
-#include <QDebug>
 #include <forward_list>
 #include "symwininterface.h"
-#include "onoff_networkinteraction.h"
-
 #include "../../document.h"
 #include "../../privilege.h"
 #include "errorconnection.h"
@@ -44,12 +40,6 @@ public:
     void success() override;
 
     void failure(const QString& toPrint) override;
-
-    /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    //void setClientDispatcher(Symposium::clientdispatcher *cl);
     /**
      * @brief called by clientdispatcher when the edit of privilege for the user selected was successfully done
      */

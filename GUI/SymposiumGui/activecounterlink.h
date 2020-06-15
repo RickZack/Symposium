@@ -2,7 +2,6 @@
 #define ACTIVECOUNTERLINK_H
 
 #include <QDialog>
-#include <QMessageBox>
 #include <QPropertyAnimation>
 #include <QCloseEvent>
 #include "../../privilege.h"

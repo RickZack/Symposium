@@ -3,7 +3,6 @@
 
 #include <QDialog>
 #include "icon.h"
-#include <QMessageBox>
 #include "../../user.h"
 #include "errorconnection.h"
 #include "errorlogout.h"
