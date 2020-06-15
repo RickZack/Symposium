@@ -30,10 +30,10 @@ In particular we use:
 
 ## Authors
 
-* **Riccardo Zaccone** - [PurpleBooth](https://github.com/PurpleBooth)
-* **Ksenia Del Conte Akimova** - [PurpleBooth](https://github.com/PurpleBooth)
-* **Cristian Giannetto** - [PurpleBooth](https://github.com/PurpleBooth)
-* **Martina Bellissimo** - [PurpleBooth](https://github.com/PurpleBooth)
+* **Riccardo Zaccone** - [RickZack](https://github.com/RickZack)
+* **Ksenia Del Conte Akimova** - [KseniaDelConte](https://github.com/KseniaDelConte)
+* **Cristian Gianetto** - [addocm](https://github.com/addocm)
+* **Martina Bellissimo** - [martinaBellissimo](https://github.com/martinaBellissimo)
 
 ## License
 Symposium is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See the [COPYING](COPYING) file for details.
