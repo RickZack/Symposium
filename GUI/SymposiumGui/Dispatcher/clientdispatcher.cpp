@@ -30,7 +30,6 @@
 
 #include <chrono>
 #include <QApplication>
-#include "../textedit.h"
 #include "../onlineusers.h"
 #include "../alluser.h"
 #include "../../../filesystem.h"
