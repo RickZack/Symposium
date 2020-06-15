@@ -339,11 +339,9 @@ notepad::~notepad()
 
 void notepad::failure(const QString &toPrint){
     if(toPrint == "-2"){
-        QMessageBox notWindow(QMessageBox::Critical, "Error", "There is a problem with the current document, so it will close.");
-        //notWindow.setIcon(QMessageBox::Critical);
-        //notWindow.setText("There is a problem with the current document");
-        int ret = notWindow.exec();
-        if( ret == QMessageBox::Ok || ret == QMessageBox::Close){
+        notification notWindow(nullptr, "There is a problem with the current document, so it will be closed.");
+        int ret=notWindow.exec();
+        if(ret==0){
             close();
             showParent();
         }
@@ -854,7 +852,7 @@ void notepad::fillTextEdit(){
     else{
         unsigned valStyle=20;
         auto valAlign=Symposium::alignType::left;
-        for(size_t i=0; i<symbols.size() && symbols[i][0].getCh()!=Symposium::document::emptyChar;i++){
+        for(size_t i=0; i<symbols.size();i++){
             auto style=alignmentStyle[i];
             if(valStyle!=style.second){
                 this->textStyle(style.second);
