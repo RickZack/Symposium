@@ -339,10 +339,9 @@ notepad::~notepad()
 
 void notepad::failure(const QString &toPrint){
     if(toPrint == "-2"){
-        notification notWindow(nullptr, "There is a problem with the current document, so it will be closed.");
+        notification notWindow(nullptr, "There is a problem with the current document,\nso it will be closed.");
         int ret=notWindow.exec();
         if(ret==0){
-            close();
             showParent();
         }
     }else{
