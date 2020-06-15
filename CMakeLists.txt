@@ -82,7 +82,6 @@ add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SYMPOSIUM_CLIENT}
         GUI/SymposiumGui/avatarimg.qrc GUI/SymposiumGui/buttonhoverwatcher.cpp GUI/SymposiumGui/buttonhoverwatcher.h
         GUI/SymposiumGui/changeuserinfo.cpp GUI/SymposiumGui/changeuserinfo.h GUI/SymposiumGui/changeuserinfo.ui
         GUI/SymposiumGui/choosedir.cpp GUI/SymposiumGui/choosedir.h GUI/SymposiumGui/choosedir.ui
-        GUI/SymposiumGui/choosepriv.cpp GUI/SymposiumGui/choosepriv.h GUI/SymposiumGui/choosepriv.ui
         GUI/SymposiumGui/deleteaccount.cpp GUI/SymposiumGui/deleteaccount.h GUI/SymposiumGui/deleteaccount.ui
         GUI/SymposiumGui/directory.cpp GUI/SymposiumGui/directory.h GUI/SymposiumGui/directory.ui
         GUI/SymposiumGui/errorconnection.cpp GUI/SymposiumGui/errorconnection.h GUI/SymposiumGui/errorconnection.ui

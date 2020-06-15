@@ -1,7 +1,5 @@
 #include "choosedir.h"
 #include "ui_choosedir.h"
-#include "onoff_networkinteraction.h"
-
 
 
 choosedir::choosedir(QWidget *parent, std::string pathDir) :
@@ -12,13 +10,7 @@ choosedir::choosedir(QWidget *parent, std::string pathDir) :
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-
-    #ifndef DISPATCHER_ON
-    std::string str="directory 1 directory1\n directory 2  directory2\n symlink 10   link10 owner\n directory 3   directory3\n file 9    file9 owner\n directory 4  directory4\n directory 5 directory5\n directory 6  directory6\n directory 7   directory7\n directory 8 directory8\n";
-    #else
     std::string str=pathDir;
-    #endif
-
     int count=number_elements(str);
 
     ui->tree->setColumnCount(3);
@@ -214,7 +206,6 @@ int choosedir::number_elements(std::string& string)
     for(size_t i = 0; i < string.size(); i++)
       if(string[i] == '\n')
       {count++; string[i]=' ';}
-    //string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
     return count;
 }
 

@@ -5,7 +5,6 @@
 #include "../../privilege.h"
 #include "../../uri.h"
 #include "../../Symposium.h"
-#include <QMessageBox>
 #include <QCloseEvent>
 
 #include "errorconnection.h"

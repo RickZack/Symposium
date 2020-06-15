@@ -6,7 +6,6 @@
 #include <sstream>
 #include <locale>
 #include <iomanip>
-#include <QMessageBox>
 #include <QPropertyAnimation>
 #include <QCloseEvent>
 #include "../../privilege.h"

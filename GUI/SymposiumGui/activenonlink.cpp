@@ -1,7 +1,6 @@
 #include "activenonlink.h"
 #include "ui_activenonlink.h"
 #include "Dispatcher/clientdispatcher.h"
-#include "onoff_networkinteraction.h"
 
 activenonlink::activenonlink(QWidget *parent, Symposium::uint_positive_cnt::type fileId, std::string pathFile, std::string pathAssoluto, SymWinInterface& si) :
     QDialog(parent),
@@ -77,11 +76,7 @@ void activenonlink::on_ok_clicked()
     disableButtons();
     disableStyleButtons();
     u.deactivate();
-    #ifdef DISPATCHER_ON
     cl.shareResource(pathFile, std::to_string(fileId), u);
-    #else
-    success();
-    #endif
 }
 
 void activenonlink::on_cancel_clicked()

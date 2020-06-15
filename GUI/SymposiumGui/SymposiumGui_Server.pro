@@ -41,7 +41,6 @@ SOURCES += \
         buttonhoverwatcher.cpp \
         changeuserinfo.cpp \
         choosedir.cpp \
-        choosepriv.cpp \
         deleteaccount.cpp \
         directory.cpp \
         errorconnection.cpp \
@@ -94,7 +93,6 @@ HEADERS += \
         buttonhoverwatcher.h \
         changeuserinfo.h \
         choosedir.h \
-        choosepriv.h \
         deleteaccount.h \
         directory.h \
         errorconnection.h \
@@ -147,7 +145,6 @@ FORMS += \
         alluser.ui \
         changeuserinfo.ui \
         choosedir.ui \
-        choosepriv.ui \
         deleteaccount.ui \
         directory.ui \
         errorconnection.ui \
