@@ -61,7 +61,7 @@ private slots:
 
 private:
     Ui::deleteAccount *ui;
-    //Symposium::clientdispatcher *cl;
+
     /**
      * @brief disable all buttons present so user cannot perform any operation
      */

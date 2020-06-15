@@ -7,9 +7,6 @@
 #include <QtWidgets/qwidget.h>
 #include <QListWidgetItem>
 #include <QMouseEvent>
-
-
-
 #include "inserturi.h"
 #include "choosepriv.h"
 #include "errorconnection.h"
@@ -50,14 +47,10 @@ public:
     ~directory();
     void listGenerate(std::string list, int count);
 
-
-
-
     /**
      * @brief successRename renames the selected source
      */
     void successRename();
-
 
     /**
      * @brief directory::successRemouve remouves the selected source
@@ -69,13 +62,13 @@ public:
      */
     void successCreate();
 
+
     void setClientDispatcher(Symposium::clientdispatcher *cl);
 
     /**
      * @brief successNewSource creates a new file and updates the string str
      */
     notepad* successNewSource();
-
 
     /**
      * @brief failureActionDirectory shows an error message in case of the server doesn't answer
@@ -86,7 +79,7 @@ public:
     /**
      * @brief errorLogout shows an error message and closes the window
      */
-     void errorConnectionLogout();
+    void errorConnectionLogout();
 
     void openSelectedSource();
 
@@ -104,11 +97,12 @@ public:
     static std::string fixNameSource(const std::string nameSource);
 
     signals:
-    void resNameChanged(Symposium::uint_positive_cnt::type resId, const QString& newName);
+    void resNameChanged(Symposium::uint_positive_cnt::type resId, const QString& newName); 
     void closeWaiting();
 
 public slots:
     void enableButtonsAfter();
+
 private slots:
 
     void ProvideContextMenu(const QPoint &);
@@ -117,7 +111,6 @@ private slots:
      * @brief directory::on_actionHome_triggered opens the home window
      */
     void on_actionHome_triggered();
-
 
     /**
      * @brief directory::on_actionUri_triggered opens the uri window
@@ -165,7 +158,6 @@ private slots:
 
     void on_myListWidget_itemDoubleClicked();
 
-
     void on_okButton_2_clicked();
 
     /**
@@ -173,6 +165,10 @@ private slots:
      */
     void on_OkPriv_clicked();
 
+    /**
+     * @brief on_cancPriv_clicked acts when the cancel button related to the choice of the privilege to open a
+     * file or a symlink is clicked
+     */
     void on_cancPriv_clicked();
 
     void on_okButton_3_clicked();
@@ -182,7 +178,7 @@ private slots:
 private:
     Ui::directory *ui;
 
-    /*
+    /**
      * Variables related to success()
      */
     action lastChoice;                                                  /**< indicates the last action requested to the server */
@@ -190,9 +186,8 @@ private:
     QString curResName;                                                 /**< resName of the currently selected resource, for an action has been requested */
 
     std::map<std::string,std::pair<std::string,std::string>> ids;       /**< contains for all the elements inside a folder, the correspondent id */
-    //TODO: spiegare come è usato, a cosa serve
-    bool pressed=false;
 
+    bool pressed=false;
 
     /**
      * @brief openFolders this variable is used to say that a window has been opened and to enable/disable the BACK button
@@ -212,7 +207,6 @@ private:
      */
     std::string actualId;
 
-    //TODO: a che serve la password? Abbiamo fatto apposta a non memorizzarla mai in chiaro dentro user, perchè qui la teniamo?
     std::string pwd;
 
     /**
@@ -236,7 +230,6 @@ private:
      */
     std::string selectedId;
 
-    std::string separate_word(std::string& string);
     Symposium::privilege priv=Symposium::privilege::none;
     Symposium::privilege privOpen=Symposium::privilege::none;
     std::string initialPriv;
@@ -261,7 +254,7 @@ private:
      */
     QString value;
 
-
+    std::string separate_word(std::string& string);
 
     /**
      * @brief directory::number_elements counts the number of element inside the @e string
@@ -269,7 +262,6 @@ private:
      * @return #of elements inside the string
      */
     int number_elements(const std::string& string);
-
 
     /**
      * @brief directory::generateString deletes from the string the \n in such way to visualize the list of element without spaces
@@ -285,9 +277,6 @@ private:
      * @param str1 cointains all the sources inside the attual folder
      */
     void openWindow(const std::string& str1);
-
-
-    //void contextMenuEvent(QContextMenuEvent *event) override;
 
     std::string manipulationPath(std::string& s);
 
@@ -339,7 +328,6 @@ private:
      * @param list the list of all the elements inside a directory
      */
     void populateMap(std::string list);
-
 
     void handleFailureSymlink();
 };

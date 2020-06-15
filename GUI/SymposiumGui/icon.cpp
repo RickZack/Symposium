@@ -47,8 +47,6 @@ icon::icon(QWidget *parent) :
 
     ui->beaver->click();
 
-
-
     connect(ui->pushButton, SIGNAL(clicked()), parent, SLOT(chooseIcon()));
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(close()));
     setAttribute( Qt::WA_DeleteOnClose );

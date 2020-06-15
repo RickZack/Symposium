@@ -17,17 +17,10 @@ directory::directory(QWidget *parent, std::string pwd, SymWinInterface& si) :
     this->previousId = "0";
     this->openFolders = 0;
 
-    // METODO DISPATCHER CHE RESTITUISCE LA STRINGA
-    #ifdef DISPATCHER_ON
     list=cl.showHome();
     path = "./";
     list = manipulationPath(list);
-    qDebug()<<"Lista attuale"<<QString::fromStdString(list);
     this->populateMap(list);
-    #else
-    list="directory 1 Folder1\n file 9 Folder1 owner\n symlink 10 symlink10 modify\n directory 1 Folder2\n directory 3 Folder3\n directory 4 Folder4\n directory 5 Folder5\n directory 6 Folder6\n directory 7 Folder7\n directory 8 Folder8\n";
-    this->populateMap(list);
-    #endif
     this->count=number_elements(list);
     listGenerate(list, count);
 
@@ -70,12 +63,8 @@ void directory::populateMap(std::string list){
            }
            ids.insert({name,{id,privilege}});
            privilege="none";
-    }
-
-       for(auto i:ids)
-               qDebug()<<"Mappa "<<QString::fromStdString(i.first)<<"Nome "<<QString::fromStdString(i.second.first)<<"Id "<<QString::fromStdString(i.second.second)<<"Privilegio ";
+    }  
 }
-
 
 
 std::string directory::manipulationPath(std::string& s){
@@ -85,25 +74,31 @@ std::string directory::manipulationPath(std::string& s){
     std::size_t found;
     std::size_t foundn = 0;
     std::size_t dim_s = s.size();
+
     //delete first username and space
     found = s.find_first_of(" ");
     s.erase(0, found+1);
+
     //check the first character is space yet
     while(s.substr(0,1) == " "){
         s.erase(0,1);
     }
     dim_s = s.size();
+
     //check if there is no directory
     if(dim_s == 0)
         return s;
+
     //add space between directory
     while(dim_s != 0 && s!=" "){
         foundn = s.find_first_of("\n");
         estratta = s.substr(0,foundn+1);
+
         //delete start space
         while(estratta.substr(0,1) == " "){
             estratta.erase(0,1);
         }
+
         //delete final space
         while(estratta.substr(estratta.size()-1,1) == " "){
             estratta.erase(estratta.size()-1,1);
@@ -112,11 +107,11 @@ std::string directory::manipulationPath(std::string& s){
         s.erase(0,foundn+1);
         dim_s = s.size();
     }
+
     //delete final space
     found = result.find_last_of(" ");
     dim_s = result.size();
     result.erase(found, dim_s);
-    qDebug()<<"Stringa finale"<<QString::fromStdString(result);
     return result;
 }
 
@@ -157,13 +152,14 @@ void directory::success(){
 
 void directory::failure(const QString& toPrint){
     enableStyleButtons();
-    //if(this->lastChoice != createNewSource)
     emit closeWaiting();
     pressed=false;
     const char*  msg="The element has not been found with get";
+
     QByteArray ba=toPrint.toLocal8Bit();
     const char* msgPrint=ba.data();
     int ret=strcmp(msg,msgPrint);
+
     if(lastChoice==openSymlink && ret==0 ){
         handleFailureSymlink();
     }else if(lastChoice==openSource && ret==0){
@@ -202,7 +198,6 @@ void directory::handleFailureSymlink(){
 
 void directory::listGenerate(std::string str_first, int count)
 {
-
     std::string str=generateString(str_first);
     std::string word;
     countDir=-1;
@@ -228,8 +223,6 @@ void directory::listGenerate(std::string str_first, int count)
             item->setWhatsThis("directory");
             item->setText(QString::fromStdString(word));
             ui->myListWidget->addItem(item);
-
-
         }
 
         else if(word=="file")
@@ -238,8 +231,8 @@ void directory::listGenerate(std::string str_first, int count)
             for(size_t i=0;i<word.size();i++){
                 if(word[i]==0x1F)
                    word.replace(i,1,1,' ');
-
             }
+
             QListWidgetItem *item=new QListWidgetItem(QIcon(":/icon/file.png"), QString::fromStdString(word));
             v.setValue(-1);
             item->setData(Qt::UserRole,v);
@@ -247,6 +240,7 @@ void directory::listGenerate(std::string str_first, int count)
             ui->myListWidget->addItem(item);
             word=separate_word(str);
         }
+
         else
         {
             word=separate_word(str);
@@ -350,10 +344,9 @@ void directory::ProvideContextMenu(const QPoint &pos)
         submenu.exec(item);
 }
 
-//acts when the user clicks on the button "DELETE"
+//acts when the user want to delete a source
 void directory::deleteSource()
 {
-    // dove ho eliminato
    lastChoice = remove;
    std::string id;
    QList<QListWidgetItem*> item= ui->myListWidget->selectedItems();
@@ -363,7 +356,6 @@ void directory::deleteSource()
        // estract from the map the id of the source that I want to remove
        auto it=this->ids.find(fixedName);
        id=it->second.first;
-       #ifdef DISPATCHER_ON
        std::string pathToSend=path;
        if(pathToSend!="./")
        {
@@ -374,40 +366,7 @@ void directory::deleteSource()
        disableStyleButtons();
        pressed=true;
        cl.removeResource(pathToSend,id);
-       #endif
-
-       //-------------------------------------------------------------------
-       //DA RIMUOVERE
-       #ifndef DISPATCHER_ON
-       enableStyleButtons();
-       emit closeWaiting();
-       pressed=false;
-       bool msg=true;
-       if(msg)
-       {
-           if (count>1)
-           {
-              count--;
-                    ui->myListWidget->removeItemWidget(items);
-                    delete items;
-                    ui->myListWidget->currentItem()->setSelected(false);
-           }// if
-           else
-           {
-                     ui->myListWidget->removeItemWidget(items);
-                     delete items;
-               count=0;
-
-           }//else
-
-       }// if
-       else
-       {
-           QMessageBox::warning(this, "Error Message","It is no possible to delete the selected folder");
-       }
-       #endif
-   }//foreach
-   //----------------------------------------------------------------------------------------------------
+   }
 }
 
 void directory::successRemove(){
@@ -422,15 +381,14 @@ void directory::successRemove(){
                  ui->myListWidget->removeItemWidget(items);
                  delete items;
                  ui->myListWidget->currentItem()->setSelected(false);
-        }// if
+        }
         else
         {
                   ui->myListWidget->removeItemWidget(items);
                   delete items;
-            count=0;
+                  count=0;
 
-        }//else
-
+        }
     }
 }
 
@@ -447,8 +405,8 @@ void directory::on_pushButton_3_clicked()
     if(name.isEmpty() || name== " "){
         return this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
+
     this->fixedName=this->fixNameSource(name.toStdString());   /** < name folder without possible spaces */
-    #ifdef DISPATCHER_ON
     int numVal=this->ids.count(fixedName);
     std::string pathToSend=path;
     if(pathToSend!="./")
@@ -463,35 +421,6 @@ void directory::on_pushButton_3_clicked()
         cl.createNewDir(pathToSend,fixedName);
     }else
         this->failureActionDirectory("You already have an element with this name");
-    #else
-    // anche questo da eliminare
-    ui->name->setText(" ");
-    // std::string id=createNewDir(path,nameFolder);
-    //--------------------------------------------------------------------
-    // DA ELIMINARE
-    enableStyleButtons();
-    pressed=false;
-    emit closeWaiting();
-    std::string id="1"; //PER ESEMPIO
-
-    if(id!="-1")
-     // OK dal dispatcher, posso creare la nuova cartella. Tutti i controlli sono andati bene
-    {
-        count++;
-        std::string new_str=" directory "+id+' '+name.toStdString()+'\n';
-        str=str+new_str;
-        ui->myListWidget->clear();
-        int count=number_elements(str);
-        listGenerate(str,count);
-
-    }//if
-    else
-    {
-      QMessageBox::warning(this, "Error Message","It is no possible to open the selected folder");
-
-    }
-    //-----------------------------------------------------------------------------------------
-    #endif
 }
 
 void directory::successCreate(){
@@ -571,6 +500,8 @@ void directory::enableStyleButtons()
     }
     case remove:{
         break;}
+    default:
+        break;
     }
 }
 
@@ -726,12 +657,11 @@ void directory::showRename()
 void directory::on_pushButton_4_clicked()
 {
     lastChoice = createNewSource;
-    this->curResName =ui->name_2->text();                                                              /** < name with possible spaces */
+    this->curResName =ui->name_2->text();                                     /** < name with possible spaces */
     if(curResName.isEmpty() || curResName==" "){
         return this->failureActionDirectory("The inserted name is not correct. Please try again");
     }
-    std::string fixedName=this->fixNameSource(curResName.toStdString());           /** < name without possible spaces */
-    #ifdef DISPATCHER_ON
+    std::string fixedName=this->fixNameSource(curResName.toStdString());       /** < name without possible spaces */
     int numVal=this->ids.count(fixedName);
     std::string pathToSend=path;
     if(pathToSend!="./")
@@ -748,27 +678,6 @@ void directory::on_pushButton_4_clicked()
     }
     else
         this->failureActionDirectory("You already have an element with this name");
-    #else
-    // DA RIMUOVERE
-    emit closeWaiting();
-    enableStyleButtons();
-    pressed=false;
-    std::string id="1"; //PER ESEMPIO
-    if(id!="-1")
-         // OK dal dispatcher, posso creare il nuovo documento
-    {
-        count++;
-        std::string new_str=" file "+id+' '+curResName.toStdString()+'\n';
-        str=str+new_str;
-        ui->myListWidget->clear();
-        int count=number_elements(str);
-        listGenerate(str,count);
-    }//if
-    else
-    {
-      QMessageBox::warning(this, "Error Message","It is no possible to open the selected Document");
-    }
-    #endif
 }
 
 notepad* directory::successNewSource(){
@@ -789,9 +698,9 @@ notepad* directory::successNewSource(){
 
 
     std::string percorso = pathToSend;
-    //cancelliamo il './' iniziale
+    //delete the initial ./
     percorso.erase(0,2);
-    //costruiamo il percorso assoluto
+    //built the abs path
     std::string sharingPath = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + '/' + percorso+std::to_string(cl.getNewFileID());
     nw->setSharingPath(sharingPath);
 
@@ -821,13 +730,10 @@ void directory::on_back_button_clicked()
             pathLabel.erase(found+1,pathLabel.size());
             ui->pathPlainEdit->setPlainText(QString::fromStdString(pathLabel));
         }
-        #ifdef DISPATCHER_ON
-        //aggiorniamo il path
-        //togliamo l'ultimo "/"
+
+        // update the path by erasing the last "/"
         path.erase(path.end()-1);
-        //troviamo la posizione dell'ultimo "/"
         found=path.find_last_of("/");
-        //aggiorniamo il path
         path.erase(found+1,path.size());
         this->openFolders--;
         if(this->openFolders==0){
@@ -859,7 +765,6 @@ void directory::on_back_button_clicked()
         ui->myListWidget->clear();
         this->count=number_elements(list);
         listGenerate(list,count);
-        #endif
     }else{
         std::string pathLabel=ui->pathPlainEdit->toPlainText().toStdString();
         pathLabel.erase(5,pathLabel.size());
@@ -890,7 +795,6 @@ void directory::on_okButton_clicked()
          auto it=this->ids.find(fixedOldName);
          std::string id=it->second.first;
          curResId=std::stoul(id);
-         #ifdef DISPATCHER_ON
          int numVal=this->ids.count(fixedName);
          std::string pathToSend=path;
          if(pathToSend!="./")
@@ -907,20 +811,14 @@ void directory::on_okButton_clicked()
          }
          else
              this->failureActionDirectory("You already have an element with this name");
-         #else
-         enableStyleButtons();
-         emit closeWaiting();
-         pressed=false;
-         items->setText(curResName);
-         ui->myListWidget->currentItem()->setSelected(false);
-         hideAll();
-         #endif
+
     }
 
 }
 
 void directory::successRename(){
     hideAll();
+
     // update the map
     auto it=this->ids.find(fixedOldName);
     std::string id=it->second.first;
@@ -979,17 +877,11 @@ void directory::openSelectedSource(){
              this->openFolders++;
 
              // open the folder Window
-             #ifdef DISPATCHER_ON
              list=cl.getStr(this->actualId, this->path);
              list = manipulationPath(list);
              this->ids.clear();
              this->populateMap(list);
              path+=actualId+'/';
-             #else
-             std::string str1="directory 7 Prova1\n file 9 Document1 owner\n symlink 10 symlink10 modify\n directory 1 Prova2\n directory 3 Prova3\n directory 4 Prova4\n directory 5 Prova5\n directory 6 Prova6\n directory 7 Prova7\n directory 8 Prova8\n";
-             this->ids.clear();
-             this->populateMap(str1);
-             #endif
              ui->pathPlainEdit->setPlainText(ui->pathPlainEdit->toPlainText()+QString::fromStdString(nameSource)+'/');
              this->openWindow(list);
 
@@ -1010,9 +902,7 @@ void directory::openSelectedSource(){
               else
                   priv= Symposium::privilege::owner;
          }
-
- }// foreach
-
+    }
 }
 
 void directory::showPrivilegeButtons(){
@@ -1021,7 +911,7 @@ void directory::showPrivilegeButtons(){
     ui->privilegeLine->show();
     ui->writerButton->show();
     ui->readerButton->show();
-    //lastChoice=openSource;
+
     if(this->value=="file")
         lastChoice=openSource;
     else
@@ -1037,7 +927,7 @@ void directory::on_okButton_2_clicked()
 
 void directory::on_OkPriv_clicked()
 {
-    //lastChoice = openSource;
+
     if(this->value=="file")
         lastChoice=openSource;
     else {
@@ -1050,7 +940,7 @@ void directory::on_OkPriv_clicked()
     else if(ui->readerButton->isChecked())
         privOpen= Symposium::privilege::readOnly;
     waitingFunction();
-    #ifdef DISPATCHER_ON
+
     std::string pathToSend=path;
     if(pathToSend!="./")
     {
@@ -1061,20 +951,6 @@ void directory::on_OkPriv_clicked()
         cl.openSource(pathToSend, this->selectedId,privOpen, false);
     else
         cl.openSource(pathToSend, this->selectedId,privOpen, true);
-    #else
-    priv=Symposium::privilege::owner;
-    hideAll();
-    enableStyleButtons();
-    pressed=false;
-    emit closeWaiting();
-    Symposium::document d;
-    notepad* notepadWindow= new notepad(nullptr,priv,privOpen,path,d,0, *this);
-    notepadWindow->setWindowTitle(curResName);
-    goToWindow(*notepadWindow);
-    notepadWindow->showLabels();
-    if(privOpen==Symposium::privilege::readOnly)
-        notepadWindow->setreadonly();
-    #endif
 }
 
 void directory::successOpen(){
@@ -1093,9 +969,9 @@ void directory::successOpen(){
     }
     else{
         std::string percorso = path;
-        //cancelliamo il './' iniziale
+        //delete the first ./
         percorso.erase(0,2);
-        //costruiamo il percorso assoluto
+        //build the abs path
         std::string sharingPath = "./" + std::to_string(cl.getHomeIDofCurrentUser()) + '/' + percorso +selectedId;
         notepadWindow->setSharingPath(sharingPath);
     }

@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "Dispatcher/clientdispatcher.h"
-#include "QDebug"
 #include "option.h"
 
 MainWindow::MainWindow(QWidget *parent, SymWinManager& m, Symposium::clientdispatcher& p) :

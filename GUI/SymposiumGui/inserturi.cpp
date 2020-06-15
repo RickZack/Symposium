@@ -15,10 +15,9 @@ inserturi::inserturi(QWidget *parent, std::string pwd, SymWinInterface& si) :
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    #ifdef DISPATCHER_ON
     this->showDir=cl.showDir(true);
     this->showDir = manipulationPath(this->showDir);
-    #endif
+
 
     ui->writer->click();
     QPixmap pix2(":/icon/logo.png");
@@ -217,10 +216,8 @@ void inserturi::on_add_clicked()
                 disableButtons();
                 disableStyleButtons();
                 title=ui->name->text();
-                #ifdef DISPATCHER_ON
                 std::string nameToSend=directory::fixNameSource(ui->name->text().toStdString());
                 cl.openNewSource(pathLink, privilege, path, nameToSend);
-                #endif
             }
         }
 
@@ -269,8 +266,6 @@ void inserturi::successInsert()
              notepadWindow->fixAlignment();
         }
     }
-
-
 }
 
 void inserturi::on_cancel_clicked()

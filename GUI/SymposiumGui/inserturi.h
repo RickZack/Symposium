@@ -34,11 +34,6 @@ public:
     void failure(const QString& toPrint) override;
 
     /**
-     * @brief setting of clientdispatcher
-     * @param cl clientdispatcher for reference
-     */
-    //void setClientDispatcher(Symposium::clientdispatcher *cl);
-    /**
      * @brief called by clientdispatcher when there is some error during the operation
      * @param errorMess the messagge to show
      */

@@ -57,11 +57,6 @@ void home::on_delete_2_clicked()
     disableStyleButtons();
     deleteAccount* del = new deleteAccount(this, *this);
     goToWindow(*del);
-    //------------------------------------------------------------------PARTE DA DECOMENTARE
-    #ifdef DISPATCHER_ON
-    //cl->setDeleteAccount(deleteAccountWindow);
-    #endif
-    //------------------------------------------------------------------
 }
 
 
@@ -70,22 +65,12 @@ void home::on_modify_clicked()
 
     changeUserInfo* changeWindow = new changeUserInfo(nullptr, pwd, *this);
     goToWindow(*changeWindow);
-    //------------------------------------------------------------------PARTE DA DECOMENTARE
-    #ifdef DISPATCHER_ON
-    //cl.setChangeUserInfo(changeWindow);
-    #endif
-    //------------------------------------------------------------------
 }
 
 void home::on_directory_clicked()
 {
     directory* dir = new directory(nullptr, pwd, *this);
     goToWindow(*dir);
-    //------------------------------------------------------------------PARTE DA DECOMENTARE
-    #ifdef DISPATCHER_ON
-    //cl.setDirectory(directoryWindow);
-    #endif
-    //------------------------------------------------------------------
 }
 
 void home::logout()
@@ -94,11 +79,7 @@ void home::logout()
     waiting();
     disableButtons();
     disableStyleButtons();
-    //------------------------------------------------------------------PARTE DA DECOMENTARE
-    #ifdef DISPATCHER_ON
     cl.logout();
-    #endif
-    //------------------------------------------------------------------
 }
 
 void home::closeEvent(QCloseEvent *event)
