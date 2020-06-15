@@ -342,6 +342,7 @@ void notepad::failure(const QString &toPrint){
         notification notWindow(nullptr, "There is a problem with the current document,\nso it will be closed.");
         int ret=notWindow.exec();
         if(ret==0){
+            close();
             showParent();
         }
     }else{
