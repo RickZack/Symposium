@@ -401,7 +401,7 @@ updateDocMessage SymClient::mapSiteIdToUser(const document &currentDoc) {
 
 void SymClient::setUserColors(uint_positive_cnt::type docId, const std::map<uint_positive_cnt::type, user> &siteIdToUser) {
     //prendiamo il generatore di colore associato al documento
-    colorGen gen = this->getColorGeneratorbyDocumentiID(docId);
+    colorGen& gen = this->getColorGeneratorbyDocumentiID(docId);
     //iteratore alla mappa ricevuta
     std::map<uint_positive_cnt::type, user>::const_iterator it = siteIdToUser.begin();
     //iteratore alla mappa {siteId, documentId}->{user, color}
@@ -585,7 +585,7 @@ const file& SymClient::getActiveFiletoOpenbyID(uint_positive_cnt::type id){
     throw SymClientException(SymClientException::noActiveFile, UnpackFileLineFunction());
 }
 
-colorGen & SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
+colorGen& SymClient::getColorGeneratorbyDocumentiID(uint_positive_cnt::type id){
     for (auto& it:this->activeDoc){
         if((it.first->getId() == id))
             return (it.second);

@@ -82,12 +82,12 @@ namespace Symposium{
         std::string username;                                   /**< variable to contain the username that user inserted in signin or signup window  */
         uint_positive_cnt::type openDocumentID;                 /**< variable to contain the id of document that client want to open or has just created  */
         uint_positive_cnt::type newFileID;                      /**< variable to contain the id of file that client has just created  */
-        uint_positive_cnt::type SymFileID;
+        uint_positive_cnt::type SymFileID;                      /**< variable to contain the id of the file that symlink is refer to */
+        uint_positive_cnt::type symlinkID;                      /**< variable to contain the id of the symlink just created */
         bool appIsClosing;                                      /**< this variable is true if the application will close, false otherwise  */
         bool userIsLogged;                                      /**< this variable is true if the user is logged in, false otherwise  */
-        bool connectionClosed;
-        //bool isSymlink;
-        uint_positive_cnt::type symlinkID;
+        bool connectionClosed;                                  /**< this variable is true if the connection to the server is closed, false otherwise */
+
     public:
         clientdispatcher(QObject *parent = nullptr);
 
@@ -98,8 +98,17 @@ namespace Symposium{
          */
         int run(int argc, char **argv);
 
+        /**
+         * @brief this method is used to set the address and the port to connect to the server
+         * @param address the address of the server
+         * @param port the port of the server
+         */
         void setServerAddress(std::string address, std::string port);
 
+        /**
+         * @brief this method is invoked by the option mask to get the current address and current port of the server
+         * @return a pair to contain the address and the port of the server
+         */
         std::pair<std::string, std::string> getServerAddress();
 
         /**
@@ -269,6 +278,10 @@ namespace Symposium{
          */
         void addUserCursor(uint_positive_cnt::type siteID, std::string username, uint_positive_cnt::type resourceID);
 
+        /**
+         * @brief invoke the method on the correct notepad GUI to update online users
+         * @param resourceID the ID of the document to update online users
+         */
         void addUserReadOnly(uint_positive_cnt::type resourceID);
 
         /**
@@ -319,6 +332,9 @@ namespace Symposium{
          */
         const user& getUser();
 
+        /**
+         * @brief method to provide the Symlink ID to the GUI
+         */
         uint_positive_cnt::type getSymlinkID();
 
         /**
@@ -339,11 +355,25 @@ namespace Symposium{
 
         /**
          * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param currentDoc document you are working on
          */
         void mapSiteIdToUser(const document &currentDoc);
 
+        /**
+         * @brief invoke the corrisponding method in Symclient and send to the server the message that @ref SymClient's method create
+         * @param docId document you are working on
+         * @param oldLineStyle a pair to contain the old alignament information of the document line
+         * @param newLineStyle a pair to contain the new alignament information of the document line
+         * @param row the row number
+         */
         void localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& oldLineStyle, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
 
+        /**
+         * @brief apply the new style of the row in a correct notepad GUI
+         * @param docId document ID of the document on which to update the style of the row
+         * @param newLineStyle a pair to contain the new alignament information of the document line
+         * @param row the row number
+         */
         void remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
         /**
          * @brief it provides a string with all file that in user's root directory
@@ -388,8 +418,16 @@ namespace Symposium{
          */
         uint_positive_cnt::type getNewFileID();
 
+        /**
+         * @brief set the @ref newFileID
+         * @param the new file ID
+         */
         void setNewFileID(uint_positive_cnt::type newID);
 
+        /**
+         * @brief set the @ref SymFileID and the @ref symlinkID
+         * @param the numbers to set @ref SymFileID and the @ref symlinkID
+         */
         void setSymlinkID(uint_positive_cnt::type symlinkID, uint_positive_cnt::type fileID);
 
         /**
@@ -416,16 +454,23 @@ namespace Symposium{
 
         /**
          * @brief it used to notify the success of setUserColors to the GUI
+         * @param docID the id of the document
          */
         void successSetUserColors(uint_positive_cnt::type docID);
 
+        /**
+         * @brief it used to notify the document's error to the correct notepad GUI
+         * @param docID the id of the document
+         */
         void errorOnDocument(uint_positive_cnt::type docID);
 
         ~clientdispatcher() override;
 
     private:
 
-        //classe per eccezione
+    /**
+    * @brief class used to exception when sending messages fails
+    */
     class sendFailure : public std::exception {};
 
     public slots:
