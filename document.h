@@ -90,9 +90,9 @@ namespace Symposium {
         template<class Archive>
         void serialize(Archive &ar, const unsigned int){
             if(!serializeFull)
-                ar & id;
+                ar & id & idCounter;
             else //serialize all the information only when sending or saving onto disk
-                ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy &alignmentStyle;
+                ar & id & symbols  & activeUsers  & numchar & strategyCache & strategy &alignmentStyle & idCounter;
         }
     public:
         static constexpr wchar_t  emptyChar=0x1F;

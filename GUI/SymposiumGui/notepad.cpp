@@ -419,6 +419,7 @@ void notepad::on_Export_PDF_triggered()
 void notepad::on_actionCopy_triggered()
 {
     ui->textEdit->copy();
+    NotRefreshLabels=false;
 }
 
 void notepad::on_actionCut_triggered()
