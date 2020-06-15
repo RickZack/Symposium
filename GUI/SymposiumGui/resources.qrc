@@ -99,8 +99,6 @@
         <file>errorlogout.h</file>
         <file>exit.cpp</file>
         <file>exit.h</file>
-        <file>folder1.cpp</file>
-        <file>folder1.h</file>
         <file>home.cpp</file>
         <file>home.h</file>
         <file>icon.cpp</file>
@@ -111,8 +109,6 @@
         <file>mainwindow.cpp</file>
         <file>mainwindow.h</file>
         <file>newdocument.cpp</file>
-        <file>newfolderwindow.cpp</file>
-        <file>newfolderwindow.h</file>
         <file>notepad.cpp</file>
         <file>notepad.h</file>
         <file>notification.cpp</file>
@@ -125,8 +121,6 @@
         <file>sigin.h</file>
         <file>signup.cpp</file>
         <file>signup.h</file>
-        <file>textedit.cpp</file>
-        <file>textedit.h</file>
         <file>unsuccessdeleteaccount.cpp</file>
         <file>unsuccessdeleteaccount.h</file>
     </qresource>

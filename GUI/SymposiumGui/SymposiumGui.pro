@@ -71,7 +71,6 @@ SOURCES += \
         sigin.cpp \
         signup.cpp \
         successlinks.cpp \
-        textedit.cpp \
         Dispatcher/clientdispatcher.cpp \
         Dispatcher/serverdispatcher.cpp \
         unsuccessdeleteaccount.cpp \
@@ -124,7 +123,6 @@ HEADERS += \
         sigin.h \
         signup.h \
         successlinks.h \
-        textedit.h \
         Dispatcher/clientdispatcher.h \
         Dispatcher/serverdispatcher.h \
         unsuccessdeleteaccount.h \
@@ -146,12 +144,10 @@ FORMS += \
         errorconnection.ui \
         errorlogout.ui \
         exit.ui \
-        folder1.ui \
         home.ui \
         icon.ui \
         inserturi.ui \
         mainwindow.ui \
-        newfolderwindow.ui \
         notepad.ui \
         notification.ui \
         onlineusers.ui \
