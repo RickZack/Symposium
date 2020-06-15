@@ -362,6 +362,7 @@ std::pair<unsigned int, unsigned int> document::remoteRemove(uint_positive_cnt::
         unsigned charsToMove=countCharsInLine(i0+1);
         symbols[i0].insert(symbols[i0].begin()+i1, symbols[i0+1].begin(), symbols[i0+1].begin()+charsToMove);
         symbols.erase(symbols.begin()+i0+1);
+        alignmentStyle.erase(alignmentStyle.begin()+i0+1);
     }
 
     return pos;

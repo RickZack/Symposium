@@ -344,7 +344,8 @@ void notepad::failure(const QString &toPrint){
         //notWindow.setText("There is a problem with the current document");
         int ret = notWindow.exec();
         if( ret == QMessageBox::Ok || ret == QMessageBox::Close){
-            backToParent();
+            close();
+            showParent();
         }
     }else{
         errorConnectionLogout();
