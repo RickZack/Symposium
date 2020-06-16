@@ -36,7 +36,6 @@ namespace Symposium {
 /**
  * @brief defines the possible outcomes of an operation followed by a message
  */
-//TODO: specify more details about "success" and "failure", like messages that can be showed to the user or stored in a log file
     enum class msgOutcome : char {
         failure, success
     };

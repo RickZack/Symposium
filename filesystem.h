@@ -62,12 +62,6 @@ BOOST_CLASS_EXPORT_KEY(Symposium::directory)
 BOOST_CLASS_EXPORT_KEY(Symposium::symlink)
 
 
-/*
- * Forward declaration: filesystem must use "user" only with pointers.
- * Filesystem uses "user" only to verify that a user has the right to
- * access a resource, through an AccessStrategy. Filesystem mustn't call
- * any of the functions of "user"
- */
 namespace Symposium {
     /**
       * @interface filesystem filesystem.h filesystem
@@ -79,13 +73,12 @@ namespace Symposium {
       * and @link symlink symlink @endlink @e sharingPolicy must indicate that the resource is not sharable
       */
     class filesystem {
-        static uint_positive_cnt idCounter;  /**< id to be assigned to the next created filesystem object */
-        uint_positive_cnt::type id;          /**< unique identifier for the filesystem object, used also for identifying objects along a path */
+        static uint_positive_cnt idCounter;       /**< id to be assigned to the next created filesystem object */
+        uint_positive_cnt::type id;               /**< unique identifier for the filesystem object, used also for identifying objects along a path */
     protected:
-        static const std::string realPath;
-        std::string name;                    /**< resource name */
-        uri sharingPolicy;                   /**< sharing policy applied to the resource */
-        std::unique_ptr<AccessStrategy> strategy;
+        std::string name;                         /**< resource name */
+        uri sharingPolicy;                        /**< sharing policy applied to the resource */
+        std::unique_ptr<AccessStrategy> strategy; /**< embodies the privileges associated with users */
 
 
         friend class boost::serialization::access;

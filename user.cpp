@@ -195,15 +195,10 @@ user::accessFile(const std::string &absolutePath, const std::string &destPath, c
     return std::make_pair(sym->getId(), fi);
 }
 
-//FIXME: al chiamante serve avere indietro il file e il documento aperto, potremmo tornare un pair
 std::shared_ptr<file> user::openFile(const std::string &resPath, const std::string &resId, privilege) const {
     if(!correctFormatResPath(resPath))
         throw userException(userException::path, UnpackFileLineFunction());
-    auto f=home->getFile(resPath, resId);
-    //FIXME: perchè abbiamo commentato questa linea?
-    // In origine volevo solo avere indietro il file al posto del documento
-    //document& newD= home->access(*this, path, resId, accessMode);
-    return f;
+    return home->getFile(resPath, resId);
 }
 
 privilege user::editPrivilege(const std::string &otherUser, const std::string &resPath, const std::string &resId,
@@ -337,6 +332,6 @@ bool user::correctFormatAbsolutePathWithId(const std::string &path) {
 }
 
 bool user::noSpaceUsername(const std::string &username) {
-    std::size_t found = username.find(" ");
+    std::size_t found = username.find(' ');
     return found == std::string::npos;
 }

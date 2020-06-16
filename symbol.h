@@ -46,7 +46,7 @@ enum class alignType{
     left,                           /**< to declare that the row has a left alignment */
     right,                          /**< to declare that the row has a right alignment */
     center,                         /**< to declare that the row has a center alignment */
-    justify                        /**< to declare that the row has a justified alignment */
+    justify                         /**< to declare that the row has a justified alignment */
 };
 
     struct format{
@@ -69,18 +69,18 @@ enum class alignType{
         familyType(ft), isBold(bold), isUnderlined(underline), isItalic(italic), size(size),col(col),indexStyle(indexStyle), type(type){}
 
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version);
+        void serialize(Archive &ar, const unsigned int);
 
     };
 
 
     class symbol {
-        wchar_t ch;
-        int siteId;
+        wchar_t ch;             /**< the character the symbols carries */
+        int siteId;             /**< identifies the user that generated the symbol */
         int counter;
-        std::vector<int> pos;
-        bool verified;  /**< true if the symbol has been verified by the server or has been inserted by remoteInsert */
-        format charFormat;
+        std::vector<int> pos;   /**< vector that defines the fractional indices of the symbol inside a document */
+        bool verified;          /**< true if the symbol has been verified by the server or has been inserted by remoteInsert */
+        format charFormat;      /**< attributes of the symbol for rich text editor */
 
         friend class boost::serialization::access;
         template<class Archive>

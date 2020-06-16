@@ -251,7 +251,6 @@ TEST_F(SymClientTest, signUpConstructsGoodMessageAndInsertInUnanswered){
     EXPECT_EQ(expected, mex.getNewUser());
     EXPECT_TRUE(client.thereIsUnansweredMex(mex.getMsgId()).first);
 }
-//FIXME: this won't work
 TEST_F(SymClientTest, signUpAssignesLoggedUser){
     auto mex= client.signUp(username, pwd, nickname, resPath);
     //just imagine that the server has answered with msgOutcome::success to client's signUpMessage, the response contain the
@@ -556,11 +555,6 @@ TEST_F(SymClientTest, removeUserCleansLoggedUserAndMapping){
     EXPECT_TRUE(client.getUserColors().empty());
 }
 
-//FIXME: Perchè questo test controlla che il messaggio di logout venga inserito tra quelli non risposti?
-// Risposta: per uniformità di protocollo, anche per poter dire che il login è andato a buon fine.
-// Dobbiamo prevedere anche i casi in cui ad un certo punto si interrompa la connessione proprio prima del
-// logout: lato client non è problematico ma è giusto segnalarlo, e questo puoi farlo solo se sai che ti
-// deve arrivare un messaggio.
 TEST_F(SymClientTest, logoutConstructsGoodMessageAndInsertInUnanswered){
     setStageForLoggedUser();
     auto mex=client.logout();
@@ -591,25 +585,6 @@ TEST_F(SymClientTest, setUserColorsAssignesDifferentColorToUsers){
     std::map<uint_positive_cnt::type, user> sampleMapping({{0, userReceived},{1, userReceived}});
     client.setUserColors(docInUserFilesystem.getId(), sampleMapping);
     EXPECT_TRUE(everyUserHasDifferentColor());
-}
-
-TEST_F(SymClientTest, DISABLED_addActiveUserCallsAccessOnDocAndAssignesColor){
-    setStageForOpenedDoc();
-    SymClientUserMock anotherUser(anotherUsername, pwd, "noempty", "", 10, nullptr);
-    EXPECT_CALL(docInUserFilesystem, access(anotherUser, privilege::readOnly)).WillOnce(::testing::ReturnRef(docInUserFilesystem));
-    EXPECT_CALL(*fileInUserFilesystem, getUserPrivilege(anotherUsername)).WillOnce(::testing::Return(uri::getDefaultPrivilege()));
-    client.addActiveUser(docInUserFilesystem.getId(), anotherUser, privilege::readOnly);
-
-    EXPECT_TRUE(userHasAssignedColor(anotherUser.getSiteId(), docInUserFilesystem.getId()));
-}
-
-TEST_F(SymClientTest, DISABLED_removeActiveUserCallsCloseOnDocAndRemovesColor){
-    setStageForOpenedDoc();
-    SymClientUserMock anotherUser(anotherUsername, pwd, "noempty", "", 10, nullptr);
-    EXPECT_CALL(docInUserFilesystem, close(anotherUser));
-    client.removeActiveUser(docInUserFilesystem.getId(), anotherUser);
-
-    EXPECT_FALSE(userHasAssignedColor(anotherUser.getSiteId(), docSentByServer.getId()));
 }
 
 TEST_F(SymClientTest, editUserConstructsGoodMessageAndInsertInUnanswered){

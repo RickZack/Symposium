@@ -71,12 +71,12 @@
          virtual ~message() = default;
      };
 
-/**
- * @brief class used to model a message sent by a client
- *
- * A message sent by a client performs an action on the server that has received it. An object of this class is used to
- * log in the user indicated in @e actionOwner and to identify the user who asks for the @e action
- */
+    /**
+     * @brief class used to model a message sent by a client
+     *
+     * A message sent by a client performs an action on the server that has received it. An object of this class is used to
+     * log in the user indicated in @e actionOwner and to identify the user who asks for the @e action
+     */
      class clientMessage : public virtual message {
          std::pair<std::string, std::string> actionOwner; /**< Defines the user (username, password) that has just performed the action */
 
@@ -213,9 +213,9 @@
          ~askResMessage() override = default;
      };
 
-/**
- * @brief class used to model a sign up message sent by a client
- */
+    /**
+     * @brief class used to model a sign up message sent by a client
+     */
      class signUpMessage : public clientMessage {
 
          friend class boost::serialization::access;
@@ -290,9 +290,9 @@
 
      };
 
-/**
- * @brief class used to model a message sent by the server
- */
+    /**
+     * @brief class used to model a message sent by the server
+     */
      class serverMessage : public virtual message {
          friend class boost::serialization::access;
          template<class Archive>
@@ -337,13 +337,13 @@
          ~serverMessage() override = default;
      };
 
-/**
- * @brief class used to model a message sent by a server as answer to a login message
- *
- * The client sends a @link clientMessage clientMessage @endlink object with the authentication parameters and receives
- * a @link loginMessage @endlink object with all the data of the logged user.
- * In this message <em> action=msgType::registration </em> or <em> action=msgType::login </em>
- */
+    /**
+     * @brief class used to model a message sent by a server as answer to a login message
+     *
+     * The client sends a @link clientMessage clientMessage @endlink object with the authentication parameters and receives
+     * a @link loginMessage @endlink object with all the data of the logged user.
+     * In this message <em> action=msgType::registration </em> or <em> action=msgType::login </em>
+     */
      class loginMessage : public serverMessage {
 
          friend class boost::serialization::access;
@@ -376,13 +376,13 @@
          ~loginMessage() override = default;
      };
 
-/**
- * @brief class used to model an answer message sent by a server for a @link clientMessage clientMessage @endlink
- *
- * The server answers with the map siteId->user for the document the current user is working on.
- * The client ask for this answer with a @link updateDocMessage updateDocMessage @endlink with <em> action=msgType::mapChangesToUser </em>
- * In this message <em> action=msgType::mapChangesToUser </em>: calls
- */
+    /**
+     * @brief class used to model an answer message sent by a server for a @link clientMessage clientMessage @endlink
+     *
+     * The server answers with the map siteId->user for the document the current user is working on.
+     * The client ask for this answer with a @link updateDocMessage updateDocMessage @endlink with <em> action=msgType::mapChangesToUser </em>
+     * In this message <em> action=msgType::mapChangesToUser </em>: calls
+     */
      class mapMessage : public serverMessage {
 
          friend class boost::serialization::access;
@@ -415,9 +415,9 @@
          ~mapMessage() override = default;
      };
 
-/**
- * @brief class used to model an answer message sent by a server for a @link askResMessage askResMessage @endlink
- */
+    /**
+     * @brief class used to model an answer message sent by a server for a @link askResMessage askResMessage @endlink
+     */
      class sendResMessage : public serverMessage {
 
          friend class boost::serialization::access;
@@ -451,16 +451,16 @@
          ~sendResMessage() override = default;
      };
 
-/**
- * @brief class used to model the joining of an user to a document
- *
- * The server sends this message when an user access or closes a document. If a user opens a document,
- * then becomes @e active on it and the other clients must be able to see who is active on the document:
- * in this case <em> action=msgType::addActiveUser </em>. Similarly, when a user closes a document, since
- * it is not longer active on it, the server sends a @e updateActiveMessage with <em> action=msgType::removeActiveUser </em>.
- * Client side, if @e newUser is not in any set (readers, writers, owners), then add the user to the proper
- * set basing on @e userPrivilege
- */
+    /**
+     * @brief class used to model the joining of an user to a document
+     *
+     * The server sends this message when an user access or closes a document. If a user opens a document,
+     * then becomes @e active on it and the other clients must be able to see who is active on the document:
+     * in this case <em> action=msgType::addActiveUser </em>. Similarly, when a user closes a document, since
+     * it is not longer active on it, the server sends a @e updateActiveMessage with <em> action=msgType::removeActiveUser </em>.
+     * Client side, if @e newUser is not in any set (readers, writers, owners), then add the user to the proper
+     * set basing on @e userPrivilege
+     */
      class updateActiveMessage : public serverMessage {
 
          friend class boost::serialization::access;
@@ -500,13 +500,13 @@
          ~updateActiveMessage() override = default;
      };
 
-/**
- * @brief class used to model a privilege change message sent by a client. It is also used to propagate such a change on other clients
- *
- * The client sends the resource identifier for the target resource, the user whose privilege has to be changed and the new privilege.
- * The server forward this message to other clients that share a privilege on that resource to inform them about what changed.
- * Object of this class have <em> action=msgType::changePrivileges </em>
- */
+    /**
+     * @brief class used to model a privilege change message sent by a client. It is also used to propagate such a change on other clients
+     *
+     * The client sends the resource identifier for the target resource, the user whose privilege has to be changed and the new privilege.
+     * The server forward this message to other clients that share a privilege on that resource to inform them about what changed.
+     * Object of this class have <em> action=msgType::changePrivileges </em>
+     */
      class privMessage : public clientMessage, public serverMessage {
 
          friend class boost::serialization::access;
@@ -554,13 +554,13 @@
          ~privMessage() override = default;
      };
 
-/**
- * @brief class used to model a message regarding a symbol
- *
- * The client sends the @link symbol symbol @endlink to be inserted or removed.
- * The server forwards this message to other clients that are working on the same document.
- * Object of this class have <em> action=msgType::insertSymbol </em> or <em> action=msgType::removeSymbol </em>
- */
+    /**
+     * @brief class used to model a message regarding a symbol
+     *
+     * The client sends the @link symbol symbol @endlink to be inserted or removed.
+     * The server forwards this message to other clients that are working on the same document.
+     * Object of this class have <em> action=msgType::insertSymbol </em> or <em> action=msgType::removeSymbol </em>
+     */
      class symbolMessage : public clientMessage, public serverMessage {
 
          friend class boost::serialization::access;
@@ -633,7 +633,6 @@
           *  </ul>
           * </ul>
           */
-          //TODO: complete description
           void completeAction(SymClient &client, msgOutcome serverResult) override;
 
          bool operator==(const symbolMessage &rhs) const;
@@ -643,12 +642,12 @@
          ~symbolMessage() override = default;
      };
 
-/**
- * @brief class used to model a message for sharing a document
- *
- * The client sends an object of type @link uri uri @endlink with the sharing preferences changed by the user.
- * The server forwards this message to other clients that are enabled to see the sharing preferences of a document.
- */
+    /**
+     * @brief class used to model a message for sharing a document
+     *
+     * The client sends an object of type @link uri uri @endlink with the sharing preferences changed by the user.
+     * The server forwards this message to other clients that are enabled to see the sharing preferences of a document.
+     */
      class uriMessage : public clientMessage, public serverMessage {
 
          friend class boost::serialization::access;
@@ -840,9 +839,6 @@
 
          bool operator!=(const editLineStyleMessage &rhs) const;
      };
-
-
-
  }
 
 #endif //SYMPOSIUM_MESSAGE_H

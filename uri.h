@@ -124,7 +124,7 @@ namespace Symposium {
         /**
          * @brief check uri validity with requested privilege @ref requested by user
          * @param requested the privilege which user want
-         * @return or requested privilege if it is <= than granted privilege or granted privilege if requested privilege is > than granted
+         * @return requested privilege if it is <= than granted privilege or granted privilege if requested privilege is > than granted
          */
         virtual privilege getShare(privilege requested);
 

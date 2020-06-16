@@ -32,7 +32,6 @@
 #include <cstring>
 using namespace Symposium;
 
-//char SymposiumException::genericError[msgMaxLen]="Generic Symposium error";
 
 SymposiumException::SymposiumException(const char *file, const int line, const char *func,
                                        const char *errDescr) {
@@ -57,7 +56,7 @@ const char* SymServerException::SymServerErrors[]={"the user already exists",
 
 SymServerException::SymServerException(SymServerExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
-                                       SymposiumException(file, line, func, SymServerErrors[static_cast<int>(exceptionCode)]){};
+                                       SymposiumException(file, line, func, SymServerErrors[static_cast<int>(exceptionCode)]){}
 
 const char* userException::userErrors[]={"Too short password", "Too long password",
                                          "You don't use any alphabetic character for password", "You don't use any number for password",
@@ -69,7 +68,7 @@ const char* userException::userErrors[]={"Too short password", "Too long passwor
 
 userException::userException(userExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
-        SymposiumException(file, line, func, userErrors[static_cast<int>(exceptionCode)]){};
+        SymposiumException(file, line, func, userErrors[static_cast<int>(exceptionCode)]){}
 
 
 
@@ -82,13 +81,13 @@ const char* filesystemException::filesystemErrors[]={"Object is not shareable", 
 
 filesystemException::filesystemException(filesystemExceptionCodes exceptionCode, const char *file, int line,
                              const char *func) :
-        SymposiumException(file, line, func, filesystemErrors[static_cast<int>(exceptionCode)]){};
+        SymposiumException(file, line, func, filesystemErrors[static_cast<int>(exceptionCode)]){}
 
 const char* SymClientException::SymClientErrors[]={"No active document with that ID", "No relative message found", "User not found on that document", "No active file with that ID"};
 
 SymClientException::SymClientException(SymClientExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
-        SymposiumException(file, line, func, SymClientErrors[static_cast<int>(exceptionCode)]){};
+        SymposiumException(file, line, func, SymClientErrors[static_cast<int>(exceptionCode)]){}
 
 const char* messageException::messageErrors[]={"Action is not consistent with the message type", "This is not a client message",
                                                "The action had not succeded", "This is not an askRes message",
@@ -98,18 +97,18 @@ const char* messageException::messageErrors[]={"Action is not consistent with th
 
 messageException::messageException(messageExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
-        SymposiumException(file, line, func, messageErrors[static_cast<int>(exceptionCode)]){};
+        SymposiumException(file, line, func, messageErrors[static_cast<int>(exceptionCode)]){}
 
 
 const char* clientdispatcherException::clientdispatcherErrors[]={"The action of this message is not valid", "Unrecognized class of message", "The action of this message is not allowed"};
 
 clientdispatcherException::clientdispatcherException(clientdispatcherExceptionCodes exceptionCode, const char *file, int line,
                                        const char *func) :
-        SymposiumException(file, line, func, clientdispatcherErrors[static_cast<int>(exceptionCode)]){};
+        SymposiumException(file, line, func, clientdispatcherErrors[static_cast<int>(exceptionCode)]){}
 
 const char* documentException::documentErrors[]={"Error in finding the position of the symbol searched", "Fix Position Sorting", "trying to access index of of bounds",
                                                  "Logic error, trying to delete line delimiter emptyChar", "Logic error, trying to insert in the same line after a newline character"};
 
 documentException::documentException(docExceptionCodes exceptionCode, const char *file,
                                      int line, const char *func) :
-    SymposiumException(file, line, func, documentErrors[static_cast<int>(exceptionCode)]){};
+    SymposiumException(file, line, func, documentErrors[static_cast<int>(exceptionCode)]){}

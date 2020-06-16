@@ -86,7 +86,7 @@ namespace Symposium{
             userWorkingOnDoc, userNotFound, noUserWorkingOnRes};
 
         explicit SymServerException(SymServerExceptionCodes exceptionCode, const char *file, int line, const char *func);
-        virtual ~SymServerException()=default;
+        ~SymServerException() override =default;
     };
 
     class userException : public SymposiumException {
@@ -99,7 +99,7 @@ namespace Symposium{
                 noPermissionToChange, LinkNoCorrect, haveLink, path, pathForLink, minPriv, userSpace};
 
         explicit userException(userExceptionCodes exceptionCode, const char *file, int line, const char *func);
-        virtual ~userException()=default;
+        ~userException() override =default;
     };
 
     class filesystemException : public SymposiumException {
@@ -112,7 +112,7 @@ namespace Symposium{
                 noGetFile, sameName, notOnlyOwn, someoneWork, notOwnDelete};
 
         explicit filesystemException(filesystemExceptionCodes exceptionCode, const char *file, int line, const char *func);
-        virtual ~filesystemException()=default;
+        ~filesystemException() override =default;
     };
 
     class SymClientException : public SymposiumException {
@@ -124,7 +124,7 @@ namespace Symposium{
         enum SymClientExceptionCodes{noActiveDocument=0, noRelatedMessage, nocolorOfUser, noActiveFile};
 
         explicit SymClientException(SymClientExceptionCodes exceptionCode, const char *file, int line, const char *func);
-        virtual ~SymClientException()=default;
+        ~SymClientException() override =default;
     };
 
     class messageException : public SymposiumException {
@@ -136,7 +136,7 @@ namespace Symposium{
         enum messageExceptionCodes{action=0, notClient, notSucc, askResMes, sendResMes, symb, upAct, upDoc, userData, cursor};
 
         explicit messageException(messageExceptionCodes exceptionCode, const char *file, int line, const char *func);
-        virtual ~messageException()=default;
+        ~messageException() override =default;
     };
 
     class clientdispatcherException : public SymposiumException {
@@ -148,7 +148,7 @@ namespace Symposium{
         enum clientdispatcherExceptionCodes{UnknownMessageAction=0, UnknownClassOfMessage, MsgActionNotAllowed};
 
         explicit clientdispatcherException(clientdispatcherExceptionCodes exceptionCode, const char *file, int line, const char *func);
-        virtual ~clientdispatcherException()=default;
+        ~clientdispatcherException() override =default;
     };
 
     class documentException : public SymposiumException {
@@ -158,7 +158,7 @@ namespace Symposium{
         enum docExceptionCodes{positionNotFound=0, fixPositionSorting, outOfBounds, deletingEmptyChar, insertingAfterNewLine};
 
         explicit documentException(docExceptionCodes exceptionCode, const char *file, int line, const char *func);
-        virtual ~documentException()=default;
+        ~documentException() override =default;
     };
 
 

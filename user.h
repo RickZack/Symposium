@@ -240,8 +240,8 @@ namespace Symposium {
         static bool noSpecialCharPwd(const std::string &pass);
 
         /**
-         * @param pass the password to control
-         * @return true if the @pass don't have any special character and false if it does
+         * @param username the password to control
+         * @return true if the @username don't have any space and false if it does
          */
         static bool noSpaceUsername(const std::string &username);
     private:

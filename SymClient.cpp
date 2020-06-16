@@ -112,8 +112,8 @@ SymClient::openNewSource(const std::string &absolutePath, privilege reqPriv, con
 void SymClient::openNewSource(const std::string &absolutePath, privilege reqPriv, const std::string &destPath,
                               const std::string &destName,
                               uint_positive_cnt::type idToAssign, const std::shared_ptr<file> fileAsked) {
-    std::string filePath = absolutePath.substr(0, absolutePath.find_last_of("/"));
-    std::string fileName = absolutePath.substr(absolutePath.find_last_of("/") + 1);
+    std::string filePath = absolutePath.substr(0, absolutePath.find_last_of('/'));
+    std::string fileName = absolutePath.substr(absolutePath.find_last_of('/') + 1);
     (this->getLoggedUser().getHome())->addLink(destPath, destName, filePath, fileName, idToAssign);
     activeFile.push_front(fileAsked);
     document& doc = fileAsked->access(this->getLoggedUser(), reqPriv);
@@ -180,7 +180,9 @@ symbolMessage SymClient::localInsert(uint_positive_cnt::type docId, const symbol
         this->unanswered.push_front(mess);
         return *mess;
     }else{
+        #ifdef DISPATCHER_ON
         this->dispatcher->errorOnDocument(docId);
+        #endif
     }
 }
 
@@ -195,7 +197,9 @@ symbolMessage SymClient::localRemove(uint_positive_cnt::type docId, const std::p
         this->unanswered.push_front(mess);
         return *mess;
     }else{
+        #ifdef DISPATCHER_ON
         this->dispatcher->errorOnDocument(docId);
+        #endif
     }
 }
 
@@ -213,8 +217,10 @@ void SymClient::remoteInsert(uint_positive_cnt::type siteId, uint_positive_cnt::
         this->dispatcher->remoteInsert(docId,newSym, siteId, p);
         #endif
     }else{
-       this->dispatcher->closeSource(docId);
-       this->dispatcher->errorOnDocument(docId);
+        #ifdef DISPATCHER_ON
+        this->dispatcher->closeSource(docId);
+        this->dispatcher->errorOnDocument(docId);
+        #endif
     }
 }
 
@@ -232,8 +238,10 @@ void SymClient::remoteRemove(uint_positive_cnt::type siteId, uint_positive_cnt::
         this->dispatcher->remoteRemove(docId, siteId, p);
         #endif
     }else{
-       this->dispatcher->closeSource(docId);
-       this->dispatcher->errorOnDocument(docId);
+        #ifdef DISPATCHER_ON
+        this->dispatcher->closeSource(docId);
+        this->dispatcher->errorOnDocument(docId);
+        #endif
     }
 }
 
@@ -252,7 +260,6 @@ privMessage SymClient::editPrivilege(const std::string &targetUser, const std::s
 
 privilege SymClient::editPrivilege(const std::string &targetUser, const std::string &resPath, const std::string &resId,
                                    privilege newPrivilege, bool msgRcv) {
-    //privilege p=const_cast<file&>(getActiveFiletoOpenbyID(std::stoul(resId))).setUserPrivilege(targetUser, newPrivilege);
     privilege p;
     if(msgRcv){
         p=getLoggedUser().editPrivilege(targetUser, resPath, resId, newPrivilege);
@@ -262,12 +269,7 @@ privilege SymClient::editPrivilege(const std::string &targetUser, const std::str
         #endif
     }
     else{
-        std::string pathRemain, id;
-        std::tie(pathRemain, id)=directory::separateFirst(resPath);
-        if(std::to_string(getLoggedUser().getHome()->getId())==id)
-            p=getLoggedUser().getHome()->getFile("./"+pathRemain, resId)->setUserPrivilege(targetUser, newPrivilege);
-        else
-            p=directory::getRoot()->getFile(resPath, resId)->setUserPrivilege(targetUser, newPrivilege);
+        const_cast<file&>(getActiveFiletoOpenbyID(std::stoul(resId))).setUserPrivilege(targetUser, newPrivilege);
     }
     return p;
 }
@@ -282,9 +284,6 @@ std::shared_ptr<filesystem>
 SymClient::shareResource(const std::string &actionUser, const std::string &resPath, const std::string &resId,
                          const uri &newPrefs,
                          bool msgRcv) {
-    //std::shared_ptr<filesystem> fil (this->getLoggedUser().shareResource(resPath, resId, newPrefs));
-    //const_cast<file&>(getActiveFiletoOpenbyID(std::stoul(resId))).forceUpdateSharingPolicy(newPrefs);
-    qDebug() << "SHARERESOURCE --> resPath: " << QString::fromStdString(resPath) << " resId: " << QString::fromStdString(resId);
     std::shared_ptr<filesystem> res;
     if(msgRcv){
         res=getLoggedUser().shareResource(resPath, resId, newPrefs);
@@ -294,13 +293,7 @@ SymClient::shareResource(const std::string &actionUser, const std::string &resPa
         #endif
     }
     else{
-        std::string pathRemain, id;
-        std::tie(pathRemain, id)=directory::separateFirst(resPath);
-        if(std::to_string(getLoggedUser().getHome()->getId())==id)
-            res=getLoggedUser().getHome()->getFile("./"+pathRemain, resId);
-        else
-            res=directory::getRoot()->getFile(resPath, resId);
-        res->setSharingPolicy(actionUser, newPrefs);
+        const_cast<file&>(getActiveFiletoOpenbyID(std::stoul(resId))).setSharingPolicy(actionUser, newPrefs);
     }
 
     return res;
@@ -319,7 +312,6 @@ SymClient::renameResource(const std::string &resPath, const std::string &resId, 
     std::shared_ptr<filesystem> f (getLoggedUser().renameResource(resPath, resId, newName));
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    //this->dispatcher->successRenameResource();
     this->dispatcher->successAction();
     #endif
     return f;
@@ -336,7 +328,6 @@ SymClient::removeResource(const std::string &resPath, const std::string &resId, 
     std::shared_ptr<filesystem> f = this->getLoggedUser().removeResource(resPath, resId);
     //notifichiamo alla gui il successo
     #ifdef DISPATCHER_ON
-    //this->dispatcher->successRemoveResource();
     this->dispatcher->successAction();
     #endif
     return f;
@@ -500,12 +491,11 @@ std::shared_ptr<clientMessage> SymClient::retrieveRelatedMessage(const serverMes
     }
     throw SymClientException(SymClientException::noRelatedMessage, UnpackFileLineFunction());
 }
-
+#ifdef DISPATCHER_ON
 void SymClient::setClientDispatcher(clientdispatcher *cl){
-    #ifdef DISPATCHER_ON
     this->dispatcher = cl;
-    #endif
 }
+#endif
 
 void SymClient::verifySymbol(uint_positive_cnt::type docId, const symbol &sym) {
     document* d = this->getActiveDocumentbyID(docId);
@@ -522,8 +512,10 @@ void SymClient::verifySymbol(uint_positive_cnt::type docId, const symbol &sym) {
         #endif
         return;
     }else{
+        #ifdef DISPATCHER_ON
         this->dispatcher->closeSource(docId);
         this->dispatcher->errorOnDocument(docId);
+        #endif
     }
 }
 
@@ -549,7 +541,6 @@ document* SymClient::getActiveDocumentbyID(uint_positive_cnt::type id){
         if((it.first->getId() == id))
             return it.first;
     }
-    //throw SymClientException(SymClientException::noActiveDocument, UnpackFileLineFunction());
     return nullptr;
 }
 
@@ -660,11 +651,6 @@ Color SymClient::colorOfUserbyUsername(uint_positive_cnt::type resId, const std:
     return Color(82,82,82);
 }
 
-const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &
-SymClient::getUserColors() const {
-    return userColors;
-}
-
 editLineStyleMessage
 SymClient::localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned int> &oldLineStyle,
                               const std::pair<alignType, unsigned int> &newLineStyle, unsigned int row) {
@@ -677,7 +663,9 @@ SymClient::localEditLineStyle(uint_positive_cnt::type docId, const std::pair<ali
         this->unanswered.push_front(mess);
         return *mess;
     }else{
+        #ifdef DISPATCHER_ON
         this->dispatcher->errorOnDocument(docId);
+        #endif
     }
 }
 
@@ -697,8 +685,10 @@ SymClient::remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<al
         #endif
         return;
     }else{
+        #ifdef DISPATCHER_ON
         this->dispatcher->closeSource(docId);
         this->dispatcher->errorOnDocument(docId);
+        #endif
     }
 }
 

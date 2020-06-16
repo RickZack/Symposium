@@ -221,9 +221,6 @@ SymServer::editPrivilege(const std::string &actionUser, const std::string &targe
     privilege oldPriv=actionU.editPrivilege(targetUser, resPath, resId, newPrivilege);
 
     std::forward_list<uint_positive_cnt::type> setSiteIds= siteIdOfUserOfDoc(resIdOfDocOfUser(actionUser), actionU.getSiteId());
-
-    //TODO: should work, it's not tested!
-    // must give an absolute path, containing also the fileId
     std::string absPath, realId;
     std::tie(absPath, realId)= fromLocalPathToGlobal(actionU, resPath, resId);
     auto toSend=std::make_shared<privMessage>(msgType::changePrivileges, std::make_pair(actionUser,""), msgOutcome::success, absPath+"/"+realId, targetUser, newPrivilege, respMsgId);
@@ -263,10 +260,8 @@ SymServer::shareResource(const std::string &actionUser, const std::string &resPa
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     const user& actionU=getRegistered(actionUser);
     auto res= actionU.shareResource(resPath, resId, newPrefs);
-    //TODO: split
     std::string absPath, realId;
     std::tie(absPath, realId)= fromLocalPathToGlobal(actionU, resPath, resId);
-
 
     auto toSend=std::make_shared<uriMessage>(msgType::shareRes, make_pair(actionUser, ""), msgOutcome ::success, absPath, realId, newPrefs, respMsgId);
     int docId= std::dynamic_pointer_cast<file>(res)->getDoc().getId();
@@ -296,10 +291,6 @@ SymServer::removeResource(const std::string &remover, const std::string &resPath
     if(!userIsActive(remover))
         throw SymServerException(SymServerException::userNotLogged, UnpackFileLineFunction());
     user& actionU=getRegistered(remover);
-    /*
-    std::shared_ptr<file> fileReq= actionU.openFile(resPath, resId, uri::getDefaultPrivilege());
-    handleUserState(remover, fileReq->getDoc().getId());
-     */
     auto res=actionU.removeResource(resPath, resId);
 
     generateSimpleResponse(actionU.getSiteId(), msgType::removeRes, respMsgId);
@@ -371,10 +362,6 @@ SymServer::mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::typ
         throw SymServerException(SymServerException::userNotWorkingOnDoc, UnpackFileLineFunction());
     std::set<uint_positive_cnt::type> siteIds=retrieved.second->retrieveSiteIds();
     std::map<uint_positive_cnt::type, user> result;
-    //FIXME: così potrebbe essere lenta, complessità theta(N*size(siteIds))
-    // con N pari alla dimensione di registered.
-    // Idea: findUserBySiteId potrebbe ricevere un elenco di siteId e tornare
-    // un elenco di user. In questo modo la complessità diventa O(N)
     for(uint_positive_cnt::type siteId:siteIds){
         const user& founded= findUserBySiteId(siteId);
         result.emplace(siteId, founded);
@@ -611,7 +598,7 @@ SymServer::fromLocalPathToGlobal(const user &actionU, const std::string &resPath
     if(res->resType()==resourceType::symlink){
         auto sym=std::dynamic_pointer_cast<symlink>(res);
         absPath=sym->getPath();
-        absPath.erase(absPath.find_last_of("/"), absPath.size());
+        absPath.erase(absPath.find_last_of('/'), absPath.size());
         id=sym->getResId();
     }
     else{

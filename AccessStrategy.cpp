@@ -28,7 +28,6 @@
  * Created on 05 Luglio 2019, 16.22
  */
 #include "AccessStrategy.h"
-#include "user.h"
 
 using namespace Symposium;
 

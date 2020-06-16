@@ -219,7 +219,6 @@ updatePos updates[]={
 };
 INSTANTIATE_TEST_SUITE_P(TwoSymbolsFromDifferentSiteIds, docRemoteInsertUpdateCursor, testing::ValuesIn(updates));
 
-//TODO: da rivedere
 struct docRemoteRemoveUpdateCursor: public testing::TestWithParam<updatePos>{
     document d;
     user user1;

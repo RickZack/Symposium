@@ -222,7 +222,7 @@ std::string file::print(const std::string &targetUser, bool, unsigned int indent
     typeres<<resType(); //then the type of the resource
     std::ostringstream priv;
     priv<<getUserPrivilege(targetUser); //the privilege
-    std::string spaces = "";
+    std::string spaces;
     if(indent>0)
         spaces.insert(spaces.begin(), indent, ' ');
     return typeres.str()+" "+std::to_string(getId())+" "+spaces+name+" " + priv.str();
@@ -240,12 +240,9 @@ bool file::validateAction(const std::string &userName, privilege priv) {
 
 
 void file::replacement(std::shared_ptr<file> replace){
-    //this->doc=replace->doc;
     std::swap(this->doc, replace->doc);
-    //this->doc.swap(replace->doc);
     this->sharingPolicy=std::move(replace->sharingPolicy);
     std::swap(this->strategy, replace->strategy);
-    //this->strategy=std::move(replace->strategy);
 }
 
 bool file::operator==(const file &rhs) const {
@@ -538,7 +535,7 @@ std::string directory::print(const std::string &targetUser, bool recursive, unsi
                 std::shared_ptr<directory> dir=std::dynamic_pointer_cast<directory>(it);
                 std::ostringstream typeres;
                 typeres<<dir->resType();
-                std::string spaces = "";
+                std::string spaces;
                 if(indent>0)
                     spaces.insert(spaces.begin(), indent, ' ');
                 result=result+typeres.str()+" "+std::to_string(it->getId())+" "+spaces+dir->name+"\n";
@@ -553,7 +550,7 @@ std::string directory::print(const std::string &targetUser, bool recursive, unsi
 }
 
 bool directory::isReadyToRemove(const std::string &username) const {
-    for(auto element:contained)
+    for(const auto& element:contained)
         return element->isReadyToRemove(username);
     return true;
 }
@@ -589,7 +586,7 @@ std::string Symposium::symlink::print(const std::string &targetUser, bool, unsig
     try {
        std::shared_ptr<file> file=directory::getRoot()->getFile(absPathWithoutId, resId);
        priv<<file->getUserPrivilege(targetUser);
-    } catch (filesystemException) {
+    } catch (const filesystemException&) {
         priv<<privilege::none;
     }
     //priv<<file->getUserPrivilege(targetUser);

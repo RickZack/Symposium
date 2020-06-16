@@ -38,10 +38,6 @@
 #include <map>
 #include <boost/serialization/access.hpp>
 
-
-
-
-//#include "Symposium.h"
 #include "user.h"
 #include "message.h"
 
@@ -60,7 +56,7 @@
 
          friend class boost::serialization::access;
          template<class Archive>
-         void serialize(Archive &ar, const unsigned int version);
+         void serialize(Archive &ar, unsigned int);
 
      protected:
          std::unordered_map<std::string, user> registered;                                                        /**< registered users, indexed by username */
@@ -77,7 +73,7 @@
          bool loadData, storeData;                                                                                /**< flags to indicate whether the server data is to be stored and loaded */
 
          //Some methods are virtual in order to use the mocks in tests
-         SymServer(bool loading=true, bool storing=true);
+         explicit SymServer(bool loading=true, bool storing=true);
          SymServer& operator=(SymServer&& other)=default;
 
          bool operator==(const SymServer &rhs) const;
@@ -356,7 +352,6 @@
          virtual std::map<uint_positive_cnt::type, user>
          mapSiteIdToUser(const std::string &actionUser, uint_positive_cnt::type docId,
                          uint_positive_cnt::type respMsgId);
-         //OPTIMIZE: this operation seems expensive, other ways to make it lighter? Only thing is minimize these requests client side
 
          /**
           * @brief edit the alignment and/or indexStyle of the document's paragraph @e row inside one of the documents he's working on
@@ -374,14 +369,27 @@
           */
          std::pair<const uint_positive_cnt::type , std::shared_ptr<serverMessage>> extractNextMessage();
 
+         /**
+          * @brief retrieve the site id of an user
+          * @param username the username of the user whose id is to be retrieved
+          * @return the site id of that user
+          */
          uint_positive_cnt::type getSiteIdOfUser(const std::string& username) const;
 
          /**
-          * @brief store the server data onto the disk
+          * @brief store the server data (users registered and filesystem structure) onto the disk
           */
          void store() const;
 
+         /**
+          * @brief load data (users registered and filesystem structure) from disk
+          * @return true if data has been found and correctly loaded, false otherwise
+          */
          bool load();
+
+         /**
+          * @brief performs storing operations of the data of the whole system
+          */
          virtual ~SymServer();
 
      protected:
@@ -419,7 +427,14 @@
           * These are utility methods for internal use that don't need override
           */
      private:
+
+         /**
+          * @brief checks that part of user's data that matters for the server
+          * @param toCheck the user object whose parameters has to be checked
+          * @return true if username and nickname are not empty and if icon path is a valid path
+          */
          static bool userIsValid(const user &toCheck)  noexcept ;
+
          /**
           * @brief searches in the @e workingDoc map for the document that has the given @e resourceId
           * @param username the username of the user whose working state on a document is to be checked
@@ -504,6 +519,13 @@
           */
          void generateSimpleResponse(unsigned int recvSiteId, msgType action, uint_positive_cnt::type respMsgId);
 
+         /**
+          * @brief retrieves the absolute path of a resource
+          * @param actionU the user who has the resource pointed by @e resPath and @e resId
+          * @param resPath the path of the resource relative to @e actionU's filesystem
+          * @param resId the id of the resource
+          * @return a pair containing the absolute path and the id of the resource
+          */
          static std::pair<std::string, std::string>
          fromLocalPathToGlobal(const user &actionU, const std::string &resPath, const std::string &resId);
      };

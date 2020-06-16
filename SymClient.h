@@ -41,14 +41,16 @@
 #include "document.h"
 #include "message.h"
 
+#include "onoff_networkinteraction.h"
+
 namespace Symposium {
 
     constexpr bool operator<(const std::tuple<int, int, Color>& lhs, const std::tuple<int, int, Color>& rhs){
         return std::get<0>(lhs)<std::get<0>(rhs) && std::get<1>(lhs)<std::get<1>(rhs);
     }
-
+    #ifdef DISPATCHER_ON
     class clientdispatcher;
-
+    #endif
     /**
      * @brief class used to model a client of Symposium system
      *
@@ -64,7 +66,9 @@ namespace Symposium {
         std::forward_list<std::shared_ptr<file>> activeFile;                                                            /**< list of active documents */
         std::forward_list<std::pair<document *, colorGen>> activeDoc;                                                   /**< list of files the active documents are related to */
         std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> userColors;       /**< map {siteId, documentId}->{user, color}  */
+        #ifdef DISPATCHER_ON
         clientdispatcher* dispatcher;                                                                                   /**< pointer to client dispatcher */
+        #endif
         std::forward_list<std::shared_ptr<clientMessage>> unanswered;                                                   /**< messages sent by client that have not been received an answer */
 
         /*
@@ -399,9 +403,6 @@ namespace Symposium {
          */
         std::string showDir(bool recursive=false) const;
 
-
-
-
         /**
         * @brief close a @ref document for a user
         * @param docId document to be closed
@@ -465,9 +466,23 @@ namespace Symposium {
          */
         updateDocMessage mapSiteIdToUser(const document &currentDoc);
 
+        /**
+         * @brief edit the alignment and/or the indexStyle of a document's paragraph @e row
+         * @param docId the id of the document that has to be modified
+         * @param oldLineStyle the actual alignment and indexStyle of the document at row @e row
+         * @param newLineStyle the new alignment and indexStyle to apply at row @e row
+         * @param row the document's row that has to be modified
+         * @return a properly constructed @ref editLineStyleMessage to send to the server
+         */
         editLineStyleMessage
         localEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& oldLineStyle, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
 
+        /**
+         * @brief propagate an update of line style on document made by another user
+         * @param docId the id of the document that has been modified
+         * @param newLineStyle the new alignment and indexStyle applied at row @e row
+         * @param row the document's row that has been modified
+         */
         virtual void remoteEditLineStyle(uint_positive_cnt::type docId, const std::pair<alignType, unsigned>& newLineStyle, unsigned row);
 
         /**
@@ -508,6 +523,7 @@ namespace Symposium {
          */
         virtual ~SymClient() = default;
 
+        #ifdef DISPATCHER_ON
         /**
          * @brief set dispatcher pointer to a correct client dispatcher
          * @param cl pointer to client dispatcher
@@ -515,6 +531,7 @@ namespace Symposium {
          * this function is important to invoke it for allow Symclient to communicate with other Symposium module
          */
         void setClientDispatcher(clientdispatcher *cl);
+        #endif
 
         /**
          * @brief it provides the online users list on the specified document
@@ -554,13 +571,6 @@ namespace Symposium {
 
         Color colorOfUserbyUsername(uint_positive_cnt::type resId, const std::string& username);
 
-        /**
-         * @brief returns the map {siteId, documentId}->{user, color}
-         * @return the map specified
-         */
-        const std::map<std::pair<uint_positive_cnt::type, uint_positive_cnt::type>, std::pair<user, Color>> &
-        getUserColors() const;
-
         const document& getActiveDocumenttoOpenbyID(uint_positive_cnt::type id);
 
         const file& getActiveFiletoOpenbyID(uint_positive_cnt::type id);
@@ -592,12 +602,12 @@ namespace Symposium {
         const std::shared_ptr<file> getFilebyDocumentID(uint_positive_cnt::type id);
 
         /**
-             * @brief set all the details of the user just logged
-             * @param loggedUser the user object containing all the information of the logged user
-             *
-             * When the client wants to perform login it calls the logIn method. When the server answers, the loginMessage
-             * calls setLoggedUser, passing the user object transmitted by the user
-             */
+         * @brief set all the details of the user just logged
+         * @param loggedUser the user object containing all the information of the logged user
+         *
+         * When the client wants to perform login it calls the logIn method. When the server answers, the loginMessage
+         * calls setLoggedUser, passing the user object transmitted by the user
+         */
         virtual void setLoggedUser(const user &loggedUser);
 
         const user& addUsersOnDocument(const user& toInsert);

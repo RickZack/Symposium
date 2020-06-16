@@ -44,10 +44,6 @@
 #include <boost/serialization/assume_abstract.hpp>
 #include <boost/serialization/export.hpp>
 
-/*
- * OPTIMIZE: use template to implement strategy pattern
- */
-
 namespace Symposium {
 /**
  * @brief Defines how the permissions on objects of type @link filesystem are handled
