@@ -3,7 +3,9 @@ project(Symposium)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
+set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
 if(WIN32)
     set(Boost_INCLUDE_DIR c:/mingw/include/)
     set(Boost_LIBRARY_DIR c:/mingw/lib/)
@@ -30,6 +32,7 @@ include_directories(SymposiumGUI SymposiumServer GUI/SymposiumGui)
 include_directories(SymposiumGUI SymposiumServer GUI/SymposiumGui/Dispatcher)
 
 #Packages required by SymposiumGUI
+find_package(Boost COMPONENTS REQUIRED serialization wserialization random)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Core REQUIRED)
@@ -44,7 +47,7 @@ set(CMAKE_AUTORCC ON)
 include_directories(lib/hash)
 
 # Dependency from Boost library for serialization and generator of random numbers
-link_libraries(boost_serialization boost_wserialization boost_random)
+link_libraries(Boost::serialization Boost::wserialization Boost::random)
 
 # List of source files for testing
 FILE(GLOB TEST_FILES ${CMAKE_SOURCE_DIR}/tests/*.cpp)
@@ -107,7 +110,7 @@ add_executable(SymposiumGUI GUI/SymposiumGui/main.cpp ${SYMPOSIUM_CLIENT}
 # Files and headers for SymposiumServer target: this is the executable that will run the server
 add_executable(SymposiumServer GUI/SymposiumGui/Dispatcher/mainServer.cpp ${SYMPOSIUM_SERVER} GUI/SymposiumGui/onoff_networkinteraction.h
         GUI/SymposiumGui/Dispatcher/gui_symserver.h GUI/SymposiumGui/Dispatcher/gui_symserver.ui GUI/SymposiumGui/Dispatcher/gui_symserver.cpp
-        GUI/SymposiumGui/logoserver.qrc)
+        GUI/SymposiumGui/logoserver.qrc GUI/SymposiumGui/resources.qrc)
 
 # Linking Google Test libraries for SymposiumTest target
 target_link_libraries(SymposiumTest gtest gtest_main gmock gmock_main)
