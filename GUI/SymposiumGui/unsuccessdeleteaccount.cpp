@@ -3,8 +3,7 @@
 
 unsuccessdeleteaccount::unsuccessdeleteaccount(QWidget *parent, std::string error) :
     QDialog(parent),
-    ui(new Ui::unsuccessdeleteaccount), error(error)
-{
+    ui(new Ui::unsuccessdeleteaccount), error(error){
     ui->setupUi(this);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
@@ -12,12 +11,10 @@ unsuccessdeleteaccount::unsuccessdeleteaccount(QWidget *parent, std::string erro
     ui->error->setText(QString::fromStdString(error));
 }
 
-unsuccessdeleteaccount::~unsuccessdeleteaccount()
-{
+unsuccessdeleteaccount::~unsuccessdeleteaccount(){
     delete ui;
 }
 
-void unsuccessdeleteaccount::on_pushButton_clicked()
-{
+void unsuccessdeleteaccount::on_pushButton_clicked(){
     close();
 }

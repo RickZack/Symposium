@@ -21,7 +21,6 @@ public:
 
 private slots:
     void on_ok_clicked();
-
     void on_pushButton_clicked();
 
 private:
@@ -34,7 +33,6 @@ private:
     Symposium::privilege priv;
 
     void hideAll();
-
     void share();
     void noshare();
     void timeshare();

@@ -3,8 +3,7 @@
 
 waiting::waiting(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::waiting)
-{
+    ui(new Ui::waiting){
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
@@ -19,7 +18,6 @@ waiting::waiting(QWidget *parent) :
     setAttribute(Qt::WA_TranslucentBackground);
 }
 
-waiting::~waiting()
-{
+waiting::~waiting(){
     delete ui;
 }

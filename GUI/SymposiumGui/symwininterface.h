@@ -45,12 +45,6 @@ class SymWinManager;
 struct SymNotepadWinInterface;
 struct SymModalWinInterface;
 
-/*namespace Symposium {
-    struct symbol{
-        void dummyMethod() const{}
-    };
-}*/
-
 struct isQWidget{
     class QWidgetType{
         QWidgetType(){}
@@ -91,9 +85,9 @@ class SymWinInterface{
 protected:
     Symposium::clientdispatcher& cl;                /**< a reference to the @ref clientDispatcher to whom actions are to be requested */
 private:
-    SymWinManager& handler;              /**< a reference to the windows handler, used to inform when this window is opening another one */
-    bool forceQuit;                      /**< indicates whether the window is closed by the code (true) or explicitly by the user. False by default */
-    SymWinInterface* s_parent;           /**< the window that opened this window*/
+    SymWinManager& handler;                         /**< a reference to the windows handler, used to inform when this window is opening another one */
+    bool forceQuit;                                 /**< indicates whether the window is closed by the code (true) or explicitly by the user. False by default */
+    SymWinInterface* s_parent;                      /**< the window that opened this window*/
 
     /**
      * @brief SymWinInterface private constructor used by @ref SymChildWinInterface and @ref SymMainWinInterface (friends) subclasses to create a window

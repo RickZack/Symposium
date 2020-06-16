@@ -3,9 +3,6 @@
 #include "Dispatcher/clientdispatcher.h"
 #include <QMovie>
 
-
-
-
 onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, Symposium::uint_positive_cnt::type documentID, Symposium::user user, std::string pathFile) :
     QDialog(parent),
     pathFile(pathFile), user(user),  ui(new Ui::onlineusers),  documentID(documentID), privelege(privelege)
@@ -37,7 +34,6 @@ onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, Sympos
     }
     if(privelege==Symposium::privilege::owner)
         ui->modify->click();
-    listusers();
     insertusers();
     ui->waiting->hide();
     ui->gif->hide();
@@ -47,33 +43,11 @@ onlineusers::onlineusers(QWidget *parent, Symposium::privilege privelege, Sympos
 
 }
 
-onlineusers::~onlineusers()
-{
+onlineusers::~onlineusers(){
     delete ui;
 }
 
-
-//--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE PERCHE' DEVE ESSERE FATTA DAL NOTEPAD.CPP
-void onlineusers::listusers()
-{
-    Symposium::user *u1=new Symposium::user("Mario", "AP@ssw0rd!", "Mariuz", ":/resources/avatar/beaver.png", 1, nullptr);
-    Symposium::user *u2=new Symposium::user("Carlo", "AP@ssw0rd!", "Carluz", ":/resources/avatar/boar.png", 2, nullptr);
-    Symposium::user *u3=new Symposium::user("Federico", "AP@ssw0rd!", "Fede", ":/resources/avatar/bull.png", 3, nullptr);
-    Symposium::user *u4=new Symposium::user("Vincenzo", "AP@ssw0rd!", "Vinci", ":/resources/avatar/deer.png", 4, nullptr);
-    std::pair<Symposium::user*, Symposium::sessionData> p1{u1, Symposium::sessionData(Symposium::privilege::modify)};
-    std::pair<Symposium::user*, Symposium::sessionData> p2{u2, Symposium::sessionData(Symposium::privilege::modify)};
-    std::pair<Symposium::user*, Symposium::sessionData> p3{u3, Symposium::sessionData(Symposium::privilege::readOnly)};
-    std::pair<Symposium::user*, Symposium::sessionData> p4{u4, Symposium::sessionData(Symposium::privilege::owner)};
-    onlineUsers.push_front(p1);
-    onlineUsers.push_front(p2);
-    onlineUsers.push_front(p3);
-    onlineUsers.push_front(p4);
-
-}
-//----------------------------------------------------------------------------------------
-
-void onlineusers::insertusers()
-{
+void onlineusers::insertusers(){
     for(auto it:onlineUsers)
     {
         QTreeWidgetItem *item=new QTreeWidgetItem();
@@ -90,32 +64,25 @@ void onlineusers::insertusers()
 
 }
 
-void onlineusers::changeList()
-{
+void onlineusers::changeList(){
     ui->tree->clear();
     insertusers();
-
 }
 
 void onlineusers::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
 }
 
-void onlineusers::successEditPrivilege()
-{
+void onlineusers::successEditPrivilege(){
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
     QMessageBox::information(parentWidget(),
                              tr("Modify Privilege"), tr("The privilege was successfully modify!"), QMessageBox::Ok);
-
-    //onlineUsers=cl->allUser(documentID);
     changeList();
-
 }
 
-void onlineusers::errorEditPrivilege(std::string errorMess)
-{
+void onlineusers::errorEditPrivilege(std::string errorMess){
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
@@ -124,8 +91,7 @@ void onlineusers::errorEditPrivilege(std::string errorMess)
                              tr("Modify Privilege"), "ERROR: "+error, QMessageBox::Ok);
 }
 
-void onlineusers::errorConnectionLogout()
-{
+void onlineusers::errorConnectionLogout(){
     ui->waiting->hide();
     ui->gif->hide();
     ui->button->setDisabled(false);
@@ -136,8 +102,7 @@ void onlineusers::errorConnectionLogout()
     errorLog.exec();
 }
 
-void onlineusers::on_button_clicked()
-{
+void onlineusers::on_button_clicked(){
     QString priv;
     switch (newPrivelege)
     {
@@ -161,41 +126,29 @@ void onlineusers::on_button_clicked()
                                                                     text,
                                                                      QMessageBox::No | QMessageBox::Yes,
                                                                     QMessageBox::Yes);
-        if (resBtn == QMessageBox::Yes)
-        {
-            //cl->editPrivilege(username, pathFile, newPrivelege, documentID);
-            ui->waiting->show();
-            ui->gif->show();
-            ui->button->setDisabled(true);
-
-            //--------------------------------------------PARTE DA CANCELLARE SUCCESSIVAMENTE
-            changeList();
-
-            //---------------------------------------------------------------------------------
-        }
+    if (resBtn == QMessageBox::Yes){
+        ui->waiting->show();
+        ui->gif->show();
+        ui->button->setDisabled(true);
+    }
 }
 
-void onlineusers::on_tree_itemClicked(QTreeWidgetItem *item, int)
-{
+void onlineusers::on_tree_itemClicked(QTreeWidgetItem *item, int){
     username=item->text(0).toStdString();
 }
 
-void onlineusers::on_owner_clicked()
-{
+void onlineusers::on_owner_clicked(){
     newPrivelege=Symposium::privilege::owner;
 }
 
-void onlineusers::on_modify_clicked()
-{
+void onlineusers::on_modify_clicked(){
     newPrivelege=Symposium::privilege::modify;
 }
 
-void onlineusers::on_reader_clicked()
-{
+void onlineusers::on_reader_clicked(){
     newPrivelege=Symposium::privilege::readOnly;
 }
 
-void onlineusers::on_none_clicked()
-{
+void onlineusers::on_none_clicked(){
     newPrivelege=Symposium::privilege::none;
 }

@@ -12,18 +12,15 @@ Option::Option(QWidget *parent, Symposium::clientdispatcher* cl) :
     ui->SV_Port->setText(QString::fromStdString(inf.second));
 }
 
-Option::~Option()
-{
+Option::~Option(){
     delete ui;
 }
 
-void Option::on_OK_button_clicked()
-{
+void Option::on_OK_button_clicked(){
     cl->setServerAddress(ui->SV_Address->text().toStdString(), ui->SV_Port->text().toStdString());
     this->close();
 }
 
-void Option::on_Cancel_button_clicked()
-{
+void Option::on_Cancel_button_clicked(){
     this->close();
 }

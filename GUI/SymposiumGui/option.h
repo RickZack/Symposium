@@ -21,7 +21,6 @@ public:
 
 private slots:
     void on_OK_button_clicked();
-
     void on_Cancel_button_clicked();
 
 private:

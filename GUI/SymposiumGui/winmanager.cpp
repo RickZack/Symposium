@@ -31,35 +31,31 @@
 #include<QDebug>
 
 
-SymWinManager::SymWinManager() :numOfActiveEditors(0)
-{
+SymWinManager::SymWinManager() :numOfActiveEditors(0){
     current=nullptr;
 }
 
-SymWinInterface &SymWinManager::activeWindow()
-{
+SymWinInterface &SymWinManager::activeWindow(){
     return *current;
 }
 
 void SymWinManager::setActive(SymWinInterface &newScreen){
     current=&newScreen;
-    qDebug()<<"Now active"<<dynamic_cast<QWidget*>(current)->metaObject()->className();
 }
 
-void SymWinManager::addNotepad(Symposium::uint_positive_cnt::type id, SymNotepadWinInterface &tx) {
+void SymWinManager::addNotepad(Symposium::uint_positive_cnt::type id, SymNotepadWinInterface &tx){
     editors.push_front({id, &tx});
     numOfActiveEditors++;
 }
 
-SymNotepadWinInterface &SymWinManager::getNotepad(Symposium::uint_positive_cnt::type id) {
+SymNotepadWinInterface &SymWinManager::getNotepad(Symposium::uint_positive_cnt::type id){
     for(auto& ed: editors)
         if (ed.first==id)
             return *ed.second;
     throw std::exception();
 }
 
-void SymWinManager::removeNotepad(Symposium::uint_positive_cnt::type id)
-{
+void SymWinManager::removeNotepad(Symposium::uint_positive_cnt::type id){
     for(auto& ed: editors)
         if (ed.first==id){
             numOfActiveEditors--;
@@ -67,8 +63,7 @@ void SymWinManager::removeNotepad(Symposium::uint_positive_cnt::type id)
         }
 }
 
-void SymWinManager::closeAllNotepads()
-{
+void SymWinManager::closeAllNotepads(){
     while(!editors.empty()){
         editors.front().second->forceClose();
         editors.pop_front();
@@ -76,7 +71,6 @@ void SymWinManager::closeAllNotepads()
     numOfActiveEditors=0;
 }
 
-unsigned SymWinManager::getNumOfActiveEditors() const
-{
+unsigned SymWinManager::getNumOfActiveEditors() const{
     return numOfActiveEditors;
 }

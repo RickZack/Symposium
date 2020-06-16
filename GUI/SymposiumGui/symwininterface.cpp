@@ -29,37 +29,32 @@
  */
 #include "symwininterface.h"
 #include "winmanager.h"
-#include<QWidget>
-#include<QDialog>
+#include <QWidget>
+#include <QDialog>
 
 
-SymWinInterface::SymWinInterface(SymWinManager &m, Symposium::clientdispatcher &p): cl(p), handler(m), forceQuit(false)
-{
+SymWinInterface::SymWinInterface(SymWinManager &m, Symposium::clientdispatcher &p): cl(p), handler(m), forceQuit(false){
 }
 
-bool SymWinInterface::closedByUser() const
-{
+bool SymWinInterface::closedByUser() const{
     return !forceQuit;
 }
 
-SymWinInterface::operator QWidget*()
-{
+SymWinInterface::operator QWidget*(){
     QWidget* asQWidget=dynamic_cast<QWidget*>(this);
     if(asQWidget==nullptr)
         throw std::logic_error("This is not a QWidget");
     return asQWidget;
 }
 
-void SymChildWinInterface::backToParent()
-{
+void SymChildWinInterface::backToParent(){
     handler.closeAllNotepads();
     goToWindow(*s_parent);
     this->forceQuit=true;
     this->operator QWidget *()->close();
 }
 
-void SymChildWinInterface::backToMainWin()
-{
+void SymChildWinInterface::backToMainWin(){
     handler.closeAllNotepads();
     SymWinInterface* p=this;
     for(; p->s_parent!=nullptr; p=p->s_parent){
@@ -71,8 +66,7 @@ void SymChildWinInterface::backToMainWin()
     p->operator QWidget *()->show();
 }
 
-void SymWinInterface::goToWindow(SymWinInterface &nextWin)
-{
+void SymWinInterface::goToWindow(SymWinInterface &nextWin){
     QWidget* thisAsQWidget=this->operator QWidget *();
     QWidget* nextWinAsWidget=nextWin.operator QWidget *();
 
@@ -81,97 +75,82 @@ void SymWinInterface::goToWindow(SymWinInterface &nextWin)
     nextWinAsWidget->showNormal();
 }
 
-void SymWinInterface::goToWindow(SymNotepadWinInterface& notepad)
-{
+void SymWinInterface::goToWindow(SymNotepadWinInterface& notepad){
     SymWinInterface::goToWindow(static_cast<SymWinInterface&>(notepad));
     handler.addNotepad(static_cast<Symposium::uint_positive_cnt::type>(notepad.getId()), notepad);
 }
 
-void SymWinInterface::goToWindow(SymModalWinInterface &nextWin)
-{
+void SymWinInterface::goToWindow(SymModalWinInterface &nextWin){
     handler.setActive(nextWin);
     QDialog* nextAsQDialog=nextWin.operator QDialog*();
     nextAsQDialog->exec();
 }
 
-SymMainWinInterface::SymMainWinInterface(SymWinManager &m, Symposium::clientdispatcher& p, isQWidget::QWidgetType): SymWinInterface(m,p)
-{
+SymMainWinInterface::SymMainWinInterface(SymWinManager &m, Symposium::clientdispatcher& p, isQWidget::QWidgetType): SymWinInterface(m,p){
     s_parent=nullptr;
 }
 
-SymChildWinInterface::SymChildWinInterface(SymWinInterface &parentScreen) :SymWinInterface(parentScreen.handler, parentScreen.cl)
-{
+SymChildWinInterface::SymChildWinInterface(SymWinInterface &parentScreen) :SymWinInterface(parentScreen.handler, parentScreen.cl){
     s_parent=&parentScreen;
 }
 
-SymChildWinInterface::SymChildWinInterface(SymWinInterface &parentScreen, isQWidget::QWidgetType) :SymWinInterface(parentScreen.handler, parentScreen.cl)
-{
+SymChildWinInterface::SymChildWinInterface(SymWinInterface &parentScreen, isQWidget::QWidgetType) :SymWinInterface(parentScreen.handler, parentScreen.cl){
     s_parent=&parentScreen;
 }
 
-SymNotepadWinInterface::SymNotepadWinInterface(SymWinInterface &parentScreen, isQWidget::QWidgetType arg, bool parentIsTransient) :SymChildWinInterface(parentScreen, arg)
-{
+SymNotepadWinInterface::SymNotepadWinInterface(SymWinInterface &parentScreen, isQWidget::QWidgetType arg, bool parentIsTransient) :SymChildWinInterface(parentScreen, arg){
     if(parentIsTransient)
         s_parent=parentScreen.s_parent;
 }
 
-void SymNotepadWinInterface::showParent()
-{
+void SymNotepadWinInterface::showParent(){
     handler.setActive(*s_parent);
     QWidget* dir=s_parent->operator QWidget *();
     dir->show();
     dir->activateWindow();
 }
 
-void SymNotepadWinInterface::focusToDirectory()
-{
+void SymNotepadWinInterface::focusToDirectory(){
     QWidget* dir=s_parent->operator QWidget *();
     if(dir->isHidden()) return;
     showParent();
 }
 
-void SymNotepadWinInterface::obtainFocus() {
+void SymNotepadWinInterface::obtainFocus(){
     handler.setActive(*this);
     QWidget* w=s_parent->operator QWidget *();
     w->hide();
 }
 
-void SymNotepadWinInterface::closeNotepad()
-{
+void SymNotepadWinInterface::closeNotepad(){
     handler.removeNotepad(static_cast<Symposium::uint_positive_cnt::type>(getId()));
 }
 
-void SymNotepadWinInterface::backToMainWin()
-{
+void SymNotepadWinInterface::backToMainWin(){
     handler.removeNotepad(static_cast<Symposium::uint_positive_cnt::type>(getId()));
     SymChildWinInterface::backToMainWin();
 }
 
-bool SymNotepadWinInterface::isLastNotepadOpened() const
-{
+bool SymNotepadWinInterface::isLastNotepadOpened() const{
     return handler.getNumOfActiveEditors()==1;
 }
 
-void SymNotepadWinInterface::forceClose()
-{
+void SymNotepadWinInterface::forceClose(){
     forceQuit=true;
     this->operator QWidget *()->close();
 }
 
-SymModalWinInterface::SymModalWinInterface(SymWinInterface &parentScreen, isQDialog::QDialogType) :SymChildWinInterface(parentScreen)
-{
+SymModalWinInterface::SymModalWinInterface(SymWinInterface &parentScreen, isQDialog::QDialogType) :SymChildWinInterface(parentScreen){
     s_parent=&parentScreen;
 }
 
-void SymModalWinInterface::backToParent()
-{
+void SymModalWinInterface::backToParent(){
     handler.setActive(*s_parent);
     this->forceQuit=true;
     this->operator QWidget *()->close();
 }
 
-SymModalWinInterface::operator QDialog *()
-{
+SymModalWinInterface::operator QDialog *(){
     QDialog* asQDialog=dynamic_cast<QDialog*>(this);
     if(asQDialog==nullptr)
         throw std::logic_error("This is not a QDialog");

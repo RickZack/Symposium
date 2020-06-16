@@ -2,8 +2,8 @@
 #define NOTEPAD_H
 
 #include <QMainWindow>
-#include  <QtCore>
-#include  <QtGui>
+#include <QtCore>
+#include <QtGui>
 #include <QTextEdit>
 #include <QCloseEvent>
 #include <QResizeEvent>
@@ -18,8 +18,6 @@
 #include "activecounterlink.h"
 #include "activealwayslink.h"
 #include "activenonlink.h"
-
-
 
 namespace Symposium{
 class clientdispatcher;
@@ -41,7 +39,6 @@ public:
 
     explicit notepad(QWidget *parent,Symposium::privilege priv,Symposium::privilege privOpen,std::string pathToFile,const Symposium::document& doc, Symposium::uint_positive_cnt::type fileID, SymWinInterface& si, bool parentIsTransient=false);
 
-    //Not used at the moment
     void success() override;
 
     void failure(const QString&) override;
@@ -134,11 +131,6 @@ private slots:
     void on_actionAlignTextRight_triggered();
     void on_actionAlignTextJustify_triggered();
     void on_actionColorText_triggered();
-
-    //void on_comboBox_activated(int index);
-
-    //void on_fontComboBox_activated(const QString &arg1);
-
     void on_textEdit_textChanged();
     void on_hideUsers_clicked();
     void on_showUsers_clicked();

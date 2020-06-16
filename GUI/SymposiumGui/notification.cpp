@@ -3,8 +3,7 @@
 
 notification::notification(QWidget *parent, QString str) :
     QDialog(parent),
-    ui(new Ui::notification), str(str)
-{
+    ui(new Ui::notification), str(str){
     ui->setupUi(this);
     setFixedSize(size());
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
@@ -16,12 +15,11 @@ notification::notification(QWidget *parent, QString str) :
         connect(ui->ok, SIGNAL(clicked()), parentWidget(), SLOT(enableButtonsAfter()));
 }
 
-notification::~notification()
-{
+notification::~notification(){
     delete ui;
 }
 
-void notification::closeEvent(QCloseEvent *e) {
+void notification::closeEvent(QCloseEvent *e){
     emit ui->ok->click();
     QDialog::closeEvent(e);
 }

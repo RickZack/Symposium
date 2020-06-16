@@ -19,7 +19,6 @@ class sigin : public QDialog, public SymChildWinInterface
 public:
     explicit sigin(QWidget *parent, SymWinInterface& si);
     ~sigin() override;
-
     void success() override;
     void failure(const QString& toPrint) override;
 

@@ -24,18 +24,15 @@ successlinks::successlinks(QWidget *parent, int caseLink, QString link, QString 
     ui->pathPlainEdit->setLineWrapMode(QPlainTextEdit::LineWrapMode::NoWrap);
 }
 
-successlinks::~successlinks()
-{
+successlinks::~successlinks(){
     delete ui;
 }
 
-void successlinks::on_ok_clicked()
-{
+void successlinks::on_ok_clicked(){
     close();
 }
 
-void successlinks::hideAll()
-{
+void successlinks::hideAll(){
     ui->all->hide();
     ui->share1->hide();
     ui->share2->hide();
@@ -45,16 +42,14 @@ void successlinks::hideAll()
     ui->timer2->hide();
 }
 
-void successlinks::share()
-{
+void successlinks::share(){
     ui->share1->show();
     ui->share2->show();
     ui->share3->show();
     ui->share2->setText(numShares);
 }
 
-void successlinks::noshare()
-{
+void successlinks::noshare(){
     ui->label->hide();
     ui->pathPlainEdit->hide();
     ui->share4->show();
@@ -66,15 +61,13 @@ void successlinks::noshare()
     ui->ok->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 rgb(95, 167, 175), stop: 1 rgb(58, 80, 116));color: rgb(249, 247, 241);font: 14pt 'Baskerville Old Face';border-radius:15px;");
 }
 
-void successlinks::timeshare()
-{
+void successlinks::timeshare(){
     ui->timer1->show();
     ui->timer2->setText(time);
     ui->timer2->show();
 }
 
-void successlinks::on_pushButton_clicked()
-{
+void successlinks::on_pushButton_clicked(){
     close();
     QString user(QString::fromStdString(us.getNickname()));
     std::ostringstream privString;

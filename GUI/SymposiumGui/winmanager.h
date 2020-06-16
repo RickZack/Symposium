@@ -33,7 +33,7 @@
 
 #include "symwininterface.h"
 #include "../../Symposium.h"
-#include<forward_list>
+#include <forward_list>
 
 class SymWinManager{
     SymWinInterface* current;

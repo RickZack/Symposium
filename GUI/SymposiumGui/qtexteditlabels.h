@@ -4,7 +4,7 @@
 #include <QLabel>
 #include <forward_list>
 
-#include"onoff_networkinteraction.h"
+#include "onoff_networkinteraction.h"
 #include "../../user.h"
 #include "../../Color.h"
 #include "../../document.h"

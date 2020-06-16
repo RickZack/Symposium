@@ -18,7 +18,6 @@ public:
     explicit waiting(QWidget *parent=nullptr);
     ~waiting();
 
-
 private:
     Ui::waiting *ui;
 

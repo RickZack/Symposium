@@ -1,11 +1,9 @@
 #include "qtexteditlabels.h"
 #include "Dispatcher/clientdispatcher.h"
-#include <QDebug>
 #include "notepad.h"
 
 
-void qtexteditlabels::scrollContentsBy(int dx, int dy)
-{
+void qtexteditlabels::scrollContentsBy(int dx, int dy){
     QTextEdit::scrollContentsBy(dx,dy);
     for(auto it:labels)
     {
@@ -18,8 +16,7 @@ void qtexteditlabels::scrollContentsBy(int dx, int dy)
     }
 }
 
-void qtexteditlabels::scroll()
-{
+void qtexteditlabels::scroll(){
     j=0;
     int block=this->textCursor().blockNumber();
     int column=this->textCursor().positionInBlock();
@@ -40,8 +37,7 @@ void qtexteditlabels::scroll()
     j=1;
 }
 
-void qtexteditlabels::changePosition(int block, int collumn)
-{
+void qtexteditlabels::changePosition(int block, int collumn){
     QTextCursor cursor = this->textCursor();
     cursor.movePosition(QTextCursor::Start);
     cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, block);
@@ -49,8 +45,7 @@ void qtexteditlabels::changePosition(int block, int collumn)
     this->setTextCursor(cursor);
 }
 
-void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, int block, int collumn)
-{
+void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, int block, int collumn){
     j=0;
     auto pairlabels=labels.find(siteId);
     if(pairlabels!=labels.end())
@@ -68,10 +63,7 @@ void qtexteditlabels::changePosition(Symposium::uint_positive_cnt::type siteId, 
     j=1;
 }
 
-
-
-void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId)
-{
+void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId){
     j=0;
     for(const auto& it:users)
     {
@@ -83,17 +75,12 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, static_cast<int>(it.second.col));
             this->setTextCursor(cursor);
 
-
             QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
 
-            #ifdef DISPATCHER_ON
             Symposium::Color c=cl->getColor(documentId,it.first->getSiteId());
             QString str=QString::fromStdString(c.rgb_hex_string());
-            #else
-            QString str="#ff0000";
-            #endif
             labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -101,7 +88,6 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
             labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
             labelReverse->setAttribute(Qt::WA_TranslucentBackground);
             newLabel->setAttribute(Qt::WA_TranslucentBackground);
-
             showLabel(labelReverse, newLabel);
             cursors.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<int, int>>
                            (it.first->getSiteId(), std::pair<int, int>(static_cast<int>(it.second.row),
@@ -114,14 +100,11 @@ void qtexteditlabels::constractLabelsCursors(std::forward_list<std::pair<const S
     j=1;
 }
 
-
-void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId)
-{
+void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> > users, Symposium::uint_positive_cnt::type siteId){
     j=0;
     int block=0;
     int column=0;
     thisUserSiteId=siteId;
-    //-----------------------------------------------------------------------------------------------------------------PARTE DA CANCELLARE PER ELIMINARE IL CURSORE VISIBILE CON LA LABEL
     for(const auto& it:users)
     {
         if(it.first->getSiteId()==siteId && priv!=Symposium::privilege::readOnly)
@@ -129,14 +112,9 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             QString nameLabel="\u25BC"+QString::fromStdString(it.first->getUsername());
             QString nameLabelReverse=QString::fromStdString(it.first->getUsername())+"\u25BC";
             QLabel *labelReverse=new QLabel(nameLabelReverse, this);
-
-            #ifdef DISPATCHER_ON
             Symposium::Color c=cl->getColor(documentId,it.first->getSiteId());
             std::string colorHex(c.rgb_hex_string());
             QString str=QString::fromStdString(colorHex);
-            #else
-            QString str="#ff0000";
-            #endif
             labelReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
             QLabel *newLabel=new QLabel(nameLabel, this);
             newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -144,40 +122,32 @@ void qtexteditlabels::insertCurrentUser(std::forward_list<std::pair<const Sympos
             labelReverse->setAttribute(Qt::WA_TranslucentBackground);
             newLabel->setAttribute(Qt::WA_TranslucentBackground);
             labels.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<QLabel*, QLabel*>>(it.first->getSiteId(), pairs));
-
             showLabel(labelReverse, newLabel);
         }
 
     }
-    //----------------------------------------------------------------------------------------------------------------------------
     moveCursor(QTextCursor::Start);
     cursors.insert(std::pair<Symposium::uint_positive_cnt::type, std::pair<int, int>>
                    (thisUserSiteId, std::pair<int, int>(block,column)));
     j=1;
 }
 
-
-void qtexteditlabels::showLabel(QLabel *labelNameReverse, QLabel *labelName)
-{
+void qtexteditlabels::showLabel(QLabel *labelNameReverse, QLabel *labelName){
     const QRect curRect = this->cursorRect(this->textCursor());
     int ty=curRect.y()-2;
     labelName->hide();
     labelNameReverse->hide();
 
-    if(curRect.left()<=this->width()-labelName->rect().width()-25)
-    {
+    if(curRect.left()<=this->width()-labelName->rect().width()-25){
         labelName->move(curRect.topLeft().x()-3, ty);
         labelName->show();
-    }
-    else
-    {
+    }else{
         labelNameReverse->move(curRect.topLeft().x()-labelName->rect().width()+3, ty);
         labelNameReverse->show();
     }
 }
 
-void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::string name)
-{
+void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::string name){
     j=0;
     int blockThisUser=this->textCursor().blockNumber();
     int columnThisUser=this->textCursor().positionInBlock();
@@ -187,12 +157,8 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     QString nameLabelReverse=QString::fromStdString(name)+"\u25BC";
     QLabel *labelNameReverse=new QLabel(nameLabelReverse, this);
 
-    #ifdef DISPATCHER_ON
     Symposium::Color c=cl->getColor(documentId, siteId);
     QString str=QString::fromStdString(c.rgb_hex_string());
-    #else
-    QString str="#ff0000";
-    #endif
     labelNameReverse->setStyleSheet("color:  "+str+ "; font-size: 9px; font-weight: bold;");
     QLabel *newLabel=new QLabel(nameLabel, this);
     newLabel->setStyleSheet("color: "+str+ "; font-size: 9px; font-weight: bold;");
@@ -207,8 +173,7 @@ void qtexteditlabels::addUser(Symposium::uint_positive_cnt::type siteId, std::st
     j=1;
 }
 
-void qtexteditlabels::removeUser(Symposium::uint_positive_cnt::type siteId)
-{
+void qtexteditlabels::removeUser(Symposium::uint_positive_cnt::type siteId){
     if(labels.find(siteId)!=labels.end())
     {
         QLabel *labelHide=labels.find(siteId)->second.first;
@@ -221,14 +186,12 @@ void qtexteditlabels::removeUser(Symposium::uint_positive_cnt::type siteId)
     }
 }
 
-void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type siteId)
-{
+void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type siteId){
     if(isReadOnly()) return;
     if(j==1)
     {
         if(priv!=Symposium::privilege::readOnly)
         {
-            //-----------------------------------------------------------------------------PARTE DA CANCELLARE SE SI VUOLE ELIMINARE LA PROPRIA LABEL
             QLabel *labelName=labels.find(siteId)->second.second;
             QLabel *labelReverseName=labels.find(siteId)->second.first;
             QTextCursor newCursor=this->textCursor();
@@ -237,41 +200,33 @@ void qtexteditlabels::thisUserChangePosition(Symposium::uint_positive_cnt::type 
             cursors.find(siteId)->second.first=newBlock;
             cursors.find(siteId)->second.second=newColumn;
             showLabel(labelReverseName, labelName);
-            //--------------------------------------------------------------------------------------------------------------
             QTextCursor cursor= this->textCursor();
 
-            #ifdef DISPATCHER_ON
             int column=cursor.positionInBlock();
             int block= cursor.blockNumber();
             cl->moveMyCursor(documentId,block,column);
-            #endif
         }
     }
 
 }
 
-void qtexteditlabels::setClientDispatcher(Symposium::clientdispatcher *cl)
-{
+void qtexteditlabels::setClientDispatcher(Symposium::clientdispatcher *cl){
     this->cl = cl;
 }
 
-void qtexteditlabels::setDocumentId(Symposium::uint_positive_cnt::type docId)
-{
+void qtexteditlabels::setDocumentId(Symposium::uint_positive_cnt::type docId){
     documentId=docId;
 }
 
-void qtexteditlabels::setThisUserSiteId(Symposium::uint_positive_cnt::type id)
-{
+void qtexteditlabels::setThisUserSiteId(Symposium::uint_positive_cnt::type id){
     thisUserSiteId=id;
 }
 
-void qtexteditlabels::setThisUserPrivilege(Symposium::privilege priv)
-{
+void qtexteditlabels::setThisUserPrivilege(Symposium::privilege priv){
     this->priv=priv;
 }
 
-void qtexteditlabels::translateCursors(const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> >& users)
-{
+void qtexteditlabels::translateCursors(const std::forward_list<std::pair<const Symposium::user *, Symposium::sessionData> >& users){
     for(const auto& it:users)
     {
         if(it.second.p!=Symposium::privilege::readOnly)
@@ -280,8 +235,7 @@ void qtexteditlabels::translateCursors(const std::forward_list<std::pair<const S
             int oldColumn=cursors.find(it.first->getSiteId())->second.second;
             int newBlock=static_cast<int>(it.second.row);
             int newColumn=static_cast<int>(it.second.col);
-            if(oldBlock!=newBlock || oldColumn!=newColumn)
-            {
+            if(oldBlock!=newBlock || oldColumn!=newColumn){
                 cursors.find(it.first->getSiteId())->second.first=newBlock;
                 cursors.find(it.first->getSiteId())->second.second=newColumn;
             }
@@ -305,8 +259,6 @@ void qtexteditlabels::insertFromMimeData(const QMimeData *source) {
     if (source->hasText()) {
         QString sourceText = source->text();
         QString toInsert;
-        qDebug()<<"Text in input: "<<sourceText;
-
 
         for(auto& x:sourceText){
             if (x == '\n' || x == "\u2028" || x == "\u2029") {
@@ -319,7 +271,6 @@ void qtexteditlabels::insertFromMimeData(const QMimeData *source) {
         }
         cursor.insertText(toInsert, fmt);
         for (auto& x : toInsert) {
-            qDebug()<<"pasting "<<x<<" in pos: ["<<row<<", "<<col<<"]";
             if (x == '\r') {
                 n->sendSymbolToInsert(row, col, QString(x), fmt);
                 row++;
