@@ -112,7 +112,7 @@ color: rgb(58, 80, 116); </string>
 color: rgb(58, 80, 116); </string>
       </property>
       <property name="text">
-       <string>modify</string>
+       <string>writer (default)</string>
       </property>
      </widget>
     </item>
