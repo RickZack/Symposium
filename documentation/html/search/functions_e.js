@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['saltgenerate',['saltGenerate',['../classSymposium_1_1user.html#ac4090885394c0e15aef1d0b244da4eb6',1,'Symposium::user']]],
+  ['sendresmessage',['sendResMessage',['../classSymposium_1_1sendResMessage.html#ad08f209bbc64e5f7f82b5d2d7114cab7',1,'Symposium::sendResMessage']]],
+  ['separate',['separate',['../classSymposium_1_1filesystem.html#ae81aae6143b054c4fcaf4bcf0ddaece7',1,'Symposium::filesystem']]],
+  ['separatefirst',['separateFirst',['../classSymposium_1_1directory.html#aa8e50eda7de1bea5b2e54e58dac3bf43',1,'Symposium::directory']]],
+  ['servermessage',['serverMessage',['../classSymposium_1_1serverMessage.html#aa6aaf31c825ee989a6140cb63df997a4',1,'Symposium::serverMessage']]],
+  ['setloggeduser',['setLoggedUser',['../classSymposium_1_1SymClient.html#a5b69fb210c482aaf833155b90350e8c6',1,'Symposium::SymClient']]],
+  ['setprivilege',['setPrivilege',['../classSymposium_1_1AccessStrategy.html#aed8862459bf978da966e5298c8157f38',1,'Symposium::AccessStrategy::setPrivilege()'],['../classSymposium_1_1RMOAccess.html#a3c0db7acd71246122da97588106f5e46',1,'Symposium::RMOAccess::setPrivilege()'],['../classSymposium_1_1TrivialAccess.html#aa4b32559d84614136c32fa97e6264411',1,'Symposium::TrivialAccess::setPrivilege()']]],
+  ['setsharingpolicy',['setSharingPolicy',['../classSymposium_1_1filesystem.html#a81f4c705b52b3069e4459ed84b5cd715',1,'Symposium::filesystem::setSharingPolicy()'],['../classSymposium_1_1file.html#a2a57bcd54d9cf937f9533a6928e2fa19',1,'Symposium::file::setSharingPolicy()']]],
+  ['setusercolors',['setUserColors',['../classSymposium_1_1SymClient.html#ad24ec00897c63fd8e4698409caa5f5ec',1,'Symposium::SymClient']]],
+  ['setuserprivilege',['setUserPrivilege',['../classSymposium_1_1filesystem.html#a273e4723dc21c243704b9071fa0e5402',1,'Symposium::filesystem::setUserPrivilege()'],['../classSymposium_1_1file.html#a379c4e9ca32aee1b7f1bef9481f0dfba',1,'Symposium::file::setUserPrivilege()']]],
+  ['shareresource',['shareResource',['../classSymposium_1_1SymClient.html#ab463c5ea98734b57f588f2f74f91738c',1,'Symposium::SymClient::shareResource(const std::string &amp;resPath, const std::string &amp;resId, const uri &amp;newPrefs)'],['../classSymposium_1_1SymClient.html#a80f76e5fca27756f73e2ddf2b33374ed',1,'Symposium::SymClient::shareResource(const std::string &amp;actionUser, const std::string &amp;resPath, const std::string &amp;resId, const uri &amp;newPrefs, bool msgRcv)'],['../classSymposium_1_1SymServer.html#ab9cb7728f4c9ecf379e83b9e0ced8973',1,'Symposium::SymServer::shareResource()'],['../classSymposium_1_1user.html#a32967c2ee558947a1a43ed5b870ef42f',1,'Symposium::user::shareResource()']]],
+  ['showdir',['showDir',['../classSymposium_1_1SymClient.html#a6302895c097afb39ff4eb77df2fc983d',1,'Symposium::SymClient::showDir()'],['../classSymposium_1_1user.html#a65b3ab19f380313943079cd9b031ddc8',1,'Symposium::user::showDir()']]],
+  ['signup',['signUp',['../classSymposium_1_1SymClient.html#a7705dadfcdb9dc9570cc5ea342654f64',1,'Symposium::SymClient::signUp(const std::string &amp;username, const std::string &amp;pwd, const std::string &amp;nickname, const std::string &amp;iconPath)'],['../classSymposium_1_1SymClient.html#af6ed3b20cf26ff929aab792ca2420d60',1,'Symposium::SymClient::signUp(const user &amp;logged)']]],
+  ['signupmessage',['signUpMessage',['../classSymposium_1_1signUpMessage.html#a1b7a973aad168883b0a160d9fc86f8ef',1,'Symposium::signUpMessage']]],
+  ['siteidofuserofdoc',['siteIdOfUserOfDoc',['../classSymposium_1_1SymServer.html#a22eb00daeeef6739434357d121b30b53',1,'Symposium::SymServer']]],
+  ['siteidsfor',['siteIdsFor',['../classSymposium_1_1SymServer.html#ac3c04ffbd3a6c1324df717c4187a0172',1,'Symposium::SymServer']]],
+  ['store',['store',['../classSymposium_1_1document.html#a9ff3fdeec2f63e147e4cbdde879f77ef',1,'Symposium::document::store()'],['../classSymposium_1_1SymServer.html#a75ebc0d588c54b56c91698fc31159965',1,'Symposium::SymServer::store()']]],
+  ['storecontent',['storeContent',['../classSymposium_1_1filesystem.html#a7749a2ee7da440ac652bda89e38fb460',1,'Symposium::filesystem::storeContent()'],['../classSymposium_1_1file.html#a657577aef321e9060e4f7d17510439c5',1,'Symposium::file::storeContent()'],['../classSymposium_1_1directory.html#a8b93d4ac188586909a9d7d925eea7cf0',1,'Symposium::directory::storeContent()']]],
+  ['symbolmessage',['symbolMessage',['../classSymposium_1_1symbolMessage.html#a1b4d4c64059dd8f6f7e1295f81af8776',1,'Symposium::symbolMessage']]]
+];
