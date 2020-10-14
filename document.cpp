@@ -765,3 +765,15 @@ void document::editLineStyle(const std::pair<alignType, unsigned int> &newLineSt
     checkIndexes({row, 0});
     alignmentStyle[row]=newLineStyle;
 }
+
+bool document::deleteFromDisk() const {
+    if(!doLoadAndStore) return true;
+    std::string fileName=basePath+std::to_string(id)+".dat";
+    std::fstream f{fileName, std::ios::in};
+    if(f.good()) { //file exist on disk
+        f.close();
+        int ret=std::remove(fileName.c_str());
+        return ret==0;
+    }
+    return true; //file doesn't exist, nothing to remove
+}

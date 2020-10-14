@@ -467,6 +467,8 @@ std::shared_ptr<filesystem> directory::remove(const user &targetUser, const std:
             throw filesystemException(filesystemException::notOnlyOwn, UnpackFileLineFunction());
         auto it=std::find_if(contained.begin(), contained.end(),
                              [idRem, f](const std::shared_ptr<filesystem>& i){return i->getId()==f->getId();});
+        if(!f->getDoc().deleteFromDisk())
+            throw filesystemException(filesystemException::wrongRem, UnpackFileLineFunction());
         contained.erase(it);//cancel from the container the object
         return obj;
     }

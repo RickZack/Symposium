@@ -215,6 +215,12 @@ namespace Symposium {
         bool load();
 
         /**
+         * @brief deletes the file (if present) being stored on disk
+         * @return a bool indicating failure if has not been possible to delete the file (it exist), success otherwise
+         */
+        bool deleteFromDisk() const;
+
+        /**
          * @brief executes @e op assuring that, if @ref serialize method wil be invoked,
          * the serialization will involve all object's attributes
          * @param op the operation to be executed with full serialization

@@ -109,7 +109,7 @@ namespace Symposium{
          * @brief Specific error codes for @ref filesystemException. They are used as indexes to the error table string
          */
         enum filesystemExceptionCodes{objSha=0, pathEmpty, pathNvalid, changePriv, notOwn, noPermission, noGet, noGetDir,
-                noGetFile, sameName, notOnlyOwn, someoneWork, notOwnDelete};
+                noGetFile, sameName, notOnlyOwn, someoneWork, notOwnDelete, wrongRem};
 
         explicit filesystemException(filesystemExceptionCodes exceptionCode, const char *file, int line, const char *func);
         ~filesystemException() override =default;

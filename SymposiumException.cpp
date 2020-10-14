@@ -77,7 +77,8 @@ const char* filesystemException::filesystemErrors[]={"Object is not shareable", 
                                                      "You have not permission to access this file in this mode", "The element has not been found with get",
                                                      "Directory are you searching for, is not present", "File are you searching for, is not present",
                                                      "You already have an element with the same name", "You are not the only owner of this file, so you cannot delete it",
-                                                     "It is not possible to delete:someone is working on document", "Ask an owner to delete this file, you cannot do it"};
+                                                     "It is not possible to delete:someone is working on document", "Ask an owner to delete this file, you cannot do it",
+                                                     "Error removing the file"};
 
 filesystemException::filesystemException(filesystemExceptionCodes exceptionCode, const char *file, int line,
                              const char *func) :
